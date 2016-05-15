@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-4.2.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+    <!-- 配置C3P0数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="jdbcUrl" value="${dataSource.jdbcUrl}" />
+        <property name="driverClass" value="${dataSource.driverClass}" />
+        <property name="user" value="${dataSource.username}" />
+        <property name="password" value="${dataSource.password}" />
+        <!--连接池中保留的最大连接数。Default: 15 -->
+        <property name="maxPoolSize" value="${dataSource.maxPoolSize}" />
+        <!--连接池中保留的最小连接数。-->
+        <property name="minPoolSize" value="${dataSource.minPoolSize}" />
+        <!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->
+        <property name="initialPoolSize" value="${dataSource.initialPoolSize}" />
+        <!--最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+        <property name="maxIdleTime" value="${dataSource.maxIdleTime}" />
+        <!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+        <property name="acquireIncrement" value="${dataSource.acquireIncrement}" />
+        <!--JDBC的标准参数，用以控制数据源内加载的PreparedStatements数量。但由于预缓存的statements
+          属于单个connection而不是整个连接池。所以设置这个参数需要考虑到多方面的因素。
+          如果maxStatements与maxStatementsPerConnection均为0，则缓存被关闭。Default: 0-->
+        <property name="maxStatements" value="${dataSource.maxStatements}" />
+        <!--每60秒检查所有连接池中的空闲连接。Default: 0 -->
+        <property name="idleConnectionTestPeriod" value="${dataSource.idleConnectionTestPeriod}" />
+        <!--定义在从数据库获取新连接失败后重复尝试的次数。Default: 30 -->
+        <property name="acquireRetryAttempts" value="${dataSource.acquireRetryAttempts}" />
+        <!--获取连接失败将会引起所有等待连接池来获取连接的线程抛出异常。但是数据源仍有效
+          保留，并在下次调用getConnection()的时候继续尝试获取连接。如果设为true，那么在尝试
+          获取连接失败后该数据源将申明已断开并永久关闭。Default: false-->
+        <property name="breakAfterAcquireFailure" value="${dataSource.breakAfterAcquireFailure}" />
+        <!--因性能消耗大请只在需要的时候使用它。如果设为true那么在每个connection提交的
+          时候都将校验其有效性。建议使用idleConnectionTestPeriod或automaticTestTable
+          等方法来提升连接测试的性能。Default: false -->
+        <property name="testConnectionOnCheckout"  value="${dataSource.testConnectionOnCheckout}" />
+    </bean>
+
+    <!-- 配置dbcp数据源
+      <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${dataSource.driverClass}"/>
+        <property name="url" value="${dataSource.jdbcUrl}"/>
+        <property name="username" value="${dataSource.username}"/>
+        <property name="password" value="${dataSource.password}"/>
+        <!- 池启动时创建的连接数量 ->
+        <property name="initialSize" value="5"/>
+        <!- 同一时间可以从池分配的最多连接数量。设置为0时表示无限制。 ->
+        <property name="maxActive" value="30"/>
+        <!- 池里不会被释放的最多空闲连接数量。设置为0时表示无限制。 ->
+        <property name="maxIdle" value="20"/>
+        <!- 在不新建连接的条件下，池中保持空闲的最少连接数。 ->
+        <property name="minIdle" value="3"/>
+        <!- 设置自动回收超时连接 ->
+        <property name="removeAbandoned" value="true" />
+        <!- 自动回收超时时间(以秒数为单位) ->
+        <property name="removeAbandonedTimeout" value="200"/>
+        <!- 设置在自动回收超时连接的时候打印连接的超时错误  ->
+        <property name="logAbandoned" value="true"/>
+        <!- 等待超时以毫秒为单位，在抛出异常之前，池等待连接被回收的最长时间（当没有可用连接时）。设置为-1表示无限等待。  ->
+        <property name="maxWait" value="100"/>
+      </bean>-->
+
+    <!-- 配置简单数据源
+    <bean id="dataSource"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dataSource.driverClass}" />
+        <property name="url" value="${dataSource.jdbcUrl}" />
+        <property name="username" value="${dataSource.username}" />
+        <property name="password" value="${dataSource.password}" />
+    </bean>-->
+
+    <!--  配置hibernate SessionFactory-->
+    <bean id="sessionFactory"
+        class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hiberante.format_sql">${hibernate.format_sql}</prop>
+            </props>
+        </property>
+        <property name="packagesToScan">
+            <array>
+                <value>net.eulerform.web.**.entity</value>
+            </array>
+        </property>
+        <!-- <property name="configLocations">
+            <list>
+                <value>
+                    classpath*:mapping.xml
+                </value>
+            </list>
+        </property> -->
+    </bean>
+
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 事务代理类
+    <bean id="transactionBese"
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+        lazy-init="true" abstract="true">
+        <property name="transactionManager" ref="transactionManager"></property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="add*">PROPAGATION_REQUIRED,-Exception</prop>
+                <prop key="update*">PROPAGATION_REQUIRED,-Exception</prop>
+                <prop key="insert*">PROPAGATION_REQUIRED,-Exception</prop>
+                <prop key="modify*">PROPAGATION_REQUIRED,-Exception</prop>
+                <prop key="delete*">PROPAGATION_REQUIRED,-Exception</prop>
+                <prop key="del*">PROPAGATION_REQUIRED,-Exception</prop>
+                <prop key="get*">PROPAGATION_NEVER</prop>
+            </props>
+        </property>
+    </bean>-->
+
+    <!--启动注解用注解来管理事务
+    <tx:annotation-driven transaction-manager="transactionManager"/>-->
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="save*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="create*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="delete*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" read-only="true" name="load*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" read-only="true" name="find*" />
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+            <aop:advisor pointcut="execution(* net.eulerform.web..service..*.*(..))" advice-ref="txAdvice" />
+    </aop:config>
+
+</beans>

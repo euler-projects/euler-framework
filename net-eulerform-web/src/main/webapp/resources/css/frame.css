@@ -1,0 +1,30 @@
+@CHARSET "UTF-8";
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#__page__ {
+    height: auto;
+    min-height: 100%;
+    position: absolute;
+    top:0px;
+    left:0px;
+    right:0px;
+    /*background:green;*/
+}
+
+#__body__ {
+    margin-top:32px;
+    margin-bottom:60px;
+    position:relative;
+    /*background:blue;*/
+}
+
+#__view__ {
+    position:relative;
+    overflow:hidden;
+    /*zoom:1;*/
+    /*background:yellow;*/
+}

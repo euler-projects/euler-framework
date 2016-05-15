@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN">
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d{[yyy-MM-dd HH:mm:ss SSS]} %-5level [REQUEST_ID:%X{id}] ------ %msg ------  [USERNAME:%X{username}] [%t] %l%n"/>
+        </Console>
+        <!-- <RollingFile name="WroxFileAppender" fileName="D:/log4j2/logs/application.log"
+                     filePattern="D:/log4j2//logs/application-%d{MM-dd-yyyy}-%i.log">
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %X{id} %X{username} %-5level %l: %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+            <DefaultRolloverStrategy min="1" max="4" />
+        </RollingFile>-->
+    </appenders>
+    <loggers>
+        <root level="warn">
+            <appender-ref ref="Console" />
+        </root>
+        <logger name="net.eulerform" level="info"/>
+    </loggers>
+</configuration>

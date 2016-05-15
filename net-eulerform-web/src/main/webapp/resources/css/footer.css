@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+
+/*底栏样式_BEGIN*/
+footer, #footer {
+    clear: both;
+    display: block;
+    padding-top: 10px;
+    height: 50px;
+    position: absolute;
+    bottom:0px;
+    left:0px;
+    right:0px;
+    text-align: center;
+    color: #666666; 
+    background-color: #dddddd;    
+}
+
+footer > a#icp, 
+#footer > a#icp{
+    color: #666666;
+}
+/*底栏样式_END*/

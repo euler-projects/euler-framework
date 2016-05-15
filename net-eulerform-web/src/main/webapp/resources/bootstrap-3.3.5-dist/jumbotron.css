@@ -1,0 +1,44 @@
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  font-family: arial, 'Microsoft YaHei';
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+
+a{
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    text-decoration: none;
+}
+a:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+#userInfo>a,#userInfo>* a{
+    color:#fff;
+}
+
+
+#userInfo> ul {
+    margin:0;
+    padding:0 10px 0 10px;
+    background-color:rgba(10%, 10%, 10%, 0.7);
+    //font-color:#fff;
+    //display:none;
+}
+
+#userInfo > * .child_li{
+    border-bottom: 1px solid #aaa;
+    //color:#fff;
+}
+
+.last_child_li{
+    border:none;
+}
+
+#userInfo > li, #userInfo > * li {
+    text-align:center;
+    list-style-type:none;
+}

@@ -1,0 +1,27 @@
+@CHARSET "UTF-8";
+bod1y {
+  font-family: arial, 'Microsoft YaHei';
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+/*底栏样式_BEGIN*/
+footer, #footer {
+    font-size: 12px;
+    padding-top: 16px;
+    height: 60px;
+    text-align: center;
+    color: #666666; 
+    background-color: #dddddd;   
+    margin: 0;
+    border-radius:0; 
+}
+
+footer > a#icp, 
+#footer > a#icp{
+    color: #666666;
+}
+/*底栏样式_END*/

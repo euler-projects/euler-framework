@@ -1,0 +1,55 @@
+2016-02-19
+
+Title:CentOS下的Jenkins安装与配置
+Tags:Java;CI;Jenkins;Linux
+Time:2016-02-19
+
+1.安装最新版JDK(作为JENKINS运行环境)
+# mount -t cifs //192.168.8.1/share /mnt -o username=share,password=share,nounix,sec=ntlmssp
+# cd /mnt/
+# rpm -ivh jdk-8u74-linux-x64.rpm
+
+2.安装最新版GIT
+# yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel gcc perl-ExtUtils-MakeMaker -y
+# wget https://www.kernel.org/pub/software/scm/git/git-2.7.1.tar.gz
+# tar -xzvf git-2.7.1.tar.gz
+# cd git-2.7.1
+# make prefix=/usr/local/git all
+# make prefix=/usr/local/git install
+
+# ln -s /usr/local/git/bin/git /usr/bin/git
+OR
+# echo "export PATH=$PATH:/usr/local/git/bin" >> /etc/bashrc
+# source /etc/bashrc
+#此处的选择会影响后面Jenkins的Git配置，用前者无需配置，用后者Jenkins无法识别git，需在Jenkins系统管理中填写绝对路径
+
+3.安装JENKINS
+# wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo
+# rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+# yum install jenkins
+3.1修改JENKINS根目录
+# vim /etc/sysconfig/jenkins
+	JENKINS_HOME="/jenkins"
+# vim /etc/sysconfig/iptables
+	# Firewall configuration written by system-config-firewall
+	# Manual customization of this file is not recommended.
+	*filter
+	:INPUT ACCEPT [0:0]
+	:FORWARD ACCEPT [0:0]
+	:OUTPUT ACCEPT [0:0]
+	-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+	-A INPUT -p icmp -j ACCEPT
+	-A INPUT -i lo -j ACCEPT
+	-A INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
+	-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+	-A INPUT -j REJECT --reject-with icmp-host-prohibited
+	-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+	COMMIT
+# service iptables restart
+# mkdir /jenkins
+# chown jenkins:jenkins /jenkins
+# service jenkins start
+
+4.与GitLab集成
+需要插件: Git Plugin GitLab Plugin
+注意: 如果用webhooks激活构建需要配置分支过滤，否则任意分支的事件均可激活构件

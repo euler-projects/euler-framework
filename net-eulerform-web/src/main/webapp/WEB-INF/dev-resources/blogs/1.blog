@@ -1,0 +1,58 @@
+<p>OS X自带Apache，sudo apachectl start可以启动，配置文件在/etc/apache2/httpd.conf，默认网站根目录在/Library/WebServer/Documents。</p>
+<p>如果不想破坏默认的网站根目录，可采用虚拟主机的方式添加其他目录，虚拟主机配置文件在 /etc/apache2/extra/httpd-vhosts.conf。添加之前要先配置httpd.conf：</p>
+<p>1.去掉javascript:void(0);Include /private/etc/apache2/extra/httpd-vhosts.con的注释，以启用虚拟主机；</p>
+<p>2.在<code><</code><code>Directory "/Library/WebServer/CGI-Executables"</code><code>></code>...<code><</code>/Directory<code>></code>后做如下配置：</p>
+<p><div class="code">
+        <div class="codeLine odd"<code><</code>
+        <code>Directory "/Library/WebServer/CGI-Executables"</code>
+        <code>></code></div>
+            <div class="codeLine even tab1"><code>AllowOverride None</code></div>
+            <div class="codeLine odd tab1"><code>Options None</code></div>
+            <div class="codeLine even tab1"><code>Require all granted</code></div>
+        <div class="codeLine odd"><code><</code><code>/Directory</code><code>></code></div>
+        
+        <div class="codeLine even"><code><</code>
+        <code>Directory "/Users/Shared/cFrost.net"</code>
+        <code>></code></div>
+            <div class="codeLine odd tab1"><code>Options FollowSymLinks Multiviews</code></div>
+            <div class="codeLine even tab1"><code>MultiviewsMatch Any</code></div>
+            <div class="codeLine odd tab1"><code>AllowOverride None</code></div>
+            <div class="codeLine even tab1"><code>Require all granted</code></div>
+        <div class="codeLine odd"><code><</code><code>/Directory</code><code>></code></div>
+</div></p>
+<p>3.在/etc/apache2/extra/httpd-vhosts.conf注释掉如下部分：</p>
+<p><div class="code">
+    <div class="codeLine odd"><code><</code><code>VirtualHost *:80</code<code>></code></div>
+    <div class="codeLine even tab1"><code>ServerAdmin webmaster@dummy-host.example.com</code></div>
+    <div class="codeLine odd tab1"><code>DocumentRoot "/usr/docs/dummy-host.example.com"</code></div>
+    <div class="codeLine even tab1"><code>ServerName dummy-host.example.com</code></div>
+    <div class="codeLine odd tab1"><code>ServerAlias www.dummy-host.example.com</code></div>
+    <div class="codeLine even tab1"><code>ErrorLog "/private/var/log/apache2/dummy-host.example.com-error_log"</code></div>
+    <div class="codeLine odd tab1"><code>CustomLog "/private/var/log/apache2/dummy-host.example.com-access_log" common</code></div>
+    <div class="codeLine even"><code><</code><code>/VirtualHost</code<code>></code></div>
+
+    <div class="codeLine odd"><code><</code><code>VirtualHost *:80</code<code>></code></div>
+    <div class="codeLine even tab1"><code>ServerAdmin webmaster@dummy-host2.example.com</code></div>
+    <div class="codeLine odd tab1"><code>DocumentRoot "/usr/docs/dummy-host2.example.com"</code></div>
+    <div class="codeLine even tab1"><code>ServerName dummy-host2.example.com</code></div>
+    <div class="codeLine odd tab1"><code>ErrorLog "/private/var/log/apache2/dummy-host2.example.com-error_log"</code></div>
+    <div class="codeLine even tab1"><code>CustomLog "/private/var/log/apache2/dummy-host2.example.com-access_log" common</code></div>
+    <div class="codeLine odd"><code><</code><code>/VirtualHost</code<code>></code></div>
+</div></p>
+<p>4.然后增加如下配置：</p>
+<p><div class="code">
+    <div class="codeLine odd"><code><</code><code>VirtualHost *:80</code<code>></code></div>
+    <div class="codeLine even tab1"><code>DocumentRoot "/Library/WebServer/Documents"</code></div>
+    <div class="codeLine odd tab1"><code>ServerName localhost</code></div>
+    <div class="codeLine even tab1"><code>ErrorLog "/private/var/log/apache2/localhost-error_log"</code></div>
+    <div class="codeLine odd tab1"><code>CustomLog "/private/var/log/apache2/localhost-access_log" common</code></div>
+    <div class="codeLine even"><code><</code><code>/VirtualHost</code<code>></code></div>
+
+    <div class="codeLine odd"><code><</code><code>VirtualHost *:80</code<code>></code></div>
+    <div class="codeLine even tab1"><code>DocumentRoot "/Users/Shared/cFrost.net"</code></div>
+    <div class="codeLine odd tab1"><code>ServerName cfrost.net.local</code></div>
+    <div class="codeLine even tab1"><code>ErrorLog "/private/var/log/apache2/sites-error_log"</code></div>
+    <div class="codeLine odd tab1"><code>CustomLog "/private/var/log/apache2/sites-access_log" common</code></div>
+    <div class="codeLine even"><code><</code><code>/VirtualHost</code<code>></code></div>
+</div></p>
+<p>5.sudo apachectl restart重启Apache即可，注意站点目录755权限，测试不能放在用户目录。</p>

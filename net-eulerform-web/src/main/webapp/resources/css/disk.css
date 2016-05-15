@@ -1,0 +1,33 @@
+#disk_fileTableDiv {
+    margin-top: 32px;
+    margin-left: 33px;
+    margin-right: 33px;
+}
+
+#disk_fileTable {
+    border: 1px solid black;
+    text-align: left;
+    width: 100%;
+}
+
+#disk_fileTable * th {
+    border-bottom: 1px solid black;
+    text-align: left;
+}
+#disk_fileName{
+    width: auto;
+    
+}
+
+#disk_uploadDate {
+    width: 6rem;
+    
+}
+
+#disk_fileSize {
+    width: 5rem;
+}
+
+#disk_download {
+    width: 4rem;
+}
