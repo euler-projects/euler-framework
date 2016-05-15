@@ -1,0 +1,17 @@
+2016-02-18
+
+今天研究GitLab+Jenkins自动集成时，出现
+Failed to connect to repository : Command "git config --local credential.helper store --file=/tmp/git2956041026506359040.credentials" returned status code 129:
+stdout: 
+stderr: error: unknown option `local'
+错误
+发现时CentOS6安装的GIT版本时1.7.1所致，因yum源版本太旧，因此下载源码手动编译之：
+# yum remove git
+# yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel -y
+# yum install  gcc perl-ExtUtils-MakeMaker -y
+# wget https://www.kernel.org/pub/software/scm/git/git-2.7.1.tar.gz
+# tar -xzvf git-2.7.1.tar.gz
+# cd git-2.7.1
+# make prefix=/usr/local/git all
+# make prefix=/usr/local/git install
+# ln -s /usr/local/git/bin/git /usr/bin/git

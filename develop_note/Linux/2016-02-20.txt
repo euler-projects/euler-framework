@@ -1,0 +1,37 @@
+2016-02-20
+
+
+/etc下的fstable文件 控制分区权限 (2010-01-07 09:42:33)
+标签： 杂谈	分类： RHEL日常使用
+/etc/fstab
+打开这个文件
+挂载分区的位置          挂载点                 分区格式   设置         备份自检
+LABEL=/1                /                       ext3    defaults        1 1
+LABEL=/var1             /var                    ext3    defaults        1 2
+LABEL=/home1            /home                   ext3    defaults        1 2
+LABEL=/boot1            /boot                   ext3    defaults        1 2
+tmpfs                   /dev/shm                tmpfs   defaults        0 0
+devpts                  /dev/pts                devpts  gid=5,mode=620  0 0
+sysfs                   /sys                    sysfs   defaults        0 0
+proc                    /proc                   proc    defaults        0 0
+LABEL=SWAP-sda5         swap                    swap    defaults        0 0
+ 
+第一列：设备名或者设备卷标名，（/dev/sda10 或者 LABEL=/）
+
+第二列：设备挂载目录        （例如上面的“/”或者“/mnt/D/”）
+
+第三列：设备文件系统          （例如上面的“ext3”或者“vfat”）
+
+第四列：挂载参数     （看帮助man mount）
+对于已经挂载好的设备，例如上面的/dev/sda2，现在要改变挂载参数，这时可以不用卸载该设备，而可以使用下面的命令（没有挂载的设备，remount 这个参数无效）
+#mount /mnt/D/ -o remount,ro （改defaults为ro）
+为了安全起见，可以指明其他挂载参数，例如：
+noexec（不允许可执行文件可执行，但千万不要把根分区挂为noexec，那就无法使用系统了，连mount 命令都无法使用了，这时只有重新做系统了！
+nodev（不允许挂载设备文件）
+nosuid,nosgid（不允许有suid和sgid属性）
+nouser（不允许普通用户挂载）
+
+第五列：指明是否要备份，（0为不备份，1为要备份，一般根分区要备份）
+
+第六列：指明自检顺序。 （0为不自检，1或者2为要自检，如果是根分区要设为1，其他分区只能是2）
+修改完之后，重新挂载下：#mount -o remount /home

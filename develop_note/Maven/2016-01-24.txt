@@ -1,0 +1,8 @@
+2016-01-24
+今天在用Maven集成Struts2+Spring+Hibernate时发现只要不在web模块中声明spring-web的依赖，就会报java.lang.NoClassDefFoundError: [Lorg/springframework/context/ApplicationContextInitializer;异常，站点无法启动。
+
+对比了半天发现添加spring-web依赖后打包生成的文件少了一个spring-asm-3.0.5.RELEASE.jar文件，很是纳闷，再仔细看spring-context还有几个其他文件的版本号也是3.0.5，奇怪啊，我明明写了<springframework.version>4.2.3.RELEASE</springframework.version>啊。
+
+分析了半天，发现对于Spring的整合，我只声明了spring-web和spring-orm的依赖，再去看spring的官方说明要求引入spring-context，一定是其他引用引入了旧版本的spring-context，找了一下果然发现struts2-spring-plugin这个引用引入了3.0.5.RELEASE版本的spring-context。。。
+
+果断在最前面显试声明spring-context！
