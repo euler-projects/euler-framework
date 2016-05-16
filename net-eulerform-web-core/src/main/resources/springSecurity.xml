@@ -96,8 +96,6 @@
     <beans:beans profile="cas">
         <http use-expressions="true" auto-config="false" entry-point-ref="casEntryPoint" servlet-api-provision="true">
             <intercept-url pattern="${cas.localSystemLoginUrl}" access="permitAll" />
-            <intercept-url pattern="/login" access="permitAll" />
-            <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
             <intercept-url pattern="/webapi/**" access="permitAll" />
             <intercept-url pattern="/**" access="isFullyAuthenticated()" />
