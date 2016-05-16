@@ -23,7 +23,7 @@
             <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
             <intercept-url pattern="/webapi/**" access="permitAll" />
-            <intercept-url pattern="/**" access="isFullyAuthenticated()" />
+            <intercept-url pattern="/**" access="permitAll" />
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
                 default-target-url="/" username-parameter="username"

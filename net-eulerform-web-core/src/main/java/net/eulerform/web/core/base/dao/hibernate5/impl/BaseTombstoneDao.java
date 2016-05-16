@@ -10,7 +10,7 @@ import org.hibernate.criterion.Restrictions;
 
 import net.eulerform.web.core.base.dao.hibernate5.IBaseTombstoneDao;
 import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
-import net.eulerform.web.core.util.SecurityContextTool;
+import net.eulerform.web.core.util.UserContext;
 
 public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends BaseDao<T> implements IBaseTombstoneDao<T> {
 
@@ -105,7 +105,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
     }
     
     private void setBaseInfo(T entity){
-        Serializable currentUserId = SecurityContextTool.getCurrentUser().getId();
+        Serializable currentUserId = UserContext.getCurrentUser().getId();;
         Date date = new Date();
         if(entity.getCreateDate() == null)
             entity.setCreateDate(date);
