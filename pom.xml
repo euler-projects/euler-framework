@@ -10,7 +10,7 @@
     <description>eulerform.net</description>
 
     <modules>
-        <module>net-eulerform-web</module>
+        <module>net-eulerform-web-demo</module>
         <module>net-eulerform-web-root</module>
         <module>net-eulerform-web-core</module>
         <module>net-eulerform-common</module>
