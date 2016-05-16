@@ -17,7 +17,7 @@
     <div id="__page__">
         <header>
             <div id="siteName">
-                <a href="<%=request.getContextPath()%>/">cFrost.net</a>
+                <a href="<%=request.getContextPath()%>/"><div class="euler-formula"></div></a>
             </div>
             <nav>
                 <a href="<%=request.getContextPath()%>/blog/">BLOG</a>

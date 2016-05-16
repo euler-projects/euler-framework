@@ -32,6 +32,14 @@ header, #header {
     left:3px;
 }
 
+.euler-formula {
+    height: 32px;
+    width:96px;
+    background-image:url(../images/Euler-Formula.png);
+    background-repeat:no-repeat;
+    background-size:contain;
+}
+
 nav, #nav {
     height: 32px;
     line-height: 32px;
