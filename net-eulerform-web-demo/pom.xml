@@ -7,7 +7,7 @@
         <artifactId>net-eulerform</artifactId>
         <version>0.0.3-SNAPSHOT</version>
     </parent>
-    <artifactId>net-eulerform-web</artifactId>
+    <artifactId>net-eulerform-web-demo</artifactId>
     <packaging>war</packaging>
     <name>net-eulerform-web Maven Webapp</name>
     <url>http://maven.apache.org</url>
