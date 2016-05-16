@@ -107,10 +107,12 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
     private void setBaseInfo(T entity){
         if(entity.getId() != null){
             T oldEntity = super.load(entity.getId());
-            entity.setCreateBy(oldEntity.getCreateBy());
-            entity.setCreateDate(oldEntity.getCreateDate());
-            entity.setIfDel(oldEntity.getIfDel());
-            this.getSessionFactory().getCurrentSession().evict(oldEntity);
+            if(oldEntity != null) {
+                entity.setCreateBy(oldEntity.getCreateBy());
+                entity.setCreateDate(oldEntity.getCreateDate());
+                entity.setIfDel(oldEntity.getIfDel());
+                this.getSessionFactory().getCurrentSession().evict(oldEntity);
+            }
         }
         
         Serializable currentUserId = UserContext.getCurrentUser().getId();;
