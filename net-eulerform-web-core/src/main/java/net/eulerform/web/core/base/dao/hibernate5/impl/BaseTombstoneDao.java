@@ -110,7 +110,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             if(oldEntity != null) {
                 entity.setCreateBy(oldEntity.getCreateBy());
                 entity.setCreateDate(oldEntity.getCreateDate());
-                //entity.setIfDel(oldEntity.getIfDel());注释掉此处:再次保存已逻辑删除的对象时,删除状态已新对象为准
+                //entity.setIfDel(oldEntity.getIfDel());注释掉此处:再次保存已逻辑删除的对象时,删除状态以新对象为准
                 this.getSessionFactory().getCurrentSession().evict(oldEntity);
             }
         }
