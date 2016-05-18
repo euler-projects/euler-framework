@@ -1,12 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns="http://www.springframework.org/schema/security"
              xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans  
                                  http://www.springframework.org/schema/beans/spring-beans-4.2.xsd  
                                  http://www.springframework.org/schema/security  
                                  http://www.springframework.org/schema/security/spring-security-4.0.xsd">
 	
+<!-- 	<beans:bean id="webSecurityExpressionHandler"
+                class="org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler" />
+    <beans:bean id="methodSecurityExpressionHandler"
+                class="org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler" />
+	<beans:bean id="tokenServices" 
+                class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+        <beans:property name="tokenStore" ref="tokenStore" />
+        <beans:property name="clientDetailsService" ref="clientDetailsService" />
+        <beans:property name="accessTokenEnhancer" ref="accessTokenEnhancer" />
+        <beans:property name="authenticationManager" ref="authenticationManager" />
+    </beans:bean>
+    
+    <beans:bean id="userApprovalHandler"
+                class="org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler">
+        <beans:property name="tokenServices" ref="tokenServices" />
+    </beans:bean>
+
+    <beans:bean id="oauthAccessDeniedHandler"
+                class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+   
+    
+    <beans:bean id="nonceServices"
+                class="com.wrox.site.DefaultOAuthNonceServices" />
+    <beans:bean id="resourceServerFilter"
+                class="com.wrox.site.OAuthSigningTokenAuthenticationFilter">
+        <beans:property name="authenticationEntryPoint"
+                        ref="oauthAuthenticationEntryPoint" />
+        <beans:property name="nonceServices" ref="nonceServices" />
+        <beans:property name="tokenServices" ref="tokenServices" />
+        <beans:property name="resourceId" value="SUPPORT" />
+    </beans:bean>
+    
+    <oauth2:authorization-server token-services-ref="tokenServices"
+                 client-details-service-ref="clientDetailsService"
+                 user-approval-page="oauth/authorize" error-page="oauth/error">
+        <oauth2:authorization-code />
+    </oauth2:authorization-server>
+    
+    <http use-expressions="true" create-session="stateless"
+          authentication-manager-ref="oauthClientAuthenticationManager"
+          entry-point-ref="oauthAuthenticationEntryPoint" pattern="/oauth/token">
+        <intercept-url pattern="/oauth/token"
+                       access="hasAuthority('OAUTH_CLIENT')" />
+        <http-basic />
+        <access-denied-handler ref="oauthAccessDeniedHandler" />
+        <expression-handler ref="webSecurityExpressionHandler" />
+    </http> -->
+    
+    <beans:bean id="oauthAuthenticationEntryPoint"
+                class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint" /> 
+
+    <http use-expressions="true" create-session="stateless"
+          entry-point-ref="oauthAuthenticationEntryPoint" pattern="/webapi/**">
+        <intercept-url pattern="/webapi/**" access="permitAll" />
+        <!-- <custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+        <access-denied-handler ref="oauthAccessDeniedHandler" />
+        <expression-handler ref="webSecurityExpressionHandler" /> -->
+    </http>
+    
 	<global-method-security pre-post-annotations="enabled" order="0"
                             proxy-target-class="true">
     </global-method-security>
@@ -15,6 +75,7 @@
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
 
     <http security="none" pattern="/resources/**" />
+    <http security="none" pattern="/favicon.ico" />
 
     <beans:beans profile="local,ldap">
         <http use-expressions="true">
@@ -22,8 +83,7 @@
             <intercept-url pattern="/login" access="permitAll" />
             <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
-            <intercept-url pattern="/webapi/**" access="permitAll" />
-            <intercept-url pattern="/**" access="permitAll" />
+            <intercept-url pattern="/**" access="isFullyAuthenticated()" />
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
                 default-target-url="/" username-parameter="username"
@@ -97,7 +157,6 @@
         <http use-expressions="true" auto-config="false" entry-point-ref="casEntryPoint" servlet-api-provision="true">
             <intercept-url pattern="${cas.localSystemLoginUrl}" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
-            <intercept-url pattern="/webapi/**" access="permitAll" />
             <intercept-url pattern="/**" access="isFullyAuthenticated()" />
             <custom-filter position="FORM_LOGIN_FILTER" ref="casFilter" />
             <custom-filter ref="singleLogoutFilter" before="CAS_FILTER" />
