@@ -4,4 +4,6 @@
 
 http://10.88.5.166:7070/efb/oauth/authorize?client_id=123&response_type=code&redirect_uri=http%3A%2F%2F10.88.5.166%3A7070%2Fefb%2Fwebapi%2Fsvn%2Fworkingcopy
 
+http://10.88.5.166:7070/efb/webapi/svn/workingcopy?access_token=1e076cd5-fe9f-4327-9dc1-83135dd834d8
+
 http://10.88.5.166:7070/efb/oauth/token?code=mmYiVE&client_id=123&grant_type=authorization_code&redirect_uri=http%3A%2F%2F10.88.5.166%3A7070%2Fefb%2Fwebapi%2Fsvn%2Fworkingcopy

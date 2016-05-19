@@ -37,16 +37,7 @@
                 class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />
 
     <beans:bean id="oauth2AccessDeniedHandler"
-                class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />    
-    
-    
-    <!-- <beans:bean id="webSecurityExpressionHandler"
-                class="org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler" /> -->
-    
-    <!-- <beans:bean id="resourceServerFilter"
-                class="org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter">
-        <beans:property name="authenticationManager" ref="oauthClientAuthenticationManager" />
-    </beans:bean> -->
+                class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
     
     <oauth2:authorization-server 
                  token-services-ref="tokenServices"
@@ -60,18 +51,6 @@
         <oauth2:client-credentials />  
         <oauth2:password /> 
     </oauth2:authorization-server>
-    
-    <beans:bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">  
-        <beans:constructor-arg>  
-            <beans:list>  
-                <beans:bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>  
-                <beans:bean class="org.springframework.security.access.vote.RoleVoter"/>  
-                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>  
-            </beans:list>  
-        </beans:constructor-arg>  
-    </beans:bean>   
-    
-    <oauth2:resource-server id="restResourceServer" resource-id="SUPPORT" token-services-ref="tokenServices" />
     
     <beans:bean id="clientCredentialsTokenEndpointFilter"  
                 class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">  
@@ -89,37 +68,29 @@
         <csrf disabled="true"/>
     </http>
     
-    <http pattern="/webapi/**" create-session="never" entry-point-ref="oauth2AuthenticationEntryPoint"
-          access-decision-manager-ref="oauth2AccessDecisionManager" use-expressions="false">
+    <!-- <beans:bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">  
+        <beans:constructor-arg>  
+            <beans:list>  
+                <beans:bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>  
+                <beans:bean class="org.springframework.security.access.vote.RoleVoter"/>  
+                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>  
+            </beans:list>  
+        </beans:constructor-arg>  
+    </beans:bean>-->
+    
+    <oauth2:resource-server id="restResourceServer" resource-id="SUPPORT" token-services-ref="tokenServices" />
+    
+    <http pattern="/webapi/**" create-session="stateless" entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false"
+          authentication-manager-ref="oauth2AuthenticationManager" >
+          <!-- access-decision-manager-ref="oauth2AccessDecisionManager" > -->
         <anonymous enabled="false"/>
 
-        <intercept-url pattern="/webapi/**" access="SCOPE_READ"/>
+        <intercept-url pattern="/webapi/**" access="IS_AUTHENTICATED_FULLY"/>
 
         <custom-filter ref="restResourceServer" before="PRE_AUTH_FILTER"/>
         <access-denied-handler ref="oauth2AccessDeniedHandler"/>
         <csrf disabled="true"/>
     </http>
-    
-    <!-- <http use-expressions="true" create-session="stateless"
-          authentication-manager-ref="oauthClientAuthenticationManager"
-          entry-point-ref="oauthAuthenticationEntryPoint" pattern="/oauth/token">
-        <intercept-url pattern="/oauth/token" access="hasAuthority('OAUTH_CLIENT')" />
-        <http-basic />
-        <access-denied-handler ref="oauthAccessDeniedHandler" />
-        <expression-handler ref="webSecurityExpressionHandler" />
-    
-        <csrf disabled="true" />
-    </http> -->
-
-    <!-- <http use-expressions="true" create-session="stateless"
-          entry-point-ref="oauthAuthenticationEntryPoint" pattern="/webapi/**">
-        <intercept-url pattern="/webapi/**" access="hasAuthority('OAUTH_CLIENT')" />
-        <access-denied-handler ref="oauthAccessDeniedHandler" />
-        <expression-handler ref="webSecurityExpressionHandler" />
-        <custom-filter ref="restResourceServer" before="PRE_AUTH_FILTER"/>
-        <custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
-        <csrf disabled="true" />
-    </http> -->
     
 	<global-method-security pre-post-annotations="enabled" order="0"
                             proxy-target-class="true">
