@@ -92,7 +92,7 @@
         <csrf disabled="true"/>
     </http>
     
-	<global-method-security pre-post-annotations="enabled" order="0"
+    <global-method-security pre-post-annotations="enabled" order="0"
                             proxy-target-class="true">
     </global-method-security>
     
