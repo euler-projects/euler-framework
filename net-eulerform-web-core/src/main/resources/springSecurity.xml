@@ -11,9 +11,9 @@
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
                                  
     <beans:bean id="jwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
-        <beans:property name="signingKey" ref="jwtTokenSigningKey"/>
-        <beans:property name="verifierKey" ref="jwtTokenVerifierKey"/>     
-        <!-- <beans:property name="keyPair" ref="keyPair" /> -->
+        <beans:property name="signingKey" ref="jwtSigningKey"/>
+        <beans:property name="verifierKey" ref="jwtVerifierKey"/>
+        <!--<beans:property name="keyPair" ref="keyPair" />-->
     </beans:bean>
     
     <beans:bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JwtTokenStore" >  
