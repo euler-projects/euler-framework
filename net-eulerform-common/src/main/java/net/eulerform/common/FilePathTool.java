@@ -1,6 +1,6 @@
 package net.eulerform.common;
 
-public class FilePathTool {
+public abstract class FilePathTool {
     
     /**
      * 统一路径为UNIX格式,结尾的"/"会去掉<br>

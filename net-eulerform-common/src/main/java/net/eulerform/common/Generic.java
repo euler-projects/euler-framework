@@ -3,7 +3,7 @@ package net.eulerform.common;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public class Generic {
+public abstract class Generic {
     
     public static Class<?> findSuperClassGenricType(Class<?> clazz, int index){
         if(clazz == null)
