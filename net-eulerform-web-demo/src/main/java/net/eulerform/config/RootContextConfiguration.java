@@ -1,7 +1,6 @@
 package net.eulerform.config;
 
 import java.nio.charset.StandardCharsets;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
