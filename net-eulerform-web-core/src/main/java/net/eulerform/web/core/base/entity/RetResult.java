@@ -3,20 +3,13 @@ package net.eulerform.web.core.base.entity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class RetResult<T> {
     
-    public final static int UNINIT = 0;
-    public final static int SUCCESS = 1;
-    public final static int UNKNOWN_ERR = -1;
-    
     public RetResult() {
         this.dataSize = 0;
-        this.returnFlag = RetResult.UNINIT;
-        this.returnInfo = "UNINIT";
     }
 
     public RetResult(T data) {
@@ -27,7 +20,13 @@ public class RetResult<T> {
         this.setData(data);
     }
     
-    private List<T> data;
+    public RetResult(RetStatus retStatus) {
+		this();
+		this.returnFlag = retStatus.getReturnFlag();
+		this.returnInfo = retStatus.getReturnInfo();
+	}
+
+	private List<T> data;
     
     private Integer dataSize;
     
@@ -46,9 +45,6 @@ public class RetResult<T> {
     public void setData(List<T> data) {
         this.data = data;
         this.dataSize = this.data==null?0:this.data.size();
-        if(this.returnInfo == "UNINIT") {
-            this.returnInfo = null;
-        }
     }
     
     public List<T> getData() {
@@ -61,13 +57,10 @@ public class RetResult<T> {
     
     public void setReturnFlag(Integer returnFlag) {
         this.returnFlag = returnFlag;
-        
-        if(this.returnInfo == null || this.returnInfo == "UNINIT") {
-            switch(returnFlag) {
-            case RetResult.SUCCESS : this.returnInfo = "SUCCESS";break;
-            case RetResult.UNKNOWN_ERR : this.returnInfo = "UNKNOWN_ERR";break;
-            }
-        }
+    }
+
+    public void setReturnFlag(RetStatus returnFlag) {
+        this.returnFlag = returnFlag.getReturnFlag();
     }
 
     public String getReturnInfo() {
@@ -78,7 +71,13 @@ public class RetResult<T> {
         this.returnInfo = returnInfo;
     }
 
-    public void setDataSize(Integer dataSize) {
+    public void setReturnInfo(RetStatus returnInfo) {
+        this.returnInfo = returnInfo.getReturnInfo();
+    }
+
+    public void setReturnStatus(RetStatus retStatus) {
+    	this.returnFlag = retStatus.getReturnFlag();
+        this.returnInfo = retStatus.getReturnInfo();
     }
 
     public Integer getDataSize() {

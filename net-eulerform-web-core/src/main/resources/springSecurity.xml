@@ -9,97 +9,7 @@
                                  http://www.springframework.org/schema/security/spring-security-4.0.xsd
                                  http://www.springframework.org/schema/security/oauth2
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
-                                 
-    <beans:bean id="jwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
-        <beans:property name="signingKey" ref="jwtSigningKey"/>
-        <beans:property name="verifierKey" ref="jwtVerifierKey"/>
-        <!--<beans:property name="keyPair" ref="keyPair" />-->
-    </beans:bean>
     
-    <beans:bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JwtTokenStore" >  
-        <beans:constructor-arg ref="jwtAccessTokenConverter"/>
-    </beans:bean>
-    
-    <beans:bean id="tokenServices" 
-                class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
-        <beans:property name="tokenStore" ref="tokenStore" />
-        <beans:property name="clientDetailsService" ref="clientDetailsService" />
-        <beans:property name="tokenEnhancer" ref="jwtAccessTokenConverter" />        
-    </beans:bean>
-    
-    <beans:bean id="oauth2ClientDetailsUserService"  
-                class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">  
-        <beans:constructor-arg ref="clientDetailsService"/>
-        <beans:property name="passwordEncoder" ref="passwordEncoder"/>
-    </beans:bean> 
-
-    <beans:bean id="oauth2AuthenticationEntryPoint"
-                class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint" />
-    
-    <authentication-manager id="oauth2AuthenticationManager">
-        <authentication-provider user-service-ref="oauth2ClientDetailsUserService">
-            <password-encoder ref="passwordEncoder" />
-        </authentication-provider>
-    </authentication-manager>
-    
-    <beans:bean id="oauthUserApprovalHandler"
-                class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />
-
-    <beans:bean id="oauth2AccessDeniedHandler"
-                class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
-    
-    <oauth2:authorization-server 
-                 token-services-ref="tokenServices"
-                 client-details-service-ref="clientDetailsService"
-                 user-approval-handler-ref="oauthUserApprovalHandler"
-                 user-approval-page="oauth/authorize"
-                 error-page="oauth/error" >
-        <oauth2:authorization-code />        
-        <oauth2:implicit />  
-        <oauth2:refresh-token />  
-        <oauth2:client-credentials />  
-        <oauth2:password /> 
-    </oauth2:authorization-server>
-    
-    <beans:bean id="clientCredentialsTokenEndpointFilter"  
-                class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">  
-        <beans:property name="authenticationManager" ref="oauth2AuthenticationManager"/>  
-    </beans:bean>
-    
-    <http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager"
-          entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false">
-        <intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY"/>
-        <anonymous enabled="false"/>
-        <http-basic entry-point-ref="oauth2AuthenticationEntryPoint"/>
-
-        <custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>
-        <access-denied-handler ref="oauth2AccessDeniedHandler"/>
-        <csrf disabled="true"/>
-    </http>
-    
-    <beans:bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">  
-        <beans:constructor-arg>  
-            <beans:list>  
-                <beans:bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>  
-                <beans:bean class="org.springframework.security.access.vote.RoleVoter"/>  
-                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>  
-            </beans:list>  
-        </beans:constructor-arg>  
-    </beans:bean>
-    
-    <oauth2:resource-server id="restResourceServer" resource-id="SUPPORT" token-services-ref="tokenServices" />
-    
-    <http pattern="/webapi/**" create-session="stateless" entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false"
-          authentication-manager-ref="oauth2AuthenticationManager" >
-          <!-- access-decision-manager-ref="oauth2AccessDecisionManager" > -->
-        <anonymous enabled="false"/>
-
-        <intercept-url pattern="/webapi/**" access="IS_AUTHENTICATED_FULLY"/>
-
-        <custom-filter ref="restResourceServer" before="PRE_AUTH_FILTER"/>
-        <access-denied-handler ref="oauth2AccessDeniedHandler"/>
-        <csrf disabled="true"/>
-    </http>
     
     <global-method-security pre-post-annotations="enabled" order="0"
                             proxy-target-class="true">
@@ -110,6 +20,103 @@
 
     <http security="none" pattern="/resources/**" />
     <http security="none" pattern="/favicon.ico" />
+    
+    <beans:beans profile="oauth">
+	    <beans:bean id="jwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
+	        <beans:property name="signingKey" ref="jwtSigningKey"/>
+	        <beans:property name="verifierKey" ref="jwtVerifierKey"/>
+	        <!--<beans:property name="keyPair" ref="keyPair" />-->
+	    </beans:bean>
+	    
+	    <beans:bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JwtTokenStore" >  
+	        <beans:constructor-arg ref="jwtAccessTokenConverter"/>
+	    </beans:bean>
+	    
+	    <beans:bean id="tokenServices" 
+	                class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+	        <beans:property name="tokenStore" ref="tokenStore" />
+	        <beans:property name="clientDetailsService" ref="clientDetailsService" />
+	        <beans:property name="tokenEnhancer" ref="jwtAccessTokenConverter" />        
+	    </beans:bean>
+	    
+	    <beans:bean id="oauth2ClientDetailsUserService"  
+	                class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">  
+	        <beans:constructor-arg ref="clientDetailsService"/>
+	        <beans:property name="passwordEncoder" ref="passwordEncoder"/>
+	    </beans:bean> 
+	
+	    <beans:bean id="oauth2AuthenticationEntryPoint"
+	                class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint" />
+	    
+	    <authentication-manager id="oauth2AuthenticationManager">
+	        <authentication-provider user-service-ref="oauth2ClientDetailsUserService">
+	            <password-encoder ref="passwordEncoder" />
+	        </authentication-provider>
+	    </authentication-manager>
+	    
+	    <beans:bean id="oauthUserApprovalHandler"
+	                class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />
+	
+	    <beans:bean id="oauth2AccessDeniedHandler"
+	                class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+	    
+	    <oauth2:authorization-server 
+	                 token-services-ref="tokenServices"
+	                 client-details-service-ref="clientDetailsService"
+	                 user-approval-handler-ref="oauthUserApprovalHandler"
+	                 user-approval-page="oauth/authorize"
+	                 error-page="oauth/error" >
+	        <oauth2:authorization-code />        
+	        <oauth2:implicit />  
+	        <oauth2:refresh-token />  
+	        <oauth2:client-credentials />  
+	        <oauth2:password /> 
+	    </oauth2:authorization-server>
+	    
+	    <beans:bean id="clientCredentialsTokenEndpointFilter"  
+	                class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">  
+	        <beans:property name="authenticationManager" ref="oauth2AuthenticationManager"/>  
+	    </beans:bean>
+	    
+	    <http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager"
+	          entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false">
+	        <intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY"/>
+	        <anonymous enabled="false"/>
+	        <http-basic entry-point-ref="oauth2AuthenticationEntryPoint"/>
+	
+	        <custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>
+	        <access-denied-handler ref="oauth2AccessDeniedHandler"/>
+	        <csrf disabled="true"/>
+	    </http>
+	    
+	    <beans:bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">  
+	        <beans:constructor-arg>  
+	            <beans:list>  
+	                <beans:bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>  
+	                <beans:bean class="org.springframework.security.access.vote.RoleVoter"/>  
+	                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>  
+	            </beans:list>  
+	        </beans:constructor-arg>  
+	    </beans:bean>
+	    
+	    <oauth2:resource-server id="restResourceServer" resource-id="SUPPORT" token-services-ref="tokenServices" />
+	    
+	    <http pattern="/webapi/**" create-session="stateless" entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false"
+	          authentication-manager-ref="oauth2AuthenticationManager" >
+	          <!-- access-decision-manager-ref="oauth2AccessDecisionManager" > -->
+	        <anonymous enabled="false"/>
+	
+	        <intercept-url pattern="/webapi/**" access="IS_AUTHENTICATED_FULLY"/>
+	
+	        <custom-filter ref="restResourceServer" before="PRE_AUTH_FILTER"/>
+	        <access-denied-handler ref="oauth2AccessDeniedHandler"/>
+	        <csrf disabled="true"/>
+	    </http>
+    </beans:beans>
+    
+    <beans:beans profile="no_oauth">
+    	<http security="none" pattern="/webapi/**" />
+    </beans:beans>
 
     <beans:beans profile="local,ldap">
         <http use-expressions="true">
@@ -118,7 +125,7 @@
             <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
             <intercept-url pattern="/oauth/**" access="permitAll" />
-            <intercept-url pattern="/**" access="permitAll" />
+            <intercept-url pattern="/**" access="isFullyAuthenticated()" />
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
                 default-target-url="/" username-parameter="username"

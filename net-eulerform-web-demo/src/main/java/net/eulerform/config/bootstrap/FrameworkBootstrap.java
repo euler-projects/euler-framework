@@ -18,6 +18,10 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 @Order(1)
 public class FrameworkBootstrap implements WebApplicationInitializer {
+	
+	private static final String DISABLE = "disable";
+	private static final String OAUTH_PROFILE = "oauth";
+	private static final String NO_OAUTH_PROFILE = "no_oauth";
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
@@ -27,17 +31,26 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         
         PropertyReader propertyReader;
         String authenticationProvider;
+        boolean enableOAuth=false;
         try {
             propertyReader = new PropertyReader("config.properties");
             authenticationProvider = (String) propertyReader.getProperty("springSecurity.authenticationProvider");
+            enableOAuth = Boolean.valueOf((String) propertyReader.getProperty("springSecurity.enableOAuth"));
         } catch (Exception e) {
             rootContext.close();
             throw new ServletException(e);
-        }        
+        }
         
-        if(!"disable".equalsIgnoreCase(authenticationProvider)) {
-            ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
-            configurableEnvironment.setActiveProfiles(authenticationProvider.toLowerCase());
+        ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
+        
+        if(!DISABLE.equalsIgnoreCase(authenticationProvider)) {
+            configurableEnvironment.addActiveProfile(authenticationProvider.toLowerCase());
+        }
+        
+        if(enableOAuth) {
+        	configurableEnvironment.addActiveProfile(OAUTH_PROFILE);
+        } else {
+        	configurableEnvironment.addActiveProfile(NO_OAUTH_PROFILE);
         }
         
         container.addListener(new ContextLoaderListener(rootContext));
