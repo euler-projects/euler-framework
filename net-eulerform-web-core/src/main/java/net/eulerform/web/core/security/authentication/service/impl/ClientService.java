@@ -32,7 +32,6 @@ public class ClientService extends BaseService implements IClientService, Client
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
         Client c = new Client();
         c.setId(clientId);
-        c.setClientId(clientId);
         Set<String> authorizedGrantTypes = new HashSet<>();
         authorizedGrantTypes.add("authorization_code");
         Set<String> scope = new HashSet<>();
