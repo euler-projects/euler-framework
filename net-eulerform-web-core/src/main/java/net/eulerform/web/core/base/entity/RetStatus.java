@@ -2,7 +2,7 @@ package net.eulerform.web.core.base.entity;
 
 public class RetStatus {
 	
-	public final static RetStatus SUCCESS = new RetStatus(1, "SUCCESS");
+	public final static RetStatus SUCCESS = new RetStatus(0, "SUCCESS");
 	public final static RetStatus RESROURCE_NOT_FOUND = new RetStatus(-1, "RESROURCE_NOT_FOUND");
 	public final static RetStatus UNKNOWN_ERR = new RetStatus(-1000, "UNKNOWN_ERR");
 	
