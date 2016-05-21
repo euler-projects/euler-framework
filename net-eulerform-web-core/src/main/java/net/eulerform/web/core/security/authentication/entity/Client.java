@@ -20,9 +20,6 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 
 @SuppressWarnings("serial")
 public class Client extends UUIDEntity<Client> implements ClientDetails {
-
-    @Column(name = "CLIENT_ID")
-    private String clientId;
     
     @Column(name = "CLIENT_SECRET")
     private String clientSecret;
@@ -31,35 +28,30 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @CollectionTable(name = "SYS_CLIENT_SCOPE", joinColumns = {
             @JoinColumn(name = "CLIENT_ID",
                     referencedColumnName = "ID")
-    })
+    })    
     @Column(name = "SCOPE")
     private Set<String> scope;
     
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "SYS_CLIENT_GRANT", joinColumns = {
+    @CollectionTable(name = "SYS_CLIENT_GRANT_TYPE", joinColumns = {
             @JoinColumn(name = "CLIENT_ID",
                     referencedColumnName = "ID")
     })
-    @Column(name = "GRANT_NAME")
+    @Column(name = "GRANT_TYPE")
     private Set<String> authorizedGrantTypes;
     
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "SYS_CLIENT_REDIRECTURI", joinColumns = {
+    @CollectionTable(name = "SYS_CLIENT_REG_REDIRECT_URI", joinColumns = {
             @JoinColumn(name = "CLIENT_ID",
                     referencedColumnName = "ID")
     })
-    @Column(name = "URI")
+    @Column(name = "REG_REDIRECT_URI")
     private Set<String> registeredRedirectUri;
 
     @Override
     public String getClientId()
     {
-        return this.clientId;
-    }
-
-    public void setClientId(String clientId)
-    {
-        this.clientId = clientId;
+        return super.getId();
     }
 
     @Override
