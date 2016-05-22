@@ -7,7 +7,6 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,21 +32,21 @@ public class SecurityRest extends BaseRest {
     
     @ResponseBody
     @RequestMapping(value = { "/createUser" }, method = RequestMethod.POST)
-    public RetResult<String> createUser(@ModelAttribute( "user" ) User user){
+    public RetResult<String> createUser(User user){
         this.userService.createUser(user.getUsername(), user.getPassword());
         return new RetResult<String>(RetStatus.SUCCESS);
     }
     
     @ResponseBody
     @RequestMapping(value = { "/createAuthority" }, method = RequestMethod.POST)
-    public RetResult<String> createAuthority(@ModelAttribute( "authority" ) Authority authority){
+    public RetResult<String> createAuthority(Authority authority){
         this.authorityService.createAuthority(authority.getAuthority(), authority.getDescription());
         return new RetResult<String>(RetStatus.SUCCESS);
     }
 
     @ResponseBody
     @RequestMapping(value = { "/createUrlMatcher" }, method = RequestMethod.POST)
-    public RetResult<String> createUrlMatcher(@ModelAttribute( "urlMatcher" ) UrlMatcher urlMatcher){
+    public RetResult<String> createUrlMatcher(UrlMatcher urlMatcher){
         this.authorityService.createUrlMatcher(urlMatcher.getUrlMatcher(), urlMatcher.getOrder());
         return new RetResult<String>(RetStatus.SUCCESS);
     }

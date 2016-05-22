@@ -73,6 +73,7 @@ public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfi
         ));
         jsonConverter.setObjectMapper(this.objectMapper);
         converters.add(jsonConverter);
+        
     }
 
     @Override
