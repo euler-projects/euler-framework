@@ -11,7 +11,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = "net.eulerform.web.**.controller",
+        basePackages = "net.eulerform.web.**.controller.web",
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(Controller.class)
 )

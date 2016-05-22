@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.controller;
+package net.eulerform.web.core.base.controller.web;
 
 import java.io.IOException;
 

@@ -1,11 +1,11 @@
-package net.eulerform.web.module.root.controller;
-
-import net.eulerform.web.core.base.controller.BaseController;
+package net.eulerform.web.module.root.controller.web;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import net.eulerform.web.core.base.controller.web.BaseController;
 
 @Controller
 @Scope("prototype")

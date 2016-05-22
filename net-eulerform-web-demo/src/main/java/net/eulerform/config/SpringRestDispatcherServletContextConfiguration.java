@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = "net.eulerform.web.**.rest",
+        basePackages = "net.eulerform.web.**.controller.rest",
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(Controller.class)
 )

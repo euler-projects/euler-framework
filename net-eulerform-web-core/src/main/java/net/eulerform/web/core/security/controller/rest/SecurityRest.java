@@ -1,4 +1,4 @@
-package net.eulerform.web.core.security.rest;
+package net.eulerform.web.core.security.controller.rest;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import net.eulerform.web.core.base.entity.RetResult;
-import net.eulerform.web.core.base.entity.RetStatus;
-import net.eulerform.web.core.base.rest.BaseRest;
+import net.eulerform.web.core.base.controller.rest.BaseRest;
+import net.eulerform.web.core.base.entity.RestResponseEntity;
+import net.eulerform.web.core.base.entity.RestResponseStatus;
 import net.eulerform.web.core.security.authentication.entity.Authority;
 import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
 import net.eulerform.web.core.security.authentication.entity.User;
@@ -32,39 +32,39 @@ public class SecurityRest extends BaseRest {
     
     @ResponseBody
     @RequestMapping(value = { "/createUser" }, method = RequestMethod.POST)
-    public RetResult<String> createUser(User user){
+    public RestResponseEntity<String> createUser(User user){
         this.userService.createUser(user.getUsername(), user.getPassword());
-        return new RetResult<String>(RetStatus.SUCCESS);
+        return new RestResponseEntity<String>(RestResponseStatus.SUCCESS);
     }
     
     @ResponseBody
     @RequestMapping(value = { "/createAuthority" }, method = RequestMethod.POST)
-    public RetResult<String> createAuthority(Authority authority){
+    public RestResponseEntity<String> createAuthority(Authority authority){
         this.authorityService.createAuthority(authority.getAuthority(), authority.getDescription());
-        return new RetResult<String>(RetStatus.SUCCESS);
+        return new RestResponseEntity<String>(RestResponseStatus.SUCCESS);
     }
 
     @ResponseBody
     @RequestMapping(value = { "/createUrlMatcher" }, method = RequestMethod.POST)
-    public RetResult<String> createUrlMatcher(UrlMatcher urlMatcher){
+    public RestResponseEntity<String> createUrlMatcher(UrlMatcher urlMatcher){
         this.authorityService.createUrlMatcher(urlMatcher.getUrlMatcher(), urlMatcher.getOrder());
-        return new RetResult<String>(RetStatus.SUCCESS);
+        return new RestResponseEntity<String>(RestResponseStatus.SUCCESS);
     }
     
     @ResponseBody
     @RequestMapping(value = { "/getUser/all" }, method = RequestMethod.GET)
-    public RetResult<User> getUserAll(){
+    public RestResponseEntity<User> getUserAll(){
         List<User> allUsers = this.userService.findAllUsers(true);
-        RetResult<User> ret = new RetResult<User>(allUsers);
-        ret.setReturnStatus(RetStatus.SUCCESS);
-        return ret;
+        RestResponseEntity<User> restResponseEntity = new RestResponseEntity<User>(allUsers);
+        restResponseEntity.setStatus(RestResponseStatus.SUCCESS);
+        return restResponseEntity;
     }
     
     @ResponseBody
     @RequestMapping(value = { "/getUser/current" }, method = RequestMethod.GET)
-    public RetResult<User> getUserCurrent(@AuthenticationPrincipal User user){
-        RetResult<User> ret = new RetResult<User>(user);
-        ret.setReturnStatus(RetStatus.SUCCESS);
-        return ret;
+    public RestResponseEntity<User> getUserCurrent(@AuthenticationPrincipal User user){
+        RestResponseEntity<User> restResponseEntity = new RestResponseEntity<User>(user);
+        restResponseEntity.setStatus(RestResponseStatus.SUCCESS);
+        return restResponseEntity;
     }
 }
