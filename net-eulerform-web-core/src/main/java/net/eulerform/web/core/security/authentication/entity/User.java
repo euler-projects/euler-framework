@@ -34,7 +34,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private boolean accountNonLocked;
     @Column(name="CREDENTIALS_NON_EXPIRED",nullable=false)
     private boolean credentialsNonExpired;
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="SYS_USER_AUTHORITY",
         joinColumns={@JoinColumn(name="USER_ID")},
         inverseJoinColumns={@JoinColumn(name="AUTHORITY_ID")})

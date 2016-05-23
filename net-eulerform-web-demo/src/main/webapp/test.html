@@ -34,6 +34,17 @@
     authority: <input type="text" id="authority">
     description: <input type="text" id="description">
     <input type="button" id="createAuthority" value="createAuthority" onClick="createAuthority()"><br>
+    <h3>Create Client</h3>
+    secret: <input type="text" id="client_secret">
+    <input type="button" id="createClient" value="createClient" onClick="createClient()"><br>
+    <h3>Create Scope</h3>
+    scope: <input type="text" id="scope">
+    description: <input type="text" id="scope_description">
+    <input type="button" id="createScope" value="createScope" onClick="createScope()"><br>
+    <h3>Create Resource</h3>
+    resource name: <input type="text" id="resource_name">
+    description: <input type="text" id="resource_description">
+    <input type="button" id="createResource" value="createResource" onClick="createResource()"><br>
     <h3>Create Url Matcher</h3>
     UrlMatcher: <input type="text" id="urlMatcher">
     Order: <input type="text" id="order">
@@ -76,6 +87,54 @@
                 url : 'webapi/security/createUser',
                 dataType: 'json',
                 data: user,
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+
+        function createClient(){
+            var client = {};
+            client.clientSecret = $('#client_secret').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'webapi/security/createClient',
+                dataType: 'json',
+                data: client,
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createScope(){
+            var scope = {};
+            scope.scope = $('#scope').val();
+            scope.description = $('#scope_description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'webapi/security/createScope',
+                dataType: 'json',
+                data: scope,
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createResource(){
+            var resource = {};
+            resource.resourceName = $('#resource_name').val();
+            resource.description = $('#resource_description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'webapi/security/createResource',
+                dataType: 'json',
+                data: resource,
                 success : function(data) {},
                 error : function() {}
             });
