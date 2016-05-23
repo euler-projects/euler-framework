@@ -55,7 +55,15 @@
 	    </authentication-manager>
 	    
 	    <beans:bean id="oauthUserApprovalHandler"
-	                class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler" />
+	                class="org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler" >
+	        <beans:property name="tokenStore" ref="tokenStore" />
+	        <beans:property name="clientDetailsService" ref="clientDetailsService" />
+	        <beans:property name="requestFactory">
+	        	<beans:bean class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
+	        	    <beans:constructor-arg ref="clientDetailsService"/>
+	        	</beans:bean>
+	        </beans:property>
+	    </beans:bean>
 	
 	    <beans:bean id="oauth2AccessDeniedHandler"
 	                class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />

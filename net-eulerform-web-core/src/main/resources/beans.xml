@@ -54,6 +54,7 @@
         <property name="clientDao" ref="clientDao"/>
         <property name="resourceDao" ref="resourceDao"/>
         <property name="scopeDao" ref="scopeDao"/>
+        <property name="passwordEncoder" ref="passwordEncoder"/>
     </bean>
     
     <bean id="authorityService" class="net.eulerform.web.core.security.authentication.service.impl.AuthorityService">

@@ -9,12 +9,12 @@ import net.eulerform.web.core.security.authentication.entity.Scope;
 
 public interface IClientService extends IBaseService {
 
-    void createClient(Client client);
-
     void createScope(Scope scope);
 
     void createResource(Resource resource);
 
     List<Client> findAllClient();
+    
+    public void createClient(String secret);
     
 }

@@ -52,7 +52,27 @@
     <h3>Create Blog</h3>
     name: <input type="text" id="blog_name">
     <input type="button" id="createBlog" value="createBlog" onClick="createBlog()"><br>
+    <input type="button" id="Test" value="Test" onClick="Test()"><br>
     <script>
+    
+    function Test(){
+    	var data = {};
+    	data.client_id = '4028808154ddbefd0154ddbfaef60000';
+        data.response_type = 'code';
+        data.redirect_uri = 'http://localhost:8080/eulerform-demo/getToken.html';
+        data.user_oauth_approval=true;
+        
+        $.ajax({
+            type : "POST",
+            async : true,
+            url : 'oauth/authorize',
+            dataType: 'json',
+            data: data,
+            success : function(data) {},
+            error : function() {}
+        });
+    }
+    
         function ajax(){
             var url = $('#requestUrl').val();
             var method = $("#requestMethod").val();
