@@ -5,12 +5,15 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.security.authentication.dao.IClientDao;
+import net.eulerform.web.core.security.authentication.dao.IResourceDao;
+import net.eulerform.web.core.security.authentication.dao.IScopeDao;
 import net.eulerform.web.core.security.authentication.entity.Client;
+import net.eulerform.web.core.security.authentication.entity.Resource;
+import net.eulerform.web.core.security.authentication.entity.Scope;
 import net.eulerform.web.core.security.authentication.service.IClientService;
 
 import org.springframework.security.crypto.codec.Base64;
@@ -23,33 +26,28 @@ import org.springframework.security.oauth2.provider.ClientRegistrationException;
 public class ClientService extends BaseService implements IClientService, ClientDetailsService {
     
     private IClientDao clientDao;
+    private IResourceDao resourceDao;
+    private IScopeDao scopeDao;
 
     public void setClientDao(IClientDao clientDao) {
         this.clientDao = clientDao;
     }
 
+    public void setResourceDao(IResourceDao resourceDao) {
+        this.resourceDao = resourceDao;
+    }
+
+    public void setScopeDao(IScopeDao scopeDao) {
+        this.scopeDao = scopeDao;
+    }
+
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-        Client c = new Client();
-        c.setId(clientId);
-        Set<String> authorizedGrantTypes = new HashSet<>();
-        authorizedGrantTypes.add("authorization_code");
-        Set<String> scope = new HashSet<>();
-        scope.add("READ");
-        scope.add("WRITE");
-        scope.add("TRUST");
-        c.setAuthorizedGrantTypes(authorizedGrantTypes);
-        c.setScope(scope);
-        Set<String> ruri = new HashSet<>();
-        ruri.add("http://localhost:8080/eulerform-demo/webapi/svn/workingcopy");
-        ruri.add("http://localhost:8080/eulerform-demo/getToken.html");
-        ruri.add("http://localhost:7070/efb/getToken.html");
-        c.setRegisteredRedirectUri(ruri);
-        return c;
-//        Client client = this.clientDao.findClientByClientId(clientId);
-//        if(client == null)
-//            throw new ClientRegistrationException("Client \"" + clientId + "\" not found");
-//        return client;
+        //Client client = this.clientDao.findClientByClientId(clientId);
+        Client client = this.clientDao.load(clientId);
+        if(client == null)
+            throw new ClientRegistrationException("Client \"" + clientId + "\" not found");
+        return client;
     }
     
     public static void main(String[] args) throws NoSuchAlgorithmException{
@@ -73,6 +71,26 @@ public class ClientService extends BaseService implements IClientService, Client
                 //"MIICWgIBAAKBgGAbzjs7fo9HeoxvZqnjHu9WTOFbNX+RMGtRtrA0PqG0ekOri7MnSkD3K8Zgs3tGjVEwW48YdUfVqNDwGpdwZtlhBgPydbqk1Ki87arAZrExAEly7TQ60+CPj8vGkVEC3K1ZH0/TkRUHlP/6C8V3SOqI56d1/ZjqWerZ8FVFqMy9AgElAoGAIcSUkVoXtc0Bi0m8SYcmi3FZSEKkGBBq9UY5RNQWAXbDLIhhhCKPtfX6n6VvflcPDrAgK1ue1AzMnHAJV82L6xM4S1M06jmq2UvVmpNjpeCN978U9Qpjke+iQDYS1gS6cK3xQYFKM1zGrPCkbqFl4FsWH62pWuH5amxLzu71R60CQQC5EbbwYgTn7BnOQGTV/gDZDwQWiMbfRpBQFGZiWlwGVLb8kCJ7TrkDUzG6yt8ZCSzdkgsJXkGkqS51f+uk/b0BAkEAhPGeAZDMU9rpZZwX0MM6sXDmsrKgPfvElXKHQHeAKiaORhuaSr3xN0dr4R4hppPwWVG4aqmjYBI+ug7N5N1DvQJBAKAPUhwBvw3FRsA3sSfG6/n/JiFTsuqd5JhI/ppAT5bFzrDrXBeeB8uGONjmzsmLZRKn0jGdoI5ozjwbm15DO60CQCPuRmFJuq7hOClMyCqVoSkJwc9ujCxtjxOiab5lfJXFOzWK624lf3a5W21GafWrcWQ/maBJhhn3F99CRXwgICUCQQCcDZ8y99aUOPppd1t4Z1Wemc44Nyl/M+IxGxiEvEAUWv0UdBBTyuQX+9Gh2WImVYfl8ugGTqCI22n6Xt/u+w8n"+
                 "-----END RSA PRIVATE KEY-----");
         System.out.println(signer.toString());
+    }
+
+    @Override
+    public void createClient(Client client) {
+        this.clientDao.save(client);
+    }
+
+    @Override
+    public void createScope(Scope scope) {
+        this.scopeDao.save(scope);
+    }
+
+    @Override
+    public void createResource(Resource resource) {
+        this.resourceDao.save(resource);
+    }
+
+    @Override
+    public List<Client> findAllClient() {
+        return this.clientDao.findAll();
     }
     
 }

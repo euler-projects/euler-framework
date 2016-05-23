@@ -8,9 +8,11 @@ import net.eulerform.web.core.base.controller.rest.BaseRest;
 import net.eulerform.web.core.base.entity.RestResponseEntity;
 import net.eulerform.web.core.base.entity.RestResponseStatus;
 import net.eulerform.web.core.security.authentication.entity.Authority;
+import net.eulerform.web.core.security.authentication.entity.Client;
 import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
 import net.eulerform.web.core.security.authentication.entity.User;
 import net.eulerform.web.core.security.authentication.service.IAuthorityService;
+import net.eulerform.web.core.security.authentication.service.IClientService;
 import net.eulerform.web.core.security.authentication.service.IUserService;
 
 import org.springframework.context.annotation.Scope;
@@ -29,6 +31,8 @@ public class SecurityRest extends BaseRest {
     private IUserService userService;
     @Resource
     private IAuthorityService authorityService;
+    @Resource
+    private IClientService clientService;
     
     @ResponseBody
     @RequestMapping(value = { "/createUser" }, method = RequestMethod.POST)
@@ -52,10 +56,38 @@ public class SecurityRest extends BaseRest {
     }
     
     @ResponseBody
+    @RequestMapping(value = { "/createClient" }, method = RequestMethod.POST)
+    public RestResponseEntity<String> createClient(Client client){
+        this.clientService.createClient(client);
+        return new RestResponseEntity<String>(RestResponseStatus.OK);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/createScope" }, method = RequestMethod.POST)
+    public RestResponseEntity<String> createScope(net.eulerform.web.core.security.authentication.entity.Scope scope){
+        this.clientService.createScope(scope);
+        return new RestResponseEntity<String>(RestResponseStatus.OK);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/createResource" }, method = RequestMethod.POST)
+    public RestResponseEntity<String> createResource(net.eulerform.web.core.security.authentication.entity.Resource resource){
+        this.clientService.createResource(resource);
+        return new RestResponseEntity<String>(RestResponseStatus.OK);
+    }
+    @ResponseBody
     @RequestMapping(value = { "/findUser/all" }, method = RequestMethod.GET)
     public RestResponseEntity<User> findUserAll(){
         List<User> allUsers = this.userService.findAllUsers(true);
-        RestResponseEntity<User> restResponseEntity = new RestResponseEntity<User>(allUsers);
+        RestResponseEntity<User> restResponseEntity = new RestResponseEntity<>(allUsers);
+        restResponseEntity.setStatus(RestResponseStatus.OK);
+        return restResponseEntity;
+    }
+    @ResponseBody
+    @RequestMapping(value = { "/findClient/all" }, method = RequestMethod.GET)
+    public RestResponseEntity<Client> findClientAll(){
+        List<Client> allClient = this.clientService.findAllClient();
+        RestResponseEntity<Client> restResponseEntity = new RestResponseEntity<>(allClient);
         restResponseEntity.setStatus(RestResponseStatus.OK);
         return restResponseEntity;
     }
