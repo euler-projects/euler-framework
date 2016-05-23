@@ -17,6 +17,7 @@ import net.eulerform.web.core.security.authentication.entity.Scope;
 import net.eulerform.web.core.security.authentication.service.IClientService;
 
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jwt.crypto.sign.RsaSigner;
 import org.springframework.security.jwt.crypto.sign.Signer;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -28,6 +29,8 @@ public class ClientService extends BaseService implements IClientService, Client
     private IClientDao clientDao;
     private IResourceDao resourceDao;
     private IScopeDao scopeDao;
+    
+    private PasswordEncoder passwordEncoder;
 
     public void setClientDao(IClientDao clientDao) {
         this.clientDao = clientDao;
@@ -40,6 +43,10 @@ public class ClientService extends BaseService implements IClientService, Client
     public void setScopeDao(IScopeDao scopeDao) {
         this.scopeDao = scopeDao;
     }
+    
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+	    this.passwordEncoder = passwordEncoder;
+	}
 
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
@@ -74,11 +81,6 @@ public class ClientService extends BaseService implements IClientService, Client
     }
 
     @Override
-    public void createClient(Client client) {
-        this.clientDao.save(client);
-    }
-
-    @Override
     public void createScope(Scope scope) {
         this.scopeDao.save(scope);
     }
@@ -92,5 +94,12 @@ public class ClientService extends BaseService implements IClientService, Client
     public List<Client> findAllClient() {
         return this.clientDao.findAll();
     }
+
+	@Override
+	public void createClient(String secret) {
+		Client client = new Client();
+		client.setClientSecret(this.passwordEncoder.encode(secret));
+		this.clientDao.save(client);
+	}
     
 }

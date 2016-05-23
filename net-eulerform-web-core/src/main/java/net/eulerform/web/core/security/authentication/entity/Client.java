@@ -137,13 +137,13 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @Override
     @Transient
     public boolean isSecretRequired() {
-        return false;
+        return true;
     }
 
     @Override
     @Transient
     public boolean isScoped() {
-        return false;
+        return true;
     }
 
     @Override

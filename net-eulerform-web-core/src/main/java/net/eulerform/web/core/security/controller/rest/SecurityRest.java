@@ -58,7 +58,7 @@ public class SecurityRest extends BaseRest {
     @ResponseBody
     @RequestMapping(value = { "/createClient" }, method = RequestMethod.POST)
     public RestResponseEntity<String> createClient(Client client){
-        this.clientService.createClient(client);
+        this.clientService.createClient(client.getClientSecret());
         return new RestResponseEntity<String>(RestResponseStatus.OK);
     }
     
