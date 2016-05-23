@@ -20,6 +20,20 @@ public class RestResponseEntity<T> {
         this.setData(data);
     }
     
+    public RestResponseEntity(T data, RestResponseStatus restResponseStatus) {
+        this();
+        this.setData(data);
+        this.statusCode = restResponseStatus.getStatusCode();
+        this.statusInfo = restResponseStatus.getStatusInfo();
+    }
+
+    public RestResponseEntity(List<T> data, RestResponseStatus restResponseStatus) {
+        this();
+        this.setData(data);
+        this.statusCode = restResponseStatus.getStatusCode();
+        this.statusInfo = restResponseStatus.getStatusInfo();
+    }
+    
     public RestResponseEntity(RestResponseStatus restResponseStatus) {
 		this();
 		this.statusCode = restResponseStatus.getStatusCode();
@@ -49,7 +63,7 @@ public class RestResponseEntity<T> {
     	if(data == null || data.isEmpty()){
     		this.data=null;
     		this.dataSize=0;
-    		this.setStatus(RestResponseStatus.RESROURCE_NOT_FOUND);
+    		this.setStatus(RestResponseStatus.NO_CONTENT);
     		return;
     	}
     	
