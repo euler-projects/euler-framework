@@ -6,38 +6,38 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class RestResponseEntity<T> {
+public class WebServiceResponse<T> {
     
-    public RestResponseEntity() {
+    public WebServiceResponse() {
         this.dataSize = 0;
     }
 
-    public RestResponseEntity(T data) {
+    public WebServiceResponse(T data) {
         this.setData(data);
     }
 
-    public RestResponseEntity(List<T> data) {
+    public WebServiceResponse(List<T> data) {
         this.setData(data);
     }
     
-    public RestResponseEntity(T data, RestResponseStatus restResponseStatus) {
+    public WebServiceResponse(T data, WebServiceResponseStatus webServiceResponseStatus) {
         this();
         this.setData(data);
-        this.statusCode = restResponseStatus.getStatusCode();
-        this.statusInfo = restResponseStatus.getStatusInfo();
+        this.statusCode = webServiceResponseStatus.getStatusCode();
+        this.statusInfo = webServiceResponseStatus.getStatusInfo();
     }
 
-    public RestResponseEntity(List<T> data, RestResponseStatus restResponseStatus) {
+    public WebServiceResponse(List<T> data, WebServiceResponseStatus webServiceResponseStatus) {
         this();
         this.setData(data);
-        this.statusCode = restResponseStatus.getStatusCode();
-        this.statusInfo = restResponseStatus.getStatusInfo();
+        this.statusCode = webServiceResponseStatus.getStatusCode();
+        this.statusInfo = webServiceResponseStatus.getStatusInfo();
     }
     
-    public RestResponseEntity(RestResponseStatus restResponseStatus) {
+    public WebServiceResponse(WebServiceResponseStatus webServiceResponseStatus) {
 		this();
-		this.statusCode = restResponseStatus.getStatusCode();
-		this.statusInfo = restResponseStatus.getStatusInfo();
+		this.statusCode = webServiceResponseStatus.getStatusCode();
+		this.statusInfo = webServiceResponseStatus.getStatusInfo();
 	}
 
 	private List<T> data;
@@ -63,7 +63,7 @@ public class RestResponseEntity<T> {
     	if(data == null || data.isEmpty()){
     		this.data=null;
     		this.dataSize=0;
-    		this.setStatus(RestResponseStatus.NO_CONTENT);
+    		this.setStatus(WebServiceResponseStatus.NO_CONTENT);
     		return;
     	}
     	
@@ -78,30 +78,19 @@ public class RestResponseEntity<T> {
     public Integer getStatusCode() {
         return statusCode;
     }
-    
-    public void setStatusCode(Integer statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public void setStatusCode(RestResponseStatus statusCode) {
-        this.statusCode = statusCode.getStatusCode();
-    }
 
     public String getStatusInfo() {
         return statusInfo;
     }
 
-    public void setStatusInfo(String statusInfo) {
+    public void setStatus(WebServiceResponseStatus webServiceResponseStatus) {
+    	this.statusCode = webServiceResponseStatus.getStatusCode();
+        this.statusInfo = webServiceResponseStatus.getStatusInfo();
+    }
+    
+    public void setStatus(int statusCode, String statusInfo) {
+        this.statusCode = statusCode;
         this.statusInfo = statusInfo;
-    }
-
-    public void setStatusInfo(RestResponseStatus statusInfo) {
-        this.statusInfo = statusInfo.getStatusInfo();
-    }
-
-    public void setStatus(RestResponseStatus restResponseStatus) {
-    	this.statusCode = restResponseStatus.getStatusCode();
-        this.statusInfo = restResponseStatus.getStatusInfo();
     }
 
     public Integer getDataSize() {

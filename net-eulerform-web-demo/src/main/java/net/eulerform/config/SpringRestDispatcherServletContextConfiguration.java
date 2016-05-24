@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import net.eulerform.web.core.annotation.RestEndpoint;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +20,6 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -28,9 +29,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = "net.eulerform.web.**.controller.rest",
+        basePackages = "net.eulerform.web.**.controller",
         useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(Controller.class)
+        includeFilters = @ComponentScan.Filter(RestEndpoint.class)
 )
 public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
     @Resource(name="objectMapper") ObjectMapper objectMapper;

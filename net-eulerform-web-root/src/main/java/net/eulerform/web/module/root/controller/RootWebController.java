@@ -1,16 +1,16 @@
-package net.eulerform.web.module.root.controller.web;
+package net.eulerform.web.module.root.controller;
 
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.web.BaseController;
 
-@Controller
+@WebController
 @Scope("prototype")
 @RequestMapping("/")
-public class RootController extends BaseController {
+public class RootWebController extends BaseController {
     
     @RequestMapping(value = "/about", method = RequestMethod.GET)
     public String about() {

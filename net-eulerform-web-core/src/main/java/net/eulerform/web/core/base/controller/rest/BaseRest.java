@@ -1,7 +1,7 @@
 package net.eulerform.web.core.base.controller.rest;
 
-import net.eulerform.web.core.base.entity.RestResponseEntity;
-import net.eulerform.web.core.base.entity.RestResponseStatus;
+import net.eulerform.web.core.base.entity.WebServiceResponse;
+import net.eulerform.web.core.base.entity.WebServiceResponseStatus;
 
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,8 +13,8 @@ public abstract class BaseRest {
      */  
     @ResponseBody
     @ExceptionHandler({Exception.class})   
-    public RestResponseEntity<String> exception(Exception e) {
+    public WebServiceResponse<String> exception(Exception e) {
         e.printStackTrace();
-        return new RestResponseEntity<>(RestResponseStatus.UNKNOWN_ERR);
+        return new WebServiceResponse<>(WebServiceResponseStatus.UNKNOWN_ERR);
     }
 }
