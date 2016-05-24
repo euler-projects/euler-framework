@@ -15,11 +15,12 @@ public class UserContext {
     }
 
     private final static User ANONYMOUS_USER;
+    private final static String ANONYMOUS_USERNAME="anonymousUser";
     
     static {
         ANONYMOUS_USER = new User();
-        ANONYMOUS_USER.setId("anonymousUser");
-        ANONYMOUS_USER.setUsername("anonymousUser");
+        ANONYMOUS_USER.setId(ANONYMOUS_USERNAME);
+        ANONYMOUS_USER.setUsername(ANONYMOUS_USERNAME);
         ANONYMOUS_USER.setAuthorities(null);
         ANONYMOUS_USER.setAccountNonExpired(false);
         ANONYMOUS_USER.setAccountNonLocked(false);
@@ -28,19 +29,23 @@ public class UserContext {
     }
     
     public static User getCurrentUser() {
-          SecurityContext context = SecurityContextHolder.getContext();
-          if(context != null && context.getAuthentication() != null){
-              Object principal = context.getAuthentication().getPrincipal();
-              
-              if(principal.getClass().isAssignableFrom(User.class))
-                  return (User)context.getAuthentication().getPrincipal();
-              
-              if(principal.getClass().isAssignableFrom(String.class)) {
-                  User user = (User) userDetailsService.loadUserByUsername((String) principal);
-                  user.eraseCredentials();
-                  return user;
-              }
-          }
+        try {
+            SecurityContext context = SecurityContextHolder.getContext();
+            if(context != null && context.getAuthentication() != null){
+                Object principal = context.getAuthentication().getPrincipal();
+            
+                if(principal.getClass().isAssignableFrom(User.class))
+                    return (User)context.getAuthentication().getPrincipal();
+                
+                if(principal.getClass().isAssignableFrom(String.class) && (!ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
+                    User user = (User) userDetailsService.loadUserByUsername((String) principal);
+                    user.eraseCredentials();
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            //DO NOTHING
+        }
         return ANONYMOUS_USER;
     }
 }

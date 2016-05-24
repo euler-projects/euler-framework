@@ -12,7 +12,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 
@@ -21,6 +23,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     protected final Logger log = LogManager.getLogger();
 
     private SessionFactory sessionFactory;
+    
+    public Session getCurrentSession() {
+        return sessionFactory.getCurrentSession();
+    }
 
     public SessionFactory getSessionFactory() {
         return sessionFactory;
@@ -39,7 +45,9 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public T load(Serializable id) {
-        return this.getSessionFactory().getCurrentSession().get(this.entityClass, id);
+        T entity = this.getCurrentSession().get(this.entityClass, id);
+        evict(entity);
+        return entity;
     }
 
     @Override
@@ -98,12 +106,17 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     public List<T> findBy(T entity) {        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.add(Example.create(entity));
-        return this.findBy(detachedCriteria);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        List<T> result = this.findBy(detachedCriteria);
+        evict(result);
+        return result;
     }
 
     @Override
     public List<T> findAll() {
-        return this.findBy("select en from "+ this.entityClass.getSimpleName() + " en");
+        List<T> result = this.findBy("select en from "+ this.entityClass.getSimpleName() + " en");
+        evict(result);
+        return result;
     }
 
 
@@ -145,5 +158,14 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         if(l!=null && l.size() == 1)
             return (Long)l.get(0);
         return 0;
+    }
+    
+    protected void evict(T entity){
+        this.getCurrentSession().evict(entity);
+    }
+    
+    protected void evict(Collection<T> entities){
+        for(T entity : entities)
+            this.getCurrentSession().evict(entity);
     }
 }
