@@ -1,18 +1,12 @@
 package net.eulerform.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.Filter;
-
-import net.eulerform.web.core.security.authentication.entity.Authority;
-import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
-import net.eulerform.web.core.security.authentication.provider.UsernamePasswordAuthenticationProvider;
-import net.eulerform.web.core.security.authentication.service.IAuthorityService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,6 +41,11 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
+import net.eulerform.web.core.security.authentication.entity.Authority;
+import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
+import net.eulerform.web.core.security.authentication.provider.UsernamePasswordAuthenticationProvider;
+import net.eulerform.web.core.security.authentication.service.IAuthorityService;
+
 @Configuration
 @EnableWebSecurity
 //@ImportResource("classpath*:springSecurity.xml")
@@ -63,8 +62,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Resource
     private PasswordEncoder passwordEncoder;
     
-    @Value("${springSecurity.ignoreUrls}")
-    private String ignoreUrls;
     @Value("${springSecurity.authenticationProvider}")
     private String springSecurityAuthenticationProvider;
     private static final String LOCAL = "local";
@@ -73,9 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     
     @Override
     public void configure(WebSecurity security){
-        String[] antMatchers = this.ignoreUrls.trim().split(",");
-        security.ignoring().antMatchers(antMatchers);
-        this.log.info("SPRING SECURITY CONFIG: Add ignore urls: \""+ Arrays.asList(antMatchers) +"\"");
+        security.ignoring().antMatchers("/resources/**","/favicon.ico");
     }
     
     @Override

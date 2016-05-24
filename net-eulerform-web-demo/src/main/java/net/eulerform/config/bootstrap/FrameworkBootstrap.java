@@ -31,11 +31,11 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         
         PropertyReader propertyReader;
         String authenticationProvider;
-        boolean enableOAuth=false;
+        boolean oauthEnabled=false;
         try {
             propertyReader = new PropertyReader("config.properties");
             authenticationProvider = (String) propertyReader.getProperty("springSecurity.authenticationProvider");
-            enableOAuth = Boolean.valueOf((String) propertyReader.getProperty("springSecurity.enableOAuth"));
+            oauthEnabled = Boolean.valueOf((String) propertyReader.getProperty("oauth.enable"));
         } catch (Exception e) {
             rootContext.close();
             throw new ServletException(e);
@@ -47,7 +47,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(authenticationProvider.toLowerCase());
         }
         
-        if(enableOAuth) {
+        if(oauthEnabled) {
         	configurableEnvironment.addActiveProfile(OAUTH_PROFILE);
         } else {
         	configurableEnvironment.addActiveProfile(NO_OAUTH_PROFILE);

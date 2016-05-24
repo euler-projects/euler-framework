@@ -30,6 +30,6 @@
     </dependencies>
 
     <build>
-        <finalName>eulerform-demo</finalName>
+        <finalName>demo</finalName>
     </build>
 </project>
