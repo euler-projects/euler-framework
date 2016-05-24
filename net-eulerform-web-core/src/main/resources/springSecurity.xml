@@ -107,7 +107,7 @@
 	        </beans:constructor-arg>  
 	    </beans:bean>
 	    
-	    <oauth2:resource-server id="restResourceServer" resource-id="SUPPORT" token-services-ref="tokenServices" />
+	    <oauth2:resource-server id="restResourceServer" resource-id="${oauth.resourceId}" token-services-ref="tokenServices" />
 	    
 	    <http pattern="/webapi/**" create-session="stateless" entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false"
 	          authentication-manager-ref="oauth2AuthenticationManager" >
@@ -123,24 +123,6 @@
     </beans:beans>
     
     <beans:beans profile="no_oauth">
-        <http pattern="/webapi/**" use-expressions="true">    
-            <intercept-url pattern="/webapi/**" access="permitAll" />  
-            
-            <form-login login-page="/login" login-processing-url="/login"
-                authentication-failure-url="/login?error"
-                default-target-url="/" username-parameter="username"
-                password-parameter="password" />
-            <logout logout-url="/logout" logout-success-url="/login?loggedOut"
-                invalidate-session="true" delete-cookies="JSESSIONID" />
-    
-            <session-management invalid-session-url="/login"
-                session-fixation-protection="migrateSession">
-                <concurrency-control max-sessions="1"
-                    error-if-maximum-exceeded="true"
-                    session-registry-ref="sessionRegistry" />
-            </session-management>  
-            <csrf disabled="true" />    
-        </http>
     </beans:beans>
 
     <beans:beans profile="local,ldap">
@@ -150,6 +132,7 @@
             <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
             <intercept-url pattern="/oauth/**" access="permitAll" />
+            <intercept-url pattern="/webapi/**" access="permitAll" />
             <intercept-url pattern="/**" access="isFullyAuthenticated()" />
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
