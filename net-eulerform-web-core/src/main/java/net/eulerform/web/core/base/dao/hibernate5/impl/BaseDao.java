@@ -161,11 +161,16 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     }
     
     protected void evict(T entity){
+        if(entity==null) return;
         this.getCurrentSession().evict(entity);
     }
     
     protected void evict(Collection<T> entities){
-        for(T entity : entities)
+        if(entities == null) return;
+        
+        for(T entity : entities) {
+            if(entity==null) continue;
             this.getCurrentSession().evict(entity);
+        }
     }
 }
