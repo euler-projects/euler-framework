@@ -4,9 +4,16 @@ import net.eulerform.web.core.security.authentication.entity.User;
 
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 public class UserContext {
     
+    private static UserDetailsService userDetailsService;
+    
+    public static void setUserDetailsService(UserDetailsService userDetailsService) {
+        UserContext.userDetailsService = userDetailsService;
+    }
+
     private final static User ANONYMOUS_USER;
     
     static {
@@ -27,6 +34,12 @@ public class UserContext {
               
               if(principal.getClass().isAssignableFrom(User.class))
                   return (User)context.getAuthentication().getPrincipal();
+              
+              if(principal.getClass().isAssignableFrom(String.class)) {
+                  User user = (User) userDetailsService.loadUserByUsername((String) principal);
+                  user.eraseCredentials();
+                  return user;
+              }
           }
         return ANONYMOUS_USER;
     }
