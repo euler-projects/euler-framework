@@ -17,7 +17,9 @@ public class UserDao extends BaseDao<User> implements IUserDao {
         detachedCriteria.add(Restrictions.eq("username", username));
         List<User> users = this.findBy(detachedCriteria);
         if(users == null || users.isEmpty()) return null;        
-        return users.get(0);
+        User user =  users.get(0);
+        this.getSessionFactory().getCurrentSession().evict(user);
+        return user;
     }
 
 }

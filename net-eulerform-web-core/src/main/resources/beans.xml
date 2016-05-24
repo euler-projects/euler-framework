@@ -16,6 +16,10 @@
     <bean id="log" class="net.eulerform.web.core.util.Log">
         <property name="logService" ref="logService"/>
     </bean>
+    
+    <bean id="userContext" class="net.eulerform.web.core.util.UserContext">
+        <property name="userDetailsService" ref="userDetailsService"/>
+    </bean>
 
     <bean id="logService" class="net.eulerform.web.core.log.service.impl.LogService">
         <property name="accessLogDao" ref="accessLogDao"/>
