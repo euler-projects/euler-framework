@@ -1,4 +1,4 @@
-还需要研究的：
+﻿还需要研究的：
 1.grant_type
 2.投票决策期在access="ROLE_MOBILE,SCOPE_READ"时只能识别第一个
 
@@ -10,4 +10,6 @@ http://10.88.5.166:7070/efb/oauth/token?code=mmYiVE&client_id=123&grant_type=aut
 
 http://localhost:8080/eulerform-demo/oauth/authorize?client_id=123&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Feulerform-demo%2FgetToken.html
 
-http://localhost:7070/efb/oauth/authorize?client_id=123&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fefb%2FgetToken.html
+http://localhost:7070/efb/oauth/authorize?client_id=8ad8852654dba8bb0154dbaa491a0001&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fefb%2FgetToken.html
+
+http://localhost:7070/cfrost-net/oauth/authorize?client_id=4028808154ddbefd0154ddbfaef60000&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fcfrost-net%2FgetToken.html
