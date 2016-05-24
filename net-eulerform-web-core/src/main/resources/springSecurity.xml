@@ -123,7 +123,23 @@
     </beans:beans>
     
     <beans:beans profile="no_oauth">
-    	<http security="none" pattern="/webapi/**" />
+        <http pattern="/webapi/**" use-expressions="true">    
+            <intercept-url pattern="/webapi/**" access="permitAll" />  
+            <form-login login-page="/login" login-processing-url="/login"
+                authentication-failure-url="/login?error"
+                default-target-url="/" username-parameter="username"
+                password-parameter="password" />
+            <logout logout-url="/logout" logout-success-url="/login?loggedOut"
+                invalidate-session="true" delete-cookies="JSESSIONID" />
+    
+            <session-management invalid-session-url="/login"
+                session-fixation-protection="migrateSession">
+                <concurrency-control max-sessions="1"
+                    error-if-maximum-exceeded="true"
+                    session-registry-ref="sessionRegistry" />
+            </session-management>  
+            <csrf disabled="true" />    
+        </http>
     </beans:beans>
 
     <beans:beans profile="local,ldap">
