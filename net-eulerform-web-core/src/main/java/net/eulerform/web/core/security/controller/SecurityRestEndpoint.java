@@ -18,6 +18,8 @@ import net.eulerform.web.core.security.authentication.service.IUserService;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,8 @@ public class SecurityRestEndpoint extends BaseRest {
     
     @Resource
     private IUserService userService;
+    @Resource
+    private UserDetailsService userDetailsService;
     @Resource
     private IAuthorityService authorityService;
     @Resource
@@ -95,7 +99,16 @@ public class SecurityRestEndpoint extends BaseRest {
     @ResponseBody
     @RequestMapping(value = { "/findUser/current" }, method = RequestMethod.GET)
     public WebServiceResponse<User> findUserCurrent(@AuthenticationPrincipal User user){
-        WebServiceResponse<User> wsResponse = new WebServiceResponse<User>(user);
+        WebServiceResponse<User> wsResponse = new WebServiceResponse<>(user);
+        wsResponse.setStatus(WebServiceResponseStatus.OK);
+        return wsResponse;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/findUserByName/{name}", method = RequestMethod.GET)
+    public WebServiceResponse<User> findBlogByName(@PathVariable("name") String name) {
+        WebServiceResponse<User> wsResponse = new WebServiceResponse<>();
+        wsResponse.setData((User) this.userDetailsService.loadUserByUsername(name));
         wsResponse.setStatus(WebServiceResponseStatus.OK);
         return wsResponse;
     }

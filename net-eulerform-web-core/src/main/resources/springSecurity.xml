@@ -125,6 +125,7 @@
     <beans:beans profile="no_oauth">
         <http pattern="/webapi/**" use-expressions="true">    
             <intercept-url pattern="/webapi/**" access="permitAll" />  
+            
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
                 default-target-url="/" username-parameter="username"

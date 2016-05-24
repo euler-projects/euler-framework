@@ -27,13 +27,13 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     @Column(name="PASSWORD",nullable=false)
     private String password;
     @Column(name="ENABLED",nullable=false)
-    private boolean enabled;
+    private Boolean enabled;
     @Column(name="ACCOUNT_NON_EXPIRED",nullable=false)
-    private boolean accountNonExpired;
+    private Boolean accountNonExpired;
     @Column(name="ACCOUNT_NON_LOCKED",nullable=false)
-    private boolean accountNonLocked;
+    private Boolean accountNonLocked;
     @Column(name="CREDENTIALS_NON_EXPIRED",nullable=false)
-    private boolean credentialsNonExpired;
+    private Boolean credentialsNonExpired;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="SYS_USER_AUTHORITY",
         joinColumns={@JoinColumn(name="USER_ID")},
@@ -55,25 +55,25 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     public boolean isEnabled() {
         return enabled;
     }
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
     public boolean isAccountNonExpired() {
         return accountNonExpired;
     }
-    public void setAccountNonExpired(boolean accountNonExpired) {
+    public void setAccountNonExpired(Boolean accountNonExpired) {
         this.accountNonExpired = accountNonExpired;
     }
     public boolean isAccountNonLocked() {
         return accountNonLocked;
     }
-    public void setAccountNonLocked(boolean accountNonLocked) {
+    public void setAccountNonLocked(Boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
     }
     public boolean isCredentialsNonExpired() {
         return credentialsNonExpired;
     }
-    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
+    public void setCredentialsNonExpired(Boolean credentialsNonExpired) {
         this.credentialsNonExpired = credentialsNonExpired;
     }
     //@XmlTransient
@@ -87,7 +87,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     
     @Override
     public void eraseCredentials() {
-        this.password = "******";
+        this.password = null;
     }
     
 //    public User() {
@@ -98,7 +98,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 //        this(username, password, true, true, true, true, authorities);
 //    }
 //
-//    public User(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked,
+//    public User(String username, String password, Boolean enabled, Boolean accountNonExpired, Boolean credentialsNonExpired, Boolean accountNonLocked,
 //            Collection<Authority> authorities) {
 //        super();
 //        if ((username == null) || ("".equals(username)) || (password == null)) {
