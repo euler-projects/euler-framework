@@ -13,3 +13,5 @@ http://localhost:8080/demo/oauth/authorize?client_id=4028808154ddbefd0154ddbfaef
 http://localhost:7070/efb/oauth/authorize?client_id=8ad8852654dba8bb0154dbaa491a0001&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fefb%2FgetToken.html
 
 http://localhost:7070/cfrost-net/oauth/authorize?client_id=4028808154ddbefd0154ddbfaef60000&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fcfrost-net%2FgetToken.html
+
+$2a$10$bdTeNA55WSqrIOKlS39tEus2W9Bmic3o409c0rWCqdgoQCP5/3DGO

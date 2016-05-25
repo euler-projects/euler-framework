@@ -27,6 +27,11 @@
             <artifactId>net-eulerform-web-root</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>net-eulerform-web-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

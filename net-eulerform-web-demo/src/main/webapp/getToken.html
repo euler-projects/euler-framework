@@ -31,6 +31,7 @@
                 success : function(data) {
                     var tokenInfo='';
                     tokenInfo += '<p>access_token: '+data.access_token+'</p>'
+                    tokenInfo += '<p>refresh_token: '+data.refresh_token+'</p>'
                     tokenInfo += '<p>token_type: '+data.token_type+'</p>'
                     tokenInfo += '<p>expires_in: '+data.expires_in+'</p>'
                     tokenInfo += '<p>scope: '+data.scope+'</p>'

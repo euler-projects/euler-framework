@@ -19,6 +19,7 @@
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
 
     <http security="none" pattern="/resources/**" />
+    <http security="none" pattern="/getToken.html" />
     <http security="none" pattern="/favicon.ico" />
     
     <beans:beans profile="rest-security-oauth">
@@ -87,12 +88,11 @@
 	        <beans:property name="authenticationManager" ref="oauth2AuthenticationManager"/>  
 	    </beans:bean>
 	    
-	    <http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager"
-	          entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false">
-	        <intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY"/>
-	        <anonymous enabled="false"/>
-	        <http-basic entry-point-ref="oauth2AuthenticationEntryPoint"/>
-	
+	    <http pattern="/oauth/token" use-expressions="true" create-session="stateless" 
+	          authentication-manager-ref="oauth2AuthenticationManager"
+	          entry-point-ref="oauth2AuthenticationEntryPoint">
+	        <intercept-url pattern="/oauth/token" access="isFullyAuthenticated()"/>
+	        <http-basic />
 	        <custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>
 	        <access-denied-handler ref="oauth2AccessDeniedHandler"/>
 	        <csrf disabled="true"/>
@@ -114,7 +114,6 @@
               entry-point-ref="oauth2AuthenticationEntryPoint"
 	          authentication-manager-ref="oauth2AuthenticationManager" >
 	          <!-- access-decision-manager-ref="oauth2AccessDecisionManager" > -->
-	        <anonymous enabled="false"/>
 	
 	        <intercept-url pattern="${rest.rooturl}/**" access="isFullyAuthenticated()"/>
 	
@@ -146,7 +145,7 @@
             <intercept-url pattern="/login" access="permitAll" />
             <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
-            <intercept-url pattern="/oauth/**" access="permitAll" />
+            <intercept-url pattern="/oauth/**" access="isFullyAuthenticated()" />
             <intercept-url pattern="/**" access="isFullyAuthenticated()" />
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
