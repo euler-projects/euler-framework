@@ -42,6 +42,9 @@
     <bean id="scopeDao" class="net.eulerform.web.core.security.authentication.dao.impl.ScopeDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
+    <bean id="grantTypeDao" class="net.eulerform.web.core.security.authentication.dao.impl.GrantTypeDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
     <bean id="authorityDao" class="net.eulerform.web.core.security.authentication.dao.impl.AuthorityDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -58,6 +61,7 @@
         <property name="clientDao" ref="clientDao"/>
         <property name="resourceDao" ref="resourceDao"/>
         <property name="scopeDao" ref="scopeDao"/>
+        <property name="grantTypeDao" ref="grantTypeDao"/>
         <property name="passwordEncoder" ref="passwordEncoder"/>
     </bean>
     

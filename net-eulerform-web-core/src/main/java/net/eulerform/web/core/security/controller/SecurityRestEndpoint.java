@@ -10,6 +10,7 @@ import net.eulerform.web.core.base.entity.WebServiceResponse;
 import net.eulerform.web.core.base.entity.WebServiceResponseStatus;
 import net.eulerform.web.core.security.authentication.entity.Authority;
 import net.eulerform.web.core.security.authentication.entity.Client;
+import net.eulerform.web.core.security.authentication.entity.GrantType;
 import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
 import net.eulerform.web.core.security.authentication.entity.User;
 import net.eulerform.web.core.security.authentication.service.IAuthorityService;
@@ -70,6 +71,13 @@ public class SecurityRestEndpoint extends BaseRest {
     @RequestMapping(value = { "/createScope" }, method = RequestMethod.POST)
     public WebServiceResponse<String> createScope(net.eulerform.web.core.security.authentication.entity.Scope scope){
         this.clientService.createScope(scope);
+        return new WebServiceResponse<String>(WebServiceResponseStatus.OK);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/createGrantType" }, method = RequestMethod.POST)
+    public WebServiceResponse<String> createGrantType(GrantType grantType){
+        this.clientService.createGrantType(grantType);
         return new WebServiceResponse<String>(WebServiceResponseStatus.OK);
     }
     

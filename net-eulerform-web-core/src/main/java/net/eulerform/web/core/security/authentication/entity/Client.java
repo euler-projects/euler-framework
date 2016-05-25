@@ -26,13 +26,23 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 public class Client extends UUIDEntity<Client> implements ClientDetails {
     
     private static final Set<String> AUTHORIZDE_GRANT_TYPES = new HashSet<>();
+    private static final String AUTO_APPROVE_SCOPE="AUTOAPPROVE";
     static {
         AUTHORIZDE_GRANT_TYPES.add("authorization_code");
         AUTHORIZDE_GRANT_TYPES.add("refresh_token");
     }
 
-    @Column(name = "CLIENT_SECRET")
+    @Column(name = "CLIENT_SECRET", nullable=false)
     private String clientSecret;
+    
+    @Column(name = "ACCESS_TOLEN_LIFE", nullable=false)
+    private Integer accessTokenValiditySeconds;
+
+    @Column(name = "REFRESH_TOKEN_LIFE", nullable=false)
+	private Integer refreshTokenValiditySeconds;
+    
+    @Column(name = "NEVER_NEED_APPROVE", nullable=false)
+    private Boolean neverNeedApprove;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_RESOURCE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
@@ -41,6 +51,10 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_SCOPE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "SCOPE_ID") })
     private Set<Scope> scopes;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "SYS_CLIENT_GRANT_TYPE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "GRANT_TYPE_ID") })
+    private Set<GrantType> grantTypes;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_AUTHORITY", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
@@ -111,22 +125,28 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         this.registeredRedirectUri = registeredRedirectUri;
     }
 
-    @Override
+	@Override
     @Transient
     public Set<String> getAuthorizedGrantTypes() {
-        return AUTHORIZDE_GRANT_TYPES;
+        Set<String> result = new HashSet<>();
+        for(GrantType grantType : this.grantTypes){
+            result.add(grantType.getGrantType());
+        }
+        return result;
     }
 
+    public void setGrantTypes(Set<GrantType> grantTypes) {
+		//this.grantTypes = grantTypes;
+	}
+
     @Override
-    @Transient
     public Integer getAccessTokenValiditySeconds() {
-        return 3600;
+        return this.accessTokenValiditySeconds;
     }
 
     @Override
-    @Transient
     public Integer getRefreshTokenValiditySeconds() {
-        return -1;
+        return this.refreshTokenValiditySeconds;
     }
 
     @Override
@@ -149,9 +169,15 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     @Override
     public boolean isAutoApprove(String scope) {
-        System.out.println("!!!!!!!isAutoApprove+"+scope);
-        // TODO Auto-generated method stub
-        return true;
+        return AUTO_APPROVE_SCOPE.equals(scope) || this.neverNeedApprove;
     }
+
+	public void setAccessTokenValiditySeconds(Integer accessTokenValiditySeconds) {
+		this.accessTokenValiditySeconds = accessTokenValiditySeconds;
+	}
+
+	public void setRefreshTokenValiditySeconds(Integer refreshTokenValiditySeconds) {
+		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
+	}
 
 }

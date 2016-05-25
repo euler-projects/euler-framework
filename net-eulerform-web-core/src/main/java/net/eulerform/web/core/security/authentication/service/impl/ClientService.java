@@ -9,9 +9,11 @@ import java.util.List;
 
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.security.authentication.dao.IClientDao;
+import net.eulerform.web.core.security.authentication.dao.IGrantTypeDao;
 import net.eulerform.web.core.security.authentication.dao.IResourceDao;
 import net.eulerform.web.core.security.authentication.dao.IScopeDao;
 import net.eulerform.web.core.security.authentication.entity.Client;
+import net.eulerform.web.core.security.authentication.entity.GrantType;
 import net.eulerform.web.core.security.authentication.entity.Resource;
 import net.eulerform.web.core.security.authentication.entity.Scope;
 import net.eulerform.web.core.security.authentication.service.IClientService;
@@ -29,6 +31,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IClientDao clientDao;
     private IResourceDao resourceDao;
     private IScopeDao scopeDao;
+    private IGrantTypeDao grantTypeDao;
     
     private PasswordEncoder passwordEncoder;
 
@@ -44,6 +47,10 @@ public class ClientService extends BaseService implements IClientService, Client
         this.scopeDao = scopeDao;
     }
     
+	public void setGrantTypeDao(IGrantTypeDao grantTypeDao) {
+		this.grantTypeDao = grantTypeDao;
+	}
+
 	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
 	    this.passwordEncoder = passwordEncoder;
 	}
@@ -100,6 +107,11 @@ public class ClientService extends BaseService implements IClientService, Client
 		Client client = new Client();
 		client.setClientSecret(this.passwordEncoder.encode(secret));
 		this.clientDao.save(client);
+	}
+
+	@Override
+	public void createGrantType(GrantType grantType) {
+		this.grantTypeDao.save(grantType);
 	}
     
 }
