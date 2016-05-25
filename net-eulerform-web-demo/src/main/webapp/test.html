@@ -41,6 +41,10 @@
     scope: <input type="text" id="scope">
     description: <input type="text" id="scope_description">
     <input type="button" id="createScope" value="createScope" onClick="createScope()"><br>
+    <h3>Create Grant Type</h3>
+    scope: <input type="text" id="grant_type">
+    description: <input type="text" id="grant_type_description">
+    <input type="button" id="createGrantType" value="createGrantType" onClick="createGrantType()"><br>
     <h3>Create Resource</h3>
     resource name: <input type="text" id="resource_name">
     description: <input type="text" id="resource_description">
@@ -94,7 +98,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/security/createUser',
+                url : 'rs/security/createUser',
                 dataType: 'json',
                 data: user,
                 beforeSend: function(request) {
@@ -113,7 +117,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/security/createClient',
+                url : 'rs/security/createClient',
                 dataType: 'json',
                 data: client,
                 beforeSend: function(request) {
@@ -132,9 +136,28 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/security/createScope',
+                url : 'rs/security/createScope',
                 dataType: 'json',
                 data: scope,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createGrantType(){
+            var grantType = {};
+            grantType.grantType = $('#grant_type').val();
+            grantType.description = $('#grant_type_description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/createGrantType',
+                dataType: 'json',
+                data: grantType,
                 beforeSend: function(request) {
                     addAccessToken(request);
                 },
@@ -151,7 +174,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/security/createResource',
+                url : 'rs/security/createResource',
                 dataType: 'json',
                 data: resource,
                 beforeSend: function(request) {
@@ -170,7 +193,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/security/createAuthority',
+                url : 'rs/security/createAuthority',
                 dataType: 'json',
                 data: authority,
                 beforeSend: function(request) {
@@ -189,7 +212,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/security/createUrlMatcher',
+                url : 'rs/security/createUrlMatcher',
                 dataType: 'json',
                 data: urlMatcher,
                 beforeSend: function(request) {
@@ -207,7 +230,7 @@
              $.ajax({
                 type : "POST",
                 async : true,
-                url : 'webapi/blog/createBlog',
+                url : 'rs/blog/createBlog',
                 dataType: 'json',
                 data: blog,
                 beforeSend: function(request) {
