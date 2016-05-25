@@ -1,4 +1,4 @@
-package net.eulerform.config.bootstrap;
+package net.eulerform.config.boot;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -59,7 +59,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(WEB_SECURITY_NONE);break;
         default: 
             rootContext.close();
-            throw new WebInitException("不支持的WEB验证方式: "+restAuthentication);   
+            throw new WebInitException("不支持的WEB验证方式123: "+restAuthentication);   
         }
         
         switch(restAuthentication){

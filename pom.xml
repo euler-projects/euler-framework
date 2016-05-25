@@ -13,6 +13,8 @@
         <module>net-eulerform-web-demo</module>
         <module>net-eulerform-web-root</module>
         <module>net-eulerform-web-core</module>
+        <module>net-eulerform-web-config</module>
+        <module>net-eulerform-web-config-provider</module>
         <module>net-eulerform-common</module>
     </modules>
 

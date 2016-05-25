@@ -1,4 +1,4 @@
-package net.eulerform.config.bootstrap;
+package net.eulerform.config.boot;
 
 import net.eulerform.web.core.filter.PostLoggingFilter;
 
