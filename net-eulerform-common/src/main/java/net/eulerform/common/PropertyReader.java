@@ -1,4 +1,4 @@
-package net.eulerform.web.core.util;
+package net.eulerform.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;

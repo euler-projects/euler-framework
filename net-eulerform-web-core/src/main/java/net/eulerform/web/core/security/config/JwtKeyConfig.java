@@ -10,24 +10,23 @@ import net.eulerform.common.FileReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("rest-security-oauth")
 public class JwtKeyConfig {
     
     private KeyPair keyPair;
     private String jwtVerifierKey;
     private String jwtSigningKey;
     
-    @Value("${jwtSigningKeyFile}")
+    @Value("${oauth.jwtSigningKeyFile}")
     private String jwtSigningKeyFile;
-    @Value("${jwtVerifierKeyFile}")
+    @Value("${oauth.jwtVerifierKeyFile}")
     private String jwtVerifierKeyFile;
-    @Value("${oauth.enable}")
-    private boolean oauthEnabled;
 
     @Bean(name="keyPair")
     public KeyPair rsaKeys() throws NoSuchAlgorithmException {
-    	if(!this.oauthEnabled) return null;
         if(this.keyPair != null) return this.keyPair;
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA"); 
         keyPairGen.initialize(2048); 
@@ -37,7 +36,6 @@ public class JwtKeyConfig {
     
     @Bean(name="jwtVerifierKey")
     public String jwtVerifierKey() throws IOException{
-    	if(!this.oauthEnabled) return null;
         if(this.jwtVerifierKey != null) return this.jwtVerifierKey;
         String path = this.getClass().getResource("/").getPath();
         this.jwtVerifierKey = FileReader.readFileByLines(path+jwtVerifierKeyFile);
@@ -46,7 +44,6 @@ public class JwtKeyConfig {
     
     @Bean(name="jwtSigningKey")
     public String jwtSigningKey() throws IOException{
-    	if(!this.oauthEnabled) return null;
         if(this.jwtSigningKey != null) return this.jwtSigningKey;
         String path = this.getClass().getResource("/").getPath();
         this.jwtSigningKey = FileReader.readFileByLines(path+jwtSigningKeyFile);

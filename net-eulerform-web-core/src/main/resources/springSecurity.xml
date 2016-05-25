@@ -21,7 +21,7 @@
     <http security="none" pattern="/resources/**" />
     <http security="none" pattern="/favicon.ico" />
     
-    <beans:beans profile="oauth">
+    <beans:beans profile="rest-security-oauth">
 	    <beans:bean id="jwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
 	        <beans:property name="signingKey" ref="jwtSigningKey"/>
 	        <beans:property name="verifierKey" ref="jwtVerifierKey"/>
@@ -109,12 +109,13 @@
 	    
 	    <oauth2:resource-server id="restResourceServer" resource-id="${oauth.resourceId}" token-services-ref="tokenServices" />
 	    
-	    <http pattern="/webapi/**" create-session="stateless" entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false"
+	    <http pattern="${rest.rooturl}/**" use-expressions="true" create-session="stateless" 
+              entry-point-ref="oauth2AuthenticationEntryPoint"
 	          authentication-manager-ref="oauth2AuthenticationManager" >
 	          <!-- access-decision-manager-ref="oauth2AccessDecisionManager" > -->
 	        <anonymous enabled="false"/>
 	
-	        <intercept-url pattern="/webapi/**" access="IS_AUTHENTICATED_FULLY"/>
+	        <intercept-url pattern="${rest.rooturl}/**" access="isFullyAuthenticated()"/>
 	
 	        <custom-filter ref="restResourceServer" before="PRE_AUTH_FILTER"/>
 	        <access-denied-handler ref="oauth2AccessDeniedHandler"/>
@@ -122,17 +123,29 @@
 	    </http>
     </beans:beans>
     
-    <beans:beans profile="no_oauth">
+    <beans:beans profile="rest-security-basic">    
+        <http pattern="${rest.rooturl}/**" use-expressions="true" create-session="stateless">    
+            <intercept-url pattern="${rest.rooturl}/**" access="permitAll"/>
+            <http-basic />
+            <csrf disabled="true"/>
+        </http>
+    </beans:beans>
+    
+    <beans:beans profile="rest-security-none">
+        <http security="none" pattern="${rest.rooturl}/**" />
+    </beans:beans>
+    
+    <beans:beans profile="web-security-none">
+        <http security="none" pattern="/**" />
     </beans:beans>
 
-    <beans:beans profile="local,ldap">
+    <beans:beans profile="web-security-local,web-security-ldap">
         <http use-expressions="true">
     
             <intercept-url pattern="/login" access="permitAll" />
             <intercept-url pattern="/login/**" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
             <intercept-url pattern="/oauth/**" access="permitAll" />
-            <intercept-url pattern="/webapi/**" access="permitAll" />
             <intercept-url pattern="/**" access="isFullyAuthenticated()" />
             <form-login login-page="/login" login-processing-url="/login"
                 authentication-failure-url="/login?error"
@@ -153,7 +166,7 @@
         </http>
     </beans:beans>
     
-    <beans:beans profile="local">
+    <beans:beans profile="web-security-local">
         <authentication-manager>
             <authentication-provider user-service-ref="userDetailsService">
                 <password-encoder ref="passwordEncoder" />
@@ -161,7 +174,7 @@
         </authentication-manager>
     </beans:beans>
 
-    <beans:beans profile="ldap">    	
+    <beans:beans profile="web-security-ldap">    	
         <authentication-manager>
             <authentication-provider ref="ldapAuthenticationProvider" />
         </authentication-manager>
@@ -203,7 +216,7 @@
         </beans:bean>
     </beans:beans>
     
-    <beans:beans profile="cas">
+    <beans:beans profile="web-security-cas">
         <http use-expressions="true" auto-config="false" entry-point-ref="casEntryPoint" servlet-api-provision="true">
             <intercept-url pattern="${cas.localSystemLoginUrl}" access="permitAll" />
             <intercept-url pattern="/logout" access="permitAll" />
