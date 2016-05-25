@@ -28,6 +28,7 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     private static final Set<String> AUTHORIZDE_GRANT_TYPES = new HashSet<>();
     static {
         AUTHORIZDE_GRANT_TYPES.add("authorization_code");
+        AUTHORIZDE_GRANT_TYPES.add("refresh_token");
     }
 
     @Column(name = "CLIENT_SECRET")

@@ -36,7 +36,8 @@
 	                class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 	        <beans:property name="tokenStore" ref="tokenStore" />
 	        <beans:property name="clientDetailsService" ref="clientDetailsService" />
-	        <beans:property name="tokenEnhancer" ref="jwtAccessTokenConverter" />        
+	        <beans:property name="tokenEnhancer" ref="jwtAccessTokenConverter" />      
+            <beans:property name="supportRefreshToken" value="true" />
 	    </beans:bean>
 	    
 	    <beans:bean id="oauth2ClientDetailsUserService"  
