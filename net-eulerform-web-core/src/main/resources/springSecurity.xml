@@ -157,7 +157,7 @@
             <session-management invalid-session-url="/login"
                 session-fixation-protection="migrateSession">
                 <concurrency-control max-sessions="1"
-                    error-if-maximum-exceeded="true"
+                    error-if-maximum-exceeded="false"
                     session-registry-ref="sessionRegistry" />
             </session-management>
     
@@ -232,7 +232,7 @@
             <session-management invalid-session-url="/login"
                 session-fixation-protection="migrateSession">
                 <concurrency-control max-sessions="1"
-                    error-if-maximum-exceeded="true" />
+                    error-if-maximum-exceeded="false" />
             </session-management>
     
             <csrf disabled="true" />
