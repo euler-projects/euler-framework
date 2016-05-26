@@ -1,5 +1,6 @@
 package net.eulerform.config.boot;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
@@ -82,6 +83,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         DispatcherServlet springWebDispatcher = new DispatcherServlet(springWebDispatcherServletContext);
         ServletRegistration.Dynamic dispatcher = container.addServlet("springWebDispatcher", springWebDispatcher);
         dispatcher.setLoadOnStartup(1);
+        dispatcher.setMultipartConfig(new MultipartConfigElement(null, 20971520L, 20971520L, 20971520));
         dispatcher.addMapping("/");
         
         AnnotationConfigWebApplicationContext springRestDispatcherServletContext = new AnnotationConfigWebApplicationContext();
