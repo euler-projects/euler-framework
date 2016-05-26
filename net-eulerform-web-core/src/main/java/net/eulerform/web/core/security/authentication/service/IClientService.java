@@ -16,7 +16,7 @@ public interface IClientService extends IBaseService {
 
     List<Client> findAllClient();
     
-    public void createClient(String secret);
+    public void createClient(String secret, Integer accessTokenValiditySeconds, Integer refreshTokenValiditySeconds, Boolean neverNeedApprove);
 
 	void createGrantType(GrantType grantType);
     

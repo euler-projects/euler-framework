@@ -22,36 +22,31 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name="SYS_CLIENT")
+@Table(name = "SYS_CLIENT")
 public class Client extends UUIDEntity<Client> implements ClientDetails {
-    
-    private static final Set<String> AUTHORIZDE_GRANT_TYPES = new HashSet<>();
-    private static final String AUTO_APPROVE_SCOPE="AUTOAPPROVE";
-    static {
-        AUTHORIZDE_GRANT_TYPES.add("authorization_code");
-        AUTHORIZDE_GRANT_TYPES.add("refresh_token");
-    }
 
-    @Column(name = "CLIENT_SECRET", nullable=false)
+    private static final String AUTO_APPROVE_SCOPE = "AUTOAPPROVE";
+
+    @Column(name = "CLIENT_SECRET", nullable = false)
     private String clientSecret;
-    
-    @Column(name = "ACCESS_TOLEN_LIFE", nullable=false)
+
+    @Column(name = "ACCESS_TOLEN_LIFE", nullable = false)
     private Integer accessTokenValiditySeconds;
 
-    @Column(name = "REFRESH_TOKEN_LIFE", nullable=false)
-	private Integer refreshTokenValiditySeconds;
-    
-    @Column(name = "NEVER_NEED_APPROVE", nullable=false)
+    @Column(name = "REFRESH_TOKEN_LIFE", nullable = false)
+    private Integer refreshTokenValiditySeconds;
+
+    @Column(name = "NEVER_NEED_APPROVE", nullable = false)
     private Boolean neverNeedApprove;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_RESOURCE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
     private Set<Resource> resources;
-    
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_SCOPE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "SCOPE_ID") })
     private Set<Scope> scopes;
-    
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_GRANT_TYPE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "GRANT_TYPE_ID") })
     private Set<GrantType> grantTypes;
@@ -65,6 +60,58 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @Column(name = "REDIRECT_URI")
     private Set<String> registeredRedirectUri;
 
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public void setResources(Set<Resource> resources) {
+        this.resources = resources;
+    }
+
+    public void setScopes(Set<Scope> scopes) {
+        this.scopes = scopes;
+    }
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public void setGrantTypes(Set<GrantType> grantTypes) {
+        this.grantTypes = grantTypes;
+    }
+
+    public void setRegisteredRedirectUri(Set<String> registeredRedirectUri) {
+        this.registeredRedirectUri = registeredRedirectUri;
+    }
+
+    public void setAccessTokenValiditySeconds(Integer accessTokenValiditySeconds) {
+        this.accessTokenValiditySeconds = accessTokenValiditySeconds;
+    }
+
+    public void setRefreshTokenValiditySeconds(Integer refreshTokenValiditySeconds) {
+        this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
+    }
+
+    public void setNeverNeedApprove(Boolean neverNeedApprove) {
+        this.neverNeedApprove = neverNeedApprove;
+    }
+
+    public Boolean getNeverNeedApprove() {
+        return neverNeedApprove;
+    }
+
+    public Set<Resource> getResources() {
+        return resources;
+    }
+
+    public Set<Scope> getScopes() {
+        return scopes;
+    }
+
+    public Set<GrantType> getGrantTypes() {
+        return grantTypes;
+    }
+
     @Override
     public String getClientId() {
         return super.getId();
@@ -75,18 +122,10 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         return this.clientSecret;
     }
 
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
-    }
-
-    public void setResources(Set<Resource> resources) {
-        this.resources = resources;
-    }
-
     @Override
     public Set<String> getResourceIds() {
         Set<String> result = new HashSet<>();
-        for(Resource resource : this.resources){
+        for (Resource resource : this.resources) {
             result.add(resource.getResourceName());
         }
         return result;
@@ -95,14 +134,10 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @Override
     public Set<String> getScope() {
         Set<String> result = new HashSet<>();
-        for(Scope scope : this.scopes){
+        for (Scope scope : this.scopes) {
             result.add(scope.getScope());
         }
         return result;
-    }
-
-    public void setScopes(Set<Scope> scopes) {
-        this.scopes = scopes;
     }
 
     @Override
@@ -112,32 +147,20 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         return result;
     }
 
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
+    @Override
+    @Transient
+    public Set<String> getAuthorizedGrantTypes() {
+        Set<String> result = new HashSet<>();
+        for (GrantType grantType : this.grantTypes) {
+            result.add(grantType.getGrantType());
+        }
+        return result;
     }
 
     @Override
     public Set<String> getRegisteredRedirectUri() {
         return this.registeredRedirectUri;
     }
-
-    public void setRegisteredRedirectUri(Set<String> registeredRedirectUri) {
-        this.registeredRedirectUri = registeredRedirectUri;
-    }
-
-	@Override
-    @Transient
-    public Set<String> getAuthorizedGrantTypes() {
-        Set<String> result = new HashSet<>();
-        for(GrantType grantType : this.grantTypes){
-            result.add(grantType.getGrantType());
-        }
-        return result;
-    }
-
-    public void setGrantTypes(Set<GrantType> grantTypes) {
-		//this.grantTypes = grantTypes;
-	}
 
     @Override
     public Integer getAccessTokenValiditySeconds() {
@@ -168,16 +191,9 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     }
 
     @Override
+    @Transient
     public boolean isAutoApprove(String scope) {
         return AUTO_APPROVE_SCOPE.equals(scope) || this.neverNeedApprove;
     }
-
-	public void setAccessTokenValiditySeconds(Integer accessTokenValiditySeconds) {
-		this.accessTokenValiditySeconds = accessTokenValiditySeconds;
-	}
-
-	public void setRefreshTokenValiditySeconds(Integer refreshTokenValiditySeconds) {
-		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
-	}
 
 }
