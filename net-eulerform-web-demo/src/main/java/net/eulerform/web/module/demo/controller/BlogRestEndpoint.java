@@ -3,7 +3,7 @@ package net.eulerform.web.module.demo.controller;
 import javax.annotation.Resource;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.base.controller.rest.BaseRest;
+import net.eulerform.web.core.base.controller.BaseRest;
 import net.eulerform.web.core.base.entity.WebServiceResponse;
 import net.eulerform.web.core.base.entity.WebServiceResponseStatus;
 import net.eulerform.web.module.demo.entity.Blog;

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.eulerform.common.FileReader;
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.web.BaseController;
+import net.eulerform.web.core.base.controller.BaseController;
 import net.eulerform.web.module.demo.entity.Blog;
 import net.eulerform.web.module.demo.service.IBlogService;
 

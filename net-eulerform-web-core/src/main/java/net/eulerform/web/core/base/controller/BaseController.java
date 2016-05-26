@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.controller.web;
+package net.eulerform.web.core.base.controller;
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 public abstract class BaseController {
     
-    protected final Logger log = LogManager.getLogger();
+    protected final Logger logger = LogManager.getLogger(this.getClass());
     
     protected ServletContext getServletContext(){
         WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
@@ -33,7 +33,7 @@ public abstract class BaseController {
     public String index(HttpServletRequest request, Model model) {
         String moduleName = this.findModuleName(request);
         String pagePath = moduleName+"/index";
-        this.log.info("Redirect to module index page: "+pagePath);
+        this.logger.info("Redirect to module index page: "+pagePath);
         //request.setAttribute("user", UserContext.getCurrentUser());
         //model.addAttribute("user", UserContext.getCurrentUser());
         return pagePath;

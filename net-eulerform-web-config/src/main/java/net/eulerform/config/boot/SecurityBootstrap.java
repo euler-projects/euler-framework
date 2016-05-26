@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
-@Order(2)
+@Order(200)
 public class SecurityBootstrap extends AbstractSecurityWebApplicationInitializer
 {
     private static final Logger log = LogManager.getLogger();

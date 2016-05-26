@@ -27,9 +27,6 @@ public class BlogService extends BaseService implements IBlogService {
 
     @Override
     public List<Blog> findAllBlogs() {
-        this.log.warn("test warn");
-        this.log.info("test info");
-        this.log.error("test error");
         return this.blogDao.findAll();
     }
 
