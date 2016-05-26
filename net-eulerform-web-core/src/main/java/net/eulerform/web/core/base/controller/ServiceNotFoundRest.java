@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.controller.rest;
+package net.eulerform.web.core.base.controller;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;

@@ -11,19 +11,15 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-@Order(3)
-public class LoggingBootstrap implements WebApplicationInitializer
-{
+@Order(300)
+public class PostLoggingBootstrap implements WebApplicationInitializer {
     private static final Logger log = LogManager.getLogger();
 
     @Override
-    public void onStartup(ServletContext container) throws ServletException
-    {
-        log.info("Executing logging bootstrap.");
+    public void onStartup(ServletContext container) throws ServletException {
+        log.info("Executing post logging bootstrap.");
 
-        FilterRegistration.Dynamic postLoggingFilter = container.addFilter(
-                "postLoggingFilter", new PostLoggingFilter()
-        );
+        FilterRegistration.Dynamic postLoggingFilter = container.addFilter("postLoggingFilter", new PostLoggingFilter());
         postLoggingFilter.addMappingForUrlPatterns(null, false, "/*");
     }
 }

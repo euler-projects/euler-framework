@@ -19,6 +19,8 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
+    
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     protected final Logger log = LogManager.getLogger();
 

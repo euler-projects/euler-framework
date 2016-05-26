@@ -1,6 +1,5 @@
 package net.eulerform.config.boot;
 
-import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
@@ -8,18 +7,19 @@ import javax.servlet.ServletRegistration;
 import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.web.core.base.exception.WebInitException;
-import net.eulerform.web.core.filter.PreLoggingFilter;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
-@Order(1)
+@Order(0)
 public class FrameworkBootstrap implements WebApplicationInitializer {
+    private static final Logger log = LogManager.getLogger();
     
     private static final String WEB_SECURITY_LOCAL_ENABLED = "local";
     private static final String WEB_SECURITY_LOCAL = "web-security-local";
@@ -39,6 +39,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
+        log.info("Executing framework bootstrap.");
         
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         rootContext.register(net.eulerform.config.RootContextConfiguration.class);
@@ -98,15 +99,5 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         }
         restRootUrl = FilePathTool.changeToUnixFormat(restRootUrl);
         dispatcher.addMapping(restRootUrl+"/*");
-
-        FilterRegistration.Dynamic characterEncodingFilter = container.addFilter(
-                "characterEncodingFilter", new CharacterEncodingFilter("UTF-8")
-        );
-        characterEncodingFilter.addMappingForUrlPatterns(null, false, "/*");
-        
-        FilterRegistration.Dynamic preLoggingFilter = container.addFilter(
-                "preLoggingFilter", new PreLoggingFilter()
-        );
-        preLoggingFilter.addMappingForUrlPatterns(null, false, "/*");
     }
 }

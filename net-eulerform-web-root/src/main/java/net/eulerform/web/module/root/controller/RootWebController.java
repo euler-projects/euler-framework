@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.web.BaseController;
+import net.eulerform.web.core.base.controller.BaseController;
 
 @WebController
 @Scope("prototype")
