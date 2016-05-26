@@ -83,7 +83,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         DispatcherServlet springWebDispatcher = new DispatcherServlet(springWebDispatcherServletContext);
         ServletRegistration.Dynamic dispatcher = container.addServlet("springWebDispatcher", springWebDispatcher);
         dispatcher.setLoadOnStartup(1);
-        dispatcher.setMultipartConfig(new MultipartConfigElement(null, 20971520L, 20971520L, 20971520));
+        dispatcher.setMultipartConfig(new MultipartConfigElement(null, 1024L*1024L*1024L, 1024L*1024L*1024L, 1024*1024*1024));
         dispatcher.addMapping("/");
         
         AnnotationConfigWebApplicationContext springRestDispatcherServletContext = new AnnotationConfigWebApplicationContext();

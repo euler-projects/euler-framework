@@ -34,8 +34,6 @@ public abstract class BaseController {
         String moduleName = this.findModuleName(request);
         String pagePath = moduleName+"/index";
         this.logger.info("Redirect to module index page: "+pagePath);
-        //request.setAttribute("user", UserContext.getCurrentUser());
-        //model.addAttribute("user", UserContext.getCurrentUser());
         return pagePath;
     }
     
