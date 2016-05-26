@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.controller;
+package net.eulerform.web.core.base.controller.web;
 
 import java.io.IOException;
 
@@ -34,8 +34,8 @@ public abstract class BaseController {
         String moduleName = this.findModuleName(request);
         String pagePath = moduleName+"/index";
         this.log.info("Redirect to module index page: "+pagePath);
-        //request.setAttribute("user", SecurityContextTool.getCurrentUser());
-        //model.addAttribute("user", SecurityContextTool.getCurrentUser());
+        //request.setAttribute("user", UserContext.getCurrentUser());
+        //model.addAttribute("user", UserContext.getCurrentUser());
         return pagePath;
     }
     

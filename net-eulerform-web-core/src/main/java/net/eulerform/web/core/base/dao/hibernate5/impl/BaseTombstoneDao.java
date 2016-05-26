@@ -10,7 +10,7 @@ import org.hibernate.criterion.Restrictions;
 
 import net.eulerform.web.core.base.dao.hibernate5.IBaseTombstoneDao;
 import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
-import net.eulerform.web.core.util.SecurityContextTool;
+import net.eulerform.web.core.util.UserContext;
 
 public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends BaseDao<T> implements IBaseTombstoneDao<T> {
 
@@ -105,7 +105,17 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
     }
     
     private void setBaseInfo(T entity){
-        Serializable currentUserId = SecurityContextTool.getCurrentUser().getId();
+        if(entity.getId() != null){
+            T oldEntity = super.load(entity.getId());
+            if(oldEntity != null) {
+                entity.setCreateBy(oldEntity.getCreateBy());
+                entity.setCreateDate(oldEntity.getCreateDate());
+                //entity.setIfDel(oldEntity.getIfDel());注释掉此处:再次保存已逻辑删除的对象时,删除状态以新对象为准
+                //this.getSessionFactory().getCurrentSession().evict(oldEntity);//注释掉此处:load方法已经改为将查出实体置为游离态,此处不再需要
+            }
+        }
+        
+        Serializable currentUserId = UserContext.getCurrentUser().getId();;
         Date date = new Date();
         if(entity.getCreateDate() == null)
             entity.setCreateDate(date);
@@ -113,6 +123,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             entity.setCreateBy(String.valueOf(currentUserId));
         entity.setModifyDate(date);
         entity.setModifyBy(String.valueOf(currentUserId));
-        entity.setIfDel(false);
+        if(entity.getIfDel() != true)
+            entity.setIfDel(false);
     }
 }

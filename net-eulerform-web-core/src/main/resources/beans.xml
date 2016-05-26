@@ -16,6 +16,10 @@
     <bean id="log" class="net.eulerform.web.core.util.Log">
         <property name="logService" ref="logService"/>
     </bean>
+    
+    <bean id="userContext" class="net.eulerform.web.core.util.UserContext">
+        <property name="userDetailsService" ref="userDetailsService"/>
+    </bean>
 
     <bean id="logService" class="net.eulerform.web.core.log.service.impl.LogService">
         <property name="accessLogDao" ref="accessLogDao"/>
@@ -29,6 +33,18 @@
     <bean id="userDao" class="net.eulerform.web.core.security.authentication.dao.impl.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
+    <bean id="clientDao" class="net.eulerform.web.core.security.authentication.dao.impl.ClientDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="resourceDao" class="net.eulerform.web.core.security.authentication.dao.impl.ResourceDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="scopeDao" class="net.eulerform.web.core.security.authentication.dao.impl.ScopeDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="grantTypeDao" class="net.eulerform.web.core.security.authentication.dao.impl.GrantTypeDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
     <bean id="authorityDao" class="net.eulerform.web.core.security.authentication.dao.impl.AuthorityDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -38,6 +54,14 @@
     
     <bean id="userService" name="userDetailsService" class="net.eulerform.web.core.security.authentication.service.impl.UserService">
         <property name="userDao" ref="userDao"/>
+        <property name="passwordEncoder" ref="passwordEncoder"/>
+    </bean>
+    
+    <bean id="clientService" name="clientDetailsService" class="net.eulerform.web.core.security.authentication.service.impl.ClientService">
+        <property name="clientDao" ref="clientDao"/>
+        <property name="resourceDao" ref="resourceDao"/>
+        <property name="scopeDao" ref="scopeDao"/>
+        <property name="grantTypeDao" ref="grantTypeDao"/>
         <property name="passwordEncoder" ref="passwordEncoder"/>
     </bean>
     

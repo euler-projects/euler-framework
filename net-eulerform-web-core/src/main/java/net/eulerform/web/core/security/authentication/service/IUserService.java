@@ -6,8 +6,6 @@ import net.eulerform.web.core.base.service.IBaseService;
 import net.eulerform.web.core.security.authentication.entity.User;
 
 public interface IUserService extends IBaseService {
-    
-    public User findUserByName(String username, boolean loadRoles);
 
     public void createUser(String username, String password);
 

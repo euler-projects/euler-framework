@@ -1,4 +1,4 @@
-package net.eulerform.web.core.util;
+package net.eulerform.common;
 
 public class NullValueException extends Exception {
     private static final long serialVersionUID = -3749594067077482264L;
