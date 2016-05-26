@@ -23,7 +23,7 @@ import org.hibernate.annotations.GenericGenerator;
 public abstract class UUIDEntity<T extends UUIDEntity<?>> implements BaseEntity<T> {    
 
     @Id
-    @Column(name="ID")
+    @Column(name="ID", length=36)
     @GenericGenerator(name="systemUUID",strategy="uuid2")
     @GeneratedValue(generator="systemUUID")
     private String id;
