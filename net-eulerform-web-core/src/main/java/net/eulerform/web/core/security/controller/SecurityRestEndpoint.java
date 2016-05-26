@@ -63,7 +63,10 @@ public class SecurityRestEndpoint extends BaseRest {
     @ResponseBody
     @RequestMapping(value = { "/createClient" }, method = RequestMethod.POST)
     public WebServiceResponse<String> createClient(Client client){
-        this.clientService.createClient(client.getClientSecret());
+        this.clientService.createClient(client.getClientSecret(), 
+                client.getAccessTokenValiditySeconds(),
+                client.getRefreshTokenValiditySeconds(),
+                client.getNeverNeedApprove());
         return new WebServiceResponse<String>(WebServiceResponseStatus.OK);
     }
     

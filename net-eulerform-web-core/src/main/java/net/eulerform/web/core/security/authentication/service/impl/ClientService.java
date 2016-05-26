@@ -103,9 +103,12 @@ public class ClientService extends BaseService implements IClientService, Client
     }
 
 	@Override
-	public void createClient(String secret) {
+	public void createClient(String secret, Integer accessTokenValiditySeconds, Integer refreshTokenValiditySeconds, Boolean neverNeedApprove) {
 		Client client = new Client();
 		client.setClientSecret(this.passwordEncoder.encode(secret));
+		client.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
+		client.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
+		client.setNeverNeedApprove(neverNeedApprove);
 		this.clientDao.save(client);
 	}
 
