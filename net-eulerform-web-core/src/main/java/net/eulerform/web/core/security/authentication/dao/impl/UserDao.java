@@ -18,9 +18,9 @@ public class UserDao extends BaseDao<User> implements IUserDao {
         detachedCriteria.add(Restrictions.eq("username", username));
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         List<User> users = this.findBy(detachedCriteria);
-        if(users == null || users.isEmpty()) return null;        
-        User user =  users.get(0);
-        evict(user);
+        if (users == null || users.isEmpty())
+            return null;
+        User user = users.get(0);
         return user;
     }
 }

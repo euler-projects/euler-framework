@@ -19,11 +19,11 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
-    
+
     protected final Logger log = LogManager.getLogger();
 
     private SessionFactory sessionFactory;
-    
+
     public Session getCurrentSession() {
         return sessionFactory.getCurrentSession();
     }
@@ -39,7 +39,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     protected final Class<T> entityClass;
 
     @SuppressWarnings("unchecked")
-    public BaseDao(){
+    public BaseDao() {
         this.entityClass = (Class<T>) Generic.findSuperClassGenricType(this.getClass(), 0);
     }
 
@@ -60,17 +60,15 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         this.getSessionFactory().getCurrentSession().update(entity);
 
     }
-    
+
     protected void update(String hql) {
-        this.getSessionFactory().getCurrentSession()
-            .createQuery(hql)
-            .executeUpdate();
+        this.getSessionFactory().getCurrentSession().createQuery(hql).executeUpdate();
     }
-    
+
     protected void update(String hql, Object... params) {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
-        for(int i = 0; i < params.length; i++){
+        for (int i = 0; i < params.length; i++) {
             query.setParameter(i, params[i]);
         }
 
@@ -81,10 +79,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     public void saveOrUpdate(T entity) {
         this.getSessionFactory().getCurrentSession().saveOrUpdate(entity);
     }
-    
+
     @Override
-    public void saveOrUpdate(Collection<T> entities){
-        for(T entity : entities){
+    public void saveOrUpdate(Collection<T> entities) {
+        for (T entity : entities) {
             this.saveOrUpdate(entity);
         }
     }
@@ -96,14 +94,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void delete(Serializable id) {
-        this.getSessionFactory().getCurrentSession()
-            .createQuery("delete "+ this.entityClass.getSimpleName() + " en where en.id = ?0")
-            .setParameter(0, id)
-            .executeUpdate();
+        this.getSessionFactory().getCurrentSession().createQuery("delete " + this.entityClass.getSimpleName() + " en where en.id = ?0").setParameter(0, id)
+                .executeUpdate();
     }
 
     @Override
-    public List<T> findBy(T entity) {        
+    public List<T> findBy(T entity) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.add(Example.create(entity));
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
@@ -114,33 +110,36 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public List<T> findAll() {
-        List<T> result = this.findBy("select en from "+ this.entityClass.getSimpleName() + " en");
+        List<T> result = this.findBy("select en from " + this.entityClass.getSimpleName() + " en");
         evict(result);
         return result;
     }
 
-
     @SuppressWarnings("unchecked")
-    protected List<T> findBy(String hql){
-        return this.getSessionFactory().getCurrentSession().createQuery(hql).list();
+    protected List<T> findBy(String hql) {
+        List<T> result = this.getSessionFactory().getCurrentSession().createQuery(hql).list();
+        evict(result);
+        return result;
     }
 
-
     @SuppressWarnings("unchecked")
-    protected List<T> findBy(String hql, Object... params){
+    protected List<T> findBy(String hql, Object... params) {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
-        for(int i = 0; i < params.length; i++){
+        for (int i = 0; i < params.length; i++) {
             query.setParameter(i, params[i]);
         }
 
-        return query.list();
+        List<T> result = query.list();
+        evict(result);
+        return result;
     }
-
 
     @SuppressWarnings("unchecked")
     protected List<T> findBy(DetachedCriteria detachedCriteria) {
-        return detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list();
+        List<T> result = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list();
+        evict(result);
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -148,28 +147,33 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
         criteria.setFirstResult(pageIndex);
         criteria.setMaxResults(pageSize);
-        return criteria.list();
+        List<T> result = criteria.list();
+        evict(result);
+        return result;
     }
 
     @Override
     public long findCount() {
-        List<?> l = this.findBy("select count(*) from "+ this.entityClass.getSimpleName());
+        List<?> l = this.findBy("select count(*) from " + this.entityClass.getSimpleName());
 
-        if(l!=null && l.size() == 1)
-            return (Long)l.get(0);
+        if (l != null && l.size() == 1)
+            return (Long) l.get(0);
         return 0;
     }
-    
-    protected void evict(T entity){
-        if(entity==null) return;
+
+    protected void evict(T entity) {
+        if (entity == null)
+            return;
         this.getCurrentSession().evict(entity);
     }
-    
-    protected void evict(Collection<T> entities){
-        if(entities == null) return;
-        
-        for(T entity : entities) {
-            if(entity==null) continue;
+
+    protected void evict(Collection<T> entities) {
+        if (entities == null)
+            return;
+
+        for (T entity : entities) {
+            if (entity == null)
+                continue;
             this.getCurrentSession().evict(entity);
         }
     }
