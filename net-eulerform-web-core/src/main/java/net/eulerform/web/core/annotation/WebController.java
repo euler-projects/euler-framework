@@ -13,5 +13,5 @@ import org.springframework.stereotype.Controller;
 @Documented
 @Controller
 public @interface WebController {
-    
+    String value() default "";  
 }

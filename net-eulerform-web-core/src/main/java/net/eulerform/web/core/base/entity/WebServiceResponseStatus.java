@@ -1,11 +1,13 @@
 package net.eulerform.web.core.base.entity;
 
+import org.springframework.http.HttpStatus;
+
 public class WebServiceResponseStatus {
 	
-	public final static WebServiceResponseStatus OK = new WebServiceResponseStatus(200, "OK");
-	public final static WebServiceResponseStatus SERVICE_NOT_FOUND = new WebServiceResponseStatus(404, "SERVICE_NOT_FOUND");
-	public final static WebServiceResponseStatus NO_CONTENT = new WebServiceResponseStatus(204, "NO_CONTENT");
-	public final static WebServiceResponseStatus UNKNOWN_ERR = new WebServiceResponseStatus(-1, "UNKNOWN_ERR");
+	public final static WebServiceResponseStatus OK = new WebServiceResponseStatus(HttpStatus.OK);
+	public final static WebServiceResponseStatus RESOURCE_NOT_FOUND = new WebServiceResponseStatus(HttpStatus.NOT_FOUND);
+	public final static WebServiceResponseStatus NO_CONTENT = new WebServiceResponseStatus(HttpStatus.NO_CONTENT);
+	public final static WebServiceResponseStatus UNKNOWN_ERROR = new WebServiceResponseStatus(-1, "Unknown Error");
 	
 	private Integer statusCode;
 	private String statusInfo;
@@ -14,6 +16,11 @@ public class WebServiceResponseStatus {
 		this.statusCode=statusCode;
 		this.statusInfo=statusInfo;
 	}
+	
+	private WebServiceResponseStatus(HttpStatus httpStatus){
+        this.statusCode=httpStatus.value();
+        this.statusInfo=httpStatus.getReasonPhrase();
+    }
 
 	public Integer getStatusCode() {
 		return statusCode;
