@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 @Configuration
 @ImportResource({"classpath*:beans.xml","classpath:springSecurity.xml"})
@@ -31,6 +33,12 @@ public class RootContextConfiguration {
                 "classpath:org/springframework/security/messages"
         );
         return messageSource;
+    }
+    
+    @Bean
+    public MultipartResolver multipartResolver()
+    {
+        return new StandardServletMultipartResolver();
     }
     
 }

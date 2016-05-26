@@ -24,7 +24,7 @@ public abstract class UUIDEntity<T extends UUIDEntity<?>> implements BaseEntity<
 
     @Id
     @Column(name="ID")
-    @GenericGenerator(name="systemUUID",strategy="uuid")
+    @GenericGenerator(name="systemUUID",strategy="uuid2")
     @GeneratedValue(generator="systemUUID")
     private String id;
     

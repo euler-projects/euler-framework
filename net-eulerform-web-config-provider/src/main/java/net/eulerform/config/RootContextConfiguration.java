@@ -40,5 +40,5 @@ public class RootContextConfiguration {
     public MultipartResolver multipartResolver()
     {
         return new StandardServletMultipartResolver();
-    }    
+    }
 }
