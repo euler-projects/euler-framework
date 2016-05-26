@@ -1,0 +1,183 @@
+@CHARSET "UTF-8";
+
+/*标题栏样式_BEGIN*/
+header > a, header > * a,
+#header > a, #header > * a {
+    color: #ffffff;
+}
+header, #header {
+    height: 32px;
+    width: 100%;
+    min-width: 800px;
+    background-color: black;
+    background-color: rgba(0%, 0%, 0%, 0.9);
+    position:fixed;
+    z-index:9999999;
+}
+
+/*header:hover, #header:hover{
+    background-color: black;
+}*/
+/*标题栏样式_END*/
+
+/*====================================================================================*/
+
+/**/
+#siteName {
+    height: 32px;
+    line-height: 32px;
+    color: #fff;
+    font-size: 24px;
+    position:absolute;
+    left:3px;
+}
+
+.euler-formula {
+    height: 32px;
+    width:96px;
+    background-image:url(../images/Euler-Formula.png);
+    background-repeat:no-repeat;
+    background-size:contain;
+}
+
+nav, #nav {
+    height: 32px;
+    line-height: 32px;
+    color: #fff;
+    font-size: 12px;
+    position:absolute;
+    left:213px;
+}
+
+#sFms {
+    height: 32px;
+    /*line-height: 32px;
+    color: #fff;
+    font-size: 12px;*/
+    position:absolute;
+    right:116px;
+    
+    width: 264px;
+}
+
+#userInfo {
+    height: 32px;
+    line-height: 32px;
+    color: #fff;
+    font-size: 12px;
+    position:absolute;
+    right:3px;
+    
+    width: 110px;
+    text-align: center;
+    
+    -moz-user-select:none;/*火狐*/
+    -webkit-user-select:none;/*webkit浏览器*/
+    -ms-user-select:none;/*IE10*/
+    -khtml-user-select:none;/*早期浏览器*/
+    user-select:none;
+}
+/**/
+
+/*====================================================================================*/
+
+/**/
+#searchForm {
+    position:absolute;
+    top:50%;
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+}
+
+#sFms > form > #sboxs {
+    border: 1px solid  #3385ff;
+    background-color: #ffffff;
+    height: 20px;
+    width: 200px;
+    line-height: 20px;
+    vertical-align:middle;
+    overflow: hidden;
+    display: inline-block;
+}
+
+#sFms > form > #sbtns {
+    border: 0px solid  #3385ff;
+    background-color: #ffffff;
+    height: 22px;
+    width: 60px;
+    line-height: 20px;
+    vertical-align:middle;
+    overflow: hidden;
+    display: inline-block;
+}
+
+#sFms > form > #sboxs > .searchBox {
+    width: 192px;
+    padding-left: 3px;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: #666666;
+    display: inline-block;
+    text-align: left;
+}
+
+#sFms > form > #sbtns > .searchBtn {
+      width: 60px;
+      height: 22px;
+      border:0;
+      padding:0;
+      color: white;
+      background: #3385ff;
+      cursor: pointer;
+      /*IOS下按钮处理*/
+      -webkit-appearance: none;
+      -webkit-border-radius: 0;
+      border-radius: 0;
+      /*IOS下按钮处理_END*/
+}
+
+#sFms > form > #sbtns > .searchBtn:hover {
+    background: #317ef3;
+}
+/**/
+
+/*====================================================================================*/
+
+.img_triangle {
+    position:absolute;
+    top:50%;
+    transform: translateY(-40%) rotate(0deg);
+    -webkit-transform: translateY(-40%) rotate(0deg);
+    background-image: url(../images/triangle.png);
+    background-size:10px 8px;
+    width:10px;
+    height:8px;
+    line-height:10px;
+    font-size:10px;
+    display:inline-block;
+}
+
+#userInfo> li > ul {
+    margin:0;
+    padding:0 10px 0 10px;
+    background-color:rgba(10%, 10%, 10%, 0.7);
+    display:none;
+}
+
+#userInfo > li > ul{
+    
+}
+
+#userInfo > * .child_li{
+    border-bottom: 1px solid #aaa;
+}
+
+.last_child_li{
+    border:none;
+}
+
+#userInfo > li, #userInfo > * li {
+    text-align:center;
+    list-style-type:none;
+}

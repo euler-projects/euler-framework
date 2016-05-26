@@ -9,11 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import net.eulerform.web.core.util.SecurityContextTool;
+import net.eulerform.web.core.util.UserContext;
 
 import org.apache.logging.log4j.ThreadContext;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 public class PostLoggingFilter implements Filter {
     
@@ -27,11 +25,8 @@ public class PostLoggingFilter implements Filter {
     public void doFilter(ServletRequest paramServletRequest,
             ServletResponse paramServletResponse, FilterChain paramFilterChain)
             throws IOException, ServletException {
-        SecurityContext context = SecurityContextHolder.getContext();
-        if(context != null && context.getAuthentication() != null){
-            ThreadContext.put("username", context.getAuthentication().getName());
-            paramServletRequest.setAttribute("user", SecurityContextTool.getCurrentUser());
-        }
+            paramServletRequest.setAttribute("user", UserContext.getCurrentUser());
+            ThreadContext.put("username", UserContext.getCurrentUser().getUsername());
         paramFilterChain.doFilter(paramServletRequest, paramServletResponse);
     }
 
