@@ -125,7 +125,7 @@
     
     <beans:beans profile="rest-security-basic">    
         <http pattern="${rest.rooturl}/**" use-expressions="true" create-session="stateless">    
-            <intercept-url pattern="${rest.rooturl}/**" access="permitAll"/>
+            <intercept-url pattern="${rest.rooturl}/**" access="isFullyAuthenticated()"/>
             <http-basic />
             <csrf disabled="true"/>
         </http>
