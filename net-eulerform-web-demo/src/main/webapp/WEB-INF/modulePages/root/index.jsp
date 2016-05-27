@@ -8,8 +8,8 @@
 <div id="progress"
     style="margin-top: -1px; padding: 10px;">
     <p>This site is being built...</p>
-    ${user.username}<br>
-    ${user.password}<br>
+    ${currentUser.username}<br>
+    ${currentUser.password}<br>
 </div>
 
 <%@ include file="/WEB-INF/commonPages/footer.jsp"%>
