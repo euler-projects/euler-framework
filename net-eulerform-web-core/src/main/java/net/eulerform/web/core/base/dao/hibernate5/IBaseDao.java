@@ -21,6 +21,10 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     void delete(T entity);
     
     void delete(Serializable id);
+
+    void deleteAll(Collection<T> entities);
+
+    void delete(Collection<Serializable> ids);
     
     List<T> findBy(T entity);
     
