@@ -56,7 +56,7 @@
 	        </authentication-provider>
 	    </authentication-manager>
 	    
-	    <beans:bean id="oauthUserApprovalHandler"
+	    <beans:bean id="oauth2UserApprovalHandler"
 	                class="org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler" >
 	        <beans:property name="tokenStore" ref="tokenStore" />
 	        <beans:property name="clientDetailsService" ref="clientDetailsService" />
@@ -73,7 +73,7 @@
 	    <oauth2:authorization-server 
 	                 token-services-ref="tokenServices"
 	                 client-details-service-ref="clientDetailsService"
-	                 user-approval-handler-ref="oauthUserApprovalHandler"
+	                 user-approval-handler-ref="oauth2UserApprovalHandler"
 	                 user-approval-page="oauth/authorize"
 	                 error-page="oauth/error" >
 	        <oauth2:authorization-code />        

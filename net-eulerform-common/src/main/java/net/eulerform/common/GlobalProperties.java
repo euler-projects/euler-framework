@@ -3,15 +3,16 @@ package net.eulerform.common;
 import java.io.IOException;
 
 public class GlobalProperties {
+	
+	private final static String CONFIG_FILE = "config.properties";
 
     private static PropertyReader reader;
     
     static{
-        final String configFileName = "config.properties";
         try {
-            reader = new PropertyReader(configFileName);
+            reader = new PropertyReader(CONFIG_FILE);
         } catch (IOException e) {
-            throw new RuntimeException("配置文件classpath:"+configFileName+"不存在",e);
+            throw new GlobalPropertyReadException("配置文件classpath:"+CONFIG_FILE+"不存在",e);
         }
     }
     
@@ -19,7 +20,7 @@ public class GlobalProperties {
         try {
             return (String) reader.getProperty(property);
         } catch (NullValueException e) {
-            throw new RuntimeException(e);
+            throw new GlobalPropertyReadException(e);
         }
     }
 }
