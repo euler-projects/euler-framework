@@ -7,6 +7,6 @@ import net.eulerform.web.core.base.service.IBaseService;
 
 public abstract class BaseService implements IBaseService {
     
-    protected final Logger log = LogManager.getLogger();
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
 }

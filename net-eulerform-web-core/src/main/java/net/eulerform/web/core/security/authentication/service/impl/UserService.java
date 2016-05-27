@@ -40,13 +40,10 @@ public class UserService extends BaseService implements IUserService, UserDetail
     }
 
     @Override
-    public List<User> findAllUsers(boolean loadRoles) {
+    public List<User> findAllUsers() {
         List<User> result = this.userDao.findAll();
         if(result != null){
             for(User user : result){
-                if(loadRoles) {
-                    user.getAuthorities().size();
-                }
                 user.eraseCredentials();
             }
         }

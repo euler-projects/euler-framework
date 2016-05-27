@@ -3,13 +3,13 @@ package net.eulerform.web.module.demo.controller;
 import javax.annotation.Resource;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.base.controller.rest.BaseRest;
+import net.eulerform.web.core.base.controller.BaseRest;
 import net.eulerform.web.core.base.entity.WebServiceResponse;
-import net.eulerform.web.core.base.entity.WebServiceResponseStatus;
 import net.eulerform.web.module.demo.entity.Blog;
 import net.eulerform.web.module.demo.service.IBlogService;
 
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,7 +28,7 @@ public class BlogRestEndpoint extends BaseRest {
     public WebServiceResponse<Blog> findAllBlogs() {
     	WebServiceResponse<Blog> wsResponse = new WebServiceResponse<Blog>();
     	wsResponse.setData(this.blogService.findAllBlogs());
-    	wsResponse.setStatus(WebServiceResponseStatus.OK);
+    	wsResponse.setStatus(HttpStatus.OK);
         return wsResponse;
     }
 
@@ -37,7 +37,7 @@ public class BlogRestEndpoint extends BaseRest {
     public WebServiceResponse<Blog> findBlog(@PathVariable("id") long id) {
     	WebServiceResponse<Blog> wsResponse = new WebServiceResponse<Blog>();
     	wsResponse.setData(this.blogService.find(id));
-    	wsResponse.setStatus(WebServiceResponseStatus.OK);
+    	wsResponse.setStatus(HttpStatus.OK);
         return wsResponse;
     }
 
@@ -46,7 +46,7 @@ public class BlogRestEndpoint extends BaseRest {
     public WebServiceResponse<Blog> findBlogByName(@PathVariable("name") String name) {
         WebServiceResponse<Blog> wsResponse = new WebServiceResponse<Blog>();
         wsResponse.setData(this.blogService.findBlogByName(name));
-        wsResponse.setStatus(WebServiceResponseStatus.OK);
+        wsResponse.setStatus(HttpStatus.OK);
         return wsResponse;
     }
     
