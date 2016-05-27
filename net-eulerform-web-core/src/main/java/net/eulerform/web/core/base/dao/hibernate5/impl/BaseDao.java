@@ -99,8 +99,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void delete(Serializable id) {
-        this.getSessionFactory().getCurrentSession().createQuery("delete " + this.entityClass.getSimpleName() + " en where en.id = ?0").setParameter(0, id)
-                .executeUpdate();
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("delete ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en where en.id = ?0");
+        final String hql = hqlBuffer.toString();
+        this.update(hql, id);
     }
 
     @Override
@@ -117,9 +121,23 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void delete(Collection<Serializable> ids) {
-        for(Serializable id : ids){
-            this.delete(id);
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("delete ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en where ");
+        Serializable[] idArray = ids.toArray(new Serializable[0]);
+        for(int i=0;i<idArray.length;i++) {
+            if(i==0) {
+                hqlBuffer.append("en.id= '");
+            } else {
+                hqlBuffer.append(" or en.id= '");
+            }
+            hqlBuffer.append(idArray[i]);
+            hqlBuffer.append("'");
         }
+        final String hql = hqlBuffer.toString();
+        System.out.println(hql);
+        this.update(hql);
     }
 
     @Override
@@ -134,8 +152,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public List<T> findAll() {
-        List<T> result = this.findBy("select en from " + this.entityClass.getSimpleName() + " en");
-        evict(result);
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select en from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en");
+        final String hql = hqlBuffer.toString();
+        List<T> result = this.findBy(hql);
         return result;
     }
 
@@ -178,7 +200,11 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public long findCount() {
-        List<?> l = this.findBy("select count(*) from " + this.entityClass.getSimpleName());
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select count(*) from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        final String hql = hqlBuffer.toString();
+        List<?> l = this.findBy(hql);
 
         if (l != null && l.size() == 1)
             return (Long) l.get(0);

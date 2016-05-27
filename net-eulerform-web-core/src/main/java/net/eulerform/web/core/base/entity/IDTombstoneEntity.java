@@ -26,7 +26,7 @@ public abstract class IDTombstoneEntity<T extends IDTombstoneEntity<?>> extends 
     @Column(name="MODIFY_DATE")
     private Date modifyDate;
     @Column(name="IF_DEL")
-    private boolean ifDel;
+    private Boolean ifDel;
 
     @Override
     public String getCreateBy() {
@@ -69,12 +69,12 @@ public abstract class IDTombstoneEntity<T extends IDTombstoneEntity<?>> extends 
     }
 
     @Override
-    public boolean getIfDel() {
+    public Boolean getIfDel() {
         return ifDel;
     }
 
     @Override
-    public void setIfDel(boolean ifDel) {
+    public void setIfDel(Boolean ifDel) {
         this.ifDel = ifDel;
     }
 }

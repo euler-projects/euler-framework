@@ -3,10 +3,8 @@ package net.eulerform.web.core.base.dao.hibernate5.impl;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
 
 import net.eulerform.web.core.base.dao.hibernate5.IBaseTombstoneDao;
 import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
@@ -63,6 +61,39 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
         T entity = this.load(id);
         this.delete(entity);
     }
+
+    @Override
+    public void deleteAll(Collection<T> entities) {
+        if(entities == null || entities.isEmpty()) return;
+        
+        Collection<Serializable> idList = new HashSet<>();
+        for(T entity : entities){
+            idList.add(entity.getId());
+        }
+        
+        this.delete(idList);
+    }
+
+    @Override
+    public void delete(Collection<Serializable> ids) {
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("update ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en set en.ifDel = true where ");
+        Serializable[] idArray = ids.toArray(new Serializable[0]);
+        for(int i=0;i<idArray.length;i++) {
+            if(i==0) {
+                hqlBuffer.append("en.id= '");
+            } else {
+                hqlBuffer.append(" or en.id= '");
+            }
+            hqlBuffer.append(idArray[i]);
+            hqlBuffer.append("'");
+        }
+        final String hql = hqlBuffer.toString();
+        System.out.println(hql);
+        this.update(hql);
+    }
     
     @Override
     public void deletePhysical(T entity) {
@@ -75,6 +106,16 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
     }
 
     @Override
+    public void deletePhysicalAll(Collection<T> entities){
+        super.deleteAll(entities);
+    }
+
+    @Override
+    public void deletePhysical(Collection<Serializable> ids){
+        super.delete(ids);
+    }
+
+    @Override
     public List<T> findBy(T entity) {        
         entity.setIfDel(false);
         return super.findBy(entity);
@@ -82,22 +123,34 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
 
     @Override
     public List<T> findAll() {
-        return super.findBy("select en from "+ this.entityClass.getSimpleName() + " en where en.ifDel = false");
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select en from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en where en.ifDel = false");
+        final String hql = hqlBuffer.toString();
+        return super.findBy(hql);
     }
-
-    protected List<T> findBy(DetachedCriteria detachedCriteria) {
-        detachedCriteria.add(Restrictions.eq("ifDel", false));
-        return super.findBy(detachedCriteria);
-    }
-
-    protected List<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
-        detachedCriteria.add(Restrictions.eq("ifDel", false));
-        return super.findPageBy(detachedCriteria, pageIndex, pageSize);
-    }
+    
+//    @Override
+//    protected List<T> findBy(DetachedCriteria detachedCriteria) {
+//        detachedCriteria.add(Restrictions.eq("ifDel", false));
+//        return super.findBy(detachedCriteria);
+//    }
+//    
+//    @Override
+//    protected List<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+//        detachedCriteria.add(Restrictions.eq("ifDel", false));
+//        return super.findPageBy(detachedCriteria, pageIndex, pageSize);
+//    }
 
     @Override
     public long findCount() {
-        List<?> l = super.findBy("select count(*) from "+ this.entityClass.getSimpleName() + "en where en.ifDel = 0");
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select count(*) from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en where en.ifDel = false");
+        final String hql = hqlBuffer.toString();
+        List<?> l = super.findBy(hql);
 
         if(l!=null && l.size() == 1)
             return (Long)l.get(0);
