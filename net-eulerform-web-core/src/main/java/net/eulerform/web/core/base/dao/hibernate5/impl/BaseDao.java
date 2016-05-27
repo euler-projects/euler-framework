@@ -2,6 +2,7 @@ package net.eulerform.web.core.base.dao.hibernate5.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import net.eulerform.common.Generic;
@@ -84,6 +85,8 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void saveOrUpdate(Collection<T> entities) {
+        if(entities == null || entities.isEmpty()) return;
+        
         for (T entity : entities) {
             this.saveOrUpdate(entity);
         }
@@ -98,6 +101,25 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     public void delete(Serializable id) {
         this.getSessionFactory().getCurrentSession().createQuery("delete " + this.entityClass.getSimpleName() + " en where en.id = ?0").setParameter(0, id)
                 .executeUpdate();
+    }
+
+    @Override
+    public void deleteAll(Collection<T> entities) {
+        if(entities == null || entities.isEmpty()) return;
+        
+        Collection<Serializable> idList = new HashSet<>();
+        for(T entity : entities){
+            idList.add(entity.getId());
+        }
+        
+        this.delete(idList);
+    }
+
+    @Override
+    public void delete(Collection<Serializable> ids) {
+        for(Serializable id : ids){
+            this.delete(id);
+        }
     }
 
     @Override

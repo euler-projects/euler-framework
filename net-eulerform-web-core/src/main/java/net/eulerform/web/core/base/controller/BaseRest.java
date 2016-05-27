@@ -1,6 +1,7 @@
 package net.eulerform.web.core.base.controller;
 
 import net.eulerform.web.core.base.entity.WebServiceResponse;
+import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +13,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public abstract class BaseRest {
     
     protected final Logger logger = LogManager.getLogger(this.getClass());
+    
     /**  
-     * 用于在程序发生异常时统一返回错误信息 
+     * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({ResourceNotFoundException.class})   
+    public WebServiceResponse<String> resourceNotFoundException(ResourceNotFoundException e) {
+        return new WebServiceResponse<>(HttpStatus.NOT_FOUND);
+    }
+    
+    /**  
+     * 用于在程序发生{@link Exception}异常时统一返回错误信息 
      * @return  
      */  
     @ResponseBody
