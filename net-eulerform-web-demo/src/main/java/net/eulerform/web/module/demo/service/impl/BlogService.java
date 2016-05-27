@@ -21,6 +21,8 @@ public class BlogService extends BaseService implements IBlogService {
     public Blog createBlog() {
         Blog blog = new Blog();
         blog.setName("新ABC");
+//        List<Blog> blogs =  this.blogDao.findBy(blog);
+//        this.blogDao.deleteAll(blogs);
         this.blogDao.saveOrUpdate(blog);        
         return blog;
     }

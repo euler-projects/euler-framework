@@ -74,11 +74,11 @@ public interface BaseTombstoneEntity<T extends BaseTombstoneEntity<?>> extends B
      * 获取删除标记
      * @return
      */
-    public boolean getIfDel();
+    public Boolean getIfDel();
 
     /**
      * 设置删除标记
      * @param ifDel
      */
-    public void setIfDel(boolean ifDel);
+    public void setIfDel(Boolean ifDel);
 }
