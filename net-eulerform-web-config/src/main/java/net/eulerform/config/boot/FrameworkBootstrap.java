@@ -36,7 +36,14 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
     private static final String REST_SECURITY_BASIC_ENABLED = "basic";
     private static final String REST_SECURITY_BASIC = "rest-security-basic";
     private static final String REST_SECURITY_NONE_ENABLED = "none";
-    private static final String REST_SECURITY_NONE = "rest-security-none";
+    private static final String REST_SECURITY_NONE = "rest-security-none";    
+
+    private static final String OAUTH_AUTHORIZATION_SERVER_ENABLED = "oauth-authorization-server";
+    private static final String OAUTH_AUTHORIZATION_SERVER = "oauth-authorization-server";
+    private static final String OAUTH_RESOURCE_SERVER_ENABLED = "oauth-resource-server";
+    private static final String OAUTH_RESOURCE_SERVER = "oauth-resource-server";
+    private static final String OAUTH_SERVER_BOTH_ENABLED = "both";
+    private static final String OAUTH_SERVER_NONE_ENABLED = "none";
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
@@ -47,6 +54,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         
         String webAuthentication = GlobalProperties.get("web.authenticationType");
         String restAuthentication = GlobalProperties.get("rest.authenticationType");
+        String oauthSeverType = GlobalProperties.get("oauth.severType");
         
         ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
         
@@ -61,7 +69,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(WEB_SECURITY_NONE);break;
         default: 
             rootContext.close();
-            throw new WebInitException("不支持的WEB验证方式123: "+restAuthentication);   
+            throw new WebInitException("不支持的WEB验证方式: "+restAuthentication);   
         }
         
         switch(restAuthentication){
@@ -74,6 +82,25 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         default: 
             rootContext.close();
             throw new WebInitException("不支持的REST验证方式: "+restAuthentication);   
+        }
+        
+        switch(oauthSeverType){
+        case OAUTH_AUTHORIZATION_SERVER_ENABLED:
+            configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);break;
+        case OAUTH_RESOURCE_SERVER_ENABLED:
+            if(REST_SECURITY_OAUTH_ENABLED.equals(restAuthentication))
+                configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
+            break;
+        case OAUTH_SERVER_BOTH_ENABLED:
+            configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);
+            if(REST_SECURITY_OAUTH_ENABLED.equals(restAuthentication))
+                configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
+            break;
+        case OAUTH_SERVER_NONE_ENABLED:
+            break;
+        default: 
+            rootContext.close();
+            throw new WebInitException("不支持的OAUTH SERVER TYPE: "+restAuthentication);   
         }
         
         container.addListener(new ContextLoaderListener(rootContext));

@@ -15,3 +15,79 @@ http://localhost:7070/efb/oauth/authorize?client_id=8ad8852654ea8ec70154ea8ee893
 http://localhost:7070/cfrost-net/oauth/authorize?client_id=4028808154ddbefd0154ddbfaef60000&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fcfrost-net%2FgetToken.html
 
 $2a$10$bdTeNA55WSqrIOKlS39tEus2W9Bmic3o409c0rWCqdgoQCP5/3DGO
+
+
+grant_type
+authorization_code password refresh_token
+
+
+        <!-- ************************************************** -->
+        <!-- Method Authorization                               -->
+        <!-- ************************************************** -->
+        <bean class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor" id="methodSecurityInterceptor">
+            <property name="accessDecisionManager" ref="methodAccessDecisionManager"/>
+            <property name="authenticationManager" ref="customAuthenticationManager"/>
+            <property name="securityMetadataSource" ref="delegatingMetadataSource"/>
+            <property name="afterInvocationManager" ref="afterInvocationManager"/>
+        </bean>
+        <bean class="org.springframework.security.access.intercept.aopalliance.MethodSecurityMetadataSourceAdvisor" id="methodSecurityMetadataSourceAdvisor">
+            <constructor-arg value="methodSecurityInterceptor"/>
+            <constructor-arg ref="delegatingMetadataSource"/>
+        </bean>
+        <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" id="defaultAdvisorAutoProxyCreator">
+            <property name="beanName" value="methodSecurityMetadataSourceAdvisor"/>
+        </bean>
+        <bean class="org.springframework.security.access.intercept.AfterInvocationProviderManager" id="afterInvocationManager">
+            <property name="providers">
+                <list>
+                     <ref local="postAdviceProvider"/>
+                </list>
+            </property>
+        </bean>
+        <bean class="org.springframework.security.access.vote.AffirmativeBased" id="methodAccessDecisionManager">
+            <property name="decisionVoters">
+                <list>
+                    <ref bean="preAdviceVoter"/>
+                    <ref bean="roleVoter"/>
+                    <ref bean="authenticatedVoter"/>
+                    <ref bean="jsr250Voter"/> <!-- For JSR 250 Method Annotations-->
+                </list>
+            </property>
+        </bean>
+        <!-- Overall Delegating Metadata Source -->
+        <bean class="org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource" id="delegatingMetadataSource">
+            <property name="methodSecurityMetadataSources">
+                <list>
+                    <ref local="prePostMetadataSource"/>
+                    <ref local="securedMetadataSource"/>
+                    <ref local="jsr250MetadataSource"/>
+                </list>
+            </property>
+        </bean>
+        <!-- JSR 250 Method Voters -->
+        <bean class="org.springframework.security.access.annotation.Jsr250MethodSecurityMetadataSource" id="jsr250MetadataSource"/>
+        <bean class="org.springframework.security.access.annotation.Jsr250Voter" id="jsr250Voter"/>
+        <!-- Spring @Secured Beans -->
+        <bean class="org.springframework.security.access.annotation.SecuredAnnotationSecurityMetadataSource" id="securedMetadataSource"/>
+        
+        <!-- @Pre/@Post Method Advice Voters -->
+        <bean id="preAdviceVoter" class="org.springframework.security.access.prepost.PreInvocationAuthorizationAdviceVoter">
+            <constructor-arg ref="exprPreInvocationAdvice"/>
+        </bean>
+        <bean id="postAdviceProvider" class="org.springframework.security.access.prepost.PostInvocationAdviceProvider">
+            <constructor-arg ref="exprPostInvocationAdvice"/>
+        </bean>
+        <bean id="prePostMetadataSource" class="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource">
+            <constructor-arg ref="exprAnnotationAttrFactory"/>
+        </bean>
+        <!-- @Pre/@Post Method Expression Handler -->
+        <bean id="methodExprHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler"/>
+        <bean id="exprPreInvocationAdvice" class="org.springframework.security.access.expression.method.ExpressionBasedPreInvocationAdvice">
+            <property name="expressionHandler" ref="methodExprHandler"/>
+        </bean>
+        <bean id="exprPostInvocationAdvice" class="org.springframework.security.access.expression.method.ExpressionBasedPostInvocationAdvice">
+            <constructor-arg ref="methodExprHandler"/>
+        </bean>
+        <bean id="exprAnnotationAttrFactory"> class="org.springframework.security.access.expression.method.ExpressionBasedAnnotationAttributeFactory"
+            <constructor-arg ref="methodExprHandler"/>
+        </bean>
