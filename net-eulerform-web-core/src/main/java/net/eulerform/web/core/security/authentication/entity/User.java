@@ -1,5 +1,7 @@
 package net.eulerform.web.core.security.authentication.entity;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -14,6 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import net.eulerform.web.core.base.entity.UUIDEntity;
 
 import org.springframework.security.core.CredentialsContainer;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @SuppressWarnings("serial")
@@ -98,6 +101,30 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     @Override
     public void eraseCredentials() {
         this.password = null;
+    }
+    
+    public User loadDataFromOtherUserDetails(UserDetails userDetails) {
+    	User result = new User();
+    	result.setId(userDetails.getUsername());
+    	result.setUsername(userDetails.getUsername());
+    	Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+    	if(authorities == null){
+        	result.setAuthorities(null);    		
+    	} else {
+        	Set<Authority> tmpAuthorities = new HashSet<>();
+    		for(GrantedAuthority authority : authorities){
+    			Authority tmpAuthority = new Authority();
+    			tmpAuthority.setAuthority(authority.getAuthority());
+    			tmpAuthority.setDescription(authority.getAuthority());
+    			tmpAuthorities.add(tmpAuthority);
+    		}
+        	result.setAuthorities(tmpAuthorities); 
+    	}
+    	result.setAccountNonExpired(userDetails.isAccountNonExpired());
+    	result.setAccountNonLocked(userDetails.isAccountNonLocked());
+    	result.setEnabled(userDetails.isEnabled());
+    	result.setCredentialsNonExpired(userDetails.isCredentialsNonExpired());
+    	return result;
     }
 
 }

@@ -12,23 +12,10 @@
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
-
-    <bean id="log" class="net.eulerform.web.core.util.Log">
-        <property name="logService" ref="logService"/>
-    </bean>
     
-    <bean id="userContext" class="net.eulerform.web.core.util.UserContext">
+    <bean id="userContext" class="net.eulerform.web.core.security.authentication.util.UserContext">
         <property name="userDetailsService" ref="userDetailsService"/>
-    </bean>
-
-    <bean id="logService" class="net.eulerform.web.core.log.service.impl.LogService">
-        <property name="accessLogDao" ref="accessLogDao"/>
-    </bean>
-    
-    <bean id="accessLogDao" class="net.eulerform.web.core.log.dao.impl.AccessLogDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    
+    </bean>    
     
     <bean id="userDao" class="net.eulerform.web.core.security.authentication.dao.impl.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>

@@ -43,7 +43,6 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 
 import net.eulerform.web.core.security.authentication.entity.Authority;
 import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
-import net.eulerform.web.core.security.authentication.provider.UsernamePasswordAuthenticationProvider;
 import net.eulerform.web.core.security.authentication.service.IAuthorityService;
 
 @Configuration
@@ -140,7 +139,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         }
         if(LOCAL.equalsIgnoreCase(this.springSecurityAuthenticationProvider)) {
             auth.userDetailsService(this.userDetailsService).passwordEncoder(this.passwordEncoder).and().eraseCredentials(true);
-            //auth.authenticationProvider(this.usernamePasswordAuthenticationProvider());
             this.log.info("SPRING SECURITY CONFIG: USE LOCAL USER DATABASE");
             return;
         }
@@ -148,16 +146,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
     
     //=======LOCAL_USER_DATABASE======
-    private AuthenticationProvider usernamePasswordAuthenticationProvider;
-    public AuthenticationProvider usernamePasswordAuthenticationProvider(){
-        if(this.usernamePasswordAuthenticationProvider != null) return this.usernamePasswordAuthenticationProvider;
-        
-        UsernamePasswordAuthenticationProvider usernamePasswordAuthenticationProvider = new UsernamePasswordAuthenticationProvider();
-        usernamePasswordAuthenticationProvider.setPasswordEncoder(this.passwordEncoder);
-        usernamePasswordAuthenticationProvider.setUserDetailsService(this.userDetailsService);
-        
-        return usernamePasswordAuthenticationProvider;
-    }
     
     //=======LDAP======
     @Value("${ldap.url}")
