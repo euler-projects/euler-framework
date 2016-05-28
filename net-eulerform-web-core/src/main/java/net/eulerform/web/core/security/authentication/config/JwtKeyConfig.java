@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("rest-security-oauth")
+@Profile({"rest-security-oauth","oauth-authorization-server","oauth-resource-server"})
 public class JwtKeyConfig {
 
 	private KeyPair keyPair;
