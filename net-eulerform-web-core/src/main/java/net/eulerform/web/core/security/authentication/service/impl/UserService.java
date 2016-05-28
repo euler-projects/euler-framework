@@ -6,6 +6,7 @@ import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.security.authentication.dao.IUserDao;
 import net.eulerform.web.core.security.authentication.entity.User;
 import net.eulerform.web.core.security.authentication.service.IUserService;
+import net.eulerform.web.core.security.authentication.util.UserContext;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -53,10 +54,12 @@ public class UserService extends BaseService implements IUserService, UserDetail
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = this.userDao.findUserByName(username);
-        if(user == null)
+        if(user == null) {
             throw new UsernameNotFoundException("User \"" + username + "\" not found.");
+        }
         
         user.getAuthorities().size();
+        UserContext.addUserDetailsToCache(user);
         
         return user;
     }

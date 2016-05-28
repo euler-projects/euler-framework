@@ -8,7 +8,7 @@ import java.util.List;
 
 import net.eulerform.web.core.base.dao.hibernate5.IBaseTombstoneDao;
 import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
-import net.eulerform.web.core.util.UserContext;
+import net.eulerform.web.core.security.authentication.util.UserContext;
 
 public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends BaseDao<T> implements IBaseTombstoneDao<T> {
 
@@ -176,7 +176,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             entity.setCreateBy(String.valueOf(currentUserId));
         entity.setModifyDate(date);
         entity.setModifyBy(String.valueOf(currentUserId));
-        if(entity.getIfDel() != true)
+        if(entity.getIfDel() == null)
             entity.setIfDel(false);
     }
 }
