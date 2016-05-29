@@ -24,7 +24,7 @@ public class GlobalProperties {
     public static String get(String property) {
         try {
         	String value = (String) reader.getProperty(property);
-        	logger.info("Load config: property = "+value);
+        	logger.info("Load config: " + property + "="+value);
             return value;
         } catch (NullValueException e) {
             throw new GlobalPropertyReadException(e);
