@@ -1,21 +1,18 @@
 package net.eulerform.web.core.base.cache;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import net.eulerform.web.core.base.entity.BaseEntity;
-
-public class EntityCache<T extends BaseEntity<?>> {
-    private Map<String, CacheStore<T>> dataMap = new HashMap<>();
+public class ObjectCache<T> {
+    private final ConcurrentHashMap<String, DataStore<T>> dataMap = new ConcurrentHashMap<>();
     
     private long dataLife;
     
-    public EntityCache(){
+    public ObjectCache(){
         this.dataLife = 0L;
     }
     
-    public EntityCache(long dataLife){
+    public ObjectCache(long dataLife){
         this.dataLife = dataLife;
     }
     
@@ -23,8 +20,8 @@ public class EntityCache<T extends BaseEntity<?>> {
         this.dataLife = milliseconds;
     }
     
-    public void put(String key, T entity){
-        this.dataMap.put(key, new CacheStore<T>(entity));
+    public void put(String key, T data){
+        this.dataMap.put(key, new DataStore<T>(data));
     }
     
     public void remove(String key){
@@ -32,12 +29,12 @@ public class EntityCache<T extends BaseEntity<?>> {
     }
     
     public T get(String key) {
-        CacheStore<T> cacheStore = this.dataMap.get(key);
+        DataStore<T> cacheStore = this.dataMap.get(key);
         
         if(cacheStore == null)
             return null;
         
-        if((new Date().getTime() - cacheStore.getAddDate().getTime()) >= this.dataLife) {
+        if((new Date().getTime() - cacheStore.getAddTime()) >= this.dataLife) {
             this.dataMap.remove(key);
             return null;
         }

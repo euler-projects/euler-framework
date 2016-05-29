@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
-import net.eulerform.web.core.base.cache.EntityCache;
+import net.eulerform.web.core.base.cache.ObjectCache;
 import net.eulerform.web.core.security.authentication.entity.User;
 
 public class UserContext {
@@ -22,7 +22,7 @@ public class UserContext {
 
     private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSeconds";
 
-    private final static EntityCache<User> USER_CACHE = new EntityCache<>(24 * 60 * 60 * 1000);
+    private final static ObjectCache<User> USER_CACHE = new ObjectCache<>(24 * 60 * 60 * 1000);
 
     static {
         try {
