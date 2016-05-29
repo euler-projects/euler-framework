@@ -88,13 +88,10 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         case OAUTH_AUTHORIZATION_SERVER_ENABLED:
             configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);break;
         case OAUTH_RESOURCE_SERVER_ENABLED:
-            if(REST_SECURITY_OAUTH_ENABLED.equals(restAuthentication))
-                configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
-            break;
+            configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);break;
         case OAUTH_SERVER_BOTH_ENABLED:
             configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);
-            if(REST_SECURITY_OAUTH_ENABLED.equals(restAuthentication))
-                configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
+            configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
             break;
         case OAUTH_SERVER_NONE_ENABLED:
             break;
