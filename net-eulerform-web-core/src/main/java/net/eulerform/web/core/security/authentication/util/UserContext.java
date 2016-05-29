@@ -1,9 +1,5 @@
 package net.eulerform.web.core.security.authentication.util;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,123 +9,72 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.web.core.base.cache.EntityCache;
 import net.eulerform.web.core.security.authentication.entity.User;
 
 public class UserContext {
 
-	private static UserDetailsService userDetailsService;
+    private static UserDetailsService userDetailsService;
 
-	public static void setUserDetailsService(UserDetailsService userDetailsService) {
-		UserContext.userDetailsService = userDetailsService;
-	}
+    public static void setUserDetailsService(UserDetailsService userDetailsService) {
+        UserContext.userDetailsService = userDetailsService;
+    }
 
-	private final static User ANONYMOUS_USER;
-	private final static String ANONYMOUS_USERNAME = "anonymousUser";
-	private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSecond";
+    private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSecond";
 
-	private final static Map<String, UserDetailsStore> USER_CACHE = new HashMap<>();
-	private static long cacheSecond = 24 * 60 * 60;
+    private final static EntityCache<User> USER_CACHE = new EntityCache<>(24 * 60 * 60 * 1000);
 
-	static {
-		ANONYMOUS_USER = new User();
-		ANONYMOUS_USER.setId(ANONYMOUS_USERNAME);
-		ANONYMOUS_USER.setUsername(ANONYMOUS_USERNAME);
-		ANONYMOUS_USER.setAuthorities(null);
-		ANONYMOUS_USER.setAccountNonExpired(false);
-		ANONYMOUS_USER.setAccountNonLocked(false);
-		ANONYMOUS_USER.setEnabled(false);
-		ANONYMOUS_USER.setCredentialsNonExpired(false);
-		try {
-			cacheSecond = Long.parseLong(GlobalProperties.get(USER_CONTEXT_CACHE_SECOND));
-		} catch (GlobalPropertyReadException e) {
-			// DO NOTHING
-		    LogManager.getLogger().info("Couldn't load "+USER_CONTEXT_CACHE_SECOND+" , use 86,400 for default.");
-		}
-	}
+    static {
+        try {
+            long cacheSecond = Long.parseLong(GlobalProperties.get(USER_CONTEXT_CACHE_SECOND));
+            USER_CACHE.setDataLife(cacheSecond * 1000);
+        } catch (GlobalPropertyReadException e) {
+            // DO NOTHING
+            LogManager.getLogger().info("Couldn't load " + USER_CONTEXT_CACHE_SECOND + " , use 86,400 for default.");
+        }
+    }
 
-	public static User getCurrentUser() {
-		UserDetails userDetails = getCurrentUserDetails();
+    public static User getCurrentUser() {
+        try {
+            SecurityContext context = SecurityContextHolder.getContext();
+            if (context != null && context.getAuthentication() != null) {
+                Object principal = context.getAuthentication().getPrincipal();
 
-		if (userDetails.getClass().isAssignableFrom(User.class)) {
-			return (User) userDetails;
-		}
+                if (principal.getClass().isAssignableFrom(User.class)) {
+                    User user = (User) principal;
+                    USER_CACHE.put(user.getUsername(), user);
+                    return user;
+                }
 
-		User result = new User();
-		result.loadDataFromOtherUserDetails(userDetails);
-		return result;
-	}
+                if (principal.getClass().isAssignableFrom(String.class)
+                        && (!User.ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
+                    String username = (String) principal;
+                    User user = USER_CACHE.get(username);
 
-	public static UserDetails getCurrentUserDetails() {
-		try {
-			SecurityContext context = SecurityContextHolder.getContext();
-			if (context != null && context.getAuthentication() != null) {
-				Object principal = context.getAuthentication().getPrincipal();
+                    if (user != null) {
+                        return user;
+                    }
 
-				if (principal.getClass().isAssignableFrom(User.class)) {
-					UserDetails user = (UserDetails) principal;
-					addUserDetailsToCache(user);
-					return user;
-				}
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
+                        ((CredentialsContainer) userDetails).eraseCredentials();
+                    }
 
-				if (principal.getClass().isAssignableFrom(String.class)
-						&& (!ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
-					String username = (String) principal;
-					UserDetails user = getUserDetailsFromCache(username);
-					if (user != null) {
-						return user;
-					}
-					user = userDetailsService.loadUserByUsername(username);
-					if (user.getClass().isAssignableFrom(CredentialsContainer.class)) {
-						((CredentialsContainer) user).eraseCredentials();
-					}
-					addUserDetailsToCache(user);
-					return user;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			// DO NOTHING
-		}
-		return ANONYMOUS_USER;
-	}
+                    if (userDetails.getClass().isAssignableFrom(User.class)) {
+                        user = (User) userDetails;
+                    } else {
+                        user = new User();
+                        user.loadDataFromOtherUserDetails(userDetails);
+                    }
 
-	public static void addUserDetailsToCache(UserDetails userDeatils) {
-		USER_CACHE.put(userDeatils.getUsername(), new UserDetailsStore(userDeatils));
-	}
+                    USER_CACHE.put(user.getUsername(), user);
 
-	public static void removeUserDetailsFromCache(String username) {
-		USER_CACHE.remove(username);
-	}
-
-	public static UserDetails getUserDetailsFromCache(String username) {
-		UserDetailsStore userStore = USER_CACHE.get(username);
-		if(userStore == null)
-			return null;
-		
-		Date now = new Date();
-		if ((now.getTime() - userStore.getAddDate().getTime()) > (cacheSecond * 1000)) {
-			removeUserDetailsFromCache(username);
-			return null;
-		}
-
-		return userStore.getUserDetails();
-	}
-
-	private static class UserDetailsStore {
-		private UserDetails userDetails;
-		private Date addDate;
-
-		private UserDetailsStore(UserDetails userDetails) {
-			this.userDetails = userDetails;
-			this.addDate = new Date();
-		}
-
-		private UserDetails getUserDetails() {
-			return userDetails;
-		}
-
-		private Date getAddDate() {
-			return addDate;
-		}
-	}
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            // DO NOTHING
+        }
+        return User.ANONYMOUS_USER;
+    }
 }

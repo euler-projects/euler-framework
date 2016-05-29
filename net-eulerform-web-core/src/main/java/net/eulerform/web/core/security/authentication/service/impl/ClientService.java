@@ -1,11 +1,13 @@
 package net.eulerform.web.core.security.authentication.service.impl;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import net.eulerform.web.core.base.entity.CacheStore;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+
+import net.eulerform.web.core.base.cache.EntityCache;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.security.authentication.dao.IClientDao;
 import net.eulerform.web.core.security.authentication.dao.IGrantTypeDao;
@@ -17,11 +19,6 @@ import net.eulerform.web.core.security.authentication.entity.Resource;
 import net.eulerform.web.core.security.authentication.entity.Scope;
 import net.eulerform.web.core.security.authentication.service.IClientService;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.ClientRegistrationException;
-
 public class ClientService extends BaseService implements IClientService, ClientDetailsService {
 
     private IClientDao clientDao;
@@ -30,8 +27,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IGrantTypeDao grantTypeDao;
     
     private boolean cacheEnabled = false;
-    private Map<String, CacheStore<Client>> clientCache = new HashMap<>();
-    private long cacheMilliseconds = 60000;
+    private EntityCache<Client> clientCache = new EntityCache<>(60L);
 
     private PasswordEncoder passwordEncoder;
 
@@ -41,7 +37,7 @@ public class ClientService extends BaseService implements IClientService, Client
 
     public void setCacheSeconds(long cacheSecond) {
         if(cacheSecond < 60){
-            this.cacheMilliseconds = cacheSecond * 1000;            
+            this.clientCache.setDataLife(cacheSecond * 1000);            
         }
     }
 
@@ -69,13 +65,9 @@ public class ClientService extends BaseService implements IClientService, Client
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
 
         if(cacheEnabled) {
-            CacheStore<Client> cacheStore = this.clientCache.get(clientId);
-            if(cacheStore != null) {
-                if((new Date().getTime() - cacheStore.getAddDate().getTime()) < this.cacheMilliseconds){
-                    return cacheStore.getData();
-                } else {
-                    this.clientCache.remove(clientId);
-                }
+            Client cachedClient = this.clientCache.get(clientId);
+            if(cachedClient != null) {
+                return cachedClient;
             }
         }
         
@@ -84,7 +76,7 @@ public class ClientService extends BaseService implements IClientService, Client
             throw new ClientRegistrationException("Client \"" + clientId + "\" not found");
         
         if(cacheEnabled) {
-            this.clientCache.put(clientId, new CacheStore<Client>(client));
+            this.clientCache.put(clientId, client);
         }
         
         return client;
