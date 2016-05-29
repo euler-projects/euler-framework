@@ -42,8 +42,6 @@
     <bean id="userService" name="userDetailsService" class="net.eulerform.web.core.security.authentication.service.impl.UserService">
         <property name="userDao" ref="userDao"/>
         <property name="passwordEncoder" ref="passwordEncoder"/>
-        <property name="cacheEnabled" value="${userCache.enabled}"/>
-        <property name="cacheSeconds" value="${userCache.cacheSeconds}"/>
     </bean>
     
     <bean id="clientService" name="clientDetailsService" class="net.eulerform.web.core.security.authentication.service.impl.ClientService">
@@ -52,8 +50,8 @@
         <property name="scopeDao" ref="scopeDao"/>
         <property name="grantTypeDao" ref="grantTypeDao"/>
         <property name="passwordEncoder" ref="passwordEncoder"/>
-        <property name="cacheEnabled" value="${clientCache.enabled}"/>
-        <property name="cacheSeconds" value="${clientCache.cacheSeconds}"/>
+        <property name="cacheEnabled" value="${clientDetailsServiceCache.enabled}"/>
+        <property name="cacheSeconds" value="${clientDetailsServiceCache.cacheSeconds}"/>
     </bean>
     
     <bean id="authorityService" class="net.eulerform.web.core.security.authentication.service.impl.AuthorityService">

@@ -27,7 +27,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IGrantTypeDao grantTypeDao;
     
     private boolean cacheEnabled = false;
-    private EntityCache<Client> clientCache = new EntityCache<>(60L);
+    private EntityCache<Client> clientCache = new EntityCache<>(60_000L);
 
     private PasswordEncoder passwordEncoder;
 
