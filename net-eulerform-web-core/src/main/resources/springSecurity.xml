@@ -77,7 +77,7 @@
                      user-approval-page="oauth/authorize"
                      error-page="oauth/error" >
             <oauth2:authorization-code />
-            <!--<oauth2:implicit />-->
+            <oauth2:implicit />
             <oauth2:refresh-token />
             <!--<oauth2:client-credentials />-->
             <oauth2:password />
@@ -99,7 +99,7 @@
         </http>
     </beans:beans>
 
-    <beans:beans profile="rest-security-oauth,oauth-resource-server">
+    <beans:beans profile="oauth-resource-server">
         <beans:bean id="oauth2ResourceServerJwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
             <beans:property name="verifierKey" ref="jwtVerifierKey"/>
         </beans:bean>
@@ -132,27 +132,14 @@
                     class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
 
         <oauth2:resource-server id="oauth2ResourceServerFilter" resource-id="${oauth.resourceId}" token-services-ref="oauth2ResourceServerTokenServices" />
+    </beans:beans>
 
-        <http pattern="${rest.rooturl}/**" use-expressions="false" create-session="stateless"
-              entry-point-ref="oauth2ResourceServerAuthenticationEntryPoint"
-              access-decision-manager-ref="oauth2ResourceServerAccessDecisionManager">
-
-            <intercept-url pattern="${rest.rooturl}/security/**" access="SCOPE_SECURITY"/>
-            <intercept-url pattern="${rest.rooturl}/demo/**" access="IS_AUTHENTICATED_FULLY"/>
-            <intercept-url pattern="${rest.rooturl}/**" access="DENY_OAUTH"/>
-
-            <custom-filter ref="oauth2ResourceServerFilter" before="PRE_AUTH_FILTER"/>
-            <access-denied-handler ref="oauth2ResourceServerAccessDeniedHandler"/>
-            <csrf disabled="true"/>
-        </http>
+    <beans:beans profile="rest-security-oauth">
+        <beans:import resource="rest-security-oauth-config.xml"/>
     </beans:beans>
 
     <beans:beans profile="rest-security-basic">
-        <http pattern="${rest.rooturl}/**" use-expressions="true" create-session="stateless">
-            <intercept-url pattern="${rest.rooturl}/**" access="isFullyAuthenticated()"/>
-            <http-basic />
-            <csrf disabled="true"/>
-        </http>
+        <beans:import resource="rest-security-basic-config.xml"/>
     </beans:beans>
 
     <beans:beans profile="rest-security-none">
@@ -163,34 +150,10 @@
         <http security="none" pattern="/**" />
     </beans:beans>
 
-    <beans:beans profile="web-security-local,web-security-ldap">
-        <http use-expressions="true">
-
-            <intercept-url pattern="/login" access="permitAll" />
-            <intercept-url pattern="/login/**" access="permitAll" />
-            <intercept-url pattern="/logout" access="permitAll" />
-            <intercept-url pattern="/oauth/**" access="isFullyAuthenticated()" />
-            <intercept-url pattern="/**" access="isFullyAuthenticated()" />
-            <form-login login-page="/login" login-processing-url="/login"
-                authentication-failure-url="/login?error"
-                default-target-url="/" username-parameter="username"
-                password-parameter="password" />
-            <logout logout-url="/logout" logout-success-url="/login?loggedOut"
-                invalidate-session="true" delete-cookies="JSESSIONID" />
-
-            <session-management invalid-session-url="/login"
-                session-fixation-protection="migrateSession">
-                <concurrency-control max-sessions="1"
-                    error-if-maximum-exceeded="false"
-                    session-registry-ref="sessionRegistry" />
-            </session-management>
-
-            <csrf disabled="true" />
-
-        </http>
-    </beans:beans>
-
     <beans:beans profile="web-security-local">
+    
+        <beans:import resource="web-security-local-config.xml"/>
+        
         <authentication-manager>
             <authentication-provider user-service-ref="userDetailsService">
                 <password-encoder ref="passwordEncoder" />
@@ -199,6 +162,9 @@
     </beans:beans>
 
     <beans:beans profile="web-security-ldap">
+    
+        <beans:import resource="web-security-ldap-config.xml"/>
+        
         <authentication-manager>
             <authentication-provider ref="ldapAuthenticationProvider" />
         </authentication-manager>
@@ -241,27 +207,8 @@
     </beans:beans>
 
     <beans:beans profile="web-security-cas">
-        <http use-expressions="true" auto-config="false" entry-point-ref="casEntryPoint" servlet-api-provision="true">
-            <intercept-url pattern="${cas.localSystemLoginUrl}" access="permitAll" />
-            <intercept-url pattern="/logout" access="permitAll" />
-            <intercept-url pattern="/**" access="isFullyAuthenticated()" />
-            <custom-filter position="CAS_FILTER" ref="casFilter"/>
-            <custom-filter before="CAS_FILTER" ref="singleLogoutFilter" />
-            <custom-filter before="LOGOUT_FILTER" ref="requestSingleLogoutFilter" />
-            <logout logout-url="/logout" logout-success-url="/login?loggedOut"
-                invalidate-session="true" delete-cookies="JSESSIONID" />
-            <!--logout logout-url="/logout"
-                invalidate-session="true" delete-cookies="JSESSIONID" success-handler-ref="casLogoutSuccessHandler" /-->
-
-            <session-management invalid-session-url="/login"
-                session-fixation-protection="migrateSession">
-                <concurrency-control max-sessions="1"
-                    error-if-maximum-exceeded="false" />
-            </session-management>
-
-            <csrf disabled="true" />
-
-        </http>
+    
+        <beans:import resource="web-security-cas-config.xml"/>
 
         <authentication-manager alias="authenticationManager">
             <authentication-provider ref="casAuthenticationProvider" />
