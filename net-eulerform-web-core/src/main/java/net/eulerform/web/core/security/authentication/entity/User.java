@@ -24,6 +24,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 @XmlRootElement
 @Table(name = "SYS_USER")
 public class User extends UUIDEntity<User> implements UserDetails, CredentialsContainer {
+    public final static User ANONYMOUS_USER;
+    public final static String ANONYMOUS_USERNAME = "anonymousUser";
+    
+    static {
+        ANONYMOUS_USER = new User();
+        ANONYMOUS_USER.setId(ANONYMOUS_USERNAME);
+        ANONYMOUS_USER.setUsername(ANONYMOUS_USERNAME);
+        ANONYMOUS_USER.setAuthorities(null);
+        ANONYMOUS_USER.setAccountNonExpired(false);
+        ANONYMOUS_USER.setAccountNonLocked(false);
+        ANONYMOUS_USER.setEnabled(false);
+        ANONYMOUS_USER.setCredentialsNonExpired(false);
+    }
 
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
