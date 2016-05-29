@@ -20,7 +20,7 @@ public class UserContext {
         UserContext.userDetailsService = userDetailsService;
     }
 
-    private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSecond";
+    private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSeconds";
 
     private final static EntityCache<User> USER_CACHE = new EntityCache<>(24 * 60 * 60 * 1000);
 
