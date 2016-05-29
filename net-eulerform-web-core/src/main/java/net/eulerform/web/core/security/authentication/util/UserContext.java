@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ public class UserContext {
 
 	private final static User ANONYMOUS_USER;
 	private final static String ANONYMOUS_USERNAME = "anonymousUser";
+	private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSecond";
 
 	private final static Map<String, UserDetailsStore> USER_CACHE = new HashMap<>();
 	private static long cacheSecond = 24 * 60 * 60;
@@ -38,9 +40,10 @@ public class UserContext {
 		ANONYMOUS_USER.setEnabled(false);
 		ANONYMOUS_USER.setCredentialsNonExpired(false);
 		try {
-			cacheSecond = Long.parseLong(GlobalProperties.get("userContext.cacheSecond"));
+			cacheSecond = Long.parseLong(GlobalProperties.get(USER_CONTEXT_CACHE_SECOND));
 		} catch (GlobalPropertyReadException e) {
 			// DO NOTHING
+		    LogManager.getLogger().info("Couldn't load "+USER_CONTEXT_CACHE_SECOND+" , use 86,400 for default.");
 		}
 	}
 
