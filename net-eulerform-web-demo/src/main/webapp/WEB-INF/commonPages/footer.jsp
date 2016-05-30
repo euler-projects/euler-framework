@@ -7,6 +7,7 @@
         </footer>
     </div>
     <script src="<%=request.getContextPath()%>/resources/scripts/lib/jquery-2.1.4.js"></script>
+    <script src="<%=request.getContextPath()%>/resources/scripts/lib/common-dict.js"></script>
     <script src="<%=request.getContextPath()%>/resources/scripts/util.js"></script>
     <script src="<%=request.getContextPath()%>/resources/scripts/header.js"></script>
 </body>

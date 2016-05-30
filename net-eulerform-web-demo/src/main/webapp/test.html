@@ -53,6 +53,12 @@
     UrlMatcher: <input type="text" id="urlMatcher">
     Order: <input type="text" id="order">
     <input type="button" id="createUrlMatchery" value="createUrlMatcher" onClick="createUrlMatcher()"><br>
+    <h3>Create CodeTable</h3>
+    code name: <input type="text" id="code_name">
+    code key: <input type="text" id="code_key">
+    code value: <input type="text" id="code_value">
+    code order: <input type="text" id="code_order">
+    <input type="button" id="createUrlMatchery" value="createCodeTable" onClick="createCodeTable()"><br>
     <h3>Create Blog</h3>
     name: <input type="text" id="blog_name">
     <input type="button" id="createBlog" value="createBlog" onClick="createBlog()"><br>
@@ -215,6 +221,27 @@
                 url : 'rs/security/createUrlMatcher',
                 dataType: 'json',
                 data: urlMatcher,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+
+        function createCodeTable(){
+            var codeTable = {};
+            codeTable.name = $('#code_name').val();
+            codeTable.key = $('#code_key').val();
+            codeTable.value = $('#code_value').val();
+            codeTable.showOrder = parseInt($('#code_order').val());
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/baseData/saveCodeTable',
+                dataType: 'json',
+                data: codeTable,
                 beforeSend: function(request) {
                     addAccessToken(request);
                 },
