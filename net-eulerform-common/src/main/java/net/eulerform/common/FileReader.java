@@ -1,8 +1,10 @@
 package net.eulerform.common;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -220,5 +222,61 @@ public abstract class FileReader {
                 }
             }
         }
+    }
+    
+    public static void writeFile(String filePath, String data) throws IOException{
+        File file =new File(filePath);
+        FileWriter fileWritter = null;
+        BufferedWriter bufferWritter = null;
+
+        try {
+        //if file doesnt exists, then create it
+        if(!file.exists()){
+            file.createNewFile();
+        }        
+        //true = append file
+        fileWritter = new FileWriter(filePath,true);
+        bufferWritter = new BufferedWriter(fileWritter);
+        bufferWritter.write(data);
+        bufferWritter.close();
+        } catch (IOException e) {
+            if(fileWritter != null) fileWritter.close();
+            if(bufferWritter != null) bufferWritter.close();
+            throw e;
+        }
+    }
+    
+    /**
+     * 递归删除目录下的所有文件及子目录下所有文件
+     * @param dir 将要删除的文件目录
+     * @return boolean Returns "true" if all deletions were successful.
+     *                 If a deletion fails, the method stops attempting to
+     *                 delete and returns "false".
+     */
+    public static boolean deleteFile(String path) {
+        File file = new File(path);
+        return deleteFile(file);
+    }
+    public static boolean deleteFile(File file) {
+        if(!file.exists())
+            return true;
+        
+        if (file.isDirectory()) {
+            String[] children = file.list();
+            //递归删除目录中的子目录下
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteFile(new File(file, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // 目录此时为空，可以删除
+        return delete(file);
+    }
+
+    private static boolean delete(File file) {
+        System.out.println("DELETE " + file.getPath());
+        return file.delete();
     }
 }
