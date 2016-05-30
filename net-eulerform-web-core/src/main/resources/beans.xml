@@ -60,4 +60,11 @@
     </bean>   
     
     <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+    
+    <bean id="codeTableDao" class="net.eulerform.web.module.basedata.dao.impl.CodeTableDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="baseDataService" class="net.eulerform.web.module.basedata.service.impl.BaseDataService">
+        <property name="codeTableDao" ref="codeTableDao"/>
+    </bean>
 </beans>
