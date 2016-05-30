@@ -11,11 +11,11 @@ import net.eulerform.web.core.base.entity.UUIDEntity;
 @Table(name = "SYS_CODE_TABLE")
 public class CodeTable extends UUIDEntity<CodeTable> {
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "CODE_NAME", nullable = false)
     private String name;
-    @Column(name = "KEY", nullable = false)
+    @Column(name = "CODE_KEY", nullable = false)
     private String key;
-    @Column(name = "VALUE")
+    @Column(name = "CODE_VALUE")
     private String value;
     @Column(name = "SHOW_ORDER", nullable = false)
     private Integer showOrder;

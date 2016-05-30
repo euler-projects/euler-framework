@@ -5,11 +5,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import net.eulerform.common.FilePathTool;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
-import net.eulerform.web.core.base.exception.WebInitException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
@@ -18,6 +13,11 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import net.eulerform.common.FilePathTool;
+import net.eulerform.common.GlobalProperties;
+import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.web.core.base.exception.WebInitException;
 
 @Order(0)
 public class FrameworkBootstrap implements WebApplicationInitializer {
