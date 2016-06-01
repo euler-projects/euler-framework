@@ -75,7 +75,8 @@
                      client-details-service-ref="clientDetailsService"
                      user-approval-handler-ref="oauth2AuthorizationServerUserApprovalHandler"
                      user-approval-page="oauth/authorize"
-                     error-page="oauth/error" >
+                     error-page="oauth/error"
+                     check-token-enabled="true" >
             <oauth2:authorization-code />
             <oauth2:implicit />
             <oauth2:refresh-token />
@@ -97,6 +98,16 @@
             <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler"/>
             <csrf disabled="true"/>
         </http>
+        
+        <http pattern="/oauth/check_token" use-expressions="true" create-session="stateless"
+              authentication-manager-ref="oauth2AuthorizationServerAuthenticationManager"
+              entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+            <intercept-url pattern="/oauth/check_token" access="isFullyAuthenticated()"/>
+            <http-basic />
+            <!--<custom-filter ref="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>-->
+            <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler"/>
+            <csrf disabled="true"/>
+        </http>
     </beans:beans>
 
     <beans:beans profile="oauth-resource-server">
@@ -106,14 +117,13 @@
 
         <beans:bean id="oauth2ResourceServerTokenStore" class="org.springframework.security.oauth2.provider.token.store.JwtTokenStore" >
             <beans:constructor-arg ref="oauth2ResourceServerJwtAccessTokenConverter"/>
-        </beans:bean>
+        </beans:bean>        
 
         <beans:bean id="oauth2ResourceServerTokenServices"
-                    class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
-            <beans:property name="tokenStore" ref="oauth2ResourceServerTokenStore" />
-            <beans:property name="clientDetailsService" ref="clientDetailsService" />
-            <beans:property name="tokenEnhancer" ref="oauth2ResourceServerJwtAccessTokenConverter" />
-            <beans:property name="supportRefreshToken" value="true" />
+                    class="org.springframework.security.oauth2.provider.token.RemoteTokenServices">
+            <beans:property name="checkTokenEndpointUrl" value="${oauth.remoteTokenServices.checkTokenEndpointUrl}" />
+            <beans:property name="clientId" value="${oauth.remoteTokenServices.clientId}" />
+            <beans:property name="clientSecret" value="${oauth.remoteTokenServices.clientSecret}" />
         </beans:bean>
 
         <beans:bean id="oauth2ResourceServerAccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">

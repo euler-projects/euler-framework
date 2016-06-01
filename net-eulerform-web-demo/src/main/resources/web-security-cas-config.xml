@@ -17,7 +17,7 @@
         <custom-filter position="CAS_FILTER" ref="casFilter"/>
         <custom-filter before="CAS_FILTER" ref="singleLogoutFilter" />
         <custom-filter before="LOGOUT_FILTER" ref="requestSingleLogoutFilter" />
-        <logout logout-url="/logout" logout-success-url="/login?loggedOut"
+        <logout logout-url="/logout" logout-success-url="/"
             invalidate-session="true" delete-cookies="JSESSIONID" />
         <!--logout logout-url="/logout"
             invalidate-session="true" delete-cookies="JSESSIONID" success-handler-ref="casLogoutSuccessHandler" /-->
