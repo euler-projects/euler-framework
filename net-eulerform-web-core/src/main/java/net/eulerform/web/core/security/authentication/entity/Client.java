@@ -25,8 +25,6 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 @Table(name = "SYS_CLIENT")
 public class Client extends UUIDEntity<Client> implements ClientDetails {
 
-    private static final String AUTO_APPROVE_SCOPE = "AUTOAPPROVE";
-
     @Column(name = "CLIENT_SECRET", nullable = false)
     private String clientSecret;
 
@@ -47,9 +45,10 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @JoinTable(name = "SYS_CLIENT_SCOPE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "SCOPE_ID") })
     private Set<Scope> scopes;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "SYS_CLIENT_GRANT_TYPE", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "GRANT_TYPE_ID") })
-    private Set<GrantType> grantTypes;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "SYS_CLIENT_GRANT_TYPE", joinColumns = { @JoinColumn(name = "CLIENT_ID", referencedColumnName = "ID") })
+    @Column(name = "GRANT_TYPE")
+    private Set<String> authorizedGrantTypes;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_AUTHORITY", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
@@ -76,9 +75,6 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         this.authorities = authorities;
     }
 
-    public void setGrantTypes(Set<GrantType> grantTypes) {
-        this.grantTypes = grantTypes;
-    }
 
     public void setRegisteredRedirectUri(Set<String> registeredRedirectUri) {
         this.registeredRedirectUri = registeredRedirectUri;
@@ -106,10 +102,6 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     public Set<Scope> getScopes() {
         return scopes;
-    }
-
-    public Set<GrantType> getGrantTypes() {
-        return grantTypes;
     }
 
     @Override
@@ -147,14 +139,14 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         return result;
     }
 
+    public void setAuthorizedGrantTypes(Set<String> authorizedGrantTypes) {
+        this.authorizedGrantTypes = authorizedGrantTypes;
+    }
+
     @Override
     @Transient
     public Set<String> getAuthorizedGrantTypes() {
-        Set<String> result = new HashSet<>();
-        for (GrantType grantType : this.grantTypes) {
-            result.add(grantType.getGrantType());
-        }
-        return result;
+        return this.authorizedGrantTypes;
     }
 
     @Override
@@ -193,7 +185,7 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @Override
     @Transient
     public boolean isAutoApprove(String scope) {
-        return AUTO_APPROVE_SCOPE.equals(scope) || this.neverNeedApprove;
+        return this.neverNeedApprove;
     }
 
 }

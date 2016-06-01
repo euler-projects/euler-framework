@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 @Configuration
-@ImportResource({"classpath*:beans.xml","classpath:springSecurity.xml"})
+@ImportResource({"classpath*:beans.xml","classpath:spring-security.xml"})
 //@org.springframework.context.annotation.Import({SecurityConfiguration.class})
 @ComponentScan(
         basePackages = "net.eulerform.web",

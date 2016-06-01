@@ -104,7 +104,6 @@
               entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
             <intercept-url pattern="/oauth/check_token" access="isFullyAuthenticated()"/>
             <http-basic />
-            <!--<custom-filter ref="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>-->
             <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler"/>
             <csrf disabled="true"/>
         </http>
