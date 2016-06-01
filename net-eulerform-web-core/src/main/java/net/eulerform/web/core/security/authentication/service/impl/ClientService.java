@@ -10,11 +10,9 @@ import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import net.eulerform.web.core.base.cache.ObjectCache;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.security.authentication.dao.IClientDao;
-import net.eulerform.web.core.security.authentication.dao.IGrantTypeDao;
 import net.eulerform.web.core.security.authentication.dao.IResourceDao;
 import net.eulerform.web.core.security.authentication.dao.IScopeDao;
 import net.eulerform.web.core.security.authentication.entity.Client;
-import net.eulerform.web.core.security.authentication.entity.GrantType;
 import net.eulerform.web.core.security.authentication.entity.Resource;
 import net.eulerform.web.core.security.authentication.entity.Scope;
 import net.eulerform.web.core.security.authentication.service.IClientService;
@@ -24,7 +22,6 @@ public class ClientService extends BaseService implements IClientService, Client
     private IClientDao clientDao;
     private IResourceDao resourceDao;
     private IScopeDao scopeDao;
-    private IGrantTypeDao grantTypeDao;
     
     private boolean cacheEnabled = false;
     private ObjectCache<Client> clientCache = new ObjectCache<>(60_000L);
@@ -51,10 +48,6 @@ public class ClientService extends BaseService implements IClientService, Client
 
     public void setScopeDao(IScopeDao scopeDao) {
         this.scopeDao = scopeDao;
-    }
-
-    public void setGrantTypeDao(IGrantTypeDao grantTypeDao) {
-        this.grantTypeDao = grantTypeDao;
     }
 
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
@@ -105,11 +98,6 @@ public class ClientService extends BaseService implements IClientService, Client
         client.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
         client.setNeverNeedApprove(neverNeedApprove);
         this.clientDao.save(client);
-    }
-
-    @Override
-    public void createGrantType(GrantType grantType) {
-        this.grantTypeDao.save(grantType);
     }
 
 }

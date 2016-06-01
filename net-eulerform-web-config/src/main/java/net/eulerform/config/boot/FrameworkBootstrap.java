@@ -40,6 +40,8 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
     private static final String REST_SECURITY_OAUTH = "rest-security-oauth";
     private static final String REST_SECURITY_BASIC_ENABLED = "basic";
     private static final String REST_SECURITY_BASIC = "rest-security-basic";
+    private static final String REST_SECURITY_WEB_ENABLED = "web";
+    private static final String REST_SECURITY_WEB = "rest-security-web";
     private static final String REST_SECURITY_NONE_ENABLED = "none";
     private static final String REST_SECURITY_NONE = "rest-security-none";    
 
@@ -88,6 +90,8 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(REST_SECURITY_OAUTH);break;
         case REST_SECURITY_BASIC_ENABLED:
             configurableEnvironment.addActiveProfile(REST_SECURITY_BASIC);break;
+        case REST_SECURITY_WEB_ENABLED:
+            configurableEnvironment.addActiveProfile(REST_SECURITY_WEB);break;
         case REST_SECURITY_NONE_ENABLED:
             configurableEnvironment.addActiveProfile(REST_SECURITY_NONE);break;
         default: 
