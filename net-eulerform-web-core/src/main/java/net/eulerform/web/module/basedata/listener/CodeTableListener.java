@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import net.eulerform.web.core.security.authentication.util.UserContext;
 import net.eulerform.web.module.basedata.service.impl.CodeTableService;
 
 @Component
@@ -16,6 +17,9 @@ public class CodeTableListener implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        
+        UserContext.addSpecialSystemSecurityContext();
+        
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
         CodeTableService bean= (CodeTableService)rwp.getBean("codeTableService");
         String webRootRealPath = sce.getServletContext().getRealPath("/");

@@ -86,7 +86,7 @@
 
         <!--<beans:bean id="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter"
                     class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
-            <beans:property name="authenticationManager" ref="oauth2AuthenticationManager"/>
+            <beans:property name="authenticationManager" ref="oauth2AuthorizationServerAuthenticationManager"/>
         </beans:bean>-->
 
         <http pattern="/oauth/token" use-expressions="true" create-session="stateless"
@@ -94,7 +94,7 @@
               entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
             <intercept-url pattern="/oauth/token" access="isFullyAuthenticated()"/>
             <http-basic />
-            <!--<custom-filter ref="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>-->
+            <!--custom-filter ref="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/-->
             <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler"/>
             <csrf disabled="true"/>
         </http>

@@ -14,6 +14,15 @@ import net.eulerform.web.core.base.entity.UUIDEntity;
 public class Authority extends UUIDEntity<Authority> implements GrantedAuthority {
    
     public final static String ANONYMOUS = "ANONYMOUS";
+    public final static String SYSTEM = "SYSTEM";
+    
+    public final static Authority SYSTEM_AUTHORITY;
+    
+    static {
+        SYSTEM_AUTHORITY = new Authority();
+        SYSTEM_AUTHORITY.setAuthority(SYSTEM);
+        SYSTEM_AUTHORITY.setDescription(SYSTEM);
+    }
 
     @Column(name="AUTHORITY",nullable=false,unique=true)
     private String authority;

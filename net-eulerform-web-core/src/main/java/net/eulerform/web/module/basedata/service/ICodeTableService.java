@@ -2,10 +2,13 @@ package net.eulerform.web.module.basedata.service;
 
 import java.io.IOException;
 
-import net.eulerform.web.core.base.service.IBaseService;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import net.eulerform.web.core.base.service.IBaseSecurityService;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 
-public interface ICodeTableService extends IBaseService {
+@PreAuthorize("permitAll")
+public interface ICodeTableService extends IBaseSecurityService {
 
     public void createCodeDict() throws IOException;
     
