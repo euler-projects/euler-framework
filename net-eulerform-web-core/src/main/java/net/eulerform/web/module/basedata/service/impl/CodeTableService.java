@@ -9,12 +9,12 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerform.common.FileReader;
-import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.base.service.impl.BaseSecurityService;
 import net.eulerform.web.module.basedata.dao.ICodeTableDao;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 import net.eulerform.web.module.basedata.service.ICodeTableService;
 
-public class CodeTableService extends BaseService implements ICodeTableService {
+public class CodeTableService extends BaseSecurityService implements ICodeTableService {
     
     private ICodeTableDao codeTableDao;
 

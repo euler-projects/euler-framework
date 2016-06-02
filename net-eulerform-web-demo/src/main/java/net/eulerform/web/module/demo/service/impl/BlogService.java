@@ -2,14 +2,14 @@ package net.eulerform.web.module.demo.service.impl;
 
 import java.util.List;
 
-import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.base.service.impl.BaseSecurityService;
 import net.eulerform.web.module.demo.dao.IBlogDao;
 import net.eulerform.web.module.demo.entity.Blog;
 import net.eulerform.web.module.demo.service.IBlogService;
 
 import org.springframework.transaction.annotation.Transactional;
 
-public class BlogService extends BaseService implements IBlogService {
+public class BlogService extends BaseSecurityService implements IBlogService {
 
     private IBlogDao blogDao;
     

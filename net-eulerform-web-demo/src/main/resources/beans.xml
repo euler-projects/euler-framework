@@ -4,6 +4,7 @@
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:task="http://www.springframework.org/schema/task"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
@@ -11,7 +12,9 @@
            http://www.springframework.org/schema/aop
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
-           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task-4.2.xsd">
 
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="fileEncoding" value="utf-8" />
@@ -26,6 +29,31 @@
     </bean>
     <bean id="blogDao" class="net.eulerform.web.module.demo.dao.impl.BlogDao">
         <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+    <bean id="taskJob" class="net.eulerform.web.module.demo.task.Job"/>
+    <!-- task:scheduled-tasks>   
+        <task:scheduled ref="taskJob" method="job1" cron="*/1 * * * * ?" fixed-delay="60000"/>   
+    </task:scheduled-tasks>-->
+    
+    <bean id="job" class="net.eulerform.web.core.security.authentication.task.SecurityMethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject" ref="taskJob" />
+        <property name="targetMethod" value="job" />
+    </bean>
+    
+    <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail" ref="job" />  
+        <property name="startDelay" value="0" /><!-- 调度工厂实例化后，经过0秒开始执行调度 -->
+        <property name="cronExpression" value="*/2 * * * * ?" /> 
+    </bean>
+    
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="startupDelay" value="10"/>
+        <property name="triggers">  
+            <list>  
+                <ref bean="simpleTrigger" />  
+            </list>  
+        </property>  
     </bean>
     
 </beans>

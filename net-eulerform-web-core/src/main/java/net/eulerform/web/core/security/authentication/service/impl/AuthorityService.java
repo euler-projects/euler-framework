@@ -2,14 +2,14 @@ package net.eulerform.web.core.security.authentication.service.impl;
 
 import java.util.List;
 
-import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.base.service.impl.BaseSecurityService;
 import net.eulerform.web.core.security.authentication.dao.IAuthorityDao;
 import net.eulerform.web.core.security.authentication.dao.IUrlMatcherDao;
 import net.eulerform.web.core.security.authentication.entity.Authority;
 import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
 import net.eulerform.web.core.security.authentication.service.IAuthorityService;
 
-public class AuthorityService extends BaseService implements IAuthorityService {
+public class AuthorityService extends BaseSecurityService implements IAuthorityService {
     
     private IUrlMatcherDao urlMatcherDao;
     private IAuthorityDao authorityDao;

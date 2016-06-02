@@ -1,6 +1,7 @@
 package net.eulerform.web.core.security.authentication.util;
 
 import org.apache.logging.log4j.LogManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -76,5 +77,14 @@ public class UserContext {
             // DO NOTHING
         }
         return User.ANONYMOUS_USER;
+    }
+    
+    public static void addSpecialSystemSecurityContext() {
+        UsernamePasswordAuthenticationToken systemToken = new UsernamePasswordAuthenticationToken(
+                User.SYSTEM_USER, null,
+                User.SYSTEM_USER.getAuthorities());
+        systemToken.setDetails(User.SYSTEM_USER);
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(systemToken);
     }
 }

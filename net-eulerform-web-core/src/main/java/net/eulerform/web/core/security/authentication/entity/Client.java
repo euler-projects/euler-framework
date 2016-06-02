@@ -53,6 +53,10 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SYS_CLIENT_AUTHORITY", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
     private Set<Authority> authorities;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "SYS_CLIENT_GROUP", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "GROUP_ID") })
+    private Set<Group> groups;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "SYS_CLIENT_REDIRECT_URI", joinColumns = { @JoinColumn(name = "CLIENT_ID", referencedColumnName = "ID") })
@@ -104,6 +108,14 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         return scopes;
     }
 
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
+
     @Override
     public String getClientId() {
         return super.getId();
@@ -136,6 +148,14 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     public Set<GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> result = new HashSet<>();
         result.addAll(this.authorities);
+        
+        if(this.groups == null || this.groups.isEmpty()) {
+            return result;
+        }
+        
+        for(Group group : this.groups) {
+            result.addAll(group.getAuthorities());
+        }
         return result;
     }
 
