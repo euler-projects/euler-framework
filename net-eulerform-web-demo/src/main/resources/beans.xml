@@ -51,7 +51,7 @@
         <property name="startupDelay" value="10"/>
         <property name="triggers">  
             <list>  
-                <ref bean="simpleTrigger" />  
+                <!-- <ref bean="simpleTrigger" /> --> 
             </list>  
         </property>  
     </bean>

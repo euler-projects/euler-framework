@@ -29,7 +29,7 @@
         <jaxb-api.version>2.2.12</jaxb-api.version>
         <jta.version>1.1</jta.version>
 
-        <springframework.version>4.2.3.RELEASE</springframework.version>
+        <springframework.version>4.2.5.RELEASE</springframework.version>
         <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
         <jasig.version>3.2.2</jasig.version>
         
@@ -128,8 +128,13 @@
                         <artifactId>slf4j-api</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>         
+            </dependency>
 
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-core</artifactId>
+                <version>${springsecurity.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-web</artifactId>
