@@ -13,35 +13,35 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
     
-    <bean id="userContext" class="net.eulerform.web.core.security.authentication.util.UserContext">
+    <bean id="userContext" class="net.eulerform.web.module.authentication.util.UserContext">
         <property name="userDetailsService" ref="userDetailsService"/>
     </bean>    
     
-    <bean id="userDao" class="net.eulerform.web.core.security.authentication.dao.impl.UserDao">
+    <bean id="userDao" class="net.eulerform.web.module.authentication.dao.impl.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="clientDao" class="net.eulerform.web.core.security.authentication.dao.impl.ClientDao">
+    <bean id="clientDao" class="net.eulerform.web.module.authentication.dao.impl.ClientDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="resourceDao" class="net.eulerform.web.core.security.authentication.dao.impl.ResourceDao">
+    <bean id="resourceDao" class="net.eulerform.web.module.authentication.dao.impl.ResourceDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="scopeDao" class="net.eulerform.web.core.security.authentication.dao.impl.ScopeDao">
+    <bean id="scopeDao" class="net.eulerform.web.module.authentication.dao.impl.ScopeDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="authorityDao" class="net.eulerform.web.core.security.authentication.dao.impl.AuthorityDao">
+    <bean id="authorityDao" class="net.eulerform.web.module.authentication.dao.impl.AuthorityDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="urlMatcherDao" class="net.eulerform.web.core.security.authentication.dao.impl.UrlMatcherDao">
+    <bean id="urlMatcherDao" class="net.eulerform.web.module.authentication.dao.impl.UrlMatcherDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="userService" name="userDetailsService" class="net.eulerform.web.core.security.authentication.service.impl.UserService">
+    <bean id="userService" name="userDetailsService" class="net.eulerform.web.module.authentication.service.impl.UserService">
         <property name="userDao" ref="userDao"/>
         <property name="passwordEncoder" ref="passwordEncoder"/>
     </bean>
     
-    <bean id="clientService" name="clientDetailsService" class="net.eulerform.web.core.security.authentication.service.impl.ClientService">
+    <bean id="clientService" name="clientDetailsService" class="net.eulerform.web.module.authentication.service.impl.ClientService">
         <property name="clientDao" ref="clientDao"/>
         <property name="resourceDao" ref="resourceDao"/>
         <property name="scopeDao" ref="scopeDao"/>
@@ -50,7 +50,7 @@
         <property name="cacheSeconds" value="${clientDetailsServiceCache.cacheSeconds}"/>
     </bean>
     
-    <bean id="authorityService" class="net.eulerform.web.core.security.authentication.service.impl.AuthorityService">
+    <bean id="authorityService" class="net.eulerform.web.module.authentication.service.impl.AuthorityService">
         <property name="urlMatcherDao" ref="urlMatcherDao"/>
         <property name="authorityDao" ref="authorityDao"/>
     </bean>   

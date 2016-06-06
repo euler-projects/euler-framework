@@ -36,6 +36,9 @@
     <input type="button" id="createAuthority" value="createAuthority" onClick="createAuthority()"><br>
     <h3>Create Client</h3>
     secret: <input type="text" id="client_secret">
+    accessTokenValiditySeconds: <input type="text" id="accessTokenValiditySeconds">
+    refreshTokenValiditySeconds: <input type="text" id="refreshTokenValiditySeconds">
+    neverNeedApprove: <input type="text" id="neverNeedApprove">
     <input type="button" id="createClient" value="createClient" onClick="createClient()"><br>
     <h3>Create Scope</h3>
     scope: <input type="text" id="scope">
@@ -120,6 +123,9 @@
         function createClient(){
             var client = {};
             client.clientSecret = $('#client_secret').val();
+            client.accessTokenValiditySeconds = $('#accessTokenValiditySeconds').val();
+            client.refreshTokenValiditySeconds = $('#refreshTokenValiditySeconds').val();
+            client.neverNeedApprove = $('#neverNeedApprove').val();
             
             $.ajax({
                 type : "POST",

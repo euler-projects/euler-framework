@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import net.eulerform.web.core.security.authentication.util.UserContext;
+import net.eulerform.web.module.authentication.util.UserContext;
 
 public class PostLoggingFilter extends OncePerRequestFilter {
 

@@ -16,6 +16,7 @@
         <module>net-eulerform-web-config</module>
         <module>net-eulerform-web-config-provider</module>
         <module>net-eulerform-common</module>
+        <module>net-eulerform-rs-client</module>
     </modules>
 
     <properties>

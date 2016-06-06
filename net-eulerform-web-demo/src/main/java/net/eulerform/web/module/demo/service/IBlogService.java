@@ -7,7 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import net.eulerform.web.core.base.service.IBaseSecurityService;
 import net.eulerform.web.module.demo.entity.Blog;
 
-@PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('SYSTEM')")
+@PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('SYSTEM','ADMIN')")
 public interface IBlogService extends IBaseSecurityService {
     public List<Blog> findAllBlogs();
     public Blog createBlog();

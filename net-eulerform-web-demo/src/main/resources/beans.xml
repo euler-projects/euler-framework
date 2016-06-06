@@ -36,7 +36,7 @@
         <task:scheduled ref="taskJob" method="job1" cron="*/1 * * * * ?" fixed-delay="60000"/>   
     </task:scheduled-tasks>-->
     
-    <bean id="job" class="net.eulerform.web.core.security.authentication.task.SecurityMethodInvokingJobDetailFactoryBean">  
+    <bean id="job" class="net.eulerform.web.module.authentication.task.SecurityMethodInvokingJobDetailFactoryBean">  
         <property name="targetObject" ref="taskJob" />
         <property name="targetMethod" value="job" />
     </bean>

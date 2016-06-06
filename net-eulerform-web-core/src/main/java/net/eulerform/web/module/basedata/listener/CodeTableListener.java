@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import net.eulerform.web.core.security.authentication.util.UserContext;
+import net.eulerform.web.module.authentication.util.UserContext;
 import net.eulerform.web.module.basedata.service.impl.CodeTableService;
 
 @Component
