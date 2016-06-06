@@ -8,7 +8,7 @@ import java.util.List;
 
 import net.eulerform.web.core.base.dao.hibernate5.IBaseTombstoneDao;
 import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
-import net.eulerform.web.core.security.authentication.util.UserContext;
+import net.eulerform.web.module.authentication.util.UserContext;
 
 public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends BaseDao<T> implements IBaseTombstoneDao<T> {
 

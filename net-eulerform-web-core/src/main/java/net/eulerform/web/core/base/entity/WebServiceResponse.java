@@ -9,6 +9,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 /**
  * 用来作为Webservice的返回数据实体
  * 
@@ -144,6 +147,7 @@ public class WebServiceResponse<T> {
 
     private Date returnDate;
 
+    @JsonIgnore
     public void setData(T data) {
         if (data == null) {
             this.setStatusToNoContent();
@@ -155,6 +159,7 @@ public class WebServiceResponse<T> {
         this.setData(dataList);
     }
 
+    @JsonSetter
     public void setData(List<T> data) {
         if (data == null || data.isEmpty()) {
             this.setStatusToNoContent();
@@ -171,25 +176,30 @@ public class WebServiceResponse<T> {
     }
 
     @XmlElement
+    @JsonSetter
     public Integer getStatusCode() {
         return statusCode;
     }
 
     @XmlElement
+    @JsonSetter
     public String getStatusInfo() {
         return statusInfo;
     }
 
+    @JsonIgnore
     public void setStatus(HttpStatus httpStatus) {
         this.statusCode = httpStatus.value();
         this.statusInfo = httpStatus.getReasonPhrase();
     }
 
+    @JsonIgnore
     public void setStatus(WebServiceResponseStatus webServiceResponseStatus) {
         this.statusCode = webServiceResponseStatus.getStatusCode();
         this.statusInfo = webServiceResponseStatus.getStatusInfo();
     }
 
+    @JsonIgnore
     public void setStatus(int statusCode, String statusInfo) {
         this.statusCode = statusCode;
         this.statusInfo = statusInfo;
@@ -205,6 +215,7 @@ public class WebServiceResponse<T> {
         return returnDate == null ? new Date() : this.returnDate;
     }
 
+    @JsonSetter
     public void setReturnDate(Date returnDate) {
         this.returnDate = returnDate;
     }

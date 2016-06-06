@@ -41,9 +41,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
-import net.eulerform.web.core.security.authentication.entity.Authority;
-import net.eulerform.web.core.security.authentication.entity.UrlMatcher;
-import net.eulerform.web.core.security.authentication.service.IAuthorityService;
+import net.eulerform.web.module.authentication.entity.Authority;
+import net.eulerform.web.module.authentication.entity.UrlMatcher;
+import net.eulerform.web.module.authentication.service.IAuthorityService;
 
 @Configuration
 @EnableWebSecurity

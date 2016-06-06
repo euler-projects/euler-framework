@@ -3,6 +3,8 @@ package net.eulerform.web.core.base.controller;
 import net.eulerform.web.core.base.entity.WebServiceResponse;
 import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 
+import javax.servlet.ServletContext;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -10,10 +12,17 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
 
 public abstract class BaseRest {
     
     protected final Logger logger = LogManager.getLogger(this.getClass());
+    
+    protected ServletContext getServletContext(){
+        WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
+        return webApplicationContext.getServletContext();
+    }
     
     /**  
      * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息 
