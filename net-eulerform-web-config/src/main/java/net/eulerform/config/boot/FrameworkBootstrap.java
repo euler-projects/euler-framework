@@ -17,7 +17,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
-import net.eulerform.web.core.base.exception.WebInitException;
 
 @Order(0)
 public class FrameworkBootstrap implements WebApplicationInitializer {
@@ -82,7 +81,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(WEB_SECURITY_NONE);break;
         default: 
             rootContext.close();
-            throw new WebInitException("不支持的WEB验证方式: "+restAuthentication);   
+            throw new ServletException("不支持的WEB验证方式: "+restAuthentication);   
         }
         
         switch(restAuthentication){
@@ -96,7 +95,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(REST_SECURITY_NONE);break;
         default: 
             rootContext.close();
-            throw new WebInitException("不支持的REST验证方式: "+restAuthentication);   
+            throw new ServletException("不支持的REST验证方式: "+restAuthentication);   
         }
         
         switch(oauthSeverType){
@@ -112,7 +111,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
             break;
         default: 
             rootContext.close();
-            throw new WebInitException("不支持的OAUTH SERVER TYPE: "+oauthSeverType);   
+            throw new ServletException("不支持的OAUTH SERVER TYPE: "+oauthSeverType);   
         }
         
         container.addListener(new ContextLoaderListener(rootContext));

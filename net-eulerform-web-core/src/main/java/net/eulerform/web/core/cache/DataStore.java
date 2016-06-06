@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.cache;
+package net.eulerform.web.core.cache;
 
 import java.util.Date;
 

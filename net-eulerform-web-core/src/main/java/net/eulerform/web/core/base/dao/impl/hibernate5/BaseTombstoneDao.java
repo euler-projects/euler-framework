@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.dao.hibernate5.impl;
+package net.eulerform.web.core.base.dao.impl.hibernate5;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import net.eulerform.web.core.base.dao.hibernate5.IBaseTombstoneDao;
+import net.eulerform.web.core.base.dao.IBaseTombstoneDao;
 import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
 import net.eulerform.web.module.authentication.util.UserContext;
 
