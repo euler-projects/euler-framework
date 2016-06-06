@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.dao.hibernate5;
+package net.eulerform.web.core.base.dao;
 
 import java.io.Serializable;
 import java.util.Collection;

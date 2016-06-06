@@ -7,8 +7,8 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 
-import net.eulerform.web.core.base.cache.ObjectCache;
 import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.cache.ObjectCache;
 import net.eulerform.web.module.authentication.dao.IClientDao;
 import net.eulerform.web.module.authentication.dao.IResourceDao;
 import net.eulerform.web.module.authentication.dao.IScopeDao;
@@ -24,7 +24,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IScopeDao scopeDao;
     
     private boolean cacheEnabled = false;
-    private ObjectCache<Client> clientCache = new ObjectCache<>(60_000L);
+    private ObjectCache<String, Client> clientCache = new ObjectCache<>(60_000L);
 
     private PasswordEncoder passwordEncoder;
 

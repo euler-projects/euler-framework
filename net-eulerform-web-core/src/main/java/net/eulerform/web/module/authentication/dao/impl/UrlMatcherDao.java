@@ -5,7 +5,7 @@ import java.util.List;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 
-import net.eulerform.web.core.base.dao.hibernate5.impl.BaseDao;
+import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerform.web.module.authentication.dao.IUrlMatcherDao;
 import net.eulerform.web.module.authentication.entity.UrlMatcher;
 

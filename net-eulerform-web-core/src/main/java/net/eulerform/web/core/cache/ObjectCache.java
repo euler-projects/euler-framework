@@ -1,10 +1,10 @@
-package net.eulerform.web.core.base.cache;
+package net.eulerform.web.core.cache;
 
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ObjectCache<T> {
-    private final ConcurrentHashMap<String, DataStore<T>> dataMap = new ConcurrentHashMap<>();
+public class ObjectCache<KEY_T, DATA_T> {
+    private final ConcurrentHashMap<KEY_T, DataStore<DATA_T>> dataMap = new ConcurrentHashMap<>();
     
     private long dataLife;
     
@@ -20,16 +20,16 @@ public class ObjectCache<T> {
         this.dataLife = milliseconds;
     }
     
-    public void put(String key, T data){
-        this.dataMap.put(key, new DataStore<T>(data));
+    public void put(KEY_T key, DATA_T data){
+        this.dataMap.put(key, new DataStore<DATA_T>(data));
     }
     
-    public void remove(String key){
+    public void remove(KEY_T key){
         this.dataMap.remove(key);
     }
     
-    public T get(String key) {
-        DataStore<T> cacheStore = this.dataMap.get(key);
+    public DATA_T get(KEY_T key) {
+        DataStore<DATA_T> cacheStore = this.dataMap.get(key);
         
         if(cacheStore == null)
             return null;
