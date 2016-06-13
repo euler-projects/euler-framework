@@ -20,6 +20,9 @@
     <bean id="userDao" class="net.eulerform.web.module.authentication.dao.impl.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
+    <bean id="groupDao" class="net.eulerform.web.module.authentication.dao.impl.GroupDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
     <bean id="clientDao" class="net.eulerform.web.module.authentication.dao.impl.ClientDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -53,6 +56,7 @@
     <bean id="authorityService" class="net.eulerform.web.module.authentication.service.impl.AuthorityService">
         <property name="urlMatcherDao" ref="urlMatcherDao"/>
         <property name="authorityDao" ref="authorityDao"/>
+        <property name="groupDao" ref="groupDao"/>
     </bean>   
     
     <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />

@@ -1,6 +1,7 @@
 package net.eulerform.web.core.base.controller;
 
 import net.eulerform.web.core.base.entity.WebServiceResponse;
+import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 
 import javax.servlet.ServletContext;
@@ -33,6 +34,19 @@ public abstract class BaseRest {
     @ExceptionHandler({ResourceNotFoundException.class})   
     public WebServiceResponse<String> resourceNotFoundException(ResourceNotFoundException e) {
         return new WebServiceResponse<>(HttpStatus.NOT_FOUND);
+    }
+    
+    /**  
+     * 用于在程序发生{@link IllegalParamException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalParamException.class})   
+    public WebServiceResponse<String> IllegalParamException(IllegalParamException e) {
+        WebServiceResponse<String> response =  new WebServiceResponse<>();
+        response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return response;
     }
     
 	/**  
