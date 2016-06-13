@@ -12,4 +12,6 @@ public interface IAuthorityService extends IBaseSecurityService {
     public void createAuthority(String authority, String description);
 
     public void createUrlMatcher(String urlMatcher, int order);
+
+    public void createGroup(String name, String description);
 }

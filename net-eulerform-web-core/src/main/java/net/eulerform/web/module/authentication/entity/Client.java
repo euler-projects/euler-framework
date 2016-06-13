@@ -25,6 +25,9 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 @Table(name = "SYS_CLIENT")
 public class Client extends UUIDEntity<Client> implements ClientDetails {
 
+    
+    private final static Set<GrantedAuthority> DEFAULT_GRANTED_AUTHORITY = new HashSet<>();
+
     @Column(name = "CLIENT_SECRET", nullable = false)
     private String clientSecret;
 
@@ -50,14 +53,6 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @Column(name = "GRANT_TYPE")
     private Set<String> authorizedGrantTypes;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "SYS_CLIENT_AUTHORITY", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
-    private Set<Authority> authorities;
-    
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "SYS_CLIENT_GROUP", joinColumns = { @JoinColumn(name = "CLIENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "GROUP_ID") })
-    private Set<Group> groups;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "SYS_CLIENT_REDIRECT_URI", joinColumns = { @JoinColumn(name = "CLIENT_ID", referencedColumnName = "ID") })
     @Column(name = "REDIRECT_URI")
@@ -73,10 +68,6 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     public void setScopes(Set<Scope> scopes) {
         this.scopes = scopes;
-    }
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
     }
 
 
@@ -106,14 +97,6 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     public Set<Scope> getScopes() {
         return scopes;
-    }
-
-    public Set<Group> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(Set<Group> groups) {
-        this.groups = groups;
     }
 
     @Override
@@ -146,17 +129,7 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     @Override
     public Set<GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> result = new HashSet<>();
-        result.addAll(this.authorities);
-        
-        if(this.groups == null || this.groups.isEmpty()) {
-            return result;
-        }
-        
-        for(Group group : this.groups) {
-            result.addAll(group.getAuthorities());
-        }
-        return result;
+        return DEFAULT_GRANTED_AUTHORITY;
     }
 
     public void setAuthorizedGrantTypes(Set<String> authorizedGrantTypes) {

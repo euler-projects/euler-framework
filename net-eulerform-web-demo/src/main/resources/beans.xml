@@ -21,8 +21,6 @@
         <property name="ignoreUnresolvablePlaceholders" value="true" />
         <property name="location" value="classpath:config.properties"/>
     </bean>
-
-    <import resource="db_config.xml"/>
     
     <bean id="blogService" class="net.eulerform.web.module.demo.service.impl.BlogService">
         <property name="blogDao" ref="blogDao"/>
@@ -31,29 +29,9 @@
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="taskJob" class="net.eulerform.web.module.demo.task.Job"/>
-    <!-- task:scheduled-tasks>   
-        <task:scheduled ref="taskJob" method="job1" cron="*/1 * * * * ?" fixed-delay="60000"/>   
-    </task:scheduled-tasks>-->
+    <bean id="taskJob" class="net.eulerform.web.module.demo.task.Job"/>  
     
-    <bean id="job" class="net.eulerform.web.module.authentication.task.SecurityMethodInvokingJobDetailFactoryBean">  
-        <property name="targetObject" ref="taskJob" />
-        <property name="targetMethod" value="job" />
-    </bean>
-    
-    <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
-        <property name="jobDetail" ref="job" />  
-        <property name="startDelay" value="0" /><!-- 调度工厂实例化后，经过0秒开始执行调度 -->
-        <property name="cronExpression" value="*/2 * * * * ?" /> 
-    </bean>
-    
-    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="startupDelay" value="10"/>
-        <property name="triggers">  
-            <list>  
-                <!-- <ref bean="simpleTrigger" /> --> 
-            </list>  
-        </property>  
-    </bean>
+    <import resource="beans-database.xml"/>
+    <import resource="beans-schedule.xml"/>  
     
 </beans>

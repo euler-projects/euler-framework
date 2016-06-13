@@ -30,6 +30,10 @@
     username: <input type="text" id="username">
     password: <input type="password" id="password">
     <input type="button" id="createUser" value="createUser" onClick="createUser()"><br>
+    <h3>Create Group</h3>
+    name: <input type="text" id="group_name">
+    desp: <input type="text" id="group_desp">
+    <input type="button" id="createGroup" value="createGroup" onClick="createGroup()"><br>
     <h3>Create Authority</h3>
     authority: <input type="text" id="authority">
     description: <input type="text" id="description">
@@ -108,7 +112,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createUser',
+                url : 'rs/security/user',
                 dataType: 'json',
                 data: user,
                 beforeSend: function(request) {
@@ -119,7 +123,25 @@
             });
         }
         
-
+        function createGroup(){
+            var group = {};
+            group.name = $('#group_name').val();
+            group.description = $('#group_desp').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/group',
+                dataType: 'json',
+                data: group,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
         function createClient(){
             var client = {};
             client.clientSecret = $('#client_secret').val();
@@ -130,7 +152,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createClient',
+                url : 'rs/security/client',
                 dataType: 'json',
                 data: client,
                 beforeSend: function(request) {
@@ -149,7 +171,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createScope',
+                url : 'rs/security/scope',
                 dataType: 'json',
                 data: scope,
                 beforeSend: function(request) {
@@ -168,7 +190,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createGrantType',
+                url : 'rs/security/grantType',
                 dataType: 'json',
                 data: grantType,
                 beforeSend: function(request) {
@@ -187,7 +209,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createResource',
+                url : 'rs/security/resource',
                 dataType: 'json',
                 data: resource,
                 beforeSend: function(request) {
@@ -206,7 +228,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createAuthority',
+                url : 'rs/security/authority',
                 dataType: 'json',
                 data: authority,
                 beforeSend: function(request) {
@@ -225,7 +247,7 @@
             $.ajax({
                 type : "POST",
                 async : true,
-                url : 'rs/security/createUrlMatcher',
+                url : 'rs/security/urlMatcher',
                 dataType: 'json',
                 data: urlMatcher,
                 beforeSend: function(request) {

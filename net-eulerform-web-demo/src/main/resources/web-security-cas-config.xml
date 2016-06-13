@@ -27,6 +27,14 @@
             <concurrency-control max-sessions="1"
                 error-if-maximum-exceeded="false" />
         </session-management>
+        
+        <headers>
+            <cache-control />
+            <content-type-options />
+            <hsts />
+            <frame-options policy="SAMEORIGIN" />
+            <xss-protection />
+        </headers>
 
         <csrf disabled="true" />
 

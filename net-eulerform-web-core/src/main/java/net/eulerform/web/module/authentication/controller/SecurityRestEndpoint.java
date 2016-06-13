@@ -11,6 +11,7 @@ import net.eulerform.web.module.authentication.entity.Authority;
 import net.eulerform.web.module.authentication.entity.Client;
 import net.eulerform.web.module.authentication.entity.UrlMatcher;
 import net.eulerform.web.module.authentication.entity.User;
+import net.eulerform.web.module.authentication.entity.Group;
 import net.eulerform.web.module.authentication.service.IAuthorityService;
 import net.eulerform.web.module.authentication.service.IClientService;
 import net.eulerform.web.module.authentication.service.IUserService;
@@ -38,29 +39,37 @@ public class SecurityRestEndpoint extends BaseRest {
 	@Resource
 	private IClientService clientService;
 
+
+    @ResponseBody
+    @RequestMapping(value = { "/group" }, method = RequestMethod.POST)
+    public WebServiceResponse<String> createGroup(Group group) {
+        this.authorityService.createGroup(group.getName(), group.getDescription());
+        return new WebServiceResponse<String>(HttpStatus.OK);
+    }
+    
 	@ResponseBody
-	@RequestMapping(value = { "/createUser" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/user" }, method = RequestMethod.POST)
 	public WebServiceResponse<String> createUser(User user) {
 		this.userService.createUser(user.getUsername(), user.getPassword());
 		return new WebServiceResponse<String>(HttpStatus.OK);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/createAuthority" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/authority" }, method = RequestMethod.POST)
 	public WebServiceResponse<String> createAuthority(Authority authority) {
 		this.authorityService.createAuthority(authority.getAuthority(), authority.getDescription());
 		return new WebServiceResponse<String>(HttpStatus.OK);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/createUrlMatcher" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/urlMatcher" }, method = RequestMethod.POST)
 	public WebServiceResponse<String> createUrlMatcher(UrlMatcher urlMatcher) {
 		this.authorityService.createUrlMatcher(urlMatcher.getUrlMatcher(), urlMatcher.getOrder());
 		return new WebServiceResponse<String>(HttpStatus.OK);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/createClient" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/client" }, method = RequestMethod.POST)
 	public WebServiceResponse<String> createClient(Client client) {
 		this.clientService.createClient(client.getClientSecret(), client.getAccessTokenValiditySeconds(),
 				client.getRefreshTokenValiditySeconds(), client.getNeverNeedApprove());
@@ -68,14 +77,14 @@ public class SecurityRestEndpoint extends BaseRest {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/createScope" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/scope" }, method = RequestMethod.POST)
 	public WebServiceResponse<String> createScope(net.eulerform.web.module.authentication.entity.Scope scope) {
 		this.clientService.createScope(scope);
 		return new WebServiceResponse<String>(HttpStatus.OK);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/createResource" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/resource" }, method = RequestMethod.POST)
 	public WebServiceResponse<String> createResource(
 			net.eulerform.web.module.authentication.entity.Resource resource) {
 		this.clientService.createResource(resource);
@@ -83,27 +92,27 @@ public class SecurityRestEndpoint extends BaseRest {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/findUser/all" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/user/all" }, method = RequestMethod.GET)
 	public WebServiceResponse<User> findUserAll() {
 		List<User> allUsers = this.userService.findAllUsers();
 		return new WebServiceResponse<>(allUsers);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/findClient/all" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/client/all" }, method = RequestMethod.GET)
 	public WebServiceResponse<Client> findClientAll() {
 		List<Client> allClient = this.clientService.findAllClient();
 		return new WebServiceResponse<>(allClient);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/findUser/current" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/user/current" }, method = RequestMethod.GET)
 	public WebServiceResponse<User> findUserCurrent(@AuthenticationPrincipal User user) {
 		return new WebServiceResponse<>(user);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/findUserByName/{name}", method = RequestMethod.GET)
+	@RequestMapping(value = "/user/{name}", method = RequestMethod.GET)
 	public WebServiceResponse<User> findBlogByName(@PathVariable("name") String name) {
 		User user = (User) this.userDetailsService.loadUserByUsername(name);
 		return new WebServiceResponse<>(user);

@@ -8,6 +8,12 @@ body {
     background-color: #eeeeee;
 }
 
+.search-table {
+    width:100%;
+    background-color:   #F0F8FF;
+    font-size:12px;
+}
+
 input {
     font-family: arial, 'Microsoft YaHei';
     outline: none;    

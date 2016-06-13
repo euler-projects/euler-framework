@@ -30,6 +30,14 @@
                 error-if-maximum-exceeded="false"
                 session-registry-ref="sessionRegistry" />
         </session-management>
+        
+        <headers>
+            <cache-control />
+            <content-type-options />
+            <hsts />
+            <frame-options policy="SAMEORIGIN" />
+            <xss-protection />
+        </headers>
 
         <csrf disabled="true" />
 

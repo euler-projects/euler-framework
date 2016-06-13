@@ -1,12 +1,8 @@
 package net.eulerform.web.module.demo.controller;
 
-import javax.annotation.Resource;
+import java.text.ParseException;
 
-import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.base.controller.BaseRest;
-import net.eulerform.web.core.base.entity.WebServiceResponse;
-import net.eulerform.web.module.demo.entity.Blog;
-import net.eulerform.web.module.demo.service.IBlogService;
+import javax.annotation.Resource;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -15,13 +11,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import net.eulerform.web.core.annotation.RestEndpoint;
+import net.eulerform.web.core.base.controller.BaseRest;
+import net.eulerform.web.core.base.entity.WebServiceResponse;
+import net.eulerform.web.core.util.ParamCheck;
+import net.eulerform.web.module.demo.entity.Blog;
+import net.eulerform.web.module.demo.service.IBlogService;
+
 @RestEndpoint
 @Scope("prototype")
 @RequestMapping("/demo")
-public class BlogRestEndpoint extends BaseRest {
+public class DemoRestEndpoint extends BaseRest {
     
     @Resource
     private IBlogService blogService;
+
+    @ResponseBody
+    @RequestMapping(value = { "/test" }, method = RequestMethod.GET)
+    public WebServiceResponse<String> createClient(String date) throws ParseException {
+        ParamCheck.require(date);
+        ParamCheck.matches(date, ParamCheck.REGEX_YYYY_MM_DD);
+        
+        return new WebServiceResponse<>(HttpStatus.OK);
+    }
 
     @ResponseBody
     @RequestMapping(value = "/loadBlog/all", method = RequestMethod.GET)
