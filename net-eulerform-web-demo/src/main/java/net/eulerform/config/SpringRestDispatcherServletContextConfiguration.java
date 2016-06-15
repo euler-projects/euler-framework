@@ -73,10 +73,4 @@ public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfi
                 .defaultContentType(MediaType.APPLICATION_JSON_UTF8)
                 .mediaTypes(mediaTypes);
     }
-
- /*   @Bean
-    public LocaleResolver localeResolver()
-    {
-        return new AcceptHeaderLocaleResolver();
-    }*/
 }

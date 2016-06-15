@@ -11,7 +11,7 @@ import org.springframework.web.WebApplicationInitializer;
 import net.eulerform.web.module.basedata.listener.CodeTableListener;
 
 @Order(1)
-public class CodeTableBootstrap implements WebApplicationInitializer {
+public abstract class CodeTableBootstrap implements WebApplicationInitializer {
     private final Logger log = LogManager.getLogger();
     
     @Override

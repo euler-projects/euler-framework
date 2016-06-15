@@ -10,6 +10,9 @@
     <p>This site is being built...</p>
     ${currentUser.username}<br>
     ${currentUser.password}<br>
+    ${euler:i18n('test')}<br>
+    ${euler:i18n('eulerform')}<br>
+    <spring:message code="test"/>
 </div>
 
 <%@ include file="/WEB-INF/commonPages/footer.jsp"%>
