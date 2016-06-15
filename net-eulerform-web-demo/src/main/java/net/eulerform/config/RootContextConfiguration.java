@@ -11,6 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Configuration
 @ImportResource({"classpath*:beans.xml","classpath:spring-security.xml"})
 //@org.springframework.context.annotation.Import({SecurityConfiguration.class})
@@ -40,5 +43,19 @@ public class RootContextConfiguration {
     {
         return new StandardServletMultipartResolver();
     }
+    
+    @Bean(name="objectMapper")
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(Include.NON_NULL);
+        return mapper;
+    }
+    
+//    @Bean(name="jaxb2Marshaller")
+//    public Jaxb2Marshaller jaxb2Marshaller() {
+//        Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+//        jaxb2Marshaller.setPackagesToScan("com.sfa.framework.**.entity", "com.sfa.maoc.**.entity");
+//        return jaxb2Marshaller;
+//    }
     
 }
