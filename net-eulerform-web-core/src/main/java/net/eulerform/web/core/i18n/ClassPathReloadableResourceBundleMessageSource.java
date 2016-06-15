@@ -16,6 +16,11 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
     private static final String PROPERTIES_SUFFIX = ".properties";
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+
+    @Override
+    public void setBasename(String basename) {
+        this.setBasenames(basename);
+    }
     
     @Override
     public void setBasenames(String... basenames) {
