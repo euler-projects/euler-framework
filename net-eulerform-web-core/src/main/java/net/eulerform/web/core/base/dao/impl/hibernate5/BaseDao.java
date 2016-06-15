@@ -5,10 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import net.eulerform.common.Generic;
-import net.eulerform.web.core.base.dao.IBaseDao;
-import net.eulerform.web.core.base.entity.BaseEntity;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
@@ -18,6 +14,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
+
+import net.eulerform.common.Generic;
+import net.eulerform.web.core.base.dao.IBaseDao;
+import net.eulerform.web.core.base.entity.BaseEntity;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     
@@ -72,7 +72,8 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
-            query.setParameter(i, params[i]);
+            query.setParameter(i+"", params[i]);
+            System.out.println(params[i]);
         }
 
         query.executeUpdate();
@@ -98,7 +99,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     }
 
     @Override
-    public void delete(Serializable id) {
+    public void deleteById(Serializable id) {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("delete ");
         hqlBuffer.append(this.entityClass.getSimpleName());
@@ -116,16 +117,21 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
             idList.add(entity.getId());
         }
         
-        this.delete(idList);
+        this.deleteByIds(idList);
     }
 
     @Override
-    public void delete(Collection<Serializable> ids) {
+    public void deleteByIds(Collection<Serializable> ids) {
+        Serializable[] idArray = ids.toArray(new Serializable[0]);
+        this.deleteById(idArray);
+    }
+
+    @Override
+    public void deleteByIds(Serializable[] idArray) {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("delete ");
         hqlBuffer.append(this.entityClass.getSimpleName());
         hqlBuffer.append(" en where ");
-        Serializable[] idArray = ids.toArray(new Serializable[0]);
         for(int i=0;i<idArray.length;i++) {
             if(i==0) {
                 hqlBuffer.append("en.id= '");
@@ -173,7 +179,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
-            query.setParameter(i, params[i]);
+            query.setParameter(i+"", params[i]);
         }
 
         List<T> result = query.list();

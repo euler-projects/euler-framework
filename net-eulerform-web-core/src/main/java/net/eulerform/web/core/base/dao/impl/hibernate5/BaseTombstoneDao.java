@@ -57,7 +57,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
     }
 
     @Override
-    public void delete(Serializable id) {
+    public void deleteById(Serializable id) {
         T entity = this.load(id);
         this.delete(entity);
     }
@@ -71,16 +71,21 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             idList.add(entity.getId());
         }
         
-        this.delete(idList);
+        this.deleteByIds(idList);
     }
 
     @Override
-    public void delete(Collection<Serializable> ids) {
+    public void deleteByIds(Collection<Serializable> ids) {
+        Serializable[] idArray = ids.toArray(new Serializable[0]);
+        this.deleteByIds(idArray);
+    }
+
+    @Override
+    public void deleteByIds(Serializable[] idArray) {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("update ");
         hqlBuffer.append(this.entityClass.getSimpleName());
         hqlBuffer.append(" en set en.ifDel = true where ");
-        Serializable[] idArray = ids.toArray(new Serializable[0]);
         for(int i=0;i<idArray.length;i++) {
             if(i==0) {
                 hqlBuffer.append("en.id= '");
@@ -92,7 +97,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
         }
         final String hql = hqlBuffer.toString();
         System.out.println(hql);
-        this.update(hql);
+        super.update(hql);
     }
     
     @Override
@@ -101,18 +106,23 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
     }
 
     @Override
-    public void deletePhysical(Serializable id) {
-        super.delete(id);
+    public void deleteByIdPhysical(Serializable id) {
+        super.deleteById(id);
     }
 
     @Override
-    public void deletePhysicalAll(Collection<T> entities){
+    public void deleteAllPhysical(Collection<T> entities){
         super.deleteAll(entities);
     }
 
     @Override
-    public void deletePhysical(Collection<Serializable> ids){
-        super.delete(ids);
+    public void deleteByIdsPhysical(Collection<Serializable> ids){
+        super.deleteByIds(ids);
+    }
+
+    @Override
+    public void deleteByIdsPhysical(Serializable[] idArray){
+        super.deleteByIds(idArray);
     }
 
     @Override

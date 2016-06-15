@@ -8,10 +8,12 @@ import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
 public interface IBaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends IBaseDao<T>{
     
     void deletePhysical(T entity);
+
+    void deleteAllPhysical(Collection<T> entities);
     
-    void deletePhysical(Serializable id);
+    void deleteByIdPhysical(Serializable id);
 
-    void deletePhysicalAll(Collection<T> entities);
+    void deleteByIdsPhysical(Collection<Serializable> ids);
 
-    void deletePhysical(Collection<Serializable> ids);
+    void deleteByIdsPhysical(Serializable[] idArray);
 }
