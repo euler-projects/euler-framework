@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,12 +62,21 @@ public abstract class FileReader {
      */
     public static byte[] readFileByMultiBytes(File file, int number) throws IOException {
         InputStream inputStream = null;
-        
+        try {
+            inputStream = new FileInputStream(file);
+            return readInputStreamByMultiBytes(inputStream, number);
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            if(inputStream != null ) inputStream.close();
+        }
+    }
+    
+    public static byte[] readInputStreamByMultiBytes(InputStream inputStream, int number) throws IOException {
         byte[] result;
         try {
             // 一次读多个字节
             byte[] tempbytes = new byte[number];
-            inputStream = new FileInputStream(file);
             result = new byte[inputStream.available()];
             int readCount;
             int count=0;
@@ -77,8 +87,6 @@ public abstract class FileReader {
             }
         } catch (IOException e) {
             throw e;
-        } finally {
-            if(inputStream != null ) inputStream.close();
         }
         
         return result;
@@ -240,9 +248,32 @@ public abstract class FileReader {
         bufferWritter.write(data);
         bufferWritter.close();
         } catch (IOException e) {
-            if(fileWritter != null) fileWritter.close();
-            if(bufferWritter != null) bufferWritter.close();
             throw e;
+        } finally {
+            if(fileWritter != null) fileWritter.close();
+            if(bufferWritter != null) bufferWritter.close();           
+        }
+    }
+    
+    public static void writeFile(String filePath, byte[] data) throws IOException{
+        File file =new File(filePath);
+        FileOutputStream fileOutputStream = null;
+
+        try {
+            //if file doesnt exists, then create it
+            if(!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(data);
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            if(fileOutputStream != null) fileOutputStream.close();            
         }
     }
     

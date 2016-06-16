@@ -17,6 +17,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.web.core.listener.EulerFormCoreListener;
 
 @Order(0)
 public class FrameworkBootstrap implements WebApplicationInitializer {
@@ -115,6 +116,7 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         }
         
         container.addListener(new ContextLoaderListener(rootContext));
+        container.addListener(new EulerFormCoreListener());
         
         String location = null;
         long maxFileSize = -1L;
