@@ -197,7 +197,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     @SuppressWarnings("unchecked")
     protected List<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
         Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
-        criteria.setFirstResult(pageIndex);
+        criteria.setFirstResult((pageIndex-1) * pageSize);
         criteria.setMaxResults(pageSize);
         List<T> result = criteria.list();
         evict(result);
@@ -217,20 +217,24 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         return 0;
     }
 
-    protected void evict(T entity) {
-        if (entity == null)
+    protected void evict(Object entity) {
+        if (entity == null || !entity.getClass().isAssignableFrom(BaseEntity.class))
             return;
         this.getCurrentSession().evict(entity);
     }
 
-    protected void evict(Collection<T> entities) {
+    protected void evict(Collection<?> entities) {
         if (entities == null)
             return;
 
-        for (T entity : entities) {
+        for (Object entity : entities) {
             if (entity == null)
                 continue;
-            this.getCurrentSession().evict(entity);
+            evict(entity);
         }
+    }
+    
+    protected String generateLikeStr(String str){
+        return "%" + str + "%";
     }
 }
