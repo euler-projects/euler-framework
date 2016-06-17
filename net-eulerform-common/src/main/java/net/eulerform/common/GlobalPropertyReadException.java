@@ -1,7 +1,7 @@
 package net.eulerform.common;
 
 @SuppressWarnings("serial")
-public class GlobalPropertyReadException extends RuntimeException {
+public class GlobalPropertyReadException extends Exception {
 
     public GlobalPropertyReadException() {
         super();

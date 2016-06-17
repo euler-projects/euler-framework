@@ -36,36 +36,66 @@ import java.io.InputStream;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import net.eulerform.common.FilePathTool;
 import net.eulerform.common.FileReader;
+import net.eulerform.common.GlobalProperties;
+import net.eulerform.common.GlobalPropertyReadException;
 
 @Component
 public class EulerFormCoreListener implements ServletContextListener {
+    private static final Logger log = LogManager.getLogger();
+
+    private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
+    private final static String JAR_MODULE_JSP_FOLDER = "/META-INF/pages";
+    private final static String MODULE_JSP_FOLDER;
+
+    static {
+        String temp;
+        try {
+            temp = FilePathTool.changeToUnixFormat(GlobalProperties.get("web.jspPath"));
+        } catch (GlobalPropertyReadException e) {
+            temp = "/WEB-INF/modulePages";
+            log.info("Couldn't load web.jspPath , use '/WEB-INF/modulePages' for default.");
+        }
+        MODULE_JSP_FOLDER = temp;
+    }
+
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        this.initJarJspPages(sce);
+    }
+
+    private void initJarJspPages(ServletContextEvent sce) {
         Resource[] resources = null;
         InputStream inputStream = null;
         try {
-            resources = this.resourcePatternResolver.getResources("classpath*:**/web/module/*/META-INF/pages/*");
+            resources = this.resourcePatternResolver.getResources(JAR_JSP_PATH);
 
             for (Resource r : resources) {
                 inputStream = r.getInputStream();
                 String jspPath = r.getURI().toString();
+                // like "/index.jsp"
                 String filename = jspPath
-                        .substring(jspPath.lastIndexOf("/META-INF/pages/") + "/META-INF/pages/".length());
-                String tmp = jspPath.substring(0, jspPath.lastIndexOf("/META-INF/pages/"));
+                        .substring(jspPath.lastIndexOf(JAR_MODULE_JSP_FOLDER) + JAR_MODULE_JSP_FOLDER.length());
+                String tmp = jspPath.substring(0, jspPath.lastIndexOf(JAR_MODULE_JSP_FOLDER));
+                // like "/demoModule"
                 String moduleName = tmp.substring(tmp.lastIndexOf("/"));
-                String webRootRealPath = sce.getServletContext().getRealPath("/");
-                String destPaht = webRootRealPath + "WEB-INF/modulePages" + moduleName + "/" + filename;
-                if (!new File(destPaht).exists()) {
+                // like "/var/www/demo" or "D:/website"
+                String webRootRealPath = FilePathTool.changeToUnixFormat(sce.getServletContext().getRealPath("/"));
+                String destPath = webRootRealPath + MODULE_JSP_FOLDER + moduleName + filename;
+                if (!new File(destPath).exists()) {
                     byte[] result = FileReader.readInputStreamByMultiBytes(inputStream, 1024);
-                    FileReader.writeFile(destPaht, result);
+                    FileReader.writeFile(destPath, result);
+                    log.info("\nImport module jsp file: \n" + r.getURI().toString() + "\ninto\n" + destPath + "\n");
                 }
             }
         } catch (IOException e) {

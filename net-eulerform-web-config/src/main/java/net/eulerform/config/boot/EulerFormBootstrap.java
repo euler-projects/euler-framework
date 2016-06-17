@@ -1,3 +1,32 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015-2016 cFrost.sun(孙宾, SUN BIN) 
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * For more information, please visit the following website
+ * 
+ * https://github.com/euler-form/web-form
+ * http://eulerform.net
+ * http://cfrost.net
+ */
 package net.eulerform.config.boot;
 
 import javax.servlet.MultipartConfigElement;
@@ -17,10 +46,11 @@ import org.springframework.web.servlet.DispatcherServlet;
 import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.common.StringTool;
 import net.eulerform.web.core.listener.EulerFormCoreListener;
 
 @Order(0)
-public class FrameworkBootstrap implements WebApplicationInitializer {
+public class EulerFormBootstrap implements WebApplicationInitializer {
     private final Logger log = LogManager.getLogger();
     
     private static final String WEB_AUTHENTICATION_TYPE = "web.authenticationType";
@@ -60,14 +90,22 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
-        log.info("Executing framework bootstrap.");
+        log.info("Executing Euler-Framework bootstrap.");
         
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         rootContext.register(net.eulerform.config.RootContextConfiguration.class);
         
-        String webAuthentication = GlobalProperties.get(WEB_AUTHENTICATION_TYPE);
-        String restAuthentication = GlobalProperties.get(REST_AUTHENTICATION_TYPE);
-        String oauthSeverType = GlobalProperties.get(OAUTH_SERVER_TYPE);
+        String webAuthentication;
+        String restAuthentication;
+        String oauthSeverType;
+        try {
+            webAuthentication = GlobalProperties.get(WEB_AUTHENTICATION_TYPE);
+            restAuthentication = GlobalProperties.get(REST_AUTHENTICATION_TYPE);
+            oauthSeverType = GlobalProperties.get(OAUTH_SERVER_TYPE);
+        } catch (GlobalPropertyReadException e1) {
+            rootContext.close();
+            throw new ServletException(e1);
+        }
         
         ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
         
@@ -156,7 +194,17 @@ public class FrameworkBootstrap implements WebApplicationInitializer {
         springWebDispatcher.setMultipartConfig(new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold));
         springWebDispatcher.addMapping("/");
 
-        String restRootUrl = GlobalProperties.get(REST_ROOT_URL);
+        String restRootUrl = "/rs";
+        try {
+            restRootUrl = GlobalProperties.get(REST_ROOT_URL);
+        } catch (GlobalPropertyReadException e) {
+            // DO NOTHING
+            log.info("Couldn't load "+REST_ROOT_URL+" , use '/rs' for default.");
+        }
+        
+        if(StringTool.isNull(restRootUrl))
+            throw new ServletException(REST_ROOT_URL + "不能为空");
+        
         while(restRootUrl.endsWith("*")){
             restRootUrl = restRootUrl.substring(0, restRootUrl.length()-1);
         }
