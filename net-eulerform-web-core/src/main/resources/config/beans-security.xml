@@ -144,11 +144,11 @@
     </beans:beans>
 
     <beans:beans profile="rest-security-oauth">
-        <beans:import resource="rest-security-oauth-config.xml"/>
+        <beans:import resource="classpath:**/rest-security-oauth-config.xml"/>
     </beans:beans>
 
     <beans:beans profile="rest-security-basic">
-        <beans:import resource="rest-security-basic-config.xml"/>
+        <beans:import resource="classpath:**/rest-security-basic-config.xml"/>
     </beans:beans>
 
     <beans:beans profile="rest-security-none">
@@ -161,7 +161,7 @@
 
     <beans:beans profile="web-security-local">
     
-        <beans:import resource="web-security-local-config.xml"/>
+        <beans:import resource="classpath:**/web-security-local-config.xml"/>
         
         <authentication-manager>
             <authentication-provider user-service-ref="userDetailsService">
@@ -172,7 +172,7 @@
 
     <beans:beans profile="web-security-ldap">
     
-        <beans:import resource="web-security-ldap-config.xml"/>
+        <beans:import resource="classpath:**/web-security-ldap-config.xml"/>
         
         <authentication-manager>
             <authentication-provider ref="ldapAuthenticationProvider" />
@@ -217,7 +217,7 @@
 
     <beans:beans profile="web-security-cas">
     
-        <beans:import resource="web-security-cas-config.xml"/>
+        <beans:import resource="classpath:**/web-security-cas-config.xml"/>
 
         <authentication-manager alias="authenticationManager">
             <authentication-provider ref="casAuthenticationProvider" />

@@ -12,6 +12,12 @@
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="fileEncoding" value="utf-8" />
+        <property name="ignoreUnresolvablePlaceholders" value="true" />
+        <property name="location" value="classpath:config.properties"/>
+    </bean>
     
     <bean id="userContext" class="net.eulerform.web.module.authentication.util.UserContext">
         <property name="userDetailsService" ref="userDetailsService"/>
@@ -67,4 +73,7 @@
     <bean id="codeTableService" class="net.eulerform.web.module.basedata.service.impl.CodeTableService">
         <property name="codeTableDao" ref="codeTableDao"/>
     </bean>
+    
+    <import resource="beans-security.xml"/>
+    
 </beans>
