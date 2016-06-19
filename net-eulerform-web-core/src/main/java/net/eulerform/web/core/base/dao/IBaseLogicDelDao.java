@@ -3,15 +3,15 @@ package net.eulerform.web.core.base.dao;
 import java.io.Serializable;
 import java.util.Collection;
 
-import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
+import net.eulerform.web.core.base.entity.BaseLogicDelEntity;
 
-public interface IBaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends IBaseDao<T>{
+public interface IBaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends IBaseModifyInfoDao<T>{
     
     void deletePhysical(T entity);
-
-    void deleteAllPhysical(Collection<T> entities);
     
     void deleteByIdPhysical(Serializable id);
+
+    void deleteAllPhysical(Collection<T> entities);
 
     void deleteByIdsPhysical(Collection<Serializable> ids);
 

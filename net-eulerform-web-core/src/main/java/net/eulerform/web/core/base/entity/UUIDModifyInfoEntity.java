@@ -1,0 +1,94 @@
+package net.eulerform.web.core.base.entity;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
+
+/**
+ * 具有修改人记录功能的<strong>UUID主键</strong>实体<br>
+ * 
+ * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends IDModifyInfoEntity&lt;Example&gt;<code>
+ * @author cFrost
+ * @see net.eulerform.web.core.base.entity.NonIDModifyInfoEntity
+ * @see net.eulerform.web.core.base.entity.IDModifyInfoEntity
+ */
+@SuppressWarnings("serial")
+@MappedSuperclass
+public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T> {    
+
+    @Column(name="CREATE_BY", nullable=false)
+    private String createBy;
+    @Column(name="MODIFY_BY", nullable=false)
+    private String modifyBy;
+    @Column(name="CREATE_DATE", nullable=false)
+    private Date createDate;
+    @Column(name="MODIFY_DATE", nullable=false)
+    private Date modifyDate;
+
+    @Override
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    @Override
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
+
+    @Override
+    public String getModifyBy() {
+        return modifyBy;
+    }
+
+    @Override
+    public void setModifyBy(String modifyBy) {
+        this.modifyBy = modifyBy;
+    }
+
+    @Override
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    @Override
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    @Override
+    public Date getModifyDate() {
+        return modifyDate;
+    }
+
+    @Override
+    public void setModifyDate(Date modifyDate) {
+        this.modifyDate = modifyDate;
+    }
+    
+    @Transient
+    private String createByName;
+    @Transient
+    private String modifyByName;
+
+    @Override
+    public String getCreateByName() {
+        return createByName;
+    }
+
+    @Override
+    public void setCreateByName(String createByName) {
+        this.createByName = createByName;
+    }
+
+    @Override
+    public String getModifyByName() {
+        return modifyByName;
+    }
+
+    @Override
+    public void setModifyByName(String modifyByName) {
+        this.modifyByName = modifyByName;
+    }
+}
