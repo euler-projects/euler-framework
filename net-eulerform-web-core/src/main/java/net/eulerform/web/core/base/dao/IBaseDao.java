@@ -9,6 +9,10 @@ import net.eulerform.web.core.base.entity.BaseEntity;
 public interface IBaseDao<T extends BaseEntity<?>>{
 
     T load(Serializable id);
+
+    List<T> load(Collection<Serializable> ids);
+
+    List<T> load(Serializable[] idArray);
     
     Serializable save(T entity);
     
@@ -19,10 +23,10 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     void saveOrUpdate(Collection<T> entities);
     
     void delete(T entity);
-
-    void deleteAll(Collection<T> entities);
     
     void deleteById(Serializable id);
+
+    void deleteAll(Collection<T> entities);
 
     void deleteByIds(Collection<Serializable> ids);
 

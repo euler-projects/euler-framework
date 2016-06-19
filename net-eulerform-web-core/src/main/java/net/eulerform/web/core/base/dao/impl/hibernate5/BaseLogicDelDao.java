@@ -6,11 +6,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import net.eulerform.web.core.base.dao.IBaseTombstoneDao;
-import net.eulerform.web.core.base.entity.BaseTombstoneEntity;
+import net.eulerform.web.core.base.dao.IBaseLogicDelDao;
+import net.eulerform.web.core.base.entity.BaseLogicDelEntity;
 import net.eulerform.web.module.authentication.util.UserContext;
 
-public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends BaseDao<T> implements IBaseTombstoneDao<T> {
+public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends BaseModifyInfoDao<T> implements IBaseLogicDelDao<T> {
 
     @Override
     public T load(Serializable id) {
@@ -21,45 +21,74 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             return null;
         return entity;
     }
+    
+    @Override
+    public List<T> load(Collection<Serializable> ids) {
+        Serializable[] idArray = ids.toArray(new Serializable[0]);
+        return this.load(idArray);
+    }
+    
+    @Override
+    public List<T> load(Serializable[] idArray) {
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select en from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en where en.ifDel = false and (");
+        for(int i=0;i<idArray.length;i++) {
+            if(i==0) {
+                hqlBuffer.append("en.id= '");
+            } else {
+                hqlBuffer.append(" or en.id= '");
+            }
+            hqlBuffer.append(idArray[i]);
+            hqlBuffer.append(")'");
+        }
+        final String hql = hqlBuffer.toString();
+        return super.findBy(hql);        
+    }
 
     @Override
     public Serializable save(T entity) {
-        this.setBaseInfo(entity);
+        this.setLogicDelInfo(entity);
         return super.save(entity);
     }
 
     @Override
     public void update(T entity) {
-        this.setBaseInfo(entity);
+        this.setLogicDelInfo(entity);
         super.update(entity);
 
     }
 
     @Override
     public void saveOrUpdate(T entity) {
-        this.setBaseInfo(entity);
+        this.setLogicDelInfo(entity);
         super.saveOrUpdate(entity);
     }
     
     @Override
     public void saveOrUpdate(Collection<T> entities){
         for(T entity : entities){
-            this.setBaseInfo(entity);
+            this.setLogicDelInfo(entity);
         }
         super.saveOrUpdate(entities);
     }
 
     @Override
     public void delete(T entity) {
-        this.setBaseInfo(entity);
         entity.setIfDel(true);
         this.update(entity);
     }
 
     @Override
     public void deleteById(Serializable id) {
-        T entity = this.load(id);
-        this.delete(entity);
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("update ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en set en.modifyBy = ?0, en.modifyDate = ?1, en.ifDel = true where en.id = ?2");
+
+        final String hql = hqlBuffer.toString();
+        this.update(hql, UserContext.getCurrentUser().getId(), new Date(), id);
     }
 
     @Override
@@ -85,7 +114,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("update ");
         hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en set en.ifDel = true where ");
+        hqlBuffer.append(" en set en.modifyBy = ?0, en.modifyDate = ?1, en.ifDel = true where ");
         for(int i=0;i<idArray.length;i++) {
             if(i==0) {
                 hqlBuffer.append("en.id= '");
@@ -96,8 +125,7 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             hqlBuffer.append("'");
         }
         final String hql = hqlBuffer.toString();
-        System.out.println(hql);
-        super.update(hql);
+        this.update(hql, UserContext.getCurrentUser().getId(), new Date());
     }
     
     @Override
@@ -140,18 +168,6 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
         final String hql = hqlBuffer.toString();
         return super.findBy(hql);
     }
-    
-//    @Override
-//    protected List<T> findBy(DetachedCriteria detachedCriteria) {
-//        detachedCriteria.add(Restrictions.eq("ifDel", false));
-//        return super.findBy(detachedCriteria);
-//    }
-//    
-//    @Override
-//    protected List<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
-//        detachedCriteria.add(Restrictions.eq("ifDel", false));
-//        return super.findPageBy(detachedCriteria, pageIndex, pageSize);
-//    }
 
     @Override
     public long findCount() {
@@ -166,26 +182,8 @@ public abstract class BaseTombstoneDao<T extends BaseTombstoneEntity<?>> extends
             return (Long)l.get(0);
         return 0;
     }
-    
-    private void setBaseInfo(T entity){
-        if(entity.getId() != null){
-            T oldEntity = super.load(entity.getId());
-            if(oldEntity != null) {
-                entity.setCreateBy(oldEntity.getCreateBy());
-                entity.setCreateDate(oldEntity.getCreateDate());
-                //entity.setIfDel(oldEntity.getIfDel());注释掉此处:再次保存已逻辑删除的对象时,删除状态以新对象为准
-                //this.getSessionFactory().getCurrentSession().evict(oldEntity);//注释掉此处:load方法已经改为将查出实体置为游离态,此处不再需要
-            }
-        }
-        
-        Serializable currentUserId = UserContext.getCurrentUser().getId();;
-        Date date = new Date();
-        if(entity.getCreateDate() == null)
-            entity.setCreateDate(date);
-        if(entity.getCreateBy() == null)
-            entity.setCreateBy(String.valueOf(currentUserId));
-        entity.setModifyDate(date);
-        entity.setModifyBy(String.valueOf(currentUserId));
+
+    private void setLogicDelInfo(T entity){        
         if(entity.getIfDel() == null)
             entity.setIfDel(false);
     }

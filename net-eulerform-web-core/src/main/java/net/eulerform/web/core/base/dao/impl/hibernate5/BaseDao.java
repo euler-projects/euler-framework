@@ -15,12 +15,13 @@ import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 
+import net.eulerform.common.BeanTool;
 import net.eulerform.common.Generic;
 import net.eulerform.web.core.base.dao.IBaseDao;
 import net.eulerform.web.core.base.entity.BaseEntity;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
-    
+
     protected final Logger logger = LogManager.getLogger(this.getClass());
 
     protected final Logger log = LogManager.getLogger();
@@ -54,12 +55,39 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     }
 
     @Override
+    public List<T> load(Collection<Serializable> ids) {
+        Serializable[] idArray = ids.toArray(new Serializable[0]);
+        return this.load(idArray);
+    }
+
+    @Override
+    public List<T> load(Serializable[] idArray) {
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select en from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        hqlBuffer.append(" en where ");
+        for (int i = 0; i < idArray.length; i++) {
+            if (i == 0) {
+                hqlBuffer.append("en.id= '");
+            } else {
+                hqlBuffer.append(" or en.id= '");
+            }
+            hqlBuffer.append(idArray[i]);
+            hqlBuffer.append("'");
+        }
+        final String hql = hqlBuffer.toString();
+        return this.findBy(hql);
+    }
+
+    @Override
     public Serializable save(T entity) {
+        this.eraseEmptyProperty(entity);
         return this.getSessionFactory().getCurrentSession().save(entity);
     }
 
     @Override
     public void update(T entity) {
+        this.eraseEmptyProperty(entity);
         this.getSessionFactory().getCurrentSession().update(entity);
 
     }
@@ -72,7 +100,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
-            query.setParameter(i+"", params[i]);
+            query.setParameter(i + "", params[i]);
             System.out.println(params[i]);
         }
 
@@ -81,13 +109,16 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void saveOrUpdate(T entity) {
+        this.eraseEmptyProperty(entity);
         this.getSessionFactory().getCurrentSession().saveOrUpdate(entity);
     }
 
     @Override
     public void saveOrUpdate(Collection<T> entities) {
-        if(entities == null || entities.isEmpty()) return;
-        
+        if (entities == null || entities.isEmpty())
+            return;
+        this.eraseEmptyProperty(entities);
+
         for (T entity : entities) {
             this.saveOrUpdate(entity);
         }
@@ -110,20 +141,21 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void deleteAll(Collection<T> entities) {
-        if(entities == null || entities.isEmpty()) return;
-        
+        if (entities == null || entities.isEmpty())
+            return;
+
         Collection<Serializable> idList = new HashSet<>();
-        for(T entity : entities){
+        for (T entity : entities) {
             idList.add(entity.getId());
         }
-        
+
         this.deleteByIds(idList);
     }
 
     @Override
     public void deleteByIds(Collection<Serializable> ids) {
         Serializable[] idArray = ids.toArray(new Serializable[0]);
-        this.deleteById(idArray);
+        this.deleteByIds(idArray);
     }
 
     @Override
@@ -132,8 +164,8 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         hqlBuffer.append("delete ");
         hqlBuffer.append(this.entityClass.getSimpleName());
         hqlBuffer.append(" en where ");
-        for(int i=0;i<idArray.length;i++) {
-            if(i==0) {
+        for (int i = 0; i < idArray.length; i++) {
+            if (i == 0) {
                 hqlBuffer.append("en.id= '");
             } else {
                 hqlBuffer.append(" or en.id= '");
@@ -179,7 +211,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
-            query.setParameter(i+"", params[i]);
+            query.setParameter(i + "", params[i]);
         }
 
         List<T> result = query.list();
@@ -197,7 +229,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     @SuppressWarnings("unchecked")
     protected List<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
         Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
-        criteria.setFirstResult((pageIndex-1) * pageSize);
+        criteria.setFirstResult((pageIndex - 1) * pageSize);
         criteria.setMaxResults(pageSize);
         List<T> result = criteria.list();
         evict(result);
@@ -218,7 +250,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     }
 
     protected void evict(Object entity) {
-        if (entity == null || !entity.getClass().isAssignableFrom(BaseEntity.class))
+        if (entity == null || !BaseEntity.class.isAssignableFrom(entity.getClass()))
             return;
         this.getCurrentSession().evict(entity);
     }
@@ -233,8 +265,13 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
             evict(entity);
         }
     }
-    
-    protected String generateLikeStr(String str){
-        return "%" + str + "%";
+
+    protected void eraseEmptyProperty(Collection<T> entities) {
+        for (T entity : entities)
+            this.eraseEmptyProperty(entity);
+    }
+
+    protected void eraseEmptyProperty(T entity) {
+        BeanTool.clearEmptyProperty(entity);
     }
 }

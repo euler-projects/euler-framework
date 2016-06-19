@@ -4,13 +4,13 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import net.eulerform.web.core.base.entity.IDTombstoneEntity;
+import net.eulerform.web.core.base.entity.IDLogicDelEntity;
 
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(name="BLG_BLOG")
-public class Blog extends IDTombstoneEntity<Blog> {
+public class Blog extends IDLogicDelEntity<Blog> {
     
     private String name;
     
