@@ -37,6 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 非阻塞对象缓存,可通过索引键值查询缓存对象,
  * 在缓存被其他线程修改时,本线程对缓存的修改会被忽略,而不会阻塞程序运行<br>
  * 需要设定数据生命周期,单位:秒. 默认为<code>0</code>,即缓存不启用
+ * <strong>注意:</strong>查出的数据应<strong>避免</strong>被修改
  * 
  * @author cFrost
  *
