@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,6 +45,19 @@ public abstract class BaseRest {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalParamException.class})   
     public WebServiceResponse<String> IllegalParamException(IllegalParamException e) {
+        WebServiceResponse<String> response =  new WebServiceResponse<>();
+        response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return response;
+    }
+    
+    /**  
+     * 用于在程序发生{@link MissingServletRequestParameterException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({MissingServletRequestParameterException.class})   
+    public WebServiceResponse<String> missingServletRequestParameterException(MissingServletRequestParameterException e) {
         WebServiceResponse<String> response =  new WebServiceResponse<>();
         response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return response;
