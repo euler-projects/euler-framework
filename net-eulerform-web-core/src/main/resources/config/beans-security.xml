@@ -74,8 +74,8 @@
                      token-services-ref="oauth2AuthorizationServerTokenServices"
                      client-details-service-ref="clientDetailsService"
                      user-approval-handler-ref="oauth2AuthorizationServerUserApprovalHandler"
-                     user-approval-page="oauth/authorize"
-                     error-page="oauth/error"
+                     user-approval-page="authentication/authorize"
+                     error-page="authentication/error"
                      check-token-enabled="true" >
             <oauth2:authorization-code />
             <oauth2:implicit />
