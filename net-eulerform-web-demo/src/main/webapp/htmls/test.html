@@ -84,6 +84,7 @@
                     if(accpet == "NULL")
                         return;
                     request.setRequestHeader("Accept", accpet);
+                    addAccessToken(request);
                 },
                 success : function(data) {
                     /* var date = new Date(data.createDate);

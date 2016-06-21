@@ -1,10 +1,5 @@
 package net.eulerform.config;
 
-import net.eulerform.common.FilePathTool;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
-import net.eulerform.web.core.annotation.WebController;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -12,12 +7,18 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+import net.eulerform.common.FilePathTool;
+import net.eulerform.common.GlobalProperties;
+import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.web.core.annotation.WebController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "net.eulerform.web.**.controller", useDefaultFilters = false, includeFilters = @ComponentScan.Filter(WebController.class))
-public class SpringWebDispatcherServletContextConfiguration {
+public class SpringWebDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
 
     private final Logger log = LogManager.getLogger();
 

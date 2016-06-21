@@ -14,6 +14,7 @@
           entry-point-ref="oauth2ResourceServerAuthenticationEntryPoint"
           access-decision-manager-ref="oauth2ResourceServerAccessDecisionManager">
 
+        <intercept-url pattern="${rest.rooturl}/**" method="OPTIONS" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <intercept-url pattern="${rest.rooturl}/security/**" access="SCOPE_READ"/>
         <intercept-url pattern="${rest.rooturl}/demo/**" access="IS_AUTHENTICATED_FULLY"/>
         <intercept-url pattern="${rest.rooturl}/**" access="DENY_OAUTH"/>

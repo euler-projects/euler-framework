@@ -16,6 +16,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -72,5 +73,10 @@ public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfi
                 .ignoreAcceptHeader(false)
                 .defaultContentType(MediaType.APPLICATION_JSON_UTF8)
                 .mediaTypes(mediaTypes);
+    }
+    
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedMethods("PUT", "DELETE", "POST", "GET");
     }
 }
