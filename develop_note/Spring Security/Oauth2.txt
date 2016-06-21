@@ -14,6 +14,10 @@ http://10.88.5.166:7070/efb/oauth/authorize?client_id=8ad8852654ea8ec70154ea8ee8
 
 http://localhost:7070/cfrost-net/oauth/authorize?client_id=4028808154ddbefd0154ddbfaef60000&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fcfrost-net%2FgetToken.html
 
+
+
+http://10.88.29.34:8080/maoc/oauth/authorize?client_id=0e0874d0-ccd5-4653-a786-3e93b7f300f6&response_type=token&redirect_uri=http://10.88.5.57:8080/test/index.html
+
 $2a$10$bdTeNA55WSqrIOKlS39tEus2W9Bmic3o409c0rWCqdgoQCP5/3DGO
 
 

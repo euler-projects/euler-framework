@@ -120,7 +120,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(WEB_SECURITY_NONE);break;
         default: 
             rootContext.close();
-            throw new ServletException("不支持的WEB验证方式: "+restAuthentication);   
+            throw new ServletException("不支持的WEB验证方式: "+webAuthentication);   
         }
         
         switch(restAuthentication){
