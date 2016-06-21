@@ -29,6 +29,7 @@
  */
 package net.eulerform.config.boot;
 
+import javax.servlet.FilterRegistration;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -48,6 +49,7 @@ import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.listener.EulerFormCoreListener;
+import net.eulerform.web.core.filter.CrosFilter;
 
 @Order(0)
 public class EulerFormBootstrap implements WebApplicationInitializer {
@@ -218,5 +220,8 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         springRestDispatcher.setLoadOnStartup(2);
         springRestDispatcher.setMultipartConfig(new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold));        
         springRestDispatcher.addMapping(restRootUrl+"/*");
+        
+        FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
+        crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token");
     }
 }

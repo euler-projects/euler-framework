@@ -102,6 +102,7 @@
         <http pattern="/oauth/check_token" use-expressions="true" create-session="stateless"
               authentication-manager-ref="oauth2AuthorizationServerAuthenticationManager"
               entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+            <intercept-url pattern="/oauth/check_token" method="OPTIONS" access="permitAll"/>
             <intercept-url pattern="/oauth/check_token" access="isFullyAuthenticated()"/>
             <http-basic />
             <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler"/>
