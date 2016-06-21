@@ -20,7 +20,7 @@ public class BaseBean {
     @Bean
     public MessageSource messageSource() {
         ClassPathReloadableResourceBundleMessageSource messageSource = new ClassPathReloadableResourceBundleMessageSource();
-        messageSource.setCacheSeconds(1);
+        messageSource.setCacheSeconds(86400);
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setBasenames("classpath*:i18n/messages", "/WEB-INF/i18n/titles", "/WEB-INF/i18n/messages",
