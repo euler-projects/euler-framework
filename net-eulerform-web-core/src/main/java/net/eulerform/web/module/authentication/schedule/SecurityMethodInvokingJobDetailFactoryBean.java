@@ -1,6 +1,7 @@
-package net.eulerform.web.module.authentication.task;
+package net.eulerform.web.module.authentication.schedule;
 
 import java.lang.reflect.InvocationTargetException;
+
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 
 import net.eulerform.web.module.authentication.util.UserContext;

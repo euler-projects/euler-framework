@@ -11,7 +11,7 @@ import net.eulerform.web.core.base.entity.UUIDEntity;
 @Table(name="SYS_RESOURCE")
 public class Resource extends UUIDEntity<Resource> {
     
-    @Column(name="RESOURCE_NAME",nullable=false,unique=true)
+    @Column(name="NAME",nullable=false,unique=true)
     private String resourceName;
     @Column(name="DESCRIPTION")
     private String description;

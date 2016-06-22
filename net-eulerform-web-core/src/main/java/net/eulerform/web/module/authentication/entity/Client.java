@@ -24,10 +24,12 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 @Entity
 @Table(name = "SYS_CLIENT")
 public class Client extends UUIDEntity<Client> implements ClientDetails {
-
     
     private final static Set<GrantedAuthority> DEFAULT_GRANTED_AUTHORITY = new HashSet<>();
 
+    @Column(name= "CLIENT_ID", nullable = false, unique = true)
+    private String clientId;
+    
     @Column(name = "CLIENT_SECRET", nullable = false)
     private String clientSecret;
 
@@ -57,6 +59,10 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @CollectionTable(name = "SYS_CLIENT_REDIRECT_URI", joinColumns = { @JoinColumn(name = "CLIENT_ID", referencedColumnName = "ID") })
     @Column(name = "REDIRECT_URI")
     private Set<String> registeredRedirectUri;
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
@@ -101,7 +107,7 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     @Override
     public String getClientId() {
-        return super.getId();
+        return this.clientId;
     }
 
     @Override

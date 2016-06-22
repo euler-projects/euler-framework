@@ -5,4 +5,6 @@ import net.eulerform.web.module.authentication.entity.Client;
 
 public interface IClientDao extends IBaseDao<Client> {
 
+    Client findClientByClientId(String clientId);
+
 }

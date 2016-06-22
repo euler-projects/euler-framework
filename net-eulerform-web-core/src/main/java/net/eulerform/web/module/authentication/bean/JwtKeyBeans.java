@@ -1,20 +1,20 @@
-package net.eulerform.web.module.authentication.config;
+package net.eulerform.web.module.authentication.bean;
 
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
-import net.eulerform.common.FileReader;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import net.eulerform.common.FileReader;
+
 @Configuration
 @Profile({"oauth-authorization-server","oauth-resource-server"})
-public class JwtKeyConfig {
+public class JwtKeyBeans {
 
 	private KeyPair keyPair;
 	private String jwtVerifierKey;

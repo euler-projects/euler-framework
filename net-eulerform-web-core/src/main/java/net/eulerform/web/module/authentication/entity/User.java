@@ -55,6 +55,8 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private String username;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
+    @Column(name = "EMP_NAME")
+    private String empName;
     @Column(name = "ENABLED", nullable = false)
     private Boolean enabled;
     @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
@@ -77,6 +79,14 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getEmpName() {
+        return empName;
+    }
+
+    public void setEmpName(String empName) {
+        this.empName = empName;
     }
 
     public String getPassword() {

@@ -8,15 +8,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 
-import net.eulerform.web.module.basedata.listener.CodeTableListener;
+import net.eulerform.web.module.basedata.listener.BaseDataListener;
 
 @Order(1)
-public abstract class CodeTableBootstrap implements WebApplicationInitializer {
+public class CodeTableBootstrap implements WebApplicationInitializer {
     private final Logger log = LogManager.getLogger();
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         log.info("Executing CodeTable bootstrap.");
-        container.addListener(new CodeTableListener());
+        container.addListener(new BaseDataListener());
     }
 }

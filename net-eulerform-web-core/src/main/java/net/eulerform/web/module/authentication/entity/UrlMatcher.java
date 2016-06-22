@@ -3,7 +3,6 @@ package net.eulerform.web.module.authentication.entity;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -13,7 +12,7 @@ import javax.persistence.Table;
 import net.eulerform.web.core.base.entity.UUIDEntity;
 
 @SuppressWarnings("serial")
-@Entity
+//@Entity
 @Table(name="SYS_URL_MATCHER")
 public class UrlMatcher extends UUIDEntity<UrlMatcher> {
 
