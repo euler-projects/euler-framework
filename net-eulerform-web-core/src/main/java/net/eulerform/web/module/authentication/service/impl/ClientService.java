@@ -64,7 +64,7 @@ public class ClientService extends BaseService implements IClientService, Client
             }
         }
         
-        Client client = this.clientDao.load(clientId);
+        Client client = this.clientDao.findClientByClientId(clientId);
         if (client == null)
             throw new ClientRegistrationException("Client \"" + clientId + "\" not found");
         

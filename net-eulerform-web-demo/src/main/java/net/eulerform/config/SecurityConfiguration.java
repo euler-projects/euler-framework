@@ -75,7 +75,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity security) throws Exception{
         
-        List<UrlMatcher> roleAuthList = this.authorityService.findUrlMatcherAuthorities();
+        List<UrlMatcher> roleAuthList = new ArrayList<>();//this.authorityService.findUrlMatcherAuthorities();
         
         if(roleAuthList != null){
             setAuth:for(UrlMatcher urlMatcher : roleAuthList){

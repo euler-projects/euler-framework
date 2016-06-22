@@ -9,26 +9,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import net.eulerform.web.module.authentication.util.UserContext;
-import net.eulerform.web.module.basedata.service.impl.CodeTableService;
+import net.eulerform.web.module.basedata.service.IBaseDataService;
+import net.eulerform.web.module.basedata.service.impl.BaseDataService;
 
 @Component
-public class CodeTableListener implements ServletContextListener {
+public class BaseDataListener implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         
-        UserContext.addSpecialSystemSecurityContext();
-        
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
-        CodeTableService bean= (CodeTableService)rwp.getBean("codeTableService");
+        
+        IBaseDataService baseDataService= (BaseDataService)rwp.getBean("baseDataService");
+        
         String webRootRealPath = sce.getServletContext().getRealPath("/");
-        bean.setWebRootRealPath(webRootRealPath);
+        baseDataService.setWebRootRealPath(webRootRealPath);
         try {
-            bean.createCodeDict();
+            baseDataService.createCodeDict();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        
+        baseDataService.loadBaseData();
     }
 
     @Override

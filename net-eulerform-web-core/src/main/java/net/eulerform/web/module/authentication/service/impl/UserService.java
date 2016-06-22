@@ -1,5 +1,6 @@
 package net.eulerform.web.module.authentication.service.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -61,5 +62,17 @@ public class UserService extends BaseService implements IUserService, UserDetail
         user.getAuthorities().size();
         
         return user;
+    }
+
+    @Override
+    public User findUserById(Serializable id) {
+        User user = this.userDao.load(id);
+        user.eraseCredentials();
+        return user;
+    }
+
+    @Override
+    public List<User> findUserByNameOrCode(String nameOrCode) {
+        return this.userDao.findUserByNameOrCode(nameOrCode);
     }
 }

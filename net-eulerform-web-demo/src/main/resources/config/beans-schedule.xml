@@ -22,7 +22,7 @@
         </property>  
     </bean>
     
-    <bean id="job" class="net.eulerform.web.module.authentication.task.SecurityMethodInvokingJobDetailFactoryBean">  
+    <bean id="job" class="net.eulerform.web.module.authentication.schedule.SecurityMethodInvokingJobDetailFactoryBean">  
         <property name="targetObject" ref="taskJob" />
         <property name="targetMethod" value="job" />
     </bean>

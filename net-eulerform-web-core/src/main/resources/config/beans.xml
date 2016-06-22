@@ -21,7 +21,11 @@
     
     <bean id="userContext" class="net.eulerform.web.module.authentication.util.UserContext">
         <property name="userDetailsService" ref="userDetailsService"/>
-    </bean>    
+        <property name="userService" ref="userService"/>
+    </bean>
+    <bean id="codeTable" class="net.eulerform.web.module.basedata.util.CodeTable">
+        <property name="baseDataService" ref="baseDataService"/>
+    </bean> 
     
     <bean id="userDao" class="net.eulerform.web.module.authentication.dao.impl.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
@@ -41,9 +45,6 @@
     <bean id="authorityDao" class="net.eulerform.web.module.authentication.dao.impl.AuthorityDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="urlMatcherDao" class="net.eulerform.web.module.authentication.dao.impl.UrlMatcherDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
     
     <bean id="userService" name="userDetailsService" class="net.eulerform.web.module.authentication.service.impl.UserService">
         <property name="userDao" ref="userDao"/>
@@ -60,20 +61,22 @@
     </bean>
     
     <bean id="authorityService" class="net.eulerform.web.module.authentication.service.impl.AuthorityService">
-        <property name="urlMatcherDao" ref="urlMatcherDao"/>
         <property name="authorityDao" ref="authorityDao"/>
         <property name="groupDao" ref="groupDao"/>
     </bean>   
     
     <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
     
+    <bean id="moduleDao" class="net.eulerform.web.module.basedata.dao.impl.ModuleDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
     <bean id="codeTableDao" class="net.eulerform.web.module.basedata.dao.impl.CodeTableDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="codeTableService" class="net.eulerform.web.module.basedata.service.impl.CodeTableService">
+    <bean id="baseDataService" class="net.eulerform.web.module.basedata.service.impl.BaseDataService">
         <property name="codeTableDao" ref="codeTableDao"/>
+        <property name="moduleDao" ref="moduleDao"/>
     </bean>
     
     <import resource="beans-security.xml"/>
-    
 </beans>
