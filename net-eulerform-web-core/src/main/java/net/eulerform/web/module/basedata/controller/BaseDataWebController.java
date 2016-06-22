@@ -23,6 +23,11 @@ public class BaseDataWebController extends BaseController {
     @Resource
     private IBaseDataService baseDataService;
     
+    @RequestMapping(value ="/codeTable",method=RequestMethod.GET)
+    public String codeTable(){
+        return "/basedata/codeTable";
+    }
+    
     @RequestMapping(value ="/module",method=RequestMethod.GET)
     public String module(){
         return "/basedata/module";
