@@ -9,6 +9,7 @@ import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.service.IBaseService;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 import net.eulerform.web.module.basedata.entity.Module;
+import net.eulerform.web.module.basedata.entity.Page;
 
 public interface IBaseDataService extends IBaseService {
 
@@ -31,5 +32,9 @@ public interface IBaseDataService extends IBaseService {
     public void deleteCodeTables(Serializable[] idArray);
 
     public void deleteCodeTable(Serializable id);
+
+    public Module findModuleById(String id);
+
+    public Page findPageById(String id);
 
 }

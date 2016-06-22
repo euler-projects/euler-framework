@@ -70,12 +70,16 @@
     <bean id="moduleDao" class="net.eulerform.web.module.basedata.dao.impl.ModuleDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
+    <bean id="pageDao" class="net.eulerform.web.module.basedata.dao.impl.PageDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
     <bean id="codeTableDao" class="net.eulerform.web.module.basedata.dao.impl.CodeTableDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     <bean id="baseDataService" class="net.eulerform.web.module.basedata.service.impl.BaseDataService">
         <property name="codeTableDao" ref="codeTableDao"/>
         <property name="moduleDao" ref="moduleDao"/>
+        <property name="pageDao" ref="pageDao"/>
     </bean>
     
     <import resource="beans-security.xml"/>
