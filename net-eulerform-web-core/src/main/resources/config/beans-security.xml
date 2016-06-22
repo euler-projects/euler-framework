@@ -19,8 +19,8 @@
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
 
     <http security="none" pattern="/resources/**" />
-    <http security="none" pattern="/getToken.html" />
     <http security="none" pattern="/favicon.ico" />
+    <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
 
     <beans:beans profile="oauth-authorization-server">
         <beans:bean id="oauth2AuthorizationServerJwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
