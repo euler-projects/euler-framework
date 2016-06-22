@@ -1,8 +1,12 @@
 package net.eulerform.web.module.basedata.controller;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Scope;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,6 +17,7 @@ import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 import net.eulerform.web.module.basedata.entity.Module;
+import net.eulerform.web.module.basedata.entity.Page;
 import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 @WebController
@@ -29,13 +34,36 @@ public class BaseDataWebController extends BaseController {
     }
     
     @RequestMapping(value ="/module",method=RequestMethod.GET)
-    public String module(){
+    public String module(Model model){
+        List<Module> allModules = this.baseDataService.findAllModule();
+        model.addAllAttributes(allModules);
+        model.addAttribute("menu", allModules);
         return "/basedata/module";
     }
     
     @RequestMapping(value ="/page",method=RequestMethod.GET)
     public String page(){
         return "/basedata/page";
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/findAllModules")
+    public PageResponse<Module> findAllModules() {
+        PageResponse<Module> result = new PageResponse<>();
+        result.setRows(this.baseDataService.findAllModule());
+        return result;
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/findModuleProperties/{id}")
+    public Module findModuleProperties(@PathVariable("id") String id) {
+        return this.baseDataService.findModuleById(id);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/findPageProperties/{id}")
+    public Page findPageProperties(@PathVariable("id") String id) {
+        return this.baseDataService.findPageById(id);
     }
     
     @ResponseBody

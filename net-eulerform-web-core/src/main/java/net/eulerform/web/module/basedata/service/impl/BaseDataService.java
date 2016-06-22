@@ -16,8 +16,10 @@ import net.eulerform.web.core.cache.ObjectCache;
 import net.eulerform.web.module.authentication.util.UserContext;
 import net.eulerform.web.module.basedata.dao.ICodeTableDao;
 import net.eulerform.web.module.basedata.dao.IModuleDao;
+import net.eulerform.web.module.basedata.dao.IPageDao;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 import net.eulerform.web.module.basedata.entity.Module;
+import net.eulerform.web.module.basedata.entity.Page;
 import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 public class BaseDataService extends BaseService implements IBaseDataService {
@@ -27,10 +29,15 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     
     private ICodeTableDao codeTableDao;
     
-    private IModuleDao moduleDao;    
+    private IModuleDao moduleDao;  
+    private IPageDao pageDao;     
 
     public void setModuleDao(IModuleDao moduleDao) {
         this.moduleDao = moduleDao;
+    }
+
+    public void setPageDao(IPageDao pageDao) {
+        this.pageDao = pageDao;
     }
 
     public void setCodeTableDao(ICodeTableDao codeTableDao) {
@@ -202,6 +209,16 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     @Override
     public void deleteCodeTable(Serializable id) {
         this.codeTableDao.deleteById(id);
+    }
+
+    @Override
+    public Module findModuleById(String id) {
+        return this.moduleDao.load(id);
+    }
+
+    @Override
+    public Page findPageById(String id) {
+        return this.pageDao.load(id);
     }
 
 }
