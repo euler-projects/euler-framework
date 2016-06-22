@@ -2,6 +2,7 @@ package net.eulerform.web.core.bean;
 
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +18,14 @@ import net.eulerform.web.core.i18n.ClassPathReloadableResourceBundleMessageSourc
 
 @Configuration
 public class BaseBean {
+    
+    @Value("${i18n.cacheSeconds}")
+    private int i18nCacheSeconds;
+    
     @Bean
     public MessageSource messageSource() {
         ClassPathReloadableResourceBundleMessageSource messageSource = new ClassPathReloadableResourceBundleMessageSource();
-        messageSource.setCacheSeconds(86400);
+        messageSource.setCacheSeconds(this.i18nCacheSeconds);
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setBasenames("classpath*:i18n/messages", "/WEB-INF/i18n/titles", "/WEB-INF/i18n/messages",

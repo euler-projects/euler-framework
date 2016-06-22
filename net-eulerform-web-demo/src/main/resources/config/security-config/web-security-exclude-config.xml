@@ -9,12 +9,8 @@
                                  http://www.springframework.org/schema/security/spring-security-4.0.xsd
                                  http://www.springframework.org/schema/security/oauth2
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
-
-    <http pattern="${rest.rooturl}/**" use-expressions="true" create-session="stateless">
-        <intercept-url pattern="${rest.rooturl}/**" method="OPTIONS" access="permitAll"/>
-        <intercept-url pattern="${rest.rooturl}/**" access="isFullyAuthenticated()"/>
-        <http-basic />
-        <csrf disabled="true"/>
-    </http>
+    
+    <http security="none" pattern="/getToken.html" />
+    <http security="none" pattern="/maoc-html/**" />
 
 </beans:beans>

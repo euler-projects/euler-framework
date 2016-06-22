@@ -159,33 +159,33 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         container.addListener(new EulerFormCoreListener());
         
         String location = null;
-        long maxFileSize = -1L;
-        long maxRequestSize = -1L;
-        int fileSizeThreshold = 0;
+        long maxFileSize = 51_200L;
+        long maxRequestSize = 51_200L;
+        int fileSizeThreshold = 1_024;
         
         try {
             location = GlobalProperties.get(MULITPART_LOCATION);
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_LOCATION+" , use null for default.");
+            log.info("Couldn't load "+MULITPART_LOCATION+" , use " + location + " for default.");
         }
         try {
             maxFileSize = Long.parseLong(GlobalProperties.get(MULITPART_MAX_FILE_SIZE));
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_MAX_FILE_SIZE+" , use -1L for default.");
+            log.info("Couldn't load "+MULITPART_MAX_FILE_SIZE+" , use " + maxFileSize + " for default.");
         }
         try {
             maxRequestSize = Long.parseLong(GlobalProperties.get(MULITPART_MAX_REQUEST_SIZE));
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_MAX_REQUEST_SIZE+" , use -1L for default.");
+            log.info("Couldn't load "+MULITPART_MAX_REQUEST_SIZE+" , use " + maxRequestSize + " for default.");
         }
         try {
             fileSizeThreshold = Integer.parseInt(GlobalProperties.get(MULITPART_FILE_SIZE_THRESHOLD));
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_FILE_SIZE_THRESHOLD+" , use 0 for default.");
+            log.info("Couldn't load "+MULITPART_FILE_SIZE_THRESHOLD+" , use " + fileSizeThreshold + " for default.");
         }
         
         AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
