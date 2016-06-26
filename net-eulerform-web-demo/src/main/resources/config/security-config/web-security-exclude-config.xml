@@ -12,5 +12,6 @@
     
     <http security="none" pattern="/getToken.html" />
     <http security="none" pattern="/maoc-html/**" />
+    <http security="none" pattern="/htmls/**" />
 
 </beans:beans>

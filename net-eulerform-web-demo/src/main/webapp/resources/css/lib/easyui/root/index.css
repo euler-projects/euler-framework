@@ -77,7 +77,10 @@
     background-size: 70% 70%;
 }
 
-#main-content > .tabs-panels > .panel > .panel-body {
+#main-content > .tabs-panels > .panel > .panel-body,
+#header-zone,
+#footer-zone,
+#menu-zone {
     overflow: hidden;
 }
 
