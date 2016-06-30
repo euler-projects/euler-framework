@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.eulerform.common.FileReader;
@@ -29,7 +30,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     
     private ICodeTableDao codeTableDao;
     
-    private IModuleDao moduleDao;  
+    private IModuleDao moduleDao;
     private IPageDao pageDao;     
 
     public void setModuleDao(IModuleDao moduleDao) {
@@ -65,6 +66,11 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     }
 
     @Override
+    public List<Module> findAllModuleFromDB() {
+        return this.moduleDao.findAllInOrder();
+    }
+
+    @Override
     public String findConfigValue(String key) {
         CodeTable resultCodeTable = allConfigs.get(key);
         
@@ -84,6 +90,79 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     @Override
     public void saveCodeTable(CodeTable codeTable) {
         this.codeTableDao.saveOrUpdate(codeTable);
+    }
+
+    @Override
+    public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+        PageResponse<CodeTable> result = new PageResponse<>();
+        long total = this.codeTableDao.findCount();
+        List<CodeTable> data = this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
+        
+        for(CodeTable each :data) {
+            each.setCreateByName(UserContext.getUserNameAndCodeById(each.getCreateBy()));
+            each.setModifyByName(UserContext.getUserNameAndCodeById(each.getModifyBy()));
+        }
+        
+        result.setTotal(total);
+        result.setRows(data);
+        result.setPageIndex(pageIndex);
+        result.setPageSize(pageSize);
+        return result;
+    }
+
+    @Override
+    public void deleteCodeTables(Serializable[] idArray) {
+        this.codeTableDao.deleteByIds(idArray);
+        
+    }
+
+    @Override
+    public void deleteCodeTable(Serializable id) {
+        this.codeTableDao.deleteById(id);
+    }
+
+    @Override
+    public Module findModuleById(String id) {
+        return this.moduleDao.load(id);
+    }
+
+    @Override
+    public Page findPageById(String id) {
+        return this.pageDao.load(id);
+    }
+
+    @Override
+    public void savePage(Page page) {
+        if(page.getModuleId() == null)
+            throw new RuntimeException("Module Id 不能为空");
+        this.pageDao.saveOrUpdate(page);
+        allModules = this.moduleDao.findAllInOrder(); 
+    }
+
+    @Override
+    public void deletePage(Serializable id) {
+        this.pageDao.deleteById(id);
+        allModules = this.moduleDao.findAllInOrder(); 
+    }
+
+    @Override
+    public void saveModule(Module module) {
+        if(module.getId() != null){
+            Set<Page> pages = this.moduleDao.load(module.getId()).getPages();
+            if(module.getPages() == null || module.getPages().isEmpty()) {
+                module.setPages(pages);
+            }
+        }
+        this.moduleDao.saveOrUpdate(module);
+        allModules = this.moduleDao.findAllInOrder(); 
+    }
+
+    @Override
+    public void deleteModule(Serializable id) {
+        Set<Page> pages = this.moduleDao.load(id).getPages();
+        this.pageDao.deleteAll(pages);
+        this.moduleDao.deleteById(id);
+        allModules = this.moduleDao.findAllInOrder(); 
     }
     
     
@@ -168,57 +247,6 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             this.key = codeTable.getKey();
             this.value = codeTable.getValue();
         }
-    }
-
-    @Override
-    public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        PageResponse<CodeTable> result = new PageResponse<>();
-        long total = this.codeTableDao.findCount();
-        List<CodeTable> data = this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
-        
-        for(CodeTable each :data) {
-            each.setCreateByName(UserContext.getUserNameAndCodeById(each.getCreateBy()));
-            each.setModifyByName(UserContext.getUserNameAndCodeById(each.getModifyBy()));
-        }
-        
-        result.setTotal(total);
-        result.setRows(data);
-        result.setPageIndex(pageIndex);
-        result.setPageSize(pageSize);
-        return result;
-    }
-
-    @Override
-    public PageResponse<Module> findModuleByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        PageResponse<Module> result = new PageResponse<>();
-        long total = this.moduleDao.findCount();
-        List<Module> data = this.moduleDao.findModuleByPage(queryRequest, pageIndex, pageSize);
-        
-        result.setTotal(total);
-        result.setRows(data);
-        result.setPageIndex(pageIndex);
-        result.setPageSize(pageSize);
-        return result;
-    }
-
-    @Override
-    public void deleteCodeTables(Serializable[] idArray) {
-        this.codeTableDao.deleteByIds(idArray);
-    }
-
-    @Override
-    public void deleteCodeTable(Serializable id) {
-        this.codeTableDao.deleteById(id);
-    }
-
-    @Override
-    public Module findModuleById(String id) {
-        return this.moduleDao.load(id);
-    }
-
-    @Override
-    public Page findPageById(String id) {
-        return this.pageDao.load(id);
     }
 
 }

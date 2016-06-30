@@ -16,6 +16,8 @@ public interface IBaseDataService extends IBaseService {
     public void loadBaseData();
 
     public List<Module> findAllModule();
+    
+    public List<Module> findAllModuleFromDB();
 
     public void createCodeDict() throws IOException;
     
@@ -27,8 +29,6 @@ public interface IBaseDataService extends IBaseService {
 
     public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
 
-    public PageResponse<Module> findModuleByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
-
     public void deleteCodeTables(Serializable[] idArray);
 
     public void deleteCodeTable(Serializable id);
@@ -36,5 +36,13 @@ public interface IBaseDataService extends IBaseService {
     public Module findModuleById(String id);
 
     public Page findPageById(String id);
+
+    public void savePage(Page page);
+
+    public void deletePage(Serializable id);
+
+    public void saveModule(Module module);
+
+    public void deleteModule(Serializable id);
 
 }

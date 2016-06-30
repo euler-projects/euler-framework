@@ -2,7 +2,6 @@ package net.eulerform.web.module.basedata.entity;
 
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,7 +32,7 @@ public class Module extends UUIDEntity<Module> {
     private Integer showOrder;
     @Column(name = "REQUIRE_AUTHORITY")
     private String requireAuthority;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "MODULE_ID")
     @OrderBy("showOrder ASC")
     public Set<Page> pages;

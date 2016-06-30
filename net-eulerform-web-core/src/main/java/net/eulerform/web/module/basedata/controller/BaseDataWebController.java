@@ -5,10 +5,10 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Scope;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.WebController;
@@ -34,24 +34,14 @@ public class BaseDataWebController extends BaseController {
     }
     
     @RequestMapping(value ="/module",method=RequestMethod.GET)
-    public String module(Model model){
-        List<Module> allModules = this.baseDataService.findAllModule();
-        model.addAllAttributes(allModules);
-        model.addAttribute("menu", allModules);
+    public String module(){
         return "/basedata/module";
-    }
-    
-    @RequestMapping(value ="/page",method=RequestMethod.GET)
-    public String page(){
-        return "/basedata/page";
     }
     
     @ResponseBody
     @RequestMapping(value ="/findAllModules")
-    public PageResponse<Module> findAllModules() {
-        PageResponse<Module> result = new PageResponse<>();
-        result.setRows(this.baseDataService.findAllModule());
-        return result;
+    public List<Module> findAllModules() {
+        return this.baseDataService.findAllModuleFromDB();
     }
     
     @ResponseBody
@@ -64,16 +54,6 @@ public class BaseDataWebController extends BaseController {
     @RequestMapping(value ="/findPageProperties/{id}")
     public Page findPageProperties(@PathVariable("id") String id) {
         return this.baseDataService.findPageById(id);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value ="/findModuleByPage")
-    public PageResponse<Module> findModuleByPage(HttpServletRequest request, String page, String rows) {
-        QueryRequest queryRequest = new QueryRequest(request);
-        
-        int pageIndex = Integer.parseInt(page);
-        int pageSize = Integer.parseInt(rows);
-        return this.baseDataService.findModuleByPage(queryRequest, pageIndex, pageSize);
     }
     
     @ResponseBody
@@ -93,15 +73,39 @@ public class BaseDataWebController extends BaseController {
     }
     
     @ResponseBody
-    @RequestMapping(value ="/delCodeTablesByIds", method = RequestMethod.POST)
-    public void delCodeTablesByIds(String ids) {
+    @RequestMapping(value ="/saveModule", method = RequestMethod.POST)
+    public void saveModule(Module module) {
+        this.baseDataService.saveModule(module);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/deleteModule", method = RequestMethod.POST)
+    public void deleteModule(@RequestParam String id) {
+        this.baseDataService.deleteModule(id);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/savePage", method = RequestMethod.POST)
+    public void savePage(Page page) {
+        this.baseDataService.savePage(page);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/deletePage", method = RequestMethod.POST)
+    public void deletePage(@RequestParam String id) {
+        this.baseDataService.deletePage(id);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/deleteCodeTables", method = RequestMethod.POST)
+    public void deleteCodeTables(@RequestParam String ids) {
         String[] idArray = ids.trim().replace(" ", "").split(",");
         this.baseDataService.deleteCodeTables(idArray);
     }
     
     @ResponseBody
-    @RequestMapping(value ="/delCodeTableById", method = RequestMethod.POST)
-    public void delCodeTableById(String id) {
+    @RequestMapping(value ="/deleteCodeTable", method = RequestMethod.POST)
+    public void deleteCodeTable(@RequestParam String id) {
         this.baseDataService.deleteCodeTable(id);
     }
     

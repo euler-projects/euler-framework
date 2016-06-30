@@ -101,7 +101,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
         for (int i = 0; i < params.length; i++) {
             query.setParameter(i + "", params[i]);
-            System.out.println(params[i]);
         }
 
         query.executeUpdate();
@@ -174,7 +173,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
             hqlBuffer.append("'");
         }
         final String hql = hqlBuffer.toString();
-        System.out.println(hql);
         this.update(hql);
     }
 
