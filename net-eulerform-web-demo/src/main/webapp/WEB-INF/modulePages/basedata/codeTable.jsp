@@ -1,18 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.text.SimpleDateFormat,java.util.Date" %>
 <!DOCTYPE html>
-<html lang="zh-CN">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/themes/metro/easyui.css">
     <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/root/index.css">
     <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/global.css">
 
     <title></title>
-
 
 </head>
 
@@ -47,10 +43,10 @@
                     <td><input class="easyui-datebox" style="width: 150px" id="query_modifyDate" name="query.modifyDate" /></td>
                 </tr>
             </table>
-            <table style="display: inline-block;">
+            <table class="search-btn-table">
                 <tr><td>
-                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-search'" id="search-btn" onclick="doSearch()">搜索</a>
-                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-reload'" id="reset-btn" onclick="doReset()">重置</a>
+                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-search'" id="search-btn" onclick="doSearch()">${euler:i18n('global.search')}</a>
+                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-reload'" id="reset-btn" onclick="doReset()">${euler:i18n('global.search')}</a>
                 </td></tr>
             </table>
         </form>
@@ -58,9 +54,9 @@
     <div data-options="region:'center'" style="background:#eee;">
         
         <div id="toolbar">
-            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="onAdd()">创建</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" id="editBtn" iconCls="icon-edit" plain="true" onclick="onEdit()">编辑</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="onDelete()">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="onAdd()">${euler:i18n('global.add')}</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="editBtn" iconCls="icon-edit" plain="true" onclick="onEdit()">${euler:i18n('global.edit')}</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="onDelete()">${euler:i18n('global.delete')}</a>
         </div>
         <table id="dg" class="easyui-datagrid" 
             data-options="
@@ -91,13 +87,14 @@
                 </tr>
             </thead>
         </table>
-        <div id="dlg" class="easyui-dialog" title="My Dialog" style="width:400px;"
+        <div id="dlg" class="easyui-dialog" style="width:400px;"
                 data-options="
                     closed:true,
                     iconCls:'icon-save',
                     resizable:false,
                     modal:true,
-                    buttons:[{text:'保存', iconCls:'icon-ok', handler:onSave},{text:'取消', iconCls:'icon-cancel', handler:onCancel}]">
+                    onClose:clearDlg,
+                    buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSave},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancel}]">
             <form id="fm" method="post">
                 <input type="hidden" id="dlg_id" name="id">
                 <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.name')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_name" name="name"></div>
@@ -128,50 +125,33 @@
             });
         });
         
-        $.fn.serializeJson=function(){ 
-            var serializeObj={};
-            var array=this.serializeArray();
-            $(array).each(function(){
-                    if(serializeObj[this.name]){
-                          if($.isArray(serializeObj[this.name])){ 
-                              serializeObj[this.name].push(this.value); 
-                          }else{
-                              serializeObj[this.name]=[serializeObj[this.name],this.value]; 
-                          } 
-                    }else{ 
-                        serializeObj[this.name]=this.value;
-                    } 
-            }); 
-            return serializeObj; 
-        };
-        
         function refreshDatagrid(){
             var jsonParam = $('#search-form').serializeJson();
             $('#dg').datagrid('reload', jsonParam);
         }
         
-        function doSearch() {
+        function onSearch() {
             var jsonParam = $('#search-form').serializeJson();
             $('#dg').datagrid('load', jsonParam);            
         }
         
-        function doReset() {
+        function onReset() {
             $('#search-form').form('clear');
         }
         
         function onAdd() {
-            $('#dlg').dialog('open').dialog('setTitle', '创建');
+            $('#dlg').dialog('open').dialog('setTitle', "${euler:i18n('jsp.codeTable.addCodeTable')}");
         }
         
         function onEdit() {
             var row = $('#dg').datagrid('getSelections');
             
             if(row == null || row.length < 1){
-                $.messager.alert('提示', '请选择需要删除的记录');
+                $.messager.alert("${euler:i18n('global.remind')}", "${euler:i18n('global.pleaseSelectRowsToEdit')}");
             } else if(row){
                 $('#fm').form('clear');
                 $('#fm').form('load', row[0]);
-                $('#dlg').dialog('open').dialog('setTitle', '编辑');
+                $('#dlg').dialog('open').dialog('setTitle', "${euler:i18n('jsp.codeTable.editCodeTable')}");
                 
             }
         }
@@ -183,6 +163,7 @@
                     return $(this).form('validate');
                 },
                 success:function(result) {
+                    clearDlg();
                     onClose();
                     refreshDatagrid();
                 }
@@ -193,21 +174,21 @@
             var row = $('#dg').datagrid('getSelections');
             
             if(row == null || row.length < 1){
-                $.messager.alert('提示', '请选择需要删除的记录');
+                $.messager.alert("${euler:i18n('global.remind')}", "${euler:i18n('global.pleaseSelectRowsToDelete')}");
             } else if(row){
-                $.messager.confirm('提示', '确定删除所选记录吗?', function(r) {
+                $.messager.confirm("${euler:i18n('global.warn')}", "${euler:i18n('global.sureToDelete')}", function(r) {
                     if(r) {
                         var ids = "";
                         for(var i = 0; i < row.length; i++){
                             ids += row[i].id + ',';
                         }
                         $.ajax({
-                            url:'delCodeTablesByIds',
+                            url:'deleteCodeTables',
                             type:'POST',
                             async:true,
                             data: "ids=" + ids,
                             error:function() {
-                                $.messager.alert('提示', '删除失败');
+                                $.messager.alert("${euler:i18n('global.warn')}", "${euler:i18n('global.operateFailed')}");
                             },
                             success:function() {
                                 refreshDatagrid();                                    
@@ -219,11 +200,15 @@
         }
         
         function onCancel() {
+            clearDlg();
             onClose();
         }
         
+        function clearDlg(){
+            $('#fm').form('clear');            
+        }
+        
         function onClose(){
-            $('#fm').form('clear');
             $('#dlg').dialog('close');
         }
         

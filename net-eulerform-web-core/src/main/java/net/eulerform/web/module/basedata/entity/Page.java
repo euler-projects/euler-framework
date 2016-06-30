@@ -28,6 +28,8 @@ public class Page extends UUIDEntity<Page> {
     private Integer showOrder;
     @Column(name = "REQUIRE_AUTHORITY")
     private String requireAuthority;
+    @Column(name = "MODULE_ID")
+    private String moduleId;
 
     public String getName() {
         return name;
@@ -79,4 +81,13 @@ public class Page extends UUIDEntity<Page> {
     public void setRequireAuthority(String requireAuthority) {
         this.requireAuthority = requireAuthority;
     }
+
+    public String getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(String moduleId) {
+        this.moduleId = moduleId;
+    }
+    
 }
