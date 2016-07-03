@@ -18,7 +18,6 @@ public class PostLoggingFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		request.setAttribute("currentUser", UserContext.getCurrentUser());
-		request.getServletContext().setAttribute("currentUser", UserContext.getCurrentUser());
 		ThreadContext.put("username", UserContext.getCurrentUser().getUsername());
 		filterChain.doFilter(request, response);
 	}

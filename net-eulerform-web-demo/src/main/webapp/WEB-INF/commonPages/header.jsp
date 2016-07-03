@@ -4,37 +4,37 @@
 <meta http-equiv="X-Frame-Options" content="SAMEORIGIN"> 
 
 <link rel="stylesheet" type="text/css"
-    href="<%=request.getContextPath()%>/resources/css/frame.css" />
+    href="${contextPath}/resources/css/frame.css" />
 <link rel="stylesheet" type="text/css"
-    href="<%=request.getContextPath()%>/resources/css/global.css" />
+    href="${contextPath}/resources/css/global.css" />
 <link rel="stylesheet" type="text/css"
-    href="<%=request.getContextPath()%>/resources/css/header.css" />
+    href="${contextPath}/resources/css/header.css" />
 <link rel="stylesheet" type="text/css"
-    href="<%=request.getContextPath()%>/resources/css/footer.css" />
+    href="${contextPath}/resources/css/footer.css" />
 
 </head>
 <body>
     <div id="__page__">
         <header>
             <div id="siteName">
-                <a href="<%=request.getContextPath()%>/"><div class="euler-formula"></div></a>
+                <a href="${contextPath}/"><div class="euler-formula"></div></a>
             </div>
             <nav>
-                <a href="<%=request.getContextPath()%>/blog/">BLOG</a>
+                <a href="${contextPath}/blog/">BLOG</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;<a
-                    href="<%=request.getContextPath()%>/code/">CODE</a>
+                    href="${contextPath}/code/">CODE</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;<a
-                    href="<%=request.getContextPath()%>/disk/">DISK</a>
+                    href="${contextPath}/disk/">DISK</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;<a
                     href="http://nexus.cfrost.net" target="_Blank">NEXUS</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;<a
                     href="http://mail.cfrost.net" target="_Blank">E-MAIL</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;<a
-                    href="<%=request.getContextPath()%>/about/">ABOUT</a>
+                    href="${contextPath}/about/">ABOUT</a>
             </nav>
             <div id="sFms">
                 <form id="searchForm" method="get"
-                    action="<%=request.getContextPath()%>/doSearch.action">
+                    action="${contextPath}/doSearch.action">
                     <span id="sboxs"><input id="sBox"
                         class="searchBox" type="text" name="search"
                         value="Input to search..."
@@ -59,7 +59,7 @@
                         <li class="child_li"><a
                             href="javascript:void(0);">设置</a></li>
                         <li class="last_child_li"><a
-                            href="<%=request.getContextPath()%>/logout">注销</a></li>
+                            href="${contextPath}/logout">注销</a></li>
                     </ul>
                 </li>
             </div>
