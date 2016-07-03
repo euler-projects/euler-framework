@@ -48,8 +48,9 @@ import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.common.StringTool;
-import net.eulerform.web.core.listener.EulerFormCoreListener;
 import net.eulerform.web.core.filter.CrosFilter;
+import net.eulerform.web.core.filter.EulerFormCoreFilter;
+import net.eulerform.web.core.listener.EulerFormCoreListener;
 
 @Order(0)
 public class EulerFormBootstrap implements WebApplicationInitializer {
@@ -220,6 +221,9 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         springRestDispatcher.setLoadOnStartup(2);
         springRestDispatcher.setMultipartConfig(new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold));        
         springRestDispatcher.addMapping(restRootUrl+"/*");
+        
+        FilterRegistration.Dynamic eulerFormCoreFilter = container.addFilter("eulerFormCoreFilter", new EulerFormCoreFilter());
+        eulerFormCoreFilter.addMappingForUrlPatterns(null, false, "/*");
         
         FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
         crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token");
