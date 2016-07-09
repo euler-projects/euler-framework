@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.service.IBaseService;
@@ -13,36 +15,42 @@ import net.eulerform.web.module.basedata.entity.Page;
 
 public interface IBaseDataService extends IBaseService {
 
-    public void loadBaseData();
+    public void setWebRootRealPath(String webRootRealPath);
 
-    public List<Module> findAllModule();
-    
-    public List<Module> findAllModuleFromDB();
+    public void loadBaseData();
 
     public void createCodeDict() throws IOException;
     
-    public void saveCodeTable(CodeTable codeTable);
-    
     public String findConfigValue(String key);
 
-    public void setWebRootRealPath(String webRootRealPath);
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    public List<Module> findAllModuleFromDB();
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    public void saveCodeTable(CodeTable codeTable);
+
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void deleteCodeTables(Serializable[] idArray);
 
-    public void deleteCodeTable(Serializable id);
-
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public Module findModuleById(String id);
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public Page findPageById(String id);
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void savePage(Page page);
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void deletePage(Serializable id);
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void saveModule(Module module);
 
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void deleteModule(Serializable id);
 
 }

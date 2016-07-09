@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.web.context.ContextLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.eulerform.common.FileReader;
 import net.eulerform.web.core.base.entity.QueryRequest;
@@ -25,13 +27,29 @@ import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 public class BaseDataService extends BaseService implements IBaseDataService {
     
-    private static List<Module> allModules;
     private static ObjectCache<String, CodeTable> allConfigs = new ObjectCache<>(86_400_000L);//所有配置缓存一天
     
     private ICodeTableDao codeTableDao;
     
     private IModuleDao moduleDao;
-    private IPageDao pageDao;     
+    private IPageDao pageDao;
+    
+    private String codeTableJsFilePath = "resources/scripts/lib/common-dict.js";
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private String webRootRealPath;
+
+    @Override
+    public void setWebRootRealPath(String webRootRealPath) {
+        this.webRootRealPath = webRootRealPath;
+    }
+
+    public void setCodeTableJsFilePath(String codeTableJsFilePath) {
+        this.codeTableJsFilePath = codeTableJsFilePath;
+    }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }  
 
     public void setModuleDao(IModuleDao moduleDao) {
         this.moduleDao = moduleDao;
@@ -49,7 +67,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     public void loadBaseData() {
         
         //allModules
-        allModules = this.moduleDao.findAllInOrder(); 
+        this.refreshModules();
         
         //allConfigs
         List<CodeTable> allConfigs = this.codeTableDao.findAllConfig();        
@@ -57,17 +75,8 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             for(CodeTable each : allConfigs){
                 BaseDataService.allConfigs.put(each.getKey(), each);
             }
-        }       
-    }
-
-    @Override
-    public List<Module> findAllModule() {
-        return allModules;
-    }
-
-    @Override
-    public List<Module> findAllModuleFromDB() {
-        return this.moduleDao.findAllInOrder();
+        }
+        
     }
 
     @Override
@@ -85,104 +94,6 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             return null;
         
         return resultCodeTable.getValue();
-    }
-
-    @Override
-    public void saveCodeTable(CodeTable codeTable) {
-        this.codeTableDao.saveOrUpdate(codeTable);
-    }
-
-    @Override
-    public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        PageResponse<CodeTable> result = new PageResponse<>();
-        long total = this.codeTableDao.findCount();
-        List<CodeTable> data = this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
-        
-        for(CodeTable each :data) {
-            each.setCreateByName(UserContext.getUserNameAndCodeById(each.getCreateBy()));
-            each.setModifyByName(UserContext.getUserNameAndCodeById(each.getModifyBy()));
-        }
-        
-        result.setTotal(total);
-        result.setRows(data);
-        result.setPageIndex(pageIndex);
-        result.setPageSize(pageSize);
-        return result;
-    }
-
-    @Override
-    public void deleteCodeTables(Serializable[] idArray) {
-        this.codeTableDao.deleteByIds(idArray);
-        
-    }
-
-    @Override
-    public void deleteCodeTable(Serializable id) {
-        this.codeTableDao.deleteById(id);
-    }
-
-    @Override
-    public Module findModuleById(String id) {
-        return this.moduleDao.load(id);
-    }
-
-    @Override
-    public Page findPageById(String id) {
-        return this.pageDao.load(id);
-    }
-
-    @Override
-    public void savePage(Page page) {
-        if(page.getModuleId() == null)
-            throw new RuntimeException("Module Id 不能为空");
-        this.pageDao.saveOrUpdate(page);
-        allModules = this.moduleDao.findAllInOrder(); 
-    }
-
-    @Override
-    public void deletePage(Serializable id) {
-        this.pageDao.deleteById(id);
-        allModules = this.moduleDao.findAllInOrder(); 
-    }
-
-    @Override
-    public void saveModule(Module module) {
-        if(module.getId() != null){
-            Set<Page> pages = this.moduleDao.load(module.getId()).getPages();
-            if(module.getPages() == null || module.getPages().isEmpty()) {
-                module.setPages(pages);
-            }
-        }
-        this.moduleDao.saveOrUpdate(module);
-        allModules = this.moduleDao.findAllInOrder(); 
-    }
-
-    @Override
-    public void deleteModule(Serializable id) {
-        Set<Page> pages = this.moduleDao.load(id).getPages();
-        this.pageDao.deleteAll(pages);
-        this.moduleDao.deleteById(id);
-        allModules = this.moduleDao.findAllInOrder(); 
-    }
-    
-    
-    //==================================================================================
-    
-    private String codeTableJsFilePath = "resources/scripts/lib/common-dict.js";
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private String webRootRealPath;
-
-    @Override
-    public void setWebRootRealPath(String webRootRealPath) {
-        this.webRootRealPath = webRootRealPath;
-    }
-
-    public void setCodeTableJsFilePath(String codeTableJsFilePath) {
-        this.codeTableJsFilePath = codeTableJsFilePath;
-    }
-
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
     }
     
     @Override
@@ -248,5 +159,85 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             this.value = codeTable.getValue();
         }
     }
+    
+    //==================================================================================
 
+    @Override
+    public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+        PageResponse<CodeTable> result = this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
+        
+        List<CodeTable> rows = result.getRows();
+        
+        for(CodeTable each : rows) {
+            each.setCreateByName(UserContext.getUserNameAndCodeById(each.getCreateBy()));
+            each.setModifyByName(UserContext.getUserNameAndCodeById(each.getModifyBy()));
+        }
+        
+        return result;
+    }
+
+    @Override
+    public List<Module> findAllModuleFromDB() {
+        return this.moduleDao.findAllInOrder();
+    }
+
+    @Override
+    public void saveCodeTable(CodeTable codeTable) {
+        this.codeTableDao.saveOrUpdate(codeTable);
+    }
+
+    @Override
+    public void deleteCodeTables(Serializable[] idArray) {
+        this.codeTableDao.deleteByIds(idArray);
+        
+    }
+
+    @Override
+    public Module findModuleById(String id) {
+        return this.moduleDao.load(id);
+    }
+
+    @Override
+    public Page findPageById(String id) {
+        return this.pageDao.load(id);
+    }
+
+    @Override
+    public void savePage(Page page) {
+        if(page.getModuleId() == null)
+            throw new RuntimeException("Module Id 不能为空");
+        this.pageDao.saveOrUpdate(page);
+        this.refreshModules();
+    }
+
+    @Override
+    public void deletePage(Serializable id) {
+        this.pageDao.deleteById(id);
+        this.refreshModules();
+    }
+
+    @Override
+    public void saveModule(Module module) {
+        if(module.getId() != null){
+            Set<Page> pages = this.moduleDao.load(module.getId()).getPages();
+            if(module.getPages() == null || module.getPages().isEmpty()) {
+                module.setPages(pages);
+            }
+        }
+        this.moduleDao.saveOrUpdate(module);
+        this.refreshModules();
+    }
+
+    @Override
+    public void deleteModule(Serializable id) {
+        Set<Page> pages = this.moduleDao.load(id).getPages();
+        this.pageDao.deleteAll(pages);
+        this.moduleDao.deleteById(id);
+        this.refreshModules();
+    }
+    
+    private void refreshModules(){
+        List<Module> allModules = this.moduleDao.findAllInOrder();
+        ContextLoader.getCurrentWebApplicationContext().getServletContext().setAttribute("menu", allModules);        
+    }
 }

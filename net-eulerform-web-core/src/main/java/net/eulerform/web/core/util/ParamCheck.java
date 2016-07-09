@@ -4,8 +4,6 @@ import net.eulerform.web.core.base.exception.IllegalParamException;
 
 public class ParamCheck {
 
-    public static final String REGEX_YYYY_MM_DD = "[0-9]{4}-[0-9]{2}-[0-9]{2}";
-
     public static void require(String param) {
         if (param == null)
             throw new IllegalParamException("Param is required.");

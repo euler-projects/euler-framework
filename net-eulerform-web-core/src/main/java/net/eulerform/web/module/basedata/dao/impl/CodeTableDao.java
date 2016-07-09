@@ -12,6 +12,7 @@ import org.hibernate.criterion.Restrictions;
 import net.eulerform.common.CalendarTool;
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseModifyInfoDao;
+import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.module.authentication.util.UserContext;
 import net.eulerform.web.module.basedata.dao.ICodeTableDao;
@@ -51,7 +52,7 @@ public class CodeTableDao extends BaseModifyInfoDao<CodeTable> implements ICodeT
     }
 
     @Override
-    public List<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+    public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         try {
             String queryValue = null;

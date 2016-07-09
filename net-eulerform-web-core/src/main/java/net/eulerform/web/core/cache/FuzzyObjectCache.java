@@ -29,8 +29,10 @@
  */
 package net.eulerform.web.core.cache;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -65,7 +67,7 @@ public class FuzzyObjectCache<DATA_T> extends ObjectCache<String, DATA_T> {
      * @param key 缓存索引键值,不区分大小写
      * @return 符合条件的对象集合
      */
-    public Set<DATA_T> getFuzzy(String key){
+    public List<DATA_T> getFuzzy(String key){
         Set<String> keySet = this.dataMap.keySet();
         Set<String> targetKeySet = new HashSet<>();
         for(String each : keySet) {
@@ -81,8 +83,8 @@ public class FuzzyObjectCache<DATA_T> extends ObjectCache<String, DATA_T> {
      * @param keySet 缓存索引键值集合,区分大小写
      * @return 符合条件的对象集合
      */
-    public Set<DATA_T> getAll(Set<String> keySet) {
-        Set<DATA_T> result = new HashSet<>();
+    public List<DATA_T> getAll(Set<String> keySet) {
+        List<DATA_T> result = new ArrayList<>();
         for(String key : keySet) {
             DATA_T data = super.get(key);
             if(data == null){

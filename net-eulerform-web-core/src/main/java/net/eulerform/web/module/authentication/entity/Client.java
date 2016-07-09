@@ -14,6 +14,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import net.eulerform.web.core.base.entity.UUIDEntity;
 
@@ -27,11 +28,15 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     
     private final static Set<GrantedAuthority> DEFAULT_GRANTED_AUTHORITY = new HashSet<>();
 
+    @NotNull
     @Column(name= "CLIENT_ID", nullable = false, unique = true)
     private String clientId;
     
     @Column(name = "CLIENT_SECRET", nullable = false)
     private String clientSecret;
+    
+    @Column(name = "ENABLED", nullable = false)
+    private Boolean enabled;
 
     @Column(name = "ACCESS_TOLEN_LIFE", nullable = false)
     private Integer accessTokenValiditySeconds;
@@ -59,6 +64,9 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     @CollectionTable(name = "SYS_CLIENT_REDIRECT_URI", joinColumns = { @JoinColumn(name = "CLIENT_ID", referencedColumnName = "ID") })
     @Column(name = "REDIRECT_URI")
     private Set<String> registeredRedirectUri;
+    
+    @Column(name="DESCRIPTION")
+    private String description;
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
@@ -66,6 +74,14 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
+    }
+
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public void setResources(Set<Resource> resources) {
@@ -105,6 +121,14 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         return scopes;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String getClientId() {
         return this.clientId;
@@ -119,7 +143,7 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
     public Set<String> getResourceIds() {
         Set<String> result = new HashSet<>();
         for (Resource resource : this.resources) {
-            result.add(resource.getResourceName());
+            result.add(resource.getResourceId());
         }
         return result;
     }
@@ -138,7 +162,14 @@ public class Client extends UUIDEntity<Client> implements ClientDetails {
         return DEFAULT_GRANTED_AUTHORITY;
     }
 
-    public void setAuthorizedGrantTypes(Set<String> authorizedGrantTypes) {
+    public void setAuthorizedGrantTypes(Set<GrantType> grantTypes) {
+        if (grantTypes == null) {
+            this.authorizedGrantTypes = null;
+        }
+        Set<String> authorizedGrantTypes = new HashSet<>();
+        for(GrantType grantType : grantTypes){
+            authorizedGrantTypes.add(grantType.toString());
+        }
         this.authorizedGrantTypes = authorizedGrantTypes;
     }
 

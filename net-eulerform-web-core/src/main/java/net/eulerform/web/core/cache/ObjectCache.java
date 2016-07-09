@@ -47,10 +47,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * @see net.eulerform.web.core.cache.FuzzyObjectCache
  */
 public class ObjectCache<KEY_T, DATA_T> {
-    
     protected final HashMap<KEY_T, DataStore<DATA_T>> dataMap = new HashMap<>();
-    protected final ReentrantLock cacheWritelock = new ReentrantLock();
+
     protected long dataLife;
+
+    protected ReentrantLock cacheWritelock = new ReentrantLock();
 
     /**
      * 新建缓存对象,默认数据生命周期为0s
@@ -88,12 +89,12 @@ public class ObjectCache<KEY_T, DATA_T> {
         if(this.dataLife <= 0)
             return false;
         
-        if (this.cacheWritelock.tryLock()) {
+        if (cacheWritelock.tryLock()) {
             try {
                 this.dataMap.put(key, new DataStore<DATA_T>(data));
                 return true;
             } finally {
-                this.cacheWritelock.unlock();
+                cacheWritelock.unlock();
             }
         }
         return false;
@@ -107,12 +108,12 @@ public class ObjectCache<KEY_T, DATA_T> {
      * @return <code>true</code>表示删除成功,<code>false</code>表示删除失败
      */
     public boolean remove(KEY_T key) {
-        if (this.cacheWritelock.tryLock()) {
+        if (cacheWritelock.tryLock()) {
             try {
                 this.dataMap.remove(key);
                 return true;
             } finally {
-                this.cacheWritelock.unlock();
+                cacheWritelock.unlock();
             }
         }
         return false;

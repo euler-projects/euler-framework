@@ -14,11 +14,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projections;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.common.Generic;
 import net.eulerform.web.core.base.dao.IBaseDao;
 import net.eulerform.web.core.base.entity.BaseEntity;
+import net.eulerform.web.core.base.entity.PageResponse;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
@@ -225,13 +227,18 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+    protected PageResponse<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+        
+        detachedCriteria.setProjection(Projections.rowCount());
+        long total = ((Long)detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list().get(0)).longValue();
+        detachedCriteria.setProjection(null);
+        
         Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
         criteria.setFirstResult((pageIndex - 1) * pageSize);
         criteria.setMaxResults(pageSize);
         List<T> result = criteria.list();
         evict(result);
-        return result;
+        return new PageResponse<>(result, total, pageIndex, pageSize);
     }
 
     @Override

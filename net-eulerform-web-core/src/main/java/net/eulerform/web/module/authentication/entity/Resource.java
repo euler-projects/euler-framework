@@ -3,6 +3,8 @@ package net.eulerform.web.module.authentication.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import net.eulerform.web.core.base.entity.UUIDEntity;
 
@@ -10,17 +12,27 @@ import net.eulerform.web.core.base.entity.UUIDEntity;
 @Entity
 @Table(name="SYS_RESOURCE")
 public class Resource extends UUIDEntity<Resource> {
-    
+
+    @NotNull
+    @Pattern(regexp="[a-zA-Z][a-zA-Z0-9_]*", message="{validation.resource.resourceId}")
+    @Column(name="RESOURCE_ID",nullable=false,unique=true)
+    private String resourceId;
     @Column(name="NAME",nullable=false,unique=true)
-    private String resourceName;
+    private String name;
     @Column(name="DESCRIPTION")
     private String description;
     
-    public String getResourceName() {
-        return resourceName;
+    public String getResourceId() {
+        return resourceId;
     }
-    public void setResourceName(String resourceName) {
-        this.resourceName = resourceName;
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
     public String getDescription() {
         return description;

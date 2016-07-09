@@ -35,7 +35,7 @@ public class QueryRequest {
         for (Map.Entry<String, String[]> entry : map.entrySet()) {
             String key = entry.getKey();
             if(key.startsWith(prefix)) {
-                String value = entry.getValue().length > 0 ? entry.getValue()[0] : null;
+                String value = entry.getValue().length > 0 ? entry.getValue()[0].trim() : null;
                 values.put(key.substring(prefix.length()), value);
             }
         }

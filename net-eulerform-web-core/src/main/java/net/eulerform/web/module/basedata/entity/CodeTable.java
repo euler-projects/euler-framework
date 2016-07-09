@@ -3,6 +3,8 @@ package net.eulerform.web.module.basedata.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import net.eulerform.web.core.base.entity.UUIDModifyInfoEntity;
 
@@ -17,8 +19,10 @@ import net.eulerform.web.core.base.entity.UUIDModifyInfoEntity;
 @Table(name = "SYS_CODE_TABLE")
 public class CodeTable extends UUIDModifyInfoEntity<CodeTable> {
 
+    @NotNull
+    @Pattern(regexp="[a-z][a-zA-Z0-9]*", message="{validation.codeTable.name}")
     @Column(name = "CODE_NAME", nullable = false)
-    private String name;
+    private String name;    
     @Column(name = "CODE_KEY", nullable = false)
     private String key;
     @Column(name = "CODE_VALUE")

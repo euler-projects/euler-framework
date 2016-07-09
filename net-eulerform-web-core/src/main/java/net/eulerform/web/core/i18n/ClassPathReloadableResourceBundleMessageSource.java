@@ -11,7 +11,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
 
-public class ClassPathReloadableResourceBundleMessageSource extends ReloadableResourceBundleMessageSource implements ResourceLoaderAware {
+public class ClassPathReloadableResourceBundleMessageSource extends ReloadableResourceBundleMessageSource
+        implements ResourceLoaderAware {
 
     private static final String PROPERTIES_SUFFIX = ".properties";
 
@@ -21,7 +22,7 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
     public void setBasename(String basename) {
         this.setBasenames(basename);
     }
-    
+
     @Override
     public void setBasenames(String... basenames) {
         if (basenames != null) {
@@ -29,22 +30,22 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
             for (int i = 0; i < basenames.length; i++) {
                 String basename = basenames[i];
                 Assert.hasText(basename, "Basename must not be empty");
-                
-                if(basename.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)){
+
+                if (basename.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
                     Resource[] resources = null;
                     try {
                         resources = this.resourcePatternResolver.getResources(basename.trim() + PROPERTIES_SUFFIX);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    for(Resource resource : resources){
+                    for (Resource resource : resources) {
                         String path = null;
                         try {
                             path = resource.getURI().toString();
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                        String realFileName = path.substring(0, path.length()-PROPERTIES_SUFFIX.length());
+                        String realFileName = path.substring(0, path.length() - PROPERTIES_SUFFIX.length());
                         basenamesList.add(realFileName);
                     }
                 } else {
