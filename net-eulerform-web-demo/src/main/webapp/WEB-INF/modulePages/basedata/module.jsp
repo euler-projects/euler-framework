@@ -5,9 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/themes/metro/easyui.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/global.css">
+    
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/global.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/icon.css">
 
     <title></title>
 
@@ -33,44 +35,46 @@
             <div onclick="onAddPage()" data-options="iconCls:'icon-add'">${euler:i18n('jsp.page.createPage')}</div>
             <div onclick="onRemovePage()" data-options="iconCls:'icon-remove'">${euler:i18n('jsp.page.removepage')}</div>
         </div>
-        <div id="module-dlg" class="easyui-dialog" title="${euler:i18n('jsp.module.createModule')}" style="width:400px;"
+        <div id="module-dlg" class="easyui-dialog dlg-window" title="${euler:i18n('jsp.module.createModule')}" style="width:400px;"
                 data-options="
+                    zIndex:99999999,
                     closed:true,
                     iconCls:'icon-save',
                     resizable:false,
                     modal:true,
                     onClose:clearModuleDlg,
                     buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSaveModuleDlg},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancelModuleDlg}]">
-            <form id="module-fm" method="post">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.name')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_module_name" name="name"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.requireAuthority')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_module_requireAuthority" name="requireAuthority"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.showOrder')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_module_showOrder" name="showOrder"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.description')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_module_description" name="description"></div>
+            <form id="module-fm" class="dlg-form"  method="post">
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_name" name="name"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.requireAuthority')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_requireAuthority" name="requireAuthority"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.showOrder')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_showOrder" name="showOrder"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.description')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" id="dlg_module_description" name="description"></span></div>
             </form>
         </div>
-        <div id="page-dlg" class="easyui-dialog" title="${euler:i18n('jsp.page.createPage')}" style="width:400px;"
+        <div id="page-dlg" class="easyui-dialog dlg-window" title="${euler:i18n('jsp.page.createPage')}" style="width:400px;"
                 data-options="
+                    zIndex:99999999,
                     closed:true,
                     iconCls:'icon-save',
                     resizable:false,
                     modal:true,
                     onClose:clearPageDlg,
                     buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSavePageDlg},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancelPageDlg}]">
-            <form id="page-fm" method="post">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.name')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_page_module_id" data-options="editable:false" name="moduleId"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.name')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_page_name" name="name"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.url')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_page_url" name="url"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.requireAuthority')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_page_requireAuthority" name="requireAuthority"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.showOrder')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_page_showOrder" name="showOrder"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.description')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_page_description" name="description"></div>
+            <form id="page-fm" class="dlg-form"  method="post">
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_module_id" data-options="editable:false" name="moduleId"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_name" name="name"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.url')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_url" name="url"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.requireAuthority')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_requireAuthority" name="requireAuthority"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.showOrder')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_showOrder" name="showOrder"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.description')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" id="dlg_page_description" name="description"></span></div>
             </form>
         </div>
     </div>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/jquery.min.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/common-dict.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/util.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/common-dict.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/util.js"></script>
 
     <script>
         $(function(){
@@ -109,8 +113,10 @@
                             type : "GET",
                             async : true,
                             url : 'findModuleProperties/'+node.id,
-                            dataType: 'json',
-                            success : function(data) {
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
+                            },
+                            success:function(data, textStatus) {
                                 var result = [];
                                 var obj = {};
                                 obj.name="${euler:i18n('module.name')}";
@@ -142,16 +148,17 @@
                                 pgData.type="module";
                                 pgData.id=data.id;
                                 $('#pg').propertygrid('loadData',pgData);
-                            },
-                            error : function() {}
+                            }
                         });
                     } else if("page" == node.type) {
                         $.ajax({
                             type : "GET",
                             async : true,
                             url : 'findPageProperties/'+node.id,
-                            dataType: 'json',
-                            success : function(data) {
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
+                            },
+                            success:function(data, textStatus) {
                                 var result = [];
                                 var obj = {};
                                 obj.name="${euler:i18n('page.name')}";
@@ -190,8 +197,7 @@
                                 pgData.id=data.id;
                                 pgData.moduleId = data.moduleId;
                                 $('#pg').propertygrid('loadData',pgData);
-                            },
-                            error : function() {}
+                            }
                         });
                     }
                 },
@@ -226,7 +232,11 @@
                 onSumit:function(){
                     return $(this).form('validate');
                 },
-                success:function(result) {
+                success:function(data) {
+                    if(data) {
+                        $.messager.alert("${euler:i18n('global.error')}", data);
+                        return;
+                    }
                     $('#module-tree').tree('reload');
                     clearModuleDlg();
                     onCloseModuleDlg();
@@ -258,10 +268,10 @@
                             type:'POST',
                             async:true,
                             data: "id=" + node.id,
-                            error:function() {
-                                $.messager.alert("${euler:i18n('global.warn')}", "${euler:i18n('global.operateFailed')}");
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
                             },
-                            success:function() {
+                            success:function(data, textStatus) {
                                 $('#module-tree').tree('reload');                                  
                             }
                         });
@@ -289,7 +299,11 @@
                 onSumit:function(){
                     return $(this).form('validate');
                 },
-                success:function(result) {
+                success:function(data) {
+                    if(data) {
+                        $.messager.alert("${euler:i18n('global.error')}", data);
+                        return;
+                    }
                     $('#module-tree').tree('reload');
                     clearPageDlg();
                     onClosePageDlg();
@@ -321,10 +335,10 @@
                             type:'POST',
                             async:true,
                             data: "id=" + node.id,
-                            error:function() {
-                                $.messager.alert("${euler:i18n('global.warn')}", "${euler:i18n('global.operateFailed')}");
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
                             },
-                            success:function() {
+                            success:function(data, textStatus) {
                                 $('#module-tree').tree('reload');                                  
                             }
                         });
@@ -354,10 +368,10 @@
                 type:'POST',
                 async:true,
                 data: a,
-                error:function() {
-                    $.messager.alert("${euler:i18n('global.warn')}", "${euler:i18n('global.operateFailed')}");
+                error:function(XMLHttpRequest, textStatus, errorThrown) {
+                    $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
                 },
-                success:function() {
+                success:function(data, textStatus) {
                     $('#module-tree').tree('reload');
                 }
             });
@@ -375,10 +389,10 @@
                 type:'POST',
                 async:true,
                 data: a,
-                error:function() {
-                    $.messager.alert("${euler:i18n('global.warn')}", "${euler:i18n('global.operateFailed')}");
+                error:function(XMLHttpRequest, textStatus, errorThrown) {
+                    $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
                 },
-                success:function() {
+                success:function(data, textStatus) {
                     $('#module-tree').tree('reload');
                 }
             });

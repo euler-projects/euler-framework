@@ -62,7 +62,7 @@ public class EulerFormCoreListener implements ServletContextListener {
             temp = FilePathTool.changeToUnixFormat(GlobalProperties.get("web.jspPath"));
         } catch (GlobalPropertyReadException e) {
             temp = "/WEB-INF/modulePages";
-            log.info("Couldn't load web.jspPath , use '/WEB-INF/modulePages' for default.");
+            log.warn("Couldn't load web.jspPath , use '/WEB-INF/modulePages' for default.");
         }
         MODULE_JSP_FOLDER = temp;
     }

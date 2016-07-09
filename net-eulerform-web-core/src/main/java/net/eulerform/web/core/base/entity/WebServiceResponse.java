@@ -19,13 +19,36 @@ import org.springframework.http.HttpStatus;
  *            例如Object和List&lt;Object&gt;均只需指定为WebServiceResponse&lt;Object&gt;
  */
 @XmlRootElement
-public class WebServiceResponse<T> {
+public class WebServiceResponse<T> extends HttpStatusResponse {
 
     /**
      * 新建空实体,状态代码默认为204 No Content
      */
     public WebServiceResponse() {
+        super();
         this.setStatusToNoContent();
+    }
+
+    /**
+     * 新建空实体,并指定标准HTTP状态码{@link HttpStatus}
+     * 
+     * @param httpStatus
+     *            标准HTTP状态码
+     */
+    public WebServiceResponse(HttpStatus httpStatus) {
+        this.data = null;
+        this.dataSize = 0;
+        this.setStatus(httpStatus);
+    }
+
+    /**
+     * 新建空实体,并指定非标准HTTP状态码和非标准HTTP状态信息
+     * 
+     * @param statusCode 状态码
+     * @param statusInfo 状态信息
+     */
+    public WebServiceResponse(int statusCode, String statusInfo) {
+        super(statusCode, statusInfo);
     }
 
     /**
@@ -59,32 +82,6 @@ public class WebServiceResponse<T> {
     }
 
     /**
-     * 新建单个对象实体,并指定非标准HTTP状态码{@link WebServiceResponseStatus}
-     * 
-     * @param data
-     *            返回数据
-     * @param webServiceResponseStatus
-     *            非标准HTTP状态码
-     */
-    public WebServiceResponse(T data, WebServiceResponseStatus webServiceResponseStatus) {
-        this.setData(data);
-        this.setStatus(webServiceResponseStatus);
-    }
-
-    /**
-     * 新建容器实体,并指定非标准HTTP状态码{@link WebServiceResponseStatus}
-     * 
-     * @param data
-     *            返回数据容器
-     * @param webServiceResponseStatus
-     *            非标准HTTP状态码
-     */
-    public WebServiceResponse(List<T> data, WebServiceResponseStatus webServiceResponseStatus) {
-        this.setData(data);
-        this.setStatus(webServiceResponseStatus);
-    }
-
-    /**
      * 新建单个对象实体,并指定标准HTTP状态码{@link HttpStatus}
      * 
      * @param data
@@ -111,36 +108,34 @@ public class WebServiceResponse<T> {
     }
 
     /**
-     * 新建空实体,并指定标准HTTP状态码{@link HttpStatus}
+     * 新建单个对象实体,并指定非标准HTTP状态码和非标准HTTP状态信息
      * 
-     * @param httpStatus
-     *            标准HTTP状态码
+     * @param data
+     *            返回数据
+     * @param statusCode 状态码
+     * @param statusInfo 状态信息
      */
-    public WebServiceResponse(HttpStatus httpStatus) {
-        this.data = null;
-        this.dataSize = 0;
-        this.setStatus(httpStatus);
+    public WebServiceResponse(T data, int statusCode, String statusInfo) {
+        this(statusCode, statusInfo);
+        this.setData(data);
     }
 
     /**
-     * 新建空实体,并指定非标准HTTP状态码{@link WebServiceResponseStatus}
+     * 新建容器实体,并指定非标准HTTP状态码和非标准HTTP状态信息
      * 
-     * @param webServiceResponseStatus
-     *            非标准HTTP状态码
+     * @param data
+     *            返回数据容器
+     * @param statusCode 状态码
+     * @param statusInfo 状态信息
      */
-    public WebServiceResponse(WebServiceResponseStatus webServiceResponseStatus) {
-        this.data = null;
-        this.dataSize = 0;
-        this.setStatus(webServiceResponseStatus);
+    public WebServiceResponse(List<T> data, int statusCode, String statusInfo) {
+        this(statusCode, statusInfo);
+        this.setData(data);
     }
 
     private List<T> data;
 
     private Integer dataSize;
-
-    private Integer statusCode;
-
-    private String statusInfo;
 
     private Date returnDate;
 
@@ -168,31 +163,6 @@ public class WebServiceResponse<T> {
     @XmlElement
     public List<T> getData() {
         return data;
-    }
-
-    @XmlElement
-    public Integer getStatusCode() {
-        return statusCode;
-    }
-
-    @XmlElement
-    public String getStatusInfo() {
-        return statusInfo;
-    }
-
-    public void setStatus(HttpStatus httpStatus) {
-        this.statusCode = httpStatus.value();
-        this.statusInfo = httpStatus.getReasonPhrase();
-    }
-
-    public void setStatus(WebServiceResponseStatus webServiceResponseStatus) {
-        this.statusCode = webServiceResponseStatus.getStatusCode();
-        this.statusInfo = webServiceResponseStatus.getStatusInfo();
-    }
-
-    public void setStatus(int statusCode, String statusInfo) {
-        this.statusCode = statusCode;
-        this.statusInfo = statusInfo;
     }
 
     @XmlElement

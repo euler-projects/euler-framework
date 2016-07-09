@@ -1,26 +1,26 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.text.SimpleDateFormat,java.util.Date" %>
 <!DOCTYPE html>
-<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
-<link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
-<link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/root/index.css">
-<link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/global.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/global.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/icon.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/root/index.css">
 
-<title></title>
-
+    <title>${euler:i18n('global.websiteTitle')}</title>
 
 </head>
 
 <body class="easyui-layout">
     <div id="header-zone" data-options="region:'north',split:false,collapsible:false">
         <div id="header">
-            <span id="site-title"><a href="<%=request.getContextPath()%>/"><span class="euler-formula"></span></a></span>
+                        <span id="site-title"><a href="${contextPath}/"><span class="euler-formula"></span></a></span>
             <span id="user-info" style="position:absolute;right:3px;">
-                <span>${currentUser.empName}(${currentUser.username})</span>&nbsp;&nbsp;<span><a href="<c:url value="/logout"/>">退出系统</a></span>
+                <span>${currentUser.empName}(${currentUser.username})</span>&nbsp;&nbsp;<span><a href="${contextPath}/logout">${euler:i18n('global.logout')}</a></span>
             </span>
         </div>
     </div>
@@ -28,7 +28,7 @@
         <div id="footer">Version 0.0.2 &copy;<%=new SimpleDateFormat("yyyy").format(new Date()) %>&nbsp;cFrost&nbsp;<a id="icp"
                 href="http://www.miitbeian.gov.cn" target="_Blank">粤ICP备15054669号</a></div>
     </div>
-    <div id="menu-zone" data-options="region:'west',title:'功能导航',split:false">
+    <div id="menu-zone" data-options="region:'west',title:'${euler:i18n('global.menu')}',split:false">
         <div id="sys-menu" class="easyui-accordion" style="width:100%;height:100%;border:0">
             <c:forEach items="${menu}" var="module">    
                 <security:authorize access="hasAnyAuthority('${module.requireAuthority},ADMIN') ">           
@@ -45,9 +45,9 @@
     </div>
     <div id="content-zone"  data-options="region:'center',split:false">
         <div id="main-content" class="easyui-tabs" data-options="collapsible:false" style="width:100%;height:100%;">
-            <div id="index-tab" title="欢迎" data-options="closable:true">
-                <h3 style="color:#0099FF;">欧拉框架</h3>
-                <p></p>
+            <div id="index-tab" title="${euler:i18n('global.welcome')}" data-options="closable:true">
+                <h3 style="color:#0099FF;">${euler:i18n('global.welcomeTitle')}</h3>
+                <p>${euler:i18n('global.welcomeInfo')}</p>
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
     
     <script>
         
-        function addTab(url, title){
+        function addTab(url, title) {
             
             var html = '<iframe width="100%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0" allowtransparency="yes" src="'+url+'"></iframe>';
             var exists = $('#main-content').tabs('exists', title);
@@ -68,16 +68,17 @@
                     options: {
                         title: title,
                         content:html,
-                        //href: url  // the new content URL
                     }
                 });
                 return;
-            }     
+            }
+            
             $('#main-content').tabs('add',{
                 title:title,
                 content:html,
                 closable:true
             });
+            
         }
     </script>
 </body>

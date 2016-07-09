@@ -79,6 +79,8 @@ public class UserContext {
 
     public static String getUserNameAndCodeById(Serializable id) {
         User user = getUserById(id);
+        if(user == null)
+            return "UNKOWN-"+id;
         return user.getEmpName()+"("+user.getUsername()+")";
     }
 

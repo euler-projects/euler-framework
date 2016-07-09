@@ -19,6 +19,10 @@
     text-decoration:none; 
 }
 
+#footer > a{
+    color: #444;
+}
+
 #site-title{
     width:200px;
 }
@@ -72,11 +76,6 @@
     text-decoration:none;
 }
 
-.icon-module-menu {
-    background: url('../icons/module-menu.png') no-repeat center center;
-    background-size: 70% 70%;
-}
-
 #main-content > .tabs-panels > .panel > .panel-body,
 #header-zone,
 #footer-zone,
@@ -109,7 +108,7 @@
     width:200px;
     margin-top:10px;
     margin-bottom:10px;
-    background-image:url(../../../../images/Euler-Formula.png);
+    background-image:url(Euler-Formula.png);
     background-repeat:no-repeat;
     background-size:contain;
     display:inline-block;

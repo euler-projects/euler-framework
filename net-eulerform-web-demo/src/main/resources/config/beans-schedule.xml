@@ -14,21 +14,21 @@
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
     
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="startupDelay" value="10"/>
+        <property name="startupDelay" value="60"/>
+        <property name="autoStartup" value="${schedule.autoStartup}"/>
         <property name="triggers">  
-            <list>  
-                <!-- <ref bean="demoTrigger" /> -->
+            <list>
             </list>  
         </property>  
     </bean>
     
-    <bean id="job" class="net.eulerform.web.module.authentication.schedule.SecurityMethodInvokingJobDetailFactoryBean">  
-        <property name="targetObject" ref="taskJob" />
-        <property name="targetMethod" value="job" />
+    <!-- <bean id="XXX" class="net.eulerform.web.module.authentication.schedule.SecurityMethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject" ref="xxxTask" />
+        <property name="targetMethod" value="xxx />
     </bean>
-    <bean id="demoTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
-        <property name="jobDetail" ref="job" />  
-        <property name="cronExpression" value="*/2 * * * * ?" /> 
-    </bean>
+    <bean id="employeeTaskJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail" ref="XXX" />
+        <property name="cronExpression" value="0 0 8 * * ?" />
+    </bean> -->
     
 </beans>

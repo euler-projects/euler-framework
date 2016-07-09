@@ -4,7 +4,6 @@
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:tx="http://www.springframework.org/schema/tx"
-    xmlns:task="http://www.springframework.org/schema/task"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
@@ -12,20 +11,8 @@
            http://www.springframework.org/schema/aop
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
-           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-           http://www.springframework.org/schema/task
-           http://www.springframework.org/schema/task/spring-task-4.2.xsd">
-    
-    <bean id="blogService" class="net.eulerform.web.module.demo.service.impl.BlogService">
-        <property name="blogDao" ref="blogDao"/>
-    </bean>
-    <bean id="blogDao" class="net.eulerform.web.module.demo.dao.impl.BlogDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    
-    <bean id="taskJob" class="net.eulerform.web.module.demo.task.Job"/>  
-    
+           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
     <import resource="beans-database.xml"/>
-    <import resource="beans-schedule.xml"/>  
-    
+    <import resource="beans-schedule.xml"/>
 </beans>

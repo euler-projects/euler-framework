@@ -10,8 +10,8 @@
                                  http://www.springframework.org/schema/security/oauth2
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
     
-    <http security="none" pattern="/getToken.html" />
-    <http security="none" pattern="/maoc-html/**" />
+    <http security="none" pattern="/index.html" />
+    <http security="none" pattern="/app/**" />
     <http security="none" pattern="/htmls/**" />
 
 </beans:beans>

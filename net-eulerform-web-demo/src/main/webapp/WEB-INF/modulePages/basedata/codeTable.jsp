@@ -4,9 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/themes/metro/easyui.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/lib/easyui/global.css">
+    
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/global.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/icon.css">
 
     <title></title>
 
@@ -19,34 +21,34 @@
             <table class="search-table">
                 <tr>
                     <td>${euler:i18n('codeTable.name')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_name" name="query.name" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_name" name="query.name" /></td>
                     <td>${euler:i18n('codeTable.codeType')}</td>
-                    <td><input class="easyui-combobox" style="width: 150px" id="query_codeType" name="query.codeType"
+                    <td><input class="easyui-combobox search-input" id="query_codeType" name="query.codeType"
                             data-options="panelHeight:'auto',panelMaxHeight:'200px'" /></td>
                     <td>${euler:i18n('codeTable.description')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_description" name="query.description" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_description" name="query.description" /></td>
                 </tr>
                 <tr>
                     <td>${euler:i18n('codeTable.value')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_value" name="query.value" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_value" name="query.value" /></td>
                     <td>${euler:i18n('codeTable.valueZhCn')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_valueZhCn" name="query.valueZhCn" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_valueZhCn" name="query.valueZhCn" /></td>
                     <td>${euler:i18n('codeTable.valueEnUs')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_valueEnUs" name="query.valueEnUs" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_valueEnUs" name="query.valueEnUs" /></td>
                 </tr>
                 <tr>
                     <td>${euler:i18n('createPerson')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_createBy" name="query.createBy" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_createBy" name="query.createBy" /></td>
                     <td>${euler:i18n('lastModifyPerson')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_modifyBy" name="query.modifyBy" /></td>
+                    <td><input class="easyui-textbox search-input" id="query_modifyBy" name="query.modifyBy" /></td>
                     <td>${euler:i18n('lastModifyDate')}</td>
-                    <td><input class="easyui-datebox" style="width: 150px" id="query_modifyDate" name="query.modifyDate" /></td>
+                    <td><input class="easyui-datebox search-input" id="query_modifyDate" name="query.modifyDate" /></td>
                 </tr>
             </table>
             <table class="search-btn-table">
                 <tr><td>
-                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-search'" id="search-btn" onclick="doSearch()">${euler:i18n('global.search')}</a>
-                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-reload'" id="reset-btn" onclick="doReset()">${euler:i18n('global.search')}</a>
+                <a class="easyui-linkbutton search-btn" data-options="iconCls:'icon-search'" id="search-btn" onclick="onSearch()">${euler:i18n('global.search')}</a>
+                <a class="easyui-linkbutton search-btn" data-options="iconCls:'icon-reload'" id="reset-btn" onclick="onReset()">${euler:i18n('global.reset')}</a>
                 </td></tr>
             </table>
         </form>
@@ -87,32 +89,33 @@
                 </tr>
             </thead>
         </table>
-        <div id="dlg" class="easyui-dialog" style="width:400px;"
+        <div id="dlg" class="easyui-dialog dlg-window" style="width:400px;"
                 data-options="
+                    zIndex:99999999,
                     closed:true,
                     iconCls:'icon-save',
                     resizable:false,
                     modal:true,
                     onClose:clearDlg,
                     buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSave},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancel}]">
-            <form id="fm" method="post">
+            <form id="fm" class="dlg-form" method="post">
                 <input type="hidden" id="dlg_id" name="id">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.name')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_name" name="name"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.codeType')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_codeType" name="codeType"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.key')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_key" name="key"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.value')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_value" name="value"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.valueZhCn')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_value" name="valueZhCn"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.valueEnUs')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_value" name="valueEnUs"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.showOrder')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_showOrder" name="showOrder"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.description')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_description" name="description"></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_name" name="name"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.codeType')}</label><span class="dlg_span"><input class="easyui-combobox dlg-input" data-options="required:true,panelHeight:'auto',panelMaxHeight:'200px'" id="dlg_codeType" name="codeType"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.key')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_key" name="key"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.value')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_value" name="value"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.valueZhCn')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:false" id="dlg_value" name="valueZhCn"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.valueEnUs')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:false" id="dlg_value" name="valueEnUs"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.showOrder')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:false" id="dlg_showOrder" name="showOrder"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.description')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:false" id="dlg_description" name="description"></span></div>
             </form>
         </div>
     </div>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/jquery.min.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/common-dict.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/util.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/common-dict.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/util.js"></script>
 
     <script>
         $(function(){ 
@@ -122,6 +125,13 @@
                 textField:'value',
                 editable:false,
                 data:getDictData(codeType, 'all')
+            });
+            
+            $('#dlg_codeType').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(codeType)
             });
         });
         
@@ -162,7 +172,11 @@
                 onSumit:function(){
                     return $(this).form('validate');
                 },
-                success:function(result) {
+                success:function(data) {
+                    if(data) {
+                        $.messager.alert("${euler:i18n('global.error')}", data);
+                        return;
+                    }
                     clearDlg();
                     onClose();
                     refreshDatagrid();
@@ -180,17 +194,17 @@
                     if(r) {
                         var ids = "";
                         for(var i = 0; i < row.length; i++){
-                            ids += row[i].id + ',';
+                            ids += row[i].id + ';';
                         }
                         $.ajax({
                             url:'deleteCodeTables',
                             type:'POST',
                             async:true,
                             data: "ids=" + ids,
-                            error:function() {
-                                $.messager.alert("${euler:i18n('global.warn')}", "${euler:i18n('global.operateFailed')}");
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
                             },
-                            success:function() {
+                            success:function(data, textStatus) {
                                 refreshDatagrid();                                    
                             }
                         });

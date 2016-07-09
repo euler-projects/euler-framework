@@ -138,12 +138,17 @@
             <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="save*" />
             <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="create*" />
             <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="delete*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="update*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" name="*RWT" />
             <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" read-only="true" name="load*" />
             <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" read-only="true" name="find*" />
+            <tx:method propagation="REQUIRED" isolation="DEFAULT" rollback-for="Exception" read-only="true" name="*RT" />
         </tx:attributes>
     </tx:advice>
     <aop:config>
-            <aop:advisor pointcut="execution(* net.eulerform.web..service..*.*(..))" advice-ref="txAdvice" />
+            <aop:advisor advice-ref="txAdvice" 
+            			 pointcut="execution(* net.eulerform.web..service..*.*(..)) or
+                                   execution(* **.web..service..*.*(..))" />
     </aop:config>
 
 </beans>

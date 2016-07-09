@@ -1,0 +1,83 @@
+/*全局字体，颜色_BEGIN*/
+body {
+    font-family: arial, 'Microsoft YaHei';
+}
+
+#search-form {
+    width:100%;
+    background-color: #eee;
+    font-size:12px;
+}
+
+.search-table{
+    margin:2px 2px 0px 2px;
+    display: inline-block;
+}
+
+.search-btn-table{
+    display: inline-block;
+}
+
+.dlg-window{
+}
+
+.dlg-form{
+    display:table;
+    width: auto;
+    margin-left:auto;
+    margin-right:auto;
+}
+.dlg_line {
+    width: 100%;
+    text-align:center;
+    display:table-row;
+    height: 30px;
+}
+
+.hidden_line{
+    display:none;
+}
+
+.dlg_label {
+    display:table-cell;
+    text-align:left;
+    width:auto;
+    padding-left:6px;
+    padding-right:6px;
+    vertical-align: middle;
+}
+
+.dlg_span{
+    display:table-cell;
+    text-align:center;
+    width:auto;
+    padding-left:6px;
+    padding-right:6px;
+    vertical-align: middle;
+}
+
+.dlg-input{
+    display:table-cell;
+    text-align:center;
+    width: 150px;
+}
+
+.search-input{
+    width: 150px;    
+}
+
+.search-btn {
+    width: 90px;
+}
+
+.panel-body {
+    border-color:#eee;
+}
+
+a {
+    text-decoration:none;
+}
+
+a:hover{
+    text-decoration:underline;
+}

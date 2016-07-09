@@ -1,18 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.text.SimpleDateFormat,java.util.Date" %>
 <!DOCTYPE html>
-<html lang="zh-CN">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="../resources/themes/metro/easyui.css">
-    <link rel="stylesheet" type="text/css" href="../resources/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/root/index.css">
-    <link rel="stylesheet" type="text/css" href="../resources/css/global.css">
+    
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/global.css">
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/icon.css">
 
     <title></title>
-
 
 </head>
 
@@ -22,245 +20,368 @@
         <form id="search-form">
             <table class="search-table">
                 <tr>
-                    <td>${euler:i18n('codeTable.name')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_name" name="query.name" /></td>
-                    <td>${euler:i18n('codeTable.codeType')}</td>
-                    <td><input class="easyui-combobox" style="width: 150px" id="query_codeType" name="query.codeType"
+                    <td>${euler:i18n('user.username')}</td>
+                    <td><input class="easyui-textbox search-input" id="query_username" name="query.username" /></td>
+                    <td>${euler:i18n('user.empName')}</td>
+                    <td><input class="easyui-textbox search-input" id="query_empName" name="query.empName" /></td>
+                    <td>${euler:i18n('user.enabled')}</td>
+                    <td><input class="easyui-combobox search-input" id="query_enabled" name="query.enabled"
                             data-options="panelHeight:'auto',panelMaxHeight:'200px'" /></td>
-                    <td>${euler:i18n('codeTable.description')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_description" name="query.description" /></td>
                 </tr>
-                <tr>
-                    <td>${euler:i18n('codeTable.value')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_value" name="query.value" /></td>
-                    <td>${euler:i18n('codeTable.valueZhCn')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_valueZhCn" name="query.valueZhCn" /></td>
-                    <td>${euler:i18n('codeTable.valueEnUs')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_valueEnUs" name="query.valueEnUs" /></td>
-                </tr>
-                <tr>
-                    <td>${euler:i18n('createPerson')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_createBy" name="query.createBy" /></td>
-                    <td>${euler:i18n('lastModifyPerson')}</td>
-                    <td><input class="easyui-textbox" style="width: 150px" id="query_modifyBy" name="query.modifyBy" /></td>
-                    <td>${euler:i18n('lastModifyDate')}</td>
-                    <td><input class="easyui-datebox" style="width: 150px" id="query_modifyDate" name="query.modifyDate" /></td>
-                </tr>
+                <%-- <tr>
+                    <td>${euler:i18n('user.accountNonExpired')}</td>
+                    <td><input class="easyui-combobox search-input" id="query_accountNonExpired" name="query.accountNonExpired"
+                            data-options="panelHeight:'auto',panelMaxHeight:'200px'" /></td>
+                    <td>${euler:i18n('user.accountNonLocked')}</td>
+                    <td><input class="easyui-combobox search-input" id="query_accountNonLocked" name="query.accountNonLocked"
+                            data-options="panelHeight:'auto',panelMaxHeight:'200px'" /></td>
+                    <td>${euler:i18n('user.credentialsNonExpired')}</td>
+                    <td><input class="easyui-combobox search-input" id="query_credentialsNonExpired" name="query.credentialsNonExpired"
+                            data-options="panelHeight:'auto',panelMaxHeight:'200px'" /></td>
+                </tr> --%>
             </table>
-            <table style="display: inline-block;">
+            <table class="search-btn-table">
                 <tr><td>
-                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-search'" id="search-btn" onclick="doSearch()">搜索</a>
-                <a class="easyui-linkbutton" style="width: 90px;" data-options="iconCls:'icon-reload'" id="reset-btn" onclick="doReset()">重置</a>
+                <a class="easyui-linkbutton search-btn" data-options="iconCls:'icon-search'" id="search-btn" onclick="onSearch()">${euler:i18n('global.search')}</a>
+                <a class="easyui-linkbutton search-btn" data-options="iconCls:'icon-reload'" id="reset-btn" onclick="onReset()">${euler:i18n('global.reset')}</a>
                 </td></tr>
             </table>
         </form>
     </div>
     <div data-options="region:'center'" style="background:#eee;">
-        
+
         <div id="toolbar">
-            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="onAdd()">创建</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" id="editBtn" iconCls="icon-edit" plain="true" onclick="onEdit()">编辑</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="onDelete()">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="onAdd()">${euler:i18n('global.add')}</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="editBtn" iconCls="icon-ok" plain="true" onclick="onEnable()">${euler:i18n('global.enable')}</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" plain="true" onclick="onDisable()">${euler:i18n('global.disable')}</a>
         </div>
-        <table id="dg" class="easyui-datagrid" 
+        <table id="dg" class="easyui-datagrid"
             data-options="
                 fit:true,
-                url:'findCodeTableByPage',
+                url:'findUserByPage',
                 toolbar:'#toolbar',
                 fitColumns:false,
                 rownumbers:true,
                 remoteSort:false,
                 pagination:true,
-                singleSelect:false,
-                onDblClickRow:onDblClickRow">
+                singleSelect:true,
+                onClickRow:onClickRow">
             <thead>
                 <tr>
-                    <th data-options="field:'ck', checkbox:true"></th>
                     <th data-options="field:'id',hidden:true">ID</th>
-                    <th data-options="field:'name',align:'center'">${euler:i18n('codeTable.name')}</th>
-                    <th data-options="field:'codeType',align:'center',formatter:codeTypeFormatter">${euler:i18n('codeTable.codeType')}</th>
-                    <th data-options="field:'key',align:'center'">${euler:i18n('codeTable.key')}</th>
-                    <th data-options="field:'value',align:'center'">${euler:i18n('codeTable.value')}</th>
-                    <th data-options="field:'valueZhCn',align:'center'">${euler:i18n('codeTable.valueZhCn')}</th>
-                    <th data-options="field:'valueEnUs',align:'center'">${euler:i18n('codeTable.valueEnUs')}</th>
-                    <th data-options="field:'showOrder',align:'center'">${euler:i18n('codeTable.showOrder')}</th>
-                    <th data-options="field:'description',align:'center'">${euler:i18n('codeTable.description')}</th>
-                    <th data-options="field:'createByName',align:'center'">${euler:i18n('createPerson')}</th>
-                    <th data-options="field:'modifyByName',align:'center'">${euler:i18n('lastModifyPerson')}</th>
-                    <th data-options="field:'modifyDate',align:'center',formatter:unixDateFormatter">${euler:i18n('lastModifyDate')}</th>
+                    <th data-options="field:'username',align:'center',width:'120px'">${euler:i18n('user.username')}</th>
+                    <th data-options="field:'empName',align:'center',width:'120px'">${euler:i18n('user.empName')}</th>
+                    <th data-options="field:'enabled',align:'center',width:'60px',formatter:yesOrNoFormatter">${euler:i18n('user.enabled')}</th>
+                    <%-- <th data-options="field:'accountNonExpired',align:'center'">${euler:i18n('user.accountNonExpired')}</th>
+                    <th data-options="field:'accountNonLocked',align:'center'">${euler:i18n('user.accountNonLocked')}</th>
+                    <th data-options="field:'credentialsNonExpired',align:'center'">${euler:i18n('user.credentialsNonExpired')}</th> --%>
                 </tr>
             </thead>
         </table>
-        <div id="dlg" class="easyui-dialog" title="My Dialog" style="width:400px;"
+        <div id="dlg" class="easyui-dialog dlg-window" style="width:400px;"
                 data-options="
+                    zIndex:99999999,
                     closed:true,
                     iconCls:'icon-save',
                     resizable:false,
                     modal:true,
-                    buttons:[{text:'保存', iconCls:'icon-ok', handler:onSave},{text:'取消', iconCls:'icon-cancel', handler:onCancel}]">
-            <form id="fm" method="post">
+                    onClose:clearDlg,
+                    buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSave},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancel}]">
+            <form id="fm" class="dlg-form" method="post">
                 <input type="hidden" id="dlg_id" name="id">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.name')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_name" name="name"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.codeType')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_codeType" name="codeType"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.key')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_key" name="key"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.value')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_value" name="value"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.valueZhCn')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_value" name="valueZhCn"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.valueEnUs')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_value" name="valueEnUs"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.showOrder')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_showOrder" name="showOrder"></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('codeTable.description')}</label><input class="easyui-textbox" style="width: 150px" id="dlg_description" name="description"></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('user.username')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_username" name="username"></span></div>
+                <div class="dlg_line"><label class="dlg_label">${euler:i18n('user.empName')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_empName" name="empName"></span></div>
+                <div class="dlg_line hidden_line"><label class="dlg_label">${euler:i18n('user.enabled')}</label><span class="dlg_span"><input class="easyui-combobox dlg-input" data-options="panelHeight:'auto',panelMaxHeight:'200px',required:true" id="dlg_enabled" name="enabled"></span></div>
+                <div class="dlg_line hidden_line"><label class="dlg_label">${euler:i18n('user.accountNonExpired')}</label><span class="dlg_span"><input class="easyui-combobox dlg-input" data-options="panelHeight:'auto',panelMaxHeight:'200px',required:true" id="dlg_accountNonExpired" name="accountNonExpired"></span></div>
+                <div class="dlg_line hidden_line"><label class="dlg_label">${euler:i18n('user.accountNonLocked')}</label><span class="dlg_span"><input class="easyui-combobox dlg-input" data-options="panelHeight:'auto',panelMaxHeight:'200px',required:true" id="dlg_accountNonLocked" name="accountNonLocked"></span></div>
+                <div class="dlg_line hidden_line"><label class="dlg_label">${euler:i18n('user.credentialsNonExpired')}</label><span class="dlg_span"><input class="easyui-combobox dlg-input" data-options="panelHeight:'auto',panelMaxHeight:'200px',required:true" id="dlg_credentialsNonExpired" name="credentialsNonExpired"></span></div>
             </form>
         </div>
     </div>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/jquery.min.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/common-dict.js"></script>
-    <script type="text/javascript" src="../resources/scripts/lib/common-dict-render.js"></script>
+    <div data-options="region:'east',title:'${euler:i18n('user.group')}',split:true" style="width:300px;">
+        <div id="user-group-toolbar">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="onSaveUserGroup()">${euler:i18n('global.saveChange')}</a>
+        </div>
+        <div id="user-group-list" class="easyui-datalist" style="width:100%;height:100%"
+            data-options="url:'findAllGroups',
+                          checkbox:true,
+                          valueField:'id',
+                          textField:'name',
+                          singleSelect:false,
+                          toolbar:'#user-group-toolbar',
+                          lines:true" ></div>
+    </div>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/common-dict.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/util.js"></script>
 
     <script>
-        $(function(){ 
-            
-            $('#query_codeType').combobox({
+        function empSearchDlgCallback(data) {
+            var emp = {};
+            emp.username=data.workNo;
+            emp.empName=data.cnName;
+            emp.enabled=true;
+            emp.accountNonExpired=true;
+            emp.accountNonLocked=true;
+            emp.credentialsNonExpired=true;
+            $.ajax({
+                url:'saveUser',
+                type:'POST',
+                async:true,
+                data: emp,
+                error:function(XMLHttpRequest, textStatus, errorThrown) {
+                    $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
+                },
+                success:function(data, textStatus) {
+                    refreshDatagrid();
+                }
+            });
+            //$('#dlg_username').textbox('setValue', data.workNo);
+            //$('#dlg_empName').textbox('setValue', data.cnName);
+        }
+
+        $(function(){
+
+            $('#query_enabled').combobox({
                 valueField:'key',
                 textField:'value',
                 editable:false,
-                data:getDictData(codeType, 'all')
+                data:getDictData(yesOrNo, 'all')
             });
+            /* $('#query_accountNonExpired').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo, 'all')
+            });
+            $('#query_accountNonLocked').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo, 'all')
+            });
+            $('#query_credentialsNonExpired').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo, 'all')
+            }); */
+
+            /* $('#dlg_enabled').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo)
+            });
+            $('#dlg_accountNonExpired').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo)
+            });
+            $('#dlg_accountNonLocked').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo)
+            });
+            $('#dlg_credentialsNonExpired').combobox({
+                valueField:'key',
+                textField:'value',
+                editable:false,
+                data:getDictData(yesOrNo)
+            });
+
+            $('#dlg_username').searchbox({
+                searcher:function(value,name){
+                    openEmpSearchDlg();
+                },
+                prompt:"${euler:i18n('jsp.user.clickButtonToAddUser')}"
+            }); */
         });
-        
-        $.fn.serializeJson=function(){ 
-            var serializeObj={};
-            var array=this.serializeArray();
-            $(array).each(function(){
-                    if(serializeObj[this.name]){
-                          if($.isArray(serializeObj[this.name])){ 
-                              serializeObj[this.name].push(this.value); 
-                          }else{
-                              serializeObj[this.name]=[serializeObj[this.name],this.value]; 
-                          } 
-                    }else{ 
-                        serializeObj[this.name]=this.value;
-                    } 
-            }); 
-            return serializeObj; 
-        };
-        
+
         function refreshDatagrid(){
             var jsonParam = $('#search-form').serializeJson();
             $('#dg').datagrid('reload', jsonParam);
         }
-        
-        function doSearch() {
+
+        function onSearch() {
             var jsonParam = $('#search-form').serializeJson();
-            $('#dg').datagrid('load', jsonParam);            
+            $('#dg').datagrid('load', jsonParam);
         }
-        
-        function doReset() {
+
+        function onReset() {
             $('#search-form').form('clear');
         }
-        
+
         function onAdd() {
-            $('#dlg').dialog('open').dialog('setTitle', '创建');
+            $('#fm').form('clear');
+            $('#dlg_enabled').combobox('select', 'true');
+            $('#dlg_accountNonExpired').combobox('select', 'true');
+            $('#dlg_accountNonLocked').combobox('select', 'true');
+            $('#dlg_credentialsNonExpired').combobox('select', 'true');
+            $('#dlg').dialog('open').dialog('setTitle', "${euler:i18n('jsp.user.addUser')}");
         }
-        
-        function onEdit() {
+
+        /* function onEdit() {
             var row = $('#dg').datagrid('getSelections');
-            
+
             if(row == null || row.length < 1){
-                $.messager.alert('提示', '请选择需要删除的记录');
+                $.messager.alert("${euler:i18n('global.remind')}", "${euler:i18n('global.pleaseSelectRowsToEdit')}");
             } else if(row){
-                $('#fm').form('clear');
-                $('#fm').form('load', row[0]);
-                $('#dlg').dialog('open').dialog('setTitle', '编辑');
-                
+                $('#dlg_id').val(row[0].id);
+                $('#dlg_username').textbox('setValue', row[0].username);
+                $('#dlg_empName').textbox('setValue', row[0].empName);
+                $('#dlg_enabled').combobox('select', row[0].enabled+"");
+                $('#dlg_accountNonExpired').combobox('select', row[0].accountNonExpired+"");
+                $('#dlg_accountNonLocked').combobox('select', row[0].accountNonLocked+"");
+                $('#dlg_credentialsNonExpired').combobox('select', row[0].credentialsNonExpired+"");
+                $('#dlg').dialog('open').dialog('setTitle', "${euler:i18n('jsp.user.editUser')}");
+
             }
-        }
-        
+        } */
+
         function onSave() {
+
             $('#fm').form('submit', {
-                url:'saveCodeTable',
+                url:'saveUser',
                 onSumit:function(){
-                    return $(this).form('validate');
+                    return false;//$(this).form('validate');
                 },
-                success:function(result) {
+                success:function(data) {
+                    if(data) {
+                        $.messager.alert("${euler:i18n('global.error')}", data);
+                        return;
+                    }
+                    clearDlg();
                     onClose();
                     refreshDatagrid();
                 }
             });
         }
-        
-        function onDelete() {
+
+        function onEnable() {
             var row = $('#dg').datagrid('getSelections');
-            
+
             if(row == null || row.length < 1){
-                $.messager.alert('提示', '请选择需要删除的记录');
+                $.messager.alert("${euler:i18n('global.remind')}", "${euler:i18n('global.pleaseSelectRowsToModify')}");
             } else if(row){
-                $.messager.confirm('提示', '确定删除所选记录吗?', function(r) {
+                $.messager.confirm("${euler:i18n('global.warn')}", "${euler:i18n('global.sureToEnable')}", function(r) {
                     if(r) {
                         var ids = "";
                         for(var i = 0; i < row.length; i++){
-                            ids += row[i].id + ',';
+                            ids += row[i].id + ';';
                         }
                         $.ajax({
-                            url:'delCodeTablesByIds',
+                            url:'enableUsers',
                             type:'POST',
                             async:true,
                             data: "ids=" + ids,
-                            error:function() {
-                                $.messager.alert('提示', '删除失败');
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
                             },
-                            success:function() {
-                                refreshDatagrid();                                    
+                            success:function(data, textStatus) {
+                                refreshDatagrid();
                             }
                         });
                     }
                 });
             }
         }
-        
-        function onCancel() {
-            onClose();
-        }
-        
-        function onClose(){
-            $('#fm').form('clear');
-            $('#dlg').dialog('close');
-        }
-        
-        function onDblClickRow(rowIndex, rowData){
-            var row = $('#dg').datagrid('clearSelections');
-            var row = $('#dg').datagrid('selectRow', rowIndex);
-            onEdit();
-        }
-        
-        function codeTypeFormatter(value, row, index) {
-            for(i in codeType){
-                if(codeType[i].key == value)
-                    return codeType[i].value;
+
+        function onDisable() {
+            var row = $('#dg').datagrid('getSelections');
+
+            if(row == null || row.length < 1){
+                $.messager.alert("${euler:i18n('global.remind')}", "${euler:i18n('global.pleaseSelectRowsToModify')}");
+            } else if(row){
+                $.messager.confirm("${euler:i18n('global.warn')}", "${euler:i18n('global.sureToDisable')}", function(r) {
+                    if(r) {
+                        var ids = "";
+                        for(var i = 0; i < row.length; i++){
+                            ids += row[i].id + ';';
+                        }
+                        $.ajax({
+                            url:'disableUsers',
+                            type:'POST',
+                            async:true,
+                            data: "ids=" + ids,
+                            error:function(XMLHttpRequest, textStatus, errorThrown) {
+                                $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
+                            },
+                            success:function(data, textStatus) {
+                                refreshDatagrid();
+                            }
+                        });
+                    }
+                });
             }
         }
 
-        function unixDateFormatter(value, row, index) {
-            return new Date(value).Format('yyyy-MM-dd hh:mm:ss');
-            /* return date.getFullYear() + '-' + (date.getMonth()+1) +'-' + date.getDate() + ' '
-            +date.getHours() + ':' +date.getMinutes() + ':' +date.getSeconds(); */
+        function onCancel() {
+            clearDlg();
+            onClose();
         }
-        
-        Date.prototype.Format = function (fmt) { //author: meizz 
-            var o = {
-                "M+": this.getMonth() + 1, //月份 
-                "d+": this.getDate(), //日 
-                "h+": this.getHours(), //小时 
-                "m+": this.getMinutes(), //分 
-                "s+": this.getSeconds(), //秒 
-                "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
-                "S": this.getMilliseconds() //毫秒 
-            };
-            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-            for (var k in o)
-            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-            return fmt;
+
+        function clearDlg(){
+            $('#fm').form('clear');
         }
+
+        function onClose(){
+            $('#dlg').dialog('close');
+        }
+
+        function onClickRow(rowIndex, rowData){
+            $('#user-group-list').datalist('unselectAll');
+            var groupData = [];
+            for(var x in rowData.groups){
+                var groupId = rowData.groups[x].id;
+                var rows = $('#user-group-list').datalist('getRows');
+                for(var y in rows){
+                    if(rows[y].id === groupId) {
+                        $('#user-group-list').datalist('selectRow', y);
+                    }
+                }
+            }
+        }
+
+        function onSaveUserGroup() {
+            var userRows = $('#dg').datalist('getSelections');
+
+            if(userRows == null || userRows.length != 1) {
+                return;
+            }
+            var rows = $('#user-group-list').datalist('getSelections');
+            var userId = userRows[0].id;
+            var groupIds = "";
+            for(var x in rows){
+                groupIds += rows[x].id+";";
+            }
+
+            var data = {};
+            data.userId = userId;
+            data.groupIds = groupIds;
+            $.ajax({
+                url:'saveUserGroups',
+                type:'POST',
+                async:true,
+                data: data,
+                error:function(XMLHttpRequest, textStatus, errorThrown) {
+                    $.messager.alert("${euler:i18n('global.error')}", XMLHttpRequest.responseText);
+                },
+                success:function(data, textStatus) {
+                    refreshDatagrid();
+                }
+            });
+        }
+
+        /* function onDblClickRow(rowIndex, rowData){
+            var row = $('#dg').datagrid('clearSelections');
+            var row = $('#dg').datagrid('selectRow', rowIndex);
+            onEdit();
+        } */
     </script>
 </body>
 

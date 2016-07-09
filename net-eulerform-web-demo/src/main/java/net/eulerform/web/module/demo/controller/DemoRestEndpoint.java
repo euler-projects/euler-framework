@@ -17,7 +17,6 @@ import org.springframework.web.servlet.support.RequestContext;
 import net.eulerform.web.core.annotation.RestEndpoint;
 import net.eulerform.web.core.base.controller.BaseRest;
 import net.eulerform.web.core.base.entity.WebServiceResponse;
-import net.eulerform.web.core.util.ParamCheck;
 import net.eulerform.web.module.demo.entity.Blog;
 import net.eulerform.web.module.demo.service.IBlogService;
 
@@ -32,8 +31,6 @@ public class DemoRestEndpoint extends BaseRest {
     @ResponseBody
     @RequestMapping(value = { "/test" }, method = RequestMethod.GET)
     public WebServiceResponse<String> createClient(String date,HttpServletRequest request) throws ParseException {
-        ParamCheck.require(date);
-        ParamCheck.matches(date, ParamCheck.REGEX_YYYY_MM_DD);
         RequestContext requestContext = new RequestContext(request);
         Locale myLocale = requestContext.getLocale();
         System.out.println(myLocale);

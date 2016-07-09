@@ -1,3 +1,28 @@
+$.fn.serializeJson=function(){ 
+    var serializeObj={};
+    var array=this.serializeArray();
+    $(array).each(function(){
+            if(serializeObj[this.name]){
+                  if($.isArray(serializeObj[this.name])){ 
+                      serializeObj[this.name].push(this.value); 
+                  }else{
+                      serializeObj[this.name]=[serializeObj[this.name],this.value]; 
+                  } 
+            }else{ 
+                serializeObj[this.name]=this.value;
+            } 
+    }); 
+    return serializeObj; 
+};
+
+$(function(){
+    $(".search-table input,.search-table select").on('keyup',function(event){
+        if(event.keyCode == "13"){
+            $(".search-btn-table #search-btn").click();
+        }
+    });
+});
+
 function getDictData(code, all){
     code = getDictClone(code);
     var a = [], c;
@@ -31,11 +56,6 @@ function clone(data) {
         d[a] = clone(data[a]);
     }
     return d;
-}
-
-
-function unixDateFormatter(value, row, index) {
-    return new Date(value).Format('yyyy-MM-dd hh:mm:ss');
 }
 
 Date.prototype.Format = function (fmt) { //author: meizz 
@@ -77,8 +97,19 @@ function addTab(url, title){
     });
 }
 
-function getQueryString(name) { 
+function getUrlParam(name) { 
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
     var r = window.location.search.substr(1).match(reg); 
     if (r != null) return unescape(r[2]); return null; 
+}
+
+function unixDateFormatter(value, row, index) {
+    return new Date(value).Format('yyyy-MM-dd hh:mm:ss');
+}
+
+function yesOrNoFormatter(value, row, index){
+    for(i in yesOrNo){
+        if(yesOrNo[i].key == value+"")
+            return yesOrNo[i].value;
+    }    
 }

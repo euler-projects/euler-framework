@@ -19,13 +19,11 @@
         <custom-filter before="LOGOUT_FILTER" ref="requestSingleLogoutFilter" />
         <logout logout-url="/logout" logout-success-url="/"
             invalidate-session="true" delete-cookies="JSESSIONID" />
-        <!--logout logout-url="/logout"
-            invalidate-session="true" delete-cookies="JSESSIONID" success-handler-ref="casLogoutSuccessHandler" /-->
 
-        <session-management invalid-session-url="/login"
-            session-fixation-protection="migrateSession">
-            <concurrency-control max-sessions="1"
-                error-if-maximum-exceeded="false" />
+        <session-management session-fixation-protection="migrateSession">
+            <concurrency-control max-sessions="1" 
+                                 error-if-maximum-exceeded="false" 
+                                 session-registry-ref="sessionRegistry"/>
         </session-management>
         
         <headers>

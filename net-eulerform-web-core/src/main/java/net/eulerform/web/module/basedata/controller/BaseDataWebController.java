@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +41,16 @@ public class BaseDataWebController extends BaseController {
     }
     
     @ResponseBody
+    @RequestMapping(value ="/findCodeTableByPage")
+    public PageResponse<CodeTable> findCodeTableByPage(HttpServletRequest request, String page, String rows) {
+        QueryRequest queryRequest = new QueryRequest(request);
+        
+        int pageIndex = Integer.parseInt(page);
+        int pageSize = Integer.parseInt(rows);
+        return this.baseDataService.findCodeTableByPage(queryRequest, pageIndex, pageSize);
+    }
+    
+    @ResponseBody
     @RequestMapping(value ="/findAllModules")
     public List<Module> findAllModules() {
         return this.baseDataService.findAllModuleFromDB();
@@ -57,18 +69,8 @@ public class BaseDataWebController extends BaseController {
     }
     
     @ResponseBody
-    @RequestMapping(value ="/findCodeTableByPage")
-    public PageResponse<CodeTable> findCodeTableByPage(HttpServletRequest request, String page, String rows) {
-        QueryRequest queryRequest = new QueryRequest(request);
-        
-        int pageIndex = Integer.parseInt(page);
-        int pageSize = Integer.parseInt(rows);
-        return this.baseDataService.findCodeTableByPage(queryRequest, pageIndex, pageSize);
-    }
-    
-    @ResponseBody
     @RequestMapping(value ="/saveCodeTable", method = RequestMethod.POST)
-    public void saveCodeTable(CodeTable codeTable) {
+    public void saveCodeTable(@Valid CodeTable codeTable) {
         this.baseDataService.saveCodeTable(codeTable);
     }
     
@@ -79,34 +81,28 @@ public class BaseDataWebController extends BaseController {
     }
     
     @ResponseBody
-    @RequestMapping(value ="/deleteModule", method = RequestMethod.POST)
-    public void deleteModule(@RequestParam String id) {
-        this.baseDataService.deleteModule(id);
-    }
-    
-    @ResponseBody
     @RequestMapping(value ="/savePage", method = RequestMethod.POST)
     public void savePage(Page page) {
         this.baseDataService.savePage(page);
     }
     
     @ResponseBody
-    @RequestMapping(value ="/deletePage", method = RequestMethod.POST)
-    public void deletePage(@RequestParam String id) {
-        this.baseDataService.deletePage(id);
-    }
-    
-    @ResponseBody
     @RequestMapping(value ="/deleteCodeTables", method = RequestMethod.POST)
     public void deleteCodeTables(@RequestParam String ids) {
-        String[] idArray = ids.trim().replace(" ", "").split(",");
+        String[] idArray = ids.trim().replace(" ", "").split(";");
         this.baseDataService.deleteCodeTables(idArray);
     }
     
     @ResponseBody
-    @RequestMapping(value ="/deleteCodeTable", method = RequestMethod.POST)
-    public void deleteCodeTable(@RequestParam String id) {
-        this.baseDataService.deleteCodeTable(id);
+    @RequestMapping(value ="/deleteModule", method = RequestMethod.POST)
+    public void deleteModule(@RequestParam String id) {
+        this.baseDataService.deleteModule(id);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/deletePage", method = RequestMethod.POST)
+    public void deletePage(@RequestParam String id) {
+        this.baseDataService.deletePage(id);
     }
     
 }

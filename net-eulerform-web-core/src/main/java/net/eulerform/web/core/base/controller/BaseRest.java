@@ -1,11 +1,5 @@
 package net.eulerform.web.core.base.controller;
 
-import net.eulerform.web.core.base.entity.WebServiceResponse;
-import net.eulerform.web.core.base.exception.IllegalParamException;
-import net.eulerform.web.core.base.exception.ResourceNotFoundException;
-
-import javax.servlet.ServletContext;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -14,17 +8,14 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
+
+import net.eulerform.web.core.base.entity.WebServiceResponse;
+import net.eulerform.web.core.base.exception.IllegalParamException;
+import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 
 public abstract class BaseRest {
     
     protected final Logger logger = LogManager.getLogger(this.getClass());
-    
-    protected ServletContext getServletContext(){
-        WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
-        return webApplicationContext.getServletContext();
-    }
     
     /**  
      * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息 
@@ -44,7 +35,7 @@ public abstract class BaseRest {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalParamException.class})   
-    public WebServiceResponse<String> IllegalParamException(IllegalParamException e) {
+    public WebServiceResponse<String> illegalParamException(IllegalParamException e) {
         WebServiceResponse<String> response =  new WebServiceResponse<>();
         response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return response;

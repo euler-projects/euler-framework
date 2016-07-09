@@ -134,9 +134,11 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         if(this.groups == null || this.groups.isEmpty())
             return this.authorities;
         Set<Authority> result =  new HashSet<>();
-        result.addAll(this.authorities);
+        if(this.authorities != null && !this.authorities.isEmpty())
+            result.addAll(this.authorities);
         for(Group group : this.groups) {
-            result.addAll(group.getAuthorities());
+            if(group.getAuthorities() != null && !group.getAuthorities().isEmpty())
+                result.addAll(group.getAuthorities());
         }
         return result;
     }

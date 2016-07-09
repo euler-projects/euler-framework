@@ -48,9 +48,9 @@ import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.common.StringTool;
-import net.eulerform.web.core.filter.CrosFilter;
-import net.eulerform.web.core.filter.EulerFormCoreFilter;
 import net.eulerform.web.core.listener.EulerFormCoreListener;
+import net.eulerform.web.core.filter.EulerFormCoreFilter;
+import net.eulerform.web.core.filter.CrosFilter;
 
 @Order(0)
 public class EulerFormBootstrap implements WebApplicationInitializer {
@@ -96,7 +96,12 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         log.info("Executing Euler-Framework bootstrap.");
         
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(net.eulerform.config.RootContextConfiguration.class);
+        try {
+            rootContext.register(Class.forName("net.eulerform.config.RootContextConfiguration"));
+        } catch (ClassNotFoundException e) {
+            rootContext.close();
+            throw new ServletException(e);
+        }
         
         String webAuthentication;
         String restAuthentication;
@@ -168,29 +173,35 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
             location = GlobalProperties.get(MULITPART_LOCATION);
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_LOCATION+" , use " + location + " for default.");
+            log.warn("Couldn't load "+MULITPART_LOCATION+" , use " + location + " for default.");
         }
         try {
             maxFileSize = Long.parseLong(GlobalProperties.get(MULITPART_MAX_FILE_SIZE));
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_MAX_FILE_SIZE+" , use " + maxFileSize + " for default.");
+            log.warn("Couldn't load "+MULITPART_MAX_FILE_SIZE+" , use " + maxFileSize + " for default.");
         }
         try {
             maxRequestSize = Long.parseLong(GlobalProperties.get(MULITPART_MAX_REQUEST_SIZE));
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_MAX_REQUEST_SIZE+" , use " + maxRequestSize + " for default.");
+            log.warn("Couldn't load "+MULITPART_MAX_REQUEST_SIZE+" , use " + maxRequestSize + " for default.");
         }
         try {
             fileSizeThreshold = Integer.parseInt(GlobalProperties.get(MULITPART_FILE_SIZE_THRESHOLD));
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+MULITPART_FILE_SIZE_THRESHOLD+" , use " + fileSizeThreshold + " for default.");
+            log.warn("Couldn't load "+MULITPART_FILE_SIZE_THRESHOLD+" , use " + fileSizeThreshold + " for default.");
         }
         
         AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-        springWebDispatcherServletContext.register(net.eulerform.config.SpringWebDispatcherServletContextConfiguration.class);
+        try {
+            springWebDispatcherServletContext.register(Class.forName("net.eulerform.config.SpringWebDispatcherServletContextConfiguration"));
+        } catch (ClassNotFoundException e) {
+            springWebDispatcherServletContext.close();
+            rootContext.close();
+            throw new ServletException(e);
+        }
         DispatcherServlet springWebDispatcherServlet = new DispatcherServlet(springWebDispatcherServletContext);
         ServletRegistration.Dynamic springWebDispatcher = container.addServlet("springWebDispatcherServlet", springWebDispatcherServlet);
         springWebDispatcher.setLoadOnStartup(1);
@@ -202,7 +213,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
             restRootUrl = GlobalProperties.get(REST_ROOT_URL);
         } catch (GlobalPropertyReadException e) {
             // DO NOTHING
-            log.info("Couldn't load "+REST_ROOT_URL+" , use '/rs' for default.");
+            log.warn("Couldn't load "+REST_ROOT_URL+" , use '/rs' for default.");
         }
         
         if(StringTool.isNull(restRootUrl))
@@ -214,7 +225,13 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         restRootUrl = FilePathTool.changeToUnixFormat(restRootUrl);
         
         AnnotationConfigWebApplicationContext springRestDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-        springRestDispatcherServletContext.register(net.eulerform.config.SpringRestDispatcherServletContextConfiguration.class);
+        try {
+            springRestDispatcherServletContext.register(Class.forName("net.eulerform.config.SpringRestDispatcherServletContextConfiguration"));
+        } catch (ClassNotFoundException e) {
+            springRestDispatcherServletContext.close();
+            rootContext.close();
+            throw new ServletException(e);
+        }
         DispatcherServlet springRestDispatcherServlet = new DispatcherServlet(springRestDispatcherServletContext);
         springRestDispatcherServlet.setDispatchOptionsRequest(true);
         ServletRegistration.Dynamic springRestDispatcher = container.addServlet("springRestDispatcherServlet", springRestDispatcherServlet);

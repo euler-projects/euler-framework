@@ -7,8 +7,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import net.eulerform.web.core.annotation.RestEndpoint;
-
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -21,11 +19,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.eulerform.web.core.annotation.RestEndpoint;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = "net.eulerform.web.**.controller",
+        basePackages = {"net.eulerform.web.**.controller"},
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(RestEndpoint.class)
 )
@@ -67,7 +66,7 @@ public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfi
     {
         Map<String, MediaType> mediaTypes = new HashMap<>();;
         mediaTypes.put("json", MediaType.APPLICATION_JSON_UTF8);
-//        mediaTypes.put("xml", MediaType.APPLICATION_XML);
+        //mediaTypes.put("xml", MediaType.APPLICATION_XML);
         
         configurer.favorPathExtension(true).favorParameter(true)
                 .ignoreAcceptHeader(false)

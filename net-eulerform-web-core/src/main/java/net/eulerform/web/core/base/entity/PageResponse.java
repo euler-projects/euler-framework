@@ -12,7 +12,7 @@ import java.util.List;
  *            返回数据类型,支持单个对象和容器<br>
  *            例如Object和List&lt;Object&gt;均只需指定为PageResponse&lt;Object&gt;
  */
-public class PageResponse<T> {
+public class PageResponse<T> implements BaseResponse {
 
     private List<T> rows;
 
@@ -21,6 +21,22 @@ public class PageResponse<T> {
     private Integer pageIndex;
     
     private Integer pageSize;
+    
+    public PageResponse() {}
+    
+    public PageResponse(T data, long total, int pageIndex, int pageSize) {
+        this.setRows(data);
+        this.setTotal(total);
+        this.setPageIndex(pageIndex);
+        this.setPageSize(pageSize);
+    }
+    
+    public PageResponse(List<T> data, long total, int pageIndex, int pageSize) {
+        this.setRows(data);
+        this.setTotal(total);
+        this.setPageIndex(pageIndex);
+        this.setPageSize(pageSize);
+    }
 
     public void setRows(T data) {
         if (data == null) {
@@ -50,6 +66,10 @@ public class PageResponse<T> {
         return total;
     }
 
+    public void setTotal(Long total) {
+        this.total = total;
+    }
+
     public Integer getPageIndex() {
         return pageIndex;
     }
@@ -64,9 +84,5 @@ public class PageResponse<T> {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
-    }
-
-    public void setTotal(Long total) {
-        this.total = total;
     }
 }

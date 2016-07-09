@@ -84,17 +84,11 @@
             <oauth2:password />
         </oauth2:authorization-server>
 
-        <!--<beans:bean id="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter"
-                    class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
-            <beans:property name="authenticationManager" ref="oauth2AuthorizationServerAuthenticationManager"/>
-        </beans:bean>-->
-
         <http pattern="/oauth/token" use-expressions="true" create-session="stateless"
               authentication-manager-ref="oauth2AuthorizationServerAuthenticationManager"
               entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
             <intercept-url pattern="/oauth/token" access="isFullyAuthenticated()"/>
             <http-basic />
-            <!--custom-filter ref="oauth2AuthorizationServerClientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/-->
             <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler"/>
             <csrf disabled="true"/>
         </http>
@@ -102,6 +96,7 @@
         <http pattern="/oauth/check_token" use-expressions="true" create-session="stateless"
               authentication-manager-ref="oauth2AuthorizationServerAuthenticationManager"
               entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+        	
             <intercept-url pattern="/oauth/check_token" method="OPTIONS" access="permitAll"/>
             <intercept-url pattern="/oauth/check_token" access="isFullyAuthenticated()"/>
             <http-basic />
@@ -109,15 +104,8 @@
             <csrf disabled="true"/>
         </http>
     </beans:beans>
-
+    
     <beans:beans profile="oauth-resource-server">
-        <beans:bean id="oauth2ResourceServerJwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter" >
-            <beans:property name="verifierKey" ref="jwtVerifierKey"/>
-        </beans:bean>
-
-        <beans:bean id="oauth2ResourceServerTokenStore" class="org.springframework.security.oauth2.provider.token.store.JwtTokenStore" >
-            <beans:constructor-arg ref="oauth2ResourceServerJwtAccessTokenConverter"/>
-        </beans:bean>        
 
         <beans:bean id="oauth2ResourceServerTokenServices"
                     class="org.springframework.security.oauth2.provider.token.RemoteTokenServices">
