@@ -3,6 +3,8 @@ package net.eulerform.web.module.basedata.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import net.eulerform.web.core.base.entity.UUIDEntity;
 
@@ -26,6 +28,8 @@ public class Page extends UUIDEntity<Page> {
     private String description;
     @Column(name = "SHOW_ORDER", nullable = false)
     private Integer showOrder;
+    @NotNull
+    @Pattern(regexp="[A-Z][A-Z_]*", message="{validation.authority.authority}")
     @Column(name = "REQUIRE_AUTHORITY")
     private String requireAuthority;
     @Column(name = "MODULE_ID")
