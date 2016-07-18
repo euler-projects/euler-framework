@@ -19,5 +19,10 @@ public class ModuleDao extends BaseDao<Module> implements IModuleDao {
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         return this.findBy(detachedCriteria);
     }
+
+    @Override
+    public void flushSession() {        
+        this.getCurrentSession().flush();
+    }
     
 }

@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import javax.servlet.ServletContext;
 
 import org.springframework.web.context.ContextLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.eulerform.common.FileReader;
-import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.entity.PageResponse;
+import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.cache.ObjectCache;
 import net.eulerform.web.module.authentication.util.UserContext;
@@ -27,7 +28,7 @@ import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 public class BaseDataService extends BaseService implements IBaseDataService {
     
-    private static ObjectCache<String, CodeTable> allConfigs = new ObjectCache<>(86_400_000L);//所有配置缓存一天
+    private final ObjectCache<String, CodeTable> allConfigs = new ObjectCache<>(86_400_000L);//所有配置缓存一天
     
     private ICodeTableDao codeTableDao;
     
@@ -70,23 +71,22 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         this.refreshModules();
         
         //allConfigs
-        List<CodeTable> allConfigs = this.codeTableDao.findAllConfig();        
-        if(allConfigs !=null){
-            for(CodeTable each : allConfigs){
-                BaseDataService.allConfigs.put(each.getKey(), each);
-            }
-        }
+        this.refreshConfigs();
         
+        //contextPaht
+        ServletContext sc = ContextLoader.getCurrentWebApplicationContext().getServletContext();
+        String contextPath = sc.getContextPath();
+        sc.setAttribute("contextPath", contextPath);         
     }
 
     @Override
     public String findConfigValue(String key) {
-        CodeTable resultCodeTable = allConfigs.get(key);
+        CodeTable resultCodeTable = this.allConfigs.get(key);
         
         if(resultCodeTable == null) {
             resultCodeTable = this.codeTableDao.findConfig(key);
             if(resultCodeTable != null){
-                BaseDataService.allConfigs.put(resultCodeTable.getKey(), resultCodeTable);                
+                this.allConfigs.put(resultCodeTable.getKey(), resultCodeTable);                
             }
         }
         
@@ -184,11 +184,13 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     @Override
     public void saveCodeTable(CodeTable codeTable) {
         this.codeTableDao.saveOrUpdate(codeTable);
+        this.refreshConfigs();
     }
 
     @Override
     public void deleteCodeTables(Serializable[] idArray) {
         this.codeTableDao.deleteByIds(idArray);
+        this.refreshConfigs();
         
     }
 
@@ -219,7 +221,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     @Override
     public void saveModule(Module module) {
         if(module.getId() != null){
-            Set<Page> pages = this.moduleDao.load(module.getId()).getPages();
+            List<Page> pages = this.moduleDao.load(module.getId()).getPages();
             if(module.getPages() == null || module.getPages().isEmpty()) {
                 module.setPages(pages);
             }
@@ -230,14 +232,24 @@ public class BaseDataService extends BaseService implements IBaseDataService {
 
     @Override
     public void deleteModule(Serializable id) {
-        Set<Page> pages = this.moduleDao.load(id).getPages();
+        List<Page> pages = this.moduleDao.load(id).getPages();
         this.pageDao.deleteAll(pages);
         this.moduleDao.deleteById(id);
         this.refreshModules();
     }
     
     private void refreshModules(){
+        this.moduleDao.flushSession();
         List<Module> allModules = this.moduleDao.findAllInOrder();
         ContextLoader.getCurrentWebApplicationContext().getServletContext().setAttribute("menu", allModules);        
+    }
+
+    private void refreshConfigs() {
+        List<CodeTable> allConfigs = this.codeTableDao.findAllConfig();        
+        if(allConfigs !=null){
+            for(CodeTable each : allConfigs){
+                this.allConfigs.put(each.getKey(), each);
+            }
+        }
     }
 }

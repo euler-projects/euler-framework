@@ -37,4 +37,6 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     List<T> findAll();
     
     long findCount();
+
+    void flushSession();
 }

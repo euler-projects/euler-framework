@@ -1,7 +1,6 @@
 package net.eulerform.web.module.basedata.entity;
 
-import java.util.Set;
-
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,6 +8,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import net.eulerform.web.core.base.entity.UUIDEntity;
 
@@ -30,12 +31,14 @@ public class Module extends UUIDEntity<Module> {
     private String description;
     @Column(name = "SHOW_ORDER", nullable = false)
     private Integer showOrder;
+    @NotNull
+    @Pattern(regexp="[A-Z][A-Z_]*", message="{validation.authority.authority}")
     @Column(name = "REQUIRE_AUTHORITY")
     private String requireAuthority;
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "MODULE_ID")
     @OrderBy("showOrder ASC")
-    public Set<Page> pages;
+    public List<Page> pages;
 
     public String getName() {
         return name;
@@ -72,11 +75,11 @@ public class Module extends UUIDEntity<Module> {
         this.showOrder = showOrder;
     }
 
-    public Set<Page> getPages() {
+    public List<Page> getPages() {
         return pages;
     }
 
-    public void setPages(Set<Page> pages) {
+    public void setPages(List<Page> pages) {
         this.pages = pages;
     }
 

@@ -279,4 +279,9 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     protected void eraseEmptyProperty(T entity) {
         BeanTool.clearEmptyProperty(entity);
     }
+
+    @Override
+    public void flushSession() {        
+        //DO_NOTHING
+    }
 }
