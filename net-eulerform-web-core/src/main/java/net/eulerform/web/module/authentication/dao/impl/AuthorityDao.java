@@ -14,6 +14,7 @@ import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerform.web.module.authentication.dao.IAuthorityDao;
 import net.eulerform.web.module.authentication.entity.Authority;
 
@@ -26,7 +27,7 @@ public class AuthorityDao extends BaseDao<Authority> implements IAuthorityDao {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("name");
             if (!StringTool.isNull(queryValue)) {
-                detachedCriteria.add(Restrictions.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
+                detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("authority");
             if (!StringTool.isNull(queryValue)) {
