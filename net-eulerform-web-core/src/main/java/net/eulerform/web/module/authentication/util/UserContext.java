@@ -90,13 +90,18 @@ public class UserContext {
             if (context != null && context.getAuthentication() != null) {
                 Object principal = context.getAuthentication().getPrincipal();
 
-                if (principal.getClass().isAssignableFrom(User.class)) {
+                if (User.class.isAssignableFrom(principal.getClass())) {
                     User user = (User) principal;
                     USER_CACHE.put(user.getUsername(), user);
                     return user;
                 }
+                
+                if (UserDetails.class.isAssignableFrom(principal.getClass())) {
+                    UserDetails userDetails = (UserDetails)principal;
+                    principal = userDetails.getUsername();
+                }
 
-                if (principal.getClass().isAssignableFrom(String.class)
+                if (String.class.isAssignableFrom(principal.getClass())
                         && (!User.ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
                     String username = (String) principal;
                     User user = USER_CACHE.get(username);
@@ -110,7 +115,7 @@ public class UserContext {
                         ((CredentialsContainer) userDetails).eraseCredentials();
                     }
 
-                    if (userDetails.getClass().isAssignableFrom(User.class)) {
+                    if (User.class.isAssignableFrom(userDetails.getClass())) {
                         user = (User) userDetails;
                     } else {
                         user = new User();
