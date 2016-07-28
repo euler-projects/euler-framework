@@ -27,7 +27,7 @@
  * http://eulerform.net
  * http://cfrost.net
  */
-package net.eulerform.config.boot;
+package net.eulerform.bootstrap;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.MultipartConfigElement;
