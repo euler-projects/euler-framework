@@ -1,4 +1,4 @@
-package net.eulerform.config.boot;
+package net.eulerform.bootstrap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +19,7 @@ public class PostLoggingBootstrap implements WebApplicationInitializer {
     public void onStartup(ServletContext container) throws ServletException {
         log.info("Executing post logging bootstrap.");
 
-        FilterRegistration.Dynamic postLoggingFilter = container.addFilter("postLoggingFilter", new PostLoggingFilter());
+        FilterRegistration.Dynamic postLoggingFilter = container.addFilter("postLoggingFilter", new PostLoggingFilter("oauth/token","oauth/check_token"));
         postLoggingFilter.addMappingForUrlPatterns(null, false, "/*");
     }
 }
