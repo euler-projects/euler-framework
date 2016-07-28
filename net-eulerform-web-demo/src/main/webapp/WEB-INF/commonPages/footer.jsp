@@ -6,7 +6,7 @@
                 href="http://www.miitbeian.gov.cn" target="_Blank">粤ICP备15054669号</a>
         </footer>
     </div>
-    <script src="${contextPath}/resources/scripts/lib/jquery-2.1.4.js"></script>
+    <script src="${contextPath}/resources/scripts/lib/easyui/jquery.min.js"></script>
     <script src="${contextPath}/resources/scripts/lib/common-dict.js"></script>
     <script src="${contextPath}/resources/scripts/util.js"></script>
     <script src="${contextPath}/resources/scripts/header.js"></script>

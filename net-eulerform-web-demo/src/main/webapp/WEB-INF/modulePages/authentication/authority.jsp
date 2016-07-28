@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
-    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/global.css">
-    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/lib/icon.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/global.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/icon.css">
 
     <title></title>
 
@@ -81,11 +81,11 @@
             </form>
         </div>        
     </div>
-    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.min.js"></script>
-    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/common-dict.js"></script>
-    <script type="text/javascript" src="${contextPath}/resources/scripts/lib/util.js"></script>
+    <script src="${contextPath}/resources/scripts/lib/easyui/jquery.min.js"></script>
+    <script src="${contextPath}/resources/scripts/lib/easyui/jquery.easyui.min.js"></script>
+    <script src="${contextPath}/resources/scripts/lib/easyui/easyui-lang-zh_CN.js"></script>
+    <script src="${contextPath}/resources/scripts/lib/common-dict.js"></script>
+    <script src="${contextPath}/resources/scripts/lib/util.js"></script>
 
     <script>    
         $(function(){

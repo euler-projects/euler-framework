@@ -2,7 +2,7 @@
  * 
  */
 
-$(function($){        
+$(function(){        
     $('#userInfo').mouseleave(
         function(){hideUserMenu();}
     );
