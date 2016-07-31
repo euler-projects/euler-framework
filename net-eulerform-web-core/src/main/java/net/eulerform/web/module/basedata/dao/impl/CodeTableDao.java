@@ -1,7 +1,5 @@
 package net.eulerform.web.module.basedata.dao.impl;
 
-import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
@@ -9,16 +7,14 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerform.common.CalendarTool;
 import net.eulerform.common.StringTool;
-import net.eulerform.web.core.base.dao.impl.hibernate5.BaseModifyInfoDao;
+import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
-import net.eulerform.web.module.authentication.util.UserContext;
 import net.eulerform.web.module.basedata.dao.ICodeTableDao;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 
-public class CodeTableDao extends BaseModifyInfoDao<CodeTable> implements ICodeTableDao {
+public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
     
     private final static int JS_DICT_TYPE = 1;
     private final static int PROPERTY_TYPE = 2;
@@ -79,30 +75,6 @@ public class CodeTableDao extends BaseModifyInfoDao<CodeTable> implements ICodeT
             queryValue = queryRequest.getQueryValue("valueEnUs");
             if (!StringTool.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueEnUs", queryValue, MatchMode.ANYWHERE).ignoreCase());
-            }
-            queryValue = queryRequest.getQueryValue("createBy");
-            if (!StringTool.isNull(queryValue)) {
-                List<Serializable> ids = UserContext.getUserIdByNameOrCode(queryValue);
-                detachedCriteria.add(Restrictions.in("createBy", ids));
-            }
-            queryValue = queryRequest.getQueryValue("modifyBy");
-            if (!StringTool.isNull(queryValue)) {
-                List<Serializable> ids = UserContext.getUserIdByNameOrCode(queryValue);
-                detachedCriteria.add(Restrictions.in("modifyBy", ids));
-            }
-            queryValue = queryRequest.getQueryValue("createDate");
-            if (!StringTool.isNull(queryValue)) {
-                Date createDate = CalendarTool.parseDate(queryValue, "yyyy-MM-dd");
-                Date begin = CalendarTool.beginningOfTheDay(createDate).getTime();
-                Date end = CalendarTool.endingOfTheDay(createDate).getTime();
-                detachedCriteria.add(Restrictions.between("createDate", begin, end));
-            }
-            queryValue = queryRequest.getQueryValue("modifyDate");
-            if (!StringTool.isNull(queryValue)) {
-                Date modifyDate = CalendarTool.parseDate(queryValue, "yyyy-MM-dd");
-                Date begin = CalendarTool.beginningOfTheDay(modifyDate).getTime();
-                Date end = CalendarTool.endingOfTheDay(modifyDate).getTime();
-                detachedCriteria.add(Restrictions.between("modifyDate", begin, end));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

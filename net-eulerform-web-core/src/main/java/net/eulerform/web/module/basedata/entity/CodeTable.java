@@ -6,7 +6,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-import net.eulerform.web.core.base.entity.UUIDModifyInfoEntity;
+import net.eulerform.web.core.base.entity.UUIDEntity;
 
 /**
  * CODE_TABLE<br>
@@ -17,7 +17,7 @@ import net.eulerform.web.core.base.entity.UUIDModifyInfoEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_CODE_TABLE")
-public class CodeTable extends UUIDModifyInfoEntity<CodeTable> {
+public class CodeTable extends UUIDEntity<CodeTable> {
 
     @NotNull
     @Pattern(regexp="[a-z][a-zA-Z0-9]*", message="{validation.codeTable.name}")

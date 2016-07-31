@@ -17,7 +17,6 @@ import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.cache.ObjectCache;
-import net.eulerform.web.module.authentication.util.UserContext;
 import net.eulerform.web.module.basedata.dao.ICodeTableDao;
 import net.eulerform.web.module.basedata.dao.IModuleDao;
 import net.eulerform.web.module.basedata.dao.IPageDao;
@@ -164,16 +163,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
 
     @Override
     public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        PageResponse<CodeTable> result = this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
-        
-        List<CodeTable> rows = result.getRows();
-        
-        for(CodeTable each : rows) {
-            each.setCreateByName(UserContext.getUserNameAndCodeById(each.getCreateBy()));
-            each.setModifyByName(UserContext.getUserNameAndCodeById(each.getModifyBy()));
-        }
-        
-        return result;
+        return this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
     }
 
     @Override

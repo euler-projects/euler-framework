@@ -13,28 +13,22 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="fileEncoding" value="utf-8" />
-        <property name="ignoreUnresolvablePlaceholders" value="true" />
-        <property name="location" value="classpath:config.properties"/>
+    <bean id="clientDao" class="net.eulerform.web.module.authentication.dao.impl.ClientDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="resourceDao" class="net.eulerform.web.module.authentication.dao.impl.ResourceDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="scopeDao" class="net.eulerform.web.module.authentication.dao.impl.ScopeDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="codeTable" class="net.eulerform.web.module.basedata.util.CodeTable">
-        <property name="baseDataService" ref="baseDataService"/>
-    </bean> 
-
-    <bean id="moduleDao" class="net.eulerform.web.module.basedata.dao.impl.ModuleDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="pageDao" class="net.eulerform.web.module.basedata.dao.impl.PageDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="codeTableDao" class="net.eulerform.web.module.basedata.dao.impl.CodeTableDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="baseDataService" class="net.eulerform.web.module.basedata.service.impl.BaseDataService">
-        <property name="codeTableDao" ref="codeTableDao"/>
-        <property name="moduleDao" ref="moduleDao"/>
-        <property name="pageDao" ref="pageDao"/>
+    <bean id="clientService" name="clientDetailsService" class="net.eulerform.web.module.authentication.service.impl.ClientService">
+        <property name="clientDao" ref="clientDao"/>
+        <property name="resourceDao" ref="resourceDao"/>
+        <property name="scopeDao" ref="scopeDao"/>
+        <property name="passwordEncoder" ref="passwordEncoder"/>
+        <property name="cacheEnabled" value="${clientDetailsServiceCache.enabled}"/>
+        <property name="cacheSeconds" value="${clientDetailsServiceCache.cacheSeconds}"/>
     </bean>
 </beans>
