@@ -17,6 +17,8 @@
         <module>net-eulerform-web-config-provider</module>
         <module>net-eulerform-common</module>
         <module>net-eulerform-rs-client</module>
+        <module>net-eulerform-web-authentication</module>
+        <module>net-eulerform-web-rs-server</module>
     </modules>    
 
     <properties>

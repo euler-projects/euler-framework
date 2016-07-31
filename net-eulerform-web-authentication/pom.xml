@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -7,9 +6,7 @@
         <artifactId>net-eulerform</artifactId>
         <version>0.0.3-SNAPSHOT</version>
     </parent>
-    <artifactId>net-eulerform-web-config-provider</artifactId>
-    <name>net.eulerform.config-provider</name>
-    <description>net.eulerform.config-provider</description>
+    <artifactId>net-eulerform-web-authentication</artifactId>
 
     <dependencies>
         <dependency>
@@ -24,11 +21,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>net-eulerform-web-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>net-eulerform-web-authentication</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
