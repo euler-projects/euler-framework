@@ -1,4 +1,4 @@
-package net.eulerform.web.rs.client;
+
 
 import java.io.IOException;
 import java.util.Map;
