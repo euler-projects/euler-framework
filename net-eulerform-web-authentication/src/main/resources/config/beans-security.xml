@@ -22,7 +22,7 @@
     <http security="none" pattern="/favicon.ico" />
     <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
     
-    <beans:import resource="classpath:**/rs-security.xml"/>
+    <beans:import resource="classpath*:**/rs-security.xml"/>
 
     <beans:beans profile="web-security-none">
         <http security="none" pattern="/**" />

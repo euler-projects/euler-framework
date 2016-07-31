@@ -6,10 +6,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <link href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
-    <link href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
-    <link href="${contextPath}/resources/css/lib/global.css">
-    <link href="${contextPath}/resources/css/lib/icon.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/easyui/themes/metro/easyui.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/easyui/themes/icon.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/global.css">
+    <link rel="stylesheet" href="${contextPath}/resources/css/lib/icon.css">
 
     <title></title>
 

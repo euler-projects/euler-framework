@@ -201,14 +201,6 @@
                 editable:false,
                 data:getDictData(yesOrNo)
             });
-            
-            $('#dlg_grantType').combo({
-                required:true,
-                multiple:true,
-                valueField:'key',
-                textField:'value',
-                data:getDictData(grantType)
-            });
         });
         
         function refreshDatagrid(){
