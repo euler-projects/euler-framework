@@ -31,7 +31,7 @@ import net.eulerform.common.GlobalPropertyReadException;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = { "net.eulerform.web.**.controller" }, 
+@ComponentScan(basePackages = { "**.web.**.controller" }, 
                useDefaultFilters = false, 
                includeFilters = @ComponentScan.Filter(WebController.class))
 public class SpringWebDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
