@@ -24,7 +24,7 @@ import net.eulerform.web.core.annotation.RestEndpoint;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = {"net.eulerform.web.**.controller"},
+        basePackages = {"**.web.**.controller"},
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(RestEndpoint.class)
 )
