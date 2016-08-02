@@ -132,7 +132,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             resutlBuffer.append(this.objectMapper.writer().writeValueAsString(entry.getValue()));
             resutlBuffer.append(';');
             resutlBuffer.append('\n');
-            FileReader.writeFile(path, resutlBuffer.toString());
+            FileReader.writeFile(path, resutlBuffer.toString(), true);
         }        
     }
 

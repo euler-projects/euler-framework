@@ -1,6 +1,5 @@
 package net.eulerform.web.module.root.controller;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Scope;
@@ -10,15 +9,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.BaseController;
-import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 @WebController
 @Scope("prototype")
 @RequestMapping("/")
 public class RootWebController extends BaseController {
-    
-    @Resource
-    private IBaseDataService baseDataService;
     
     @RequestMapping(value = "/about", method = RequestMethod.GET)
     public String about() {

@@ -25,7 +25,7 @@ import net.eulerform.web.module.demo.service.IBlogService;
 @RequestMapping("/demo")
 public class DemoRestEndpoint extends BaseRest {
     
-    @Resource
+    //@Resource
     private IBlogService blogService;
 
     @ResponseBody

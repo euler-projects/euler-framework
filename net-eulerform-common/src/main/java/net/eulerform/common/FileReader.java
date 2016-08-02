@@ -34,10 +34,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.Reader;
 
@@ -261,9 +261,17 @@ public abstract class FileReader {
         }
     }
     
-    public static void writeFile(String filePath, String data) throws IOException{
+    /**
+     * 写字符串
+     * @param filePath 文件路径
+     * @param data 字符串内容
+     * @param append 追加模式
+     * @throws IOException
+     */
+    public static void writeFile(String filePath, String data, boolean append) throws IOException{
         File file =new File(filePath);
-        FileWriter fileWritter = null;
+        //FileWriter fileWritter = null;
+        OutputStreamWriter outputStreamWriter = null;
         BufferedWriter bufferWritter = null;
 
         try {
@@ -272,19 +280,28 @@ public abstract class FileReader {
             file.createNewFile();
         }        
         //true = append file
-        fileWritter = new FileWriter(filePath,true);
-        bufferWritter = new BufferedWriter(fileWritter);
+        //fileWritter = new FileWriter(filePath,true);
+        outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file, append),"UTF-8");
+        bufferWritter = new BufferedWriter(outputStreamWriter); ;//new BufferedWriter(fileWritter);
         bufferWritter.write(data);
         bufferWritter.close();
         } catch (IOException e) {
             throw e;
         } finally {
-            if(fileWritter != null) fileWritter.close();
-            if(bufferWritter != null) bufferWritter.close();           
+            if(bufferWritter != null) bufferWritter.close();  
+            if(outputStreamWriter != null) outputStreamWriter.close();   
+            //if(fileWritter != null) fileWritter.close();       
         }
     }
     
-    public static void writeFile(String filePath, byte[] data) throws IOException{
+    /**
+     * 写二进制数据
+     * @param filePath 文件路径
+     * @param data 数据内容
+     * @param append 追加模式
+     * @throws IOException
+     */
+    public static void writeFile(String filePath, byte[] data, boolean append) throws IOException{
         File file =new File(filePath);
         FileOutputStream fileOutputStream = null;
 
@@ -297,7 +314,7 @@ public abstract class FileReader {
             if(!file.exists()){
                 file.createNewFile();
             }
-            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream = new FileOutputStream(file, append);
             fileOutputStream.write(data);
         } catch (IOException e) {
             throw e;
