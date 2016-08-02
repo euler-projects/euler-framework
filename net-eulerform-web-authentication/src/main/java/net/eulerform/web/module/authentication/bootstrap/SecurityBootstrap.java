@@ -1,4 +1,4 @@
-package net.eulerform.bootstrap;
+package net.eulerform.web.module.authentication.bootstrap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

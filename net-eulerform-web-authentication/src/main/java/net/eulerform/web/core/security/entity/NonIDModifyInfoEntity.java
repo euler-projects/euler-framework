@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.entity;
+package net.eulerform.web.core.security.entity;
 
 import java.util.Date;
 
@@ -6,17 +6,19 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import net.eulerform.web.core.base.entity.NonIDEntity;
+
 /**
- * 具有修改人记录功能的<strong>UUID主键</strong>实体<br>
+ * 具有修改人记录功能的<strong>无主键</strong>实体<br>
  * 
- * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends IDModifyInfoEntity&lt;Example&gt;<code>
+ * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends NonIDModifyInfoEntity&lt;Example&gt;<code>
  * @author cFrost
- * @see net.eulerform.web.core.base.entity.NonIDModifyInfoEntity
- * @see net.eulerform.web.core.base.entity.IDModifyInfoEntity
+ * @see net.eulerform.web.core.security.entity.IDModifyInfoEntity
+ * @see net.eulerform.web.core.security.entity.UUIDModifyInfoEntity
  */
 @SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T> {    
+public abstract class NonIDModifyInfoEntity<T extends NonIDModifyInfoEntity<?>> extends NonIDEntity<T> implements BaseModifyInfoEntity<T> {    
 
     @Column(name="CREATE_BY", nullable=false)
     private String createBy;

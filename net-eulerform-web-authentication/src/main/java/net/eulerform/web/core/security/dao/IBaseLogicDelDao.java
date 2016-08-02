@@ -1,9 +1,9 @@
-package net.eulerform.web.core.base.dao;
+package net.eulerform.web.core.security.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
 
-import net.eulerform.web.core.base.entity.BaseLogicDelEntity;
+import net.eulerform.web.core.security.entity.BaseLogicDelEntity;
 
 public interface IBaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends IBaseModifyInfoDao<T>{
     

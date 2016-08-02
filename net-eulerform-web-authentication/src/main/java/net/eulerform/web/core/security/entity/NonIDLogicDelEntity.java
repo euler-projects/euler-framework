@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.entity;
+package net.eulerform.web.core.security.entity;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
@@ -8,8 +8,8 @@ import javax.persistence.MappedSuperclass;
  * 
  * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends NonIDLogicDelEntity&lt;Example&gt;<code>
  * @author cFrost
- * @see net.eulerform.web.core.base.entity.IDLogicDelEntity
- * @see net.eulerform.web.core.base.entity.UUIDLogicEntity
+ * @see net.eulerform.web.core.security.entity.IDLogicDelEntity
+ * @see net.eulerform.web.core.security.entity.UUIDLogicEntity
  */
 @SuppressWarnings("serial")
 @MappedSuperclass

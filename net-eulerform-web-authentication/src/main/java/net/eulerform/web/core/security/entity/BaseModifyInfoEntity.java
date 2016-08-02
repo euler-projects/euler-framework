@@ -1,20 +1,22 @@
-package net.eulerform.web.core.base.entity;
+package net.eulerform.web.core.security.entity;
 
 import java.util.Date;
+
+import net.eulerform.web.core.base.entity.BaseEntity;
 
 /**
  * 具有修改人记录功能的基础实体接口<br>
  * 可记录数据的创建人,创建时间,修改人,修改时间<br>
- * 实现时可扩展{@link net.eulerform.web.core.base.entity.BaseEntity}的某种实现以实现某种主键策略
+ * 实现时可扩展{@link net.eulerform.web.core.security.entity.BaseEntity}的某种实现以实现某种主键策略
  * 
  * @param <T> 实现类类名&nbsp;例如:<br>
  * <code>public class Example implements BaseModifyInfoEntity&lt;Example&gt;<code>
  * <br><strong>OR</strong><br>
  * <code>public class Example extends IDEntity&lt;Example&gt; implements BaseModifyInfoEntity&lt;Example&gt;<code>
  * @author cFrost
- * @see net.eulerform.web.core.base.entity.NonIDModifyInfoEntity
- * @see net.eulerform.web.core.base.entity.IDModifyInfoEntity
- * @see net.eulerform.web.core.base.entity.UUIDModifyInfoEntity
+ * @see net.eulerform.web.core.security.entity.NonIDModifyInfoEntity
+ * @see net.eulerform.web.core.security.entity.IDModifyInfoEntity
+ * @see net.eulerform.web.core.security.entity.UUIDModifyInfoEntity
  */
 public interface BaseModifyInfoEntity<T extends BaseModifyInfoEntity<?>> extends BaseEntity<T> {
 

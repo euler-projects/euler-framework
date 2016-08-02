@@ -1,14 +1,21 @@
-package net.eulerform.web.core.base.dao.impl.hibernate5;
+package net.eulerform.web.core.security.dao.impl.hibernate5;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import net.eulerform.web.core.base.dao.IBaseModifyInfoDao;
-import net.eulerform.web.core.base.entity.BaseModifyInfoEntity;
+
+import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
+import net.eulerform.web.core.security.dao.IBaseModifyInfoDao;
+import net.eulerform.web.core.security.entity.BaseModifyInfoEntity;
+import net.eulerform.web.module.authentication.entity.User;
 import net.eulerform.web.module.authentication.util.UserContext;
 
 public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> extends BaseDao<T> implements IBaseModifyInfoDao<T> {
 
+    protected User getCurrentUser(){
+        return UserContext.getCurrentUser();
+    }
+    
     @Override
     public Serializable save(T entity) {
         this.setModifyInfo(entity);
@@ -46,7 +53,7 @@ public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> exten
             }
         }
         
-        Serializable currentUserId = UserContext.getCurrentUser().getId();;
+        Serializable currentUserId = this.getCurrentUser().getId();;
         Date date = new Date();
         if(entity.getCreateDate() == null)
             entity.setCreateDate(date);
