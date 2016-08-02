@@ -17,7 +17,7 @@ public class AuthenticateBootstrap implements WebApplicationInitializer {
 
     @Override
     public void onStartup(ServletContext container) throws ServletException {
-        log.info("Executing post logging bootstrap.");
+        log.info("Executing authenticate logging bootstrap.");
 
         FilterRegistration.Dynamic authenticateInfoFilter = container.addFilter("authenticateInfoFilter", new AuthenticateInfoFilter("oauth/token","oauth/check_token"));
         authenticateInfoFilter.addMappingForUrlPatterns(null, false, "/*");
