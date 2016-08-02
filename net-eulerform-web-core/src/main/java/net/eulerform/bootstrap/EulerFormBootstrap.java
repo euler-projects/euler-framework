@@ -243,6 +243,6 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         eulerFormCoreFilter.addMappingForUrlPatterns(null, false, "/*");
         
         FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
-        crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token");
+        crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");
     }
 }
