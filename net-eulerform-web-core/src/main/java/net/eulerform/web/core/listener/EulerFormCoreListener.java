@@ -94,7 +94,7 @@ public class EulerFormCoreListener implements ServletContextListener {
                 String destPath = webRootRealPath + MODULE_JSP_FOLDER + moduleName + filename;
                 if (!new File(destPath).exists()) {
                     byte[] result = FileReader.readInputStreamByMultiBytes(inputStream, 1024);
-                    FileReader.writeFile(destPath, result);
+                    FileReader.writeFile(destPath, result, false);
                     log.info("\nImport module jsp file: \n" + r.getURI().toString() + "\ninto\n" + destPath + "\n");
                 }
             }
