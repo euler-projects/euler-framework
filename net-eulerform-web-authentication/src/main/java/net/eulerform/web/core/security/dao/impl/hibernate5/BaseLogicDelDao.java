@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.dao.impl.hibernate5;
+package net.eulerform.web.core.security.dao.impl.hibernate5;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import net.eulerform.web.core.base.dao.IBaseLogicDelDao;
-import net.eulerform.web.core.base.entity.BaseLogicDelEntity;
+import net.eulerform.web.core.security.dao.IBaseLogicDelDao;
+import net.eulerform.web.core.security.entity.BaseLogicDelEntity;
 import net.eulerform.web.module.authentication.util.UserContext;
 
 public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends BaseModifyInfoDao<T> implements IBaseLogicDelDao<T> {

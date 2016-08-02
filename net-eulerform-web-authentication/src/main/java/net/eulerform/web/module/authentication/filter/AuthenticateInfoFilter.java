@@ -1,4 +1,4 @@
-package net.eulerform.web.core.filter;
+package net.eulerform.web.module.authentication.filter;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import net.eulerform.web.module.authentication.entity.User;
 import net.eulerform.web.module.authentication.util.UserContext;
 
-public class PostLoggingFilter extends OncePerRequestFilter {
+public class AuthenticateInfoFilter extends OncePerRequestFilter {
     
     private String[] excludeServletPath;
 
@@ -21,11 +21,11 @@ public class PostLoggingFilter extends OncePerRequestFilter {
         this.excludeServletPath = excludeServletPath;
     }
 
-    public PostLoggingFilter() {
+    public AuthenticateInfoFilter() {
         
     }
     
-    public PostLoggingFilter(String... excludeServletPath) {
+    public AuthenticateInfoFilter(String... excludeServletPath) {
         this.excludeServletPath = excludeServletPath;        
     }
 

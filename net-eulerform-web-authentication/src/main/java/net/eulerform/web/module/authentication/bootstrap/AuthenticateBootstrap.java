@@ -1,25 +1,25 @@
-package net.eulerform.bootstrap;
+package net.eulerform.web.module.authentication.bootstrap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 
-import net.eulerform.web.core.filter.PostLoggingFilter;
+import net.eulerform.web.module.authentication.filter.AuthenticateInfoFilter;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 @Order(300)
-public class PostLoggingBootstrap implements WebApplicationInitializer {
+public class AuthenticateBootstrap implements WebApplicationInitializer {
     private static final Logger log = LogManager.getLogger();
 
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         log.info("Executing post logging bootstrap.");
 
-        FilterRegistration.Dynamic postLoggingFilter = container.addFilter("postLoggingFilter", new PostLoggingFilter("oauth/token","oauth/check_token"));
-        postLoggingFilter.addMappingForUrlPatterns(null, false, "/*");
+        FilterRegistration.Dynamic authenticateInfoFilter = container.addFilter("authenticateInfoFilter", new AuthenticateInfoFilter("oauth/token","oauth/check_token"));
+        authenticateInfoFilter.addMappingForUrlPatterns(null, false, "/*");
     }
 }
