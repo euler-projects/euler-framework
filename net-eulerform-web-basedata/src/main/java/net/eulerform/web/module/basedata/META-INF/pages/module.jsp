@@ -45,10 +45,10 @@
                     onClose:clearModuleDlg,
                     buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSaveModuleDlg},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancelModuleDlg}]">
             <form id="module-fm" class="dlg-form"  method="post">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_name" name="name"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.requireAuthority')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_requireAuthority" name="requireAuthority"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.showOrder')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_showOrder" name="showOrder"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.description')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" id="dlg_module_description" name="description"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('module.name')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_name" name="name"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('module.requireAuthority')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_requireAuthority" name="requireAuthority"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('module.showOrder')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_module_showOrder" name="showOrder"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('module.description')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" id="dlg_module_description" name="description"></span></div>
             </form>
         </div>
         <div id="page-dlg" class="easyui-dialog dlg-window" title="${euler:i18n('jsp.page.createPage')}" style="width:400px;"
@@ -61,12 +61,12 @@
                     onClose:clearPageDlg,
                     buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSavePageDlg},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancelPageDlg}]">
             <form id="page-fm" class="dlg-form"  method="post">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('module.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_module_id" data-options="editable:false" name="moduleId"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_name" name="name"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.url')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_url" name="url"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.requireAuthority')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_requireAuthority" name="requireAuthority"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.showOrder')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_showOrder" name="showOrder"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('page.description')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" id="dlg_page_description" name="description"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('module.name')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_module_id" data-options="editable:false" name="moduleId"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('page.name')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_name" name="name"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('page.url')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_url" name="url"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('page.requireAuthority')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_requireAuthority" name="requireAuthority"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('page.showOrder')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_page_showOrder" name="showOrder"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('page.description')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" id="dlg_page_description" name="description"></span></div>
             </form>
         </div>
     </div>

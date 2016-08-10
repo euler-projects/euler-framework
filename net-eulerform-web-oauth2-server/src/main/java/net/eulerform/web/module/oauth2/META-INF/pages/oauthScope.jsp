@@ -75,9 +75,9 @@
                     buttons:[{text:'${euler:i18n('global.save')}', iconCls:'icon-ok', handler:onSave},{text:'${euler:i18n('global.cancel')}', iconCls:'icon-cancel', handler:onCancel}]">
             <form id="fm" class="dlg-form" method="post">
                 <input type="hidden" id="dlg_id" name="id">
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('scope.scope')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_scope" name="scope"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('scope.name')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_name" name="name"></span></div>
-                <div class="dlg_line"><label class="dlg_label">${euler:i18n('scope.description')}</label><span class="dlg_span"><input class="easyui-textbox dlg-input" data-options="" id="dlg_description" name="description"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('scope.scope')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_scope" name="scope"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('scope.name')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="required:true" id="dlg_name" name="name"></span></div>
+                <div class="dlg-line"><label class="dlg-label">${euler:i18n('scope.description')}</label><span class="dlg-span"><input class="easyui-textbox dlg-input" data-options="" id="dlg_description" name="description"></span></div>
             </form>
         </div>        
     </div>
