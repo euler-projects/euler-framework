@@ -104,6 +104,18 @@ public class SecurityWebContorller extends BaseController {
         }
         this.userService.saveUser(user);
     }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/signUp" }, method = RequestMethod.POST)
+    public void signUp(String username, String password) {
+        this.userService.createUser(username, password);
+    }    
+
+    @ResponseBody
+    @RequestMapping(value = { "/resetUserPassword" }, method = RequestMethod.POST)
+    public void resetUserPassword(String id, String password) {
+        this.userService.resetUserPasswordRWT(id, password);
+    }
 
     @ResponseBody
     @RequestMapping(value = { "/saveGroup" }, method = RequestMethod.POST)

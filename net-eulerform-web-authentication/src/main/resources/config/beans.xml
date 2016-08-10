@@ -29,7 +29,6 @@
     </bean>
     
     <bean id="userService" name="userDetailsService" class="net.eulerform.web.module.authentication.service.impl.UserService">
-        <property name="userDao" ref="userDao"/>
         <property name="passwordEncoder" ref="passwordEncoder"/>
     </bean>
     

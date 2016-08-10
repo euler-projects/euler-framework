@@ -81,7 +81,7 @@ public class UserContext {
         User user = getUserById(id);
         if(user == null)
             return "UNKOWN-"+id;
-        return user.getEmpName()+"("+user.getUsername()+")";
+        return user.getFullName()+"("+user.getUsername()+")";
     }
 
     public static User getCurrentUser() {

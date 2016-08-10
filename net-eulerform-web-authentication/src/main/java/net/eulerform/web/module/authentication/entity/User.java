@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.security.core.CredentialsContainer;
@@ -55,8 +56,8 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private String username;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
-    @Column(name = "EMP_NAME")
-    private String empName;
+    @Column(name = "FULL_NAME")
+    private String fullName;
     @Column(name = "ENABLED", nullable = false)
     private Boolean enabled;
     @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
@@ -65,8 +66,9 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private Boolean accountNonLocked;
     @Column(name = "CREDENTIALS_NON_EXPIRED", nullable = false)
     private Boolean credentialsNonExpired;
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "SYS_USER_AUTHORITY", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    @JoinTable(name = "SYS_USER_AUTHORITY", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
+    @Transient
     private Set<Authority> authorities;
     
     @ManyToMany(fetch = FetchType.EAGER)
@@ -81,12 +83,12 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         this.username = username;
     }
 
-    public String getEmpName() {
-        return empName;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setEmpName(String empName) {
-        this.empName = empName;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getPassword() {

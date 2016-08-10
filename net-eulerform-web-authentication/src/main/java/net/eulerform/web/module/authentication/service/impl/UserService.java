@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import net.eulerform.common.BeanTool;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.module.authentication.dao.IGroupDao;
 import net.eulerform.web.module.authentication.dao.IUserDao;
 import net.eulerform.web.module.authentication.entity.Group;
 import net.eulerform.web.module.authentication.entity.User;
@@ -21,13 +25,10 @@ import net.eulerform.web.module.authentication.service.IUserService;
 
 public class UserService extends BaseService implements IUserService, UserDetailsService {
 
-    private IUserDao userDao;
+    @Resource private IUserDao userDao;
+    @Resource private IGroupDao groupDao;
 
     private PasswordEncoder passwordEncoder;
-
-    public void setUserDao(IUserDao userDao) {
-        this.userDao = userDao;
-    }
         
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
@@ -113,6 +114,13 @@ public class UserService extends BaseService implements IUserService, UserDetail
     }
 
     @Override
+    public void resetUserPasswordRWT(String userId, String newPassword) {
+        User user = this.userDao.load(userId);
+        user.setPassword(this.passwordEncoder.encode(newPassword));
+        this.userDao.update(user);
+    }
+
+    @Override
     public User findUserById(Serializable id) {
         User user = this.userDao.load(id);
         if(user == null)
@@ -124,5 +132,27 @@ public class UserService extends BaseService implements IUserService, UserDetail
     @Override
     public List<User> findUserByNameOrCode(String nameOrCode) {
         return this.userDao.findUserByNameOrCode(nameOrCode);
+    }
+
+    @Override
+    public void createUser(String username, String password) {
+        try {
+            this.loadUserByUsername(username);
+        } catch (UsernameNotFoundException e) {
+            User user = new User();
+            user.setUsername(username);
+            user.setPassword(this.passwordEncoder.encode(password));
+            user.setAccountNonExpired(true);
+            user.setAccountNonLocked(true);
+            user.setCredentialsNonExpired(true);
+            user.setEnabled(true);
+            Group usersGroup = this.groupDao.findSystemUsersGroup();
+            Set<Group> groups = new HashSet<>();
+            groups.add(usersGroup);
+            user.setGroups(groups);
+            this.userDao.save(user);
+            return;
+        }
+        throw new ResourceExistException("User Existed!");
     }
 }

@@ -30,8 +30,14 @@ public interface IUserService extends IBaseService {
 
     @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void disableUsersRWT(String[] idArray);
+    
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    public void resetUserPasswordRWT(String userId, String newPassword);
 
     public User findUserById(Serializable id);
 
     public List<User> findUserByNameOrCode(String nameOrCode);
+
+    public void createUser(String username, String password);
+
 }

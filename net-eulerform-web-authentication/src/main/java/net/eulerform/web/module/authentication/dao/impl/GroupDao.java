@@ -15,6 +15,7 @@ import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerform.web.module.authentication.dao.IGroupDao;
 import net.eulerform.web.module.authentication.entity.Group;
 
@@ -28,11 +29,11 @@ public class GroupDao extends BaseDao<Group> implements IGroupDao {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("name");
             if (!StringTool.isNull(queryValue)) {
-                detachedCriteria.add(Restrictions.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
+                detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("description");
             if (!StringTool.isNull(queryValue)) {
-                detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
+                detachedCriteria.add(RestrictionsX.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -58,6 +59,17 @@ public class GroupDao extends BaseDao<Group> implements IGroupDao {
         
         Collections.sort(result, c);
         return result;
+    }
+
+    @Override
+    public Group findSystemUsersGroup() {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
+                .setFetchMode("authorities", FetchMode.SELECT);
+        detachedCriteria.add(Restrictions.eq("name", Group.SYSTEM_USERS_CROUP_NAME));
+        List<Group> result = this.findBy(detachedCriteria);
+        if(result == null || result.isEmpty())
+            throw new RuntimeException("System Users Group Not Found");
+        return result.get(0);
     }
 
 }
