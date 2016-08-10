@@ -16,6 +16,8 @@ import net.eulerform.web.core.base.entity.UUIDEntity;
 @Entity
 @Table(name="SYS_GROUP")
 public class Group extends UUIDEntity<Group> {
+    
+    public static final String SYSTEM_USERS_CROUP_NAME = "Users";
 
     @Column(name="NAME", nullable = false, unique = true)
     private String name;

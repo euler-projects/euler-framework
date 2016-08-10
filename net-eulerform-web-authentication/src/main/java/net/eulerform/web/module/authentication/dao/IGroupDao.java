@@ -13,4 +13,6 @@ public interface IGroupDao extends IBaseDao<Group> {
 
     List<Group> findAllGroupsInOrder();
 
+    Group findSystemUsersGroup();
+
 }
