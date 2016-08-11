@@ -70,15 +70,13 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         hqlBuffer.append(" en where ");
         for (int i = 0; i < idArray.length; i++) {
             if (i == 0) {
-                hqlBuffer.append("en.id= '");
+                hqlBuffer.append("en.id= ?");
             } else {
-                hqlBuffer.append(" or en.id= '");
+                hqlBuffer.append(" or en.id= ?");
             }
-            hqlBuffer.append(idArray[i]);
-            hqlBuffer.append("'");
         }
         final String hql = hqlBuffer.toString();
-        return this.findBy(hql);
+        return this.findBy(hql, (Object[])idArray);
     }
 
     @Override
@@ -102,7 +100,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
-            query.setParameter(i + "", params[i]);
+            query.setParameter(i, params[i]);
         }
 
         query.executeUpdate();
@@ -135,7 +133,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("delete ");
         hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en where en.id = ?0");
+        hqlBuffer.append(" en where en.id = ?");
         final String hql = hqlBuffer.toString();
         this.update(hql, id);
     }
@@ -167,15 +165,13 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         hqlBuffer.append(" en where ");
         for (int i = 0; i < idArray.length; i++) {
             if (i == 0) {
-                hqlBuffer.append("en.id= '");
+                hqlBuffer.append("en.id= ?");
             } else {
-                hqlBuffer.append(" or en.id= '");
+                hqlBuffer.append(" or en.id= ?");
             }
-            hqlBuffer.append(idArray[i]);
-            hqlBuffer.append("'");
         }
         final String hql = hqlBuffer.toString();
-        this.update(hql);
+        this.update(hql, (Object[])idArray);
     }
 
     @Override
@@ -211,7 +207,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
-            query.setParameter(i + "", params[i]);
+            query.setParameter(i, params[i]);
         }
 
         List<T> result = query.list();
@@ -222,6 +218,31 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     @SuppressWarnings("unchecked")
     protected List<T> findBy(DetachedCriteria detachedCriteria) {
         List<T> result = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list();
+        evict(result);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<T> findByWithMaxResults(String hql, int maxResults, Object... params) {
+        Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
+        query.setMaxResults(maxResults);
+        
+        for (int i = 0; i < params.length; i++) {
+            query.setParameter(i, params[i]);
+        }
+
+        List<T> result = query.list();
+        evict(result);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<T> findByWithMaxResults(DetachedCriteria detachedCriteria, int maxResults) {
+        Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
+
+        criteria.setMaxResults(maxResults);
+        
+        List<T> result = criteria.list();
         evict(result);
         return result;
     }

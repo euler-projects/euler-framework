@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 @Configuration
 @ImportResource({"classpath*:config/beans.xml"})
 @ComponentScan(
-        basePackages = {"net.eulerform.web"},
+        basePackages = {"net.eulerform.web", "com.lehang.web"},
         excludeFilters = @ComponentScan.Filter(Controller.class)
 )
 

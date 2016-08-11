@@ -36,15 +36,13 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
         hqlBuffer.append(" en where en.ifDel = false and (");
         for(int i=0;i<idArray.length;i++) {
             if(i==0) {
-                hqlBuffer.append("en.id= '");
+                hqlBuffer.append("en.id= ?");
             } else {
-                hqlBuffer.append(" or en.id= '");
+                hqlBuffer.append(" or en.id= ?");
             }
-            hqlBuffer.append(idArray[i]);
-            hqlBuffer.append(")'");
         }
         final String hql = hqlBuffer.toString();
-        return super.findBy(hql);        
+        return super.findBy(hql, (Object[])idArray);        
     }
 
     @Override
@@ -85,7 +83,7 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("update ");
         hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en set en.modifyBy = ?0, en.modifyDate = ?1, en.ifDel = true where en.id = ?2");
+        hqlBuffer.append(" en set en.modifyBy = ?, en.modifyDate = ?, en.ifDel = true where en.id = ?");
 
         final String hql = hqlBuffer.toString();
         this.update(hql, UserContext.getCurrentUser().getId(), new Date(), id);
@@ -114,15 +112,13 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("update ");
         hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en set en.modifyBy = ?0, en.modifyDate = ?1, en.ifDel = true where ");
+        hqlBuffer.append(" en set en.modifyBy = ?, en.modifyDate = ?, en.ifDel = true where ");
         for(int i=0;i<idArray.length;i++) {
             if(i==0) {
-                hqlBuffer.append("en.id= '");
+                hqlBuffer.append("en.id= ?");
             } else {
-                hqlBuffer.append(" or en.id= '");
+                hqlBuffer.append(" or en.id= ?");
             }
-            hqlBuffer.append(idArray[i]);
-            hqlBuffer.append("'");
         }
         final String hql = hqlBuffer.toString();
         this.update(hql, UserContext.getCurrentUser().getId(), new Date());
