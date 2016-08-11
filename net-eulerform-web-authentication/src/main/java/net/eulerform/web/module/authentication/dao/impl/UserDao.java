@@ -40,7 +40,7 @@ public class UserDao extends BaseDao<User> implements IUserDao {
     @Override
     public PageResponse<User> findUserByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
-                .setFetchMode("authorities", FetchMode.SELECT)
+                //.setFetchMode("authorities", FetchMode.SELECT)
                 .setFetchMode("groups", FetchMode.SELECT);
         try {
             String queryValue = null;

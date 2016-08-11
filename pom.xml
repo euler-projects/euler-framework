@@ -151,6 +151,12 @@
                 <groupId>org.jasig.cas.client</groupId>
                 <artifactId>cas-client-core</artifactId>
                 <version>${jasig.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             
             <dependency>
