@@ -22,9 +22,11 @@ public class CodeTable extends UUIDEntity<CodeTable> {
     @NotNull
     @Pattern(regexp="[a-z][a-zA-Z0-9]*", message="{validation.codeTable.name}")
     @Column(name = "CODE_NAME", nullable = false)
-    private String name;    
+    private String name;
+    @NotNull
     @Column(name = "CODE_KEY", nullable = false)
     private String key;
+    @NotNull
     @Column(name = "CODE_VALUE")
     private String value;
     @Column(name = "CODE_VALUE_ZH_CN")
@@ -33,7 +35,7 @@ public class CodeTable extends UUIDEntity<CodeTable> {
     private String valueEnUs;
     @Column(name="DESCRIPTION")
     private String description;
-    
+    @NotNull
     @Column(name = "CODE_TYPE", nullable = false)
     private Integer codeType;
     

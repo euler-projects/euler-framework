@@ -62,6 +62,15 @@ public abstract class CalendarTool {
     public static Calendar parseCalendar (String source, String pattern, Locale local) throws ParseException{
         return formDate(parseDate(source, pattern, local));
     }
+
+    public static String formatDate (Date date, String pattern){
+        return new SimpleDateFormat(pattern).format(date);
+    }
+
+
+    public static String formatCalendar (Calendar calendar, String pattern){
+        return formatDate(calendar.getTime() , pattern);
+    }
     
     public static Calendar now(){
         return Calendar.getInstance();
