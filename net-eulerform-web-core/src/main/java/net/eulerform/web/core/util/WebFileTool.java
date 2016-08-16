@@ -28,7 +28,6 @@ public class WebFileTool {
 //    		sourceFileName = FilePathTool.changeToUnixFormat(sourceFileName);
     		int dot = sourceFileName.lastIndexOf('.');
 //            int slash = sourceFileName.lastIndexOf('/');
-//            System.out.println(dot + " " + slash+ " "+sourceFileName);
             
             String prefix = CalendarTool.formatDate(new Date(), "yyyyMMddHHmmss-");
             
