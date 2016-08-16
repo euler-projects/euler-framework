@@ -52,7 +52,6 @@ public class UeService extends BaseService implements IUeService {
         ret.setTitle(savedImg.getName());
         ret.setType(extension);
         ret.setUrl(uploadPath+"/"+savedImg.getName());
-        System.out.print(file.getOriginalFilename());
         return ret;
         
     }
