@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerform.web.core.base.entity.WebServiceResponse;
+import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 
 public abstract class BaseRest {
@@ -25,6 +26,19 @@ public abstract class BaseRest {
     @ExceptionHandler({ResourceNotFoundException.class})   
     public WebServiceResponse<String> resourceNotFoundException(ResourceNotFoundException e) {
         return new WebServiceResponse<>(HttpStatus.NOT_FOUND);
+    }
+    
+    /**  
+     * 用于在程序发生{@link IllegalParamException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalParamException.class})   
+    public WebServiceResponse<String> illegalParamException(IllegalParamException e) {
+        WebServiceResponse<String> response =  new WebServiceResponse<>();
+        response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return response;
     }
     
     /**  
