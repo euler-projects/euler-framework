@@ -76,13 +76,13 @@ public class BaseDataWebController extends BaseController {
     
     @ResponseBody
     @RequestMapping(value ="/saveModule", method = RequestMethod.POST)
-    public void saveModule(Module module) {
+    public void saveModule(@Valid Module module) {
         this.baseDataService.saveModule(module);
     }
     
     @ResponseBody
     @RequestMapping(value ="/savePage", method = RequestMethod.POST)
-    public void savePage(Page page) {
+    public void savePage(@Valid Page page) {
         this.baseDataService.savePage(page);
     }
     

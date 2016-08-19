@@ -13,25 +13,25 @@ import net.eulerform.web.module.authentication.entity.User;
 
 public interface IUserService extends IBaseService {
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public PageResponse<User> findUserByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public void saveUser(User user);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public void saveUserGroups(String userId, List<Group> groups);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public void deleteUsers(String[] idArray);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public void enableUsersRWT(String[] idArray);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public void disableUsersRWT(String[] idArray);
     
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM','DEMO')")
     public void resetUserPasswordRWT(String userId, String newPassword);
 
     public User findUserById(Serializable id);

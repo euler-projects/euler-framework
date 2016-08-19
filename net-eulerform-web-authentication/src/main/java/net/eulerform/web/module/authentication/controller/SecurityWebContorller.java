@@ -160,6 +160,13 @@ public class SecurityWebContorller extends BaseController {
     }
     
     @ResponseBody
+    @RequestMapping(value ="/deleteUsers", method = RequestMethod.POST)
+    public void deleteUsers(@RequestParam String ids) {
+        String[] idArray = ids.trim().replace(" ", "").split(";");
+        this.userService.deleteUsers(idArray);
+    }
+    
+    @ResponseBody
     @RequestMapping(value ="/deleteGroups", method = RequestMethod.POST)
     public void deleteGroups(@RequestParam String ids) {
         String[] idArray = ids.trim().replace(" ", "").split(";");
