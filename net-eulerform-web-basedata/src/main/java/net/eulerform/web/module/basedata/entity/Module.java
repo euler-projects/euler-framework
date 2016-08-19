@@ -32,7 +32,7 @@ public class Module extends UUIDEntity<Module> {
     @Column(name = "SHOW_ORDER", nullable = false)
     private Integer showOrder;
     @NotNull
-    @Pattern(regexp="[A-Z][A-Z_]*", message="{validation.authority.authority}")
+    @Pattern(regexp="[A-Z][A-Z_,]*", message="{validation.authority.authority}")
     @Column(name = "REQUIRE_AUTHORITY")
     private String requireAuthority;
     @OneToMany(fetch = FetchType.EAGER)
