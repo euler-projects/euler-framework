@@ -15,8 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import net.eulerform.common.BeanTool;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.i18n.Tag;
 import net.eulerform.web.module.authentication.dao.IGroupDao;
 import net.eulerform.web.module.authentication.dao.IUserDao;
 import net.eulerform.web.module.authentication.entity.Group;
@@ -115,6 +117,9 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Override
     public void resetUserPasswordRWT(String userId, String newPassword) {
+        if(newPassword.length() < 6) {
+            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
+        }
         User user = this.userDao.load(userId);
         user.setPassword(this.passwordEncoder.encode(newPassword));
         this.userDao.update(user);
@@ -136,6 +141,9 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Override
     public void createUser(String username, String password) {
+        if(password.length() < 6) {
+            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
+        }
         try {
             this.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {

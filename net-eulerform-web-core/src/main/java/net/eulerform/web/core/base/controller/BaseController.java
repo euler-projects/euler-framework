@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import net.eulerform.web.core.base.entity.HttpStatusResponse;
 import net.eulerform.web.core.base.entity.WebResponseStatus;
+import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.util.UrlTool;
 
@@ -96,6 +97,18 @@ public abstract class BaseController {
     public HttpStatusResponse exception(ResourceExistException e) {
         e.printStackTrace();
         return new HttpStatusResponse(WebResponseStatus.RESOURCE_EXIST.value(), e.getLocalizedMessage());
+    }
+    
+    /**  
+     * 用于在程序发生{@link IllegalParamException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalParamException.class})   
+    public HttpStatusResponse illegalParamException(IllegalParamException e) {
+        e.printStackTrace();
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
     
     /**  
