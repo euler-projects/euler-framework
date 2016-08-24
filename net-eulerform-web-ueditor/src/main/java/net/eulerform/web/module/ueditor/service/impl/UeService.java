@@ -30,13 +30,15 @@ public class UeService extends BaseService implements IUeService {
 
     @Override
     public UeImgUploadResult uploadImg(HttpServletRequest request, MultipartFile file) throws MultipartFileSaveException {
-        File savedImg = WebFileTool.saveMultipartFile(file);
+        
         String uploadPath;
         try {
-            uploadPath = GlobalProperties.get(GlobalProperties.UPLOAD_PATH);
+            uploadPath = GlobalProperties.get(GlobalProperties.UPLOAD_PATH)+"/ueditor/images";
         } catch (GlobalPropertyReadException e) {
             throw new RuntimeException(e);
         }
+        
+        File savedImg = WebFileTool.saveMultipartFile(file, uploadPath);
         
         String sourceFileName = file.getOriginalFilename();
         int dot = sourceFileName.lastIndexOf('.');
