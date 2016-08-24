@@ -18,34 +18,46 @@ import net.eulerform.web.core.exception.MultipartFileSaveException;
 public class WebFileTool {
 
 	public static File saveMultipartFile(MultipartFile multipartFile) throws MultipartFileSaveException {
-        try {
+
+            String uploadPath;
+            try {
+                uploadPath = GlobalProperties.get(GlobalProperties.UPLOAD_PATH);
+            } catch (GlobalPropertyReadException e) {
+                throw new MultipartFileSaveException(e);
+            }
+            
+            return saveMultipartFile(multipartFile, uploadPath);
+        
+	}
+
+	public static File saveMultipartFile(MultipartFile multipartFile, String uploadPath) throws MultipartFileSaveException{
+	    try {
             ServletContext scx = ContextLoader.getCurrentWebApplicationContext().getServletContext();
 
-            String uploadPath = scx.getRealPath(GlobalProperties.get(GlobalProperties.UPLOAD_PATH));
+            String realUploadPath = scx.getRealPath(uploadPath);
         
-    	    File targetDir = new File(uploadPath);
-    		String sourceFileName = multipartFile.getOriginalFilename();
-//    		sourceFileName = FilePathTool.changeToUnixFormat(sourceFileName);
-    		int dot = sourceFileName.lastIndexOf('.');
+            File targetDir = new File(realUploadPath);
+            String sourceFileName = multipartFile.getOriginalFilename();
+//          sourceFileName = FilePathTool.changeToUnixFormat(sourceFileName);
+            int dot = sourceFileName.lastIndexOf('.');
 //            int slash = sourceFileName.lastIndexOf('/');
             
             String prefix = CalendarTool.formatDate(new Date(), "yyyyMMddHHmmss-");
             
-    		String extension = "";
+            String extension = "";
             if(dot > -1)
                 extension = sourceFileName.substring(sourceFileName.lastIndexOf('.'));
             
             String targetFileName = prefix + UUID.randomUUID().toString() + extension;
             
-    		File targetFile = new File(uploadPath, targetFileName);
-    		if (!targetDir.exists()) {
-    			targetDir.mkdirs();
-    		}
-    		multipartFile.transferTo(targetFile);
-    		return targetFile;
-        } catch (GlobalPropertyReadException | IllegalStateException | IOException e) {
+            File targetFile = new File(realUploadPath, targetFileName);
+            if (!targetDir.exists()) {
+                targetDir.mkdirs();
+            }
+            multipartFile.transferTo(targetFile);
+            return targetFile;
+        } catch (IllegalStateException | IOException e) {
             throw new MultipartFileSaveException(e);
         }
 	}
-
 }
