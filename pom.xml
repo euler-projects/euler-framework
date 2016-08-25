@@ -17,6 +17,7 @@
         <module>net-eulerform-web-basedata</module>
         <module>net-eulerform-web-oauth2-server</module>
         <module>net-eulerform-web-ueditor</module>
+        <module>net-eulerform-web-cms-basic</module>
     </modules>    
 
     <properties>

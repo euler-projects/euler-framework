@@ -37,6 +37,12 @@ public class SecurityWebContorller extends BaseController {
 	private UserDetailsService userDetailsService;
 	@Resource
 	private IAuthorityService authorityService;
+
+    @RequestMapping(value = { "/login" }, method = RequestMethod.GET)
+    public String login()
+    {
+        return "/authentication/login";
+    }
     
     @RequestMapping(value ="/user",method=RequestMethod.GET)
     public String user(){
