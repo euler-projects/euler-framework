@@ -356,4 +356,12 @@ public abstract class FileReader {
         System.out.println("DELETE " + file.getPath());
         return file.delete();
     }
+    
+    public static String getFileExtension(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        String extension = "";
+        if(dot > -1)
+            extension = fileName.substring(fileName.lastIndexOf('.'));
+        return extension;
+    }
 }
