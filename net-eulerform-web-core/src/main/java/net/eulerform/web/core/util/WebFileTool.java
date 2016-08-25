@@ -11,6 +11,7 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerform.common.CalendarTool;
+import net.eulerform.common.FileReader;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
@@ -38,15 +39,10 @@ public class WebFileTool {
         
             File targetDir = new File(realUploadPath);
             String sourceFileName = multipartFile.getOriginalFilename();
-//          sourceFileName = FilePathTool.changeToUnixFormat(sourceFileName);
-            int dot = sourceFileName.lastIndexOf('.');
-//            int slash = sourceFileName.lastIndexOf('/');
             
             String prefix = CalendarTool.formatDate(new Date(), "yyyyMMddHHmmss-");
             
-            String extension = "";
-            if(dot > -1)
-                extension = sourceFileName.substring(sourceFileName.lastIndexOf('.'));
+            String extension = FileReader.getFileExtension(sourceFileName);
             
             String targetFileName = prefix + UUID.randomUUID().toString() + extension;
             

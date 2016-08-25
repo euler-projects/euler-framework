@@ -1,6 +1,6 @@
 package net.eulerform.web.module.ueditor.entity;
 
-public class UeImgUploadResult {
+public class FileUploadResult {
 
     private String state;
     private String title;
