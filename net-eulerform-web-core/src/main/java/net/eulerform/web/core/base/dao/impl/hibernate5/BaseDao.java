@@ -14,7 +14,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
+import org.hibernate.transform.Transformers;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.common.Generic;
@@ -247,12 +249,20 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     protected PageResponse<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+        return this.findPageBy(detachedCriteria, pageIndex, pageSize, null);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected PageResponse<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
         
         detachedCriteria.setProjection(Projections.rowCount());
         long total = ((Long)detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list().get(0)).longValue();
-        detachedCriteria.setProjection(null);
+
+        detachedCriteria.setProjection(projection);
+        
+        if(projection != null)
+            detachedCriteria.setResultTransformer(Transformers.aliasToBean(this.entityClass));
         
         Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
         criteria.setFirstResult((pageIndex - 1) * pageSize);
