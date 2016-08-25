@@ -35,7 +35,7 @@ import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 
 @WebController
 @Scope("prototype")
-@RequestMapping("/cmsManage")
+@RequestMapping("/cms/manage")
 public class CmsManageWebController extends BaseController {
 
     @Resource IPartnerService partnerService;
@@ -44,22 +44,22 @@ public class CmsManageWebController extends BaseController {
     
     @RequestMapping(value = "/news", method = RequestMethod.GET)
     public String news() {
-        return "/cmsManage/news";
+        return "/cms/manage/news";
     }
     
     @RequestMapping(value = "/partner", method = RequestMethod.GET)
     public String partner() {
-        return "/cmsManage/partner";
+        return "/cms/manage/partner";
     }
     
     @RequestMapping(value = "/slideshow", method = RequestMethod.GET)
     public String slideshow() {
-        return "/cmsManage/slideshow";
+        return "/cms/manage/slideshow";
     }
     
     @RequestMapping(value = "/ueditor", method = RequestMethod.GET)
     public String ueditor() {
-        return "/cmsManage/ueditor";
+        return "/cms/manage/ueditor";
     }
     
     @ResponseBody
