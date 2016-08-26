@@ -17,7 +17,7 @@ public class Partner extends UUIDEntity<Partner> {
     @NotNull
     @Column(name="NAME",nullable=false)
     private String name;
-    @Column(name="LOGO_FILENAME")
+    @Column(name="LOGO_FILE_NAME")
     private String logoFileName;
     @Column(name="DISPLAY_ORDER",nullable=false)
     private Integer order;

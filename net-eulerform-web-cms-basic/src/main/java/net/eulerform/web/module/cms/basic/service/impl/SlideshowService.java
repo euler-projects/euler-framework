@@ -62,6 +62,8 @@ public class SlideshowService extends BaseService implements ISlideshowService {
             } catch (MultipartFileSaveException e) {
                 throw new RuntimeException(e);
             }
+        } else if (slideshow.getImgFileName() == null) {
+            return;
         }
 
         this.slideshowDao.saveOrUpdate(slideshow);

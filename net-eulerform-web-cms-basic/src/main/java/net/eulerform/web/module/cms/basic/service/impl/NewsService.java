@@ -28,22 +28,21 @@ public class NewsService extends BaseService implements INewsService {
     
     @Override
     public void saveNews(News news, MultipartFile img) throws MultipartFileSaveException {
-        BeanTool.clearEmptyProperty(news);
+        BeanTool.clearEmptyProperty(news);        
+
+        if(img != null && img.getSize() > 0){
+            File savedFile = WebFileTool.saveMultipartFile(img);
+            news.setImageFileName(savedFile.getName());
+        }
         
         if(!StringTool.isNull(news.getId())){
             News tmp = this.newsDao.load(news.getId());
             if(tmp != null) {
-                if(img != null && img.getSize() > 0){
-                    String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());
-                    
+                if(!StringTool.isNull(news.getImageFileName())){
                     //删除旧图片
-                    if(news != null) {
-                        String filePath = uploadPath+"/"+tmp.getImageFileName();
-                        FileReader.deleteFile(new File(filePath));
-                    }
-
-                    File savedFile = WebFileTool.saveMultipartFile(img);
-                    news.setImageFileName(savedFile.getName()); 
+                    String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());
+                    String filePath = uploadPath+"/"+tmp.getImageFileName();
+                    FileReader.deleteFile(new File(filePath));
                 } else {
                     news.setImageFileName(tmp.getImageFileName());
                 }
