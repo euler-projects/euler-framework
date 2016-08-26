@@ -11,13 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerform.common.CalendarTool;
 import net.eulerform.common.FileReader;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
+import net.eulerform.web.core.util.WebConfig;
 import net.eulerform.web.core.util.WebFileTool;
-import net.eulerform.web.module.ueditor.entity.UeConfig;
 import net.eulerform.web.module.ueditor.entity.FileUploadResult;
+import net.eulerform.web.module.ueditor.entity.UeConfig;
 import net.eulerform.web.module.ueditor.service.IUeService;
 
 @Service
@@ -47,13 +46,8 @@ public class UeService extends BaseService implements IUeService {
     @Override
     public FileUploadResult uploadImg(HttpServletRequest request, MultipartFile file) throws MultipartFileSaveException {
         
-        String uploadPath;
-        try {
-            uploadPath = GlobalProperties.get(GlobalProperties.UPLOAD_PATH)+"/ueditor/images/" + CalendarTool.formatDate(new Date(), "yyyy-MM-dd");
-        } catch (GlobalPropertyReadException e) {
-            throw new RuntimeException(e);
-        }
-        
+        String uploadPath = WebConfig.getUploadPath()+"/ueditor/images/" + CalendarTool.formatDate(new Date(), "yyyy-MM-dd");
+
         File savedImg = WebFileTool.saveMultipartFile(file, uploadPath);
         
         String sourceFileName = file.getOriginalFilename();
@@ -75,12 +69,7 @@ public class UeService extends BaseService implements IUeService {
     public FileUploadResult uploadFile(HttpServletRequest request, MultipartFile file)
             throws MultipartFileSaveException {
         
-        String uploadPath;
-        try {
-            uploadPath = GlobalProperties.get(GlobalProperties.UPLOAD_PATH)+"/ueditor/files/" + CalendarTool.formatDate(new Date(), "yyyy-MM-dd");
-        } catch (GlobalPropertyReadException e) {
-            throw new RuntimeException(e);
-        }
+        String uploadPath = WebConfig.getUploadPath()+"/ueditor/files/" + CalendarTool.formatDate(new Date(), "yyyy-MM-dd");
         
         File savedFile = WebFileTool.saveMultipartFile(file, uploadPath);
         

@@ -40,9 +40,15 @@ public class CmsWebController extends BaseController {
     }
     
     @ResponseBody
-    @RequestMapping(value ="/loadPartners")
+    @RequestMapping(value ="/loadPartners", method = RequestMethod.GET)
     public ListResponse<Partner> loadPartners() {
         return new ListResponse<>(this.partnerService.loadPartners());
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/loadSlideshow", method = RequestMethod.GET)
+    public ListResponse<Slideshow> loadSlideshow() {
+        return new ListResponse<>(this.slideshowService.loadSlideshow());
     }
 
     @ResponseBody
@@ -53,11 +59,5 @@ public class CmsWebController extends BaseController {
         int pageIndex = Integer.parseInt(page);
         int pageSize = Integer.parseInt(rows);
         return this.newsService.findNewsByPage(queryRequest, pageIndex, pageSize, loadText, enableTop);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "/loadSlideshow", method = RequestMethod.GET)
-    public ListResponse<Slideshow> loadSlideshow() {
-        return new ListResponse<>(this.slideshowService.loadSlideshow());
     }
 }
