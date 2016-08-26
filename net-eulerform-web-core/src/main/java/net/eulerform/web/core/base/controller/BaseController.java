@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -65,6 +66,17 @@ public abstract class BaseController {
             requestURI="/root";
         }
         return requestURI.substring(requestURI.lastIndexOf("/"));
+    }
+    
+    /**  
+     * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler({AccessDeniedException.class})   
+    public HttpStatusResponse accessDeniedException(AccessDeniedException e) {
+        return new HttpStatusResponse(HttpStatus.FORBIDDEN);
     }
     
     /**  

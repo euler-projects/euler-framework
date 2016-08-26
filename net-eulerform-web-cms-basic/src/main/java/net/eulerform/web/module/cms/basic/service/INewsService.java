@@ -9,14 +9,14 @@ import net.eulerform.web.core.base.service.IBaseService;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
 import net.eulerform.web.module.cms.basic.entity.News;
 
+@PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('CMS_ADMIN','ADMIN','SYSTEM')")
 public interface INewsService extends IBaseService {
 
+    @PreAuthorize("permitAll")
     public PageResponse<News> findNewsByPage(QueryRequest queryRequest, int pageIndex, int pageSize, boolean loadText, boolean enableTop);
     
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','DEMO','SYSTEM')")
     public void saveNews(News news, MultipartFile img) throws MultipartFileSaveException;
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','DEMO','SYSTEM')")
     public void deleteNews(String[] idArray);
 
 }
