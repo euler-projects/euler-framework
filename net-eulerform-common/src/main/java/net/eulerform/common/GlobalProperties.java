@@ -7,8 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 public class GlobalProperties {
     
-    public final static String UPLOAD_PATH = "upload.path";
-    
     protected final static Logger logger = LogManager.getLogger();
 	
 	private final static String CONFIG_FILE = "config.properties";

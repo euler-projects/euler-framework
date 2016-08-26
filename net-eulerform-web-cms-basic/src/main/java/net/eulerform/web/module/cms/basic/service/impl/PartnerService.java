@@ -8,12 +8,11 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import net.eulerform.common.FileReader;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.entity.PageResponse;
 import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.util.WebConfig;
 import net.eulerform.web.module.cms.basic.dao.IPartnerDao;
 import net.eulerform.web.module.cms.basic.entity.Partner;
 import net.eulerform.web.module.cms.basic.service.IPartnerService;
@@ -44,12 +43,8 @@ public class PartnerService extends BaseService implements IPartnerService {
     @Override
     public void deleteLogo(String partnerId) {
         Partner partner = this.partnerDao.load(partnerId);
-        String filePath;
-        try {
-            filePath = this.getServletContext().getRealPath(GlobalProperties.get(GlobalProperties.UPLOAD_PATH))+"/"+partner.getLogoFileName();
-        } catch (GlobalPropertyReadException e) {
-            throw new RuntimeException(e);
-        }
+        String filePath = this.getServletContext().getRealPath(WebConfig.getUploadPath())+"/"+partner.getLogoFileName();
+
         FileReader.deleteFile(new File(filePath));
         
     }

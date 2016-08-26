@@ -12,20 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerform.common.CalendarTool;
 import net.eulerform.common.FileReader;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
 
 public class WebFileTool {
 
 	public static File saveMultipartFile(MultipartFile multipartFile) throws MultipartFileSaveException {
 
-            String uploadPath;
-            try {
-                uploadPath = GlobalProperties.get(GlobalProperties.UPLOAD_PATH);
-            } catch (GlobalPropertyReadException e) {
-                throw new MultipartFileSaveException(e);
-            }
+            String uploadPath = WebConfig.getUploadPath();
             
             return saveMultipartFile(multipartFile, uploadPath);
         

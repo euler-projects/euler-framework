@@ -9,11 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerform.common.FileReader;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
+import net.eulerform.web.core.util.WebConfig;
 import net.eulerform.web.core.util.WebFileTool;
 import net.eulerform.web.module.cms.basic.dao.ISlideshowDao;
 import net.eulerform.web.module.cms.basic.entity.Slideshow;
@@ -50,7 +49,7 @@ public class SlideshowService extends BaseService implements ISlideshowService {
         if(img != null && img.getSize() > 0){
             
             try {
-                String uploadPath = this.getServletContext().getRealPath(GlobalProperties.get(GlobalProperties.UPLOAD_PATH));
+                String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());
                 
                 //删除旧图片
                 if(!StringTool.isNull(slideshow.getId())) {
@@ -60,7 +59,7 @@ public class SlideshowService extends BaseService implements ISlideshowService {
                 
                 File savedFile = WebFileTool.saveMultipartFile(img);
                 slideshow.setImgFileName(savedFile.getName());
-            } catch (MultipartFileSaveException | GlobalPropertyReadException e) {
+            } catch (MultipartFileSaveException e) {
                 throw new RuntimeException(e);
             }
         }
