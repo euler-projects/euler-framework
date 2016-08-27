@@ -13,6 +13,6 @@ public interface IPartnerDao extends IBaseDao<Partner> {
 
     public PageResponse<Partner> findPartnerByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
 
-    public List<Partner> loadPartners();
+    public List<Partner> loadPartners(boolean onlyShow);
 
 }
