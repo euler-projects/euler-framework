@@ -46,19 +46,18 @@ public class SlideshowService extends BaseService implements ISlideshowService {
         }
         slideshow.setUrl(url);
         
-        if(img != null && img.getSize() > 0){
-            
+        if(img != null && img.getSize() > 0){            
             try {
-                String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());
                 
+                File savedFile = WebFileTool.saveMultipartFile(img);
+                slideshow.setImgFileName(savedFile.getName());
+
                 //删除旧图片
+                String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());                
                 if(!StringTool.isNull(slideshow.getId())) {
                     String filePath = uploadPath+"/"+slideshow.getImgFileName();
                     FileReader.deleteFile(new File(filePath));
                 }
-                
-                File savedFile = WebFileTool.saveMultipartFile(img);
-                slideshow.setImgFileName(savedFile.getName());
             } catch (MultipartFileSaveException e) {
                 throw new RuntimeException(e);
             }

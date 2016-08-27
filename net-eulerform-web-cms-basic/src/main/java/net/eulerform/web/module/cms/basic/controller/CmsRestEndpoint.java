@@ -30,7 +30,7 @@ public class CmsRestEndpoint extends BaseRest {
     @Resource INewsService newsService;
     
     @ResponseBody
-    @RequestMapping(value ="/partnerByPage", method = RequestMethod.GET)
+    @RequestMapping(value ="/findPartnerByPage", method = RequestMethod.GET)
     public WebServicePageResponse<Partner> findPartnerByPage(HttpServletRequest request, int pageIndex, int pageSize) {
         QueryRequest queryRequest = new QueryRequest(request);
         
@@ -38,13 +38,13 @@ public class CmsRestEndpoint extends BaseRest {
     }
     
     @ResponseBody
-    @RequestMapping(value ="/partnerAll", method = RequestMethod.GET)
-    public WebServiceResponse<Partner> loadPartnerAll() {
+    @RequestMapping(value ="/findPartnerAll", method = RequestMethod.GET)
+    public WebServiceResponse<Partner> findPartnerAll() {
         return new WebServiceResponse<>(this.partnerService.loadPartners());
     }
 
     @ResponseBody
-    @RequestMapping(value ="/newsByPage", method = RequestMethod.GET)
+    @RequestMapping(value ="/findNewsByPage", method = RequestMethod.GET)
     public WebServicePageResponse<News> findNewsByPage(HttpServletRequest request, int pageIndex, int pageSize, boolean loadText, boolean enableTop) {
         QueryRequest queryRequest = new QueryRequest(request);
         
@@ -52,8 +52,8 @@ public class CmsRestEndpoint extends BaseRest {
     }
     
     @ResponseBody
-    @RequestMapping(value = "/slideshowAll", method = RequestMethod.GET)
-    public WebServiceResponse<Slideshow> loadSlideshowAll() {
+    @RequestMapping(value = "/findSlideshowAll", method = RequestMethod.GET)
+    public WebServiceResponse<Slideshow> findSlideshowAll() {
         return new WebServiceResponse<>(this.slideshowService.loadSlideshow());
     }
 }

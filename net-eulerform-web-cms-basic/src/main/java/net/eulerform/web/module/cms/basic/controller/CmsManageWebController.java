@@ -1,6 +1,5 @@
 package net.eulerform.web.module.cms.basic.controller;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import net.eulerform.common.BeanTool;
 import net.eulerform.common.CalendarTool;
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.annotation.WebController;
@@ -24,7 +22,6 @@ import net.eulerform.web.core.base.controller.BaseController;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
-import net.eulerform.web.core.util.WebFileTool;
 import net.eulerform.web.module.cms.basic.entity.ListResponse;
 import net.eulerform.web.module.cms.basic.entity.News;
 import net.eulerform.web.module.cms.basic.entity.Partner;
@@ -85,14 +82,6 @@ public class CmsManageWebController extends BaseController {
     @ResponseBody
     @RequestMapping(value = "/savePartner", method = RequestMethod.POST)
     public void partner(@RequestParam(value = "logo", required = false) MultipartFile logo, @Valid Partner partner) throws MultipartFileSaveException {
-        BeanTool.clearEmptyProperty(partner);
-        if(logo != null && logo.getSize() > 0){
-            if(partner.getId() != null) {
-                this.partnerService.deleteLogo(partner.getId() );
-            }
-            File savedFile = WebFileTool.saveMultipartFile(logo);
-            partner.setLogoFileName(savedFile.getName());            
-        }
         
         if(!StringTool.isNull(partner.getUrl())) {
             String url = partner.getUrl();
@@ -102,7 +91,11 @@ public class CmsManageWebController extends BaseController {
                 partner.setUrl(url);
             }
         }
-        this.partnerService.savePartner(partner);
+        
+        if(partner.getShow() == null)
+            partner.setShow(false);
+        
+        this.partnerService.savePartner(partner, logo);
     }
 
     @ResponseBody

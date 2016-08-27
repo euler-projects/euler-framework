@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
@@ -35,6 +36,14 @@ public class PartnerDao extends BaseDao<Partner> implements IPartnerDao {
             queryValue = queryRequest.getQueryValue("name");
             if (!StringTool.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
+            }
+            queryValue = queryRequest.getQueryValue("summary");
+            if (!StringTool.isNull(queryValue)) {
+                detachedCriteria.add(RestrictionsX.like("summary", queryValue, MatchMode.ANYWHERE).ignoreCase());
+            }
+            queryValue = queryRequest.getQueryValue("show");
+            if (!StringTool.isNull(queryValue)) {
+                detachedCriteria.add(Restrictions.eq("show", Boolean.parseBoolean(queryValue)));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

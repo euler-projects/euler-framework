@@ -17,17 +17,27 @@ public class Partner extends UUIDEntity<Partner> {
     @NotNull
     @Column(name="NAME",nullable=false)
     private String name;
+    @Column(name="SUMMARY", length=1000)
+    private String summary;
     @Column(name="LOGO_FILE_NAME")
     private String logoFileName;
     @Column(name="DISPLAY_ORDER",nullable=false)
     private Integer order;
     @Column(name="URL")
     private String url;
+    @Column(name="IS_SHOW",nullable=false)
+    private Boolean show;
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public String getSummary() {
+        return summary;
+    }
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
     public String getLogoFileName() {
         return logoFileName;
@@ -46,5 +56,11 @@ public class Partner extends UUIDEntity<Partner> {
     }
     public void setUrl(String url) {
         this.url = url;
+    }
+    public Boolean getShow() {
+        return show;
+    }
+    public void setShow(Boolean show) {
+        this.show = show;
     }
 }
