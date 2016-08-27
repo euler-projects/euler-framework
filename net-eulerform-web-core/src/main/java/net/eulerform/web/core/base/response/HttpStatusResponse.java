@@ -1,8 +1,5 @@
 package net.eulerform.web.core.base.response;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.springframework.http.HttpStatus;
 
 /**
@@ -10,7 +7,6 @@ import org.springframework.http.HttpStatus;
  * 
  * @author cFrost
  */
-@XmlRootElement
 public class HttpStatusResponse implements BaseResponse {
 
     /**
@@ -39,12 +35,10 @@ public class HttpStatusResponse implements BaseResponse {
 
     private String statusInfo;
 
-    @XmlElement
     public Integer getStatusCode() {
         return statusCode;
     }
 
-    @XmlElement
     public String getStatusInfo() {
         return statusInfo;
     }

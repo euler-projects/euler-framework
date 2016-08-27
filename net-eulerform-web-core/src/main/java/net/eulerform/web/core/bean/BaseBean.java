@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.multipart.MultipartResolver;
@@ -16,6 +15,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.eulerform.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
 
 @Configuration
@@ -73,11 +73,11 @@ public class BaseBean {
         return mapper;
     }
 
-     @Bean(name="jaxb2Marshaller")
-     public Jaxb2Marshaller jaxb2Marshaller() {
-     Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-     jaxb2Marshaller.setPackagesToScan("net.eulerform.**.entity",
-                                       "net.eulerform.web.core.base.response");
-     return jaxb2Marshaller;
-     }
+//     @Bean(name="jaxb2Marshaller")
+//     public Jaxb2Marshaller jaxb2Marshaller() {
+//     Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+//     jaxb2Marshaller.setPackagesToScan("net.eulerform.**.entity",
+//                                       "net.eulerform.web.core.base.response");
+//     return jaxb2Marshaller;
+//     }
 }

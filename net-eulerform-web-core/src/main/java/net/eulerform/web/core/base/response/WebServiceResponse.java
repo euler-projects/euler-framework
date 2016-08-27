@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.springframework.http.HttpStatus;
 
 /**
@@ -18,7 +15,6 @@ import org.springframework.http.HttpStatus;
  *            返回数据类型,支持单个对象和容器<br>
  *            例如Object和List&lt;Object&gt;均只需指定为WebServiceResponse&lt;Object&gt;
  */
-@XmlRootElement
 public class WebServiceResponse<T> extends HttpStatusResponse {
 
     /**
@@ -148,17 +144,14 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
         this.dataSize = data.size();
     }
 
-    @XmlElement
     public List<T> getData() {
         return data;
     }
 
-    @XmlElement
     public Integer getDataSize() {
         return this.dataSize;
     }
 
-    @XmlElement
     public Date getReturnDate() {
         return returnDate == null ? new Date() : this.returnDate;
     }
