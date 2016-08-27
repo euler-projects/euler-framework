@@ -33,14 +33,13 @@ public class CmsRestEndpoint extends BaseRest {
     @RequestMapping(value ="/findPartnerByPage", method = RequestMethod.GET)
     public WebServicePageResponse<Partner> findPartnerByPage(HttpServletRequest request, int pageIndex, int pageSize) {
         QueryRequest queryRequest = new QueryRequest(request);
-        
         return new WebServicePageResponse<>(this.partnerService.findPartnerByPage(queryRequest, pageIndex, pageSize));
     }
     
     @ResponseBody
     @RequestMapping(value ="/findPartnerAll", method = RequestMethod.GET)
-    public WebServiceResponse<Partner> findPartnerAll() {
-        return new WebServiceResponse<>(this.partnerService.loadPartners());
+    public WebServiceResponse<Partner> findPartnerAll(boolean onlyShow) {
+        return new WebServiceResponse<>(this.partnerService.loadPartners(onlyShow));
     }
 
     @ResponseBody

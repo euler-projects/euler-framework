@@ -80,7 +80,7 @@ public class PartnerService extends BaseService implements IPartnerService {
     }
 
     @Override
-    public List<Partner> loadPartners() {
-        return this.partnerDao.loadPartners();
+    public List<Partner> loadPartners(boolean onlyShow) {
+        return this.partnerDao.loadPartners(onlyShow);
     }
 }

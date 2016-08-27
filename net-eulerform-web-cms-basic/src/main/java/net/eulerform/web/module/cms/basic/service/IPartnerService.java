@@ -18,7 +18,7 @@ public interface IPartnerService extends IBaseService {
     public PageResponse<Partner> findPartnerByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
 
     @PreAuthorize("permitAll")
-    public List<Partner> loadPartners();
+    public List<Partner> loadPartners(boolean onlyShow);
 
     public void savePartner(Partner partner, MultipartFile logo) throws MultipartFileSaveException;
 

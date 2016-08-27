@@ -57,8 +57,11 @@ public class PartnerDao extends BaseDao<Partner> implements IPartnerDao {
     }
 
     @Override
-    public List<Partner> loadPartners() {
-        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);        
+    public List<Partner> loadPartners(boolean onlyShow) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass); 
+        if(onlyShow) {
+            detachedCriteria.add(Restrictions.eq("show", true));
+        }
         detachedCriteria.addOrder(Order.asc("order"));
         return this.findBy(detachedCriteria);
     }
