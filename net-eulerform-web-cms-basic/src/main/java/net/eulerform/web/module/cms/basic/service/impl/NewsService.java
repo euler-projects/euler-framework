@@ -36,16 +36,12 @@ public class NewsService extends BaseService implements INewsService {
         }
         
         if(!StringTool.isNull(news.getId())){
-            News tmp = this.newsDao.load(news.getId());
-            if(tmp != null) {
-                if(!StringTool.isNull(news.getImageFileName())){
-                    //删除旧图片
-                    String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());
-                    String filePath = uploadPath+"/"+tmp.getImageFileName();
-                    FileReader.deleteFile(new File(filePath));
-                } else {
-                    news.setImageFileName(tmp.getImageFileName());
-                }
+            if(StringTool.isNull(news.getImageFileName())){
+                    News oldNews = this.newsDao.load(news.getId());
+                    if(oldNews != null)
+                        news.setImageFileName(oldNews.getImageFileName());
+            } else {
+                this.deleteImg(news.getId());
             }
         }
         
@@ -66,6 +62,16 @@ public class NewsService extends BaseService implements INewsService {
     @Override
     public void deleteNews(String[] idArray) {
         this.newsDao.deleteByIds(idArray);
+    }
+
+    @Override
+    public void deleteImg(String newsId) {
+        News oldNews = this.newsDao.load(newsId);
+        if(oldNews != null) {
+            String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());
+            String filePath = uploadPath+"/"+oldNews.getImageFileName();
+            FileReader.deleteFile(new File(filePath));
+        }
     }
 
 }

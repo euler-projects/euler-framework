@@ -19,4 +19,6 @@ public interface INewsService extends IBaseService {
 
     public void deleteNews(String[] idArray);
 
+    void deleteImg(String newsId);
+
 }
