@@ -12,8 +12,8 @@ import org.springframework.security.oauth2.provider.ClientRegistrationException;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.common.StringTool;
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.cache.ObjectCache;
 import net.eulerform.web.module.oauth2.dao.IClientDao;

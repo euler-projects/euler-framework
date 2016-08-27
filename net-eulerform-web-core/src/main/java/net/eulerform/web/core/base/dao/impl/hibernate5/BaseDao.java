@@ -22,7 +22,7 @@ import net.eulerform.common.BeanTool;
 import net.eulerform.common.Generic;
 import net.eulerform.web.core.base.dao.IBaseDao;
 import net.eulerform.web.core.base.entity.BaseEntity;
-import net.eulerform.web.core.base.entity.PageResponse;
+import net.eulerform.web.core.base.response.PageResponse;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 

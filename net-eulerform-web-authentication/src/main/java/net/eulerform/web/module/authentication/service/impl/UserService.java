@@ -13,10 +13,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import net.eulerform.common.BeanTool;
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
 import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.i18n.Tag;
 import net.eulerform.web.module.authentication.dao.IGroupDao;

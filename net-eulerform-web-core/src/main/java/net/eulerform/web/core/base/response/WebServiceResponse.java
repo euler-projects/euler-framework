@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.entity;
+package net.eulerform.web.core.base.response;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,23 +22,15 @@ import org.springframework.http.HttpStatus;
 public class WebServiceResponse<T> extends HttpStatusResponse {
 
     /**
-     * 新建空实体,状态代码默认为204 No Content
-     */
-    public WebServiceResponse() {
-        super();
-        this.setStatusToNoContent();
-    }
-
-    /**
      * 新建空实体,并指定标准HTTP状态码{@link HttpStatus}
      * 
      * @param httpStatus
      *            标准HTTP状态码
      */
     public WebServiceResponse(HttpStatus httpStatus) {
+        super(httpStatus);
         this.data = null;
         this.dataSize = 0;
-        this.setStatus(httpStatus);
     }
 
     /**
@@ -58,12 +50,11 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      *            返回数据
      */
     public WebServiceResponse(T data) {
+        super(HttpStatus.OK);
         if (data == null) {
-            this.setStatusToNoContent();
             return;
         }
         this.setData(data);
-        this.setStatus(HttpStatus.OK);
     }
 
     /**
@@ -73,12 +64,11 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      *            返回数据容器
      */
     public WebServiceResponse(List<T> data) {
+        super(HttpStatus.OK);
         if (data == null || data.isEmpty()) {
-            this.setStatusToNoContent();
             return;
         }
         this.setData(data);
-        this.setStatus(HttpStatus.OK);
     }
 
     /**
@@ -90,8 +80,8 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      *            标准HTTP状态码
      */
     public WebServiceResponse(T data, HttpStatus httpStatus) {
+        super(httpStatus);
         this.setData(data);
-        this.setStatus(httpStatus);
     }
 
     /**
@@ -103,8 +93,8 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      *            标准HTTP状态码
      */
     public WebServiceResponse(List<T> data, HttpStatus httpStatus) {
+        super(httpStatus);
         this.setData(data);
-        this.setStatus(httpStatus);
     }
 
     /**
@@ -116,7 +106,7 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      * @param statusInfo 状态信息
      */
     public WebServiceResponse(T data, int statusCode, String statusInfo) {
-        this(statusCode, statusInfo);
+        super(statusCode, statusInfo);
         this.setData(data);
     }
 
@@ -139,9 +129,8 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
 
     private Date returnDate;
 
-    public void setData(T data) {
+    private void setData(T data) {
         if (data == null) {
-            this.setStatusToNoContent();
             return;
         }
 
@@ -150,9 +139,8 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
         this.setData(dataList);
     }
 
-    public void setData(List<T> data) {
+    private void setData(List<T> data) {
         if (data == null || data.isEmpty()) {
-            this.setStatusToNoContent();
             return;
         }
 
@@ -177,11 +165,5 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
 
     public void setReturnDate(Date returnDate) {
         this.returnDate = returnDate;
-    }
-
-    private void setStatusToNoContent() {
-        this.data = null;
-        this.dataSize = 0;
-        this.setStatus(HttpStatus.NO_CONTENT);
     }
 }

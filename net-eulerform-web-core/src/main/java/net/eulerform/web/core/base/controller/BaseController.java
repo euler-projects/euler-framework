@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
-import net.eulerform.web.core.base.entity.HttpStatusResponse;
-import net.eulerform.web.core.base.entity.WebResponseStatus;
 import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
+import net.eulerform.web.core.base.response.HttpStatusResponse;
+import net.eulerform.web.core.base.response.WebResponseStatus;
 import net.eulerform.web.core.util.UrlTool;
 
 public abstract class BaseController {

@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import net.eulerform.web.core.base.entity.WebServiceResponse;
 import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceNotFoundException;
+import net.eulerform.web.core.base.response.WebServiceResponse;
 
 public abstract class BaseRest {
     
@@ -36,8 +36,8 @@ public abstract class BaseRest {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalParamException.class})   
     public WebServiceResponse<String> illegalParamException(IllegalParamException e) {
-        WebServiceResponse<String> response =  new WebServiceResponse<>();
-        response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        WebServiceResponse<String> response =  new WebServiceResponse<>(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+
         return response;
     }
     
@@ -49,8 +49,8 @@ public abstract class BaseRest {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MissingServletRequestParameterException.class})   
     public WebServiceResponse<String> missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        WebServiceResponse<String> response =  new WebServiceResponse<>();
-        response.setStatus(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        WebServiceResponse<String> response =  new WebServiceResponse<>(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+
         return response;
     }
     

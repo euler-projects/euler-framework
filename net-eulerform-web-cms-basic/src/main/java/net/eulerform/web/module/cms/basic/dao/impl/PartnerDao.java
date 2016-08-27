@@ -8,8 +8,8 @@ import org.hibernate.criterion.Order;
 
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerform.web.module.cms.basic.dao.IPartnerDao;
 import net.eulerform.web.module.cms.basic.entity.Partner;
