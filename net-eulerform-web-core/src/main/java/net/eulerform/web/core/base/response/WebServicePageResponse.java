@@ -1,7 +1,5 @@
 package net.eulerform.web.core.base.response;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * 支持分页的Webservice返回数据实体
  * 
@@ -10,7 +8,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @param <T>
  *            返回数据类型
  */
-@XmlRootElement
 public class WebServicePageResponse<T> extends WebServiceResponse<T> {
     
     public WebServicePageResponse (PageResponse<T> pageResponse) {

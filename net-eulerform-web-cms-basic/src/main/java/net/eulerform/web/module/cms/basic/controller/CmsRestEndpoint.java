@@ -52,8 +52,8 @@ public class CmsRestEndpoint extends BaseRest {
     }
     
     @ResponseBody
-    @RequestMapping(value = "/slideshow", method = RequestMethod.GET)
-    public WebServiceResponse<Slideshow> loadSlideshow() {
+    @RequestMapping(value = "/slideshowAll", method = RequestMethod.GET)
+    public WebServiceResponse<Slideshow> loadSlideshowAll() {
         return new WebServiceResponse<>(this.slideshowService.loadSlideshow());
     }
 }
