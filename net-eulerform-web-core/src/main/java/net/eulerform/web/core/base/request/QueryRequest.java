@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.entity;
+package net.eulerform.web.core.base.request;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author cFrost
  *
  */
-public class QueryRequest {
+public class QueryRequest implements BaseRequest {
     
     private final static String QUERY_PREFIX = "query.";
     

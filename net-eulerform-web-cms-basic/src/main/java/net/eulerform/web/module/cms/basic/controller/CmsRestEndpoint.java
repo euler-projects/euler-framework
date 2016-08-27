@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
 import net.eulerform.web.core.base.controller.BaseRest;
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
-import net.eulerform.web.module.cms.basic.entity.ListResponse;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.WebServicePageResponse;
+import net.eulerform.web.core.base.response.WebServiceResponse;
 import net.eulerform.web.module.cms.basic.entity.News;
 import net.eulerform.web.module.cms.basic.entity.Partner;
 import net.eulerform.web.module.cms.basic.entity.Slideshow;
@@ -30,34 +30,30 @@ public class CmsRestEndpoint extends BaseRest {
     @Resource INewsService newsService;
     
     @ResponseBody
-    @RequestMapping(value ="/findPartnerByPage")
-    public PageResponse<Partner> findPartnerByPage(HttpServletRequest request, String page, String rows) {
+    @RequestMapping(value ="/partnerByPage", method = RequestMethod.GET)
+    public WebServicePageResponse<Partner> findPartnerByPage(HttpServletRequest request, int pageIndex, int pageSize) {
         QueryRequest queryRequest = new QueryRequest(request);
         
-        int pageIndex = Integer.parseInt(page);
-        int pageSize = Integer.parseInt(rows);
-        return this.partnerService.findPartnerByPage(queryRequest, pageIndex, pageSize);
+        return new WebServicePageResponse<>(this.partnerService.findPartnerByPage(queryRequest, pageIndex, pageSize));
     }
     
     @ResponseBody
-    @RequestMapping(value ="/loadPartners")
-    public ListResponse<Partner> loadPartners() {
-        return new ListResponse<>(this.partnerService.loadPartners());
+    @RequestMapping(value ="/partnerAll", method = RequestMethod.GET)
+    public WebServiceResponse<Partner> loadPartnerAll() {
+        return new WebServiceResponse<>(this.partnerService.loadPartners());
     }
 
     @ResponseBody
-    @RequestMapping(value ="/findNewsByPage")
-    public PageResponse<News> findNewsByPage(HttpServletRequest request, String page, String rows, boolean loadText, boolean enableTop) {
+    @RequestMapping(value ="/newsByPage", method = RequestMethod.GET)
+    public WebServicePageResponse<News> findNewsByPage(HttpServletRequest request, int pageIndex, int pageSize, boolean loadText, boolean enableTop) {
         QueryRequest queryRequest = new QueryRequest(request);
         
-        int pageIndex = Integer.parseInt(page);
-        int pageSize = Integer.parseInt(rows);
-        return this.newsService.findNewsByPage(queryRequest, pageIndex, pageSize, loadText, enableTop);
+        return new WebServicePageResponse<>(this.newsService.findNewsByPage(queryRequest, pageIndex, pageSize, loadText, enableTop));
     }
     
     @ResponseBody
-    @RequestMapping(value = "/loadSlideshow", method = RequestMethod.GET)
-    public ListResponse<Slideshow> loadSlideshow() {
-        return new ListResponse<>(this.slideshowService.loadSlideshow());
+    @RequestMapping(value = "/slideshow", method = RequestMethod.GET)
+    public WebServiceResponse<Slideshow> loadSlideshow() {
+        return new WebServiceResponse<>(this.slideshowService.loadSlideshow());
     }
 }

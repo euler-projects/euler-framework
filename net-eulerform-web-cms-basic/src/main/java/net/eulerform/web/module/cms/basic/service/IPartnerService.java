@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.IBaseService;
 import net.eulerform.web.module.cms.basic.entity.Partner;
 

@@ -1,4 +1,4 @@
-package net.eulerform.web.core.base.entity;
+package net.eulerform.web.core.base.response;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,20 +14,14 @@ import org.springframework.http.HttpStatus;
 public class HttpStatusResponse implements BaseResponse {
 
     /**
-     * 新建空实体,状态代码默认为200 OK
-     */
-    public HttpStatusResponse() {
-        this(HttpStatus.OK);
-    }
-
-    /**
      * 新建空实体,并指定标准HTTP状态码{@link HttpStatus}
      * 
      * @param httpStatus
      *            标准HTTP状态码
      */
     public HttpStatusResponse(HttpStatus httpStatus) {
-        this.setStatus(httpStatus);
+        this.statusCode = httpStatus.value();
+        this.statusInfo = httpStatus.getReasonPhrase();
     }
 
     /**
@@ -53,15 +47,5 @@ public class HttpStatusResponse implements BaseResponse {
     @XmlElement
     public String getStatusInfo() {
         return statusInfo;
-    }
-
-    public void setStatus(HttpStatus httpStatus) {
-        this.statusCode = httpStatus.value();
-        this.statusInfo = httpStatus.getReasonPhrase();
-    }
-
-    public void setStatus(int statusCode, String statusInfo) {
-        this.statusCode = statusCode;
-        this.statusInfo = statusInfo;
     }
 }

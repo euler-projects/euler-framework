@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
 import net.eulerform.web.core.base.controller.BaseRest;
-import net.eulerform.web.core.base.entity.WebServiceResponse;
 import net.eulerform.web.core.base.exception.ResourceNotFoundException;
+import net.eulerform.web.core.base.response.WebServiceResponse;
 
 @RestEndpoint
 @Scope("prototype")

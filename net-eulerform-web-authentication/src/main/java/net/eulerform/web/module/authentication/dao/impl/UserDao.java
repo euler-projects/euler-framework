@@ -11,8 +11,8 @@ import org.hibernate.criterion.Restrictions;
 
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.module.authentication.dao.IUserDao;
 import net.eulerform.web.module.authentication.entity.Group;
 import net.eulerform.web.module.authentication.entity.User;

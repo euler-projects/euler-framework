@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.BaseController;
-import net.eulerform.web.core.base.entity.QueryRequest;
-import net.eulerform.web.core.base.entity.PageResponse;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.module.basedata.entity.CodeTable;
 import net.eulerform.web.module.basedata.entity.Module;
 import net.eulerform.web.module.basedata.entity.Page;

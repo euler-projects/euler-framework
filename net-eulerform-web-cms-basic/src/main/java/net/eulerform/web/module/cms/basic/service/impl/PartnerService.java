@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import net.eulerform.common.FileReader;
 import net.eulerform.common.StringTool;
-import net.eulerform.web.core.base.entity.PageResponse;
-import net.eulerform.web.core.base.entity.QueryRequest;
+import net.eulerform.web.core.base.request.QueryRequest;
+import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.util.WebConfig;
 import net.eulerform.web.module.cms.basic.dao.IPartnerDao;
