@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerform.web.core.util.UrlTool;
 
-public abstract class DefaultWebController extends BaseController {
+public abstract class DefaultWebController extends AbstractWebController {
 
     @RequestMapping(value={"", "/", "index"},method=RequestMethod.GET)
     public String index(HttpServletRequest request, Model model) {
