@@ -5,20 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.ContextLoader;
@@ -26,9 +23,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
+import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 import net.eulerform.web.core.base.response.HttpStatusResponse;
 import net.eulerform.web.core.base.response.WebResponseStatus;
-import net.eulerform.web.core.util.UrlTool;
 
 public abstract class BaseController {
     
@@ -42,30 +39,41 @@ public abstract class BaseController {
     protected void writeString(HttpServletResponse httpServletResponse, String str) throws IOException{
         httpServletResponse.getOutputStream().write(str.getBytes("UTF-8"));
     }
-
-    @RequestMapping(value={"", "/", "index"},method=RequestMethod.GET)
-    public String index(HttpServletRequest request, Model model) {
-        String moduleName = this.findModuleName(request);
-        String pagePath = moduleName+"/index";
-        this.logger.info("Redirect to module index page: "+pagePath);
-        return pagePath;
+    
+    /**  
+     * 用于在程序发生{@link ResourceExistException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({ResourceExistException.class})   
+    public HttpStatusResponse exception(ResourceExistException e) {
+        e.printStackTrace();
+        return new HttpStatusResponse(WebResponseStatus.RESOURCE_EXIST.value(), e.getLocalizedMessage());
     }
     
-    private String findModuleName(HttpServletRequest httpServletRequest){
-        String requestURI = UrlTool.findRealURI(httpServletRequest);
-        while(requestURI.lastIndexOf(".") > requestURI.lastIndexOf("/")){
-            requestURI=requestURI.substring(0, requestURI.lastIndexOf("."));
-        }
-        if(requestURI.endsWith("/")){
-            requestURI = requestURI.substring(0, requestURI.length()-1);
-        }
-        if(requestURI.endsWith("/index")){
-            requestURI = requestURI.substring(0, requestURI.length()-"/index".length());
-        }
-        if("".equals(requestURI)){
-            requestURI="/root";
-        }
-        return requestURI.substring(requestURI.lastIndexOf("/"));
+    /**  
+     * 用于在程序发生{@link IllegalParamException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalParamException.class})   
+    public HttpStatusResponse illegalParamException(IllegalParamException e) {
+        e.printStackTrace();
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+    
+    /**  
+     * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({ResourceNotFoundException.class})   
+    public HttpStatusResponse resourceNotFoundException(ResourceNotFoundException e) {
+        e.printStackTrace();
+        return new HttpStatusResponse(HttpStatus.NOT_FOUND);
     }
     
     /**  
@@ -100,27 +108,15 @@ public abstract class BaseController {
     }
     
     /**  
-     * 用于在程序发生{@link ResourceExistException}异常时统一返回错误信息 
+     * 用于在程序发生{@link MissingServletRequestParameterException}异常时统一返回错误信息 
      * @return  
      */  
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ResourceExistException.class})   
-    public HttpStatusResponse exception(ResourceExistException e) {
+    @ExceptionHandler({MissingServletRequestParameterException.class})   
+    public HttpStatusResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
         e.printStackTrace();
-        return new HttpStatusResponse(WebResponseStatus.RESOURCE_EXIST.value(), e.getLocalizedMessage());
-    }
-    
-    /**  
-     * 用于在程序发生{@link IllegalParamException}异常时统一返回错误信息 
-     * @return  
-     */  
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({IllegalParamException.class})   
-    public HttpStatusResponse illegalParamException(IllegalParamException e) {
-        e.printStackTrace();
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
     
     /**  

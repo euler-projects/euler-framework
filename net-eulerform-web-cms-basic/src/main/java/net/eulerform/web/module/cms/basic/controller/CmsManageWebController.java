@@ -18,11 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 import net.eulerform.common.CalendarTool;
 import net.eulerform.common.StringTool;
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.BaseController;
+import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
-import net.eulerform.web.module.cms.basic.entity.ListResponse;
 import net.eulerform.web.module.cms.basic.entity.News;
 import net.eulerform.web.module.cms.basic.entity.Partner;
 import net.eulerform.web.module.cms.basic.entity.Slideshow;
@@ -33,7 +32,7 @@ import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/cms/manage")
-public class CmsManageWebController extends BaseController {
+public class CmsManageWebController extends DefaultWebController {
 
     @Resource IPartnerService partnerService;
     @Resource ISlideshowService slideshowService;
@@ -125,8 +124,8 @@ public class CmsManageWebController extends BaseController {
     
     @ResponseBody
     @RequestMapping(value = "/loadSlideshow", method = RequestMethod.GET)
-    public ListResponse<Slideshow> loadSlideshow() {
-        return new ListResponse<>(this.slideshowService.loadSlideshow());
+    public List<Slideshow> loadSlideshow() {
+        return this.slideshowService.loadSlideshow();
     }
     
     @ResponseBody

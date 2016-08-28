@@ -50,7 +50,6 @@ public class SlideshowService extends BaseService implements ISlideshowService {
             try {
                 
                 File savedFile = WebFileTool.saveMultipartFile(img);
-                slideshow.setImgFileName(savedFile.getName());
 
                 //删除旧图片
                 String uploadPath = this.getServletContext().getRealPath(WebConfig.getUploadPath());                
@@ -58,6 +57,9 @@ public class SlideshowService extends BaseService implements ISlideshowService {
                     String filePath = uploadPath+"/"+slideshow.getImgFileName();
                     FileReader.deleteFile(new File(filePath));
                 }
+                
+                slideshow.setImgFileName(savedFile.getName());
+                
             } catch (MultipartFileSaveException e) {
                 throw new RuntimeException(e);
             }
