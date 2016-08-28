@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.BaseController;
+import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
@@ -23,7 +23,7 @@ import net.eulerform.web.module.oauth2.service.IClientService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/oauth2")
-public class Oauth2WebController extends BaseController {
+public class Oauth2WebController extends DefaultWebController {
     
     @Resource
     private IClientService clientService;

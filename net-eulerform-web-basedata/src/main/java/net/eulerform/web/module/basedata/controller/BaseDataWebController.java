@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.BaseController;
+import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.module.basedata.entity.CodeTable;
@@ -25,7 +25,7 @@ import net.eulerform.web.module.basedata.service.IBaseDataService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/basedata")
-public class BaseDataWebController extends BaseController {
+public class BaseDataWebController extends DefaultWebController {
     
     @Resource
     private IBaseDataService baseDataService;

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.BaseController;
+import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
@@ -29,7 +29,7 @@ import net.eulerform.web.module.authentication.service.IUserService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/authentication")
-public class SecurityWebContorller extends BaseController {
+public class SecurityWebContorller extends DefaultWebController {
 
 	@Resource
 	private IUserService userService;

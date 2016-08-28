@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerform.web.core.annotation.WebController;
-import net.eulerform.web.core.base.controller.BaseController;
+import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.module.ueditor.service.IUeService;
 
 @WebController
 @Scope("prototype")
 @RequestMapping("/ueditor")
-public class UeditorWebController extends BaseController {
+public class UeditorWebController extends DefaultWebController {
     
     @Resource private IUeService ueService;
 
