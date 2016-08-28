@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.base.controller.BaseRest;
+import net.eulerform.web.core.base.controller.AbstractRestEndpoint;
 import net.eulerform.web.module.authentication.entity.Authority;
 import net.eulerform.web.module.authentication.entity.User;
 import net.eulerform.web.module.authentication.util.UserContext;
@@ -21,7 +21,7 @@ import net.eulerform.web.module.authentication.util.UserContext;
 @RestEndpoint
 @Scope("prototype")
 @RequestMapping("/oauth2")
-public class Oauth2LocalRestEndpoint extends BaseRest {
+public class Oauth2LocalRestEndpoint extends AbstractRestEndpoint {
 	
     @ResponseBody
     @RequestMapping(value = "/authority", method = RequestMethod.GET)

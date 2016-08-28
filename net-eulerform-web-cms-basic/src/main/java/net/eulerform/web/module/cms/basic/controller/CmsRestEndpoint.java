@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.base.controller.BaseRest;
+import net.eulerform.web.core.base.controller.AbstractRestEndpoint;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.WebServicePageResponse;
 import net.eulerform.web.core.base.response.WebServiceResponse;
@@ -23,7 +23,7 @@ import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 @RestEndpoint
 @Scope("prototype")
 @RequestMapping("/cms")
-public class CmsRestEndpoint extends BaseRest {
+public class CmsRestEndpoint extends AbstractRestEndpoint {
 
     @Resource IPartnerService partnerService;
     @Resource ISlideshowService slideshowService;

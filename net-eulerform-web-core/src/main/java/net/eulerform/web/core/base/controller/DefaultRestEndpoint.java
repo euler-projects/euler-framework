@@ -5,14 +5,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.base.controller.BaseRest;
+import net.eulerform.web.core.base.controller.AbstractRestEndpoint;
 import net.eulerform.web.core.base.exception.ResourceNotFoundException;
 import net.eulerform.web.core.base.response.WebServiceResponse;
 
 @RestEndpoint
 @Scope("prototype")
 @RequestMapping("/")
-public class DefaultRestEndpoint extends BaseRest {
+public class DefaultRestEndpoint extends AbstractRestEndpoint {
 
     @ResponseBody
     @RequestMapping(value = { "**" })
