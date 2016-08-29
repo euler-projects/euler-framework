@@ -20,6 +20,8 @@
 
     <http security="none" pattern="/resources/**" />
     <http security="none" pattern="/favicon.ico" />
+    <http security="none" pattern="/robot.txt" />
+    
     <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
     
     <beans:import resource="classpath*:**/rs-security.xml"/>
