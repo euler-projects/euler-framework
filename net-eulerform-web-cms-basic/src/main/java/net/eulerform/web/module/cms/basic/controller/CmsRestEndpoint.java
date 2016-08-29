@@ -4,6 +4,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Scope;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,10 +16,8 @@ import net.eulerform.web.core.base.response.WebServicePageResponse;
 import net.eulerform.web.core.base.response.WebServiceResponse;
 import net.eulerform.web.module.cms.basic.entity.News;
 import net.eulerform.web.module.cms.basic.entity.Partner;
-import net.eulerform.web.module.cms.basic.entity.Slideshow;
 import net.eulerform.web.module.cms.basic.service.INewsService;
 import net.eulerform.web.module.cms.basic.service.IPartnerService;
-import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 
 @RestEndpoint
 @Scope("prototype")
@@ -26,7 +25,6 @@ import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 public class CmsRestEndpoint extends AbstractRestEndpoint {
 
     @Resource IPartnerService partnerService;
-    @Resource ISlideshowService slideshowService;
     @Resource INewsService newsService;
     
     @ResponseBody
@@ -49,10 +47,10 @@ public class CmsRestEndpoint extends AbstractRestEndpoint {
         
         return new WebServicePageResponse<>(this.newsService.findNewsByPage(queryRequest, pageIndex, pageSize, loadText, enableTop));
     }
-    
+
     @ResponseBody
-    @RequestMapping(value = "/findSlideshowAll", method = RequestMethod.GET)
-    public WebServiceResponse<Slideshow> findSlideshowAll() {
-        return new WebServiceResponse<>(this.slideshowService.loadSlideshow());
+    @RequestMapping(value ="/news/{newId}", method = RequestMethod.GET)
+    public WebServiceResponse<News> findNews(@PathVariable("newId") String newsId) {        
+        return new WebServiceResponse<>(this.newsService.findNews(newsId));
     }
 }

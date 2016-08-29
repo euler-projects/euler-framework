@@ -1,8 +1,6 @@
 package net.eulerform.web.module.cms.basic.controller;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -24,10 +22,8 @@ import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
 import net.eulerform.web.module.cms.basic.entity.News;
 import net.eulerform.web.module.cms.basic.entity.Partner;
-import net.eulerform.web.module.cms.basic.entity.Slideshow;
 import net.eulerform.web.module.cms.basic.service.INewsService;
 import net.eulerform.web.module.cms.basic.service.IPartnerService;
-import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 
 @WebController
 @Scope("prototype")
@@ -35,7 +31,6 @@ import net.eulerform.web.module.cms.basic.service.ISlideshowService;
 public class CmsManageWebController extends DefaultWebController {
 
     @Resource IPartnerService partnerService;
-    @Resource ISlideshowService slideshowService;
     @Resource INewsService newsService;
     
     @RequestMapping(value = "/news", method = RequestMethod.GET)
@@ -46,11 +41,6 @@ public class CmsManageWebController extends DefaultWebController {
     @RequestMapping(value = "/partner", method = RequestMethod.GET)
     public String partner() {
         return "/cms/manage/partner";
-    }
-    
-    @RequestMapping(value = "/slideshow", method = RequestMethod.GET)
-    public String slideshow() {
-        return "/cms/manage/slideshow";
     }
     
     @RequestMapping(value = "/ueditor", method = RequestMethod.GET)
@@ -120,36 +110,5 @@ public class CmsManageWebController extends DefaultWebController {
     public void deleteNews(@RequestParam String ids) {
         String[] idArray = ids.trim().replace(" ", "").split(";");
         this.newsService.deleteNews(idArray);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "/loadSlideshow", method = RequestMethod.GET)
-    public List<Slideshow> loadSlideshow() {
-        return this.slideshowService.loadSlideshow();
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "/saveSlideshow", method = RequestMethod.POST)
-    public void saveSlideshow(
-            @RequestParam(value = "img1", required = false) MultipartFile img1,
-            @RequestParam(value = "img2", required = false) MultipartFile img2,
-            @RequestParam(value = "img3", required = false) MultipartFile img3,
-            @RequestParam(value = "img4", required = false) MultipartFile img4,
-            @RequestParam(value = "url1", required = false) String url1,
-            @RequestParam(value = "url2", required = false) String url2,
-            @RequestParam(value = "url3", required = false) String url3,
-            @RequestParam(value = "url4", required = false) String url4
-        ) {
-        List<MultipartFile> img = new ArrayList<>();
-        List<String> url = new ArrayList<>();
-        img.add(img1);
-        img.add(img2);
-        img.add(img3);
-        img.add(img4);
-        url.add(url1);
-        url.add(url2);
-        url.add(url3);
-        url.add(url4);
-        this.slideshowService.saveSlideshow(img, url);
     }
 }
