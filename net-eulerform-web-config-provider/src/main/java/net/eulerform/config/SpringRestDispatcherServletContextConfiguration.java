@@ -29,6 +29,7 @@ import net.eulerform.web.core.annotation.RestEndpoint;
         includeFilters = @ComponentScan.Filter(RestEndpoint.class)
 )
 public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
+    
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 //    @Resource(name="jaxb2Marshaller") Marshaller marshaller;
 //    @Resource(name="jaxb2Marshaller") Unmarshaller unmarshaller;

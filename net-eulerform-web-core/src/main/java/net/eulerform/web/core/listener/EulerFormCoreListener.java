@@ -45,8 +45,7 @@ import org.springframework.stereotype.Component;
 
 import net.eulerform.common.FilePathTool;
 import net.eulerform.common.FileReader;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.web.core.util.WebConfig;
 
 @Component
 public class EulerFormCoreListener implements ServletContextListener {
@@ -57,21 +56,27 @@ public class EulerFormCoreListener implements ServletContextListener {
     private final static String MODULE_JSP_FOLDER;
 
     static {
-        String temp;
-        try {
-            temp = FilePathTool.changeToUnixFormat(GlobalProperties.get("web.jspPath"));
-        } catch (GlobalPropertyReadException e) {
-            temp = "/WEB-INF/modulePages";
-            log.warn("Couldn't load web.jspPath , use '/WEB-INF/modulePages' for default.");
-        }
-        MODULE_JSP_FOLDER = temp;
+        MODULE_JSP_FOLDER = WebConfig.getJspPath();
     }
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+    
+    private boolean enableJspAutoDeploy = false;
+    
+    public EulerFormCoreListener() {
+        this.enableJspAutoDeploy = WebConfig.isJspAutoDeployEnabled();
+    }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        this.initJarJspPages(sce);
+        if(this.enableJspAutoDeploy)
+            this.initJarJspPages(sce);
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        // TODO Auto-generated method stub
+
     }
 
     private void initJarJspPages(ServletContextEvent sce) {
@@ -108,12 +113,6 @@ public class EulerFormCoreListener implements ServletContextListener {
                     throw new RuntimeException(e);
                 }
         }
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        // TODO Auto-generated method stub
-
     }
 
 }
