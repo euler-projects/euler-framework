@@ -13,10 +13,6 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-
-    <bean id="slideshowDao" class="net.eulerform.web.module.cms.basic.dao.impl.SlideshowDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
     <bean id="partnerDao" class="net.eulerform.web.module.cms.basic.dao.impl.PartnerDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>

@@ -55,6 +55,11 @@ public class NewsService extends BaseService implements INewsService {
     }
 
     @Override
+    public News findNews(String newsId) {
+        return this.newsDao.load(newsId);
+    }
+
+    @Override
     public PageResponse<News> findNewsByPage(QueryRequest queryRequest, int pageIndex, int pageSize, boolean loadText, boolean enableTop) {
         return this.newsDao.findNewsByPage(queryRequest, pageIndex, pageSize, loadText, enableTop);
     }

@@ -13,6 +13,9 @@ import net.eulerform.web.module.cms.basic.entity.News;
 public interface INewsService extends IBaseService {
 
     @PreAuthorize("permitAll")
+    public News findNews(String newsId);
+    
+    @PreAuthorize("permitAll")
     public PageResponse<News> findNewsByPage(QueryRequest queryRequest, int pageIndex, int pageSize, boolean loadText, boolean enableTop);
     
     public void saveNews(News news, MultipartFile img) throws MultipartFileSaveException;
@@ -20,5 +23,6 @@ public interface INewsService extends IBaseService {
     public void deleteNews(String[] idArray);
 
     void deleteImg(String newsId);
+
 
 }
