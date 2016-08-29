@@ -44,11 +44,10 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import net.eulerform.common.FilePathTool;
 import net.eulerform.common.GlobalProperties;
 import net.eulerform.common.GlobalPropertyReadException;
-import net.eulerform.common.StringTool;
 import net.eulerform.web.core.listener.EulerFormCoreListener;
+import net.eulerform.web.core.util.WebConfig;
 import net.eulerform.web.core.filter.EulerFormCoreFilter;
 import net.eulerform.web.core.filter.CrosFilter;
 
@@ -65,8 +64,6 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
     private static final String WEB_SECURITY_CAS = "web-security-cas";
     private static final String WEB_SECURITY_NONE_ENABLED = "none";
     private static final String WEB_SECURITY_NONE = "web-security-none";
-    
-    private static final String REST_ROOT_URL = "rest.rooturl";
 
     private static final String REST_AUTHENTICATION_TYPE = "rest.authenticationType";
     private static final String REST_SECURITY_OAUTH_ENABLED = "oauth";
@@ -208,21 +205,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         springWebDispatcher.setMultipartConfig(new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold));
         springWebDispatcher.addMapping("/");
 
-        String restRootUrl = "/rs";
-        try {
-            restRootUrl = GlobalProperties.get(REST_ROOT_URL);
-        } catch (GlobalPropertyReadException e) {
-            // DO NOTHING
-            log.warn("Couldn't load "+REST_ROOT_URL+" , use '/rs' for default.");
-        }
-        
-        if(StringTool.isNull(restRootUrl))
-            throw new ServletException(REST_ROOT_URL + "不能为空");
-        
-        while(restRootUrl.endsWith("*")){
-            restRootUrl = restRootUrl.substring(0, restRootUrl.length()-1);
-        }
-        restRootUrl = FilePathTool.changeToUnixFormat(restRootUrl);
+        String restRootUrl = WebConfig.getRestRootPath();
         
         AnnotationConfigWebApplicationContext springRestDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
