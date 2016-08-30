@@ -98,4 +98,9 @@ public class PartnerService extends BaseService implements IPartnerService {
     public Partner findPartner(String partnerId) {
         return this.partnerDao.load(partnerId);
     }
+
+    @Override
+    public List<Partner> findPartnerByNameFuzzy(String name) {
+        return this.partnerDao.findPartnerByNameFuzzy(name);
+    }
 }

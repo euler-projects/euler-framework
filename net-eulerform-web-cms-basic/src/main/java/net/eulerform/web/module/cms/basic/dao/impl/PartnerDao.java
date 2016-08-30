@@ -66,4 +66,11 @@ public class PartnerDao extends BaseDao<Partner> implements IPartnerDao {
         return this.findBy(detachedCriteria);
     }
 
+    @Override
+    public List<Partner> findPartnerByNameFuzzy(String name) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
+        detachedCriteria.add(RestrictionsX.like("name", name, MatchMode.ANYWHERE).ignoreCase());
+        return this.findBy(detachedCriteria);
+    }
+
 }
