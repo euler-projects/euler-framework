@@ -1,6 +1,7 @@
 package net.eulerform.web.module.cms.basic.controller;
 
 import java.text.ParseException;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -110,5 +111,11 @@ public class CmsManageWebController extends DefaultWebController {
     public void deleteNews(@RequestParam String ids) {
         String[] idArray = ids.trim().replace(" ", "").split(";");
         this.newsService.deleteNews(idArray);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value ="/findPartnerAll", method = RequestMethod.GET)
+    public List<Partner> findPartnerAll() {
+        return this.partnerService.loadPartners(false);
     }
 }
