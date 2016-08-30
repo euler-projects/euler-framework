@@ -2,6 +2,7 @@ package net.eulerform.web.module.cms.basic.service.impl;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -82,5 +83,19 @@ public class PartnerService extends BaseService implements IPartnerService {
     @Override
     public List<Partner> loadPartners(boolean onlyShow) {
         return this.partnerDao.loadPartners(onlyShow);
+    }
+
+    @Override
+    public List<Partner> findPartners(Set<String> ids) {
+        if(ids == null || ids.isEmpty())
+            return null;
+        
+        String[] idArray = ids.toArray(new String[0]);
+        return this.partnerDao.load(idArray);
+    }
+
+    @Override
+    public Partner findPartner(String partnerId) {
+        return this.partnerDao.load(partnerId);
     }
 }
