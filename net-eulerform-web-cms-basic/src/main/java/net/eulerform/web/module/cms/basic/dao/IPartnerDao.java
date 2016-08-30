@@ -15,4 +15,6 @@ public interface IPartnerDao extends IBaseDao<Partner> {
 
     public List<Partner> loadPartners(boolean onlyShow);
 
+    public List<Partner> findPartnerByNameFuzzy(String name);
+
 }

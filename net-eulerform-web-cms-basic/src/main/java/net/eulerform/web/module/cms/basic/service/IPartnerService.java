@@ -27,6 +27,9 @@ public interface IPartnerService extends IBaseService {
     @PreAuthorize("permitAll")
     public Partner findPartner(String partnerId);
     
+    @PreAuthorize("permitAll")
+    public List<Partner> findPartnerByNameFuzzy(String name);
+    
     public void savePartner(Partner partner, MultipartFile logo) throws MultipartFileSaveException;
 
     public void deleteLogo(String partnerId);
