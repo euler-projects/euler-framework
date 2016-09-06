@@ -30,6 +30,8 @@
     
     <bean id="userService" name="userDetailsService" class="net.eulerform.web.module.authentication.service.impl.UserService">
         <property name="passwordEncoder" ref="passwordEncoder"/>
+        <property name="enableUserResetPassword" value="${local.enableUserResetPassword}"/>
+        <property name="miniPasswordLength" value="${local.miniPasswordLength}"/>
     </bean>
     
     <bean id="authorityService" class="net.eulerform.web.module.authentication.service.impl.AuthorityService">

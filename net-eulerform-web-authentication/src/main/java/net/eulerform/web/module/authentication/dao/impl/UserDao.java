@@ -1,9 +1,11 @@
 package net.eulerform.web.module.authentication.dao.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.hibernate.FetchMode;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -22,7 +24,42 @@ public class UserDao extends BaseDao<User> implements IUserDao {
     @Override
     public User findUserByName(String username) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("username", username));
+        List<User> users = this.findBy(detachedCriteria);
+        if (users == null || users.isEmpty())
+            return null;
+        return users.get(0);
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        detachedCriteria.add(Restrictions.eq("email", email));
+        List<User> users = this.findBy(detachedCriteria);
+        if (users == null || users.isEmpty())
+            return null;
+        return users.get(0);
+    }
+
+    @Override
+    public User findUserByMobile(String mobile) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        detachedCriteria.add(Restrictions.eq("mobile", mobile));
+        List<User> users = this.findBy(detachedCriteria);
+        if (users == null || users.isEmpty())
+            return null;
+        return users.get(0);
+    }
+
+    @Override
+    public User findUserByResetToken(String resetToken) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        detachedCriteria.add(Restrictions.eq("resetToken", resetToken));
+        detachedCriteria.add(Restrictions.gt("resetTokenExpireTime", new Date()));
         List<User> users = this.findBy(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
