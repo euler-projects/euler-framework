@@ -1,9 +1,11 @@
 package net.eulerform.web.module.authentication.service.impl;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -62,10 +64,14 @@ public class UserService extends BaseService implements IUserService, UserDetail
     }
 
     private boolean enableUserResetPassword = false;
-    
+    private String resetTokenURL;
     
     public void setEnableUserResetPassword(boolean enableUserResetPassword) {
         this.enableUserResetPassword = enableUserResetPassword;
+    }
+
+    public void setResetTokenURL(String resetTokenURL) {
+        this.resetTokenURL = resetTokenURL;
     }
 
     public void setUserCacheSeconds(int cacheSecond) {
@@ -253,5 +259,20 @@ public class UserService extends BaseService implements IUserService, UserDetail
         user.setResetTokenExpireTime(null);
         user.setPassword(this.passwordEncoder.encode(newPassword));
         this.userDao.update(user);        
+    }
+
+    @Override
+    public void forgotPasswordRWT(String email) {
+        User user = this.userDao.findUserByEmail(email);
+        if(user == null)
+            return;
+        String userId = user.getId();
+        String resetToken = UUID.randomUUID().toString();
+        Date resetTokenExpireTime = new Date(new Date().getTime() + 600000L);
+        user.setResetToken(resetToken);
+        user.setResetTokenExpireTime(resetTokenExpireTime);
+        this.userDao.update(user);
+        String resetURL = resetTokenURL.replace("{userId}", userId).replace("{resetToken}", resetToken);
+        System.out.println(resetURL);
     }
 }
