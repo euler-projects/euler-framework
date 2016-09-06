@@ -43,4 +43,6 @@ public interface IUserService extends IBaseService {
     public User checkResetTokenRT(String userId, String resetToken);
     
     public void resetUserPasswordWithResetTokenRWT(String userId, String newPassword, String resetToken);
+    
+    public void forgotPasswordRWT(String email);
 }

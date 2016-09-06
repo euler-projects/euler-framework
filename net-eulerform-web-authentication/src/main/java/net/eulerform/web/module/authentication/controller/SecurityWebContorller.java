@@ -74,6 +74,13 @@ public class SecurityWebContorller extends DefaultWebController {
         return "/authentication/login";
     }
     
+    @RequestMapping(value = { "/forgotPasswd" }, method = RequestMethod.POST)
+    public String forgotPasswd(String email)
+    {
+        this.userService.forgotPasswordRWT(email);
+        return "/authentication/login";
+    }
+    
     @RequestMapping(value ="/user",method=RequestMethod.GET)
     public String user(){
         return "/authentication/user";
