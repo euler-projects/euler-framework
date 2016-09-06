@@ -9,14 +9,18 @@ import javax.validation.Valid;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+
 import net.eulerform.common.BeanTool;
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.DefaultWebController;
+import net.eulerform.web.core.base.exception.NotFoundException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
@@ -41,6 +45,32 @@ public class SecurityWebContorller extends DefaultWebController {
     @RequestMapping(value = { "/login" }, method = RequestMethod.GET)
     public String login()
     {
+        return "/authentication/login";
+    }
+    
+    @RequestMapping(value = { "/resetPasswd/{userId}/{resetToken}" }, method = RequestMethod.GET)
+    public String resetPasswdPage(
+            @PathVariable("userId") String userId, 
+            @PathVariable("resetToken") String resetToken,
+            Model model)
+    {
+        try {
+            this.userService.checkResetTokenRT(userId, resetToken);
+        } catch (UsernameNotFoundException e) {
+            throw new NotFoundException();
+        }
+        model.addAttribute("userId", userId);
+        model.addAttribute("resetToken", resetToken);
+        return "/authentication/resetPasswd";
+    }
+
+    @RequestMapping(value = { "/resetPasswd" }, method = RequestMethod.POST)
+    public String resetPasswd(
+            String userId, 
+            String resetToken,
+            String pwd)
+    {
+        this.userService.resetUserPasswordWithResetTokenRWT(userId, pwd, resetToken);
         return "/authentication/login";
     }
     

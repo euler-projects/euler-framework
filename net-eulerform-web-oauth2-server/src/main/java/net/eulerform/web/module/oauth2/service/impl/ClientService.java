@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.util.Assert;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.common.StringTool;
@@ -32,7 +33,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IScopeDao scopeDao;
     
     private boolean cacheEnabled = false;
-    private ObjectCache<String, Client> clientCache = new ObjectCache<>(60_000L);
+    private final static ObjectCache<String, Client> CLIENT_CACHE = new ObjectCache<>(60_000L);
 
     private PasswordEncoder passwordEncoder;
 
@@ -41,9 +42,8 @@ public class ClientService extends BaseService implements IClientService, Client
     }
 
     public void setCacheSeconds(long cacheSecond) {
-        if(cacheSecond < 60){
-            this.clientCache.setDataLife(cacheSecond * 1000);            
-        }
+        Assert.state(cacheSecond <= 60, "Oauth client cache second must less than 30 seconds");
+        ClientService.CLIENT_CACHE.setDataLife(cacheSecond * 1000);
     }
 
     public void setClientDao(IClientDao clientDao) {
@@ -66,7 +66,7 @@ public class ClientService extends BaseService implements IClientService, Client
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
 
         if(cacheEnabled) {
-            Client cachedClient = this.clientCache.get(clientId);
+            Client cachedClient = ClientService.CLIENT_CACHE.get(clientId);
             if(cachedClient != null) {
                 return cachedClient;
             }
@@ -80,7 +80,7 @@ public class ClientService extends BaseService implements IClientService, Client
             throw new ClientRegistrationException("Client \"" + clientId + "\" is disabled");
         
         if(cacheEnabled) {
-            this.clientCache.put(clientId, client);
+            ClientService.CLIENT_CACHE.put(clientId, client);
         }
         
         return client;
@@ -260,7 +260,7 @@ public class ClientService extends BaseService implements IClientService, Client
             throw new ClientRegistrationException("Client \"" + clientId + "\" not found");
         
         if(cacheEnabled) {
-            this.clientCache.put(clientId, client);
+            ClientService.CLIENT_CACHE.put(clientId, client);
         }
         
         return client;

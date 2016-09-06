@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.Assert;
 
 import net.eulerform.common.BeanTool;
 import net.eulerform.web.core.base.exception.IllegalParamException;
@@ -18,6 +19,7 @@ import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
+import net.eulerform.web.core.cache.ObjectCache;
 import net.eulerform.web.core.i18n.Tag;
 import net.eulerform.web.module.authentication.dao.IGroupDao;
 import net.eulerform.web.module.authentication.dao.IUserDao;
@@ -29,22 +31,83 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Resource private IUserDao userDao;
     @Resource private IGroupDao groupDao;
+    
+    private int miniPasswordLength = 6;
+
+    public void setMiniPasswordLength(int miniPasswordLength) {
+        this.miniPasswordLength = miniPasswordLength;
+    }
 
     private PasswordEncoder passwordEncoder;
         
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
+    
+    private boolean enableEmailLogin = false;
+    private boolean enableMobileLogin = false;
+    private boolean enableCache = false;
+    private final static ObjectCache<String, User> USER_CAHCE = new ObjectCache<>(10_000L);
+    
+    public void setEnableEmailLogin(boolean enableEmailLogin) {
+        this.enableEmailLogin = enableEmailLogin;
+    }
+
+    public void setEnableMobileLogin(boolean enableMobileLogin) {
+        this.enableMobileLogin = enableMobileLogin;
+    }
+
+    public void setEnableCache(boolean enableCache) {
+        this.enableCache = enableCache;
+    }
+
+    private boolean enableUserResetPassword = false;
+    
+    
+    public void setEnableUserResetPassword(boolean enableUserResetPassword) {
+        this.enableUserResetPassword = enableUserResetPassword;
+    }
+
+    public void setUserCacheSeconds(int cacheSecond) {
+        Assert.state(cacheSecond <= 10, "User cache second must less than 10 seconds");
+        UserService.USER_CAHCE.setDataLife(cacheSecond * 1000);
+        if(!enableCache) {
+            this.logger.warn("User cache was disabled, cacheSecond will not take any effect");
+        } else {
+            this.logger.info("User cache secode has been set to " + cacheSecond + " secodes");
+        }
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        User user = this.userDao.findUserByName(username);
-        if(user == null) {
-            throw new UsernameNotFoundException("User \"" + username + "\" not found.");
+        User user = null;
+        if(enableCache) {
+            user = loadUserFromCache(username);
         }
-        
+        if(user == null) {
+            user = this.userDao.findUserByName(username);
+            if(user == null && enableEmailLogin) {
+                user = this.userDao.findUserByEmail(username);
+            }
+            if(user == null && enableMobileLogin) {
+                user = this.userDao.findUserByMobile(username);
+            }
+            if(user == null) {
+                throw new UsernameNotFoundException("User \"" + username + "\" not found.");
+            }
+            if(enableCache) {
+                this.putUserToCache(username, user);
+            }
+        }
         return user;
+    }
+    
+    private User loadUserFromCache(String username) {
+        return USER_CAHCE.get(username);
+    }
+    
+    private void putUserToCache(String username, User user) {
+        USER_CAHCE.put(username, user);
     }
 
     @Override
@@ -77,7 +140,7 @@ public class UserService extends BaseService implements IUserService, UserDetail
             }
         }
         if(user.getPassword() == null || user.getPassword().trim().equals("")) {
-            user.setPassword(this.passwordEncoder.encode("sf123456"));
+            user.setPassword(this.passwordEncoder.encode("123456"));
         }
         this.userDao.saveOrUpdate(user);
     }
@@ -116,16 +179,6 @@ public class UserService extends BaseService implements IUserService, UserDetail
     }
 
     @Override
-    public void resetUserPasswordRWT(String userId, String newPassword) {
-        if(newPassword.length() < 6) {
-            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
-        }
-        User user = this.userDao.load(userId);
-        user.setPassword(this.passwordEncoder.encode(newPassword));
-        this.userDao.update(user);
-    }
-
-    @Override
     public User findUserById(Serializable id) {
         User user = this.userDao.load(id);
         if(user == null)
@@ -141,7 +194,7 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Override
     public void createUser(String username, String password) {
-        if(password.length() < 6) {
+        if(password.length() < this.miniPasswordLength) {
             throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
         }
         try {
@@ -162,5 +215,43 @@ public class UserService extends BaseService implements IUserService, UserDetail
             return;
         }
         throw new ResourceExistException("User Existed!");
+    }
+
+    @Override
+    public void resetUserPasswordRWT(String userId, String newPassword) {
+        if(newPassword.length() < this.miniPasswordLength) {
+            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
+        }
+        User user = this.userDao.load(userId);
+        if(user == null)
+            throw new UsernameNotFoundException("User not found.");
+        user.setPassword(this.passwordEncoder.encode(newPassword));
+        this.userDao.update(user);
+    }
+
+    @Override
+    public User checkResetTokenRT(String userId, String resetToken) {
+        if(!enableUserResetPassword)
+            throw new UsernameNotFoundException("User not found.");
+        User user = this.userDao.findUserByResetToken(resetToken);
+        if(user == null || !user.getId().equalsIgnoreCase(userId))
+            throw new UsernameNotFoundException("User not found.");
+        return user;
+    }
+
+    @Override
+    public void resetUserPasswordWithResetTokenRWT(String userId, String newPassword, String resetToken) {
+        if(!enableUserResetPassword)
+            throw new UsernameNotFoundException("User not found.");
+        User user = this.userDao.findUserByResetToken(resetToken);
+        if(user == null || !user.getId().equalsIgnoreCase(userId))
+            throw new UsernameNotFoundException("User not found.");
+        if(newPassword.length() < this.miniPasswordLength) {
+            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
+        }
+        user.setResetToken(null);
+        user.setResetTokenExpireTime(null);
+        user.setPassword(this.passwordEncoder.encode(newPassword));
+        this.userDao.update(user);        
     }
 }

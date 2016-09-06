@@ -1,6 +1,7 @@
 package net.eulerform.web.module.authentication.entity;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,6 +55,10 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
+    @Column(name = "EMAIL", nullable = true, unique = true)
+    private String email;
+    @Column(name = "MOBILE", nullable = true, unique = true)
+    private String mobile;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
     @Column(name = "FULL_NAME")
@@ -66,6 +71,10 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private Boolean accountNonLocked;
     @Column(name = "CREDENTIALS_NON_EXPIRED", nullable = false)
     private Boolean credentialsNonExpired;
+    @Column(name = "RESET_TOKEN", unique = true)
+    private String resetToken;
+    @Column(name = "RESET_TOKEN_EXPIRE_TIME")
+    private Date resetTokenExpireTime;
 //    @ManyToMany(fetch = FetchType.EAGER)
 //    @JoinTable(name = "SYS_USER_AUTHORITY", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
     @Transient
@@ -160,6 +169,22 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public void setGroups(Set<Group> groups) {
         this.groups = groups;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public Date getResetTokenExpireTime() {
+        return resetTokenExpireTime;
+    }
+
+    public void setResetTokenExpireTime(Date resetTokenExpireTime) {
+        this.resetTokenExpireTime = resetTokenExpireTime;
     }
 
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {
