@@ -1,10 +1,12 @@
 package net.eulerform.web.module.authentication.service.impl;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -18,6 +20,7 @@ import org.springframework.util.Assert;
 import net.eulerform.common.email.MailSenderFactory;
 import net.eulerform.common.email.SimpleMailSender;
 import net.eulerform.common.util.BeanTool;
+import net.eulerform.common.util.StringTool;
 import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.request.QueryRequest;
@@ -150,6 +153,11 @@ public class UserService extends BaseService implements IUserService, UserDetail
         if(user.getPassword() == null || user.getPassword().trim().equals("")) {
             user.setPassword(this.passwordEncoder.encode("123456"));
         }
+
+        user.setUsername(user.getUsername().toLowerCase());
+        user.setEmail(user.getEmail() == null ? null : user.getEmail().toLowerCase());
+        user.setMobile(user.getMobile() == null ? null : user.getMobile().toLowerCase());
+        
         this.userDao.saveOrUpdate(user);
     }
 
@@ -202,27 +210,48 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Override
     public void createUser(String username, String password) {
-        if(password.length() < this.miniPasswordLength) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        this.createUser(user);
+    }
+
+    @Override
+    public void createUser(User user) {
+        if(user == null || StringTool.isNull(user.getUsername()) || StringTool.isNull(user.getPassword()))
+            return;
+        if(user.getPassword().length() < this.miniPasswordLength) {
             throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
         }
         try {
-            this.loadUserByUsername(username);
+            this.loadUserByUsername(user.getUsername());
         } catch (UsernameNotFoundException e) {
-            User user = new User();
-            user.setUsername(username);
-            user.setPassword(this.passwordEncoder.encode(password));
+            
+            user.setUsername(user.getUsername().toLowerCase());
+            user.setEmail(user.getEmail() == null ? null : user.getEmail().toLowerCase());
+            user.setMobile(user.getMobile() == null ? null : user.getMobile().toLowerCase());
+            
+            user.setId(null);
+            user.setResetToken(null);
+            user.setResetTokenExpireTime(null);
+            
+            user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+            
             user.setAccountNonExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
             user.setEnabled(true);
+            
             Group usersGroup = this.groupDao.findSystemUsersGroup();
             Set<Group> groups = new HashSet<>();
             groups.add(usersGroup);
             user.setGroups(groups);
+            
             this.userDao.save(user);
             return;
         }
         throw new ResourceExistException("User Existed!");
+        
     }
 
     @Override
@@ -278,8 +307,17 @@ public class UserService extends BaseService implements IUserService, UserDetail
         System.out.println(resetURL);
         SimpleMailSender simpleSystemMailSender;
         try {
+            String modelZhCn = "<p>请点击下面的链接重置您的密码，10分钟内有效</p>"
+                    + "<p><a href=\"%1$s\">%2$s</a></p>"
+                    + "<p>发送时间: %3$tY-%<tm-%<td %<tH:%<tM:%<tS %<tZ</p>"
+                    + "<p>此邮件为系统自动发出，请勿回复。</p>";
+            String modelEnUs = "<p>You can use the following link within the next 10 minutes to reset your password:</p>"
+                    + "<p><a href=\"%1$s\">%2$s</a></p>"
+                    + "<p>Send time: %3$tY/%<tm/%<td %<tH:%<tM:%<tS %<tZ</p>"
+                    + "<p>This mail was sent from an system address. Please do not respond to this mail.</p>";
+            String content = String.format(modelZhCn+"<br><br><br>"+modelEnUs, resetURL, resetURL, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
             simpleSystemMailSender = MailSenderFactory.getSimpleSystemMailSender();
-            simpleSystemMailSender.send("密码重置邮件", "<p>请点击下面的链接重置您的密码</p><p><a href=\""+resetURL+"\">"+resetURL+"</a></p>", email);
+            simpleSystemMailSender.send("密码重置邮件 Please reset your password", content, email);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

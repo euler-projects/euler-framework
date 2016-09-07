@@ -38,6 +38,8 @@ public interface IUserService extends IBaseService {
 
     public List<User> findUserByNameOrCode(String nameOrCode);
 
+    public void createUser(User user);
+    
     public void createUser(String username, String password);
 
     public User checkResetTokenRT(String userId, String resetToken);
