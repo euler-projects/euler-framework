@@ -12,8 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
+import net.eulerform.common.util.GlobalProperties;
+import net.eulerform.common.util.GlobalPropertyReadException;
 import net.eulerform.web.core.cache.ObjectCache;
 import net.eulerform.web.module.authentication.entity.User;
 import net.eulerform.web.module.authentication.service.IUserService;

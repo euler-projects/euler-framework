@@ -27,7 +27,7 @@
  * http://eulerform.net
  * http://cfrost.net
  */
-package net.eulerform.common;
+package net.eulerform.common.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

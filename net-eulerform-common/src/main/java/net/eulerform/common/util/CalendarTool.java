@@ -1,4 +1,4 @@
-package net.eulerform.common;
+package net.eulerform.common.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

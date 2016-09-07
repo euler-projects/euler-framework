@@ -11,7 +11,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerform.common.StringTool;
+import net.eulerform.common.util.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;

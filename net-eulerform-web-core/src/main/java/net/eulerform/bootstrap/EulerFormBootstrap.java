@@ -44,11 +44,11 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
 import net.eulerform.web.core.listener.EulerFormCoreListener;
 import net.eulerform.web.core.util.WebConfig;
 import net.eulerform.web.core.filter.EulerFormCoreFilter;
+import net.eulerform.common.util.GlobalProperties;
+import net.eulerform.common.util.GlobalPropertyReadException;
 import net.eulerform.web.core.filter.CrosFilter;
 
 @Order(0)

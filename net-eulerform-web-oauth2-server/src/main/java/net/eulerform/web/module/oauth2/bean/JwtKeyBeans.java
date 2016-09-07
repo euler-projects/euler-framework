@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import net.eulerform.common.FileReader;
+import net.eulerform.common.util.FileReader;
 
 @Configuration
 @Profile({"oauth-authorization-server","oauth-resource-server"})

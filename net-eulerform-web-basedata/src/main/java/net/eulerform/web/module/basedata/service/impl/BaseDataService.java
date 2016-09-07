@@ -12,7 +12,8 @@ import javax.servlet.ServletContext;
 import org.springframework.web.context.ContextLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.eulerform.common.FileReader;
+
+import net.eulerform.common.util.FileReader;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;

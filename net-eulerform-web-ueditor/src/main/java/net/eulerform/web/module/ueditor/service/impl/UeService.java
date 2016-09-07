@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import net.eulerform.common.CalendarTool;
-import net.eulerform.common.FileReader;
+import net.eulerform.common.util.CalendarTool;
+import net.eulerform.common.util.FileReader;
 import net.eulerform.web.core.base.service.impl.BaseService;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
 import net.eulerform.web.core.util.WebConfig;
