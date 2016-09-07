@@ -18,8 +18,8 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.transform.Transformers;
 
-import net.eulerform.common.BeanTool;
-import net.eulerform.common.Generic;
+import net.eulerform.common.util.BeanTool;
+import net.eulerform.common.util.Generic;
 import net.eulerform.web.core.base.dao.IBaseDao;
 import net.eulerform.web.core.base.entity.BaseEntity;
 import net.eulerform.web.core.base.response.PageResponse;

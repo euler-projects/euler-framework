@@ -3,10 +3,10 @@ package net.eulerform.web.core.util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.eulerform.common.FilePathTool;
-import net.eulerform.common.GlobalProperties;
-import net.eulerform.common.GlobalPropertyReadException;
-import net.eulerform.common.StringTool;
+import net.eulerform.common.util.FilePathTool;
+import net.eulerform.common.util.GlobalProperties;
+import net.eulerform.common.util.GlobalPropertyReadException;
+import net.eulerform.common.util.StringTool;
 
 public abstract class WebConfig {
     

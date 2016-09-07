@@ -1,4 +1,4 @@
-package net.eulerform.common;
+package net.eulerform.common.util;
 
 @SuppressWarnings("serial")
 public class GlobalPropertyReadException extends Exception {

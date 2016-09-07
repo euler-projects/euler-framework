@@ -10,8 +10,8 @@ import javax.servlet.ServletContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.multipart.MultipartFile;
 
-import net.eulerform.common.CalendarTool;
-import net.eulerform.common.FileReader;
+import net.eulerform.common.util.CalendarTool;
+import net.eulerform.common.util.FileReader;
 import net.eulerform.web.core.exception.MultipartFileSaveException;
 
 public class WebFileTool {

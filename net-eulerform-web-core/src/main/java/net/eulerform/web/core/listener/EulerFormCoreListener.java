@@ -43,8 +43,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import net.eulerform.common.FilePathTool;
-import net.eulerform.common.FileReader;
+import net.eulerform.common.util.FilePathTool;
+import net.eulerform.common.util.FileReader;
 import net.eulerform.web.core.util.WebConfig;
 
 @Component

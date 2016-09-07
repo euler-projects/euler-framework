@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import net.eulerform.common.CalendarTool;
+import net.eulerform.common.util.CalendarTool;
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.request.QueryRequest;

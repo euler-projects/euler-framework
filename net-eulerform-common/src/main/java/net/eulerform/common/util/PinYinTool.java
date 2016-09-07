@@ -1,4 +1,4 @@
-package net.eulerform.common;
+package net.eulerform.common.util;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 

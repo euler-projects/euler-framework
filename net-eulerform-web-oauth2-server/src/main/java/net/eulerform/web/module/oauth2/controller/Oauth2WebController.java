@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import net.eulerform.common.BeanTool;
+import net.eulerform.common.util.BeanTool;
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.exception.ResourceExistException;

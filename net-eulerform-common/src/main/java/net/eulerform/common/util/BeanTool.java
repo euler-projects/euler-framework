@@ -1,4 +1,4 @@
-package net.eulerform.common;
+package net.eulerform.common.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
