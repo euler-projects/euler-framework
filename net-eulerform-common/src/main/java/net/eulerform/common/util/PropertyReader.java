@@ -17,7 +17,7 @@ public class PropertyReader {
             this.props = new Properties();        
             this.props.load(bufferedReader);
         } catch (NullPointerException e) {
-            throw new IOException("Property file \"" + path + "\" read error. Does this file exist?", e);
+            throw new IOException("Property file \"" + this.getClass().getResource("")+path + "\" read error. Does this file exist?", e);
         }
 //        this.props = PropertiesLoaderUtils.loadAllProperties(path);
     }

@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
+import net.eulerform.common.email.MailSenderFactory;
+import net.eulerform.common.email.SimpleMailSender;
 import net.eulerform.common.util.BeanTool;
 import net.eulerform.web.core.base.exception.IllegalParamException;
 import net.eulerform.web.core.base.exception.ResourceExistException;
@@ -274,5 +276,13 @@ public class UserService extends BaseService implements IUserService, UserDetail
         this.userDao.update(user);
         String resetURL = resetTokenURL.replace("{userId}", userId).replace("{resetToken}", resetToken);
         System.out.println(resetURL);
+        SimpleMailSender simpleSystemMailSender;
+        try {
+            simpleSystemMailSender = MailSenderFactory.getSimpleSystemMailSender();
+            simpleSystemMailSender.send("密码重置邮件", "<p>请点击下面的链接重置您的密码</p><p><a href=\""+resetURL+"\">"+resetURL+"</a></p>", email);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    
     }
 }
