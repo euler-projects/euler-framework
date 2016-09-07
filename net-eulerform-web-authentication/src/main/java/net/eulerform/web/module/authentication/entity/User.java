@@ -187,6 +187,22 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         this.resetTokenExpireTime = resetTokenExpireTime;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {
     	User result = new User();
     	result.setId(userDetails.getUsername());
