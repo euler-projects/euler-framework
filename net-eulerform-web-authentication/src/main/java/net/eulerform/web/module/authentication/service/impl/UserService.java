@@ -31,7 +31,9 @@ import net.eulerform.web.core.i18n.Tag;
 import net.eulerform.web.module.authentication.dao.IGroupDao;
 import net.eulerform.web.module.authentication.dao.IUserDao;
 import net.eulerform.web.module.authentication.entity.Group;
+import net.eulerform.web.module.authentication.entity.IUserProfile;
 import net.eulerform.web.module.authentication.entity.User;
+import net.eulerform.web.module.authentication.service.IUserProfileService;
 import net.eulerform.web.module.authentication.service.IUserService;
 
 public class UserService extends BaseService implements IUserService, UserDetailsService {
@@ -39,6 +41,12 @@ public class UserService extends BaseService implements IUserService, UserDetail
     @Resource private IUserDao userDao;
     @Resource private IGroupDao groupDao;
     
+    private IUserProfileService userProfileService;
+    
+    public void setUserProfileService(IUserProfileService userProfileService) {
+        this.userProfileService = userProfileService;
+    }
+
     private int miniPasswordLength = 6;
 
     public void setMiniPasswordLength(int miniPasswordLength) {
@@ -252,6 +260,17 @@ public class UserService extends BaseService implements IUserService, UserDetail
         }
         throw new ResourceExistException("User Existed!");
         
+    }
+
+    @Override
+    public void createUser(User user, IUserProfile userProfile) {
+        this.createUser(user);
+        
+        if(this.userProfileService == null)
+            return;
+        
+        userProfile.setUserId(user.getId());
+        this.userProfileService.saveUserProfile(userProfile);
     }
 
     @Override
