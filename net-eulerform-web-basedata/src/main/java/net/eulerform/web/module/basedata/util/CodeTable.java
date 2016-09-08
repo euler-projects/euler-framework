@@ -1,5 +1,6 @@
 package net.eulerform.web.module.basedata.util;
 
+import net.eulerform.web.module.basedata.entity.EmailConfig;
 import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 public class CodeTable {
@@ -12,5 +13,9 @@ public class CodeTable {
 
     public static String findConfig(String key) {
         return baseDataService.findConfigValue(key);
+    }
+    
+    public static EmailConfig findEmailConfig() {
+        return baseDataService.findEmailConfig();
     }
 }

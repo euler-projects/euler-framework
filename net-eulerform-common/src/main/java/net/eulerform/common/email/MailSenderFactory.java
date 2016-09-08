@@ -14,6 +14,27 @@ public class MailSenderFactory {
      * 服务邮箱
      */
     private static SimpleMailSender simpleSystemMailSender = null;
+    
+    private SimpleMailSender simpleMailSender = null;
+    
+    private String username;
+    private String password;
+    private String smtpHost;
+    private String senderEmailAddr;
+    
+    public MailSenderFactory(String username, String password, String smtpHost, String senderEmailAddr) {
+        this.username = username;
+        this.password = password;
+        this.smtpHost = smtpHost;
+        this.senderEmailAddr = senderEmailAddr;
+    }
+    
+    public SimpleMailSender getSimpleMailSender() throws Exception {
+        if (simpleMailSender == null) {
+            simpleMailSender = new SimpleMailSender(username, password, smtpHost, senderEmailAddr);
+        }
+        return simpleMailSender;
+    }
  
     /**
      * 获取简单系统邮件发送器

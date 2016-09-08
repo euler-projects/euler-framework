@@ -10,6 +10,7 @@ import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.IBaseService;
 import net.eulerform.web.module.basedata.entity.CodeTable;
+import net.eulerform.web.module.basedata.entity.EmailConfig;
 import net.eulerform.web.module.basedata.entity.Module;
 import net.eulerform.web.module.basedata.entity.Page;
 
@@ -52,5 +53,10 @@ public interface IBaseDataService extends IBaseService {
 
     @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
     public void deleteModule(Serializable id);
+
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    public void saveSystemEmail(EmailConfig emailConfig);
+
+    public EmailConfig findEmailConfig();
 
 }
