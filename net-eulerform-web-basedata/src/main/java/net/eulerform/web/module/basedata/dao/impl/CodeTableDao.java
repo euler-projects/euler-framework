@@ -16,8 +16,8 @@ import net.eulerform.web.module.basedata.entity.CodeTable;
 
 public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
     
-    private final static int JS_DICT_TYPE = 1;
-    private final static int PROPERTY_TYPE = 2;
+    public final static int JS_DICT_TYPE = 1;
+    public final static int PROPERTY_TYPE = 2;
 
     @Override
     public List<CodeTable> findAllCodeOrderByName() {
