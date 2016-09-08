@@ -9,6 +9,7 @@ import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.IBaseService;
 import net.eulerform.web.module.authentication.entity.Group;
+import net.eulerform.web.module.authentication.entity.IUserProfile;
 import net.eulerform.web.module.authentication.entity.User;
 
 public interface IUserService extends IBaseService {
@@ -39,6 +40,8 @@ public interface IUserService extends IBaseService {
     public List<User> findUserByNameOrCode(String nameOrCode);
 
     public void createUser(User user);
+
+    public void createUser(User user, IUserProfile userProfile);
     
     public void createUser(String username, String password);
 

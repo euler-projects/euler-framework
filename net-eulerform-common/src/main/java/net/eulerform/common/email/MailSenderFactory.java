@@ -22,10 +22,10 @@ public class MailSenderFactory {
      */
     public static SimpleMailSender getSimpleSystemMailSender() throws Exception {
         if (simpleSystemMailSender == null) {
-            String username = GlobalProperties.get("email.username");
-            String password = GlobalProperties.get("email.password");
+            String username = GlobalProperties.get("mail.username");
+            String password = GlobalProperties.get("mail.password");
             String smtp = GlobalProperties.get("mail.smtp.host");
-            String adminEmail = GlobalProperties.get("email.admin.email");
+            String adminEmail = GlobalProperties.get("mail.admin.email");
             simpleSystemMailSender = new SimpleMailSender(username, password, smtp, adminEmail);
         }
         return simpleSystemMailSender;
