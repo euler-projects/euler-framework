@@ -24,14 +24,14 @@ import net.eulerform.web.module.blog.service.IBlogService;
 
 @WebController
 @Scope("prototype")
-@RequestMapping("/blog/manage")
+@RequestMapping("/manage/blog")
 public class BlogManageWebController extends DefaultWebController {
 
     @Resource IBlogService blogService;
     
     @RequestMapping(value = "/blog", method = RequestMethod.GET)
     public String blog() {
-        return "/blog/manage/blog";
+        return "/manage/blog/blog";
     }
 
     @ResponseBody
