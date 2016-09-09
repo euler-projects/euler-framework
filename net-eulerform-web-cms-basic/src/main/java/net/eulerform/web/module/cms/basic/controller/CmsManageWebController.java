@@ -28,7 +28,7 @@ import net.eulerform.web.module.cms.basic.service.IPartnerService;
 
 @WebController
 @Scope("prototype")
-@RequestMapping("/cms/manage")
+@RequestMapping("/manage/cms")
 public class CmsManageWebController extends DefaultWebController {
 
     @Resource IPartnerService partnerService;
@@ -36,17 +36,17 @@ public class CmsManageWebController extends DefaultWebController {
     
     @RequestMapping(value = "/news", method = RequestMethod.GET)
     public String news() {
-        return "/cms/manage/news";
+        return "/manage/cms/news";
     }
     
     @RequestMapping(value = "/partner", method = RequestMethod.GET)
     public String partner() {
-        return "/cms/manage/partner";
+        return "/manage/cms/partner";
     }
     
     @RequestMapping(value = "/ueditor", method = RequestMethod.GET)
     public String ueditor() {
-        return "/cms/manage/ueditor";
+        return "/manage/cms/ueditor";
     }
     
     @ResponseBody

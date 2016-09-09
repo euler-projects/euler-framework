@@ -24,20 +24,20 @@ import net.eulerform.web.module.basedata.service.IBaseDataService;
 
 @WebController
 @Scope("prototype")
-@RequestMapping("/basedata")
-public class BaseDataWebController extends DefaultWebController {
+@RequestMapping("/manage/basedata")
+public class BaseDataManageWebController extends DefaultWebController {
     
     @Resource
     private IBaseDataService baseDataService;
     
     @RequestMapping(value ="/codeTable",method=RequestMethod.GET)
     public String codeTable(){
-        return "/basedata/codeTable";
+        return "/manage/basedata/codeTable";
     }
     
     @RequestMapping(value ="/module",method=RequestMethod.GET)
     public String module(){
-        return "/basedata/module";
+        return "/manage/basedata/module";
     }
     
     @ResponseBody

@@ -22,25 +22,25 @@ import net.eulerform.web.module.oauth2.service.IClientService;
 
 @WebController
 @Scope("prototype")
-@RequestMapping("/oauth2")
-public class Oauth2WebController extends DefaultWebController {
+@RequestMapping("/manage/oauth2")
+public class Oauth2ManageWebController extends DefaultWebController {
     
     @Resource
     private IClientService clientService;
     
     @RequestMapping(value ="/oauthClient",method=RequestMethod.GET)
     public String oauthClient(){
-        return "/oauth2/oauthClient";
+        return "/manage/oauth2/oauthClient";
     }
     
     @RequestMapping(value ="/oauthResource",method=RequestMethod.GET)
     public String oauthResource(){
-        return "/oauth2/oauthResource";
+        return "/manage/oauth2/oauthResource";
     }
     
     @RequestMapping(value ="/oauthScope",method=RequestMethod.GET)
     public String oauthScope(){
-        return "/oauth2/oauthScope";
+        return "/manage/oauth2/oauthScope";
     }
     
     @ResponseBody
