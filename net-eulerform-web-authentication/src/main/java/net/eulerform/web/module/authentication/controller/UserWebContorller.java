@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.exception.NotFoundException;
+import net.eulerform.web.module.authentication.entity.User;
 import net.eulerform.web.module.authentication.service.IUserService;
 
 @WebController
@@ -27,11 +28,19 @@ public class UserWebContorller extends DefaultWebController {
     {
         return "/authentication/signin";
     }
+    
     @RequestMapping(value = { "/signup" }, method = RequestMethod.GET)
     public String signup()
     {
         return "/authentication/signup";
     }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/signup" }, method = RequestMethod.POST)
+    public void signup(User user) {
+        this.userService.createUser(user);
+    }
+    
     @RequestMapping(value = { "/forgotpasswd" }, method = RequestMethod.GET)
     public String forgotpasswd()
     {
@@ -69,11 +78,5 @@ public class UserWebContorller extends DefaultWebController {
     {
         this.userService.forgotPasswordRWT(email);
         return "/authentication/signin";
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = { "/signUp" }, method = RequestMethod.POST)
-    public void signUp(String username, String password) {
-        this.userService.createUser(username, password);
     }
 }

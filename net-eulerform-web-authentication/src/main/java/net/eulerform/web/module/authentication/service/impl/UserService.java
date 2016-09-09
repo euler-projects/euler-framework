@@ -226,6 +226,7 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Override
     public void createUser(User user) {
+        BeanTool.clearEmptyProperty(user);
         if(user == null || StringTool.isNull(user.getUsername()) || StringTool.isNull(user.getPassword()))
             return;
         if(user.getPassword().length() < this.miniPasswordLength) {

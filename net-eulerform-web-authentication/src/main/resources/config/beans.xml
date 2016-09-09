@@ -30,6 +30,8 @@
     
     <bean id="userService" name="userDetailsService" class="net.eulerform.web.module.authentication.service.impl.UserService">
         <property name="passwordEncoder" ref="passwordEncoder"/>
+        <property name="enableEmailLogin" value="${local.enableEmailLogin}"/>
+        <property name="enableMobileLogin" value="${local.enableMobileLogin}"/>
         <property name="enableUserResetPassword" value="${local.enableUserResetPassword}"/>
         <property name="resetTokenURL" value="${local.resetTokenURL}"/>
         <property name="miniPasswordLength" value="${local.miniPasswordLength}"/>
