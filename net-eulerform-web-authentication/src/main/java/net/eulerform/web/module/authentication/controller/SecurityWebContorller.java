@@ -41,10 +41,20 @@ public class SecurityWebContorller extends DefaultWebController {
 	@Resource
 	private IAuthorityService authorityService;
 
-    @RequestMapping(value = { "/login" }, method = RequestMethod.GET)
+    @RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
     public String login()
     {
-        return "/authentication/login";
+        return "/authentication/signin";
+    }
+    @RequestMapping(value = { "/signup" }, method = RequestMethod.GET)
+    public String signup()
+    {
+        return "/authentication/signup";
+    }
+    @RequestMapping(value = { "/forgotpasswd" }, method = RequestMethod.GET)
+    public String forgotpasswd()
+    {
+        return "/authentication/forgotpasswd";
     }
     
     @RequestMapping(value = { "/resetPasswd/{userId}/{resetToken}" }, method = RequestMethod.GET)
@@ -73,12 +83,26 @@ public class SecurityWebContorller extends DefaultWebController {
         return "/authentication/login";
     }
     
-    @RequestMapping(value = { "/forgotPasswd" }, method = RequestMethod.POST)
-    public String forgotPasswd(String email)
+    @RequestMapping(value = { "/applyResetPasswd" }, method = RequestMethod.POST)
+    public String applyResetPasswd(String email)
     {
         this.userService.forgotPasswordRWT(email);
-        return "/authentication/login";
+        return "/authentication/signin";
     }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/signUp" }, method = RequestMethod.POST)
+    public void signUp(String username, String password) {
+        this.userService.createUser(username, password);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     
     @RequestMapping(value ="/user",method=RequestMethod.GET)
     public String user(){
@@ -146,12 +170,6 @@ public class SecurityWebContorller extends DefaultWebController {
         }
         this.userService.saveUser(user);
     }
-    
-    @ResponseBody
-    @RequestMapping(value = { "/signUp" }, method = RequestMethod.POST)
-    public void signUp(String username, String password) {
-        this.userService.createUser(username, password);
-    }    
 
     @ResponseBody
     @RequestMapping(value = { "/resetUserPassword" }, method = RequestMethod.POST)
