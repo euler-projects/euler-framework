@@ -40,6 +40,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     private String codeTableJsFilePath = "resources/scripts/lib/common-dict.js";
     private ObjectMapper objectMapper = new ObjectMapper();
     private String webRootRealPath;
+    
 
     @Override
     public void setWebRootRealPath(String webRootRealPath) {
@@ -78,7 +79,9 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         //contextPaht
         ServletContext sc = ContextLoader.getCurrentWebApplicationContext().getServletContext();
         String contextPath = sc.getContextPath();
-        sc.setAttribute("contextPath", contextPath);         
+        sc.setAttribute("contextPath", contextPath);
+        
+        sc.setAttribute("eulerformVersion", "1.0.1");
     }
 
     @Override
