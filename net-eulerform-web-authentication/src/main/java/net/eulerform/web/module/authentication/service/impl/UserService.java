@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 import net.eulerform.common.email.MailSenderFactory;
-import net.eulerform.common.email.SimpleMailSender;
+import net.eulerform.common.email.ThreadSimpleMailSender;
 import net.eulerform.common.util.BeanTool;
 import net.eulerform.common.util.StringTool;
 import net.eulerform.web.core.base.exception.IllegalParamException;
@@ -325,7 +325,7 @@ public class UserService extends BaseService implements IUserService, UserDetail
         this.userDao.update(user);
         String resetURL = resetTokenURL.replace("{userId}", userId).replace("{resetToken}", resetToken);
         System.out.println(resetURL);
-        SimpleMailSender simpleSystemMailSender;
+        ThreadSimpleMailSender threadSimpleSystemMailSender;
         try {
             String modelZhCn = "<p>请点击下面的链接重置您的密码，10分钟内有效</p>"
                     + "<p><a href=\"%1$s\">%2$s</a></p>"
@@ -336,8 +336,8 @@ public class UserService extends BaseService implements IUserService, UserDetail
                     + "<p>Send time: %3$tY/%<tm/%<td %<tH:%<tM:%<tS %<tZ</p>"
                     + "<p>This mail was sent from an system address. Please do not respond to this mail.</p>";
             String content = String.format(modelZhCn+"<br><br><br>"+modelEnUs, resetURL, resetURL, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-            simpleSystemMailSender = MailSenderFactory.getSimpleSystemMailSender();
-            simpleSystemMailSender.send("密码重置邮件 Please reset your password", content, email);
+            threadSimpleSystemMailSender = MailSenderFactory.getThreadSimpleMailSender();
+            threadSimpleSystemMailSender.send("密码重置邮件 Please reset your password", content, email);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

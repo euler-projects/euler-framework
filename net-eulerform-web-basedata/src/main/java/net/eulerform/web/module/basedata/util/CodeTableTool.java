@@ -1,14 +1,14 @@
 package net.eulerform.web.module.basedata.util;
 
-import net.eulerform.web.module.basedata.entity.EmailConfig;
+import net.eulerform.common.email.EmailConfig;
 import net.eulerform.web.module.basedata.service.IBaseDataService;
 
-public class CodeTable {
+public class CodeTableTool {
 
     private static IBaseDataService baseDataService;    
     
     public void setBaseDataService(IBaseDataService baseDataService) {
-        CodeTable.baseDataService = baseDataService;
+        CodeTableTool.baseDataService = baseDataService;
     }
 
     public static String findConfig(String key) {

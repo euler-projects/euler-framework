@@ -1,11 +1,9 @@
 package net.eulerform.common.email;
 
 import net.eulerform.common.util.GlobalProperties;
+import net.eulerform.common.util.GlobalPropertyReadException;
 
 /**
- * 发件箱工厂
- * 
- * @author MZULE
  * 
  */
 public class MailSenderFactory {
@@ -14,42 +12,57 @@ public class MailSenderFactory {
      * 服务邮箱
      */
     private static SimpleMailSender simpleSystemMailSender = null;
-    
-    private SimpleMailSender simpleMailSender = null;
-    
-    private String username;
-    private String password;
-    private String smtpHost;
-    private String senderEmailAddr;
-    
-    public MailSenderFactory(String username, String password, String smtpHost, String senderEmailAddr) {
-        this.username = username;
-        this.password = password;
-        this.smtpHost = smtpHost;
-        this.senderEmailAddr = senderEmailAddr;
-    }
-    
-    public SimpleMailSender getSimpleMailSender() throws Exception {
-        if (simpleMailSender == null) {
-            simpleMailSender = new SimpleMailSender(username, password, smtpHost, senderEmailAddr);
-        }
-        return simpleMailSender;
-    }
+    private static ThreadSimpleMailSender threadSimpleSystemMailSender = null;
  
     /**
-     * 获取简单系统邮件发送器
-     * @return
-     * @throws Exception
+     * 获取简单系统邮件发送器<br>
+     * 需要classpath:config.properties<br>
+     * <code>mail.username</code>登录名<br>
+     * <code>mail.password</code>密码<br>
+     * <code>mail.smtp</code>SMTP服务器地址<br>
+     * <code>mail.sender</code>系统发件箱<br>
+     * <code>mail.defaultReceiver</code>系统收件箱<br>
+     * @return {@link SimpleMailSender}
+     * @throws GlobalPropertyReadException
      */
-    public static SimpleMailSender getSimpleSystemMailSender() throws Exception {
+    public static SimpleMailSender getSimpleSystemMailSender() throws GlobalPropertyReadException {
         if (simpleSystemMailSender == null) {
-            String username = GlobalProperties.get("mail.username");
-            String password = GlobalProperties.get("mail.password");
-            String smtp = GlobalProperties.get("mail.smtp.host");
-            String adminEmail = GlobalProperties.get("mail.admin.email");
-            simpleSystemMailSender = new SimpleMailSender(username, password, smtp, adminEmail);
+            String username = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_UESRNAME);
+            String password = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_PASSWORD);
+            String smtp = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SMTP);
+            String sender = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SYS_SENDER);
+            String defaultReceiver = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_DEFAULT_RECEIVER);
+            EmailConfig config = new EmailConfig();
+            config.setUsername(username);
+            config.setPassword(password);
+            config.setDefaultReceiver(defaultReceiver);
+            config.setSmtp(smtp);
+            config.setSender(sender);
+            simpleSystemMailSender = new SimpleMailSender(config);
         }
         return simpleSystemMailSender;
+    }
+    
+    public static ThreadSimpleMailSender getThreadSimpleMailSender() throws GlobalPropertyReadException {
+        if (threadSimpleSystemMailSender == null) {
+            String username = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_UESRNAME);
+            String password = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_PASSWORD);
+            String smtp = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SMTP);
+            String sender = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SYS_SENDER);
+            String defaultReceiver = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_DEFAULT_RECEIVER);
+            EmailConfig config = new EmailConfig();
+            config.setUsername(username);
+            config.setPassword(password);
+            config.setDefaultReceiver(defaultReceiver);
+            config.setSmtp(smtp);
+            config.setSender(sender);
+            threadSimpleSystemMailSender = new ThreadSimpleMailSender(config);
+        }
+        return threadSimpleSystemMailSender;
+    }
+    
+    public static ThreadSimpleMailSender getThreadSimpleMailSenderUseEmailConfig(EmailConfig config) {
+        return new ThreadSimpleMailSender(config);
     }
  
     public static void main(String[] args) throws Exception {
