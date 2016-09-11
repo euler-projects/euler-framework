@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import net.eulerform.common.email.EmailConfig;
 import net.eulerform.web.core.annotation.WebController;
 import net.eulerform.web.core.base.controller.DefaultWebController;
 import net.eulerform.web.core.base.request.QueryRequest;
@@ -38,6 +39,11 @@ public class BaseDataManageWebController extends DefaultWebController {
     @RequestMapping(value ="/module",method=RequestMethod.GET)
     public String module(){
         return "/manage/basedata/module";
+    }
+
+    @RequestMapping(value = "/emailConfig", method = RequestMethod.GET)
+    public String emailConfig() {
+        return "/manage/basedata/emailConfig";
     }
     
     @ResponseBody
@@ -103,6 +109,18 @@ public class BaseDataManageWebController extends DefaultWebController {
     @RequestMapping(value ="/deletePage", method = RequestMethod.POST)
     public void deletePage(@RequestParam String id) {
         this.baseDataService.deletePage(id);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/saveEmailConfig")
+    public void saveEmailConfig(@Valid EmailConfig emailConfig) {
+        this.baseDataService.saveSystemEmail(emailConfig);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/loadEmailConfig")
+    public EmailConfig loadEmailConfig() {
+        return this.baseDataService.findEmailConfig();
     }
     
 }

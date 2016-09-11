@@ -16,7 +16,7 @@ public class CodeTableBootstrap implements WebApplicationInitializer {
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
-        log.info("Executing CodeTable bootstrap.");
+        log.info("Executing CodeTableTool bootstrap.");
         container.addListener(new BaseDataListener());
     }
 }

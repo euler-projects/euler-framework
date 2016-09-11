@@ -20,7 +20,7 @@ import net.eulerform.web.core.base.entity.UUIDEntity;
 public class CodeTable extends UUIDEntity<CodeTable> {
 
     @NotNull
-    @Pattern(regexp="[a-z][a-zA-Z0-9]*", message="{validation.codeTable.name}")
+    @Pattern(regexp="[a-z][a-zA-Z0-9_]*", message="{validation.codeTable.name}")
     @Column(name = "CODE_NAME", nullable = false)
     private String name;
     @NotNull

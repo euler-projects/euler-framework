@@ -20,8 +20,6 @@ import javax.mail.internet.MimeMessage.RecipientType;
  * 
  */
 public class SimpleMailSender {
-    
-    private String senderEmailAddr;
 
     /**
      * 发送邮件的props文件
@@ -36,47 +34,16 @@ public class SimpleMailSender {
      * 邮箱session
      */
     private transient Session session;
-
-    /**
-     * 初始化邮件发送器
-     * 
-     * @param smtpHostName
-     *            SMTP邮件服务器地址
-     * @param username
-     *            发送邮件的用户名(地址)
-     * @param password
-     *            发送邮件的密码
-     */
-    public SimpleMailSender(final String username, final String password, final String smtpHostName, final String senderEmailAddr) {
-        init(username, password, smtpHostName);
-        this.senderEmailAddr = senderEmailAddr;
+    
+    private final String senderEmailAddr;
+    private final String defaultReceiver;
+    
+    public SimpleMailSender(EmailConfig emailConfig) {
+        init(emailConfig.getUsername(), emailConfig.getPassword(), emailConfig.getSmtp());
+        this.senderEmailAddr = emailConfig.getSender();
+        this.defaultReceiver = emailConfig.getDefaultReceiver();
     }
-
-    /**
-     * 初始化邮件发送器
-     * 
-     * @param username
-     *            发送邮件的用户名(地址)，并以此解析SMTP服务器地址
-     * @param password
-     *            发送邮件的密码
-     */
-    public SimpleMailSender(final String username, final String password) {
-        // 通过邮箱地址解析出smtp服务器，对大多数邮箱都管用
-        final String smtpHostName = "smtp." + username.split("@")[1];
-        init(username, password, smtpHostName);
-
-    }
-
-    /**
-     * 初始化
-     * 
-     * @param username
-     *            发送邮件的用户名(地址)
-     * @param password
-     *            密码
-     * @param smtpHostName
-     *            SMTP主机地址
-     */
+    
     private void init(String username, String password, String smtpHostName) {
         // 初始化props
         props.put("mail.smtp.auth", "true");
@@ -112,6 +79,10 @@ public class SimpleMailSender {
         message.setContent(content.toString(), "text/html;charset=utf-8");
         // 发送
         Transport.send(message);
+    }
+    
+    public void sendToDefaultReceiver(String subject, Object content) throws AddressException, MessagingException {
+        this.send(subject, content, this.defaultReceiver);
     }
 
     /**
@@ -159,21 +130,7 @@ public class SimpleMailSender {
      */
     public void send(String subject, Object content, Collection<String> receivers)
             throws AddressException, MessagingException {
-        // 创建mime类型邮件
-        final MimeMessage message = new MimeMessage(session);
-        // 设置发信人
-        message.setFrom(new InternetAddress(this.senderEmailAddr));
-        Set<InternetAddress> addresses = new HashSet<>();
-        for (String receiver : receivers) {
-            addresses.add(new InternetAddress(receiver));
-        }
-        message.setRecipients(RecipientType.TO, addresses.toArray(new InternetAddress[0]));
-        // 设置主题
-        message.setSubject(subject);
-        // 设置邮件内容
-        message.setContent(content.toString(), "text/html;charset=utf-8");
-        // 发送
-        Transport.send(message);
+        this.send(subject, content, receivers.toArray(new String[0]));
     }
 
 }

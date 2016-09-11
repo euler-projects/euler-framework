@@ -13,6 +13,7 @@ import org.springframework.web.context.ContextLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.eulerform.common.email.EmailConfig;
 import net.eulerform.common.util.FileReader;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
@@ -23,7 +24,6 @@ import net.eulerform.web.module.basedata.dao.IModuleDao;
 import net.eulerform.web.module.basedata.dao.IPageDao;
 import net.eulerform.web.module.basedata.dao.impl.CodeTableDao;
 import net.eulerform.web.module.basedata.entity.CodeTable;
-import net.eulerform.web.module.basedata.entity.EmailConfig;
 import net.eulerform.web.module.basedata.entity.Module;
 import net.eulerform.web.module.basedata.entity.Page;
 import net.eulerform.web.module.basedata.service.IBaseDataService;
@@ -252,21 +252,23 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     private final ObjectCache<String, EmailConfig> mailConfigCache = new ObjectCache<>(86_400_000L);//所有配置缓存一天
     @Override
     public void saveSystemEmail(EmailConfig mailConfig) {
-        String username = mailConfig.getUsername();
-        String password = mailConfig.getPassword();
-        String smtp = mailConfig.getSmtp();
-        String sender = mailConfig.getSender();
+        String username = mailConfig.getUsername().toLowerCase().trim();
+        String password = mailConfig.getPassword().trim();
+        String smtp = mailConfig.getSmtp().toLowerCase().trim();
+        String sender = mailConfig.getSender().toLowerCase().trim();
+        String defaultReceiver = mailConfig.getDefaultReceiver().toLowerCase().trim();
         
-        CodeTable usernameCode = this.codeTableDao.findConfig("sysEmaiUsername");
-        CodeTable passwordCode = this.codeTableDao.findConfig("sysEmaiPassword");
-        CodeTable smtpCode = this.codeTableDao.findConfig("sysEmaiSmtp");
-        CodeTable senderCode = this.codeTableDao.findConfig("sysEmaiSender");
+        CodeTable usernameCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_UESRNAME);
+        CodeTable passwordCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_PASSWORD);
+        CodeTable smtpCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_SMTP);
+        CodeTable senderCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_SYS_SENDER);
+        CodeTable defaultReceiverCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER);
         
         if(usernameCode == null){
             usernameCode = new CodeTable();
             usernameCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            usernameCode.setKey("sysEmaiUsername");
-            usernameCode.setName("sysEmaiUsername");
+            usernameCode.setKey(EmailConfig.DB_CONFIG_KEY_UESRNAME);
+            usernameCode.setName(EmailConfig.DB_CONFIG_KEY_UESRNAME);
             usernameCode.setValue(username);
         } else {
             usernameCode.setValue(username);
@@ -274,8 +276,8 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         if(passwordCode == null){
             passwordCode = new CodeTable();
             passwordCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            passwordCode.setKey("sysEmaiPassword");
-            passwordCode.setName("sysEmaiPassword");
+            passwordCode.setKey(EmailConfig.DB_CONFIG_KEY_PASSWORD);
+            passwordCode.setName(EmailConfig.DB_CONFIG_KEY_PASSWORD);
             passwordCode.setValue(password);
         } else {
             passwordCode.setValue(password);
@@ -283,8 +285,8 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         if(smtpCode == null){
             smtpCode = new CodeTable();
             smtpCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            smtpCode.setKey("sysEmaiSmtp");
-            smtpCode.setName("sysEmaiSmtp");
+            smtpCode.setKey(EmailConfig.DB_CONFIG_KEY_SMTP);
+            smtpCode.setName(EmailConfig.DB_CONFIG_KEY_SMTP);
             smtpCode.setValue(smtp);
         } else {
             smtpCode.setValue(smtp);
@@ -292,19 +294,33 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         if(senderCode == null){
             senderCode = new CodeTable();
             senderCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            senderCode.setKey("sysEmaiSender");
-            senderCode.setName("sysEmaiSender");
+            senderCode.setKey(EmailConfig.DB_CONFIG_KEY_SYS_SENDER);
+            senderCode.setName(EmailConfig.DB_CONFIG_KEY_SYS_SENDER);
             senderCode.setValue(sender);
         } else {
             senderCode.setValue(sender);
+        }
+        if(defaultReceiverCode == null){
+            defaultReceiverCode = new CodeTable();
+            defaultReceiverCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
+            defaultReceiverCode.setKey(EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER);
+            defaultReceiverCode.setName(EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER);
+            defaultReceiverCode.setValue(defaultReceiver);
+        } else {
+            defaultReceiverCode.setValue(defaultReceiver);
         }
         
         this.codeTableDao.saveOrUpdate(usernameCode);
         this.codeTableDao.saveOrUpdate(passwordCode);
         this.codeTableDao.saveOrUpdate(smtpCode);
         this.codeTableDao.saveOrUpdate(senderCode);
-        mailConfigCache.put("1", this.findEmailConfig());
+        this.codeTableDao.saveOrUpdate(defaultReceiverCode);
+        mailConfigCache.put("1", this.findEmailConfigFromDB());
         
+    }
+
+    private EmailConfig findEmailConfigFromDB() {
+        return this.codeTableDao.findSysEmailConfig();
     }
 
     @Override
@@ -313,20 +329,8 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         if(config != null) {
             return config;
         }
-        CodeTable usernameCode = this.codeTableDao.findConfig("sysEmaiUsername");
-        CodeTable passwordCode = this.codeTableDao.findConfig("sysEmaiPassword");
-        CodeTable smtpCode = this.codeTableDao.findConfig("sysEmaiSmtp");
-        CodeTable senderCode = this.codeTableDao.findConfig("sysEmaiSender");
         
-
-        if(usernameCode == null || passwordCode == null || smtpCode == null || senderCode == null)
-            return null;
-        
-        EmailConfig emailConfig = new EmailConfig();
-        emailConfig.setUsername(usernameCode.getValue());
-        emailConfig.setPassword(passwordCode.getValue());
-        emailConfig.setSmtp(smtpCode.getValue());
-        emailConfig.setSender(senderCode.getValue());
+        EmailConfig emailConfig = this.findEmailConfigFromDB();
         mailConfigCache.put("1", emailConfig);
         return emailConfig;
     }
