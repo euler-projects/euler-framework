@@ -10,7 +10,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.annotation.Resource;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
