@@ -1,6 +1,8 @@
 package net.eulerform.web.module.authentication.controller;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.ui.Model;
@@ -37,7 +39,7 @@ public class UserWebContorller extends DefaultWebController {
     
     @ResponseBody
     @RequestMapping(value = { "/signup" }, method = RequestMethod.POST)
-    public void signup(User user) {
+    public void signup(@Valid User user) {
         this.userService.createUser(user);
     }
     

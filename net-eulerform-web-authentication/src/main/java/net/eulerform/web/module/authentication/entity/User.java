@@ -13,6 +13,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.security.core.CredentialsContainer;
@@ -53,8 +54,10 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         SYSTEM_USER.setCredentialsNonExpired(true);
     }
 
+    @NotNull
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
+    @NotNull
     @Column(name = "EMAIL", nullable = true, unique = true)
     private String email;
     @Column(name = "MOBILE", nullable = true, unique = true)
