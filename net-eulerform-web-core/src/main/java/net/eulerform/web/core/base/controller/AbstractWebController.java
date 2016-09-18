@@ -26,6 +26,7 @@ public abstract class AbstractWebController extends BaseController {
      */
     @ExceptionHandler({AccessDeniedException.class})   
     public HttpStatusResponse accessDeniedException(AccessDeniedException e) {
+        e.printStackTrace();
         throw e;
     }
     
