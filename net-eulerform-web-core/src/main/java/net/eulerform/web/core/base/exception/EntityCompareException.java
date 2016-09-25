@@ -1,8 +1,7 @@
 package net.eulerform.web.core.base.exception;
 
+@SuppressWarnings("serial")
 public class EntityCompareException extends RuntimeException {
-
-    private static final long serialVersionUID = 531286401255349009L;
 
     public EntityCompareException() {
         super();
