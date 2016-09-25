@@ -4,9 +4,9 @@
     <parent>
         <groupId>net.eulerform</groupId>
         <artifactId>net-eulerform</artifactId>
-        <version>0.1.0</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
-    <artifactId>net-eulerform-web-authentication</artifactId>
+    <artifactId>net-eulerform-web-oauth2-server</artifactId>
 
     <dependencies>
         <dependency>
@@ -20,7 +20,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>net-eulerform-web-core</artifactId>
+            <artifactId>net-eulerform-web-authentication</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

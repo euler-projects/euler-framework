@@ -1,28 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.eulerform</groupId>
         <artifactId>net-eulerform</artifactId>
-        <version>0.1.0</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
-    <artifactId>net-eulerform-web-authentication</artifactId>
-
+    <artifactId>net-eulerform-common</artifactId>
+    <name>net.eulerform.common</name>
+    <description>eulerform's common tools</description>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet.jsp</groupId>
-            <artifactId>jsp-api</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>net-eulerform-web-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.1</version>
         </dependency>
+        
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+        </dependency>
+        <dependency >  
+            <groupId >com.sun.mail</groupId >  
+            <artifactId >javax.mail</artifactId >  
+            <version >1.5.4 </version >  
+        </dependency >
     </dependencies>
     
     <build>

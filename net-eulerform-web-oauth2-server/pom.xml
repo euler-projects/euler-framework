@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.eulerform</groupId>
         <artifactId>net-eulerform</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
     <artifactId>net-eulerform-web-oauth2-server</artifactId>
 
