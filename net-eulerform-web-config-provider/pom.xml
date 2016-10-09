@@ -5,11 +5,9 @@
     <parent>
         <groupId>net.eulerform</groupId>
         <artifactId>net-eulerform</artifactId>
-        <version>0.1.0</version>
+        <version>0.1.1</version>
     </parent>
     <artifactId>net-eulerform-web-config-provider</artifactId>
-    <name>net.eulerform.config-provider</name>
-    <description>net.eulerform.config-provider</description>
 
     <dependencies>
         <dependency>
