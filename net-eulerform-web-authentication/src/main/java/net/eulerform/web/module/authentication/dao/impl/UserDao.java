@@ -11,6 +11,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import net.eulerform.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerform.common.util.StringTool;
 import net.eulerform.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerform.web.core.base.request.QueryRequest;
@@ -83,15 +84,19 @@ public class UserDao extends BaseDao<User> implements IUserDao {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("username");
             if (!StringTool.isNull(queryValue)) {
-                detachedCriteria.add(Restrictions.like("username", queryValue, MatchMode.ANYWHERE).ignoreCase());
+                detachedCriteria.add(RestrictionsX.like("username", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("empName");
             if (!StringTool.isNull(queryValue)) {
-                detachedCriteria.add(Restrictions.like("empName", queryValue, MatchMode.ANYWHERE).ignoreCase());
+                detachedCriteria.add(RestrictionsX.like("empName", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("enabled");
             if (!StringTool.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("enabled", Boolean.parseBoolean(queryValue)));
+            }
+            queryValue = queryRequest.getQueryValue("nation");
+            if (!StringTool.isNull(queryValue)) {
+                detachedCriteria.add(RestrictionsX.like("nation", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("accountNonExpired");
             if (!StringTool.isNull(queryValue)) {
