@@ -6,3 +6,5 @@ target/
 config.properties
 node_modules
 
+.idea/
+*.iml
