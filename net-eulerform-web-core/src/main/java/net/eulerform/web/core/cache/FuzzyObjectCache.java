@@ -45,7 +45,7 @@ import java.util.Set;
  * 
  * @see net.eulerform.web.core.cache.DefaultObjectCache
  */
-public class FuzzyObjectCache<DATA_T> extends ObjectCache<String, DATA_T> {
+public class FuzzyObjectCache<DATA_T> extends DefaultObjectCache<String, DATA_T> {
 
     /**
      * 新建缓存对象,默认数据生命周期为0s
@@ -108,7 +108,7 @@ public class FuzzyObjectCache<DATA_T> extends ObjectCache<String, DATA_T> {
         if(this.dataLife <= 0)
             return false;
         
-        if (this.cacheWritelock.tryLock()) {
+        if (this.cacheWriteLock.tryLock()) {
             try {
                 Map<String, DataStore<DATA_T>> dataStoreMap = new HashMap<>();
                 
@@ -122,7 +122,7 @@ public class FuzzyObjectCache<DATA_T> extends ObjectCache<String, DATA_T> {
                 this.dataMap.putAll(dataStoreMap);
                 return true;
             } finally {
-                this.cacheWritelock.unlock();
+                this.cacheWriteLock.unlock();
             }
         }
         
