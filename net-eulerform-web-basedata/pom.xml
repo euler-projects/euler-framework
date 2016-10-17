@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.eulerform</groupId>
         <artifactId>net-eulerform</artifactId>
-        <version>0.1.1</version>
+        <version>1.1.2</version>
     </parent>
     <artifactId>net-eulerform-web-basedata</artifactId>
 

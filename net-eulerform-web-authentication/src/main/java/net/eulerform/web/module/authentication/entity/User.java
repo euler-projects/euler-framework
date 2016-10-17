@@ -1,26 +1,17 @@
 package net.eulerform.web.module.authentication.entity;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import net.eulerform.web.core.base.entity.UUIDEntity;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import net.eulerform.web.core.base.entity.UUIDEntity;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @Entity
@@ -68,6 +59,10 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private String fullName;
     @Column(name = "NATION")
     private String nation;
+    @Column(name = "SEX")
+    private String sex;
+    @Column(name = "D1")
+    private String d1;
     @Column(name = "ENABLED", nullable = false)
     private Boolean enabled;
     @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
@@ -111,6 +106,22 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public String getNation() {
         return nation;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    public String getD1() {
+        return d1;
+    }
+
+    public void setD1(String d1) {
+        this.d1 = d1;
     }
 
     public String getPassword() {
