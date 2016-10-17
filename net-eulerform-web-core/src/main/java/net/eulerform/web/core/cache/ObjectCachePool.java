@@ -45,12 +45,17 @@ public class ObjectCachePool {
 
     public static void clean() {
         for(AbstractObjectCache cache : CACHE_POOL) {
-            cache.clean();
+            if(cache.isEnable())
+                cache.clean();
         }
     }
 
-    public static void add(AbstractObjectCache exampleClass){
-        CACHE_POOL.add(exampleClass);
+    public static void add(AbstractObjectCache cache){
+        CACHE_POOL.add(cache);
+    }
+
+    public static void remove(AbstractObjectCache cache){
+        CACHE_POOL.remove(cache);
     }
 
     public static <KEY_T, DATA_T> DefaultObjectCache<KEY_T, DATA_T> generateDefaultObjectCache(long dataLife) {
