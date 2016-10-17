@@ -1,9 +1,10 @@
 package net.eulerform.web.module.authentication.util;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import net.eulerform.common.util.GlobalProperties;
+import net.eulerform.common.util.GlobalPropertyReadException;
+import net.eulerform.web.core.cache.DefaultObjectCache;
+import net.eulerform.web.module.authentication.entity.User;
+import net.eulerform.web.module.authentication.service.IUserService;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.CredentialsContainer;
@@ -12,11 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import net.eulerform.common.util.GlobalProperties;
-import net.eulerform.common.util.GlobalPropertyReadException;
-import net.eulerform.web.core.cache.ObjectCache;
-import net.eulerform.web.module.authentication.entity.User;
-import net.eulerform.web.module.authentication.service.IUserService;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserContext {
 
@@ -34,9 +33,9 @@ public class UserContext {
 
     private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSeconds";
 
-    private final static ObjectCache<String, User> USER_CACHE = new ObjectCache<>(24 * 60 * 60 * 1000);
+    private final static DefaultObjectCache<String, User> USER_CACHE = new DefaultObjectCache<>(24 * 60 * 60 * 1000);
 
-    private final static ObjectCache<Serializable, User> USER_CACHE_ID = new ObjectCache<>(24 * 60 * 60 * 1000);
+    private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = new DefaultObjectCache<>(24 * 60 * 60 * 1000);
 
     static {
         try {

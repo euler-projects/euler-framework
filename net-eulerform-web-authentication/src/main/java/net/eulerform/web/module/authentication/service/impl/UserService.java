@@ -1,21 +1,5 @@
 package net.eulerform.web.module.authentication.service.impl;
 
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.Assert;
-
 import net.eulerform.common.email.MailSenderFactory;
 import net.eulerform.common.email.ThreadSimpleMailSender;
 import net.eulerform.common.util.BeanTool;
@@ -26,7 +10,7 @@ import net.eulerform.web.core.base.exception.ResourceExistException;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
-import net.eulerform.web.core.cache.ObjectCache;
+import net.eulerform.web.core.cache.DefaultObjectCache;
 import net.eulerform.web.core.i18n.Tag;
 import net.eulerform.web.module.authentication.dao.IGroupDao;
 import net.eulerform.web.module.authentication.dao.IUserDao;
@@ -35,6 +19,15 @@ import net.eulerform.web.module.authentication.entity.IUserProfile;
 import net.eulerform.web.module.authentication.entity.User;
 import net.eulerform.web.module.authentication.service.IUserProfileService;
 import net.eulerform.web.module.authentication.service.IUserService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.Assert;
+
+import javax.annotation.Resource;
+import java.io.Serializable;
+import java.util.*;
 
 public class UserService extends BaseService implements IUserService, UserDetailsService {
 
@@ -62,9 +55,9 @@ public class UserService extends BaseService implements IUserService, UserDetail
     private boolean enableEmailLogin = false;
     private boolean enableMobileLogin = false;
     private boolean enableCache = false;
-    private final static ObjectCache<String, User> USER_CAHCE = new ObjectCache<>(10_000L);
+    private final static DefaultObjectCache<String, User> USER_CAHCE = new DefaultObjectCache<>(10_000L);
     
-    public void setEnableEmailLogin(boolean enableEmailLogin) {
+    public void seEmailLogin(boolean enableEmailLogin) {
         this.enableEmailLogin = enableEmailLogin;
     }
 

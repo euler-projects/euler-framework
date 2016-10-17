@@ -29,22 +29,39 @@
  */
 package net.eulerform.web.core.cache;
 
-import java.util.Date;
+/**
+ * Created by cFrost on 16/10/17.
+ */
+public class CacheTimerObjectCache<KEY_T, DATA_T> extends AbstractObjectCache<KEY_T, DATA_T> {
 
-public class DataStore<T> {
-    private final T data;
-    private final long addTime;
+    protected CacheTimer<DATA_T> cahceTimer;
 
-    public DataStore(T data) {
-        this.data = data;
-        this.addTime = new Date().getTime();
+    public void setCahceTimer(CacheTimer<DATA_T> cahceTimer) {
+        this.cahceTimer = cahceTimer;
     }
 
-    public T getData() {
-        return data;
+    public CacheTimerObjectCache() {
     }
 
-    public long getAddTime() {
-        return addTime;
+    public CacheTimerObjectCache(CacheTimer<DATA_T> cahceTimer) {
+        this.cahceTimer = cahceTimer;
+    }
+
+    @Override
+    public boolean isTimeout(DataStore<DATA_T> storedData) {
+        if(storedData == null) {
+            return true;
+        }
+
+        return this.cahceTimer.isTimeout(storedData.getData(), storedData.getAddTime());
+    }
+
+    @Override
+    public boolean isEnable() {
+        return this.cahceTimer == null ? false : true;
+    }
+
+    public interface CacheTimer<T> {
+        boolean isTimeout(T data, long addTime);
     }
 }

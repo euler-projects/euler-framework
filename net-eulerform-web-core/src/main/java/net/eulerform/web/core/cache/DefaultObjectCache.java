@@ -31,20 +31,35 @@ package net.eulerform.web.core.cache;
 
 import java.util.Date;
 
-public class DataStore<T> {
-    private final T data;
-    private final long addTime;
+/**
+ * Created by cFrost on 16/10/17.
+ */
+public class DefaultObjectCache<KEY_T, DATA_T> extends AbstractObjectCache<KEY_T, DATA_T> {
 
-    public DataStore(T data) {
-        this.data = data;
-        this.addTime = new Date().getTime();
+    protected long dataLife;
+
+    public void setDataLife(long dataLife) {
+        this.dataLife = dataLife;
     }
 
-    public T getData() {
-        return data;
+    public DefaultObjectCache() {
     }
 
-    public long getAddTime() {
-        return addTime;
+    public DefaultObjectCache(long dataLife) {
+        this.dataLife = dataLife;
+    }
+
+    @Override
+    public boolean isTimeout(DataStore<DATA_T> storedData) {
+        if(storedData == null || new Date().getTime() - storedData.getAddTime() >= this.dataLife) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isEnable() {
+        return this.dataLife > 0 ? true : false;
     }
 }
