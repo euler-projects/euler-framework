@@ -1,22 +1,11 @@
 package net.eulerform.web.module.oauth2.service.impl;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.util.Assert;
-
 import net.eulerform.common.util.BeanTool;
 import net.eulerform.common.util.StringTool;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
-import net.eulerform.web.core.cache.ObjectCache;
+import net.eulerform.web.core.cache.DefaultObjectCache;
 import net.eulerform.web.module.oauth2.dao.IClientDao;
 import net.eulerform.web.module.oauth2.dao.IResourceDao;
 import net.eulerform.web.module.oauth2.dao.IScopeDao;
@@ -25,6 +14,16 @@ import net.eulerform.web.module.oauth2.entity.GrantType;
 import net.eulerform.web.module.oauth2.entity.Resource;
 import net.eulerform.web.module.oauth2.entity.Scope;
 import net.eulerform.web.module.oauth2.service.IClientService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.util.Assert;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ClientService extends BaseService implements IClientService, ClientDetailsService {
 
@@ -33,7 +32,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IScopeDao scopeDao;
     
     private boolean cacheEnabled = false;
-    private final static ObjectCache<String, Client> CLIENT_CACHE = new ObjectCache<>(60_000L);
+    private final static DefaultObjectCache<String, Client> CLIENT_CACHE = new DefaultObjectCache<>(60_000L);
 
     private PasswordEncoder passwordEncoder;
 

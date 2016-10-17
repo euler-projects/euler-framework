@@ -1,24 +1,12 @@
 package net.eulerform.web.module.basedata.service.impl;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-
-import org.springframework.web.context.ContextLoader;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.eulerform.common.email.EmailConfig;
 import net.eulerform.common.util.FileReader;
 import net.eulerform.web.core.base.request.QueryRequest;
 import net.eulerform.web.core.base.response.PageResponse;
 import net.eulerform.web.core.base.service.impl.BaseService;
-import net.eulerform.web.core.cache.ObjectCache;
+import net.eulerform.web.core.cache.DefaultObjectCache;
 import net.eulerform.web.module.basedata.dao.ICodeTableDao;
 import net.eulerform.web.module.basedata.dao.IModuleDao;
 import net.eulerform.web.module.basedata.dao.IPageDao;
@@ -27,10 +15,19 @@ import net.eulerform.web.module.basedata.entity.CodeTable;
 import net.eulerform.web.module.basedata.entity.Module;
 import net.eulerform.web.module.basedata.entity.Page;
 import net.eulerform.web.module.basedata.service.IBaseDataService;
+import org.springframework.web.context.ContextLoader;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BaseDataService extends BaseService implements IBaseDataService {
     
-    private final ObjectCache<String, CodeTable> allConfigs = new ObjectCache<>(86_400_000L);//所有配置缓存一天
+    private final DefaultObjectCache<String, CodeTable> allConfigs = new DefaultObjectCache<>(86_400_000L);//所有配置缓存一天
     
     private ICodeTableDao codeTableDao;
     
@@ -249,7 +246,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         }
     }
 
-    private final ObjectCache<String, EmailConfig> mailConfigCache = new ObjectCache<>(86_400_000L);//所有配置缓存一天
+    private final DefaultObjectCache<String, EmailConfig> mailConfigCache = new DefaultObjectCache<>(86_400_000L);//所有配置缓存一天
     @Override
     public void saveSystemEmail(EmailConfig mailConfig) {
         String username = mailConfig.getUsername().toLowerCase().trim();

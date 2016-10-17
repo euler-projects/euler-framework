@@ -43,7 +43,7 @@ import java.util.Set;
  *
  * @param <DATA_T> 缓存对象类型
  * 
- * @see net.eulerform.web.core.cache.ObjectCache
+ * @see net.eulerform.web.core.cache.DefaultObjectCache
  */
 public class FuzzyObjectCache<DATA_T> extends ObjectCache<String, DATA_T> {
 
