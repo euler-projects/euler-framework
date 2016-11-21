@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.eulerform</groupId>
     <artifactId>net-eulerform</artifactId>
-    <version>1.1.2</version>
+    <version>0.1.2</version>
     <packaging>pom</packaging>
     <name>eulerform.net</name>
     <description>eulerform.net</description>
@@ -372,11 +372,13 @@
     <distributionManagement>
         <repository>
             <id>releases</id>
-            <url>http://nexus.cfrost.net/content/repositories/releases/</url>
+            <url>http://nexus.cfrost.net:8081/repository/maven-releases/</url>
+            <!--<url>http://nexus.cfrost.net/content/repositories/releases/</url>-->
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
-            <url>http://nexus.cfrost.net/content/repositories/snapshots/</url>
+            <url>http://nexus.cfrost.net:8081/repository/maven-snapshots/</url>
+            <!--<url>http://nexus.cfrost.net/content/repositories/snapshots/</url>-->
         </snapshotRepository>
     </distributionManagement>
 
