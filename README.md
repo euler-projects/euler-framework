@@ -4,6 +4,7 @@ A simple web form base Spring MVC
 ## version 0.1.1
 * CMS module
 * BLOG module
+
 ## version 0.1.0
 * Basic module
 * Local authentication
