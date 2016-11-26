@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title></title>
+</head>
+
+<body>
+
+    <h2>Hello World!</h2>
+    <h3>Request Test</h3>
+    <input id="requestUrl">
+    <select id="requestMethod">
+      <option value ="GET">GET</option>
+      <option value ="POST">POST</option>
+    </select>
+    <select id="accpet">
+      <option value ="application/json">application/json</option>
+      <option value ="application/xml">application/xml</option>
+      <option value ="NULL">空</option>
+    </select>
+    <input type="button" value="test" onclick="ajax()"><br>
+    <h3>Create User</h3>
+    username: <input type="text" id="username">
+    password: <input type="password" id="password">
+    <input type="button" id="createUser" value="createUser" onClick="createUser()"><br>
+    <h3>Create Group</h3>
+    name: <input type="text" id="group_name">
+    desp: <input type="text" id="group_desp">
+    <input type="button" id="createGroup" value="createGroup" onClick="createGroup()"><br>
+    <h3>Create Authority</h3>
+    authority: <input type="text" id="authority">
+    description: <input type="text" id="description">
+    <input type="button" id="createAuthority" value="createAuthority" onClick="createAuthority()"><br>
+    <h3>Create Client</h3>
+    secret: <input type="text" id="client_secret">
+    accessTokenValiditySeconds: <input type="text" id="accessTokenValiditySeconds">
+    refreshTokenValiditySeconds: <input type="text" id="refreshTokenValiditySeconds">
+    neverNeedApprove: <input type="text" id="neverNeedApprove">
+    <input type="button" id="createClient" value="createClient" onClick="createClient()"><br>
+    <h3>Create Scope</h3>
+    scope: <input type="text" id="scope">
+    description: <input type="text" id="scope_description">
+    <input type="button" id="createScope" value="createScope" onClick="createScope()"><br>
+    <h3>Create Grant Type</h3>
+    Grant Type: <input type="text" id="grant_type">
+    description: <input type="text" id="grant_type_description">
+    <input type="button" id="createGrantType" value="createGrantType" onClick="createGrantType()"><br>
+    <h3>Create Resource</h3>
+    resource name: <input type="text" id="resource_name">
+    description: <input type="text" id="resource_description">
+    <input type="button" id="createResource" value="createResource" onClick="createResource()"><br>
+    <h3>Create Url Matcher</h3>
+    UrlMatcher: <input type="text" id="urlMatcher">
+    Order: <input type="text" id="order">
+    <input type="button" id="createUrlMatchery" value="createUrlMatcher" onClick="createUrlMatcher()"><br>
+    <h3>Create CodeTable</h3>
+    code name: <input type="text" id="code_name">
+    code key: <input type="text" id="code_key">
+    code value: <input type="text" id="code_value">
+    code order: <input type="text" id="code_order">
+    <input type="button" id="createUrlMatchery" value="createCodeTable" onClick="createCodeTable()"><br>
+    <h3>Create Blog</h3>
+    name: <input type="text" id="blog_name">
+    <input type="button" id="createBlog" value="createBlog" onClick="createBlog()"><br>
+    <h3>Access Token</h3>
+    <textarea id="access_token" style="width:700px;height:100px;resize:none;"></textarea><br>
+    <!-- Order: <input type="text" id="order">
+    Order: <input type="text" id="order">
+    <input type="button" value="requestToken" onclick="requestToken()"><br> -->
+    <script>
+        function addAccessToken(request){
+            var token = $('#access_token').val();
+            request.setRequestHeader("Authorization", "bearer "+token);
+        }
+    
+        function ajax(){
+            var url = $('#requestUrl').val();
+            var method = $("#requestMethod").val();
+            var accpet = $("#accpet").val();
+            console.log(url);
+             $.ajax({
+                type : method,
+                async : true,
+                url : url,
+                beforeSend: function(request) {
+                    if(accpet == "NULL")
+                        return;
+                    request.setRequestHeader("Accept", accpet);
+                    addAccessToken(request);
+                },
+                success : function(data) {
+                    /* var date = new Date(data.createDate);
+                    console.log(date); */
+                },
+                error : function() {}
+            });
+        }
+		
+
+        function createUser(){
+        	var user = {};
+        	user.username = $('#username').val();
+            user.password = $('#password').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/user',
+                dataType: 'json',
+                data: user,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createGroup(){
+            var group = {};
+            group.name = $('#group_name').val();
+            group.description = $('#group_desp').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/group',
+                dataType: 'json',
+                data: group,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createClient(){
+            var client = {};
+            client.clientSecret = $('#client_secret').val();
+            client.accessTokenValiditySeconds = $('#accessTokenValiditySeconds').val();
+            client.refreshTokenValiditySeconds = $('#refreshTokenValiditySeconds').val();
+            client.neverNeedApprove = $('#neverNeedApprove').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/client',
+                dataType: 'json',
+                data: client,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createScope(){
+            var scope = {};
+            scope.scope = $('#scope').val();
+            scope.description = $('#scope_description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/scope',
+                dataType: 'json',
+                data: scope,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createGrantType(){
+            var grantType = {};
+            grantType.grantType = $('#grant_type').val();
+            grantType.description = $('#grant_type_description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/grantType',
+                dataType: 'json',
+                data: grantType,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createResource(){
+            var resource = {};
+            resource.resourceName = $('#resource_name').val();
+            resource.description = $('#resource_description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/resource',
+                dataType: 'json',
+                data: resource,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createAuthority(){
+            var authority = {};
+            authority.authority = $('#authority').val();
+            authority.description = $('#description').val();
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/authority',
+                dataType: 'json',
+                data: authority,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createUrlMatcher(){
+            var urlMatcher = {};
+            urlMatcher.urlMatcher = $('#urlMatcher').val();
+            urlMatcher.order = parseInt($('#order').val());
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/security/urlMatcher',
+                dataType: 'json',
+                data: urlMatcher,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+
+        function createCodeTable(){
+            var codeTable = {};
+            codeTable.name = $('#code_name').val();
+            codeTable.key = $('#code_key').val();
+            codeTable.value = $('#code_value').val();
+            codeTable.showOrder = parseInt($('#code_order').val());
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/baseData/saveCodeTable',
+                dataType: 'json',
+                data: codeTable,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+        
+        function createBlog(){
+            var blog = {};
+            blog.name = $('#blog_name').val();
+
+             $.ajax({
+                type : "POST",
+                async : true,
+                url : 'rs/blog/createBlog',
+                dataType: 'json',
+                data: blog,
+                beforeSend: function(request) {
+                    addAccessToken(request);
+                },
+                success : function(data) {},
+                error : function() {}
+            });
+        }
+	</script>
+    <script src="./resources/scripts/lib/jquery-2.1.4.js"></script>
+</body>
+</html>

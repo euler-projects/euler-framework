@@ -1,0 +1,10 @@
+.code {
+    
+    margin-left: 33px;
+    margin-right: 33px;
+}
+.codeLine {
+    height: 24px;
+    line-height: 24px;
+}
+.tab1 {padding-left: 2rem;}

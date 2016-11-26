@@ -57,7 +57,7 @@ public class UserService extends BaseService implements IUserService, UserDetail
     private boolean enableCache = false;
     private final static DefaultObjectCache<String, User> USER_CAHCE = new DefaultObjectCache<>(10_000L);
     
-    public void seEmailLogin(boolean enableEmailLogin) {
+    public void setEnableEmailLogin(boolean enableEmailLogin) {
         this.enableEmailLogin = enableEmailLogin;
     }
 

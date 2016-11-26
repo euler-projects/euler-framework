@@ -1,0 +1,77 @@
+@CHARSET "UTF-8";
+
+/*全局字体，颜色_BEGIN*/
+body {
+    font-family: arial, 'Microsoft YaHei';
+    font-size: 12px;
+    color: #000000;    
+    background-color: #eeeeee;
+}
+
+.search-table {
+    width:100%;
+    background-color:   #F0F8FF;
+    font-size:12px;
+}
+
+input {
+    font-family: arial, 'Microsoft YaHei';
+    outline: none;    
+}
+
+a {
+    color: #000000;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+.odd {
+    background-color: #dddddd;
+}
+.even {
+    background-color: #cccccc;
+}
+
+.code {
+    
+    margin-left: 33px;
+    margin-right: 33px;
+}
+.codeLine {
+    height: 24px;
+    line-height: 24px;
+}
+
+.tab1 {padding-left: 2rem;}
+
+.a_btn{
+    text-decoration: none;
+    display: inline-block;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+    text-align: center;
+    vertical-align: middle;
+    background:#3385ff;
+}
+
+.a_btn_txt{
+    display: inline-block;
+    vertical-align: top;
+    width: auto;
+    line-height: 22px;
+    font-size: 12px;
+    padding: 0;
+    margin: 0 4px;
+    color:#ffffff; 
+}
+
+.a_btn:hover{
+    background:#317ef3;
+    text-decoration: none; 
+}
+/*全局字体，颜色_END*/

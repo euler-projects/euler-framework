@@ -1,0 +1,36 @@
+{
+    "total":5,
+    "files":
+    [
+        {
+            "fileName":"文件名1",
+            "uploadDate":"2015年7月1日",
+            "fileSize":"1.44MB",
+            "fileUrl":"/files/WERyguygweyugfuwe.file"
+        },
+        {
+            "fileName":"文件名2",
+            "uploadDate":"2015年7月1日",
+            "fileSize":"1.44MB",
+            "fileUrl":"/files/WE123123ugfuwe.file"
+        },
+        {
+            "fileName":"文件名3",
+            "uploadDate":"2015年7月1日",
+            "fileSize":"700MB",
+            "fileUrl":"/files/derw122gweyugfuwe.file"
+        },
+        {
+            "fileName":"文件名4",
+            "uploadDate":"2015年7月1日",
+            "fileSize":"4.7GB",
+            "fileUrl":"/files/cxcvguygweyugfuwe.file"
+        },
+        {
+            "fileName":"文件名5",
+            "uploadDate":"2015年7月1日",
+            "fileSize":"1.44MB",
+            "fileUrl":"files/asdRyguygweyugfuwe.file"
+        }
+    ]    
+}

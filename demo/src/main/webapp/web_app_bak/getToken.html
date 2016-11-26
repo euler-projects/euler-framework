@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title></title>
+</head>
+
+<body>
+    <div id="token"></div>
+    <script>
+        window.onload=function(){
+            var c={};
+            c.code=getQueryString("code");
+            c.client_id="d80d0620-4b16-4ea4-a8d4-1ecae6c47610";
+            c.client_secret="123";
+            c.grant_type="authorization_code";
+            c.redirect_uri="http://localhost:8080/demo/getToken.html";
+            
+            $.ajax({
+                type : "POST",
+                async : true,
+                url : 'oauth/token',
+                dataType: 'json',
+                data: c,
+                success : function(data) {
+                    var tokenInfo='';
+                    tokenInfo += '<p>access_token: '+data.access_token+'</p>'
+                    tokenInfo += '<p>refresh_token: '+data.refresh_token+'</p>'
+                    tokenInfo += '<p>token_type: '+data.token_type+'</p>'
+                    tokenInfo += '<p>expires_in: '+data.expires_in+'</p>'
+                    tokenInfo += '<p>scope: '+data.scope+'</p>'
+                    $('#token').html(tokenInfo);
+                },
+                error : function() {}
+            });
+        };
+        
+        function getQueryString(name) { 
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+            var r = window.location.search.substr(1).match(reg); 
+            if (r != null) return unescape(r[2]); return null; 
+        }
+	</script>
+    <script src="./resources/scripts/lib/jquery-2.1.4.js"></script>
+</body>
+</html>
