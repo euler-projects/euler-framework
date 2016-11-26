@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.eulerform.web.core.annotation.RestEndpoint;
+import net.eulerframework.web.core.annotation.RestEndpoint;
 
 @Configuration
 @EnableWebMvc

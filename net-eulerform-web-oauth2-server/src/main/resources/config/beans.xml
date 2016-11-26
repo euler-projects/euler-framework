@@ -13,17 +13,17 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="clientDao" class="net.eulerform.web.module.oauth2.dao.impl.ClientDao">
+    <bean id="clientDao" class="net.eulerframework.web.module.oauth2.dao.impl.ClientDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="resourceDao" class="net.eulerform.web.module.oauth2.dao.impl.ResourceDao">
+    <bean id="resourceDao" class="net.eulerframework.web.module.oauth2.dao.impl.ResourceDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="scopeDao" class="net.eulerform.web.module.oauth2.dao.impl.ScopeDao">
+    <bean id="scopeDao" class="net.eulerframework.web.module.oauth2.dao.impl.ScopeDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="clientService" name="clientDetailsService" class="net.eulerform.web.module.oauth2.service.impl.ClientService">
+    <bean id="clientService" name="clientDetailsService" class="net.eulerframework.web.module.oauth2.service.impl.ClientService">
         <property name="clientDao" ref="clientDao"/>
         <property name="resourceDao" ref="resourceDao"/>
         <property name="scopeDao" ref="scopeDao"/>

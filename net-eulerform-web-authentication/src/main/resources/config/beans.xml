@@ -13,22 +13,22 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
     
-    <bean id="userContext" class="net.eulerform.web.module.authentication.util.UserContext">
+    <bean id="userContext" class="net.eulerframework.web.module.authentication.util.UserContext">
         <property name="userDetailsService" ref="userDetailsService"/>
         <property name="userService" ref="userService"/>
     </bean>
     
-    <bean id="userDao" class="net.eulerform.web.module.authentication.dao.impl.UserDao">
+    <bean id="userDao" class="net.eulerframework.web.module.authentication.dao.impl.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="groupDao" class="net.eulerform.web.module.authentication.dao.impl.GroupDao">
+    <bean id="groupDao" class="net.eulerframework.web.module.authentication.dao.impl.GroupDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="authorityDao" class="net.eulerform.web.module.authentication.dao.impl.AuthorityDao">
+    <bean id="authorityDao" class="net.eulerframework.web.module.authentication.dao.impl.AuthorityDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="authorityService" class="net.eulerform.web.module.authentication.service.impl.AuthorityService">
+    <bean id="authorityService" class="net.eulerframework.web.module.authentication.service.impl.AuthorityService">
         <property name="authorityDao" ref="authorityDao"/>
         <property name="groupDao" ref="groupDao"/>
     </bean>   

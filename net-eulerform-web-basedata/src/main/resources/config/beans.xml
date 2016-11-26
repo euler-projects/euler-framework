@@ -13,20 +13,20 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
     
-    <bean id="codeTable" class="net.eulerform.web.module.basedata.util.CodeTableTool">
+    <bean id="codeTable" class="net.eulerframework.web.module.basedata.util.CodeTableTool">
         <property name="baseDataService" ref="baseDataService"/>
     </bean> 
 
-    <bean id="moduleDao" class="net.eulerform.web.module.basedata.dao.impl.ModuleDao">
+    <bean id="moduleDao" class="net.eulerframework.web.module.basedata.dao.impl.ModuleDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="pageDao" class="net.eulerform.web.module.basedata.dao.impl.PageDao">
+    <bean id="pageDao" class="net.eulerframework.web.module.basedata.dao.impl.PageDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="codeTableDao" class="net.eulerform.web.module.basedata.dao.impl.CodeTableDao">
+    <bean id="codeTableDao" class="net.eulerframework.web.module.basedata.dao.impl.CodeTableDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="baseDataService" class="net.eulerform.web.module.basedata.service.impl.BaseDataService">
+    <bean id="baseDataService" class="net.eulerframework.web.module.basedata.service.impl.BaseDataService">
         <property name="codeTableDao" ref="codeTableDao"/>
         <property name="moduleDao" ref="moduleDao"/>
         <property name="pageDao" ref="pageDao"/>

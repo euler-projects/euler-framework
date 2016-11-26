@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 
-import net.eulerform.web.core.filter.PreLoggingFilter;
+import net.eulerframework.web.core.filter.PreLoggingFilter;
 
 @Order(100)
 public class PreLoggingFilterBootstrap implements WebApplicationInitializer {

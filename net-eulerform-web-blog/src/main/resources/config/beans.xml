@@ -13,7 +13,7 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="blogDao" class="net.eulerform.web.module.blog.dao.impl.BlogDao">
+    <bean id="blogDao" class="net.eulerframework.web.module.blog.dao.impl.BlogDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 </beans>

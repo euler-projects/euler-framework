@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
 
-import net.eulerform.web.core.annotation.RestEndpoint;
-import net.eulerform.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.RestEndpoint;
+import net.eulerframework.web.core.annotation.WebController;
 
 @Configuration
 @ImportResource({"classpath*:config/beans.xml"})
