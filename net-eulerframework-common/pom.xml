@@ -3,11 +3,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>net.eulerform</groupId>
-        <artifactId>net-eulerform</artifactId>
+        <groupId>net.eulerframework</groupId>
+        <artifactId>net-eulerframework</artifactId>
         <version>0.2.0-SNAPSHOT</version>
     </parent>
-    <artifactId>net-eulerform-common</artifactId>
+    <artifactId>net-eulerframework-common</artifactId>
 
     <dependencies>
         <dependency>
