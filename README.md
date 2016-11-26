@@ -4,18 +4,19 @@
 ## About
 A simple Web framework based on Spring MVC
 
-## In processing
+## In Processing
 * Change project name to euler-framework
 * Streamline modules
 
 ## Planned
 A generic form submitter
 
-## 0.1.1
+## Release History
+### 0.1.1
 * CMS module
 * BLOG module
 
-## 0.1.0
+### 0.1.0
 * Basic module
 * Local authentication
 * LDAP authentication
