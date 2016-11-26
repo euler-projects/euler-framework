@@ -2,23 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.eulerform</groupId>
-    <artifactId>net-eulerform</artifactId>
+    <groupId>net.eulerframework</groupId>
+    <artifactId>net-eulerframework</artifactId>
     <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>eulerform.net</name>
-    <description>eulerform.net</description>
+    <name>eulerframework.net</name>
+    <description>eulerframework.net</description>
 
     <modules>
-        <module>net-eulerform-common</module>
-        <module>net-eulerform-web-core</module>
-        <module>net-eulerform-web-config-provider</module>
-        <module>net-eulerform-web-authentication</module>
-        <module>net-eulerform-web-basedata</module>
-        <module>net-eulerform-web-oauth2-server</module>
-        <module>net-eulerform-web-ueditor</module>
-        <module>net-eulerform-web-cms-basic</module>
-        <module>net-eulerform-web-blog</module>
+        <module>net-eulerframework-common</module>
+        <module>net-eulerframework-web-core</module>
+        <module>net-eulerframework-web-config-provider</module>
+        <module>net-eulerframework-web-authentication</module>
+        <module>net-eulerframework-web-basedata</module>
+        <module>net-eulerframework-web-oauth2-server</module>
+        <module>net-eulerframework-web-ueditor</module>
+        <module>net-eulerframework-web-cms-basic</module>
+        <module>net-eulerframework-web-blog</module>
     </modules>    
 
     <properties>
@@ -380,5 +380,5 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <url>http://www.eulerform.net</url>
+    <url>http://www.eulerframework.net</url>
 </project>
