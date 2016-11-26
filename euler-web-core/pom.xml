@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.eulerframework</groupId>
-        <artifactId>net-eulerframework</artifactId>
+        <artifactId>euler-framework</artifactId>
         <version>0.2.0-SNAPSHOT</version>
     </parent>
-    <artifactId>net-eulerframework-web-core</artifactId>
+    <artifactId>euler-web-core</artifactId>
 
     <dependencies>
         <dependency>
@@ -161,7 +161,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>net-eulerframework-common</artifactId>
+            <artifactId>euler-framework-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
