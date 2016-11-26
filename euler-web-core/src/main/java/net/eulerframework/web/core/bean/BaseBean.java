@@ -75,8 +75,8 @@ public class BaseBean {
 //     @Bean(name="jaxb2Marshaller")
 //     public Jaxb2Marshaller jaxb2Marshaller() {
 //     Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-//     jaxb2Marshaller.setPackagesToScan("net.eulerform.**.entity",
-//                                       "net.eulerform.web.core.base.response");
+//     jaxb2Marshaller.setPackagesToScan("net.eulerframework.**.entity",
+//                                       "net.eulerframework.web.core.base.response");
 //     return jaxb2Marshaller;
 //     }
 }

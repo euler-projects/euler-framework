@@ -24,10 +24,10 @@
  * For more information, please visit the following website
  * 
  * https://github.com/euler-form/web-form
- * http://eulerform.net
+ * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerform.bootstrap;
+package net.eulerframework.bootstrap;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.MultipartConfigElement;
@@ -44,15 +44,15 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import net.eulerframework.web.core.listener.EulerFormCoreListener;
+import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 import net.eulerframework.web.core.util.WebConfig;
-import net.eulerframework.web.core.filter.EulerFormCoreFilter;
 import net.eulerframework.common.util.GlobalProperties;
 import net.eulerframework.common.util.GlobalPropertyReadException;
 import net.eulerframework.web.core.filter.CrosFilter;
+import net.eulerframework.web.core.filter.EulerFrameworkCoreFilter;
 
 @Order(0)
-public class EulerFormBootstrap implements WebApplicationInitializer {
+public class EulerFrameworkBootstrap implements WebApplicationInitializer {
     private final Logger log = LogManager.getLogger();
     
     private static final String WEB_AUTHENTICATION_TYPE = "web.authenticationType";
@@ -94,7 +94,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         try {
-            rootContext.register(Class.forName("net.eulerform.config.RootContextConfiguration"));
+            rootContext.register(Class.forName("net.eulerframework.config.RootContextConfiguration"));
         } catch (ClassNotFoundException e) {
             rootContext.close();
             throw new ServletException(e);
@@ -159,7 +159,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         }
         
         container.addListener(new ContextLoaderListener(rootContext));
-        container.addListener(new EulerFormCoreListener());
+        container.addListener(new EulerFrameworkCoreListener());
         
         String location = null;
         long maxFileSize = 51_200L;
@@ -193,7 +193,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         
         AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
-            springWebDispatcherServletContext.register(Class.forName("net.eulerform.config.SpringWebDispatcherServletContextConfiguration"));
+            springWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringWebDispatcherServletContextConfiguration"));
         } catch (ClassNotFoundException e) {
             springWebDispatcherServletContext.close();
             rootContext.close();
@@ -209,7 +209,7 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         
         AnnotationConfigWebApplicationContext springRestDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
-            springRestDispatcherServletContext.register(Class.forName("net.eulerform.config.SpringRestDispatcherServletContextConfiguration"));
+            springRestDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringRestDispatcherServletContextConfiguration"));
         } catch (ClassNotFoundException e) {
             springRestDispatcherServletContext.close();
             rootContext.close();
@@ -222,8 +222,8 @@ public class EulerFormBootstrap implements WebApplicationInitializer {
         springRestDispatcher.setMultipartConfig(new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold));        
         springRestDispatcher.addMapping(restRootUrl+"/*");
         
-        FilterRegistration.Dynamic eulerFormCoreFilter = container.addFilter("eulerFormCoreFilter", new EulerFormCoreFilter());
-        eulerFormCoreFilter.addMappingForUrlPatterns(null, false, "/*");
+        FilterRegistration.Dynamic eulerframeworkCoreFilter = container.addFilter("eulerframeworkCoreFilter", new EulerFrameworkCoreFilter());
+        eulerframeworkCoreFilter.addMappingForUrlPatterns(null, false, "/*");
         
         FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
         crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");

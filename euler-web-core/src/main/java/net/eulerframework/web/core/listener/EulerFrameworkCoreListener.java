@@ -24,7 +24,7 @@
  * For more information, please visit the following website
  * 
  * https://github.com/euler-form/web-form
- * http://eulerform.net
+ * http://eulerframework.net
  * http://cfrost.net
  */
 package net.eulerframework.web.core.listener;
@@ -48,7 +48,7 @@ import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.FileReader;
 
 @Component
-public class EulerFormCoreListener implements ServletContextListener {
+public class EulerFrameworkCoreListener implements ServletContextListener {
     private static final Logger log = LogManager.getLogger();
 
     private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
@@ -63,7 +63,7 @@ public class EulerFormCoreListener implements ServletContextListener {
     
     private boolean enableJspAutoDeploy = false;
     
-    public EulerFormCoreListener() {
+    public EulerFrameworkCoreListener() {
         this.enableJspAutoDeploy = WebConfig.isJspAutoDeployEnabled();
     }
 

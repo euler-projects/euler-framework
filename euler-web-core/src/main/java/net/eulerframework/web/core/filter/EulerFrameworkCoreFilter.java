@@ -24,7 +24,7 @@
  * For more information, please visit the following website
  * 
  * https://github.com/euler-form/web-form
- * http://eulerform.net
+ * http://eulerframework.net
  * http://cfrost.net
  */
 package net.eulerframework.web.core.filter;
@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class EulerFormCoreFilter extends OncePerRequestFilter {
+public class EulerFrameworkCoreFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

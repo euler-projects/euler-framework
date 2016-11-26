@@ -33,7 +33,7 @@
         <beans:constructor-arg index="0" ref="accessTokenRequestProxy" />
     </beans:bean>
     <beans:bean id="customerSupportRestTemplate"
-                class="net.eulerform.web.rs.client.WebServiceResponseRestTemplate">
+                class="net.eulerframework.web.rs.client.WebServiceResponseRestTemplate">
         <beans:property name="objectMapper" ref="rsClientObjectMapper" />
         <beans:constructor-arg index="0" ref="oAuth2ClientBean" />
         <beans:constructor-arg index="1">

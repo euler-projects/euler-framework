@@ -7,7 +7,7 @@
     <description>A tag library exercising SimpleTag handlers.</description>
     <tlib-version>1.0</tlib-version>
     <short-name>SimpleTagLibrary</short-name>
-    <uri>http://eulerform.net/tags</uri>
+    <uri>http://eulerframework.net/tags</uri>
 
     <function>
         <description>Reverses the characters in the given String</description>

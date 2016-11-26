@@ -78,7 +78,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         String contextPath = sc.getContextPath();
         sc.setAttribute("contextPath", contextPath);
         
-        sc.setAttribute("eulerformVersion", "1.0.1");
+        sc.setAttribute("eulerframeworkVersion", "1.0.1");
     }
 
     @Override
