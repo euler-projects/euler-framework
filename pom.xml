@@ -17,8 +17,6 @@
         <module>euler-web-basedata</module>
         <module>euler-web-oauth2-server</module>
         <module>euler-web-ueditor</module>
-        <module>euler-web-cms-basic</module>
-        <module>euler-web-blog</module>
     </modules>    
 
     <properties>
