@@ -12,7 +12,7 @@
     <function>
         <description>Reverses the characters in the given String</description>
         <name>i18n</name>
-        <function-class>net.eulerform.web.core.i18n.Tag</function-class>
+        <function-class>net.eulerframework.web.core.i18n.Tag</function-class>
         <function-signature>java.lang.String i18n( java.lang.String )</function-signature>
     </function>
 

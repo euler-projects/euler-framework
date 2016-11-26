@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.eulerform.web.core.base.response.WebServiceResponse;
+import net.eulerframework.web.core.base.response.WebServiceResponse;
 
 public class WebServiceResponseRestTemplate extends OAuth2RestTemplate {
     

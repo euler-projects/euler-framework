@@ -13,10 +13,10 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="partnerDao" class="net.eulerform.web.module.cms.basic.dao.impl.PartnerDao">
+    <bean id="partnerDao" class="net.eulerframework.web.module.cms.basic.dao.impl.PartnerDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="newsDao" class="net.eulerform.web.module.cms.basic.dao.impl.NewsDao">
+    <bean id="newsDao" class="net.eulerframework.web.module.cms.basic.dao.impl.NewsDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 </beans>
