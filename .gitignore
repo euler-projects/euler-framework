@@ -5,6 +5,6 @@ target/
 .settings/
 config.properties
 node_modules
-
+pom.xml.versionsBackup
 .idea/
 *.iml
