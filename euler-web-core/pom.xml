@@ -161,7 +161,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>euler-framework-common</artifactId>
+            <artifactId>euler-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
