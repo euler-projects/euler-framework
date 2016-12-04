@@ -379,5 +379,5 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <url>http://www.eulerframework.net</url>
+    <url>http://www.eulerproject.io/framework</url>
 </project>
