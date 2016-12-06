@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import net.eulerframework.web.core.base.exception.IllegalParamException;
 import net.eulerframework.web.core.base.exception.ResourceExistException;
+import net.eulerframework.web.core.base.exception.BadRequestException;
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
 import net.eulerframework.web.core.base.response.WebResponseStatus;
 
@@ -38,6 +39,18 @@ public abstract class BaseController {
     
     protected void writeString(HttpServletResponse httpServletResponse, String str) throws IOException{
         httpServletResponse.getOutputStream().write(str.getBytes("UTF-8"));
+    }
+    
+    /**  
+     * 用于在程序发生{@link BadRequestException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({BadRequestException.class})   
+    public HttpStatusResponse badRequestException(BadRequestException e) {
+        this.logger.error(e.getMessage(), e);
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getLocalizedMessage());
     }
     
     /**  
