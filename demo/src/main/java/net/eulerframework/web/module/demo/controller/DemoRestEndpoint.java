@@ -14,8 +14,8 @@ public class DemoRestEndpoint extends AbstractRestEndpoint {
 
     @RequestMapping("/demo")
     public String demo(HttpServletRequest request) {
-        QueryRequest pr = new QueryRequest(request);
-        System.out.println(pr.getOrderMode("a"));
+//        QueryRequest pr = new QueryRequest(request);
+//        System.out.println(pr.getOrderMode("a"));
         return "ININININ";
     }
 }
