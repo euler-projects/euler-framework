@@ -73,8 +73,20 @@ public abstract class BaseController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalParamException.class})   
     public HttpStatusResponse illegalParamException(IllegalParamException e) {
-        e.printStackTrace();
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        this.logger.error(e.getMessage(), e);
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getLocalizedMessage());
+    }
+    
+    /**  
+     * 用于在程序发生{@link IllegalArgumentException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalArgumentException.class})   
+    public HttpStatusResponse illegalArgumentException(IllegalArgumentException e) {
+        this.logger.error(e.getMessage(), e);
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getLocalizedMessage());
     }
     
     /**  
