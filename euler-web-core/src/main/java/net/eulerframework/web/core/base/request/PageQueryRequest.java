@@ -1,85 +1,51 @@
 package net.eulerframework.web.core.base.request;
 
-import java.util.ArrayList;
-
 import javax.servlet.http.HttpServletRequest;
 
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.exception.IllegalParamException;
 
-public class PageQueryRequest {
-    private final static String PROPERTIES = "properties";
-    private final static String OPERATORS = "operators";
-    private final static String EXPRESSIONS = "expressions";
-    private final static String SPLIT = "split";
-    private final static String PAGE_INDEX = "pageIndex";
-    private final static String PAGE_SIZE = "pageSize";
-    
-    
-    private final ArrayList<String> properties;
-    private final ArrayList<String> operators;
-    private final ArrayList<String> expressions;
-    private final String split;
-    
-    private final int pageIndex;
-    private final int pageSize;
-    
-    private PageQueryRequest(HttpServletRequest request) {
-        
-        this.split = generateSplit(request);
-        
-        this.pageIndex = generatePageIndex(request);
-        this.pageSize = generatePageSize(request);
-        
-        this.properties = generateProperties(request);
-        this.operators = generateOperators(request);
-        this.expressions = generateExpressions(request);
-    }
+public class PageQueryRequest extends QueryRequest {
 
-    private int generatePageSize(HttpServletRequest request) {
-        try {
-            return Integer.parseInt(request.getParameter(PAGE_SIZE));
-        } catch (NumberFormatException e) {
-            throw new IllegalParamException(PAGE_SIZE + " must be int");
-        }
-    }
+    private static final String PAGE_SIZE_NAME = "pageSize";
+    private static final String PAGE_INDEX_NAME = "pageIndex";
+    
+    private int pageIndex;
+    private int pageSize;
 
-    private int generatePageIndex(HttpServletRequest request) {
-        try {
-            String pageIndex = request.getParameter(PAGE_INDEX);
+    public PageQueryRequest(HttpServletRequest request) {
+        super(request);
+        
+        String pageSizeStr = request.getParameter(PAGE_SIZE_NAME);        
+        if(StringTool.isNull(pageSizeStr)){
+            throw new IllegalParamException("Param 'pageSize' is required");
+        }        
+        this.pageSize = Integer.parseInt(request.getParameter(PAGE_SIZE_NAME));
+        
+        if(this.pageSize <= 0) {
+            this.pageIndex = -1;
+        } else {
+            String pageIndexStr = request.getParameter(PAGE_INDEX_NAME);        
+            if(StringTool.isNull(pageIndexStr)){
+                throw new IllegalParamException("Param 'pageIndex' is required");
+            }        
+            this.pageIndex = Integer.parseInt(request.getParameter(PAGE_INDEX_NAME));
             
-            if(StringTool.isNull(pageIndex)) {
-                if(this.pageIndex > 0) {
-                    throw new IllegalParamException(PAGE_INDEX + " is required when pageSize > 0");
-                } else {
-                    return 0;
-                }
+            if(this.pageIndex < 0) {
+                throw new IllegalParamException("Param 'pageIndex' must larger than 0");                
             }
-            
-            return Integer.parseInt(request.getParameter(PAGE_INDEX));
-        } catch (NumberFormatException e) {
-            throw new IllegalParamException(PAGE_SIZE + " must be int");
         }
     }
 
-    private String generateSplit(HttpServletRequest request) {
-        // TODO Auto-generated method stub
-        return null;
+    public int getPageIndex() {
+        return pageIndex;
     }
 
-    private ArrayList<String> generateExpressions(HttpServletRequest request) {
-        // TODO Auto-generated method stub
-        return null;
+    public int getPageSize() {
+        return pageSize;
     }
-
-    private ArrayList<String> generateOperators(HttpServletRequest request) {
-        // TODO Auto-generated method stub
-        return null;
+    
+    public boolean enablePageQuery() {
+        return this.pageSize > 0;
     }
-
-    private ArrayList<String> generateProperties(HttpServletRequest request) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

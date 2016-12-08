@@ -1,9 +1,11 @@
 package net.eulerframework.web.core.base.dao.impl.hibernate5;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import org.apache.logging.log4j.LogManager;
@@ -13,16 +15,25 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.CriteriaSpecification;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
+import org.springframework.security.core.userdetails.User;
 
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.Generic;
+import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.entity.BaseEntity;
+import net.eulerframework.web.core.base.exception.IllegalParamException;
+import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
 import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
@@ -314,5 +325,89 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     @Override
     public void flushSession() {        
         //DO_NOTHING
+    }
+    
+    
+    protected DetachedCriteria generateCriteria(QueryRequest queryRequest) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
+        
+        Map<String, String> queryMap = queryRequest.getQueryMap();
+        
+        for (Map.Entry<String, String> entry : queryMap.entrySet()) {
+            String property = entry.getKey();
+            String value = entry.getValue();
+            
+            if(StringTool.isNull(value))
+                continue;
+            
+            QueryMode queryMode = queryRequest.getQueryMode(property);
+            detachedCriteria.add(this.generateRestriction(property, value, queryMode));
+        }
+        return detachedCriteria;
+    }
+
+    private Criterion generateRestriction(String property, String value, QueryMode queryMode) {
+        Field field;
+        try {
+            field = this.entityClass.getDeclaredField(property);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalParamException("Property '" + property + "' not exist");
+        }
+        
+        
+        switch (queryMode) {
+        case ANYWHERE:
+            return RestrictionsX.like(property, value, MatchMode.ANYWHERE);
+        case START:
+            return RestrictionsX.like(property, value, MatchMode.START);
+        case END:
+            return RestrictionsX.like(property, value, MatchMode.END);
+        case EXACT:
+            return RestrictionsX.like(property, value, MatchMode.EXACT);
+        case GE:
+            return Restrictions.ge(property, this.changeValueType(value, field.getType()));
+        case GT:
+            return Restrictions.gt(property, this.changeValueType(value, field.getType()));
+        case LE:
+            return Restrictions.le(property, this.changeValueType(value, field.getType()));
+        case LT:
+            return Restrictions.lt(property, this.changeValueType(value, field.getType()));
+        case IN:
+            return RestrictionsX.in(property, this.generateValueArray(value, field.getType()));
+        case NOTIN:
+            return Restrictions.not(RestrictionsX.in(property, this.generateValueArray(value, field.getType())));
+        case IS:
+            return Restrictions.eq(property, this.changeValueType(value, field.getType()));
+        case NOT:
+            return Restrictions.ne(property, this.changeValueType(value, field.getType()));
+        case BETWEEN:
+            Object[] array1 = this.generateValueArray(value, field.getType());
+            return Restrictions.between(property, array1[0], array1[1]);
+        case OUTSIDE:
+            Object[] array2 = this.generateValueArray(value, field.getType());
+            return Restrictions.not(Restrictions.between(property, array2[0], array2[1]));
+        default:
+            throw new IllegalParamException("Unknown query mode: " + queryMode);
+        }
+    }
+    
+    private Object[] generateValueArray(String value, Class<?> clazz) {
+        String[] valueArray = value.split(",");
+        
+        Object[] result = new Object[valueArray.length];
+        
+        for(int i = 0; i < valueArray.length; i++) {
+            result[i] = this.changeValueType(valueArray[i], clazz);
+        }
+        return result;
+    }
+
+    private Object changeValueType(String value, Class<?> clazz) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public static void main(String[] args) throws NoSuchFieldException, SecurityException {
+        System.out.println(User.class.getDeclaredField("username").getType().equals(String.class));
     }
 }
