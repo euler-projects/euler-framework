@@ -1,6 +1,5 @@
 # euler-framework
-[![Build Status](http://jenkins.cfrost.net/view/euler-framework/job/euler-framework-latest-jdk7/badge/icon)](http://jenkins.cfrost.net/view/euler-framework/job/euler-framework-latest-jdk7/)
-
+[![Build Status](http://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/badge/icon)](http://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/)
 ## About
 A simple Web framework based on Spring MVC
 
