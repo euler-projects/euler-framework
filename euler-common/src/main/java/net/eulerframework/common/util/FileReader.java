@@ -361,7 +361,7 @@ public abstract class FileReader {
         int dot = fileName.lastIndexOf('.');
         String extension = "";
         if(dot > -1)
-            extension = fileName.substring(fileName.lastIndexOf('.'));
+            extension = fileName.substring(dot);
         return extension;
     }
 }

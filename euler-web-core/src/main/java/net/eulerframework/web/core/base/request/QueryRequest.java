@@ -31,8 +31,8 @@ public class QueryRequest implements BaseRequest {
     
     private boolean caseSensitive;
     
-    public Map<String, QueryMode> modeMap = new HashMap<>();
-    public LinkedHashMap<String, OrderMode> sortMap = new LinkedHashMap<>();
+    private Map<String, QueryMode> modeMap = new HashMap<>();
+    private LinkedHashMap<String, OrderMode> sortMap = new LinkedHashMap<>();
     
     private Map<String, String> queryMap = new HashMap<>();
     
@@ -177,6 +177,10 @@ public class QueryRequest implements BaseRequest {
 
     public Map<String, String> getQueryMap() {
         return this.queryMap;
+    }
+
+    public LinkedHashMap<String, OrderMode> getSortMap() {
+        return this.sortMap;
     }
 
 }
