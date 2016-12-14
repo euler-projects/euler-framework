@@ -2,8 +2,12 @@ package net.eulerframework.web.core.base.dao.impl.hibernate5;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +23,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -26,11 +31,14 @@ import org.hibernate.transform.Transformers;
 import org.springframework.security.core.userdetails.User;
 
 import net.eulerframework.common.util.BeanTool;
+import net.eulerframework.common.util.CalendarTool;
 import net.eulerframework.common.util.Generic;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.exception.IllegalParamException;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.request.QueryRequest.OrderMode;
 import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
@@ -343,7 +351,41 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
             QueryMode queryMode = queryRequest.getQueryMode(property);
             detachedCriteria.add(this.generateRestriction(property, value, queryMode));
         }
+        
+        LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
+        
+        for (Map.Entry<String, OrderMode> entry : sortMap.entrySet()) {
+            String property = entry.getKey();
+            OrderMode value = entry.getValue();
+            
+            if(value == null)
+                continue;
+            
+            detachedCriteria.addOrder(this.generateOrder(property, value));
+        }
+        
+        if(PageQueryRequest.class.isAssignableFrom(queryRequest.getClass())) {
+            
+        }
+        
         return detachedCriteria;
+    }
+    
+    private Order generateOrder(String property, OrderMode orderMode) {
+        try {
+            this.entityClass.getDeclaredField(property);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalParamException("Property '" + property + "' not exist");
+        }
+        
+        switch (orderMode) {
+        case ASC:
+            return Order.asc(property);
+        case DESC:
+            return Order.desc(property);
+        default:
+            throw new IllegalParamException("Unknown order mode: " + orderMode);        
+        }
     }
 
     private Criterion generateRestriction(String property, String value, QueryMode queryMode) {
@@ -403,11 +445,47 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     }
 
     private Object changeValueType(String value, Class<?> clazz) {
-        // TODO Auto-generated method stub
-        return null;
+        if(String.class.equals(clazz)) {
+            return value;
+        } else if(Integer.class.equals(clazz) || "int".equals(clazz.toString())) {
+            return Integer.parseInt(value);
+        } else if(Long.class.equals(clazz) || "long".equals(clazz.toString())) {
+            return Long.parseLong(value);
+        } else if(Short.class.equals(clazz) || "short".equals(clazz.toString())) {
+            return Short.parseShort(value);
+        } else if(Float.class.equals(clazz) || "float".equals(clazz.toString())) {
+            return Float.parseFloat(value);
+        } else if(Double.class.equals(clazz) || "double".equals(clazz.toString())) {
+            return Double.parseDouble(value);
+        } else if(Boolean.class.equals(clazz) || "boolean".equals(clazz.toString())) {
+            return Boolean.parseBoolean(value);
+        } else if(Character.class.equals(clazz) || "char".equals(clazz.toString())) {
+            this.logger.warn("Query property type is Character, only use the first char of value");
+            return value.toCharArray()[0];
+        } else if(Date.class.equals(clazz)) {
+            Date ret = null;
+            try {
+                ret = new Date(Long.parseLong(value));
+            } catch (NumberFormatException e) {
+                try {
+                    ret = CalendarTool.parseDate(value, "yyyy-MM-dd HH:mm:ss");
+                } catch (ParseException e1) {
+                    throw new IllegalParamException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss'");
+                }
+            }
+            return ret;
+        } else if(BigDecimal.class.equals(clazz)) {
+            return new BigDecimal(value);
+        } 
+        
+        throw new IllegalParamException("Unsupport query property type: " + clazz);
     }
 
     public static void main(String[] args) throws NoSuchFieldException, SecurityException {
-        System.out.println(User.class.getDeclaredField("username").getType().equals(String.class));
+        System.out.println("int".equals(Test.class.getDeclaredField("a").getType().toString()));
+    }
+    
+    public static class Test {
+        int a;
     }
 }
