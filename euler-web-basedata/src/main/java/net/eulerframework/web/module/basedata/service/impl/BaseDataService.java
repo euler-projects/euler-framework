@@ -1,12 +1,14 @@
 package net.eulerframework.web.module.basedata.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import net.eulerframework.cache.DefaultObjectCache;
+import net.eulerframework.cache.ObjectCachePool;
 import net.eulerframework.common.email.EmailConfig;
 import net.eulerframework.common.util.FileReader;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.cache.DefaultObjectCache;
 import net.eulerframework.web.module.basedata.dao.ICodeTableDao;
 import net.eulerframework.web.module.basedata.dao.IModuleDao;
 import net.eulerframework.web.module.basedata.dao.IPageDao;
@@ -27,7 +29,7 @@ import java.util.Map;
 
 public class BaseDataService extends BaseService implements IBaseDataService {
     
-    private final DefaultObjectCache<String, CodeTable> allConfigs = new DefaultObjectCache<>(86_400_000L);//所有配置缓存一天
+    private final DefaultObjectCache<String, CodeTable> allConfigs = ObjectCachePool.generateDefaultObjectCache(86_400_000L);//所有配置缓存一天
     
     private ICodeTableDao codeTableDao;
     
@@ -246,7 +248,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         }
     }
 
-    private final DefaultObjectCache<String, EmailConfig> mailConfigCache = new DefaultObjectCache<>(86_400_000L);//所有配置缓存一天
+    private final DefaultObjectCache<String, EmailConfig> mailConfigCache = ObjectCachePool.generateDefaultObjectCache(86_400_000L);//所有配置缓存一天
     @Override
     public void saveSystemEmail(EmailConfig mailConfig) {
         String username = mailConfig.getUsername().toLowerCase().trim();

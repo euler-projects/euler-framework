@@ -17,6 +17,7 @@
         <module>euler-web-basedata</module>
         <module>euler-web-oauth2-server</module>
         <module>demo</module>
+        <module>euler-cache</module>
     </modules>
 
     <properties>

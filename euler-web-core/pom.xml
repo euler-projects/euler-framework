@@ -158,6 +158,12 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-cache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

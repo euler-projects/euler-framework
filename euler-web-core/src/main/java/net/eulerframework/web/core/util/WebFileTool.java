@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import net.eulerframework.common.util.CalendarTool;
 import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.FileReader;
+import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.exception.MultipartFileSaveException;
 
 public class WebFileTool {

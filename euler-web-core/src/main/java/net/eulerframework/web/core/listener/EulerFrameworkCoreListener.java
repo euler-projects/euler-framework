@@ -36,7 +36,6 @@ import java.io.InputStream;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import net.eulerframework.web.core.util.WebConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.Resource;
@@ -44,63 +43,54 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import net.eulerframework.cache.ObjectCachePool;
 import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.FileReader;
+import net.eulerframework.web.config.WebConfig;
 
 @Component
 public class EulerFrameworkCoreListener implements ServletContextListener {
-    private static final Logger log = LogManager.getLogger();
-
-    private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
-    private final static String JAR_MODULE_JSP_FOLDER = "/META-INF/pages";
-    private final static String MODULE_JSP_FOLDER;
-
-    static {
-        MODULE_JSP_FOLDER = WebConfig.getJspPath();
-    }
+    private final Logger logger = LogManager.getLogger();
 
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-    
-    private boolean enableJspAutoDeploy = false;
-    
-    public EulerFrameworkCoreListener() {
-        this.enableJspAutoDeploy = WebConfig.isJspAutoDeployEnabled();
-    }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        if(this.enableJspAutoDeploy)
+        if(WebConfig.isJspAutoDeployEnabled())
             this.initJarJspPages(sce);
+        
+        ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq());
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        // TODO Auto-generated method stub
-
     }
 
+    private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
+    private final static String JAR_MODULE_JSP_FOLDER = "/META-INF/pages";
     private void initJarJspPages(ServletContextEvent sce) {
         Resource[] resources = null;
         InputStream inputStream = null;
+        String jspPath = WebConfig.getJspPath();;
         try {
             resources = this.resourcePatternResolver.getResources(JAR_JSP_PATH);
 
             for (Resource r : resources) {
                 inputStream = r.getInputStream();
-                String jspPath = r.getURI().toString();
+                String jspSourcePath = r.getURI().toString();
                 // like "/index.jsp"
-                String filename = jspPath
-                        .substring(jspPath.lastIndexOf(JAR_MODULE_JSP_FOLDER) + JAR_MODULE_JSP_FOLDER.length());
-                String tmp = jspPath.substring(0, jspPath.lastIndexOf(JAR_MODULE_JSP_FOLDER));
+                String filename = jspSourcePath
+                        .substring(jspSourcePath.lastIndexOf(JAR_MODULE_JSP_FOLDER) + JAR_MODULE_JSP_FOLDER.length());
+                String tmp = jspSourcePath.substring(0, jspSourcePath.lastIndexOf(JAR_MODULE_JSP_FOLDER));
                 // like "/demoModule"
                 String moduleName = tmp.substring(tmp.lastIndexOf("/"));
                 // like "/var/www/demo" or "D:/website"
                 String webRootRealPath = FilePathTool.changeToUnixFormat(sce.getServletContext().getRealPath("/"));
-                String destPath = webRootRealPath + MODULE_JSP_FOLDER + moduleName + filename;
+                String destPath = webRootRealPath + jspPath + moduleName + filename;
                 if (!new File(destPath).exists()) {
                     byte[] result = FileReader.readInputStreamByMultiBytes(inputStream, 1024);
                     FileReader.writeFile(destPath, result, false);
-                    log.info("\nImport module jsp file: \n" + r.getURI().toString() + "\ninto\n" + destPath + "\n");
+                    logger.info("\nImport module jsp file: \n" + r.getURI().toString() + "\ninto\n" + destPath + "\n");
                 }
             }
         } catch (IOException e) {
@@ -114,5 +104,4 @@ public class EulerFrameworkCoreListener implements ServletContextListener {
                 }
         }
     }
-
 }

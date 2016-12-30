@@ -27,7 +27,7 @@
  * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerframework.web.core.cache;
+package net.eulerframework.cache;
 
 /**
  * Created by cFrost on 16/10/17.
@@ -40,10 +40,10 @@ public class CacheTimerObjectCache<KEY_T, DATA_T> extends AbstractObjectCache<KE
         this.cahceTimer = cahceTimer;
     }
 
-    public CacheTimerObjectCache() {
+    protected CacheTimerObjectCache() {
     }
 
-    public CacheTimerObjectCache(CacheTimer<DATA_T> cahceTimer) {
+    protected CacheTimerObjectCache(CacheTimer<DATA_T> cahceTimer) {
         this.cahceTimer = cahceTimer;
     }
 

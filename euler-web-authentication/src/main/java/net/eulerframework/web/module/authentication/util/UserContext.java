@@ -1,12 +1,9 @@
 package net.eulerframework.web.module.authentication.util;
 
-import net.eulerframework.common.util.GlobalProperties;
-import net.eulerframework.common.util.GlobalPropertyReadException;
-import net.eulerframework.web.core.cache.DefaultObjectCache;
-import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IUserService;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
@@ -14,9 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import net.eulerframework.cache.DefaultObjectCache;
+import net.eulerframework.cache.ObjectCachePool;
+import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.service.IUserService;
 
 public class UserContext {
 
@@ -32,22 +31,9 @@ public class UserContext {
         UserContext.userService = userService;
     }
 
-    private final static String USER_CONTEXT_CACHE_SECOND = "userContext.cacheSeconds";
+    private final static DefaultObjectCache<String, User> USER_CACHE = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
 
-    private final static DefaultObjectCache<String, User> USER_CACHE = new DefaultObjectCache<>(24 * 60 * 60 * 1000);
-
-    private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = new DefaultObjectCache<>(24 * 60 * 60 * 1000);
-
-    static {
-        try {
-            long cacheSecond = Long.parseLong(GlobalProperties.get(USER_CONTEXT_CACHE_SECOND));
-            USER_CACHE.setDataLife(cacheSecond * 1000);
-            USER_CACHE_ID.setDataLife(cacheSecond * 1000);
-        } catch (GlobalPropertyReadException e) {
-            // DO NOTHING
-            LogManager.getLogger().info("Couldn't load " + USER_CONTEXT_CACHE_SECOND + " , use 86,400 for default.");
-        }
-    }
+    private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
     
     public static List<User> getUserByNameOrCode(String nameOrCode) {
         return userService.findUserByNameOrCode(nameOrCode);
@@ -133,11 +119,11 @@ public class UserContext {
         return User.ANONYMOUS_USER;
     }
     
-    public static void addSpecialSystemSecurityContext() {
+    public static void sudo() {
         UsernamePasswordAuthenticationToken systemToken = new UsernamePasswordAuthenticationToken(
-                User.SYSTEM_USER, null,
-                User.SYSTEM_USER.getAuthorities());
-        systemToken.setDetails(User.SYSTEM_USER);
+                User.ROOT_USER, null,
+                User.ROOT_USER.getAuthorities());
+        systemToken.setDetails(User.ROOT_USER);
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(systemToken);
     }

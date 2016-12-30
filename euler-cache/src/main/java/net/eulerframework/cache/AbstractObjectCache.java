@@ -27,7 +27,7 @@
  * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerframework.web.core.cache;
+package net.eulerframework.cache;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

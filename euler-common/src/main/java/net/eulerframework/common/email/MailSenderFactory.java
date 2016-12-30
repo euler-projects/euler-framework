@@ -1,6 +1,6 @@
 package net.eulerframework.common.email;
 
-import net.eulerframework.common.util.GlobalProperties;
+import net.eulerframework.common.util.GlobalProperties1;
 import net.eulerframework.common.util.GlobalPropertyReadException;
 
 /**
@@ -27,11 +27,11 @@ public class MailSenderFactory {
      */
     public static SimpleMailSender getSimpleSystemMailSender() throws GlobalPropertyReadException {
         if (simpleSystemMailSender == null) {
-            String username = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_UESRNAME);
-            String password = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_PASSWORD);
-            String smtp = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SMTP);
-            String sender = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SYS_SENDER);
-            String defaultReceiver = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_DEFAULT_RECEIVER);
+            String username = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_UESRNAME);
+            String password = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_PASSWORD);
+            String smtp = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_SMTP);
+            String sender = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_SYS_SENDER);
+            String defaultReceiver = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_DEFAULT_RECEIVER);
             EmailConfig config = new EmailConfig();
             config.setUsername(username);
             config.setPassword(password);
@@ -45,11 +45,11 @@ public class MailSenderFactory {
     
     public static ThreadSimpleMailSender getThreadSimpleMailSender() throws GlobalPropertyReadException {
         if (threadSimpleSystemMailSender == null) {
-            String username = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_UESRNAME);
-            String password = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_PASSWORD);
-            String smtp = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SMTP);
-            String sender = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_SYS_SENDER);
-            String defaultReceiver = GlobalProperties.get(EmailConfig.F_CONFIG_KEY_DEFAULT_RECEIVER);
+            String username = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_UESRNAME);
+            String password = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_PASSWORD);
+            String smtp = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_SMTP);
+            String sender = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_SYS_SENDER);
+            String defaultReceiver = GlobalProperties1.get(EmailConfig.F_CONFIG_KEY_DEFAULT_RECEIVER);
             EmailConfig config = new EmailConfig();
             config.setUsername(username);
             config.setPassword(password);

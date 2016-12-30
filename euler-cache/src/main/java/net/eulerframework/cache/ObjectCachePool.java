@@ -27,14 +27,14 @@
  * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerframework.web.core.cache;
+package net.eulerframework.cache;
 
-import net.eulerframework.common.util.SleepTestTool;
-import net.eulerframework.web.core.cache.CacheTimerObjectCache.CacheTimer;
-
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import net.eulerframework.cache.CacheTimerObjectCache.CacheTimer;
 
 /**
  * Created by cFrost on 16/10/17.
@@ -73,32 +73,13 @@ public class ObjectCachePool {
 
         return newCache;
     }
-
-    public static void main(String[] args) {
-        DefaultObjectCache<Integer, String> cache = ObjectCachePool.generateDefaultObjectCache(10000);
-        DefaultObjectCache<Integer, String> cache3 = new DefaultObjectCache<Integer, String>(20000);
-        ObjectCachePool.add(cache3);
-
-        CacheTimer<String> timer = new CacheTimer<String>() {
-
-            @Override
-            public boolean isTimeout(String data, long addTime) {
-                if(new Date().getTime() - addTime > 5000){
-                    return true;
-                }
-                return false;
+    
+    public static void initEulerCachePoolCleaner(long delay, long period) {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+                ObjectCachePool.clean();
             }
-        };
-
-        CacheTimerObjectCache<Integer, String> cache2 = ObjectCachePool.generateCacheTimerObjectCache(timer);
-        for(int i = 0 ; i < 2 ; i++) {
-            SleepTestTool.sleep(10);
-            cache.put(i, String.valueOf(i));
-            cache2.put(i, String.valueOf(i));
-            cache3.put(i, String.valueOf(i));
-        }
-        while(true) {
-            ObjectCachePool.clean();
-        }
+        }, delay, period);
     }
 }
