@@ -11,11 +11,7 @@
            http://www.springframework.org/schema/aop
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
-           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
-    
-    <bean id="codeTable" class="net.eulerframework.web.module.basedata.util.CodeTableTool">
-        <property name="baseDataService" ref="baseDataService"/>
-    </bean> 
+           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd"> 
 
     <bean id="moduleDao" class="net.eulerframework.web.module.basedata.dao.impl.ModuleDao">
         <property name="sessionFactory" ref="sessionFactory"/>
@@ -25,10 +21,5 @@
     </bean>
     <bean id="codeTableDao" class="net.eulerframework.web.module.basedata.dao.impl.CodeTableDao">
         <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="baseDataService" class="net.eulerframework.web.module.basedata.service.impl.BaseDataService">
-        <property name="codeTableDao" ref="codeTableDao"/>
-        <property name="moduleDao" ref="moduleDao"/>
-        <property name="pageDao" ref="pageDao"/>
     </bean>
 </beans>

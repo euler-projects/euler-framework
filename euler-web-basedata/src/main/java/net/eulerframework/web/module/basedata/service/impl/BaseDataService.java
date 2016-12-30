@@ -1,25 +1,5 @@
 package net.eulerframework.web.module.basedata.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import net.eulerframework.cache.DefaultObjectCache;
-import net.eulerframework.cache.ObjectCachePool;
-import net.eulerframework.common.email.EmailConfig;
-import net.eulerframework.common.util.FileReader;
-import net.eulerframework.web.core.base.request.QueryRequest;
-import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.basedata.dao.ICodeTableDao;
-import net.eulerframework.web.module.basedata.dao.IModuleDao;
-import net.eulerframework.web.module.basedata.dao.IPageDao;
-import net.eulerframework.web.module.basedata.dao.impl.CodeTableDao;
-import net.eulerframework.web.module.basedata.entity.CodeTable;
-import net.eulerframework.web.module.basedata.entity.Module;
-import net.eulerframework.web.module.basedata.entity.Page;
-import net.eulerframework.web.module.basedata.service.IBaseDataService;
-import org.springframework.web.context.ContextLoader;
-
-import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,44 +7,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.servlet.ServletContext;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.ContextLoader;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import net.eulerframework.common.util.FileReader;
+import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.module.basedata.dao.ICodeTableDao;
+import net.eulerframework.web.module.basedata.dao.IModuleDao;
+import net.eulerframework.web.module.basedata.dao.IPageDao;
+import net.eulerframework.web.module.basedata.entity.CodeTable;
+import net.eulerframework.web.module.basedata.entity.Module;
+import net.eulerframework.web.module.basedata.entity.Page;
+import net.eulerframework.web.module.basedata.service.IBaseDataService;
+
+@Service
 public class BaseDataService extends BaseService implements IBaseDataService {
     
-    private final DefaultObjectCache<String, CodeTable> allConfigs = ObjectCachePool.generateDefaultObjectCache(86_400_000L);//所有配置缓存一天
+    @Resource private ICodeTableDao codeTableDao;
     
-    private ICodeTableDao codeTableDao;
+    @Resource private IModuleDao moduleDao;
+    @Resource private IPageDao pageDao;
     
-    private IModuleDao moduleDao;
-    private IPageDao pageDao;
+    @Resource private ObjectMapper objectMapper;
     
-    private String codeTableJsFilePath = "resources/scripts/lib/common-dict.js";
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private String webRootRealPath;
-    
-
-    @Override
-    public void setWebRootRealPath(String webRootRealPath) {
-        this.webRootRealPath = webRootRealPath;
-    }
-
-    public void setCodeTableJsFilePath(String codeTableJsFilePath) {
-        this.codeTableJsFilePath = codeTableJsFilePath;
-    }
-
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }  
-
-    public void setModuleDao(IModuleDao moduleDao) {
-        this.moduleDao = moduleDao;
-    }
-
-    public void setPageDao(IPageDao pageDao) {
-        this.pageDao = pageDao;
-    }
-
-    public void setCodeTableDao(ICodeTableDao codeTableDao) {
-        this.codeTableDao = codeTableDao;
-    }
+    @Value("${project.Mode}")
+    private String projectMode;
+    @Value("${project.Version}")
+    private String projectVersion;
+    @Value("${project.Buildtimesamp}")
+    private String projectBuildtimesamp;
 
     @Override
     public void loadBaseData() {
@@ -72,42 +51,28 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         //allModules
         this.refreshModules();
         
-        //allConfigs
-        this.refreshConfigs();
-        
         //contextPaht
         ServletContext sc = ContextLoader.getCurrentWebApplicationContext().getServletContext();
         String contextPath = sc.getContextPath();
         sc.setAttribute("contextPath", contextPath);
         
-        sc.setAttribute("eulerframeworkVersion", "1.0.1");
-    }
-
-    @Override
-    public String findConfigValue(String key) {
-        CodeTable resultCodeTable = this.allConfigs.get(key);
-        
-        if(resultCodeTable == null) {
-            resultCodeTable = this.codeTableDao.findConfig(key);
-            if(resultCodeTable != null){
-                this.allConfigs.put(resultCodeTable.getKey(), resultCodeTable);                
-            }
-        }
-        
-        if(resultCodeTable == null)
-            return null;
-        
-        return resultCodeTable.getValue();
+        sc.setAttribute("project.Version", projectVersion);
+        sc.setAttribute("project.Mode", projectMode.toUpperCase());
+        sc.setAttribute("project.Buildtimesamp", projectBuildtimesamp);
     }
     
     @Override
     public void createCodeDict() throws IOException {
+        String webRootRealPath = this.getServletContext().getRealPath("/");
+        String codeTableJsFilePath = "resources/scripts/lib/common-dict.js";
+        
+        String codeTableJsFileRealPath = webRootRealPath+codeTableJsFilePath;
+        this.logger.info("createCodeDict:"+codeTableJsFileRealPath);
+
         List<CodeTable> codes = this.codeTableDao.findAllCodeOrderByName();
         Map<String, List<Dict>> codeTableMap = new HashMap<>();
         List<Dict> dict = null;
         String name = "";
-        String codeTableJsFileRealPath = this.webRootRealPath+this.codeTableJsFilePath;
-        System.out.println("createCodeDict:"+codeTableJsFileRealPath);
         for(CodeTable code : codes) {
             if(!name.equals(code.getName())){
                 if(dict != null && !dict.isEmpty()){
@@ -145,22 +110,30 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     private class Dict{
         private String key;
         private String value;
+        private String valuei18n;
+        private String style;
+                
         public String getKey() {
             return key;
         }
-        public void setKey(String key) {
-            this.key = key;
-        }
+
         public String getValue() {
             return value;
         }
-        public void setValue(String value) {
-            this.value = value;
+
+        public String getValuei18n() {
+            return valuei18n;
         }
-        
+
+        public String getStyle() {
+            return style;
+        }
+
         private Dict(CodeTable codeTable){
             this.key = codeTable.getKey();
             this.value = codeTable.getValue();
+            this.valuei18n = codeTable.getValueI18nCode();
+            this.style = codeTable.getCssStyle();
         }
     }
     
@@ -172,21 +145,19 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     }
 
     @Override
-    public List<Module> findAllModuleFromDB() {
-        return this.moduleDao.findAllInOrder();
-    }
-
-    @Override
     public void saveCodeTable(CodeTable codeTable) {
         this.codeTableDao.saveOrUpdate(codeTable);
-        this.refreshConfigs();
     }
 
     @Override
     public void deleteCodeTables(Serializable[] idArray) {
         this.codeTableDao.deleteByIds(idArray);
-        this.refreshConfigs();
         
+    }
+
+    @Override
+    public List<Module> findAllModuleFromDB() {
+        return this.moduleDao.findAllInOrder();
     }
 
     @Override
@@ -237,100 +208,5 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         this.moduleDao.flushSession();
         List<Module> allModules = this.moduleDao.findAllInOrder();
         ContextLoader.getCurrentWebApplicationContext().getServletContext().setAttribute("menu", allModules);        
-    }
-
-    private void refreshConfigs() {
-        List<CodeTable> allConfigs = this.codeTableDao.findAllConfig();        
-        if(allConfigs !=null){
-            for(CodeTable each : allConfigs){
-                this.allConfigs.put(each.getKey(), each);
-            }
-        }
-    }
-
-    private final DefaultObjectCache<String, EmailConfig> mailConfigCache = ObjectCachePool.generateDefaultObjectCache(86_400_000L);//所有配置缓存一天
-    @Override
-    public void saveSystemEmail(EmailConfig mailConfig) {
-        String username = mailConfig.getUsername().toLowerCase().trim();
-        String password = mailConfig.getPassword().trim();
-        String smtp = mailConfig.getSmtp().toLowerCase().trim();
-        String sender = mailConfig.getSender().toLowerCase().trim();
-        String defaultReceiver = mailConfig.getDefaultReceiver().toLowerCase().trim();
-        
-        CodeTable usernameCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_UESRNAME);
-        CodeTable passwordCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_PASSWORD);
-        CodeTable smtpCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_SMTP);
-        CodeTable senderCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_SYS_SENDER);
-        CodeTable defaultReceiverCode = this.codeTableDao.findConfig(EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER);
-        
-        if(usernameCode == null){
-            usernameCode = new CodeTable();
-            usernameCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            usernameCode.setKey(EmailConfig.DB_CONFIG_KEY_UESRNAME);
-            usernameCode.setName(EmailConfig.DB_CONFIG_KEY_UESRNAME);
-            usernameCode.setValue(username);
-        } else {
-            usernameCode.setValue(username);
-        }
-        if(passwordCode == null){
-            passwordCode = new CodeTable();
-            passwordCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            passwordCode.setKey(EmailConfig.DB_CONFIG_KEY_PASSWORD);
-            passwordCode.setName(EmailConfig.DB_CONFIG_KEY_PASSWORD);
-            passwordCode.setValue(password);
-        } else {
-            passwordCode.setValue(password);
-        }
-        if(smtpCode == null){
-            smtpCode = new CodeTable();
-            smtpCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            smtpCode.setKey(EmailConfig.DB_CONFIG_KEY_SMTP);
-            smtpCode.setName(EmailConfig.DB_CONFIG_KEY_SMTP);
-            smtpCode.setValue(smtp);
-        } else {
-            smtpCode.setValue(smtp);
-        }
-        if(senderCode == null){
-            senderCode = new CodeTable();
-            senderCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            senderCode.setKey(EmailConfig.DB_CONFIG_KEY_SYS_SENDER);
-            senderCode.setName(EmailConfig.DB_CONFIG_KEY_SYS_SENDER);
-            senderCode.setValue(sender);
-        } else {
-            senderCode.setValue(sender);
-        }
-        if(defaultReceiverCode == null){
-            defaultReceiverCode = new CodeTable();
-            defaultReceiverCode.setCodeType(CodeTableDao.PROPERTY_TYPE);
-            defaultReceiverCode.setKey(EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER);
-            defaultReceiverCode.setName(EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER);
-            defaultReceiverCode.setValue(defaultReceiver);
-        } else {
-            defaultReceiverCode.setValue(defaultReceiver);
-        }
-        
-        this.codeTableDao.saveOrUpdate(usernameCode);
-        this.codeTableDao.saveOrUpdate(passwordCode);
-        this.codeTableDao.saveOrUpdate(smtpCode);
-        this.codeTableDao.saveOrUpdate(senderCode);
-        this.codeTableDao.saveOrUpdate(defaultReceiverCode);
-        mailConfigCache.put("1", this.findEmailConfigFromDB());
-        
-    }
-
-    private EmailConfig findEmailConfigFromDB() {
-        return this.codeTableDao.findSysEmailConfig();
-    }
-
-    @Override
-    public EmailConfig findEmailConfig() {
-        EmailConfig config = mailConfigCache.get("1");
-        if(config != null) {
-            return config;
-        }
-        
-        EmailConfig emailConfig = this.findEmailConfigFromDB();
-        mailConfigCache.put("1", emailConfig);
-        return emailConfig;
     }
 }

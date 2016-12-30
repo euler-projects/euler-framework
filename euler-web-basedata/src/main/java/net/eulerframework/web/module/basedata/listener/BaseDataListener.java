@@ -21,9 +21,6 @@ public class BaseDataListener implements ServletContextListener {
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
         
         IBaseDataService baseDataService= (BaseDataService)rwp.getBean("baseDataService");
-        
-        String webRootRealPath = sce.getServletContext().getRealPath("/");
-        baseDataService.setWebRootRealPath(webRootRealPath);
         try {
             baseDataService.createCodeDict();
         } catch (IOException e) {
