@@ -7,11 +7,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.eulerframework.web.module.authentication.util.UserContext;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.util.UserContext;
 
 public class AuthenticateInfoFilter extends OncePerRequestFilter {
     

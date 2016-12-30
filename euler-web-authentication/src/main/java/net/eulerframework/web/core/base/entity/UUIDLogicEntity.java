@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.security.entity;
+package net.eulerframework.web.core.base.entity;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;

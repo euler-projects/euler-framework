@@ -41,20 +41,20 @@ import java.util.Set;
  */
 public class ObjectCachePool {
 
-    private final static Set<AbstractObjectCache> CACHE_POOL = new HashSet<>();
+    private final static Set<AbstractObjectCache<?,?>> CACHE_POOL = new HashSet<>();
 
     public static void clean() {
-        for(AbstractObjectCache cache : CACHE_POOL) {
+        for(AbstractObjectCache<?,?> cache : CACHE_POOL) {
             if(cache.isEnable())
                 cache.clean();
         }
     }
 
-    public static void add(AbstractObjectCache cache){
+    public static void add(AbstractObjectCache<?,?> cache){
         CACHE_POOL.add(cache);
     }
 
-    public static void remove(AbstractObjectCache cache){
+    public static void remove(AbstractObjectCache<?,?> cache){
         CACHE_POOL.remove(cache);
     }
 
@@ -66,7 +66,7 @@ public class ObjectCachePool {
         return newCache;
     }
 
-    public static <KEY_T, DATA_T> CacheTimerObjectCache<KEY_T, DATA_T> generateCacheTimerObjectCache(CacheTimer cacheTimer) {
+    public static <KEY_T, DATA_T> CacheTimerObjectCache<KEY_T, DATA_T> generateCacheTimerObjectCache(CacheTimer<DATA_T> cacheTimer) {
 
         CacheTimerObjectCache<KEY_T, DATA_T> newCache = new CacheTimerObjectCache<>(cacheTimer);
         CACHE_POOL.add(newCache);
@@ -76,10 +76,10 @@ public class ObjectCachePool {
 
     public static void main(String[] args) {
         DefaultObjectCache<Integer, String> cache = ObjectCachePool.generateDefaultObjectCache(10000);
-        DefaultObjectCache<Integer, String> cache3 = new DefaultObjectCache(20000);
+        DefaultObjectCache<Integer, String> cache3 = new DefaultObjectCache<Integer, String>(20000);
         ObjectCachePool.add(cache3);
 
-        CacheTimer timer = new CacheTimer<String>() {
+        CacheTimer<String> timer = new CacheTimer<String>() {
 
             @Override
             public boolean isTimeout(String data, long addTime) {

@@ -19,6 +19,7 @@ import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IUserProfileService;
 import net.eulerframework.web.module.authentication.service.IUserService;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

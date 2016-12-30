@@ -11,6 +11,7 @@ import net.eulerframework.web.core.base.controller.AbstractRestEndpoint;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

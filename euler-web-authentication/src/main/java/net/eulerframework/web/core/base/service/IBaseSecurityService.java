@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.security.service;
+package net.eulerframework.web.core.base.service;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 

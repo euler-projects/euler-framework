@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.security.entity;
+package net.eulerframework.web.core.base.entity;
 
 import java.util.Date;
 

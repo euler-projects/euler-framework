@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.eulerframework.web.core.base.dao.IBaseDao;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
@@ -28,12 +27,12 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
-import org.springframework.security.core.userdetails.User;
 
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.CalendarTool;
 import net.eulerframework.common.util.Generic;
 import net.eulerframework.common.util.StringTool;
+import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.exception.IllegalParamException;
 import net.eulerframework.web.core.base.request.PageQueryRequest;

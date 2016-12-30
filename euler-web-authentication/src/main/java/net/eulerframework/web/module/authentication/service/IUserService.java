@@ -3,7 +3,6 @@ package net.eulerframework.web.module.authentication.service;
 import java.io.Serializable;
 import java.util.List;
 
-import net.eulerframework.web.module.authentication.entity.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import net.eulerframework.web.core.base.request.QueryRequest;
@@ -11,6 +10,7 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
+import net.eulerframework.web.module.authentication.entity.User;
 
 public interface IUserService extends IBaseService {
 

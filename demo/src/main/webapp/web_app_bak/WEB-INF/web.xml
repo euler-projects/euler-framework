@@ -17,7 +17,7 @@
     
     <!-- JWT LISTENER 
     <listener>
-        <listener-class>net.eulerframework.web.core.security.jwt.JwtListener</listener-class>
+        <listener-class>net.eulerframework.web.core.base.jwt.JwtListener</listener-class>
     </listener>-->
 
     <!-- ENCODING FILTER 

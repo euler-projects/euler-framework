@@ -1,12 +1,12 @@
-package net.eulerframework.web.core.security.dao.impl.hibernate5;
+package net.eulerframework.web.core.base.dao.impl.hibernate5;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
+import net.eulerframework.web.core.base.dao.IBaseModifyInfoDao;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerframework.web.core.security.dao.IBaseModifyInfoDao;
-import net.eulerframework.web.core.security.entity.BaseModifyInfoEntity;
+import net.eulerframework.web.core.base.entity.BaseModifyInfoEntity;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
 

@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.security.entity;
+package net.eulerframework.web.core.base.entity;
 
 import java.util.Date;
 
@@ -7,7 +7,7 @@ import net.eulerframework.web.core.base.entity.BaseEntity;
 /**
  * 具有修改人记录功能的基础实体接口<br>
  * 可记录数据的创建人,创建时间,修改人,修改时间<br>
- * 实现时可扩展{@link net.eulerframework.web.core.security.entity.BaseEntity}的某种实现以实现某种主键策略
+ * 实现时可扩展{@link net.eulerframework.web.core.base.entity.BaseEntity}的某种实现以实现某种主键策略
  * 
  * @param <T> 实现类类名&nbsp;例如:<br>
  * <code>public class Example implements BaseModifyInfoEntity&lt;Example&gt;<code>

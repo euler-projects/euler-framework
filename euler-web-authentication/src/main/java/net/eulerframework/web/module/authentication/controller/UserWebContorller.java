@@ -5,8 +5,7 @@ import javax.validation.Valid;
 
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.DefaultWebController;
-import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IUserService;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.ui.Model;
@@ -16,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.web.core.base.exception.NotFoundException;
+import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.service.IUserService;
 
 @WebController
 @Scope("prototype")
