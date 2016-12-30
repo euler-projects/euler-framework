@@ -5,7 +5,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.exception.ResourceExistException;
 import net.eulerframework.web.module.oauth2.entity.Client;
 import net.eulerframework.web.module.oauth2.service.IClientService;
 import org.springframework.context.annotation.Scope;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.base.exception.ResourceExistException;
-import net.eulerframework.web.core.base.request.QueryRequest;
 
 @WebController
 @Scope("prototype")

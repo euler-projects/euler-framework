@@ -6,7 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
-import net.eulerframework.web.core.base.exception.EntityCompareException;
+import net.eulerframework.web.core.exception.EntityCompareException;
 
 /**
  * <strong>自增主键</strong>实体<br>

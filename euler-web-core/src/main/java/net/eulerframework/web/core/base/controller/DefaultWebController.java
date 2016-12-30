@@ -2,10 +2,11 @@ package net.eulerframework.web.core.base.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.eulerframework.web.core.util.UrlTool;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import net.eulerframework.web.util.UrlTool;
 
 @Deprecated
 public abstract class DefaultWebController extends AbstractWebController {

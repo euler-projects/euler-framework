@@ -1,25 +1,25 @@
 package net.eulerframework.web.core.exception;
 
 @SuppressWarnings("serial")
-public class MultipartFileSaveException extends Exception {
-
-    public MultipartFileSaveException() {
+public class IllegalParamException extends RuntimeException {
+    
+    public IllegalParamException() {
         super();
     }
 
-    public MultipartFileSaveException(String message) {
+    public IllegalParamException(String message) {
         super(message);
     }
 
-    public MultipartFileSaveException(String message, Throwable cause) {
+    public IllegalParamException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public MultipartFileSaveException(Throwable cause) {
+    public IllegalParamException(Throwable cause) {
         super(cause);
     }
     
-    protected MultipartFileSaveException(String message, Throwable cause,
+    protected IllegalParamException(String message, Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);

@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.base.exception;
+package net.eulerframework.web.core.exception;
 
 @SuppressWarnings("serial")
 public class ResourceExistException extends RuntimeException {

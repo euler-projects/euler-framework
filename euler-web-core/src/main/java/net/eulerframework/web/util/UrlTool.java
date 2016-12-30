@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.util;
+package net.eulerframework.web.util;
 
 import javax.servlet.http.HttpServletRequest;
 
