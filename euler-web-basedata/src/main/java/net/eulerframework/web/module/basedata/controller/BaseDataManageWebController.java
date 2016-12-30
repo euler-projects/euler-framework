@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import net.eulerframework.common.email.EmailConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
 import net.eulerframework.web.core.base.request.QueryRequest;
@@ -109,18 +108,6 @@ public class BaseDataManageWebController extends AbstractWebController {
     @RequestMapping(value ="/deletePage", method = RequestMethod.POST)
     public void deletePage(@RequestParam String id) {
         this.baseDataService.deletePage(id);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "/saveEmailConfig")
-    public void saveEmailConfig(@Valid EmailConfig emailConfig) {
-        this.baseDataService.saveSystemEmail(emailConfig);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "/loadEmailConfig")
-    public EmailConfig loadEmailConfig() {
-        return this.baseDataService.findEmailConfig();
     }
     
 }
