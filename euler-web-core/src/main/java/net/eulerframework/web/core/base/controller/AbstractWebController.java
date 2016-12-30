@@ -5,8 +5,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import net.eulerframework.web.core.base.exception.NotFoundException;
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
+import net.eulerframework.web.core.exception.NotFoundException;
 
 public abstract class AbstractWebController extends BaseController {
     

@@ -5,8 +5,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
-import net.eulerframework.web.core.base.exception.EntityCompareException;
 import org.hibernate.annotations.GenericGenerator;
+
+import net.eulerframework.web.core.exception.EntityCompareException;
 
 /**
  * <strong>UUID主键</strong>实体<br>

@@ -3,7 +3,7 @@ package net.eulerframework.web.core.base.request;
 import javax.servlet.http.HttpServletRequest;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.core.base.exception.IllegalParamException;
+import net.eulerframework.web.core.exception.IllegalParamException;
 
 public class PageQueryRequest extends QueryRequest {
 

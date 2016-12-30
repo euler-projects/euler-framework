@@ -34,12 +34,12 @@ import net.eulerframework.common.util.Generic;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
-import net.eulerframework.web.core.base.exception.IllegalParamException;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest.OrderMode;
 import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
 import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.exception.IllegalParamException;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 
 public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
