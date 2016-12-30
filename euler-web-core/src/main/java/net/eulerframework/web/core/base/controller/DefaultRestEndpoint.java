@@ -11,7 +11,8 @@ import net.eulerframework.web.core.base.response.WebServiceResponse;
 @RestEndpoint
 @Scope("prototype")
 @RequestMapping("/")
-public class DefaultRestEndpoint extends AbstractRestEndpoint {
+@Deprecated
+public abstract class DefaultRestEndpoint extends AbstractRestEndpoint {
 
     @ResponseBody
     @RequestMapping(value = { "**" })

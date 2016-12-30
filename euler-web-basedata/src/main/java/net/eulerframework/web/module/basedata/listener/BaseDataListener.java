@@ -35,7 +35,6 @@ public class BaseDataListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        // TODO Auto-generated method stub
 
     }
 

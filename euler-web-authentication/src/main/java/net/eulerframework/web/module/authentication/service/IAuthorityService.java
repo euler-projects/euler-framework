@@ -10,7 +10,7 @@ import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
 
-@PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','SYSTEM')")
+@PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
 public interface IAuthorityService extends IBaseService {
 
     public PageResponse<Group> findGroupByPage(QueryRequest queryRequest, int pageIndex, int pageSize);

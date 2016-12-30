@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+@Deprecated
 public abstract class DefaultWebController extends AbstractWebController {
 
     @RequestMapping(value={"", "/", "index"},method=RequestMethod.GET)

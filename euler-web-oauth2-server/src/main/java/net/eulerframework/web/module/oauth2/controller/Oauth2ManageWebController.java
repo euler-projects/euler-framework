@@ -4,7 +4,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import net.eulerframework.web.core.base.controller.DefaultWebController;
+import net.eulerframework.web.core.base.controller.AbstractWebController;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.oauth2.entity.Client;
 import net.eulerframework.web.module.oauth2.service.IClientService;
@@ -23,7 +23,7 @@ import net.eulerframework.web.core.base.request.QueryRequest;
 @WebController
 @Scope("prototype")
 @RequestMapping("/manage/oauth2")
-public class Oauth2ManageWebController extends DefaultWebController {
+public class Oauth2ManageWebController extends AbstractWebController {
     
     @Resource
     private IClientService clientService;

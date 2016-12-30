@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.common.email.EmailConfig;
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.base.controller.DefaultWebController;
+import net.eulerframework.web.core.base.controller.AbstractWebController;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.basedata.entity.CodeTable;
@@ -26,7 +26,7 @@ import net.eulerframework.web.module.basedata.service.IBaseDataService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/manage/basedata")
-public class BaseDataManageWebController extends DefaultWebController {
+public class BaseDataManageWebController extends AbstractWebController {
     
     @Resource
     private IBaseDataService baseDataService;
