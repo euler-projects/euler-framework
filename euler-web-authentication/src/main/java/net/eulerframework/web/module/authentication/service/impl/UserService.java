@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.authentication.service.impl;
 
+import net.eulerframework.cache.DefaultObjectCache;
+import net.eulerframework.cache.ObjectCachePool;
 import net.eulerframework.common.email.MailSenderFactory;
 import net.eulerframework.common.email.ThreadSimpleMailSender;
 import net.eulerframework.common.util.BeanTool;
@@ -10,7 +12,6 @@ import net.eulerframework.web.core.base.exception.ResourceExistException;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.cache.DefaultObjectCache;
 import net.eulerframework.web.core.i18n.Tag;
 import net.eulerframework.web.module.authentication.dao.IGroupDao;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
@@ -56,7 +57,8 @@ public class UserService extends BaseService implements IUserService, UserDetail
     private boolean enableEmailLogin = false;
     private boolean enableMobileLogin = false;
     private boolean enableCache = false;
-    private final static DefaultObjectCache<String, User> USER_CAHCE = new DefaultObjectCache<>(10_000L);
+    
+    private final static DefaultObjectCache<String, User> USER_CAHCE = ObjectCachePool.generateDefaultObjectCache(10_000L);
     
     public void setEnableEmailLogin(boolean enableEmailLogin) {
         this.enableEmailLogin = enableEmailLogin;

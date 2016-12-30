@@ -27,7 +27,7 @@
  * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerframework.web.core.cache;
+package net.eulerframework.cache;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class ObjectCache<KEY_T, DATA_T> {
     /**
      * 新建缓存对象,默认数据生命周期为0s
      */
-    public ObjectCache() {
+    protected ObjectCache() {
         this.dataLife = 0L;
     }
 
@@ -64,7 +64,7 @@ public class ObjectCache<KEY_T, DATA_T> {
      * 新建缓存对象并指定数据生命周期
      * @param dataLife 数据生命周期,单位:毫秒,设为<code>&lt;=0</code>的值表示禁用缓存
      */
-    public ObjectCache(long dataLife) {
+    protected ObjectCache(long dataLife) {
         this.dataLife = dataLife;
     }
 

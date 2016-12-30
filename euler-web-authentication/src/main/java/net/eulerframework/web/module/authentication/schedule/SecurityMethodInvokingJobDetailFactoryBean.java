@@ -10,7 +10,7 @@ public class SecurityMethodInvokingJobDetailFactoryBean extends MethodInvokingJo
 
     @Override
     public Object invoke() throws InvocationTargetException, IllegalAccessException {
-        UserContext.addSpecialSystemSecurityContext();
+        UserContext.sudo();
         return super.invoke();
     }
 }

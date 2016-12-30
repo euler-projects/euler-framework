@@ -24,8 +24,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.util.WebConfig;
 
 @Configuration
 @EnableWebMvc

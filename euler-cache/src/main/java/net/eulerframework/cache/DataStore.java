@@ -27,7 +27,7 @@
  * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerframework.web.core.cache;
+package net.eulerframework.cache;
 
 import java.util.Date;
 
@@ -35,7 +35,7 @@ public class DataStore<T> {
     private final T data;
     private final long addTime;
 
-    public DataStore(T data) {
+    protected DataStore(T data) {
         this.data = data;
         this.addTime = new Date().getTime();
     }

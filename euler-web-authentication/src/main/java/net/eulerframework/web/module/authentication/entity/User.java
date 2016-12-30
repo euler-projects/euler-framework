@@ -19,9 +19,9 @@ import java.util.Set;
 @Table(name = "SYS_USER")
 public class User extends UUIDEntity<User> implements UserDetails, CredentialsContainer {
     public final static User ANONYMOUS_USER;
-    public final static User SYSTEM_USER;
+    public final static User ROOT_USER;
     public final static String ANONYMOUS_USERNAME = "anonymousUser";
-    public final static String SYSTEM_USERNAME = "system";
+    public final static String ROOT_USERNAME = "root";
     
     static {
         ANONYMOUS_USER = new User();
@@ -33,16 +33,16 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         ANONYMOUS_USER.setEnabled(false);
         ANONYMOUS_USER.setCredentialsNonExpired(false);
         
-        SYSTEM_USER = new User();
-        SYSTEM_USER.setId(SYSTEM_USERNAME);
-        SYSTEM_USER.setUsername(SYSTEM_USERNAME);
+        ROOT_USER = new User();
+        ROOT_USER.setId(ROOT_USERNAME);
+        ROOT_USER.setUsername(ROOT_USERNAME);
         Set<Authority> authorities = new HashSet<>();
-        authorities.add(Authority.SYSTEM_AUTHORITY);
-        SYSTEM_USER.setAuthorities(authorities);
-        SYSTEM_USER.setAccountNonExpired(true);
-        SYSTEM_USER.setAccountNonLocked(true);
-        SYSTEM_USER.setEnabled(true);
-        SYSTEM_USER.setCredentialsNonExpired(true);
+        authorities.add(Authority.ROOT_AUTHORITY);
+        ROOT_USER.setAuthorities(authorities);
+        ROOT_USER.setAccountNonExpired(true);
+        ROOT_USER.setAccountNonLocked(true);
+        ROOT_USER.setEnabled(true);
+        ROOT_USER.setCredentialsNonExpired(true);
     }
 
     @NotNull
@@ -55,14 +55,9 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private String mobile;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
+    @NotNull
     @Column(name = "FULL_NAME")
     private String fullName;
-    @Column(name = "NATION")
-    private String nation;
-    @Column(name = "SEX")
-    private String sex;
-    @Column(name = "D1")
-    private String d1;
     @Column(name = "ENABLED", nullable = false)
     private Boolean enabled;
     @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
@@ -71,6 +66,8 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private Boolean accountNonLocked;
     @Column(name = "CREDENTIALS_NON_EXPIRED", nullable = false)
     private Boolean credentialsNonExpired;
+    @Column(name = "ROOT")
+    private Boolean root;
     @Column(name = "RESET_TOKEN", unique = true)
     private String resetToken;
     @Column(name = "RESET_TOKEN_EXPIRE_TIME")
@@ -98,30 +95,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public void setNation(String nation) {
-        this.nation = nation;
-    }
-
-    public String getNation() {
-        return nation;
-    }
-
-    public String getSex() {
-        return sex;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
-    }
-
-    public String getD1() {
-        return d1;
-    }
-
-    public void setD1(String d1) {
-        this.d1 = d1;
     }
 
     public String getPassword() {
@@ -166,15 +139,22 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     
     @Override
     public Set<Authority> getAuthorities() {
-        if(this.groups == null || this.groups.isEmpty())
-            return this.authorities;
         Set<Authority> result =  new HashSet<>();
+        
         if(this.authorities != null && !this.authorities.isEmpty())
             result.addAll(this.authorities);
-        for(Group group : this.groups) {
-            if(group.getAuthorities() != null && !group.getAuthorities().isEmpty())
-                result.addAll(group.getAuthorities());
+        
+        if(this.groups != null) {
+            for(Group group : this.groups) {
+                if(group.getAuthorities() != null && !group.getAuthorities().isEmpty())
+                    result.addAll(group.getAuthorities());
+            }            
         }
+        
+        if(this.root == true) {
+            result.add(Authority.ROOT_AUTHORITY);
+        }
+        
         return result;
     }
 
@@ -225,6 +205,14 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public Boolean isRoot() {
+        return root;
+    }
+
+    public void setRoot(Boolean root) {
+        this.root = root;
     }
 
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {

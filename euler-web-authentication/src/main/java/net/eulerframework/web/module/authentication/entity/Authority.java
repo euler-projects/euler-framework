@@ -16,14 +16,14 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 public class Authority extends UUIDEntity<Authority> implements GrantedAuthority {
    
     public final static String ANONYMOUS = "ANONYMOUS";
-    public final static String SYSTEM = "SYSTEM";
+    public final static String ROOT = "ROOT";
     
-    public final static Authority SYSTEM_AUTHORITY;
+    public final static Authority ROOT_AUTHORITY;
     
     static {
-        SYSTEM_AUTHORITY = new Authority();
-        SYSTEM_AUTHORITY.setAuthority(SYSTEM);
-        SYSTEM_AUTHORITY.setDescription(SYSTEM);
+        ROOT_AUTHORITY = new Authority();
+        ROOT_AUTHORITY.setAuthority(ROOT);
+        ROOT_AUTHORITY.setDescription(ROOT);
     }
 
     @NotNull

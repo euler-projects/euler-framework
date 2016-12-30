@@ -1,11 +1,12 @@
 package net.eulerframework.web.module.oauth2.service.impl;
 
+import net.eulerframework.cache.DefaultObjectCache;
+import net.eulerframework.cache.ObjectCachePool;
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.cache.DefaultObjectCache;
 import net.eulerframework.web.module.oauth2.dao.IClientDao;
 import net.eulerframework.web.module.oauth2.dao.IResourceDao;
 import net.eulerframework.web.module.oauth2.dao.IScopeDao;
@@ -32,7 +33,7 @@ public class ClientService extends BaseService implements IClientService, Client
     private IScopeDao scopeDao;
     
     private boolean cacheEnabled = false;
-    private final static DefaultObjectCache<String, Client> CLIENT_CACHE = new DefaultObjectCache<>(60_000L);
+    private final static DefaultObjectCache<String, Client> CLIENT_CACHE = ObjectCachePool.generateDefaultObjectCache(60_000L);
 
     private PasswordEncoder passwordEncoder;
 

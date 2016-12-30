@@ -27,7 +27,7 @@
  * http://eulerframework.net
  * http://cfrost.net
  */
-package net.eulerframework.web.core.cache;
+package net.eulerframework.cache;
 
 import java.util.Date;
 
@@ -42,10 +42,10 @@ public class DefaultObjectCache<KEY_T, DATA_T> extends AbstractObjectCache<KEY_T
         this.dataLife = dataLife;
     }
 
-    public DefaultObjectCache() {
+    protected DefaultObjectCache() {
     }
 
-    public DefaultObjectCache(long dataLife) {
+    protected DefaultObjectCache(long dataLife) {
         this.dataLife = dataLife;
     }
 
