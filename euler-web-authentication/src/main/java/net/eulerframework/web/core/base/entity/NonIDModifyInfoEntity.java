@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.security.entity;
+package net.eulerframework.web.core.base.entity;
 
 import java.util.Date;
 
@@ -6,19 +6,19 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
-import net.eulerframework.web.core.base.entity.IDEntity;
+import net.eulerframework.web.core.base.entity.NonIDEntity;
 
 /**
- * 具有修改人记录功能的<strong>自增主键</strong>实体<br>
+ * 具有修改人记录功能的<strong>无主键</strong>实体<br>
  * 
- * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends IDModifyInfoEntity&lt;Example&gt;<code>
+ * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends NonIDModifyInfoEntity&lt;Example&gt;<code>
  * @author cFrost
- * @see NonIDModifyInfoEntity
+ * @see IDModifyInfoEntity
  * @see UUIDModifyInfoEntity
  */
 @SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class IDModifyInfoEntity<T extends IDModifyInfoEntity<?>> extends IDEntity<T> implements BaseModifyInfoEntity<T> {    
+public abstract class NonIDModifyInfoEntity<T extends NonIDModifyInfoEntity<?>> extends NonIDEntity<T> implements BaseModifyInfoEntity<T> {    
 
     @Column(name="CREATE_BY", nullable=false)
     private String createBy;
@@ -73,12 +73,12 @@ public abstract class IDModifyInfoEntity<T extends IDModifyInfoEntity<?>> extend
     private String createByName;
     @Transient
     private String modifyByName;
-    
+
     @Override
     public String getCreateByName() {
         return createByName;
     }
-    
+
     @Override
     public void setCreateByName(String createByName) {
         this.createByName = createByName;

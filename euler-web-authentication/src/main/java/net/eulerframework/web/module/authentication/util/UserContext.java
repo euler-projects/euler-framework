@@ -5,6 +5,7 @@ import net.eulerframework.common.util.GlobalPropertyReadException;
 import net.eulerframework.web.core.cache.DefaultObjectCache;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IUserService;
+
 import org.apache.logging.log4j.LogManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.CredentialsContainer;

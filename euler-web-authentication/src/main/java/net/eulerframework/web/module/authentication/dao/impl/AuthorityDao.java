@@ -7,8 +7,7 @@ import java.util.List;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.module.authentication.dao.IAuthorityDao;
-import net.eulerframework.web.module.authentication.entity.Authority;
+
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -17,6 +16,8 @@ import org.hibernate.criterion.Restrictions;
 import net.eulerframework.common.util.PinYinTool;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
+import net.eulerframework.web.module.authentication.dao.IAuthorityDao;
+import net.eulerframework.web.module.authentication.entity.Authority;
 
 public class AuthorityDao extends BaseDao<Authority> implements IAuthorityDao {
 

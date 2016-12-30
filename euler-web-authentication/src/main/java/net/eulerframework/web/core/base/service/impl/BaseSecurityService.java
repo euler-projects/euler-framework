@@ -1,7 +1,7 @@
-package net.eulerframework.web.core.security.service.impl;
+package net.eulerframework.web.core.base.service.impl;
 
+import net.eulerframework.web.core.base.service.IBaseSecurityService;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.security.service.IBaseSecurityService;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
 

@@ -2,8 +2,9 @@ package net.eulerframework.web.module.authentication.schedule;
 
 import java.lang.reflect.InvocationTargetException;
 
-import net.eulerframework.web.module.authentication.util.UserContext;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
+
+import net.eulerframework.web.module.authentication.util.UserContext;
 
 public class SecurityMethodInvokingJobDetailFactoryBean extends MethodInvokingJobDetailFactoryBean {
 

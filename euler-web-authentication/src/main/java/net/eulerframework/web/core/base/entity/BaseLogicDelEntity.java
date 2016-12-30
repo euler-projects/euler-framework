@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.security.entity;
+package net.eulerframework.web.core.base.entity;
 
 /**
  * 具有逻辑删除和修改人记录功能的基础实体接口<br>
