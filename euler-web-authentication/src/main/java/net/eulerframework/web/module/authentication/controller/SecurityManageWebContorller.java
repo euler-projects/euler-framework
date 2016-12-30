@@ -6,7 +6,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import net.eulerframework.web.core.base.controller.DefaultWebController;
+import net.eulerframework.web.core.base.controller.AbstractWebController;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +29,7 @@ import net.eulerframework.web.module.authentication.service.IUserService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/manage/authentication")
-public class SecurityManageWebContorller extends DefaultWebController {
+public class SecurityManageWebContorller extends AbstractWebController {
 
 	@Resource
 	private IUserService userService;

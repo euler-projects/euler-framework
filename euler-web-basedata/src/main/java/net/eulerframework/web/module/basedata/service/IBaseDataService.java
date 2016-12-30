@@ -24,37 +24,37 @@ public interface IBaseDataService extends IBaseService {
     
     public String findConfigValue(String key);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public List<Module> findAllModuleFromDB();
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public void saveCodeTable(CodeTable codeTable);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public void deleteCodeTables(Serializable[] idArray);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public Module findModuleById(String id);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public Page findPageById(String id);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public void savePage(Page page);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public void deletePage(Serializable id);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public void saveModule(Module module);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('ADMIN','ROOT')")
     public void deleteModule(Serializable id);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('SYS_EMAIL_ADMIN','ADMIN','SYSTEM')")
+    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('SYS_EMAIL_ADMIN','ADMIN','ROOT')")
     public void saveSystemEmail(EmailConfig emailConfig);
 
     public EmailConfig findEmailConfig();
