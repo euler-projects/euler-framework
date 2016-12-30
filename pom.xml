@@ -18,7 +18,7 @@
         <module>euler-web-oauth2-server</module>
         <module>euler-web-ueditor</module>
         <module>demo</module>
-    </modules>    
+    </modules>
 
     <properties>
         <jdk.version>1.7</jdk.version>
@@ -35,12 +35,12 @@
         <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
         <jasig.version>3.2.2</jasig.version>
         <quartz.version>2.2.3</quartz.version>
-        
+
         <hibernate.version>5.0.5.Final</hibernate.version>
         <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
         <c3p0.version>0.9.5.2</c3p0.version>
         <mysqljdbc.version>5.1.38</mysqljdbc.version>
-        
+
         <jersey.version>2.22.2</jersey.version>
 
         <jackson.version>2.7.3</jackson.version>
@@ -50,9 +50,9 @@
         <jboss.logging.version>3.3.0.Final</jboss.logging.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-codec.version>1.10</commons-codec.version>
-        
+
         <junit.version>3.8.1</junit.version>
-        
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -99,9 +99,9 @@
 
             <!-- Spring -->
             <dependency>
-              <groupId>org.springframework</groupId>
-              <artifactId>spring-context-support</artifactId>
-              <version>${springframework.version}</version>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${springframework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -112,7 +112,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-orm</artifactId>
                 <version>${springframework.version}</version>
-            </dependency>            
+            </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-oxm</artifactId>
@@ -160,7 +160,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
@@ -193,7 +193,7 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysqljdbc.version}</version>
             </dependency>
-            
+
             <!-- Jersey bean-validator与Hibernate5冲突 -->
             <dependency>
                 <groupId>org.glassfish.jersey.containers</groupId>
@@ -216,31 +216,31 @@
                 <artifactId>jersey-media-json-jackson</artifactId>
                 <version>${jersey.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j-api.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j2.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
                 <version>${jboss.logging.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
@@ -266,13 +266,13 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>        
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
@@ -288,13 +288,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
                 <version>1.8.9</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>javax.mail</groupId>
                 <artifactId>javax.mail-api</artifactId>
@@ -350,7 +350,7 @@
                     </archive>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -365,9 +365,23 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    
+
     <distributionManagement>
         <repository>
             <id>releases</id>
