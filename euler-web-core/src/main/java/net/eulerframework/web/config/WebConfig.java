@@ -11,6 +11,8 @@ import net.eulerframework.common.util.StringTool;
 public abstract class WebConfig {
     
     private static class WebConfigKey {
+        private final static String CORE_I18N_REFRESH_FREQ = "core.i18nRefreshFreq";
+        
         private final static String WEB_UPLOAD_PATH = "web.uploadPath";
         private final static String WEB_JSP_PATH = "web.jspPath";
         private final static String WEB_ENABLE_JSP_AUTO_DEPLOY = "web.enableJspAutoDeploy";
@@ -31,6 +33,8 @@ public abstract class WebConfig {
     }
     
     private static class WebConfigDefault {
+        private final static int CORE_I18N_REFRESH_FREQ = 86_400;
+        
         private final static String WEB_UPLOAD_PATH = "/upload";
         private final static String WEB_JSP_PATH = "/WEB-INF/modulePages";
         private final static boolean WEB_ENABLE_JSP_AUTO_DEPLOY = false;
@@ -52,6 +56,8 @@ public abstract class WebConfig {
     }
     
     protected final static Logger log = LogManager.getLogger();
+
+    private static Integer i18nRefreshFreq;
     
     private static String uploadPath;
     private static String jspPath;
@@ -65,6 +71,18 @@ public abstract class WebConfig {
     private static WebAuthenticationType webAuthenticationType;
     private static ApiAuthenticationType apiAuthenticationType;
     private static OAuthServerType oauthServerType;
+    
+    public static int getI18nRefreshFreq() {
+        if(i18nRefreshFreq == null) {
+            try {
+                i18nRefreshFreq = Integer.parseInt(GlobalProperties1.get(WebConfigKey.CORE_I18N_REFRESH_FREQ));
+            } catch (GlobalPropertyReadException e) {
+                i18nRefreshFreq = WebConfigDefault.CORE_I18N_REFRESH_FREQ;
+                log.warn("Couldn't load " + WebConfigKey.CORE_I18N_REFRESH_FREQ + " , use " + i18nRefreshFreq + " for default.");
+            }
+        }
+        return i18nRefreshFreq;        
+    }
     
     public static WebAuthenticationType getWebAuthenticationType() {
         if(webAuthenticationType == null) {

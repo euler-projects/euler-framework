@@ -1,9 +1,7 @@
-package net.eulerframework.web.core.bean;
+package net.eulerframework.web.core.base;
 
 import java.nio.charset.StandardCharsets;
 
-import net.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,16 +15,16 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
+
 @Configuration
 public class BaseBean {
-    
-    @Value("${i18n.cacheSeconds}")
-    private int i18nCacheSeconds;
     
     @Bean
     public MessageSource messageSource() {
         ClassPathReloadableResourceBundleMessageSource messageSource = new ClassPathReloadableResourceBundleMessageSource();
-        messageSource.setCacheSeconds(this.i18nCacheSeconds);
+        messageSource.setCacheSeconds(WebConfig.getI18nRefreshFreq());
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setBasenames(
