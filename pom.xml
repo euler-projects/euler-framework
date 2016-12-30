@@ -16,7 +16,6 @@
         <module>euler-web-authentication</module>
         <module>euler-web-basedata</module>
         <module>euler-web-oauth2-server</module>
-        <module>euler-web-ueditor</module>
         <module>demo</module>
     </modules>
 
