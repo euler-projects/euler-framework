@@ -27,4 +27,4 @@ The Euler Framework is based on Spring MVC, provides a set of base classes to ma
 ## License
 The Euler Framework is released under the [MIT License][].
 
-[MIT License]: https://mit-license.org
+[MIT License]: https://opensource.org/licenses/MIT
