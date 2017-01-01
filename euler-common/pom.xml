@@ -6,6 +6,7 @@
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../euler-parent/pom.xml</relativePath>
     </parent>
     <artifactId>euler-common</artifactId>
     <version>0.2.0-SNAPSHOT</version>
