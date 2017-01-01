@@ -9,8 +9,4 @@ public class UrlTool {
         String contextPath = httpServletRequest.getContextPath();        
         return requestURI.replaceFirst(contextPath, "").trim();
     }
-    
-    public static void main(String[] args) {
-        net.eulerframework.test.Test.test();
-    }
 }

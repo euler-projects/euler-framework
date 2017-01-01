@@ -21,5 +21,22 @@
         <module>euler-web-config-provider</module>
     </modules>
 
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-cache</artifactId>
+                <version>0.2.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-common</artifactId>
+                <version>0.2.0-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <url>http://www.eulerproject.io/euler-framework</url>
 </project>

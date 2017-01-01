@@ -299,18 +299,6 @@
                 <artifactId>javax.mail-api</artifactId>
                 <version>1.5.5</version>
             </dependency>
-        
-            <dependency>
-              <groupId>net.eulerframework</groupId>
-              <artifactId>euler-cache</artifactId>
-              <version>0.2.0-SNAPSHOT</version>
-            </dependency>
-        
-            <dependency>
-                <groupId>net.eulerframework</groupId>
-                <artifactId>euler-common</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
-            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
