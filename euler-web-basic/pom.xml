@@ -6,7 +6,7 @@
         <artifactId>euler-framework</artifactId>
         <version>0.2.0-SNAPSHOT</version>
     </parent>
-    <artifactId>euler-web-basedata</artifactId>
+    <artifactId>euler-web-basic</artifactId>
 
     <dependencies>
         <dependency>
