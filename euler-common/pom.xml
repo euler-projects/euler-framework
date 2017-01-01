@@ -2,38 +2,169 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>net.eulerframework</groupId>
-        <artifactId>euler-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../euler-parent/pom.xml</relativePath>
-    </parent>
+    <groupId>net.eulerframework</groupId>
     <artifactId>euler-common</artifactId>
     <version>0.2.0-SNAPSHOT</version>
-    
+
+    <properties>
+        <jdk.version>1.7</jdk.version>
+
+        <jsp.version>2.2</jsp.version>
+        <servlet.version>3.0.1</servlet.version>
+        <jstl.version>1.2</jstl.version>
+        <inject.version>1</inject.version>
+        <validation-api.version>1.1.0.Final</validation-api.version>
+        <jaxb-api.version>2.2.12</jaxb-api.version>
+        <jta.version>1.1</jta.version>
+
+        <springframework.version>4.2.5.RELEASE</springframework.version>
+        <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
+        <jasig.version>3.2.2</jasig.version>
+        <quartz.version>2.2.3</quartz.version>
+
+        <hibernate.version>5.0.5.Final</hibernate.version>
+        <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
+        <c3p0.version>0.9.5.2</c3p0.version>
+        <mysqljdbc.version>5.1.38</mysqljdbc.version>
+
+        <jersey.version>2.22.2</jersey.version>
+
+        <jackson.version>2.7.3</jackson.version>
+        <slf4j-api.version>1.7.21</slf4j-api.version>
+        <log4j.version>1.2.17</log4j.version>
+        <log4j2.version>2.5</log4j2.version>
+        <jboss.logging.version>3.3.0.Final</jboss.logging.version>
+        <commons-logging.version>1.2</commons-logging.version>
+        <commons-codec.version>1.10</commons-codec.version>
+
+        <junit.version>3.8.1</junit.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${log4j2.version}</version>
         </dependency>
         <dependency>
             <groupId>com.belerweb</groupId>
             <artifactId>pinyin4j</artifactId>
             <version>2.5.1</version>
         </dependency>
-        
+
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
+            <version>1.5.5</version>
         </dependency>
-        <dependency >  
-            <groupId >com.sun.mail</groupId >  
-            <artifactId >javax.mail</artifactId >  
-            <version >1.5.4 </version >  
-        </dependency >
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.4 </version>
+        </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>java8-doclint-disabled</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <javadoc.opts>-Xdoclint:none</javadoc.opts>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>${javadoc.opts}</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>http://repo.eulerproject.io/content/repositories/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://repo.eulerproject.io/content/repositories/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
