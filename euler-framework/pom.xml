@@ -13,7 +13,7 @@
         <module>euler-web-core</module>
         <module>euler-web-authentication</module>
         <module>euler-web-basic</module>
-        <!-- <module>euler-web-oauth2-server</module> -->
+        <module>euler-web-oauth2-server</module>
         <module>euler-web-config-provider</module>
     </modules>
 
