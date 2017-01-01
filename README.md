@@ -1,5 +1,6 @@
 # euler-framework
-[![Build Status](http://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/badge/icon)](http://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/)
+[![Build Status](https://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/badge/icon)](https://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/)
+
 ## About
 A simple Web framework based on Spring MVC
 
@@ -11,6 +12,7 @@ A simple Web framework based on Spring MVC
 A generic form submitter
 
 ## Release History
+
 ### 0.1.1
 * CMS module
 * BLOG module
