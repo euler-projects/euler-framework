@@ -311,15 +311,15 @@
             </dependency>
         
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>euler-cache</artifactId>
-                <version>0.2.0-SANPSHOT</version>
+              <groupId>net.eulerframework</groupId>
+              <artifactId>euler-cache</artifactId>
+              <version>0.2.0-SNAPSHOT</version>
             </dependency>
         
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>net.eulerframework</groupId>
                 <artifactId>euler-common</artifactId>
-                <version>0.2.0-SANPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
