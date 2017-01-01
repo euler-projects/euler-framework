@@ -74,6 +74,11 @@ public class ObjectCachePool {
         return newCache;
     }
     
+    /**
+     * 初始化缓存池
+     * @param delay 启动延时
+     * @param period 清理频率
+     */
     public static void initEulerCachePoolCleaner(long delay, long period) {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
