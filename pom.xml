@@ -313,13 +313,13 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>euler-cache</artifactId>
-                <version>${project.version}</version>
+                <version>0.2.0-SANPSHOT</version>
             </dependency>
         
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>euler-common</artifactId>
-                <version>${project.version}</version>
+                <version>0.2.0-SANPSHOT</version>
             </dependency>
 
             <dependency>
