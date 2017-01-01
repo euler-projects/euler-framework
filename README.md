@@ -25,6 +25,6 @@ The Euler Framework is based on Spring MVC, provides a set of base classes to ma
 * CAS authentication
 
 ## License
-The Euler Framework is released under version 2.0 of the [MIT License][].
+The Euler Framework is released under the [MIT License][].
 
 [MIT License]: https://mit-license.org
