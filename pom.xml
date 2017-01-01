@@ -10,13 +10,11 @@
     <description>Website framework based on Spring MVC</description>
 
     <modules>
-        <module>euler-common</module>
         <module>euler-web-core</module>
         <module>euler-web-config-provider</module>
         <module>euler-web-authentication</module>
         <module>euler-web-basic</module>
         <module>euler-web-oauth2-server</module>
-        <module>euler-cache</module>
     </modules>
 
     <properties>
@@ -310,6 +308,18 @@
                 <groupId>javax.mail</groupId>
                 <artifactId>javax.mail-api</artifactId>
                 <version>1.5.5</version>
+            </dependency>
+        
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>euler-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>euler-common</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>

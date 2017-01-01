@@ -162,13 +162,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>euler-cache</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>euler-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
     
