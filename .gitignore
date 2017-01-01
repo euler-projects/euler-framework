@@ -8,3 +8,4 @@ node_modules
 pom.xml.versionsBackup
 .idea/
 *.iml
+*.pem
