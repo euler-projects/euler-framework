@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
+import net.eulerframework.web.core.base.response.PageResponse;
 
 public interface IBaseDao<T extends BaseEntity<?>>{
 
@@ -37,6 +39,8 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     List<T> findAll();
     
     long findCount();
+    
+    PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest);
 
     void flushSession();
 }

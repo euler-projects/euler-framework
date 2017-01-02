@@ -4,58 +4,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用来作为分页查询的返回数据实体
+ * 用来作为分页查询的响应实体
  * 
  * @author cFrost
  *
- * @param <T>
- *            返回数据类型,支持单个对象和容器<br>
- *            例如Object和List&lt;Object&gt;均只需指定为PageResponse&lt;Object&gt;
+ * @param <T> 返回数据类型
  */
 public class PageResponse<T> implements BaseResponse {
 
-    private List<T> rows;
+    private final List<T> rows;
 
-    private Long total;
+    private final long total;
     
-    private Integer pageIndex;
+    private final int pageIndex;
     
-    private Integer pageSize;
+    private final int pageSize;
     
-    public PageResponse() {}
-    
-    public PageResponse(T data, long total, int pageIndex, int pageSize) {
-        this.setRows(data);
-        this.setTotal(total);
-        this.setPageIndex(pageIndex);
-        this.setPageSize(pageSize);
-    }
-    
-    public PageResponse(List<T> data, long total, int pageIndex, int pageSize) {
-        this.setRows(data);
-        this.setTotal(total);
-        this.setPageIndex(pageIndex);
-        this.setPageSize(pageSize);
-    }
-
-    public void setRows(T data) {
-        if (data == null) {
+    /**
+     * 新建分页响应实体
+     * @param rows 分页数据
+     * @param total 数据总数
+     * @param pageIndex 页码
+     * @param pageSize 每页数据量
+     */
+    public PageResponse(List<T> rows, long total, int pageIndex, int pageSize) {
+        if(rows == null)
             this.rows = new ArrayList<>();
-            return;
-        }
-
-        List<T> dataList = new ArrayList<>();
-        dataList.add(data);
-        this.setRows(dataList);
-    }
-
-    public void setRows(List<T> data) {
-        if (data == null || data.isEmpty()) {
-            this.rows = new ArrayList<>();
-            return;
-        }
-
-        this.rows = data;
+        else
+            this.rows = rows;
+        
+        this.total = total;
+        this.pageIndex = pageIndex;
+        this.pageSize = pageSize;
     }
     
     public List<T> getRows() {
@@ -66,23 +46,11 @@ public class PageResponse<T> implements BaseResponse {
         return total;
     }
 
-    public void setTotal(Long total) {
-        this.total = total;
-    }
-
     public Integer getPageIndex() {
         return pageIndex;
     }
 
-    public void setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
-    }
-
     public Integer getPageSize() {
         return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
     }
 }

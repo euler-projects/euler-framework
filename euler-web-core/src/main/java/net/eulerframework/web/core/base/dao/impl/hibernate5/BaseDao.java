@@ -215,6 +215,34 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         return result;
     }
 
+    @Override
+    public long findCount() {
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("select count(*) from ");
+        hqlBuffer.append(this.entityClass.getSimpleName());
+        final String hql = hqlBuffer.toString();
+        List<?> l = this.findBy(hql);
+
+        if (l != null && l.size() == 1)
+            return (Long) l.get(0);
+        return 0;
+    }
+    
+    @Override
+    public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest) {
+        DetachedCriteria detachedCriteria = this.generateCriteria(pageQueryRequest);
+        
+        int pageIndex = pageQueryRequest.getPageIndex();
+        int pageSize = pageQueryRequest.getPageSize();
+        
+        return this.findPageBy(detachedCriteria, pageIndex, pageSize);   
+    }
+
+    @Override
+    public void flushSession() {
+        this.getCurrentSession().flush();
+    }
+
     @SuppressWarnings("unchecked")
     protected List<T> findBy(String hql) {
         List<T> result = this.getSessionFactory().getCurrentSession().createQuery(hql).list();
@@ -242,6 +270,15 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    protected List<T> findBy(String hql, int maxResults) {
+        Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
+        query.setMaxResults(maxResults);
+        List<T> result = query.list();
+        evict(result);
+        return result;
+    }
+    
     @SuppressWarnings("unchecked")
     protected List<T> findByWithMaxResults(String hql, int maxResults, Object... params) {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
@@ -290,20 +327,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         return new PageResponse<>(result, total, pageIndex, pageSize);
     }
 
-    @Override
-    public long findCount() {
-        StringBuffer hqlBuffer = new StringBuffer();
-        hqlBuffer.append("select count(*) from ");
-        hqlBuffer.append(this.entityClass.getSimpleName());
-        final String hql = hqlBuffer.toString();
-        List<?> l = this.findBy(hql);
-
-        if (l != null && l.size() == 1)
-            return (Long) l.get(0);
-        return 0;
-    }
-
-    protected void evict(Object entity) {
+    protected final void evict(Object entity) {
         if (entity == null || !BaseEntity.class.isAssignableFrom(entity.getClass()))
             return;
         this.getCurrentSession().evict(entity);
@@ -327,12 +351,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     protected void eraseEmptyProperty(T entity) {
         BeanTool.clearEmptyProperty(entity);
-    }
-
-    @Override
-    public void flushSession() {        
-        //DO_NOTHING
-    }    
+    }   
     
     protected DetachedCriteria generateCriteria(QueryRequest queryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
@@ -360,12 +379,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
                 continue;
             
             detachedCriteria.addOrder(this.generateOrder(property, value));
-        }
-        
-        if(PageQueryRequest.class.isAssignableFrom(queryRequest.getClass())) {
-            PageQueryRequest request = (PageQueryRequest) queryRequest;
-            int pageIndex = request.getPageIndex();
-            int pageSize = request.getPageSize();
         }
         
         return detachedCriteria;
@@ -479,13 +492,5 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         } 
         
         throw new IllegalParamException("Unsupport query property type: " + clazz);
-    }
-
-    public static void main(String[] args) throws NoSuchFieldException, SecurityException {
-        System.out.println("int".equals(Test.class.getDeclaredField("a").getType().toString()));
-    }
-    
-    public static class Test {
-        int a;
     }
 }

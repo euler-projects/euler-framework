@@ -17,9 +17,7 @@ import org.springframework.http.HttpStatus;
  */
 public class WebServiceResponse<T> extends HttpStatusResponse {
 
-    private List<T> data = new ArrayList<>();
-
-    private int dataSize = 0;
+    private final List<T> data;
 
     /**
      * 新建单个对象WebService响应实体,状态码为200 OK
@@ -29,12 +27,12 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
         super(HttpStatus.OK);        
 
         if(data == null)
-            return;
-        
-        List<T> dataList = new ArrayList<>();
-        dataList.add(data);
-        
-        this.setData(dataList);
+            this.data = new ArrayList<>();
+        else {
+            List<T> dataList = new ArrayList<>();
+            dataList.add(data);
+            this.data = dataList;     
+        }
     }
     
     /**
@@ -43,16 +41,11 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      */
     public WebServiceResponse(List<T> dataList) {
         super(HttpStatus.OK);
-        
-        this.setData(dataList);
-    }
-    
-    private void setData(List<T> dataList) {
+
         if(dataList == null)
-            return;
-        
-        this.data = dataList;
-        this.dataSize = dataList.size();
+            this.data = new ArrayList<>();
+        else
+            this.data = dataList;
     }
     
     /**
@@ -60,7 +53,7 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      * 
      * @param httpStatus 标准HTTP状态码
      */
-    public void setStatus(HttpStatus httpStatus) {
+    public void changeStatus(HttpStatus httpStatus) {
         this.setStatus(httpStatus.value(), httpStatus.getReasonPhrase());
     }
     
@@ -70,7 +63,7 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      * @param httpStatus 标准HTTP状态码
      * @param statusInfo 非标准HTTP状态信息
      */
-    public void setStatus(HttpStatus httpStatus, String statusInfo) {
+    public void changeStatus(HttpStatus httpStatus, String statusInfo) {
         this.setStatus(httpStatus.value(), statusInfo);
     }
 
@@ -79,7 +72,7 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      * 
      * @param status 非标准HTTP状态吗
      */
-    public void setStatus(Status status) {
+    public void changeStatus(Status status) {
         this.setStatus(status.value(), status.getReasonPhrase());
     }
     
@@ -89,16 +82,12 @@ public class WebServiceResponse<T> extends HttpStatusResponse {
      * @param status 非标准HTTP状态吗
      * @param statusInfo 非标准HTTP状态信息
      */
-    public void setStatus(Status status, String statusInfo) {
+    public void changeStatus(Status status, String statusInfo) {
         this.setStatus(status.value(), statusInfo);
     }
 
     public List<T> getData() {
         return data;
-    }
-
-    public int getDataSize() {
-        return this.dataSize;
     }
 
     public Date getReturnDate() {
