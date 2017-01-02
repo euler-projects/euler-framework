@@ -1,6 +1,6 @@
 package net.eulerframework.web.core.base.response;
 
-public enum WebResponseStatus {
+public enum Status {
     
     RESOURCE_EXIST(-100, "Resource Existed"),
     
@@ -11,7 +11,7 @@ public enum WebResponseStatus {
     private final String reasonPhrase;
 
 
-    private WebResponseStatus(int value, String reasonPhrase) {
+    private Status(int value, String reasonPhrase) {
         this.value = value;
         this.reasonPhrase = reasonPhrase;
     }

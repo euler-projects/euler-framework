@@ -17,146 +17,91 @@ import org.springframework.http.HttpStatus;
  */
 public class WebServiceResponse<T> extends HttpStatusResponse {
 
-    /**
-     * 新建空实体,并指定标准HTTP状态码{@link HttpStatus}
-     * 
-     * @param httpStatus
-     *            标准HTTP状态码
-     */
-    public WebServiceResponse(HttpStatus httpStatus) {
-        super(httpStatus);
-        this.data = null;
-        this.dataSize = 0;
-    }
+    private List<T> data = new ArrayList<>();
+
+    private int dataSize = 0;
 
     /**
-     * 新建空实体,并指定非标准HTTP状态码和非标准HTTP状态信息
-     * 
-     * @param statusCode 状态码
-     * @param statusInfo 状态信息
-     */
-    public WebServiceResponse(int statusCode, String statusInfo) {
-        super(statusCode, statusInfo);
-    }
-
-    /**
-     * 新建单个对象实体,如果数据不为空则状态码为200 OK
-     * 
-     * @param data
-     *            返回数据
+     * 新建单个对象WebService响应实体,状态码为200 OK
+     * @param data 返回数据
      */
     public WebServiceResponse(T data) {
-        super(HttpStatus.OK);
-        if (data == null) {
+        super(HttpStatus.OK);        
+
+        if(data == null)
             return;
-        }
-        this.setData(data);
-    }
-
-    /**
-     * 新建容器实体,如果数据不为空则状态码为200 OK
-     * 
-     * @param data
-     *            返回数据容器
-     */
-    public WebServiceResponse(List<T> data) {
-        super(HttpStatus.OK);
-        if (data == null || data.isEmpty()) {
-            return;
-        }
-        this.setData(data);
-    }
-
-    /**
-     * 新建单个对象实体,并指定标准HTTP状态码{@link HttpStatus}
-     * 
-     * @param data
-     *            返回数据
-     * @param httpStatus
-     *            标准HTTP状态码
-     */
-    public WebServiceResponse(T data, HttpStatus httpStatus) {
-        super(httpStatus);
-        this.setData(data);
-    }
-
-    /**
-     * 新建容器实体,并指定标准HTTP状态码{@link HttpStatus}
-     * 
-     * @param data
-     *            返回数据容器
-     * @param httpStatus
-     *            标准HTTP状态码
-     */
-    public WebServiceResponse(List<T> data, HttpStatus httpStatus) {
-        super(httpStatus);
-        this.setData(data);
-    }
-
-    /**
-     * 新建单个对象实体,并指定非标准HTTP状态码和非标准HTTP状态信息
-     * 
-     * @param data
-     *            返回数据
-     * @param statusCode 状态码
-     * @param statusInfo 状态信息
-     */
-    public WebServiceResponse(T data, int statusCode, String statusInfo) {
-        super(statusCode, statusInfo);
-        this.setData(data);
-    }
-
-    /**
-     * 新建容器实体,并指定非标准HTTP状态码和非标准HTTP状态信息
-     * 
-     * @param data
-     *            返回数据容器
-     * @param statusCode 状态码
-     * @param statusInfo 状态信息
-     */
-    public WebServiceResponse(List<T> data, int statusCode, String statusInfo) {
-        this(statusCode, statusInfo);
-        this.setData(data);
-    }
-
-    private List<T> data;
-
-    private Integer dataSize;
-
-    private Date returnDate;
-
-    private void setData(T data) {
-        if (data == null) {
-            return;
-        }
-
+        
         List<T> dataList = new ArrayList<>();
         dataList.add(data);
+        
         this.setData(dataList);
     }
-
-    private void setData(List<T> data) {
-        if (data == null || data.isEmpty()) {
+    
+    /**
+     * 新建多个对象WebService响应实体,状态码为200 OK
+     * @param dataList 返回数据
+     */
+    public WebServiceResponse(List<T> dataList) {
+        super(HttpStatus.OK);
+        
+        this.setData(dataList);
+    }
+    
+    private void setData(List<T> dataList) {
+        if(dataList == null)
             return;
-        }
+        
+        this.data = dataList;
+        this.dataSize = dataList.size();
+    }
+    
+    /**
+     * 指定标准HTTP状态码{@link HttpStatus}
+     * 
+     * @param httpStatus 标准HTTP状态码
+     */
+    public void setStatus(HttpStatus httpStatus) {
+        this.setStatus(httpStatus.value(), httpStatus.getReasonPhrase());
+    }
+    
+    /**
+     * 指定标准HTTP状态码{@link HttpStatus}和非标准的HTTP状态信息
+     * 
+     * @param httpStatus 标准HTTP状态码
+     * @param statusInfo 非标准HTTP状态信息
+     */
+    public void setStatus(HttpStatus httpStatus, String statusInfo) {
+        this.setStatus(httpStatus.value(), statusInfo);
+    }
 
-        this.data = data;
-        this.dataSize = data.size();
+    /**
+     * 指定非标准HTTP状态码{@link Status}
+     * 
+     * @param status 非标准HTTP状态吗
+     */
+    public void setStatus(Status status) {
+        this.setStatus(status.value(), status.getReasonPhrase());
+    }
+    
+    /**
+     * 指定非标准HTTP状态码{@link Status}和非标准的HTTP状态信息
+     * 
+     * @param status 非标准HTTP状态吗
+     * @param statusInfo 非标准HTTP状态信息
+     */
+    public void setStatus(Status status, String statusInfo) {
+        this.setStatus(status.value(), statusInfo);
     }
 
     public List<T> getData() {
         return data;
     }
 
-    public Integer getDataSize() {
+    public int getDataSize() {
         return this.dataSize;
     }
 
     public Date getReturnDate() {
-        return returnDate == null ? new Date() : this.returnDate;
-    }
-
-    public void setReturnDate(Date returnDate) {
-        this.returnDate = returnDate;
+        return new Date();
     }
 }

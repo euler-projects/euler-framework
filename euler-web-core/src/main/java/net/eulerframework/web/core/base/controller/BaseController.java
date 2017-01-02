@@ -22,7 +22,7 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
-import net.eulerframework.web.core.base.response.WebResponseStatus;
+import net.eulerframework.web.core.base.response.Status;
 import net.eulerframework.web.core.exception.BadRequestException;
 import net.eulerframework.web.core.exception.IllegalParamException;
 import net.eulerframework.web.core.exception.ResourceExistException;
@@ -50,7 +50,7 @@ public abstract class BaseController {
     @ExceptionHandler({BadRequestException.class})   
     public HttpStatusResponse badRequestException(BadRequestException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
     
     /**  
@@ -62,7 +62,7 @@ public abstract class BaseController {
     @ExceptionHandler({ResourceExistException.class})   
     public HttpStatusResponse exception(ResourceExistException e) {
         e.printStackTrace();
-        return new HttpStatusResponse(WebResponseStatus.RESOURCE_EXIST.value(), e.getLocalizedMessage());
+        return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getLocalizedMessage());
     }
     
     /**  
@@ -74,7 +74,7 @@ public abstract class BaseController {
     @ExceptionHandler({IllegalParamException.class})   
     public HttpStatusResponse illegalParamException(IllegalParamException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
     
     /**  
@@ -86,7 +86,7 @@ public abstract class BaseController {
     @ExceptionHandler({IllegalArgumentException.class})   
     public HttpStatusResponse illegalArgumentException(IllegalArgumentException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
     
     /**  
@@ -129,7 +129,7 @@ public abstract class BaseController {
             else
                 errMsg.add(err.getDefaultMessage());
         }
-        return new HttpStatusResponse(WebResponseStatus.FIELD_VALID_FAILED.value(), errMsg.toString());
+        return new HttpStatusResponse(Status.FIELD_VALID_FAILED, errMsg.toString());
     }
     
     /**  
@@ -141,7 +141,7 @@ public abstract class BaseController {
     @ExceptionHandler({MissingServletRequestParameterException.class})   
     public HttpStatusResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
         e.printStackTrace();
-        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     
     /**  
@@ -153,6 +153,6 @@ public abstract class BaseController {
     @ExceptionHandler({Exception.class})   
     public HttpStatusResponse exception(Exception e) {
         e.printStackTrace();
-        return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
     }
 }

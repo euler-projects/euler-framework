@@ -332,8 +332,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     @Override
     public void flushSession() {        
         //DO_NOTHING
-    }
-    
+    }    
     
     protected DetachedCriteria generateCriteria(QueryRequest queryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
@@ -364,7 +363,9 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         }
         
         if(PageQueryRequest.class.isAssignableFrom(queryRequest.getClass())) {
-            
+            PageQueryRequest request = (PageQueryRequest) queryRequest;
+            int pageIndex = request.getPageIndex();
+            int pageSize = request.getPageSize();
         }
         
         return detachedCriteria;
