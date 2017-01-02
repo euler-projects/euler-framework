@@ -1,15 +1,21 @@
-# euler-framework
-[![Build Status](https://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/badge/icon)](https://ci.eulerproject.io/view/euler-framework/job/euler-framework-latest-jdk7/)
+## Status
+### latest (0.2.0)
+[![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/badge/icon)](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/)
+
+### stable (0.1.2)
+[![Build Status](https://ci.eulerproject.io/job/euler-framework-stable-jdk7/badge/icon)](https://ci.eulerproject.io/job/euler-framework-stable-jdk7)
 
 ## About
-A simple Web framework based on Spring MVC
+The Euler Framework is based on Spring MVC, provides a set of base classes to make website building easier.
 
 ## In Processing
 * Change project name to euler-framework
 * Streamline modules
+* Improve user authentication module
 
 ## Planned
-A generic form submitter
+* A generic form submitter
+* Redis cache module
 
 ## Release History
 
@@ -22,3 +28,8 @@ A generic form submitter
 * Local authentication
 * LDAP authentication
 * CAS authentication
+
+## License
+The Euler Framework is released under the [MIT License][].
+
+[MIT License]: https://opensource.org/licenses/MIT
