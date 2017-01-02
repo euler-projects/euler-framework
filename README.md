@@ -1,4 +1,5 @@
 ## Status
+
 ### latest (0.2.0)
 [![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/badge/icon)](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/)
 
