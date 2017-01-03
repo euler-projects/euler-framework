@@ -49,7 +49,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
     @NotNull
-    @Column(name = "EMAIL", nullable = true, unique = true)
+    @Column(name = "EMAIL", unique = true)
     private String email;
     @Column(name = "MOBILE", nullable = true, unique = true)
     private String mobile;

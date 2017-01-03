@@ -13,12 +13,12 @@ import net.eulerframework.web.core.exception.NotFoundException;
 
 public abstract class AbstractWebController extends BaseController {
     
-    @RequestMapping(value = { "{view}.html" }, method = RequestMethod.GET)
-    public String autoView(@PathVariable String view)
-    {
-        System.out.println(view);
-        return view;
-    }
+//    @RequestMapping(value = { "{view}.html" }, method = RequestMethod.GET)
+//    public String autoView(@PathVariable String view)
+//    {
+//        System.out.println(view);
+//        return view;
+//    }
     
     
     /**  
