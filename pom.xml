@@ -349,8 +349,8 @@
     </build>
 
     <scm>
-        <connection>https://github.com/euler-projects/euler-framework.git</connection>
-        <developerConnection>git@github.com:euler-projects/euler-framework.git</developerConnection>
+        <connection>scm:git:https://github.com/euler-projects/euler-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:euler-projects/euler-framework.git</developerConnection>
         <url>https://github.com/euler-projects/euler-framework</url>
     </scm>
 
