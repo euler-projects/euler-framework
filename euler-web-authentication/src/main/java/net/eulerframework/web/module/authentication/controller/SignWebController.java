@@ -35,7 +35,7 @@ public class SignWebController extends AbstractWebController {
     @RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
     public String login()
     {
-        return "/authentication/signin";
+        return "/default/authentication/signin";
     }
     
     @RequestMapping(value = { "/signup" }, method = RequestMethod.GET)
