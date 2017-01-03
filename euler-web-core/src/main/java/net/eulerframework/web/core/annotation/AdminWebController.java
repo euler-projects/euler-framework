@@ -8,14 +8,12 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Controller
 @Scope("prototype")
-@ResponseBody
-public @interface RestEndpoint {
-    String value() default "";    
+public @interface AdminWebController {
+    String value() default "";  
 }

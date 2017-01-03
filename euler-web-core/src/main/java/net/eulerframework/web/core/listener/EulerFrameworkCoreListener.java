@@ -29,35 +29,24 @@
  */
 package net.eulerframework.web.core.listener;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import net.eulerframework.cache.ObjectCachePool;
-import net.eulerframework.common.util.FilePathTool;
-import net.eulerframework.common.util.FileReader;
 import net.eulerframework.web.config.WebConfig;
 
 @Component
 public class EulerFrameworkCoreListener implements ServletContextListener {
-    private final Logger logger = LogManager.getLogger();
-
-    private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+//    private final Logger logger = LogManager.getLogger();
+//
+//    private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        if(WebConfig.isJspAutoDeployEnabled())
-            this.initJarJspPages(sce);
+//        if(WebConfig.isJspAutoDeployEnabled())
+//            this.initJarJspPages(sce);
         
         ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq());
     }
@@ -66,42 +55,42 @@ public class EulerFrameworkCoreListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
     }
 
-    private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
-    private final static String JAR_MODULE_JSP_FOLDER = "/META-INF/pages";
-    private void initJarJspPages(ServletContextEvent sce) {
-        Resource[] resources = null;
-        InputStream inputStream = null;
-        String jspPath = WebConfig.getJspPath();;
-        try {
-            resources = this.resourcePatternResolver.getResources(JAR_JSP_PATH);
-
-            for (Resource r : resources) {
-                inputStream = r.getInputStream();
-                String jspSourcePath = r.getURI().toString();
-                // like "/index.jsp"
-                String filename = jspSourcePath
-                        .substring(jspSourcePath.lastIndexOf(JAR_MODULE_JSP_FOLDER) + JAR_MODULE_JSP_FOLDER.length());
-                String tmp = jspSourcePath.substring(0, jspSourcePath.lastIndexOf(JAR_MODULE_JSP_FOLDER));
-                // like "/demoModule"
-                String moduleName = tmp.substring(tmp.lastIndexOf("/"));
-                // like "/var/www/demo" or "D:/website"
-                String webRootRealPath = FilePathTool.changeToUnixFormat(sce.getServletContext().getRealPath("/"));
-                String destPath = webRootRealPath + jspPath + moduleName + filename;
-                if (!new File(destPath).exists()) {
-                    byte[] result = FileReader.readInputStreamByMultiBytes(inputStream, 1024);
-                    FileReader.writeFile(destPath, result, false);
-                    logger.info("\nImport module jsp file: \n" + r.getURI().toString() + "\ninto\n" + destPath + "\n");
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (inputStream != null)
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-        }
-    }
+//    private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
+//    private final static String JAR_MODULE_JSP_FOLDER = "/META-INF/pages";
+//    private void initJarJspPages(ServletContextEvent sce) {
+//        Resource[] resources = null;
+//        InputStream inputStream = null;
+//        String jspPath = WebConfig.getJspPath();;
+//        try {
+//            resources = this.resourcePatternResolver.getResources(JAR_JSP_PATH);
+//
+//            for (Resource r : resources) {
+//                inputStream = r.getInputStream();
+//                String jspSourcePath = r.getURI().toString();
+//                // like "/index.jsp"
+//                String filename = jspSourcePath
+//                        .substring(jspSourcePath.lastIndexOf(JAR_MODULE_JSP_FOLDER) + JAR_MODULE_JSP_FOLDER.length());
+//                String tmp = jspSourcePath.substring(0, jspSourcePath.lastIndexOf(JAR_MODULE_JSP_FOLDER));
+//                // like "/demoModule"
+//                String moduleName = tmp.substring(tmp.lastIndexOf("/"));
+//                // like "/var/www/demo" or "D:/website"
+//                String webRootRealPath = FilePathTool.changeToUnixFormat(sce.getServletContext().getRealPath("/"));
+//                String destPath = webRootRealPath + jspPath + moduleName + filename;
+//                if (!new File(destPath).exists()) {
+//                    byte[] result = FileReader.readInputStreamByMultiBytes(inputStream, 1024);
+//                    FileReader.writeFile(destPath, result, false);
+//                    logger.info("\nImport module jsp file: \n" + r.getURI().toString() + "\ninto\n" + destPath + "\n");
+//                }
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            if (inputStream != null)
+//                try {
+//                    inputStream.close();
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//        }
+//    }
 }

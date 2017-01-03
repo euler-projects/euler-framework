@@ -20,17 +20,17 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.eulerframework.web.core.annotation.RestEndpoint;
+import net.eulerframework.web.core.annotation.ApiController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = {"**.web.**.controller"},
         useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(RestEndpoint.class)
+        includeFilters = @ComponentScan.Filter(ApiController.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class SpringRestDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
+public class SpringApiDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
     
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 //    @Resource(name="jaxb2Marshaller") Marshaller marshaller;

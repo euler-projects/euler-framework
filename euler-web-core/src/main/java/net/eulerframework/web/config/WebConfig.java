@@ -15,8 +15,11 @@ public abstract class WebConfig {
         
         private final static String WEB_UPLOAD_PATH = "web.uploadPath";
         private final static String WEB_JSP_PATH = "web.jspPath";
-        private final static String WEB_ENABLE_JSP_AUTO_DEPLOY = "web.enableJspAutoDeploy";
-
+        private final static String WEB_ADMIN_JSP_PATH = "web.adminJspPath";
+//        private final static String WEB_ENABLE_JSP_AUTO_DEPLOY = "web.enableJspAutoDeploy";
+        
+        private final static String ADMIN_ROOT_PATH = "admin.rootPath";
+        
         private final static String API_ROOT_PATH = "api.rootPath";        
 
         private final static String CACHE_RAM_CAHCE_CLEAN_FREQ = "cache.ramCacheCleanFreq";
@@ -35,10 +38,13 @@ public abstract class WebConfig {
     private static class WebConfigDefault {
         private final static int CORE_I18N_REFRESH_FREQ = 86_400;
         
-        private final static String WEB_UPLOAD_PATH = "/upload";
-        private final static String WEB_JSP_PATH = "/WEB-INF/modulePages";
-        private final static boolean WEB_ENABLE_JSP_AUTO_DEPLOY = false;
+        private final static String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
+        private final static String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
+        private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
+        private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
+//        private final static boolean WEB_ENABLE_JSP_AUTO_DEPLOY = false;
 
+        private final static String ADMIN_ROOT_PATH = "/admin";
         private final static String API_ROOT_PATH = "/api";
         
         private final static long CACHE_RAM_CAHCE_CLEAN_FREQ = 60_000L;
@@ -61,8 +67,10 @@ public abstract class WebConfig {
     
     private static String uploadPath;
     private static String jspPath;
-    private static Boolean enableJspAutoDeploy;
-    
+    private static String adminJspPath;
+//    private static Boolean enableJspAutoDeploy;
+
+    private static String adminRootPath;
     private static String apiRootPath;
 
     private static Long ramCacheCleanFreq;
@@ -133,6 +141,10 @@ public abstract class WebConfig {
                 }
 
                 apiRootPath = FilePathTool.changeToUnixFormat(apiRootPath);
+                
+                if(!apiRootPath.startsWith("/"))
+                    apiRootPath = "/" + apiRootPath;
+                
             } catch (GlobalPropertyReadException e) {
                 apiRootPath = WebConfigDefault.API_ROOT_PATH;
                 log.warn("Couldn't load " + WebConfigKey.API_ROOT_PATH + " , use " + apiRootPath + " for default.");
@@ -142,12 +154,44 @@ public abstract class WebConfig {
         
     }
 
+    public static String getAdminRootPath() {
+        if(adminRootPath == null) {
+            try {
+                adminRootPath = GlobalProperties1.get(WebConfigKey.ADMIN_ROOT_PATH);
+                
+                if(StringTool.isNull(adminRootPath))
+                    throw new RuntimeException(WebConfigKey.API_ROOT_PATH + "不能为空");
+
+                while(adminRootPath.endsWith("*")){
+                    adminRootPath = adminRootPath.substring(0, adminRootPath.length()-1);
+                }
+
+                adminRootPath = FilePathTool.changeToUnixFormat(adminRootPath);
+                
+                if(!adminRootPath.startsWith("/"))
+                    adminRootPath = "/" + adminRootPath;
+                
+            } catch (GlobalPropertyReadException e) {
+                adminRootPath = WebConfigDefault.ADMIN_ROOT_PATH;
+                log.warn("Couldn't load " + WebConfigKey.ADMIN_ROOT_PATH + " , use " + adminRootPath + " for default.");
+            }
+        }
+        return adminRootPath;
+    }
+
     public static String getUploadPath() {
         if(uploadPath == null) {
             try {
                 uploadPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_UPLOAD_PATH));
             } catch (GlobalPropertyReadException e) {
-                uploadPath = WebConfigDefault.WEB_UPLOAD_PATH;
+                if(System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+                    log.info("OS is windows");
+                    uploadPath = WebConfigDefault.WEB_UPLOAD_PATH_WIN;
+                }
+                else {
+                    log.info("OS isn't windows");
+                    uploadPath = WebConfigDefault.WEB_UPLOAD_PATH_UNIX;
+                }
                 log.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + uploadPath + " for default.");
             }
         }
@@ -160,24 +204,36 @@ public abstract class WebConfig {
             try {
                 jspPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_JSP_PATH));
             } catch (GlobalPropertyReadException e) {
-                uploadPath = WebConfigDefault.WEB_JSP_PATH;
+                jspPath = WebConfigDefault.WEB_JSP_PATH;
                 log.warn("Couldn't load " + WebConfigKey.WEB_JSP_PATH + " , use " + jspPath + " for default.");
             }
         }
         return jspPath;
     }
     
-    public static boolean isJspAutoDeployEnabled() {
-        if(enableJspAutoDeploy == null) {
+    public static String getAdminJspPath() {
+        if(adminJspPath == null) {
             try {
-                enableJspAutoDeploy = Boolean.parseBoolean(GlobalProperties1.get(WebConfigKey.WEB_ENABLE_JSP_AUTO_DEPLOY));
+                adminJspPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_ADMIN_JSP_PATH));
             } catch (GlobalPropertyReadException e) {
-                enableJspAutoDeploy = WebConfigDefault.WEB_ENABLE_JSP_AUTO_DEPLOY;
-                log.warn("Couldn't load " + WebConfigKey.WEB_ENABLE_JSP_AUTO_DEPLOY + " , use " + enableJspAutoDeploy + " for default.");
+                adminJspPath = WebConfigDefault.WEB_ADMIN_JSP_PATH;
+                log.warn("Couldn't load " + WebConfigKey.WEB_ADMIN_JSP_PATH + " , use " + adminJspPath + " for default.");
             }
         }
-        return enableJspAutoDeploy;
+        return adminJspPath;
     }
+//    
+//    public static boolean isJspAutoDeployEnabled() {
+//        if(enableJspAutoDeploy == null) {
+//            try {
+//                enableJspAutoDeploy = Boolean.parseBoolean(GlobalProperties1.get(WebConfigKey.WEB_ENABLE_JSP_AUTO_DEPLOY));
+//            } catch (GlobalPropertyReadException e) {
+//                enableJspAutoDeploy = WebConfigDefault.WEB_ENABLE_JSP_AUTO_DEPLOY;
+//                log.warn("Couldn't load " + WebConfigKey.WEB_ENABLE_JSP_AUTO_DEPLOY + " , use " + enableJspAutoDeploy + " for default.");
+//            }
+//        }
+//        return enableJspAutoDeploy;
+//    }
     
     public static long getRamCacheCleanFreq() {
         if(ramCacheCleanFreq == null) {
@@ -235,4 +291,8 @@ public abstract class WebConfig {
         
         return new MultiPartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
     } 
+    
+    public static void main(String aa[]) {  
+            System.out.println(System.getProperty("os.name"));
+    }
 }
