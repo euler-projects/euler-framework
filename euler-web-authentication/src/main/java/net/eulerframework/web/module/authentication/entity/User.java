@@ -48,7 +48,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     @NotNull
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
-    @NotNull
     @Column(name = "EMAIL", unique = true)
     private String email;
     @Column(name = "MOBILE", nullable = true, unique = true)
@@ -151,7 +150,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
             }            
         }
         
-        if(this.root == true) {
+        if(this.root != null && this.root == true) {
             result.add(Authority.ROOT_AUTHORITY);
         }
         
