@@ -3,7 +3,7 @@ package net.eulerframework.web.module.authentication.controller;
 import javax.annotation.Resource;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
-import net.eulerframework.web.core.exception.NotFoundException;
+import net.eulerframework.web.core.exception.ResourceNotFoundException;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,7 +38,7 @@ public class UserWebContorller extends AbstractWebController {
         try {
             this.userService.checkResetTokenRT(userId, resetToken);
         } catch (UsernameNotFoundException e) {
-            throw new NotFoundException();
+            throw new ResourceNotFoundException();
         }
         model.addAttribute("userId", userId);
         model.addAttribute("resetToken", resetToken);

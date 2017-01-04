@@ -26,7 +26,7 @@ public abstract class StringTool {
 
     /**
      * 按字节长度截取字符串
-     * 
+     *
      * @param string
      *            要截取的字符串
      * @param subBytes
@@ -58,9 +58,9 @@ public abstract class StringTool {
 
     /**
      * 将制表符和多个连续的空格用一个空格替代
-     * 
-     * @param string
-     * @return
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的字符串
      */
     public static String earseMultiSpcases(String string) {
         if (string == null)
@@ -74,9 +74,9 @@ public abstract class StringTool {
 
     /**
      * 删除制表符和空格
-     * 
-     * @param string
-     * @return
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的字符串
      */
     public static String earseAllSpcases(String string) {
         if (string == null)
@@ -87,9 +87,9 @@ public abstract class StringTool {
 
     /**
      * 将CRLF和CR换行符转换为LF换行符
-     * 
-     * @param string
-     * @return
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的字符串
      */
     public static String convertToLF(String string) {
         if (string == null)
@@ -99,9 +99,9 @@ public abstract class StringTool {
 
     /**
      * 将换行符替换为空格
-     * 
-     * @param string
-     * @return
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的字符串
      */
     public static String convertReturnToSpace(String string) {
         if (string == null)
@@ -111,10 +111,9 @@ public abstract class StringTool {
 
     /**
      * 删除Html标签
-     * 
-     * @author TONG RUI
-     * @param htmlStr
-     * @return
+     *
+     * @param htmlStr 带有HTML标记的字符串
+     * @return 清除标记后的字符串
      */
     public static String earseHTMLTag(String htmlStr) {
 
@@ -138,9 +137,9 @@ public abstract class StringTool {
 
     /**
      * 删除换行符
-     * 
-     * @param string
-     * @return
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的字符串
      */
     public static String earseReturn(String string) {
 
@@ -158,10 +157,10 @@ public abstract class StringTool {
     public static String toLowerCaseFirstChar(String string) {
         if(string == null || string.length() == 0)
             return string;
-        
+
         if (Character.isLowerCase(string.charAt(0)))
             return string;
-        
+
         if(string.length() == 1)
             return string.toLowerCase();
         else
@@ -176,10 +175,10 @@ public abstract class StringTool {
     public static String toUpperCaseFirstChar(String string) {
         if(string == null || string.length() == 0)
             return string;
-        
+
         if (Character.isUpperCase(string.charAt(0)))
             return string;
-        
+
         if(string.length() == 1)
             return string.toUpperCase();
         else

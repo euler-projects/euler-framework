@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.FileReader;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.exception.NotFoundException;
+import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IRootService;
@@ -25,7 +25,7 @@ public class RootService extends BaseService implements IRootService {
     public void resetRootPasswordRWT() {
         User root = this.userDao.findUserByName("root");
         if(!root.getPassword().equals("NaN"))
-            throw new NotFoundException();
+            throw new ResourceNotFoundException();
         
         String newPassword = UUID.randomUUID().toString();
         
@@ -50,7 +50,7 @@ public class RootService extends BaseService implements IRootService {
     public void resetAdminPasswordRWT() {
         User admin = this.userDao.findUserByName("admin");
         if(!admin.getPassword().equals("NaN"))
-            throw new NotFoundException();
+            throw new ResourceNotFoundException();
         
         String newPassword = UUID.randomUUID().toString();
         

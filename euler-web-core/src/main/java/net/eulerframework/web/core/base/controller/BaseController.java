@@ -40,7 +40,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BadRequestException.class})   
-    public HttpStatusResponse badRequestException(BadRequestException e) {
+    public Object badRequestException(BadRequestException e) {
         this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
@@ -52,7 +52,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ResourceExistException.class})   
-    public HttpStatusResponse exception(ResourceExistException e) {
+    public Object exception(ResourceExistException e) {
         e.printStackTrace();
         return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getLocalizedMessage());
     }
@@ -64,7 +64,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalParamException.class})   
-    public HttpStatusResponse illegalParamException(IllegalParamException e) {
+    public Object illegalParamException(IllegalParamException e) {
         this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
@@ -76,7 +76,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalArgumentException.class})   
-    public HttpStatusResponse illegalArgumentException(IllegalArgumentException e) {
+    public Object illegalArgumentException(IllegalArgumentException e) {
         this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
@@ -88,7 +88,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({ResourceNotFoundException.class})   
-    public HttpStatusResponse resourceNotFoundException(ResourceNotFoundException e) {
+    public Object resourceNotFoundException(ResourceNotFoundException e) {
         e.printStackTrace();
         return new HttpStatusResponse(HttpStatus.NOT_FOUND);
     }
@@ -100,7 +100,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler({AccessDeniedException.class})   
-    public HttpStatusResponse accessDeniedException(AccessDeniedException e) {
+    public Object accessDeniedException(AccessDeniedException e) {
         return new HttpStatusResponse(HttpStatus.FORBIDDEN);
     }
     
@@ -111,7 +111,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BindException.class})   
-    public HttpStatusResponse bindException(BindException e) {
+    public Object bindException(BindException e) {
         e.printStackTrace();
         List<ObjectError> errors = e.getAllErrors();
         List<String> errMsg = new ArrayList<>();
@@ -131,7 +131,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MissingServletRequestParameterException.class})   
-    public HttpStatusResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
+    public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
         e.printStackTrace();
         return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
@@ -143,7 +143,7 @@ public abstract class BaseController extends RequestContextAccessor {
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Exception.class})   
-    public HttpStatusResponse exception(Exception e) {
+    public Object exception(Exception e) {
         e.printStackTrace();
         return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
     }
