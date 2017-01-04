@@ -11,6 +11,9 @@
     
     <artifactId>euler-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <name>net.eulerframework:euler-common</name>
+    <url>https://eulerproject.io</url>
+    <description>Common Module for Euler Projects</description>
     
     <properties>
         <jdk.version>1.7</jdk.version>
@@ -44,6 +47,26 @@
             <version>${javax.mail.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:git:https://github.com/euler-projects/euler-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:euler-projects/euler-framework.git</developerConnection>
+        <url>https://github.com/euler-projects/euler-framework</url>
+    </scm>
     
     <profiles>
         <profile>
