@@ -24,8 +24,8 @@ import net.eulerframework.web.module.authentication.util.UserContext;
  */
 @WebController
 @Scope("prototype")
-@RequestMapping("/authentication")
-public class SignWebController extends AbstractWebController {
+@RequestMapping("/")
+public class UserCheckWebController extends AbstractWebController {
 
     @Resource
     private IUserService userService;
@@ -35,13 +35,13 @@ public class SignWebController extends AbstractWebController {
     @RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
     public String login()
     {
-        return "/default/authentication/signin";
+        return this.display("signin");
     }
     
     @RequestMapping(value = { "/signup" }, method = RequestMethod.GET)
     public String signup()
     {
-        return "/default/authentication/signup";
+        return this.theme() + "/authentication/signup";
     }
     
     @ResponseBody

@@ -203,10 +203,13 @@ public abstract class WebConfig {
         if(jspPath == null) {
             try {
                 jspPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_JSP_PATH));
+                jspPath = FilePathTool.changeToUnixFormat(jspPath);
             } catch (GlobalPropertyReadException e) {
                 jspPath = WebConfigDefault.WEB_JSP_PATH;
                 log.warn("Couldn't load " + WebConfigKey.WEB_JSP_PATH + " , use " + jspPath + " for default.");
             }
+            //统一添加/结尾，这样在controller中就可以不加/前缀
+            jspPath = jspPath + "/";
         }
         return jspPath;
     }
@@ -215,10 +218,12 @@ public abstract class WebConfig {
         if(adminJspPath == null) {
             try {
                 adminJspPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_ADMIN_JSP_PATH));
+                adminJspPath = FilePathTool.changeToUnixFormat(adminJspPath);
             } catch (GlobalPropertyReadException e) {
                 adminJspPath = WebConfigDefault.WEB_ADMIN_JSP_PATH;
                 log.warn("Couldn't load " + WebConfigKey.WEB_ADMIN_JSP_PATH + " , use " + adminJspPath + " for default.");
             }
+            adminJspPath = adminJspPath + "/";
         }
         return adminJspPath;
     }

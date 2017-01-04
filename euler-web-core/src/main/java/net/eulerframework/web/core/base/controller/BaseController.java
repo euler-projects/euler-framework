@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,9 +17,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
-
+import net.eulerframework.web.core.base.RequestContextAccessor;
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
 import net.eulerframework.web.core.base.response.Status;
 import net.eulerframework.web.core.exception.BadRequestException;
@@ -28,14 +25,9 @@ import net.eulerframework.web.core.exception.IllegalParamException;
 import net.eulerframework.web.core.exception.ResourceExistException;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 
-public abstract class BaseController {
+public abstract class BaseController extends RequestContextAccessor {
     
     protected final Logger logger = LogManager.getLogger(this.getClass());
-    
-    protected ServletContext getServletContext(){
-        WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
-        return webApplicationContext.getServletContext();
-    }
     
     protected void writeString(HttpServletResponse httpServletResponse, String str) throws IOException{
         httpServletResponse.getOutputStream().write(str.getBytes("UTF-8"));
