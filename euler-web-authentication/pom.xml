@@ -7,6 +7,9 @@
         <version>0.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>euler-web-authentication</artifactId>
+    <name>net.eulerframework:euler-web-authentication</name>
+    <url>https://euler-projects.github.io/euler-framework</url>
+    <description>euler-web-authentication</description>
 
     <dependencies>
         <dependency>
@@ -24,33 +27,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-    
-    <build>
-        <resources>    
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/java</directory>
-                <includes>  
-                    <include>**/META-INF/**</include>
-                </includes>
-                <filtering>false</filtering>
-            </resource>  
-        </resources>
-        <testResources>
-            <testResource>
-                <directory>${project.basedir}/src/test/resources</directory>
-                <filtering>true</filtering>
-            </testResource>
-            <testResource>
-                <directory>${project.basedir}/src/test/java</directory>
-                <includes>  
-                    <include>**/META-INF/**</include>
-                </includes>
-                <filtering>false</filtering>
-            </testResource> 
-        </testResources>
-    </build>
 </project>

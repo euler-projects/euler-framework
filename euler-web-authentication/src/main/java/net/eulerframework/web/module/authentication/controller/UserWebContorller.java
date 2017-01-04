@@ -16,6 +16,7 @@ import net.eulerframework.web.module.authentication.service.IUserService;
 @WebController
 @Scope("prototype")
 @RequestMapping("/authentication")
+@Deprecated
 public class UserWebContorller extends AbstractWebController {
 
 	@Resource

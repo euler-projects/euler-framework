@@ -50,11 +50,11 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private String username;
     @Column(name = "EMAIL", unique = true)
     private String email;
-    @Column(name = "MOBILE", nullable = true, unique = true)
+    @Column(name = "MOBILE", unique = true)
     private String mobile;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
-    @NotNull
+    //@NotNull
     @Column(name = "FULL_NAME")
     private String fullName;
     @Column(name = "ENABLED", nullable = false)
@@ -208,10 +208,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public Boolean isRoot() {
         return root;
-    }
-
-    public void setRoot(Boolean root) {
-        this.root = root;
     }
 
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {

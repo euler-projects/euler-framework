@@ -32,7 +32,8 @@ public abstract class WebConfig {
 
         private static final String SEC_WEB_AUTHENTICATION_TYPE = "sec.web.authenticationType";
         private static final String SEC_API_AUTHENTICATION_TYPE = "sec.api.authenticationType";        
-        private static final String SEC_OAUTH_SERVER_TYPE = "sec.oauth.severType";
+        private static final String SEC_OAUTH_SERVER_TYPE = "sec.oauth.severType";   
+        private static final String SEC_MIN_PASSWORD_LENGTH = "sec.minPasswordLength";
     }
     
     private static class WebConfigDefault {
@@ -57,6 +58,7 @@ public abstract class WebConfig {
         
         private static final WebAuthenticationType SEC_WEB_AUTHENTICATION_TYPE = WebAuthenticationType.LOCAL;
         private static final ApiAuthenticationType SEC_API_AUTHENTICATION_TYPE = ApiAuthenticationType.NONE;
+        private static final int SEC_MIN_PASSWORD_LENGTH = 6;
         
         private static final OAuthServerType SEC_OAUTH_SERVER_TYPE = OAuthServerType.NEITHER;
     }
@@ -79,6 +81,8 @@ public abstract class WebConfig {
     private static WebAuthenticationType webAuthenticationType;
     private static ApiAuthenticationType apiAuthenticationType;
     private static OAuthServerType oauthServerType;
+
+    private static Integer minPasswordLength;
     
     public static int getI18nRefreshFreq() {
         if(i18nRefreshFreq == null) {
@@ -299,5 +303,17 @@ public abstract class WebConfig {
     
     public static void main(String aa[]) {  
             System.out.println(System.getProperty("os.name"));
+    }
+
+    public static int getMinPasswordLength() {
+        if(minPasswordLength == null) {
+            try {
+                minPasswordLength = Integer.parseInt(GlobalProperties1.get(WebConfigKey.SEC_MIN_PASSWORD_LENGTH));
+            } catch (GlobalPropertyReadException e) {
+                minPasswordLength = WebConfigDefault.SEC_MIN_PASSWORD_LENGTH;
+                log.warn("Couldn't load " + WebConfigKey.SEC_MIN_PASSWORD_LENGTH + " , use " + minPasswordLength + " for default.");
+            }
+        }
+        return minPasswordLength; 
     }
 }
