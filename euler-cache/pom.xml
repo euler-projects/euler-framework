@@ -9,13 +9,36 @@
         <relativePath></relativePath>
     </parent>
     
-    <version>0.2.0-SNAPSHOT</version>
     <artifactId>euler-cache</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
+    <properties>
+        <jdk.version>1.7</jdk.version>
+        
+        <log4j.version>2.5</log4j.version>
+    </properties>
+     
     <dependencies>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
     </dependencies>
+    
+    <profiles>
+        <profile>
+            <id>eulerproject-repo-release</id>
+            <distributionManagement>
+                <repository>
+                    <id>releases</id>
+                    <url>http://repo.eulerproject.io/content/repositories/maven-releases/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>snapshots</id>
+                    <url>http://repo.eulerproject.io/content/repositories/maven-snapshots/</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>
