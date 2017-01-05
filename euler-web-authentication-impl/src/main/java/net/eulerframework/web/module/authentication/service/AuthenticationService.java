@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.authentication.service;
 
+import java.util.Date;
+
 import javax.annotation.Resource;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,30 +42,22 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
                 Assert.isNotNull(user.getEmail(), BadRequestException.class, Tag.i18n("Email is null"));
                 Assert.isNotNull(user.getPassword(), BadRequestException.class, Tag.i18n("Password is null"));
                 //Assert.isNotNull(user.getMobile(), BadRequestException.class, Tag.i18n("Mobile is null"));
+                
+                Assert.isNull(this.userDao.findUserByName(user.getUsername()), BadRequestException.class, Tag.i18n("Username han been used"));
+                Assert.isNull(this.userDao.findUserByEmail(user.getEmail()), BadRequestException.class, Tag.i18n("Email han been used"));
+                
+                if(user.getMobile() !=null)
+                    Assert.isNull(this.userDao.findUserByMobile(user.getMobile()), BadRequestException.class, Tag.i18n("Mobile han been used"));
+                
                 Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class, Tag.i18n("The username format does not meet the requirements"));
                 Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class, Tag.i18n("The email format does not meet the requirements"));
+                
                 password = user.getPassword().trim();
                 Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class, Tag.i18n("The password format does not meet the requirements"));
                 Assert.isTrue(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20, BadRequestException.class, Tag.i18n("The password length does not meet the requirements"));
+            
             } catch (BadRequestException e) {
                 throw new UserSignUpException(e.getMessage(), e);
-            }
-            
-            User existUser = this.userDao.findUserByName(user.getUsername());
-            
-            if(existUser != null)
-                throw new UserSignUpException(Tag.i18n("Username han been used"));  
-            
-            existUser = this.userDao.findUserByEmail(user.getEmail());
-            
-            if(existUser != null)
-                throw new UserSignUpException(Tag.i18n("Email han been used"));          
-
-            if(user.getMobile() != null) {
-                existUser = this.userDao.findUserByMobile(user.getMobile());
-                
-                if(existUser != null)
-                    throw new UserSignUpException(Tag.i18n("Mobile han been used"));
             }
             
             user.setId(null);
