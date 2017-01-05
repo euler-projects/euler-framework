@@ -18,7 +18,7 @@ public class Assert {
     }
 
     public static <T extends RuntimeException> void isTrue(boolean expression, Class<T> exceptionClass, String message) {
-        Assert.isFalse(expression, exceptionClass, message);
+        Assert.isFalse(!expression, exceptionClass, message);
     }
     
     public static <T extends RuntimeException> void isFalse(boolean expression, String message) {

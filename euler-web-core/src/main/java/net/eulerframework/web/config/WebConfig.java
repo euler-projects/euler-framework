@@ -318,10 +318,27 @@ public abstract class WebConfig {
     }
 
     public static String getSignUpSuccessPage() {
+        // TODO Auto-generated method stub
         return "signupSuccess";
     }
 
     public static String getSignUpFailPage() {
+        // TODO Auto-generated method stub
         return "signupFail";
+    }
+
+    public static String getUsernameFormat() {
+        // TODO Auto-generated method stub
+        return "^[A-Za-z0-9][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$";
+    }
+
+    public static String getEmailFormat() {
+        // TODO Auto-generated method stub
+        return "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$";
+    }
+    
+    public static String getPasswordFormat() {
+        // TODO Auto-generated method stub
+        return "^[\\u0021-\\u007e]+$";
     }
 }

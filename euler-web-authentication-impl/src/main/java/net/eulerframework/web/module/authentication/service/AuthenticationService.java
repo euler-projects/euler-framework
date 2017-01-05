@@ -6,10 +6,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.core.exception.BadRequestException;
 import net.eulerframework.web.core.i18n.Tag;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
@@ -30,33 +32,45 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         
         try{
             BeanTool.clearEmptyProperty(user);
-            
-            User existUser = this.userDao.findUserByEmail(user.getEmail());
-            
-            if(existUser != null)
-                throw new UserSignUpException(Tag.i18n("Email han been used"));
-            
-            existUser = this.userDao.findUserByName(user.getUsername());
-            
-            if(existUser != null)
-                throw new UserSignUpException(Tag.i18n("Username han been used"));            
 
-            existUser = this.userDao.findUserByMobile(user.getMobile());
+            String password;
+            
+            try {
+                Assert.isNotNull(user.getUsername(), BadRequestException.class, Tag.i18n("Username is null"));
+                Assert.isNotNull(user.getEmail(), BadRequestException.class, Tag.i18n("Email is null"));
+                Assert.isNotNull(user.getPassword(), BadRequestException.class, Tag.i18n("Password is null"));
+                //Assert.isNotNull(user.getMobile(), BadRequestException.class, Tag.i18n("Mobile is null"));
+                Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class, Tag.i18n("The username format does not meet the requirements"));
+                Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class, Tag.i18n("The email format does not meet the requirements"));
+                password = user.getPassword().trim();
+                Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class, Tag.i18n("The password format does not meet the requirements"));
+                Assert.isTrue(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20, BadRequestException.class, Tag.i18n("The password length does not meet the requirements"));
+            } catch (BadRequestException e) {
+                throw new UserSignUpException(e.getMessage(), e);
+            }
+            
+            User existUser = this.userDao.findUserByName(user.getUsername());
             
             if(existUser != null)
-                throw new UserSignUpException(Tag.i18n("Mobile han been used"));
+                throw new UserSignUpException(Tag.i18n("Username han been used"));  
+            
+            existUser = this.userDao.findUserByEmail(user.getEmail());
+            
+            if(existUser != null)
+                throw new UserSignUpException(Tag.i18n("Email han been used"));          
+
+            if(user.getMobile() != null) {
+                existUser = this.userDao.findUserByMobile(user.getMobile());
+                
+                if(existUser != null)
+                    throw new UserSignUpException(Tag.i18n("Mobile han been used"));
+            }
             
             user.setId(null);
             user.setAccountNonExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
             user.setEnabled(true);
-            
-            String password = StringTool.earseAllSpcases(user.getPassword());
-            
-            if(password == null || password.length() < WebConfig.getMinPasswordLength()) {
-                throw new UserSignUpException(Tag.i18n("The password length does not meet the requirements"));
-            }
             
             user.setPassword(this.passwordEncoder.encode(password));
             

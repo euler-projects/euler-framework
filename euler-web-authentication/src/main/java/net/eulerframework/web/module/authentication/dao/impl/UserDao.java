@@ -25,8 +25,8 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByName(String username) {
-        if(username == null)
-            return null;
+        Assert.isNotNull(username, "Username is null");
+        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("username", username));
@@ -51,8 +51,7 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByMobile(String mobile) {
-        if(mobile == null)
-            return null;
+        Assert.isNotNull(mobile, "Mobile is null");
         
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
