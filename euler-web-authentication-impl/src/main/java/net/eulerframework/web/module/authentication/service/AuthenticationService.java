@@ -68,8 +68,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             
             user.setPassword(this.passwordEncoder.encode(password));
             
-            user.setResetToken(null);
-            user.setResetTokenExpireTime(null);
+            user.setSignUpTime(new Date());
             
             return (String) this.userDao.save(user);
         } catch (UserSignUpException userSignUpException) {

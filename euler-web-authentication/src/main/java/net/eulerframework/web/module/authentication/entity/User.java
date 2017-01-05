@@ -67,10 +67,9 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private Boolean credentialsNonExpired;
     @Column(name = "ROOT")
     private Boolean root;
-    @Column(name = "RESET_TOKEN", unique = true)
-    private String resetToken;
-    @Column(name = "RESET_TOKEN_EXPIRE_TIME")
-    private Date resetTokenExpireTime;
+    @Column(name = "SIGN_UP_TIME", nullable = false)
+    private Date signUpTime;
+    
 //    @ManyToMany(fetch = FetchType.EAGER)
 //    @JoinTable(name = "SYS_USER_AUTHORITY", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
     @Transient
@@ -174,22 +173,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         this.groups = groups;
     }
 
-    public String getResetToken() {
-        return resetToken;
-    }
-
-    public void setResetToken(String resetToken) {
-        this.resetToken = resetToken;
-    }
-
-    public Date getResetTokenExpireTime() {
-        return resetTokenExpireTime;
-    }
-
-    public void setResetTokenExpireTime(Date resetTokenExpireTime) {
-        this.resetTokenExpireTime = resetTokenExpireTime;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -208,6 +191,14 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public Boolean isRoot() {
         return root;
+    }
+
+    public Date getSignUpTime() {
+        return signUpTime;
+    }
+
+    public void setSignUpTime(Date signUpTime) {
+        this.signUpTime = signUpTime;
     }
 
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {
