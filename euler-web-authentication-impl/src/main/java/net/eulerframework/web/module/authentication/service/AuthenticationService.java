@@ -6,14 +6,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.exception.BadRequestException;
+import net.eulerframework.web.core.i18n.Tag;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.UserSignUpException;
 
 @Service
 @Transactional
@@ -24,37 +26,69 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     @Resource private PasswordEncoder passwordEncoder;
     
     @Override
-    public String signUp(User user) {
-        user.setId(null);
-        user.setAccountNonExpired(true);
-        user.setAccountNonLocked(true);
-        user.setCredentialsNonExpired(true);
-        user.setEnabled(true);
+    public String signUp(User user) throws UserSignUpException {
         
-        String password = StringTool.earseAllSpcases(user.getPassword());
-        
-        if(password == null || password.length() < WebConfig.getMinPasswordLength())
-            throw new BadRequestException("密码格式或长度不符合要求");
-        
-        user.setPassword(this.passwordEncoder.encode(password));
-        
-        user.setResetToken(null);
-        user.setResetTokenExpireTime(null);
-        
-        return (String) this.userDao.save(user);
+        try{
+            BeanTool.clearEmptyProperty(user);
+            
+            User existUser = this.userDao.findUserByEmail(user.getEmail());
+            
+            if(existUser != null)
+                throw new UserSignUpException(Tag.i18n("Email han been used"));
+            
+            existUser = this.userDao.findUserByName(user.getUsername());
+            
+            if(existUser != null)
+                throw new UserSignUpException(Tag.i18n("Username han been used"));            
+
+            existUser = this.userDao.findUserByMobile(user.getMobile());
+            
+            if(existUser != null)
+                throw new UserSignUpException(Tag.i18n("Mobile han been used"));
+            
+            user.setId(null);
+            user.setAccountNonExpired(true);
+            user.setAccountNonLocked(true);
+            user.setCredentialsNonExpired(true);
+            user.setEnabled(true);
+            
+            String password = StringTool.earseAllSpcases(user.getPassword());
+            
+            if(password == null || password.length() < WebConfig.getMinPasswordLength()) {
+                throw new UserSignUpException(Tag.i18n("The password length does not meet the requirements"));
+            }
+            
+            user.setPassword(this.passwordEncoder.encode(password));
+            
+            user.setResetToken(null);
+            user.setResetTokenExpireTime(null);
+            
+            return (String) this.userDao.save(user);
+        } catch (UserSignUpException userSignUpException) {
+            throw userSignUpException;
+        } catch (Exception e) {
+            throw new UserSignUpException(Tag.i18n("Unknown user sign up error"), e);
+        }
     }
 
     @Override
-    public <T extends IUserProfile> String signUp(User user, T userProfile) {
-        String userId = this.signUp(user);
+    public <T extends IUserProfile> String signUp(User user, T userProfile) throws UserSignUpException {
         
-        if(StringTool.isNull(userId))
-            throw new BadRequestException("用户注册失败");
-        
-        userProfile.setUserId(userId);
-        this.userProfileDao.save(userProfile);
-        
-        return userId;
+        try{
+            String userId = this.signUp(user);
+            
+            if(StringTool.isNull(userId))
+                throw new Exception();
+            
+            userProfile.setUserId(userId);
+            this.userProfileDao.save(userProfile);
+            
+            return userId;
+        } catch (UserSignUpException userSignUpException) {
+            throw userSignUpException;
+        } catch (Exception e) {
+            throw new UserSignUpException(Tag.i18n("Unknown user sign up error"), e);
+        }
     }
 
     @Override

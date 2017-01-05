@@ -1,6 +1,7 @@
 package net.eulerframework.web.core.base.controller;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.WebControllerException;
+import net.eulerframework.web.core.i18n.Tag;
 
 public abstract class AbstractWebController extends BaseController {
 
@@ -76,6 +78,37 @@ public abstract class AbstractWebController extends BaseController {
             return this.theme() + "/" + this.getWebControllerName() + "/" + view;
         else
             return this.theme() + view;
+    }
+    
+    /**
+     * 显示跳转页面
+     * @param message 显示信息
+     * @param target 跳转目标,不需要加contextPath
+     * @param waitSeconds 等待时间(秒)
+     * @return 跳转view
+     */
+    protected String jump(String message, String target, int waitSeconds) {
+        message = message == null ? Tag.i18n("Page will be redirect") : message;
+        target = target == null ? "" : target;
+        
+        String contextPath = this.getServletContext().getContextPath();
+        if(contextPath.equals("/"))
+            contextPath = "";
+        
+        if(target.startsWith("/")) {
+            if(target.length() == 1) {
+                target = "";                
+            }
+            else {
+                target = target.substring(1);
+            }
+        }
+
+        HttpServletRequest request = this.getRequest();
+        request.setAttribute("message", message);
+        request.setAttribute("target", contextPath + "/" + target);
+        request.setAttribute("waitSeconds", waitSeconds);
+        return this.display("/common/jump");
     }
 
     /**

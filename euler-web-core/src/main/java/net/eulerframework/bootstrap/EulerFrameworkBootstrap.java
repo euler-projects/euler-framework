@@ -117,7 +117,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         }
         
         container.addListener(new ContextLoaderListener(rootContext));
-        container.addListener(new RequestContextListener());
+        //container.addListener(new RequestContextListener());
         container.addListener(new EulerFrameworkCoreListener());
         
         MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();

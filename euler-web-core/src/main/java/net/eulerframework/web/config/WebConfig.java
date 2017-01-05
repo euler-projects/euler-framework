@@ -316,4 +316,12 @@ public abstract class WebConfig {
         }
         return minPasswordLength; 
     }
+
+    public static String getSignUpSuccessPage() {
+        return "signupSuccess";
+    }
+
+    public static String getSignUpFailPage() {
+        return "signupFail";
+    }
 }

@@ -11,19 +11,22 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
-import net.eulerframework.web.module.authentication.dao.IUserDao;
-import net.eulerframework.web.module.authentication.entity.Group;
-import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
+import net.eulerframework.web.module.authentication.dao.IUserDao;
+import net.eulerframework.web.module.authentication.entity.Group;
+import net.eulerframework.web.module.authentication.entity.User;
 
 public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByName(String username) {
+        if(username == null)
+            return null;
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("username", username));
@@ -35,6 +38,8 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByEmail(String email) {
+        Assert.isNotNull(email, "Email is null");
+        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("email", email));
@@ -46,6 +51,9 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByMobile(String mobile) {
+        if(mobile == null)
+            return null;
+        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("mobile", mobile));
