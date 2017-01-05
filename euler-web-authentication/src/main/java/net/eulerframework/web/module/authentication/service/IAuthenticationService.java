@@ -11,7 +11,7 @@ public interface IAuthenticationService extends IBaseService {
  
     public String signUp(User user);
    
-    public void signUp(User user, IUserProfile userProfile);
+    public <T extends IUserProfile> String signUp(User user, T userProfile);
 
     public void passwdResetEmailGen(String email);
 

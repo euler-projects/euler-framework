@@ -11,6 +11,7 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.BadRequestException;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
+import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 
@@ -19,6 +20,7 @@ import net.eulerframework.web.module.authentication.entity.User;
 public class AuthenticationService extends BaseService implements IAuthenticationService {
 
     @Resource private IUserDao userDao;
+    @Resource private IUserProfileDao<IUserProfile> userProfileDao;
     @Resource private PasswordEncoder passwordEncoder;
     
     @Override
@@ -43,9 +45,16 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     }
 
     @Override
-    public void signUp(User user, IUserProfile userProfile) {
-        // TODO Auto-generated method stub
-
+    public <T extends IUserProfile> String signUp(User user, T userProfile) {
+        String userId = this.signUp(user);
+        
+        if(StringTool.isNull(userId))
+            throw new BadRequestException("用户注册失败");
+        
+        userProfile.setUserId(userId);
+        this.userProfileDao.save(userProfile);
+        
+        return userId;
     }
 
     @Override
