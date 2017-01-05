@@ -237,8 +237,8 @@ public class UserService extends BaseService implements IUserService, UserDetail
             user.setMobile(user.getMobile() == null ? null : user.getMobile().toLowerCase());
             
             user.setId(null);
-            user.setResetToken(null);
-            user.setResetTokenExpireTime(null);
+//            user.setResetToken(null);
+//            user.setResetTokenExpireTime(null);
             
             user.setPassword(this.passwordEncoder.encode(user.getPassword()));
             
@@ -302,8 +302,8 @@ public class UserService extends BaseService implements IUserService, UserDetail
         if(newPassword.length() < this.miniPasswordLength) {
             throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
         }
-        user.setResetToken(null);
-        user.setResetTokenExpireTime(null);
+//        user.setResetToken(null);
+//        user.setResetTokenExpireTime(null);
         user.setPassword(this.passwordEncoder.encode(newPassword));
         this.userDao.update(user);        
     }
@@ -316,8 +316,8 @@ public class UserService extends BaseService implements IUserService, UserDetail
         String userId = user.getId();
         String resetToken = UUID.randomUUID().toString();
         Date resetTokenExpireTime = new Date(new Date().getTime() + 600000L);
-        user.setResetToken(resetToken);
-        user.setResetTokenExpireTime(resetTokenExpireTime);
+//        user.setResetToken(resetToken);
+//        user.setResetTokenExpireTime(resetTokenExpireTime);
         this.userDao.update(user);
         String resetURL = resetTokenURL.replace("{userId}", userId).replace("{resetToken}", resetToken);
         System.out.println(resetURL);
