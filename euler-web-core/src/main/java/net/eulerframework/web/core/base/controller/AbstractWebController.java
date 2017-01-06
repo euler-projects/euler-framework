@@ -3,14 +3,8 @@ package net.eulerframework.web.core.base.controller;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.WebControllerException;
 import net.eulerframework.web.core.i18n.Tag;
 
@@ -109,27 +103,6 @@ public abstract class AbstractWebController extends BaseController {
         request.setAttribute("target", contextPath + "/" + target);
         request.setAttribute("waitSeconds", waitSeconds);
         return this.display("/common/jump");
-    }
-
-    /**
-     * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息
-     * @return 404页面
-     */
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({ResourceNotFoundException.class})
-    @Override
-    public String resourceNotFoundException(ResourceNotFoundException e) {
-        return this.display("/exception/404");
-    }
-
-    /**
-     * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息
-     * @return 403页面
-     */
-    @ExceptionHandler({AccessDeniedException.class})
-    @Override
-    public String accessDeniedException(AccessDeniedException e) {
-        return this.display("/exception/403");
     }
 
 }

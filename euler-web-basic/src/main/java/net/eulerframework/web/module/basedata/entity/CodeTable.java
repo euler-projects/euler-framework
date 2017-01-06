@@ -15,7 +15,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  *
  */
 @SuppressWarnings("serial")
-@Entity
+//@Entity
 @Table(name = "SYS_CODE_TABLE")
 public class CodeTable extends UUIDEntity<CodeTable> {
 

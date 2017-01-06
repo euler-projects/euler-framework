@@ -21,7 +21,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  *
  */
 @SuppressWarnings("serial")
-@Entity
+//@Entity
 @Table(name = "SYS_MODULE")
 public class Module extends UUIDEntity<Module> {
 

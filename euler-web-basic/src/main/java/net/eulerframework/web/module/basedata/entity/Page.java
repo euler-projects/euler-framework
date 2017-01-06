@@ -16,7 +16,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  *
  */
 @SuppressWarnings("serial")
-@Entity
+//@Entity
 @Table(name = "SYS_PAGE")
 public class Page extends UUIDEntity<Page> {
 
