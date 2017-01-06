@@ -41,7 +41,17 @@ import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.Reader;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * 文件读取器，可读取2GB以下文件，大文件没有测试
+ * @author cFrost
+ *
+ */
 public abstract class FileReader {
+    private static final Logger log = LogManager.getLogger();
+    
     /**
      * 以字节为单位读取文件，常用于读二进制文件，如图片、声音、影像等文件。
      * @throws IOException 
@@ -56,28 +66,18 @@ public abstract class FileReader {
      */
     public static byte[] readFileByByte(File file) throws IOException {
         InputStream inputStream = null;
-        
-        byte[] result;
         try {
-            // 一次读一个字节
             inputStream = new FileInputStream(file);
-            result = new byte[inputStream.available()];
-            int count=0;
-            byte tempByte;
-            while ((tempByte = (byte) inputStream.read()) != -1) {
-                result[count++]=tempByte;
-            }
+            return readInputStreamByByte(inputStream);
         } catch (IOException e) {
             throw e;
         } finally {
             if(inputStream != null ) inputStream.close();
         }
-        
-        return result;
     }
     
     /**
-     * 以字节为单位读取文件，常用于读二进制文件，如图片、声音、影像等文件。
+     * 以多个字节为单位读取文件，常用于读二进制文件，如图片、声音、影像等文件。
      * @throws IOException 
      */
     public static byte[] readFileByMultiBytes(String path, int number) throws IOException {
@@ -86,7 +86,7 @@ public abstract class FileReader {
     }
     
     /**
-     * 以字节为单位读取文件，常用于读二进制文件，如图片、声音、影像等文件。
+     * 以多个字节为单位读取文件，常用于读二进制文件，如图片、声音、影像等文件。
      * @throws IOException 
      */
     public static byte[] readFileByMultiBytes(File file, int number) throws IOException {
@@ -99,6 +99,26 @@ public abstract class FileReader {
         } finally {
             if(inputStream != null ) inputStream.close();
         }
+    }
+    
+    public static byte[] readInputStreamByByte(InputStream inputStream) throws IOException {
+        byte[] result;
+        
+        try {
+            // 一次读一个字节
+            result = new byte[inputStream.available()];
+            int count=0;
+            int tempInt;
+            while ((tempInt = inputStream.read()) != -1) {
+                result[count++]= (byte) (tempInt & 0xff);
+            }
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            if(inputStream != null ) inputStream.close();
+        }
+        
+        return result;
     }
     
     public static byte[] readInputStreamByMultiBytes(InputStream inputStream, int number) throws IOException {
@@ -269,6 +289,9 @@ public abstract class FileReader {
      * @throws IOException
      */
     public static void writeFile(String filePath, String data, boolean append) throws IOException{
+        
+        log.info("Write File: " + filePath);
+        
         File file =new File(filePath);
         //FileWriter fileWritter = null;
         OutputStreamWriter outputStreamWriter = null;
@@ -302,6 +325,9 @@ public abstract class FileReader {
      * @throws IOException
      */
     public static void writeFile(String filePath, byte[] data, boolean append) throws IOException{
+        
+        log.info("Write File: " + filePath);
+        
         File file =new File(filePath);
         FileOutputStream fileOutputStream = null;
 
@@ -353,15 +379,7 @@ public abstract class FileReader {
     }
 
     private static boolean delete(File file) {
-        System.out.println("DELETE " + file.getPath());
+        log.info("DELETE " + file.getPath());
         return file.delete();
-    }
-    
-    public static String getFileExtension(String fileName) {
-        int dot = fileName.lastIndexOf('.');
-        String extension = "";
-        if(dot > -1)
-            extension = fileName.substring(dot);
-        return extension;
     }
 }

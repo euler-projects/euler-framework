@@ -30,4 +30,13 @@ public class GlobalProperties1 {
             throw new GlobalPropertyReadException(e);
         }
     }
+    
+    public static String get(String property, String defaultValue) {
+        try {
+            return get(property);
+        } catch (GlobalPropertyReadException e) {
+            logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
+            return defaultValue;
+        }
+    }
 }

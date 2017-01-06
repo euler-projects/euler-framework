@@ -2,6 +2,7 @@ package net.eulerframework.web.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.web.context.ContextLoader;
 
 import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.GlobalProperties1;
@@ -197,6 +198,14 @@ public abstract class WebConfig {
                     uploadPath = WebConfigDefault.WEB_UPLOAD_PATH_UNIX;
                 }
                 log.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + uploadPath + " for default.");
+            }
+            
+            if(!uploadPath.startsWith("/") && !uploadPath.startsWith("file://")) {
+                uploadPath = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(uploadPath);
+            } else {
+                if(uploadPath.startsWith("file://")) {
+                    uploadPath = uploadPath.substring("file://".length());
+                }
             }
         }
         return uploadPath;
