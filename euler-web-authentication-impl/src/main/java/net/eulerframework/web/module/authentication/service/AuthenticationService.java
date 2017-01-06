@@ -43,14 +43,14 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
                 Assert.isNotNull(user.getPassword(), BadRequestException.class, Tag.i18n("Password is null"));
                 //Assert.isNotNull(user.getMobile(), BadRequestException.class, Tag.i18n("Mobile is null"));
                 
+                Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class, Tag.i18n("The username format does not meet the requirements"));
+                Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class, Tag.i18n("The email format does not meet the requirements"));
+                
                 Assert.isNull(this.userDao.findUserByName(user.getUsername()), BadRequestException.class, Tag.i18n("Username han been used"));
                 Assert.isNull(this.userDao.findUserByEmail(user.getEmail()), BadRequestException.class, Tag.i18n("Email han been used"));
                 
                 if(user.getMobile() !=null)
                     Assert.isNull(this.userDao.findUserByMobile(user.getMobile()), BadRequestException.class, Tag.i18n("Mobile han been used"));
-                
-                Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class, Tag.i18n("The username format does not meet the requirements"));
-                Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class, Tag.i18n("The email format does not meet the requirements"));
                 
                 password = user.getPassword().trim();
                 Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class, Tag.i18n("The password format does not meet the requirements"));

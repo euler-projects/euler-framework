@@ -1,13 +1,10 @@
 package net.eulerframework.web.module.authentication.service;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
 
-@Transactional
 public interface IAuthenticationService extends IBaseService {
  
     public String signUp(User user) throws UserSignUpException;
