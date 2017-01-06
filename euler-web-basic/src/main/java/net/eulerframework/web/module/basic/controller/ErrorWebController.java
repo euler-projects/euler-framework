@@ -3,7 +3,6 @@ package net.eulerframework.web.module.basic.controller;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
@@ -13,7 +12,7 @@ import net.eulerframework.web.core.base.controller.AbstractWebController;
 @RequestMapping("/")
 public class ErrorWebController extends AbstractWebController {
     
-    @RequestMapping(value="error-{errorCode}", method = RequestMethod.GET)
+    @RequestMapping("error-{errorCode}")
     public String error(@PathVariable("errorCode") String errorCode) {
         return this.display(errorCode);
     }
