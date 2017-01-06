@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.dao.impl;
+package net.eulerframework.web.module.basic.dao.impl;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.module.basedata.dao.ICodeTableDao;
-import net.eulerframework.web.module.basedata.entity.CodeTable;
+import net.eulerframework.web.module.basic.dao.ICodeTableDao;
+import net.eulerframework.web.module.basic.entity.CodeTable;
 
 public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
     

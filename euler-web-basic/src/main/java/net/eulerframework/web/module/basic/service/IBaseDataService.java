@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.service;
+package net.eulerframework.web.module.basic.service;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,9 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.IBaseService;
-import net.eulerframework.web.module.basedata.entity.CodeTable;
-import net.eulerframework.web.module.basedata.entity.Module;
-import net.eulerframework.web.module.basedata.entity.Page;
+import net.eulerframework.web.module.basic.entity.CodeTable;
+import net.eulerframework.web.module.basic.entity.Module;
+import net.eulerframework.web.module.basic.entity.Page;
 
 public interface IBaseDataService extends IBaseService {
 

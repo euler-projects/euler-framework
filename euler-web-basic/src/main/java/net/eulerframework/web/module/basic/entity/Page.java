@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.entity;
+package net.eulerframework.web.module.basic.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

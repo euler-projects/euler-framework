@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.controller;
+package net.eulerframework.web.module.basic.controller;
 
 import net.eulerframework.web.core.base.controller.AbstractWebController;
 import org.springframework.context.annotation.Scope;

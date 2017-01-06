@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.service.impl;
+package net.eulerframework.web.module.basic.service.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,13 +20,13 @@ import net.eulerframework.common.util.FileReader;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.basedata.dao.ICodeTableDao;
-import net.eulerframework.web.module.basedata.dao.IModuleDao;
-import net.eulerframework.web.module.basedata.dao.IPageDao;
-import net.eulerframework.web.module.basedata.entity.CodeTable;
-import net.eulerframework.web.module.basedata.entity.Module;
-import net.eulerframework.web.module.basedata.entity.Page;
-import net.eulerframework.web.module.basedata.service.IBaseDataService;
+import net.eulerframework.web.module.basic.dao.ICodeTableDao;
+import net.eulerframework.web.module.basic.dao.IModuleDao;
+import net.eulerframework.web.module.basic.dao.IPageDao;
+import net.eulerframework.web.module.basic.entity.CodeTable;
+import net.eulerframework.web.module.basic.entity.Module;
+import net.eulerframework.web.module.basic.entity.Page;
+import net.eulerframework.web.module.basic.service.IBaseDataService;
 
 @Service
 public class BaseDataService extends BaseService implements IBaseDataService {

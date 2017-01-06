@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.exception;
+package net.eulerframework.web.module.basic.exception;
 
 @SuppressWarnings("serial")
 public class CodeTableException extends Exception {

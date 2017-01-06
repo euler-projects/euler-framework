@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.dao.impl;
+package net.eulerframework.web.module.basic.dao.impl;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerframework.web.module.basedata.dao.IModuleDao;
-import net.eulerframework.web.module.basedata.entity.Module;
+import net.eulerframework.web.module.basic.dao.IModuleDao;
+import net.eulerframework.web.module.basic.entity.Module;
 
 public class ModuleDao extends BaseDao<Module> implements IModuleDao {
 

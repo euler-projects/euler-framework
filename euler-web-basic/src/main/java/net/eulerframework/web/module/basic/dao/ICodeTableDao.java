@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.dao;
+package net.eulerframework.web.module.basic.dao;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import net.eulerframework.common.email.EmailConfig;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.module.basedata.entity.CodeTable;
+import net.eulerframework.web.module.basic.entity.CodeTable;
 
 public interface ICodeTableDao extends IBaseDao<CodeTable> {
 

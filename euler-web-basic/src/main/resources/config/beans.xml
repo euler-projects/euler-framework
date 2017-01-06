@@ -13,13 +13,13 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd"> 
 
-    <bean id="moduleDao" class="net.eulerframework.web.module.basedata.dao.impl.ModuleDao">
+    <bean id="moduleDao" class="net.eulerframework.web.module.basic.dao.impl.ModuleDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="pageDao" class="net.eulerframework.web.module.basedata.dao.impl.PageDao">
+    <bean id="pageDao" class="net.eulerframework.web.module.basic.dao.impl.PageDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="codeTableDao" class="net.eulerframework.web.module.basedata.dao.impl.CodeTableDao">
+    <bean id="codeTableDao" class="net.eulerframework.web.module.basic.dao.impl.CodeTableDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 </beans>

@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basedata.controller;
+package net.eulerframework.web.module.basic.controller;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.PathVariable;
