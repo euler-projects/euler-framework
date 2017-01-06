@@ -12,13 +12,10 @@ import net.eulerframework.web.module.datastore.exception.FileArchiveException;
 
 public interface IArchivedFileService extends IBaseService {
 
-    @PreAuthorize("isFullyAuthenticated()")
     public ArchivedFile saveFileInfo(String originalFilename, File archivedFile) throws IOException;
 
-    @PreAuthorize("isFullyAuthenticated()")
     public ArchivedFile saveFile(File file) throws FileArchiveException;
 
-    @PreAuthorize("isFullyAuthenticated()")
     public ArchivedFile saveMultipartFile(MultipartFile multipartFile) throws FileArchiveException;
 
     public ArchivedFile findArchivedFile(String archivedFileId);
