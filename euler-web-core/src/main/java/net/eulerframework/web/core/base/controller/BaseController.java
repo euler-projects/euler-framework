@@ -17,7 +17,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import net.eulerframework.web.core.base.RequestContextAccessor;
+
+import net.eulerframework.web.core.base.RequestAccessable;
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
 import net.eulerframework.web.core.base.response.Status;
 import net.eulerframework.web.core.exception.BadRequestException;
@@ -25,7 +26,7 @@ import net.eulerframework.web.core.exception.IllegalParamException;
 import net.eulerframework.web.core.exception.ResourceExistException;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 
-public abstract class BaseController extends RequestContextAccessor {
+public abstract class BaseController extends RequestAccessable {
     
     protected final Logger logger = LogManager.getLogger(this.getClass());
     

@@ -9,23 +9,23 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-public abstract class RequestContextAccessor {
+public abstract class RequestContext {
     
-    protected ServletContext getServletContext(){
+    public static ServletContext getServletContext(){
         WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
         return webApplicationContext.getServletContext();
     }
     
-    private ServletRequestAttributes getServletRequestAttributes() {
+    private static ServletRequestAttributes getServletRequestAttributes() {
         return (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
     }
     
-    protected HttpServletRequest getRequest() {
-        return this.getServletRequestAttributes().getRequest();
+    public static HttpServletRequest getRequest() {
+        return getServletRequestAttributes().getRequest();
     }
     
-    protected HttpServletResponse getResponse() {
-        return this.getServletRequestAttributes().getResponse();
+    public static HttpServletResponse getResponse() {
+        return getServletRequestAttributes().getResponse();
     }
 
 }
