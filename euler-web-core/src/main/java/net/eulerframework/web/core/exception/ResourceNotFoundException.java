@@ -1,7 +1,9 @@
 package net.eulerframework.web.core.exception;
 
+import net.eulerframework.web.core.base.exception.I18NRuntimeException;
+
 @SuppressWarnings("serial")
-public class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends I18NRuntimeException {
 
     public ResourceNotFoundException() {
         super();

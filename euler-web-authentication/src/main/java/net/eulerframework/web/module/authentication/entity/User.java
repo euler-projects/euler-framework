@@ -57,6 +57,8 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     //@NotNull
     @Column(name = "FULL_NAME")
     private String fullName;
+    @Column(name = "AVATAR", length=36)
+    private String avatar;
     @Column(name = "ENABLED", nullable = false)
     private Boolean enabled;
     @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
@@ -199,6 +201,14 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public void setSignUpTime(Date signUpTime) {
         this.signUpTime = signUpTime;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {

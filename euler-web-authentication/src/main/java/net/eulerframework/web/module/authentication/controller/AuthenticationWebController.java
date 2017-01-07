@@ -14,8 +14,8 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
-import net.eulerframework.web.core.exception.BadRequestException;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.UserSignUpException;
 import net.eulerframework.web.module.authentication.service.IAuthenticationService;
 
 /**
@@ -26,35 +26,35 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
 @Scope("prototype")
 @RequestMapping("/")
 public class AuthenticationWebController extends AbstractWebController {
-    
-    @Resource private IAuthenticationService authenticationService;
-    
-    @RequestMapping(value = { "signin" }, method = RequestMethod.GET)
-    public String login()
-    {
+
+    @Resource
+    private IAuthenticationService authenticationService;
+
+    @RequestMapping(value = "signin", method = RequestMethod.GET)
+    public String login() {
         return this.display("signin");
     }
-    
-    @RequestMapping(value = { "signup" }, method = RequestMethod.GET)
-    public String signup()
-    {
+
+    @RequestMapping(value = "signup", method = RequestMethod.GET)
+    public String signup() {
         return this.display("signup");
     }
-    @RequestMapping(value = { "simpleSignup" }, method = RequestMethod.POST)
-    public String simpleSignup( @Valid User user)
-    {
+
+    @RequestMapping(value = "litesignup", method = RequestMethod.POST)
+    public String litesignup(@Valid User user) {
         try {
-        String userId = this.authenticationService.signUp(user);
-        
-        if(!StringTool.isNull(userId)) {
-            user.setPassword(null);
-            this.getRequest().setAttribute("user", user);
-            return this.display(WebConfig.getSignUpSuccessPage());
-        } else
-            throw new BadRequestException("用户注册失败");
+            String userId = this.authenticationService.signUp(user);
+
+            if (!StringTool.isNull(userId)) {
+                user.setPassword(null);
+                this.getRequest().setAttribute("user", user);
+                return this.display(WebConfig.getSignUpSuccessPage());
+            } else
+                throw new UserSignUpException("Unknown user sign up error");
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
-            return this.display(WebConfig.getSignUpFailPage());         
+            this.getRequest().setAttribute("errorMsg", e.getMessage());
+            return this.display(WebConfig.getSignUpFailPage());
         }
     }
 

@@ -2,23 +2,14 @@ package net.eulerframework.web.module.authentication.service.impl;
 
 import net.eulerframework.cache.DefaultObjectCache;
 import net.eulerframework.cache.ObjectCachePool;
-import net.eulerframework.common.email.MailSenderFactory;
-import net.eulerframework.common.email.ThreadSimpleMailSender;
 import net.eulerframework.common.util.BeanTool;
-import net.eulerframework.common.util.GlobalPropertyReadException;
-import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.exception.IllegalParamException;
-import net.eulerframework.web.core.exception.ResourceExistException;
-import net.eulerframework.web.core.i18n.Tag;
 import net.eulerframework.web.module.authentication.dao.IGroupDao;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.entity.Group;
-import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IUserProfileService;
 import net.eulerframework.web.module.authentication.service.IUserService;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,18 +26,6 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     @Resource private IUserDao userDao;
     @Resource private IGroupDao groupDao;
-    
-    private IUserProfileService userProfileService;
-    
-    public void setUserProfileService(IUserProfileService userProfileService) {
-        this.userProfileService = userProfileService;
-    }
-
-    private int miniPasswordLength = 6;
-
-    public void setMiniPasswordLength(int miniPasswordLength) {
-        this.miniPasswordLength = miniPasswordLength;
-    }
 
     private PasswordEncoder passwordEncoder;
         
@@ -70,17 +49,6 @@ public class UserService extends BaseService implements IUserService, UserDetail
 
     public void setEnableCache(boolean enableCache) {
         this.enableCache = enableCache;
-    }
-
-    private boolean enableUserResetPassword = false;
-    private String resetTokenURL;
-    
-    public void setEnableUserResetPassword(boolean enableUserResetPassword) {
-        this.enableUserResetPassword = enableUserResetPassword;
-    }
-
-    public void setResetTokenURL(String resetTokenURL) {
-        this.resetTokenURL = resetTokenURL;
     }
 
     public void setUserCacheSeconds(int cacheSecond) {
@@ -211,77 +179,6 @@ public class UserService extends BaseService implements IUserService, UserDetail
     public List<User> findUserByNameOrCode(String nameOrCode) {
         return this.userDao.findUserByNameOrCode(nameOrCode);
     }
-
-    @Override
-    public void createUser(String username, String password) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        this.createUser(user);
-    }
-
-    @Override
-    public void createUser(User user) {
-        BeanTool.clearEmptyProperty(user);
-        if(user == null || StringTool.isNull(user.getUsername()) || StringTool.isNull(user.getPassword()))
-            return;
-        if(user.getPassword().length() < this.miniPasswordLength) {
-            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
-        }
-        try {
-            this.loadUserByUsername(user.getUsername());
-        } catch (UsernameNotFoundException e) {
-            
-            user.setUsername(user.getUsername().toLowerCase());
-            user.setEmail(user.getEmail() == null ? null : user.getEmail().toLowerCase());
-            user.setMobile(user.getMobile() == null ? null : user.getMobile().toLowerCase());
-            
-            user.setId(null);
-//            user.setResetToken(null);
-//            user.setResetTokenExpireTime(null);
-            
-            user.setPassword(this.passwordEncoder.encode(user.getPassword()));
-            
-            user.setAccountNonExpired(true);
-            user.setAccountNonLocked(true);
-            user.setCredentialsNonExpired(true);
-            user.setEnabled(true);
-            
-            Group usersGroup = this.groupDao.findSystemUsersGroup();
-            Set<Group> groups = new HashSet<>();
-            groups.add(usersGroup);
-            user.setGroups(groups);
-            
-            this.userDao.save(user);
-            return;
-        }
-        throw new ResourceExistException("User Existed!");
-        
-    }
-
-    @Override
-    public void createUser(User user, IUserProfile userProfile) {
-        this.createUser(user);
-        
-        if(this.userProfileService == null)
-            return;
-        
-        userProfile.setUserId(user.getId());
-        this.userProfileService.saveUserProfile(userProfile);
-    }
-
-    @Override
-    public void resetUserPasswordRWT(String userId, String newPassword) {
-        if(newPassword.length() < this.miniPasswordLength) {
-            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
-        }
-        User user = this.userDao.load(userId);
-        if(user == null)
-            throw new UsernameNotFoundException("User not found.");
-        user.setPassword(this.passwordEncoder.encode(newPassword));
-        this.userDao.update(user);
-    }
-
 //    @Override
 //    public User checkResetTokenRT(String userId, String resetToken) {
 //        if(!enableUserResetPassword)

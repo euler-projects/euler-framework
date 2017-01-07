@@ -1,7 +1,9 @@
 package net.eulerframework.web.module.authentication.exception;
 
+import net.eulerframework.web.core.base.exception.I18NRuntimeException;
+
 @SuppressWarnings("serial")
-public class UserSignUpException extends Exception {
+public class UserSignUpException extends I18NRuntimeException {
     public UserSignUpException() {
         super();
     }

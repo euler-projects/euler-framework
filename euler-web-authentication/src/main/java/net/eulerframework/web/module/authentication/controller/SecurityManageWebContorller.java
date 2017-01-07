@@ -108,12 +108,6 @@ public class SecurityManageWebContorller extends AbstractWebController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/resetUserPassword" }, method = RequestMethod.POST)
-    public void resetUserPassword(String id, String password) {
-        this.userService.resetUserPasswordRWT(id, password);
-    }
-
-    @ResponseBody
     @RequestMapping(value = { "/saveGroup" }, method = RequestMethod.POST)
     public void saveGroup(Group group) {
         this.authorityService.saveGroup(group);

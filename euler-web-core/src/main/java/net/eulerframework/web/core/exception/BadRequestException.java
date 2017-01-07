@@ -1,7 +1,9 @@
 package net.eulerframework.web.core.exception;
 
+import net.eulerframework.web.core.base.exception.I18NRuntimeException;
+
 @SuppressWarnings("serial")
-public class BadRequestException extends RuntimeException {
+public class BadRequestException extends I18NRuntimeException {
 
     public BadRequestException() {
         super();
