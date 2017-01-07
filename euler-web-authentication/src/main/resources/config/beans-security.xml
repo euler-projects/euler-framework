@@ -25,6 +25,9 @@
     <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
     
     <beans:import resource="classpath*:**/rs-security.xml"/>
+    
+    
+    <http security="none" pattern="${api.rootPath}/**" />
 
     <beans:beans profile="web-security-none">
         <http security="none" pattern="/**" />

@@ -47,7 +47,6 @@ public abstract class WebConfig {
 //        private final static boolean WEB_ENABLE_JSP_AUTO_DEPLOY = false;
 
         private final static String ADMIN_ROOT_PATH = "/admin";
-        private final static String API_ROOT_PATH = "/api";
         
         private final static long CACHE_RAM_CAHCE_CLEAN_FREQ = 60_000L;
         private final static long CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L; 
@@ -151,8 +150,7 @@ public abstract class WebConfig {
                     apiRootPath = "/" + apiRootPath;
                 
             } catch (GlobalPropertyReadException e) {
-                apiRootPath = WebConfigDefault.API_ROOT_PATH;
-                log.warn("Couldn't load " + WebConfigKey.API_ROOT_PATH + " , use " + apiRootPath + " for default.");
+                throw new RuntimeException("Couldn't load " + WebConfigKey.API_ROOT_PATH);
             }
         }
         return apiRootPath;
