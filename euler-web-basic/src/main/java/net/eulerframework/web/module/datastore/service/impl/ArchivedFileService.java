@@ -93,6 +93,10 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
         
         File targetFile = new File(archiveFilePath + "/" + archivedPathSuffix, targetFilename);
         
+        if(!targetFile.getParentFile().exists()){
+            targetFile.getParentFile().mkdirs();
+        }            
+        
         try {
             multipartFile.transferTo(targetFile);
             
