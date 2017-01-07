@@ -20,14 +20,14 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.eulerframework.web.core.annotation.ApiController;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = {"**.web.**.controller"},
+        basePackages = {"**.web.**.api"},
         useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(ApiController.class)
+        includeFilters = @ComponentScan.Filter(ApiEndpoint.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
 public class SpringApiDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {

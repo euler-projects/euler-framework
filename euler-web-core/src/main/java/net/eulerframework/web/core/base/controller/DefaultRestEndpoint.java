@@ -4,15 +4,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import net.eulerframework.web.core.annotation.ApiController;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.response.WebServiceResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 
-@ApiController
+@ApiEndpoint
 @Scope("prototype")
 @RequestMapping("/")
 @Deprecated
-public abstract class DefaultRestEndpoint extends AbstractRestEndpoint {
+public abstract class DefaultRestEndpoint extends AbstractApiEndpoint {
 
     @ResponseBody
     @RequestMapping(value = { "**" })

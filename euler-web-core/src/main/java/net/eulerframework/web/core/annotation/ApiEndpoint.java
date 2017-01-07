@@ -14,6 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Documented
 @RestController
 @Scope("prototype")
-public @interface ApiController {
+public @interface ApiEndpoint {
     String value() default "";    
 }

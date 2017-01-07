@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.eulerframework.web.core.annotation.ApiController;
-import net.eulerframework.web.core.base.controller.AbstractRestEndpoint;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
+import net.eulerframework.web.core.base.controller.AbstractApiEndpoint;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
-@ApiController
+@ApiEndpoint
 @Scope("prototype")
 @RequestMapping("/oauth2")
-public class Oauth2LocalRestEndpoint extends AbstractRestEndpoint {
+public class Oauth2LocalRestEndpoint extends AbstractApiEndpoint {
 	
     @ResponseBody
     @RequestMapping(value = "/authority", method = RequestMethod.GET)

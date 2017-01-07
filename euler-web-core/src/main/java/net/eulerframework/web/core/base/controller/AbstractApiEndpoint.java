@@ -4,7 +4,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
-public abstract class AbstractRestEndpoint extends BaseController {
+public abstract class AbstractApiEndpoint extends BaseController {
 
     
     protected void setNoCacheHeader() {

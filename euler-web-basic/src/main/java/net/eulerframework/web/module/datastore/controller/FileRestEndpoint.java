@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.ApiController;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.base.controller.AbstractRestEndpoint;
+import net.eulerframework.web.core.base.controller.AbstractApiEndpoint;
 import net.eulerframework.web.core.base.response.WebServiceResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.datastore.entity.ArchivedFile;
@@ -25,10 +25,10 @@ import net.eulerframework.web.module.datastore.service.IArchivedFileService;
 import net.eulerframework.web.module.datastore.util.WebFileTool;
 
 @WebController
-@ApiController
+@ApiEndpoint
 @Scope("prototype")
 @RequestMapping("/datastore")
-public class FileRestEndpoint extends AbstractRestEndpoint {
+public class FileRestEndpoint extends AbstractApiEndpoint {
 
     @Resource
     private IArchivedFileService archivedFileService;

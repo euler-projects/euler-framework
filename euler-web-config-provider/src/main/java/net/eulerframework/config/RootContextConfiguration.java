@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
 
 import net.eulerframework.web.core.annotation.AdminWebController;
-import net.eulerframework.web.core.annotation.ApiController;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.annotation.WebController;
 
 @Configuration
@@ -17,7 +17,7 @@ import net.eulerframework.web.core.annotation.WebController;
         excludeFilters = {@ComponentScan.Filter(Controller.class),
                           @ComponentScan.Filter(WebController.class),
                           @ComponentScan.Filter(AdminWebController.class),
-                          @ComponentScan.Filter(ApiController.class)}
+                          @ComponentScan.Filter(ApiEndpoint.class)}
 )
 
 public class RootContextConfiguration {
