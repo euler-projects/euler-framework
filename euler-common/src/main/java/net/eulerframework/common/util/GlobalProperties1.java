@@ -14,11 +14,17 @@ public class GlobalProperties1 {
     private static PropertyReader reader;
     
     static{
+        refresh();
+    }
+
+    public static void refresh() {
         try {
             reader = new PropertyReader(CONFIG_FILE);
+            logger.info("Refresh File Config");
         } catch (IOException e) {
             throw new RuntimeException("配置文件classpath:"+CONFIG_FILE+"不存在",e);
         }
+        
     }
     
     public static String get(String property) throws GlobalPropertyReadException {
@@ -34,6 +40,34 @@ public class GlobalProperties1 {
     public static String get(String property, String defaultValue) {
         try {
             return get(property);
+        } catch (GlobalPropertyReadException e) {
+            logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
+            return defaultValue;
+        }
+    }    
+
+    public static int getIntValue(String property, int defaultValue) {
+        try {
+            return Integer.parseInt(get(property));
+        } catch (GlobalPropertyReadException e) {
+            logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
+            return defaultValue;
+        }
+    }
+    
+    public static long getLongValue(String property, long defaultValue) {
+        try {
+            return Long.parseLong(get(property));
+        } catch (GlobalPropertyReadException e) {
+            logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
+            return defaultValue;
+        }
+    }
+    
+
+    public static double getDoubleValue(String property, double defaultValue) {
+        try {
+            return Double.parseDouble(get(property));
         } catch (GlobalPropertyReadException e) {
             logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
             return defaultValue;

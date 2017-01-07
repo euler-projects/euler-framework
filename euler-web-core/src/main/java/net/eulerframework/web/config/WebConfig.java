@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.context.ContextLoader;
 
+import net.eulerframework.cache.DefaultObjectCache;
+import net.eulerframework.cache.ObjectCachePool;
 import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.GlobalProperties1;
 import net.eulerframework.common.util.GlobalPropertyReadException;
@@ -11,25 +13,26 @@ import net.eulerframework.common.util.StringTool;
 
 public abstract class WebConfig {
     
+    private final static DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool.generateDefaultObjectCache(Long.MAX_VALUE);
+    
     private static class WebConfigKey {
-        private final static String CORE_I18N_REFRESH_FREQ = "core.i18nRefreshFreq";
+        private final static String CORE_I18N_REFRESH_FREQ = "core.i18n.refreshFreq";
+        private final static String CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = "core.cache.refreshFreq";
+        private final static String CORE_CACHE_USERCONTEXT_CAHCE_LIFE = "core.cache.userContextCacheLife";  
+        private final static String CORE_MULITPART = "core.multipart"; 
+        private static final String CORE_MULITPART_LOCATION = "core.multiPart.location";
+        private static final String CORE_MULITPART_MAX_FILE_SIZE = "core.multiPart.maxFileSize";
+        private static final String CORE_MULITPART_MAX_REQUEST_SIZE = "core.multiPart.maxRequestSize";
+        private static final String CORE_MULITPART_FILE_SIZE_THRESHOLD = "core.multiPart.fileSizeThreshold"; 
         
         private final static String WEB_UPLOAD_PATH = "web.uploadPath";
         private final static String WEB_JSP_PATH = "web.jspPath";
-        private final static String WEB_ADMIN_JSP_PATH = "web.adminJspPath";
-//        private final static String WEB_ENABLE_JSP_AUTO_DEPLOY = "web.enableJspAutoDeploy";
-        
-        private final static String ADMIN_ROOT_PATH = "admin.rootPath";
-        
-        private final static String API_ROOT_PATH = "api.rootPath";        
-
-        private final static String CACHE_RAM_CAHCE_CLEAN_FREQ = "cache.ramCacheCleanFreq";
-        private final static String CACHE_USERCONTEXT_CAHCE_LIFE = "cache.userContextCacheLife";      
-
-        private static final String MULITPART_LOCATION = "multiPart.location";
-        private static final String MULITPART_MAX_FILE_SIZE = "multiPart.maxFileSize";
-        private static final String MULITPART_MAX_REQUEST_SIZE = "multiPart.maxRequestSize";
-        private static final String MULITPART_FILE_SIZE_THRESHOLD = "multiPart.fileSizeThreshold";        
+        private final static String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
+        private final static String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";        
+        private final static String WEB_API_ROOT_PATH = "web.api.rootPath";        
+//        private final static String WEB_ENABLE_JSP_AUTO_DEPLOY = "web.enableJspAutoDeploy";        
+   
+       
 
         private static final String SEC_WEB_AUTHENTICATION_TYPE = "sec.web.authenticationType";
         private static final String SEC_API_AUTHENTICATION_TYPE = "sec.api.authenticationType";        
@@ -39,22 +42,19 @@ public abstract class WebConfig {
     
     private static class WebConfigDefault {
         private final static int CORE_I18N_REFRESH_FREQ = 86_400;
+        private final static long CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = 60_000L;
+        private final static long CORE_CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L;
+        private static final String CORE_MULITPART_LOCATION = null;
+        private static final long CORE_MULITPART_MAX_FILE_SIZE = 51_200L;
+        private static final long CORE_MULITPART_MAX_REQUEST_SIZE = 51_200L;
+        private static final int CORE_MULITPART_FILE_SIZE_THRESHOLD = 1_024;
         
         private final static String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
         private final static String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
         private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
-//        private final static boolean WEB_ENABLE_JSP_AUTO_DEPLOY = false;
-
-        private final static String ADMIN_ROOT_PATH = "/admin";
-        
-        private final static long CACHE_RAM_CAHCE_CLEAN_FREQ = 60_000L;
-        private final static long CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L; 
-        
-        private static final String MULITPART_LOCATION = null;
-        private static final long MULITPART_MAX_FILE_SIZE = 51_200L;
-        private static final long MULITPART_MAX_REQUEST_SIZE = 51_200L;
-        private static final int MULITPART_FILE_SIZE_THRESHOLD = 1_024;
+        private final static String WEB_ADMIN_ROOT_PATH = "/admin";
+//      private final static boolean WEB_ENABLE_JSP_AUTO_DEPLOY = false;
         
         private static final WebAuthenticationType SEC_WEB_AUTHENTICATION_TYPE = WebAuthenticationType.LOCAL;
         private static final ApiAuthenticationType SEC_API_AUTHENTICATION_TYPE = ApiAuthenticationType.NONE;
@@ -65,263 +65,246 @@ public abstract class WebConfig {
     
     protected final static Logger log = LogManager.getLogger();
 
-    private static Integer i18nRefreshFreq;
-    
-    private static String uploadPath;
-    private static String jspPath;
-    private static String adminJspPath;
-//    private static Boolean enableJspAutoDeploy;
-
-    private static String adminRootPath;
-    private static String apiRootPath;
-
-    private static Long ramCacheCleanFreq;
-    private static Long userContextCacheLife;
-    
-    private static WebAuthenticationType webAuthenticationType;
-    private static ApiAuthenticationType apiAuthenticationType;
-    private static OAuthServerType oauthServerType;
-
-    private static Integer minPasswordLength;
+    public static boolean clearWebConfigCache() {
+        GlobalProperties1.refresh();
+        return CONFIG_CAHCE.clear();
+    }
     
     public static int getI18nRefreshFreq() {
-        if(i18nRefreshFreq == null) {
-            try {
-                i18nRefreshFreq = Integer.parseInt(GlobalProperties1.get(WebConfigKey.CORE_I18N_REFRESH_FREQ));
-            } catch (GlobalPropertyReadException e) {
-                i18nRefreshFreq = WebConfigDefault.CORE_I18N_REFRESH_FREQ;
-                log.warn("Couldn't load " + WebConfigKey.CORE_I18N_REFRESH_FREQ + " , use " + i18nRefreshFreq + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_I18N_REFRESH_FREQ);
+        if(cachedConfig != null) {
+            return (int) cachedConfig;
         }
-        return i18nRefreshFreq;        
+        
+        int result = GlobalProperties1.getIntValue(WebConfigKey.CORE_I18N_REFRESH_FREQ, WebConfigDefault.CORE_I18N_REFRESH_FREQ);
+        
+        CONFIG_CAHCE.put(WebConfigKey.CORE_I18N_REFRESH_FREQ, result);
+        return result;     
     }
     
     public static WebAuthenticationType getWebAuthenticationType() {
-        if(webAuthenticationType == null) {
-            try {
-                webAuthenticationType = WebAuthenticationType.valueOf(GlobalProperties1.get(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE).toUpperCase());
-            } catch (Exception e) {
-                webAuthenticationType = WebConfigDefault.SEC_WEB_AUTHENTICATION_TYPE;
-                log.warn("Couldn't load " + WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE + " , use " + webAuthenticationType + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE);
+        if(cachedConfig != null) {
+            return (WebAuthenticationType) cachedConfig;
         }
-        return webAuthenticationType;
+        
+        WebAuthenticationType result;
+        try {
+            result = WebAuthenticationType.valueOf(GlobalProperties1.get(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE).toUpperCase());
+        } catch (Exception e) {
+            result = WebConfigDefault.SEC_WEB_AUTHENTICATION_TYPE;
+            log.warn("Couldn't load " + WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE + " , use " + result + " for default.");
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE, result);
+        return result;
     }
     
     public static ApiAuthenticationType getApiAuthenticationType() {
-        if(apiAuthenticationType == null) {
-            try {
-                apiAuthenticationType = ApiAuthenticationType.valueOf(GlobalProperties1.get(WebConfigKey.SEC_API_AUTHENTICATION_TYPE).toUpperCase());
-            } catch (Exception e) {
-                apiAuthenticationType = WebConfigDefault.SEC_API_AUTHENTICATION_TYPE;
-                log.warn("Couldn't load " + WebConfigKey.SEC_API_AUTHENTICATION_TYPE + " , use " + apiAuthenticationType + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_API_AUTHENTICATION_TYPE);
+        if(cachedConfig != null) {
+            return (ApiAuthenticationType) cachedConfig;
         }
-        return apiAuthenticationType;
+        
+        ApiAuthenticationType result;
+        try {
+            result = ApiAuthenticationType.valueOf(GlobalProperties1.get(WebConfigKey.SEC_API_AUTHENTICATION_TYPE).toUpperCase());
+        } catch (Exception e) {
+            result = WebConfigDefault.SEC_API_AUTHENTICATION_TYPE;
+            log.warn("Couldn't load " + WebConfigKey.SEC_API_AUTHENTICATION_TYPE + " , use " + result + " for default.");
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_API_AUTHENTICATION_TYPE, result);
+        return result;
     }
 
     public static OAuthServerType getOAuthSeverType() {
-        if(oauthServerType == null) {
-            try {
-                oauthServerType = OAuthServerType.valueOf(GlobalProperties1.get(WebConfigKey.SEC_OAUTH_SERVER_TYPE).toUpperCase());
-            } catch (Exception e) {
-                oauthServerType = WebConfigDefault.SEC_OAUTH_SERVER_TYPE;
-                log.warn("Couldn't load " + WebConfigKey.SEC_OAUTH_SERVER_TYPE + " , use " + oauthServerType + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_OAUTH_SERVER_TYPE);
+        if(cachedConfig != null) {
+            return (OAuthServerType) cachedConfig;
         }
-        return oauthServerType;
+        
+        OAuthServerType result;
+        try {
+            result = OAuthServerType.valueOf(GlobalProperties1.get(WebConfigKey.SEC_OAUTH_SERVER_TYPE).toUpperCase());
+        } catch (Exception e) {
+            result = WebConfigDefault.SEC_OAUTH_SERVER_TYPE;
+            log.warn("Couldn't load " + WebConfigKey.SEC_OAUTH_SERVER_TYPE + " , use " + result + " for default.");
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_OAUTH_SERVER_TYPE, result);
+        return result;
     }  
     
     public static String getApiRootPath() {
-        if(apiRootPath == null) {
-            try {
-                apiRootPath = GlobalProperties1.get(WebConfigKey.API_ROOT_PATH);
-                
-                if(StringTool.isNull(apiRootPath))
-                    throw new RuntimeException(WebConfigKey.API_ROOT_PATH + "不能为空");
-
-                while(apiRootPath.endsWith("*")){
-                    apiRootPath = apiRootPath.substring(0, apiRootPath.length()-1);
-                }
-
-                apiRootPath = FilePathTool.changeToUnixFormat(apiRootPath);
-                
-                if(!apiRootPath.startsWith("/"))
-                    apiRootPath = "/" + apiRootPath;
-                
-            } catch (GlobalPropertyReadException e) {
-                throw new RuntimeException("Couldn't load " + WebConfigKey.API_ROOT_PATH);
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ROOT_PATH);
+        if(cachedConfig != null) {
+            return (String) cachedConfig;
         }
-        return apiRootPath;
+        
+        String result;
+        try {
+            result = GlobalProperties1.get(WebConfigKey.WEB_API_ROOT_PATH);
+            
+            if(StringTool.isNull(result))
+                throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "不能为空");
+
+            while(result.endsWith("*")){
+                result = result.substring(0, result.length()-1);
+            }
+
+            result = FilePathTool.changeToUnixFormat(result);
+            
+            if(!result.startsWith("/"))
+                result = "/" + result;
+            
+        } catch (GlobalPropertyReadException e) {
+            throw new RuntimeException("Couldn't load " + WebConfigKey.WEB_API_ROOT_PATH);
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_API_ROOT_PATH, result);
+        return result;
         
     }
 
     public static String getAdminRootPath() {
-        if(adminRootPath == null) {
-            try {
-                adminRootPath = GlobalProperties1.get(WebConfigKey.ADMIN_ROOT_PATH);
-                
-                if(StringTool.isNull(adminRootPath))
-                    throw new RuntimeException(WebConfigKey.API_ROOT_PATH + "不能为空");
-
-                while(adminRootPath.endsWith("*")){
-                    adminRootPath = adminRootPath.substring(0, adminRootPath.length()-1);
-                }
-
-                adminRootPath = FilePathTool.changeToUnixFormat(adminRootPath);
-                
-                if(!adminRootPath.startsWith("/"))
-                    adminRootPath = "/" + adminRootPath;
-                
-            } catch (GlobalPropertyReadException e) {
-                adminRootPath = WebConfigDefault.ADMIN_ROOT_PATH;
-                log.warn("Couldn't load " + WebConfigKey.ADMIN_ROOT_PATH + " , use " + adminRootPath + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_ROOT_PATH);
+        if(cachedConfig != null) {
+            return (String) cachedConfig;
         }
-        return adminRootPath;
+        
+        String result = GlobalProperties1.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
+            
+        if(StringTool.isNull(result))
+            throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + "不能为空");
+
+        while(result.endsWith("*")){
+            result = result.substring(0, result.length()-1);
+        }
+
+        result = FilePathTool.changeToUnixFormat(result);
+        
+        if(!result.startsWith("/"))
+            result = "/" + result;
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_ADMIN_ROOT_PATH, result);
+        return result;
     }
 
     public static String getUploadPath() {
-        if(uploadPath == null) {
-            try {
-                uploadPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_UPLOAD_PATH));
-            } catch (GlobalPropertyReadException e) {
-                if(System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
-                    log.info("OS is windows");
-                    uploadPath = WebConfigDefault.WEB_UPLOAD_PATH_WIN;
-                }
-                else {
-                    log.info("OS isn't windows");
-                    uploadPath = WebConfigDefault.WEB_UPLOAD_PATH_UNIX;
-                }
-                log.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + uploadPath + " for default.");
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_UPLOAD_PATH);
+        if(cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+        
+        String result;
+        try {
+            result = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_UPLOAD_PATH));            
+        } catch (GlobalPropertyReadException e) {
+            if(System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+                log.info("OS is windows");
+                result = WebConfigDefault.WEB_UPLOAD_PATH_WIN;
             }
-            
-            if(!uploadPath.startsWith("/") && !uploadPath.startsWith("file://")) {
-                uploadPath = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(uploadPath);
-            } else {
-                if(uploadPath.startsWith("file://")) {
-                    uploadPath = uploadPath.substring("file://".length());
-                }
+            else {
+                log.info("OS isn't windows");
+                result = WebConfigDefault.WEB_UPLOAD_PATH_UNIX;
+            }
+            log.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + result + " for default.");
+        }
+        
+        if(!result.startsWith("/") && !result.startsWith("file://")) {
+            result = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(result);
+        } else {
+            if(result.startsWith("file://")) {
+                result = result.substring("file://".length());
             }
         }
-        return uploadPath;
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_UPLOAD_PATH, result);
+        return result;
         
     }
     
     public static String getJspPath() {
-        if(jspPath == null) {
-            try {
-                jspPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_JSP_PATH));
-                jspPath = FilePathTool.changeToUnixFormat(jspPath);
-            } catch (GlobalPropertyReadException e) {
-                jspPath = WebConfigDefault.WEB_JSP_PATH;
-                log.warn("Couldn't load " + WebConfigKey.WEB_JSP_PATH + " , use " + jspPath + " for default.");
-            }
-            //统一添加/结尾，这样在controller中就可以不加/前缀
-            jspPath = jspPath + "/";
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_JSP_PATH);
+        if(cachedConfig != null) {
+            return (String) cachedConfig;
         }
-        return jspPath;
+        
+        String result = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
+        //统一添加/结尾，这样在controller中就可以不加/前缀
+        result = result + "/";
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_JSP_PATH, result);
+        return result;
     }
     
     public static String getAdminJspPath() {
-        if(adminJspPath == null) {
-            try {
-                adminJspPath = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_ADMIN_JSP_PATH));
-                adminJspPath = FilePathTool.changeToUnixFormat(adminJspPath);
-            } catch (GlobalPropertyReadException e) {
-                adminJspPath = WebConfigDefault.WEB_ADMIN_JSP_PATH;
-                log.warn("Couldn't load " + WebConfigKey.WEB_ADMIN_JSP_PATH + " , use " + adminJspPath + " for default.");
-            }
-            adminJspPath = adminJspPath + "/";
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_JSP_PATH);
+        if(cachedConfig != null) {
+            return (String) cachedConfig;
         }
-        return adminJspPath;
+        
+        String result = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
+        //统一添加/结尾，这样在controller中就可以不加/前缀
+        result = result + "/";
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_ADMIN_JSP_PATH, result);
+        return result;
     }
-//    
-//    public static boolean isJspAutoDeployEnabled() {
-//        if(enableJspAutoDeploy == null) {
-//            try {
-//                enableJspAutoDeploy = Boolean.parseBoolean(GlobalProperties1.get(WebConfigKey.WEB_ENABLE_JSP_AUTO_DEPLOY));
-//            } catch (GlobalPropertyReadException e) {
-//                enableJspAutoDeploy = WebConfigDefault.WEB_ENABLE_JSP_AUTO_DEPLOY;
-//                log.warn("Couldn't load " + WebConfigKey.WEB_ENABLE_JSP_AUTO_DEPLOY + " , use " + enableJspAutoDeploy + " for default.");
-//            }
-//        }
-//        return enableJspAutoDeploy;
-//    }
     
     public static long getRamCacheCleanFreq() {
-        if(ramCacheCleanFreq == null) {
-            try {
-                ramCacheCleanFreq = Long.parseLong(GlobalProperties1.get(WebConfigKey.CACHE_RAM_CAHCE_CLEAN_FREQ));
-            } catch (GlobalPropertyReadException e) {
-                ramCacheCleanFreq = WebConfigDefault.CACHE_RAM_CAHCE_CLEAN_FREQ;
-                log.warn("Couldn't load " + WebConfigKey.CACHE_RAM_CAHCE_CLEAN_FREQ + " , use " + ramCacheCleanFreq + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ);
+        if(cachedConfig != null) {
+            return (long) cachedConfig;
         }
-        return ramCacheCleanFreq;        
+        
+        long result = GlobalProperties1.getLongValue(WebConfigKey.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ, WebConfigDefault.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ);
+        
+        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ, result);
+        return result;      
     }
     
     public static long getUserContextCacheLife() {
-        if(userContextCacheLife == null) {
-            try {
-                userContextCacheLife = Long.parseLong(GlobalProperties1.get(WebConfigKey.CACHE_USERCONTEXT_CAHCE_LIFE));
-            } catch (GlobalPropertyReadException e) {
-                userContextCacheLife = WebConfigDefault.CACHE_USERCONTEXT_CAHCE_LIFE;
-                log.warn("Couldn't load " + WebConfigKey.CACHE_USERCONTEXT_CAHCE_LIFE + " , use " + userContextCacheLife + " for default.");
-            }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
+        if(cachedConfig != null) {
+            return (long) cachedConfig;
         }
-        return userContextCacheLife;  
+        
+        long result = GlobalProperties1.getLongValue(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE, WebConfigDefault.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
+        
+        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE, result);
+        return result;      
     }
 
     public static MultiPartConfig getMultiPartConfig() {
-        String location = WebConfigDefault.MULITPART_LOCATION;
-        long maxFileSize = WebConfigDefault.MULITPART_MAX_FILE_SIZE;
-        long maxRequestSize = WebConfigDefault.MULITPART_MAX_REQUEST_SIZE;
-        int fileSizeThreshold = WebConfigDefault.MULITPART_FILE_SIZE_THRESHOLD;
-        try {
-            location = GlobalProperties1.get(WebConfigKey.MULITPART_LOCATION);
-        } catch (GlobalPropertyReadException e) {
-            // DO NOTHING
-            log.warn("Couldn't load "+WebConfigKey.MULITPART_LOCATION+" , use " + location + " for default.");
-        }
-        try {
-            maxFileSize = Long.parseLong(GlobalProperties1.get(WebConfigKey.MULITPART_MAX_FILE_SIZE));
-        } catch (GlobalPropertyReadException e) {
-            // DO NOTHING
-            log.warn("Couldn't load "+WebConfigKey.MULITPART_MAX_FILE_SIZE+" , use " + maxFileSize + " for default.");
-        }
-        try {
-            maxRequestSize = Long.parseLong(GlobalProperties1.get(WebConfigKey.MULITPART_MAX_REQUEST_SIZE));
-        } catch (GlobalPropertyReadException e) {
-            // DO NOTHING
-            log.warn("Couldn't load "+WebConfigKey.MULITPART_MAX_REQUEST_SIZE+" , use " + maxRequestSize + " for default.");
-        }
-        try {
-            fileSizeThreshold = Integer.parseInt(GlobalProperties1.get(WebConfigKey.MULITPART_FILE_SIZE_THRESHOLD));
-        } catch (GlobalPropertyReadException e) {
-            // DO NOTHING
-            log.warn("Couldn't load "+WebConfigKey.MULITPART_FILE_SIZE_THRESHOLD+" , use " + fileSizeThreshold + " for default.");
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_MULITPART);
+        if(cachedConfig != null) {
+            return (MultiPartConfig) cachedConfig;
         }
         
-        return new MultiPartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
-    } 
-    
-    public static void main(String aa[]) {  
-            System.out.println(System.getProperty("os.name"));
+        String location = GlobalProperties1.get(WebConfigKey.CORE_MULITPART_LOCATION, WebConfigDefault.CORE_MULITPART_LOCATION);
+        long maxFileSize = GlobalProperties1.getLongValue(WebConfigKey.CORE_MULITPART_MAX_FILE_SIZE, WebConfigDefault.CORE_MULITPART_MAX_FILE_SIZE);
+        long maxRequestSize = GlobalProperties1.getLongValue(WebConfigKey.CORE_MULITPART_MAX_REQUEST_SIZE, WebConfigDefault.CORE_MULITPART_MAX_REQUEST_SIZE);
+        int fileSizeThreshold = GlobalProperties1.getIntValue(WebConfigKey.CORE_MULITPART_FILE_SIZE_THRESHOLD, WebConfigDefault.CORE_MULITPART_FILE_SIZE_THRESHOLD);
+        
+        MultiPartConfig result = new MultiPartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
+        
+        CONFIG_CAHCE.put(WebConfigKey.CORE_MULITPART, result);
+        return result; 
     }
 
     public static int getMinPasswordLength() {
-        if(minPasswordLength == null) {
-            try {
-                minPasswordLength = Integer.parseInt(GlobalProperties1.get(WebConfigKey.SEC_MIN_PASSWORD_LENGTH));
-            } catch (GlobalPropertyReadException e) {
-                minPasswordLength = WebConfigDefault.SEC_MIN_PASSWORD_LENGTH;
-                log.warn("Couldn't load " + WebConfigKey.SEC_MIN_PASSWORD_LENGTH + " , use " + minPasswordLength + " for default.");
-            }
+
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_MIN_PASSWORD_LENGTH);
+        if(cachedConfig != null) {
+            return (int) cachedConfig;
         }
-        return minPasswordLength; 
+        
+        int result = GlobalProperties1.getIntValue(WebConfigKey.SEC_MIN_PASSWORD_LENGTH, WebConfigDefault.SEC_MIN_PASSWORD_LENGTH);
+        
+        CONFIG_CAHCE.put(WebConfigKey.SEC_MIN_PASSWORD_LENGTH, result);
+        return result;    
     }
 
     public static String getSignUpSuccessPage() {
@@ -347,5 +330,27 @@ public abstract class WebConfig {
     public static String getPasswordFormat() {
         // TODO Auto-generated method stub
         return "^[\\u0021-\\u007e]+$";
+    }
+    
+    public static void main(String[] args) {
+
+        System.out.println(WebConfig.getAdminJspPath());
+        System.out.println(WebConfig.getAdminRootPath());
+        System.out.println(WebConfig.getApiAuthenticationType());
+        System.out.println(WebConfig.getApiRootPath());
+        System.out.println(WebConfig.getEmailFormat());
+        System.out.println(WebConfig.getI18nRefreshFreq());
+        System.out.println(WebConfig.getJspPath());
+        System.out.println(WebConfig.getMinPasswordLength());
+        System.out.println(WebConfig.getMultiPartConfig());
+        System.out.println(WebConfig.getOAuthSeverType());
+        System.out.println(WebConfig.getPasswordFormat());
+        System.out.println(WebConfig.getRamCacheCleanFreq());
+        System.out.println(WebConfig.getSignUpFailPage());
+        System.out.println(WebConfig.getSignUpSuccessPage());
+        System.out.println(WebConfig.getUploadPath());
+        System.out.println(WebConfig.getUserContextCacheLife());
+        System.out.println(WebConfig.getUsernameFormat());
+        System.out.println(WebConfig.getWebAuthenticationType());
     }
 }
