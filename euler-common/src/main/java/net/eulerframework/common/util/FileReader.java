@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,11 +90,13 @@ public abstract class FileReader {
      * 以多个字节为单位读取文件，常用于读二进制文件，如图片、声音、影像等文件。
      * @throws IOException 
      */
-    public static byte[] readFileByMultiBytes(File file, int number) throws IOException {
+    public static byte[] readFileByMultiBytes(File file, int number) throws FileNotFoundException, IOException {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
             return readInputStreamByMultiBytes(inputStream, number);
+        } catch (FileNotFoundException fileNotFoundException) {
+            throw fileNotFoundException;
         } catch (IOException e) {
             throw e;
         } finally {

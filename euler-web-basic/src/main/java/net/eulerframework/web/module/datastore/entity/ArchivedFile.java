@@ -15,6 +15,8 @@ public class ArchivedFile extends UUIDEntity<ArchivedFile> implements IArchivedO
 
     @Column(name = "ORIGINAL_FILENAME", nullable = false)
     private String originalFilename;
+    @Column(name = "ARCHIVED_PATH_SUFFIX")
+    private String archivedPathSuffix;
     @Column(name = "ARCHIVED_FILENAME", nullable = false, unique = true)
     private String archivedFilename;
     @Column(name = "EXTENSION")
@@ -34,6 +36,14 @@ public class ArchivedFile extends UUIDEntity<ArchivedFile> implements IArchivedO
 
     public void setOriginalFilename(String originalFilename) {
         this.originalFilename = originalFilename;
+    }
+
+    public String getArchivedPathSuffix() {
+        return archivedPathSuffix;
+    }
+
+    public void setArchivedPathSuffix(String archivedPathSuffix) {
+        this.archivedPathSuffix = archivedPathSuffix;
     }
 
     public String getArchivedFilename() {

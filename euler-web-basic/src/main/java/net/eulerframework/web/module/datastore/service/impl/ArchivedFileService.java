@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.common.util.Assert;
+import net.eulerframework.common.util.CalendarTool;
 import net.eulerframework.common.util.FileReader;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
@@ -23,19 +24,17 @@ import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
 import net.eulerframework.web.module.datastore.dao.IArchivedFileDao;
 import net.eulerframework.web.module.datastore.entity.ArchivedFile;
+import net.eulerframework.web.module.datastore.exception.FileArchiveException;
 import net.eulerframework.web.module.datastore.service.IArchivedFileService;
 import net.eulerframework.web.module.datastore.util.WebFileTool;
-
-import net.eulerframework.web.module.datastore.exception.FileArchiveException;
 
 @Service
 public class ArchivedFileService extends BaseService implements IArchivedFileService {
     
     @Resource
     private IArchivedFileDao archivedFileDao;
-
-    @Override
-    public ArchivedFile saveFileInfo(String originalFilename, File archivedFile) throws IOException {
+    
+    private ArchivedFile saveFileInfo(String originalFilename, String archivedPathSuffix, File archivedFile) throws IOException {
         InputStream inputStream = new FileInputStream(archivedFile);
         String md5 = DigestUtils.md5Hex(inputStream);
         long fileSize = archivedFile.length();
@@ -44,6 +43,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
         ArchivedFile af = new ArchivedFile();
         
         af.setOriginalFilename(originalFilename);
+        af.setArchivedPathSuffix(archivedPathSuffix);
         af.setArchivedFilename(archivedFilename);
         af.setExtension(WebFileTool.extractFileExtension(originalFilename));
         af.setFileByteSize(fileSize);
@@ -61,19 +61,20 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
 
     @Override
     public ArchivedFile saveFile(File file) throws FileArchiveException {
-        String archiveFilePath = WebConfig.getUploadPath();        
+        String archiveFilePath = WebConfig.getUploadPath();
+        String archivedPathSuffix = CalendarTool.formatDate(new Date(), "yyyy-MM-dd");        
         
         String originalFilename = file.getName();     
         String targetFilename = UUID.randomUUID().toString();
         
-        File targetFile = new File(archiveFilePath, targetFilename);
+        File targetFile = new File(archiveFilePath + "/" + archivedPathSuffix, targetFilename);
         
         try {
             Files.copy(file.toPath(), targetFile.toPath());
             
             this.logger.info("已保存文件: " + targetFile.getPath());
             
-            return this.saveFileInfo(originalFilename, targetFile);
+            return this.saveFileInfo(originalFilename, archivedPathSuffix, targetFile);
         } catch (IllegalStateException | IOException e) {
             if(targetFile.exists())
                 FileReader.deleteFile(targetFile);
@@ -84,19 +85,20 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
     
     @Override
     public ArchivedFile saveMultipartFile(MultipartFile multipartFile) throws FileArchiveException {
-        String archiveFilePath = WebConfig.getUploadPath();        
+        String archiveFilePath = WebConfig.getUploadPath(); 
+        String archivedPathSuffix = CalendarTool.formatDate(new Date(), "yyyy-MM-dd");          
         
         String originalFilename = multipartFile.getOriginalFilename();        
         String targetFilename = UUID.randomUUID().toString();
         
-        File targetFile = new File(archiveFilePath, targetFilename);
+        File targetFile = new File(archiveFilePath + "/" + archivedPathSuffix, targetFilename);
         
         try {
             multipartFile.transferTo(targetFile);
             
             this.logger.info("已保存文件: " + targetFile.getPath());
             
-            return this.saveFileInfo(originalFilename, targetFile);
+            return this.saveFileInfo(originalFilename, archivedPathSuffix, targetFile);
         } catch (IllegalStateException | IOException e) {
             if(targetFile.exists())
                 FileReader.deleteFile(targetFile);

@@ -1,6 +1,7 @@
 package net.eulerframework.web.module.datastore.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +15,7 @@ import net.eulerframework.web.core.base.RequestContext;
 
 public class WebFileTool {
 
-    public static void writeFileToResponse(String fileName, File file) throws IOException {
+    public static void writeFileToResponse(String fileName, File file) throws FileNotFoundException, IOException {
         byte[] fileData = FileReader.readFileByMultiBytes(file, 1024);
         
         HttpServletResponse response = RequestContext.getResponse();

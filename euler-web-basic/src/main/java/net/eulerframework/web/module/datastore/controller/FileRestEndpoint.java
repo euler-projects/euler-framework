@@ -1,6 +1,7 @@
 package net.eulerframework.web.module.datastore.controller;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.annotation.Resource;
@@ -41,12 +42,22 @@ public class FileRestEndpoint extends AbstractApiEndpoint {
             throw new ResourceNotFoundException();
         
         String archivedFilePath = WebConfig.getUploadPath();
+        
+        if(archivedFile.getArchivedPathSuffix() != null)
+            archivedFilePath += "/" + archivedFile.getArchivedPathSuffix();
+        
         File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
         String fileName = archivedFile.getOriginalFilename();
         
         this.setNoCacheHeader();
         
-        WebFileTool.writeFileToResponse(fileName, file);
+        try {
+            WebFileTool.writeFileToResponse(fileName, file);
+        } catch (FileNotFoundException e) {
+            throw new ResourceNotFoundException(e);
+        } catch (IOException e) {
+            throw e;
+        }
     }
     
     @RequestMapping(value = { "archived/file" }, method = RequestMethod.POST)
