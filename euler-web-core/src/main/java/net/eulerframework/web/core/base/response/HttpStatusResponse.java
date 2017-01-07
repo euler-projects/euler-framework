@@ -48,7 +48,7 @@ public class HttpStatusResponse implements BaseResponse {
      */
     public HttpStatusResponse(Status status, String statusInfo) {
         this.statusCode = status.value();
-        this.statusInfo = status.getReasonPhrase();
+        this.statusInfo = statusInfo;
     }
     
     protected HttpStatusResponse() {}

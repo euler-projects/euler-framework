@@ -53,7 +53,7 @@ public class AuthenticationWebController extends AbstractWebController {
                 throw new UserSignUpException("Unknown user sign up error");
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
-            this.getRequest().setAttribute("errorMsg", e.getMessage());
+            this.getRequest().setAttribute("errorMsg", e.getLocalizedMessage());
             return this.display(WebConfig.getSignUpFailPage());
         }
     }

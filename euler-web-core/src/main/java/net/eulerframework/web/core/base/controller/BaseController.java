@@ -3,10 +3,8 @@ package net.eulerframework.web.core.base.controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,12 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.FileReader;
 import net.eulerframework.web.core.base.WebContextAccessable;
@@ -34,6 +33,8 @@ import net.eulerframework.web.core.exception.ResourceNotFoundException;
 public abstract class BaseController extends WebContextAccessable {
     
     protected final Logger logger = LogManager.getLogger(this.getClass());
+    
+    @Resource private ObjectMapper objectMapper;
     
     protected void writeString(String string) throws IOException{
         this.getResponse().getOutputStream().write(string.getBytes("UTF-8"));
@@ -81,7 +82,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ResourceExistException.class})   
     public Object exception(ResourceExistException e) {
-        e.printStackTrace();
+        this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getLocalizedMessage());
     }
     
@@ -117,7 +118,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({ResourceNotFoundException.class})   
     public Object resourceNotFoundException(ResourceNotFoundException e) {
-        e.printStackTrace();
+        this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(HttpStatus.NOT_FOUND);
     }
     
@@ -140,16 +141,21 @@ public abstract class BaseController extends WebContextAccessable {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BindException.class})   
     public Object bindException(BindException e) {
-        e.printStackTrace();
-        List<ObjectError> errors = e.getAllErrors();
-        List<String> errMsg = new ArrayList<>();
-        for(ObjectError err : errors){
-            if(FieldError.class.isAssignableFrom(err.getClass()))
-                errMsg.add(((FieldError)err).getField()+ ": " + err.getDefaultMessage());
-            else
-                errMsg.add(err.getDefaultMessage());
+        this.logger.error(e.getMessage(), e);
+//        this.logger.error(e.getMessage(), e);
+//        List<ObjectError> errors = e.getAllErrors();
+//        List<String> errMsg = new ArrayList<>();
+//        for(ObjectError err : errors){
+//            if(FieldError.class.isAssignableFrom(err.getClass()))
+//                errMsg.add(((FieldError)err).getField()+ ": " + err.getDefaultMessage());
+//            else
+//                errMsg.add(err.getDefaultMessage());
+//        }
+        try {
+            return new HttpStatusResponse(Status.FIELD_VALID_FAILED, this.objectMapper.writeValueAsString(e.getAllErrors()));
+        } catch (JsonProcessingException e1) {
+            return new HttpStatusResponse(Status.FIELD_VALID_FAILED, e.getLocalizedMessage());
         }
-        return new HttpStatusResponse(Status.FIELD_VALID_FAILED, errMsg.toString());
     }
     
     /**  
@@ -160,8 +166,8 @@ public abstract class BaseController extends WebContextAccessable {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MissingServletRequestParameterException.class})   
     public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        e.printStackTrace();
-        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        this.logger.error(e.getMessage(), e);
+        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
     }
     
     /**  
@@ -172,7 +178,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Exception.class})   
     public Object exception(Exception e) {
-        e.printStackTrace();
+        this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
     }
 }
