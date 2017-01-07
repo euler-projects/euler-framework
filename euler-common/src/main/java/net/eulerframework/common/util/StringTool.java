@@ -2,6 +2,7 @@ package net.eulerframework.common.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -183,5 +184,26 @@ public abstract class StringTool {
             return string.toUpperCase();
         else
             return (new StringBuilder()).append(Character.toUpperCase(string.charAt(0))).append(string.substring(1)).toString();
+    }
+
+    /**
+     * 随机生成字符串,字符串可能的取值在ASCII 0x21-0x7e之间
+     * @param length 生成的字符串长度
+     * @return
+     */
+    public static String randomString(int length) {
+        StringBuffer stringBuffer = new StringBuffer();
+        
+        Random random = new Random();
+        for(; length > 0; length--) {
+            stringBuffer.append((char)(random.nextInt(93)+33));
+        }
+        return stringBuffer.toString();
+    }
+    
+    public static void main(String[] args) {
+        Integer i = 100;
+        System.out.println(randomString(i));
+        System.out.println(i);
     }
 }
