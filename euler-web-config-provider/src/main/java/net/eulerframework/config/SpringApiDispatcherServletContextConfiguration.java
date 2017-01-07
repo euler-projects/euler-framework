@@ -25,7 +25,7 @@ import net.eulerframework.web.core.annotation.ApiEndpoint;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = {"**.web.**.api"},
+        basePackages = {"**.web.**.api","**.web.**.controller"},
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(ApiEndpoint.class)
 )

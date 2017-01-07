@@ -30,36 +30,36 @@ public class UserWebContorller extends AbstractWebController {
         return "/authentication/forgotpasswd";
     }
     
-    @RequestMapping(value = { "/resetPasswd/{userId}/{resetToken}" }, method = RequestMethod.GET)
-    public String resetPasswdPage(
-            @PathVariable("userId") String userId, 
-            @PathVariable("resetToken") String resetToken,
-            Model model)
-    {
-        try {
-            this.userService.checkResetTokenRT(userId, resetToken);
-        } catch (UsernameNotFoundException e) {
-            throw new ResourceNotFoundException();
-        }
-        model.addAttribute("userId", userId);
-        model.addAttribute("resetToken", resetToken);
-        return "/authentication/resetPasswd";
-    }
-
-    @RequestMapping(value = { "/resetPasswd" }, method = RequestMethod.POST)
-    public String resetPasswd(
-            String userId, 
-            String resetToken,
-            String pwd)
-    {
-        this.userService.resetUserPasswordWithResetTokenRWT(userId, pwd, resetToken);
-        return "/authentication/login";
-    }
-    
-    @RequestMapping(value = { "/applyResetPasswd" }, method = RequestMethod.POST)
-    public String applyResetPasswd(String email)
-    {
-        this.userService.forgotPasswordRWT(email);
-        return "/authentication/signin";
-    }
+//    @RequestMapping(value = { "/resetPasswd/{userId}/{resetToken}" }, method = RequestMethod.GET)
+//    public String resetPasswdPage(
+//            @PathVariable("userId") String userId, 
+//            @PathVariable("resetToken") String resetToken,
+//            Model model)
+//    {
+//        try {
+//            this.userService.checkResetTokenRT(userId, resetToken);
+//        } catch (UsernameNotFoundException e) {
+//            throw new ResourceNotFoundException();
+//        }
+//        model.addAttribute("userId", userId);
+//        model.addAttribute("resetToken", resetToken);
+//        return "/authentication/resetPasswd";
+//    }
+//
+//    @RequestMapping(value = { "/resetPasswd" }, method = RequestMethod.POST)
+//    public String resetPasswd(
+//            String userId, 
+//            String resetToken,
+//            String pwd)
+//    {
+//        this.userService.resetUserPasswordWithResetTokenRWT(userId, pwd, resetToken);
+//        return "/authentication/login";
+//    }
+//    
+//    @RequestMapping(value = { "/applyResetPasswd" }, method = RequestMethod.POST)
+//    public String applyResetPasswd(String email)
+//    {
+//        this.userService.forgotPasswordRWT(email);
+//        return "/authentication/signin";
+//    }
 }

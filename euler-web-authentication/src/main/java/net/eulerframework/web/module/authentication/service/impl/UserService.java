@@ -282,61 +282,61 @@ public class UserService extends BaseService implements IUserService, UserDetail
         this.userDao.update(user);
     }
 
-    @Override
-    public User checkResetTokenRT(String userId, String resetToken) {
-        if(!enableUserResetPassword)
-            throw new UsernameNotFoundException("User not found.");
-        User user = this.userDao.findUserByResetToken(resetToken);
-        if(user == null || !user.getId().equalsIgnoreCase(userId))
-            throw new UsernameNotFoundException("User not found.");
-        return user;
-    }
-
-    @Override
-    public void resetUserPasswordWithResetTokenRWT(String userId, String newPassword, String resetToken) {
-        if(!enableUserResetPassword)
-            throw new UsernameNotFoundException("User not found.");
-        User user = this.userDao.findUserByResetToken(resetToken);
-        if(user == null || !user.getId().equalsIgnoreCase(userId))
-            throw new UsernameNotFoundException("User not found.");
-        if(newPassword.length() < this.miniPasswordLength) {
-            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
-        }
-//        user.setResetToken(null);
-//        user.setResetTokenExpireTime(null);
-        user.setPassword(this.passwordEncoder.encode(newPassword));
-        this.userDao.update(user);        
-    }
-
-    @Override
-    public void forgotPasswordRWT(String email) {
-        User user = this.userDao.findUserByEmail(email);
-        if(user == null)
-            return;
-        String userId = user.getId();
-        String resetToken = UUID.randomUUID().toString();
-        Date resetTokenExpireTime = new Date(new Date().getTime() + 600000L);
-//        user.setResetToken(resetToken);
-//        user.setResetTokenExpireTime(resetTokenExpireTime);
-        this.userDao.update(user);
-        String resetURL = resetTokenURL.replace("{userId}", userId).replace("{resetToken}", resetToken);
-        System.out.println(resetURL);
-        ThreadSimpleMailSender threadSimpleSystemMailSender;
-            String modelZhCn = "<p>请点击下面的链接重置您的密码，10分钟内有效</p>"
-                    + "<p><a href=\"%1$s\">%2$s</a></p>"
-                    + "<p>发送时间: %3$tY-%<tm-%<td %<tH:%<tM:%<tS %<tZ</p>"
-                    + "<p>此邮件为系统自动发出，请勿回复。</p>";
-            String modelEnUs = "<p>You can use the following link within the next 10 minutes to reset your password:</p>"
-                    + "<p><a href=\"%1$s\">%2$s</a></p>"
-                    + "<p>Send time: %3$tY/%<tm/%<td %<tH:%<tM:%<tS %<tZ</p>"
-                    + "<p>This mail was sent from an system address. Please do not respond to this mail.</p>";
-            String content = String.format(modelZhCn+"<br><br><br>"+modelEnUs, resetURL, resetURL, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-            try {
-                threadSimpleSystemMailSender = MailSenderFactory.getThreadSimpleMailSender();
-            } catch (GlobalPropertyReadException e) {
-                throw new RuntimeException(e);
-            }
-            threadSimpleSystemMailSender.send("密码重置邮件 Please reset your password", content, email);
-    
-    }
+//    @Override
+//    public User checkResetTokenRT(String userId, String resetToken) {
+//        if(!enableUserResetPassword)
+//            throw new UsernameNotFoundException("User not found.");
+//        User user = this.userDao.findUserByResetToken(resetToken);
+//        if(user == null || !user.getId().equalsIgnoreCase(userId))
+//            throw new UsernameNotFoundException("User not found.");
+//        return user;
+//    }
+//
+//    @Override
+//    public void resetUserPasswordWithResetTokenRWT(String userId, String newPassword, String resetToken) {
+//        if(!enableUserResetPassword)
+//            throw new UsernameNotFoundException("User not found.");
+//        User user = this.userDao.findUserByResetToken(resetToken);
+//        if(user == null || !user.getId().equalsIgnoreCase(userId))
+//            throw new UsernameNotFoundException("User not found.");
+//        if(newPassword.length() < this.miniPasswordLength) {
+//            throw new IllegalParamException(Tag.i18n("global.minPasswdLength"));
+//        }
+////        user.setResetToken(null);
+////        user.setResetTokenExpireTime(null);
+//        user.setPassword(this.passwordEncoder.encode(newPassword));
+//        this.userDao.update(user);        
+//    }
+//
+//    @Override
+//    public void forgotPasswordRWT(String email) {
+//        User user = this.userDao.findUserByEmail(email);
+//        if(user == null)
+//            return;
+//        String userId = user.getId();
+//        String resetToken = UUID.randomUUID().toString();
+//        Date resetTokenExpireTime = new Date(new Date().getTime() + 600000L);
+////        user.setResetToken(resetToken);
+////        user.setResetTokenExpireTime(resetTokenExpireTime);
+//        this.userDao.update(user);
+//        String resetURL = resetTokenURL.replace("{userId}", userId).replace("{resetToken}", resetToken);
+//        System.out.println(resetURL);
+//        ThreadSimpleMailSender threadSimpleSystemMailSender;
+//            String modelZhCn = "<p>请点击下面的链接重置您的密码，10分钟内有效</p>"
+//                    + "<p><a href=\"%1$s\">%2$s</a></p>"
+//                    + "<p>发送时间: %3$tY-%<tm-%<td %<tH:%<tM:%<tS %<tZ</p>"
+//                    + "<p>此邮件为系统自动发出，请勿回复。</p>";
+//            String modelEnUs = "<p>You can use the following link within the next 10 minutes to reset your password:</p>"
+//                    + "<p><a href=\"%1$s\">%2$s</a></p>"
+//                    + "<p>Send time: %3$tY/%<tm/%<td %<tH:%<tM:%<tS %<tZ</p>"
+//                    + "<p>This mail was sent from an system address. Please do not respond to this mail.</p>";
+//            String content = String.format(modelZhCn+"<br><br><br>"+modelEnUs, resetURL, resetURL, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+//            try {
+//                threadSimpleSystemMailSender = MailSenderFactory.getThreadSimpleMailSender();
+//            } catch (GlobalPropertyReadException e) {
+//                throw new RuntimeException(e);
+//            }
+//            threadSimpleSystemMailSender.send("密码重置邮件 Please reset your password", content, email);
+//    
+//    }
 }
