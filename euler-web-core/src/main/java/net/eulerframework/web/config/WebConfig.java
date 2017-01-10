@@ -39,6 +39,10 @@ public abstract class WebConfig {
         private static final String SEC_WEB_AUTHENTICATION_TYPE = "sec.web.authenticationType";
         private static final String SEC_API_AUTHENTICATION_TYPE = "sec.api.authenticationType";
         private static final String SEC_OAUTH_SERVER_TYPE = "sec.oauth.severType";
+        private static final String SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = "sec.authentication.enableEmailSignin";
+        private static final String SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "sec.authentication.enableMobileSignin";
+        private static final String SEC_AUTHENTICATION_ENABLE_USER_CAHCE = "sec.authentication.enableUserCache";
+        private static final String SEC_AUTHENTICATION_USER_CAHCE_LIFE = "sec.authentication.userCacheLife";
         private static final String SEC_MIN_PASSWORD_LENGTH = "sec.minPasswordLength";
     }
 
@@ -61,6 +65,10 @@ public abstract class WebConfig {
         private static final WebAuthenticationType SEC_WEB_AUTHENTICATION_TYPE = WebAuthenticationType.LOCAL;
         private static final ApiAuthenticationType SEC_API_AUTHENTICATION_TYPE = ApiAuthenticationType.NONE;
         private static final OAuthServerType SEC_OAUTH_SERVER_TYPE = OAuthServerType.NEITHER;
+        private static final boolean SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = false;
+        private static final boolean SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
+        private static final boolean SEC_AUTHENTICATION_ENABLE_USER_CAHCE = false;
+        private static final long SEC_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final int SEC_MIN_PASSWORD_LENGTH = 6;
     }
 
@@ -350,6 +358,59 @@ public abstract class WebConfig {
         // System.out.println(WebConfig.getUserContextCacheLife());
         // System.out.println(WebConfig.getUsernameFormat());
         // System.out.println(WebConfig.getWebAuthenticationType());
+    }
+
+    public static boolean isEnableEmailSignin() {
+
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
+        if (cachedConfig != null) {
+            return (boolean) cachedConfig;
+        }
+
+        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
+                WebConfigDefault.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN, result);
+        return result;
+    }
+
+    public static boolean isEnableMobileSignin() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
+        if (cachedConfig != null) {
+            return (boolean) cachedConfig;
+        }
+
+        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
+                WebConfigDefault.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN, result);
+        return result;
+    }
+
+    public static boolean isEnableUserCache() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE);
+        if (cachedConfig != null) {
+            return (boolean) cachedConfig;
+        }
+
+        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE,
+                WebConfigDefault.SEC_AUTHENTICATION_ENABLE_USER_CAHCE);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE, result);
+        return result;
+    }
+
+    public static long getUserAuthenticationCacheLife() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE);
+        if (cachedConfig != null) {
+            return (long) cachedConfig;
+        }
+
+        long result = GlobalProperties1.getLongValue(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE,
+                WebConfigDefault.SEC_AUTHENTICATION_USER_CAHCE_LIFE);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE, result);
+        return result;
     }
 
 }

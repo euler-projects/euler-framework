@@ -14,7 +14,6 @@
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
     
     <bean id="userContext" class="net.eulerframework.web.module.authentication.util.UserContext">
-        <property name="userDetailsService" ref="userDetailsService"/>
         <property name="userService" ref="userService"/>
     </bean>
     

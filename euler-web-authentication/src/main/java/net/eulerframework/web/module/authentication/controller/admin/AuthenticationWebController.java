@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.controller;
+package net.eulerframework.web.module.authentication.controller.admin;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.common.util.BeanTool;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.AdminWebController;
 import net.eulerframework.web.core.exception.ResourceExistException;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
@@ -27,11 +27,12 @@ import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IAuthorityService;
 import net.eulerframework.web.module.authentication.service.IUserService;
 
-@WebController
+@AdminWebController
 @Scope("prototype")
-@RequestMapping("/manage/authentication")
+@RequestMapping("")
 @Deprecated
-public class SecurityManageWebContorller extends AbstractWebController {
+public class AuthenticationWebController extends AbstractWebController {
+    
 
 	@Resource
 	private IUserService userService;
@@ -47,12 +48,12 @@ public class SecurityManageWebContorller extends AbstractWebController {
     
     @RequestMapping(value ="/group",method=RequestMethod.GET)
     public String group(){
-        return "/manage/authentication/group";
+        return this.display("group");
     }
     
     @RequestMapping(value ="/authority",method=RequestMethod.GET)
     public String authority(){
-        return "/manage/authentication/authority";
+        return this.display("authority");
     }
     
     @RequestMapping(value ="/authorize",method=RequestMethod.GET)
@@ -60,15 +61,6 @@ public class SecurityManageWebContorller extends AbstractWebController {
         return "/manage/authentication/authorize";
     }
     
-    @ResponseBody
-    @RequestMapping(value ="/findUserByPage")
-    public PageResponse<User> findUserByPage(HttpServletRequest request, String page, String rows) {
-        QueryRequest queryRequest = new QueryRequest(request);
-        
-        int pageIndex = Integer.parseInt(page);
-        int pageSize = Integer.parseInt(rows);
-        return this.userService.findUserByPage(queryRequest, pageIndex, pageSize);
-    }
     
     @ResponseBody
     @RequestMapping(value ="/findGroupByPage")
@@ -90,22 +82,7 @@ public class SecurityManageWebContorller extends AbstractWebController {
         return this.authorityService.findAuthorityByPage(queryRequest, pageIndex, pageSize);
     }
 
-    @ResponseBody
-    @RequestMapping(value = { "/saveUser" }, method = RequestMethod.POST)
-    public void saveUser(User user) {
-        BeanTool.clearEmptyProperty(user);
-        if(user.getId() == null) {
-            try {
-                User tmp = (User) this.userDetailsService.loadUserByUsername(user.getUsername());
-                if(tmp.isEnabled())
-                    throw new ResourceExistException("User Existed!");
-                user.setId(tmp.getId());
-            } catch (UsernameNotFoundException e) {
-                // DO Nothing
-            }
-        }
-        this.userService.saveUser(user);
-    }
+
 
     @ResponseBody
     @RequestMapping(value = { "/saveGroup" }, method = RequestMethod.POST)
@@ -118,14 +95,7 @@ public class SecurityManageWebContorller extends AbstractWebController {
     public void saveAuthority(@Valid Authority authority) {
         this.authorityService.saveAuthority(authority);
     }
-    
-    @ResponseBody
-    @RequestMapping(value ="/saveUserGroups", method = RequestMethod.POST)
-    public void savaUserGroups(@RequestParam String userId, @RequestParam String groupIds) {
-        String[] idArray = groupIds.trim().replace(" ", "").split(";");
-        List<Group> groups = this.authorityService.findGroupByIds(idArray);
-        this.userService.saveUserGroups(userId, groups);
-    }
+
     
     @ResponseBody
     @RequestMapping(value ="/saveGroupAuthorities", method = RequestMethod.POST)
@@ -134,27 +104,7 @@ public class SecurityManageWebContorller extends AbstractWebController {
         List<Authority> authorities = this.authorityService.findAuthorityByIds(idArray);
         this.authorityService.saveGroupAuthorities(groupId, authorities);
     }
-    
-    @ResponseBody
-    @RequestMapping(value ="/enableUsers", method = RequestMethod.POST)
-    public void enableUsers(@RequestParam String ids) {
-        String[] idArray = ids.trim().replace(" ", "").split(";");
-        this.userService.enableUsersRWT(idArray);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value ="/disableUsers", method = RequestMethod.POST)
-    public void disableUsers(@RequestParam String ids) {
-        String[] idArray = ids.trim().replace(" ", "").split(";");
-        this.userService.disableUsersRWT(idArray);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value ="/deleteUsers", method = RequestMethod.POST)
-    public void deleteUsers(@RequestParam String ids) {
-        String[] idArray = ids.trim().replace(" ", "").split(";");
-        this.userService.deleteUsers(idArray);
-    }
+
     
     @ResponseBody
     @RequestMapping(value ="/deleteGroups", method = RequestMethod.POST)

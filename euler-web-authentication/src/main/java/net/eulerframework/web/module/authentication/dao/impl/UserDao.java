@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.authentication.dao.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +10,6 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
@@ -25,8 +23,6 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByName(String username) {
-        Assert.isNotNull(username, "Username is null");
-        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("username", username));
@@ -38,8 +34,6 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByEmail(String email) {
-        Assert.isNotNull(email, "Email is null");
-        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("email", email));
@@ -51,23 +45,9 @@ public class UserDao extends BaseDao<User> implements IUserDao {
 
     @Override
     public User findUserByMobile(String mobile) {
-        Assert.isNotNull(mobile, "Mobile is null");
-        
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("mobile", mobile));
-        List<User> users = this.findBy(detachedCriteria);
-        if (users == null || users.isEmpty())
-            return null;
-        return users.get(0);
-    }
-
-    @Override
-    public User findUserByResetToken(String resetToken) {
-        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
-        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        detachedCriteria.add(Restrictions.eq("resetToken", resetToken));
-        detachedCriteria.add(Restrictions.gt("resetTokenExpireTime", new Date()));
         List<User> users = this.findBy(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;

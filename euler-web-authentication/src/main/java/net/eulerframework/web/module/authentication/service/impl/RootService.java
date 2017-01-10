@@ -1,7 +1,6 @@
 package net.eulerframework.web.module.authentication.service.impl;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -9,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.FileReader;
+import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
@@ -27,7 +27,7 @@ public class RootService extends BaseService implements IRootService {
         if(!root.getPassword().equals("NaN"))
             throw new ResourceNotFoundException();
         
-        String newPassword = UUID.randomUUID().toString();
+        String newPassword = StringTool.randomString(16);
         
         root.setPassword(passwordEncoder.encode(newPassword));
         
@@ -51,8 +51,8 @@ public class RootService extends BaseService implements IRootService {
         User admin = this.userDao.findUserByName("admin");
         if(!admin.getPassword().equals("NaN"))
             throw new ResourceNotFoundException();
-        
-        String newPassword = UUID.randomUUID().toString();
+
+        String newPassword = StringTool.randomString(16);
         
         admin.setPassword(passwordEncoder.encode(newPassword));
         

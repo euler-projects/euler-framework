@@ -1,37 +1,19 @@
 package net.eulerframework.web.module.authentication.service;
 
-import java.io.Serializable;
 import java.util.List;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import net.eulerframework.web.core.base.request.QueryRequest;
-import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.core.base.service.IBaseService;
-import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 
-public interface IUserService extends IBaseService {
+public interface IUserService extends UserDetailsService {
+    
+    public User loadUserByEmail(String email) throws UsernameNotFoundException;
+    
+    public User loadUserByMobile(String mobile) throws UsernameNotFoundException;
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-    public PageResponse<User> findUserByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
+    List<User> loadUserByNameOrCodeFuzzy(String nameOrCode);
 
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-    public void saveUser(User user);
-
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-    public void saveUserGroups(String userId, List<Group> groups);
-
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-    public void deleteUsers(String[] idArray);
-
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-    public void enableUsersRWT(String[] idArray);
-
-    @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-    public void disableUsersRWT(String[] idArray);
-
-    public User findUserById(Serializable id);
-
-    public List<User> findUserByNameOrCode(String nameOrCode);
+    User loadUser(String userId);
 }

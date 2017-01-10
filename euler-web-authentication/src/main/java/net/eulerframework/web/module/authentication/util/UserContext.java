@@ -9,7 +9,6 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import net.eulerframework.cache.DefaultObjectCache;
 import net.eulerframework.cache.ObjectCachePool;
@@ -18,14 +17,7 @@ import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IUserService;
 
 public class UserContext {
-
-    private static UserDetailsService userDetailsService;
-
     private static IUserService userService;
-
-    public static void setUserDetailsService(UserDetailsService userDetailsService) {
-        UserContext.userDetailsService = userDetailsService;
-    }
 
     public static void setUserService(IUserService userService) {
         UserContext.userService = userService;
@@ -36,7 +28,7 @@ public class UserContext {
     private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
     
     public static List<User> getUserByNameOrCode(String nameOrCode) {
-        return userService.findUserByNameOrCode(nameOrCode);
+        return userService.loadUserByNameOrCodeFuzzy(nameOrCode);
     }
     
     public static List<Serializable> getUserIdByNameOrCode(String nameOrCode) {
@@ -48,11 +40,11 @@ public class UserContext {
         return result;
     }
     
-    public static User getUserById(Serializable id){
-        User user = USER_CACHE_ID.get(id);
+    public static User getUserById(String userId){
+        User user = USER_CACHE_ID.get(userId);
         
         if(user == null) {
-            user = userService.findUserById(id);
+            user = userService.loadUser(userId);
             
             if(user == null)
                 return null;
@@ -63,7 +55,7 @@ public class UserContext {
         return user;        
     }
 
-    public static String getUserNameAndCodeById(Serializable id) {
+    public static String getUserNameAndCodeById(String id) {
         User user = getUserById(id);
         if(user == null)
             return "UNKOWN-"+id;
@@ -96,7 +88,7 @@ public class UserContext {
                         return user;
                     }
 
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    UserDetails userDetails = userService.loadUserByUsername(username);
                     if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
                         ((CredentialsContainer) userDetails).eraseCredentials();
                     }

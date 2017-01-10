@@ -14,8 +14,6 @@ public interface IUserDao extends IBaseDao<User> {
     User findUserByEmail(String email);
 
     User findUserByMobile(String moile);
-
-    User findUserByResetToken(String resetToken);
     
     List<User> findUserByNameOrCode(String nameOrCode);
 

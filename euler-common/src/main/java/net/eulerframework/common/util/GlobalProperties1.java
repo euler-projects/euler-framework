@@ -73,6 +73,15 @@ public class GlobalProperties1 {
             return defaultValue;
         }
     }
+
+    public static boolean getBooleanValue(String property, boolean defaultValue) {
+        try {
+            return Boolean.parseBoolean(get(property));
+        } catch (GlobalPropertyReadException e) {
+            logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
+            return defaultValue;
+        }
+    }
     
     /**
      * 读取枚举类型的配置

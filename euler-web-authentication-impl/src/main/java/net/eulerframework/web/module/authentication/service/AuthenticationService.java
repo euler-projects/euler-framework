@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.annotation.Resource;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
+import net.eulerframework.web.module.authentication.util.UserContext;
 
 @Service
 @Transactional
@@ -45,11 +48,11 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
                 Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class, "The username format does not meet the requirements");
                 Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class, "The email format does not meet the requirements");
                 
-                Assert.isNull(this.userDao.findUserByName(user.getUsername()), BadRequestException.class, "Username han been used");
-                Assert.isNull(this.userDao.findUserByEmail(user.getEmail()), BadRequestException.class, "Email han been used");
+                Assert.isNull(this.userDao.findUserByName(user.getUsername()), BadRequestException.class, "Username has been used");
+                Assert.isNull(this.userDao.findUserByEmail(user.getEmail()), BadRequestException.class, "Email has been used");
                 
                 if(user.getMobile() !=null)
-                    Assert.isNull(this.userDao.findUserByMobile(user.getMobile()), BadRequestException.class, "Mobile han been used");
+                    Assert.isNull(this.userDao.findUserByMobile(user.getMobile()), BadRequestException.class, "Mobile has been used");
                 
                 password = user.getPassword().trim();
                 Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class, "The password format does not meet the requirements");
@@ -110,9 +113,13 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     }
 
     @Override
-    public User findUser(String passwordResetToken) {
-        // TODO Auto-generated method stub
-        return null;
+    public void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
+        String userId = UserContext.getCurrentUser().getId();
+        
+        if(userId.equals(User.ANONYMOUS_USER.getId())) {
+            throw new AccessDeniedException("must signin");
+        }
+        
     }
 
 }
