@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.datastore.entity;
+package net.eulerframework.web.module.file.entity;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "ARCHIVE_FILE")
-public class ArchivedFile extends UUIDEntity<ArchivedFile> implements IArchivedObjectEntity {
+public class ArchivedFile extends UUIDEntity<ArchivedFile> {
 
     @Column(name = "ORIGINAL_FILENAME", nullable = false)
     private String originalFilename;
@@ -78,23 +78,19 @@ public class ArchivedFile extends UUIDEntity<ArchivedFile> implements IArchivedO
         this.fileByteSize = fileByteSize;
     }
 
-    @Override
     public Date getArchiveDate() {
         return this.archiveDate;
     }
 
-    @Override
     public void setArchiveDate(Date archiveDate) {
         this.archiveDate = archiveDate;
 
     }
 
-    @Override
     public String getArchiveUserId() {
         return this.archiveUserId;
     }
 
-    @Override
     public void setArchiveUserId(String archiveUserId) {
         this.archiveUserId = archiveUserId;
     }

@@ -13,7 +13,7 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd"> 
 
-    <bean id="archivedFileDao" class="net.eulerframework.web.module.datastore.dao.impl.ArchivedFileDao">
+    <bean id="archivedFileDao" class="net.eulerframework.web.module.file.dao.impl.ArchivedFileDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     

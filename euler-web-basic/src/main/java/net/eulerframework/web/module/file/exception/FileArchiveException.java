@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.datastore.exception;
+package net.eulerframework.web.module.file.exception;
 
 @SuppressWarnings("serial")
 public class FileArchiveException extends Exception {

@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.datastore.util;
+package net.eulerframework.web.module.file.util;
 
 import net.eulerframework.common.util.StringTool;
 

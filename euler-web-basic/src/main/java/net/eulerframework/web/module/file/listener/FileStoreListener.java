@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.datastore.listener;
+package net.eulerframework.web.module.file.listener;
 
 import java.io.File;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import net.eulerframework.web.config.WebConfig;
 
 @Component
-public class FileArchiveListener implements ServletContextListener {
+public class FileStoreListener implements ServletContextListener {
     private final Logger log = LogManager.getLogger();
     
     @Override

@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.datastore.service.impl;
+package net.eulerframework.web.module.file.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,13 +20,12 @@ import net.eulerframework.common.util.FileReader;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
-import net.eulerframework.web.module.datastore.dao.IArchivedFileDao;
-import net.eulerframework.web.module.datastore.entity.ArchivedFile;
-import net.eulerframework.web.module.datastore.exception.FileArchiveException;
-import net.eulerframework.web.module.datastore.service.IArchivedFileService;
-import net.eulerframework.web.module.datastore.util.WebFileTool;
+import net.eulerframework.web.module.file.dao.IArchivedFileDao;
+import net.eulerframework.web.module.file.entity.ArchivedFile;
+import net.eulerframework.web.module.file.exception.FileArchiveException;
+import net.eulerframework.web.module.file.service.IArchivedFileService;
+import net.eulerframework.web.module.file.util.WebFileTool;
 
 @Service
 public class ArchivedFileService extends BaseService implements IArchivedFileService {
@@ -49,10 +48,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
         af.setFileByteSize(fileSize);
         af.setMd5(md5);
         af.setArchiveDate(new Date());
-        
-        User currUser = UserContext.getCurrentUser();
-        
-        af.setArchiveUserId(currUser.getId());
+        af.setArchiveUserId(UserContext.getCurrentUser().getId());
         
         this.archivedFileDao.save(af);
         

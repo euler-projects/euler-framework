@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.datastore.controller;
+package net.eulerframework.web.module.file.controller;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,25 +15,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
 import net.eulerframework.web.core.base.response.WebServiceResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.module.datastore.entity.ArchivedFile;
-import net.eulerframework.web.module.datastore.exception.FileArchiveException;
-import net.eulerframework.web.module.datastore.service.IArchivedFileService;
+import net.eulerframework.web.module.file.entity.ArchivedFile;
+import net.eulerframework.web.module.file.exception.FileArchiveException;
+import net.eulerframework.web.module.file.service.IArchivedFileService;
 
 @WebController
-@ApiEndpoint
 @Scope("prototype")
-@RequestMapping("/datastore/archived/file")
-public class FileWebController extends AbstractWebController {
+@RequestMapping("/file")
+public class FileUploadAndDownloadWebController extends AbstractWebController {
 
     @Resource
     private IArchivedFileService archivedFileService;
     
-    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "download/{id}", method = RequestMethod.GET)
     public void downloadArchivedFile(@PathVariable("id") String archivedFileId, HttpServletResponse response) throws IOException {
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
@@ -59,7 +57,7 @@ public class FileWebController extends AbstractWebController {
         }
     }
     
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @RequestMapping(value = "upload", method = RequestMethod.POST)
     public WebServiceResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
         return new WebServiceResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
     }
