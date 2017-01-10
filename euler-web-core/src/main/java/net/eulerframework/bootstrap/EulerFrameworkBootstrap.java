@@ -120,6 +120,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         container.addListener(new EulerFrameworkCoreListener());
         
         MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
+        
         {
             AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
             try {
@@ -155,7 +156,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
             }
             DispatcherServlet springAdminWebDispatcherServlet = new DispatcherServlet(springAdminWebDispatcherServletContext);
             ServletRegistration.Dynamic springAdminWebDispatcher = container.addServlet("springAdminWebDispatcherServlet", springAdminWebDispatcherServlet);
-            springAdminWebDispatcher.setLoadOnStartup(1);
+            springAdminWebDispatcher.setLoadOnStartup(3);
             springAdminWebDispatcher.setMultipartConfig(new MultipartConfigElement(
                     multiPartConfig.getLocation(), 
                     multiPartConfig.getMaxFileSize(), 
