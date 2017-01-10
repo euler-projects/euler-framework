@@ -73,4 +73,28 @@ public class GlobalProperties1 {
             return defaultValue;
         }
     }
+    
+    /**
+     * 读取枚举类型的配置
+     * @param property 参数名
+     * @param defaultValue 默认值，在读不到的时候返回此值
+     * @param toUpperCase 是否将读取到的字符串转为大写后再转为对应的Enum
+     * @return 配置了正确的参数按配置返回，未配置或配置参数不正确返回默认值
+     */
+    public static <T extends Enum<T>> T getEnumValue(String property, T defaultValue, boolean toUpperCase) {
+        try {
+            String configValue = get(property);
+            
+            if(toUpperCase)
+                configValue = configValue.toUpperCase();
+            
+            return T.valueOf(defaultValue.getDeclaringClass(), configValue);
+        } catch (GlobalPropertyReadException e) {
+            logger.warn("Couldn't load "+ property +" , use " + defaultValue + " for default.");
+            return defaultValue;
+        } catch (IllegalArgumentException e) {
+            logger.warn(property +" was configed as a wrong value , use " + defaultValue + " for default.");
+            return defaultValue;
+        }
+    }
 }
