@@ -1,6 +1,8 @@
 package net.eulerframework.web.module.authentication.service;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -17,6 +19,7 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.BadRequestException;
 import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
+import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
@@ -28,7 +31,10 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
 
     @Resource private IUserService userService;
     @Resource private IUserProfileDao<IUserProfile> userProfileDao;
+    @Resource private IAuthorityService authorityService;
     @Resource private PasswordEncoder passwordEncoder;
+    private boolean autoAuthorization = WebConfig.getAutoAuthorization();
+    private String[] autoAuthorizationGroupId = WebConfig.getAutoAuthorizationId();
     
     @Override
     public String signUp(User user) throws UserSignUpException {
@@ -70,6 +76,11 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             user.setPassword(this.passwordEncoder.encode(password));
             
             user.setSignUpTime(new Date());
+            
+            if(this.autoAuthorization) {
+                List<Group> groups = this.authorityService.findGroupByIds(autoAuthorizationGroupId);
+                user.setGroups(new HashSet<>(groups));
+            }
             
             return this.userService.save(user);
         } catch (UserSignUpException userSignUpException) {

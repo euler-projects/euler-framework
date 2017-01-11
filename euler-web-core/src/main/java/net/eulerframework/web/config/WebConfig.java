@@ -413,4 +413,14 @@ public abstract class WebConfig {
         return result;
     }
 
+    public static boolean getAutoAuthorization() {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
+    public static String[] getAutoAuthorizationId() {
+        // TODO Auto-generated method stub
+        return new String[]{"8a775fcf-6f3e-4b57-8a1a-a9bd96a4bf49"};
+    }
+
 }
