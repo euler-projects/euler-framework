@@ -3,32 +3,27 @@ package net.eulerframework.web.module.authentication.exception;
 import net.eulerframework.web.core.base.exception.I18NException;
 
 @SuppressWarnings("serial")
-public class UserSignUpException extends I18NException {
-    
-    public UserSignUpException() {
+public class UserNotFoundException extends I18NException {
+    public UserNotFoundException() {
         super();
     }
 
-    public UserSignUpException(String message) {
+    public UserNotFoundException(String message) {
         super(message);
     }
 
-    public UserSignUpException(String message, Throwable cause) {
+    public UserNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UserSignUpException(Throwable cause) {
+    public UserNotFoundException(Throwable cause) {
         super(cause);
     }
     
-    protected UserSignUpException(String message, Throwable cause,
+    protected UserNotFoundException(String message, Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-    }
-    
-    public enum INFO {
-        UNKNOWN_USER_SIGNUP_ERROR;
     }
 
 }

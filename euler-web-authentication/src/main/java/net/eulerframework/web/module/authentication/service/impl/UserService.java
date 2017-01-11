@@ -13,6 +13,7 @@ import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.IGroupDao;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.IUserService;
 
 @Service
@@ -63,5 +64,18 @@ public class UserService extends BaseService implements IUserService {
     @Override
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
         return this.userDao.findEntityInPage(pageQueryRequest);
+    }
+
+    @Override
+    public void updateUser(User user) throws UserNotFoundException {
+        Assert.isNotNull(user.getId(), "userid is null");
+        
+        User existedUser = this.userDao.load(user.getId());
+        
+        if(existedUser == null)
+            throw new UserNotFoundException("User id is \"" + user.getId() + "\" not found.");
+        
+        this.userDao.update(user);
+        
     }
 }

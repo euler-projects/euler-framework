@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.Assert;
 import net.eulerframework.common.util.StringTool;
+import net.eulerframework.web.core.Lang;
 import net.eulerframework.web.core.exception.WebControllerException;
 import net.eulerframework.web.core.i18n.Tag;
 
@@ -82,7 +83,7 @@ public abstract class AbstractWebController extends BaseController {
      * @return 跳转view
      */
     protected String jump(String message, String target, int waitSeconds) {
-        message = message == null ? Tag.i18n("Page will be redirect") : message;
+        message = message == null ? Tag.i18n(Lang.PAGE_WILL_REDIRECT.toString()) : message;
         target = target == null ? "" : target;
         
         String contextPath = this.getServletContext().getContextPath();
@@ -103,6 +104,24 @@ public abstract class AbstractWebController extends BaseController {
         request.setAttribute("target", contextPath + "/" + target);
         request.setAttribute("waitSeconds", waitSeconds);
         return this.display("/common/jump");
+    }
+    
+    protected String error(String message) {
+        message = message == null ? Tag.i18n(Lang.UNKNOWN_ERROR.toString()) : message;
+
+        HttpServletRequest request = this.getRequest();
+        request.setAttribute("message", message);
+        return this.display("/common/error");
+        
+    }
+    
+    protected String success(String message) {
+        message = message == null ? Tag.i18n(Lang.SUCCESS.toString()) : message;
+
+        HttpServletRequest request = this.getRequest();
+        request.setAttribute("message", message);
+        return this.display("/common/success");
+        
     }
 
 }

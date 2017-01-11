@@ -3,32 +3,32 @@ package net.eulerframework.web.module.authentication.exception;
 import net.eulerframework.web.core.base.exception.I18NException;
 
 @SuppressWarnings("serial")
-public class UserSignUpException extends I18NException {
+public class UserChangePasswordException extends I18NException {
     
-    public UserSignUpException() {
+    public enum INFO {
+        UNKNOWN_CHANGE_PASSWD_ERROR;
+    }
+
+    public UserChangePasswordException() {
         super();
     }
 
-    public UserSignUpException(String message) {
+    public UserChangePasswordException(String message) {
         super(message);
     }
 
-    public UserSignUpException(String message, Throwable cause) {
+    public UserChangePasswordException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UserSignUpException(Throwable cause) {
+    public UserChangePasswordException(Throwable cause) {
         super(cause);
     }
     
-    protected UserSignUpException(String message, Throwable cause,
+    protected UserChangePasswordException(String message, Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-    }
-    
-    public enum INFO {
-        UNKNOWN_USER_SIGNUP_ERROR;
     }
 
 }
