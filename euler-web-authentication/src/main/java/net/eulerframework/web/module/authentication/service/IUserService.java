@@ -2,6 +2,8 @@ package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 
+import net.eulerframework.web.core.base.request.PageQueryRequest;
+import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.User;
 
@@ -18,4 +20,6 @@ public interface IUserService extends IBaseService {
     User loadUser(String userId);
 
     public String save(User user);
+
+    public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest);
 }
