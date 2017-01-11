@@ -38,7 +38,7 @@
         <beans:import resource="classpath:**/web-security-local-config.xml"/>
         
         <authentication-manager>
-            <authentication-provider user-service-ref="userService">
+            <authentication-provider user-service-ref="userDetailsService">
                 <password-encoder ref="passwordEncoder" />
             </authentication-provider>
         </authentication-manager>
@@ -85,7 +85,7 @@
 
         <beans:bean id="ldapAuthoritiesPopulator"
             class="org.springframework.security.ldap.authentication.UserDetailsServiceLdapAuthoritiesPopulator">
-            <beans:constructor-arg ref="userService" />
+            <beans:constructor-arg ref="userDetailsService" />
         </beans:bean>
     </beans:beans>
 
@@ -112,7 +112,7 @@
 
         <beans:bean id="casAuthenticationProvider"
             class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
-            <beans:property name="userDetailsService" ref="userService" />
+            <beans:property name="userDetailsService" ref="userDetailsService" />
             <beans:property name="serviceProperties" ref="serviceProperties" />
             <beans:property name="ticketValidator">
                 <beans:bean

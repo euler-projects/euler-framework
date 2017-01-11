@@ -16,7 +16,6 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.BadRequestException;
-import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
@@ -27,7 +26,7 @@ import net.eulerframework.web.module.authentication.util.UserContext;
 @Transactional
 public class AuthenticationService extends BaseService implements IAuthenticationService {
 
-    @Resource private IUserDao userDao;
+    @Resource private IUserService userService;
     @Resource private IUserProfileDao<IUserProfile> userProfileDao;
     @Resource private PasswordEncoder passwordEncoder;
     
@@ -48,11 +47,11 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
                 Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class, "The username format does not meet the requirements");
                 Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class, "The email format does not meet the requirements");
                 
-                Assert.isNull(this.userDao.findUserByName(user.getUsername()), BadRequestException.class, "Username has been used");
-                Assert.isNull(this.userDao.findUserByEmail(user.getEmail()), BadRequestException.class, "Email has been used");
+                Assert.isNull(this.userService.loadUserByUsername(user.getUsername()), BadRequestException.class, "Username has been used");
+                Assert.isNull(this.userService.loadUserByEmail(user.getEmail()), BadRequestException.class, "Email has been used");
                 
                 if(user.getMobile() !=null)
-                    Assert.isNull(this.userDao.findUserByMobile(user.getMobile()), BadRequestException.class, "Mobile has been used");
+                    Assert.isNull(this.userService.loadUserByMobile(user.getMobile()), BadRequestException.class, "Mobile has been used");
                 
                 password = user.getPassword().trim();
                 Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class, "The password format does not meet the requirements");
@@ -72,7 +71,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             
             user.setSignUpTime(new Date());
             
-            return (String) this.userDao.save(user);
+            return this.userService.save(user);
         } catch (UserSignUpException userSignUpException) {
             throw userSignUpException;
         } catch (Exception e) {

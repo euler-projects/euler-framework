@@ -9,6 +9,7 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import net.eulerframework.cache.DefaultObjectCache;
 import net.eulerframework.cache.ObjectCachePool;
@@ -89,6 +90,10 @@ public class UserContext {
                     }
 
                     UserDetails userDetails = userService.loadUserByUsername(username);
+                    if(userDetails == null) {
+                        throw new UsernameNotFoundException("User \"" + username + "\" not found.");
+                    }
+                    
                     if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
                         ((CredentialsContainer) userDetails).eraseCredentials();
                     }

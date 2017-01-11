@@ -4,88 +4,39 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import net.eulerframework.cache.DefaultObjectCache;
-import net.eulerframework.cache.ObjectCachePool;
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.IGroupDao;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IUserService;
 
 @Service
-public class UserService implements IUserService {
+public class UserService extends BaseService implements IUserService {
 
     @Resource private IUserDao userDao;
     @Resource private IGroupDao groupDao;
-    
-    private boolean enableEmailSignin = false;
-    private boolean enableMobileSignin = false;
-    private boolean enableUserCache = false;
-    
-    private DefaultObjectCache<String, User> userCache;
-    
-    public UserService() {
-        this.enableEmailSignin = WebConfig.isEnableEmailSignin();
-        this.enableMobileSignin = WebConfig.isEnableMobileSignin();
-        this.enableUserCache = WebConfig.isEnableUserCache();
-        
-        if(enableUserCache) {
-            userCache = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserAuthenticationCacheLife());           
-        }
-    }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User loadUserByUsername(String username) {
         Assert.isNotNull(username, "username is null");
-        
-        User user = null;
-        if(enableUserCache) {
-            user = this.userCache.get(username);
-        }
-        if(user == null) {
-            user = this.userDao.findUserByName(username);
-            if(user == null && enableEmailSignin) {
-                user = this.userDao.findUserByEmail(username);
-            }
-            if(user == null && enableMobileSignin) {
-                user = this.userDao.findUserByMobile(username);
-            }
-            if(user == null) {
-                throw new UsernameNotFoundException("User \"" + username + "\" not found.");
-            }
-            if(enableUserCache) {
-                this.userCache.put(username, user);
-            }
-        }
+        User user = this.userDao.findUserByName(username);
         return user;
     }
 
     @Override
-    public User loadUserByEmail(String email) throws UsernameNotFoundException {
+    public User loadUserByEmail(String email) {
         Assert.isNotNull(email, "email is null");
-        User user = this.userDao.findUserByEmail(email);
-        
-        if(user == null) {
-            throw new UsernameNotFoundException("User email is \"" + email + "\" not found.");
-        }
-        
+        User user = this.userDao.findUserByEmail(email);        
         return user;
     }
 
     @Override
-    public User loadUserByMobile(String mobile) throws UsernameNotFoundException {
+    public User loadUserByMobile(String mobile) {
         Assert.isNotNull(mobile, "mobile is null");
-        User user =  this.userDao.findUserByEmail(mobile);
-        
-        if(user == null) {
-            throw new UsernameNotFoundException("User mobile is \"" + mobile + "\" not found.");
-        }
-        
+        User user =  this.userDao.findUserByEmail(mobile);        
         return user;
     }
 
@@ -99,5 +50,11 @@ public class UserService implements IUserService {
     public User loadUser(String userId) {
         Assert.isNotNull(userId, "userId is null");
         return this.userDao.load(userId);
+    }
+
+    @Override
+    public String save(User user) {
+        Assert.isNotNull(user, "user is null");
+        return (String) this.userDao.save(user);
     }
 }
