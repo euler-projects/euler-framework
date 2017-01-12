@@ -28,7 +28,8 @@ public class BaseBean {
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setBasenames(
-                "classpath*:lang/*"
+                "classpath*:lang/*",
+                "classpath*:lang/**/*"
 //                "classpath:org/springframework/security/messages", 
 //                "classpath:org/hibernate/validator/ValidationMessages"
                 );

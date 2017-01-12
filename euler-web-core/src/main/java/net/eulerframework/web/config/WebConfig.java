@@ -17,6 +17,11 @@ public abstract class WebConfig {
             .generateDefaultObjectCache(Long.MAX_VALUE);
 
     private static class WebConfigKey {
+        //[project]
+        private final static String PROJECT_VERSION = "project.verison";
+        private final static String PROJECT_MODE = "project.mode";
+        private final static String PROJECT_BUILDTIME = "project.buildtime";
+        
         //[core]
         private final static String CORE_I18N_REFRESH_FREQ = "core.i18n.refreshFreq";
         private final static String CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = "core.cache.refreshFreq";
@@ -421,6 +426,57 @@ public abstract class WebConfig {
     public static String[] getAutoAuthorizationId() {
         // TODO Auto-generated method stub
         return new String[]{"8a775fcf-6f3e-4b57-8a1a-a9bd96a4bf49"};
+    }
+
+    public static String getProjectMode() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_MODE);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result;
+        try {
+            result = GlobalProperties1.get(WebConfigKey.PROJECT_MODE).toUpperCase();
+        } catch (GlobalPropertyReadException e) {
+            throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_MODE);
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.PROJECT_MODE, result);
+        return result;
+    }
+
+    public static String getProjectVersion() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_VERSION);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result;
+        try {
+            result = GlobalProperties1.get(WebConfigKey.PROJECT_VERSION);
+        } catch (GlobalPropertyReadException e) {
+            throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_VERSION);
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.PROJECT_VERSION, result);
+        return result;
+    }
+
+    public static String getProjectBuildtime() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_BUILDTIME);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result;
+        try {
+            result = GlobalProperties1.get(WebConfigKey.PROJECT_BUILDTIME);
+        } catch (GlobalPropertyReadException e) {
+            throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_BUILDTIME);
+        }
+
+        CONFIG_CAHCE.put(WebConfigKey.PROJECT_BUILDTIME, result);
+        return result;
     }
 
 }

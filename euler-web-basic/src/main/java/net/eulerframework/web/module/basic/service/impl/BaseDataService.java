@@ -10,13 +10,13 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.ContextLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.FileReader;
+import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
@@ -37,13 +37,6 @@ public class BaseDataService extends BaseService implements IBaseDataService {
     @Resource private IPageDao pageDao;
     
     @Resource private ObjectMapper objectMapper;
-    
-    @Value("${project.Mode}")
-    private String projectMode;
-    @Value("${project.Version}")
-    private String projectVersion;
-    @Value("${project.Buildtimesamp}")
-    private String projectBuildtimesamp;
 
     @Override
     public void loadBaseData() {
@@ -56,9 +49,12 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         String contextPath = sc.getContextPath();
         sc.setAttribute("contextPath", contextPath);
         
-        sc.setAttribute("project.Version", projectVersion);
-        sc.setAttribute("project.Mode", projectMode.toUpperCase());
-        sc.setAttribute("project.Buildtimesamp", projectBuildtimesamp);
+        sc.setAttribute("__PROJECT_VERSION", WebConfig.getProjectVersion());
+        sc.setAttribute("__PROJECT_MODE", WebConfig.getProjectMode());
+        sc.setAttribute("__PROJECT_BUILDTIME", WebConfig.getProjectBuildtime());
+        
+        sc.setAttribute("__COPYRIGHT_HOLDER", "HOLDER");
+        sc.setAttribute("__FRAMEWORK_VERSION", "0.2.01");
     }
     
     @Override
