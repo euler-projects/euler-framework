@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.eulerframework.common.util.BeanTool;
-import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.IAuthorityDao;
@@ -28,13 +28,13 @@ public class AuthorityService extends BaseService implements IAuthorityService {
     }
 
     @Override
-    public PageResponse<Group> findGroupByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        return this.groupDao.findGroupByPage(queryRequest, pageIndex, pageSize);
+    public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
+        return this.groupDao.findGroupByPage(pageQueryRequest);
     }
 
     @Override
-    public PageResponse<Authority> findAuthorityByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        return this.authorityDao.findAuthorityByPage(queryRequest, pageIndex, pageSize);
+    public PageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest) {
+        return this.authorityDao.findAuthorityByPage(pageQueryRequest);
     }
 
     @Override

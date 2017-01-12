@@ -14,25 +14,28 @@ public class PageQueryRequest extends QueryRequest {
     private int pageSize;
 
     public PageQueryRequest(HttpServletRequest request) {
+        this(request, PAGE_INDEX_NAME, PAGE_SIZE_NAME);
+    }
+    public PageQueryRequest(HttpServletRequest request, String pageIndexParamName, String pageSizeParamName) {
         super(request);
         
-        String pageSizeStr = request.getParameter(PAGE_SIZE_NAME);        
+        String pageSizeStr = request.getParameter(pageSizeParamName);        
         if(StringTool.isNull(pageSizeStr)){
-            throw new IllegalParamException("Param 'pageSize' is required");
+            throw new IllegalParamException("Param '" +pageSizeParamName+ "' is required");
         }        
-        this.pageSize = Integer.parseInt(request.getParameter(PAGE_SIZE_NAME));
+        this.pageSize = Integer.parseInt(request.getParameter(pageSizeParamName));
         
         if(this.pageSize <= 0) {
             this.pageIndex = -1;
         } else {
-            String pageIndexStr = request.getParameter(PAGE_INDEX_NAME);        
+            String pageIndexStr = request.getParameter(pageIndexParamName);        
             if(StringTool.isNull(pageIndexStr)){
-                throw new IllegalParamException("Param 'pageIndex' is required");
+                throw new IllegalParamException("Param '" +pageIndexParamName+ "' is required");
             }        
-            this.pageIndex = Integer.parseInt(request.getParameter(PAGE_INDEX_NAME));
+            this.pageIndex = Integer.parseInt(request.getParameter(pageIndexParamName));
             
             if(this.pageIndex < 0) {
-                throw new IllegalParamException("Param 'pageIndex' must larger than 0");                
+                throw new IllegalParamException("Param '" +pageIndexParamName+ "' must larger than 0");                
             }
         }
     }

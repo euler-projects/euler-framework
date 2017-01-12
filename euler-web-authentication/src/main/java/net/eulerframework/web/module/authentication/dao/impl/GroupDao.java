@@ -13,7 +13,7 @@ import org.hibernate.criterion.Restrictions;
 import net.eulerframework.common.util.PinYinTool;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.authentication.dao.IGroupDao;
@@ -22,16 +22,16 @@ import net.eulerframework.web.module.authentication.entity.Group;
 public class GroupDao extends BaseDao<Group> implements IGroupDao {
 
     @Override
-    public PageResponse<Group> findGroupByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+    public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
                 .setFetchMode("authorities", FetchMode.SELECT);
         try {
             String queryValue = null;
-            queryValue = queryRequest.getQueryValue("name");
+            queryValue = pageQueryRequest.getQueryValue("name");
             if (!StringTool.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
-            queryValue = queryRequest.getQueryValue("description");
+            queryValue = pageQueryRequest.getQueryValue("description");
             if (!StringTool.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
@@ -41,7 +41,7 @@ public class GroupDao extends BaseDao<Group> implements IGroupDao {
         
         detachedCriteria.addOrder(Order.asc("name"));        
         
-        PageResponse<Group> result = this.findPageBy(detachedCriteria, pageIndex, pageSize);
+        PageResponse<Group> result = this.findPageBy(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
         
         return result;
     }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.Authority;
@@ -13,9 +13,9 @@ import net.eulerframework.web.module.authentication.entity.Group;
 @PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
 public interface IAuthorityService extends IBaseService {
 
-    public PageResponse<Group> findGroupByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
+    public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest);
 
-    public PageResponse<Authority> findAuthorityByPage(QueryRequest queryRequest, int pageIndex, int pageSize);
+    public PageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest);
 
     public List<Group> findAllGroups();
 
