@@ -25,9 +25,4 @@ public class UserEmailException extends I18NRuntimeException {
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-
-    
-    public enum INFO {
-        INCORRECT_EMAIL_FORMAT,EMAIL_USED, EMAIL_IS_NULL;
-    }
 }

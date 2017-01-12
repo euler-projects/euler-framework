@@ -14,6 +14,7 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.module.authentication.Lang;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserChangePasswordException;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
@@ -56,13 +57,13 @@ public class AuthenticationWebController extends AbstractWebController {
                 this.getRequest().setAttribute("user", user);
                 return this.display(WebConfig.getSignUpSuccessPage());
             } else
-                throw new UserSignUpException(UserSignUpException.INFO.UNKNOWN_USER_SIGNUP_ERROR.toString());
+                throw new UserSignUpException(Lang.USER_SIGNUP.UNKNOWN_USER_SIGNUP_ERROR.toString());
         } catch (UserSignUpException e) {
             this.getRequest().setAttribute("errorMsg", e.getLocalizedMessage());
             return this.display(WebConfig.getSignUpFailPage());
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
-            this.getRequest().setAttribute("errorMsg", UserSignUpException.INFO.UNKNOWN_USER_SIGNUP_ERROR.toString());
+            this.getRequest().setAttribute("errorMsg", Lang.USER_SIGNUP.UNKNOWN_USER_SIGNUP_ERROR.toString());
             return this.display(WebConfig.getSignUpFailPage());
         }
     }
@@ -76,7 +77,7 @@ public class AuthenticationWebController extends AbstractWebController {
             return this.error(e.getLocalizedMessage());
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
-            return this.error(UserChangePasswordException.INFO.UNKNOWN_CHANGE_PASSWD_ERROR.toString());
+            return this.error(Lang.PASSWD_CHANGE.UNKNOWN_CHANGE_PASSWD_ERROR.toString());
         }
         
         return this.success(null);

@@ -25,9 +25,5 @@ public class UsernameException extends I18NRuntimeException {
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-    
-    public enum INFO {
-        INCORRECT_USERNAME_FORMAT,USERNAME_USED,USERNAME_IS_NULL;
-    }
 
 }

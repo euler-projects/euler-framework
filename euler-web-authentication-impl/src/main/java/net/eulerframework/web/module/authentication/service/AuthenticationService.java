@@ -16,17 +16,14 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.BadRequestException;
+import net.eulerframework.web.module.authentication.Lang;
 import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.exception.PasswordException;
 import net.eulerframework.web.module.authentication.exception.UserChangePasswordException;
-import net.eulerframework.web.module.authentication.exception.UserEmailException;
-import net.eulerframework.web.module.authentication.exception.UserMobileException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
-import net.eulerframework.web.module.authentication.exception.UsernameException;
 import net.eulerframework.web.module.authentication.util.UserContext;
 
 @Service
@@ -53,31 +50,31 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             String password;
 
             try {
-                Assert.isNotNull(user.getUsername(), BadRequestException.class, UsernameException.INFO.USERNAME_IS_NULL.toString());
-                Assert.isNotNull(user.getEmail(), BadRequestException.class, UserEmailException.INFO.EMAIL_IS_NULL.toString());
-                Assert.isNotNull(user.getPassword(), BadRequestException.class, PasswordException.INFO.PASSWD_IS_ULL.toString());
+                Assert.isNotNull(user.getUsername(), BadRequestException.class, Lang.USERNAME.USERNAME_IS_NULL.toString());
+                Assert.isNotNull(user.getEmail(), BadRequestException.class, Lang.USER_EMAIL.EMAIL_IS_NULL.toString());
+                Assert.isNotNull(user.getPassword(), BadRequestException.class, Lang.PASSWD.PASSWD_IS_ULL.toString());
                 // Assert.isNotNull(user.getMobile(), BadRequestException.class,
                 // "Mobile is null"));
 
                 Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class,
-                        UsernameException.INFO.INCORRECT_USERNAME_FORMAT.toString());
+                        Lang.USERNAME.INCORRECT_USERNAME_FORMAT.toString());
                 Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class,
-                        UserEmailException.INFO.INCORRECT_EMAIL_FORMAT.toString());
+                        Lang.USER_EMAIL.INCORRECT_EMAIL_FORMAT.toString());
 
                 Assert.isNull(this.userService.loadUserByUsername(user.getUsername()), BadRequestException.class,
-                        UsernameException.INFO.USERNAME_USED.toString());
+                        Lang.USERNAME.USERNAME_USED.toString());
                 Assert.isNull(this.userService.loadUserByEmail(user.getEmail()), BadRequestException.class,
-                        UserEmailException.INFO.EMAIL_USED.toString());
+                        Lang.USER_EMAIL.EMAIL_USED.toString());
 
                 if (user.getMobile() != null)
                     Assert.isNull(this.userService.loadUserByMobile(user.getMobile()), BadRequestException.class,
-                            UserMobileException.INFO.MOBILE_USED.toString());
+                            Lang.USER_MOBILE.MOBILE_USED.toString());
 
                 password = user.getPassword().trim();
                 Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class,
-                        PasswordException.INFO.INCORRECT_PASSWD_FORMAT.toString());
+                        Lang.PASSWD.INCORRECT_PASSWD_FORMAT.toString());
                 Assert.isTrue(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20,
-                        BadRequestException.class, PasswordException.INFO.INCORRECT_PASSWD_LENGTH.toString());
+                        BadRequestException.class, Lang.PASSWD.INCORRECT_PASSWD_LENGTH.toString());
 
             } catch (BadRequestException e) {
                 throw new UserSignUpException(e.getMessage(), e);
@@ -102,7 +99,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         } catch (UserSignUpException userSignUpException) {
             throw userSignUpException;
         } catch (Exception e) {
-            throw new UserSignUpException(UserSignUpException.INFO.UNKNOWN_USER_SIGNUP_ERROR.toString(), e);
+            throw new UserSignUpException(Lang.USER_SIGNUP.UNKNOWN_USER_SIGNUP_ERROR.toString(), e);
         }
     }
 
@@ -122,7 +119,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         } catch (UserSignUpException userSignUpException) {
             throw userSignUpException;
         } catch (Exception e) {
-            throw new UserSignUpException(UserSignUpException.INFO.UNKNOWN_USER_SIGNUP_ERROR.toString(), e);
+            throw new UserSignUpException(Lang.USER_SIGNUP.UNKNOWN_USER_SIGNUP_ERROR.toString(), e);
         }
     }
 
@@ -145,16 +142,16 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         User user = this.userService.loadUser(userId);
 
         if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new UserChangePasswordException(PasswordException.INFO.INCORRECT_PASSWD.toString());
+            throw new UserChangePasswordException(Lang.PASSWD.INCORRECT_PASSWD.toString());
         }
 
         String password;
         try {
             password = newPassword.trim();
             Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class,
-                    PasswordException.INFO.INCORRECT_PASSWD_FORMAT.toString());
+                    Lang.PASSWD.INCORRECT_PASSWD_FORMAT.toString());
             Assert.isTrue(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20,
-                    BadRequestException.class, PasswordException.INFO.INCORRECT_PASSWD_LENGTH.toString());
+                    BadRequestException.class, Lang.PASSWD.INCORRECT_PASSWD_LENGTH.toString());
         } catch (BadRequestException e) {
             throw new UserChangePasswordException(e.getMessage(), e);
         }

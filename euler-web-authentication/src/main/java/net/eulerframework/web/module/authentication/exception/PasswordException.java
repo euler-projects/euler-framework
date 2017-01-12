@@ -25,9 +25,5 @@ public class PasswordException extends I18NRuntimeException {
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-    
-    public enum INFO {
-        INCORRECT_PASSWD_FORMAT,INCORRECT_PASSWD_LENGTH,INCORRECT_PASSWD, PASSWD_IS_ULL;
-    }
 
 }

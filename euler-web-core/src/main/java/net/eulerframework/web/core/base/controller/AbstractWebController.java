@@ -83,7 +83,7 @@ public abstract class AbstractWebController extends BaseController {
      * @return 跳转view
      */
     protected String jump(String message, String target, int waitSeconds) {
-        message = message == null ? Tag.i18n(Lang.PAGE_WILL_REDIRECT.toString()) : message;
+        message = message == null ? Tag.i18n(Lang.CORE.PAGE_WILL_REDIRECT.toString()) : message;
         target = target == null ? "" : target;
         
         String contextPath = this.getServletContext().getContextPath();
@@ -107,7 +107,7 @@ public abstract class AbstractWebController extends BaseController {
     }
     
     protected String error(String message) {
-        message = message == null ? Tag.i18n(Lang.UNKNOWN_ERROR.toString()) : message;
+        message = message == null ? Tag.i18n(Lang.CORE.UNKNOWN_ERROR.toString()) : message;
 
         HttpServletRequest request = this.getRequest();
         request.setAttribute("message", message);
@@ -116,7 +116,7 @@ public abstract class AbstractWebController extends BaseController {
     }
     
     protected String success(String message) {
-        message = message == null ? Tag.i18n(Lang.SUCCESS.toString()) : message;
+        message = message == null ? Tag.i18n(Lang.CORE.SUCCESS.toString()) : message;
 
         HttpServletRequest request = this.getRequest();
         request.setAttribute("message", message);

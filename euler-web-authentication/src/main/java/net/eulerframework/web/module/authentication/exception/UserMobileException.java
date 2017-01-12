@@ -25,9 +25,5 @@ public class UserMobileException extends I18NRuntimeException {
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-    
-    public enum INFO {
-        INCORRECT_MOBILE_FORMAT,MOBILE_USED,NULL;
-    }
 
 }

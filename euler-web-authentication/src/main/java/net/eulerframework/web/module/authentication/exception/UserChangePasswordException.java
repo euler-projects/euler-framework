@@ -5,10 +5,6 @@ import net.eulerframework.web.core.base.exception.I18NException;
 @SuppressWarnings("serial")
 public class UserChangePasswordException extends I18NException {
     
-    public enum INFO {
-        UNKNOWN_CHANGE_PASSWD_ERROR;
-    }
-
     public UserChangePasswordException() {
         super();
     }

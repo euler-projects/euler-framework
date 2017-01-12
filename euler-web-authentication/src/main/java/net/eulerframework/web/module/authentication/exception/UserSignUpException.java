@@ -26,9 +26,5 @@ public class UserSignUpException extends I18NException {
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-    
-    public enum INFO {
-        UNKNOWN_USER_SIGNUP_ERROR;
-    }
 
 }
