@@ -2,12 +2,14 @@ package net.eulerframework.web.module.authentication.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
 
 @SuppressWarnings("serial")
+@MappedSuperclass
 public abstract class AbstractUserProfile implements BaseEntity<AbstractUserProfile> {
     @Id
     @Column(name = "USER_ID", length = 36)
