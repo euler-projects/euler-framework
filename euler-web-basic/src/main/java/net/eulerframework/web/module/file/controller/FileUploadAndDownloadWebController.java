@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.web.config.WebConfig;
@@ -57,6 +58,7 @@ public class FileUploadAndDownloadWebController extends AbstractWebController {
         }
     }
     
+    @ResponseBody
     @RequestMapping(value = "upload", method = RequestMethod.POST)
     public WebServiceResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
         return new WebServiceResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
