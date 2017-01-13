@@ -7,9 +7,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.core.Lang;
-import net.eulerframework.web.core.exception.WebControllerException;
-import net.eulerframework.web.core.exception.view.ViewException;
+import net.eulerframework.web.core.exception.ViewException;
 import net.eulerframework.web.core.i18n.Tag;
 
 public abstract class AbstractWebController extends BaseController {
@@ -26,7 +24,7 @@ public abstract class AbstractWebController extends BaseController {
         int indexOfWebController = className.lastIndexOf("WebController");
 
         if(indexOfWebController <= 0)
-            throw new WebControllerException("If you want to use this.display(), WebController's class name must end with 'WebController'");
+            throw new RuntimeException("If you want to use this.display(), WebController's class name must end with 'WebController'");
 
         return StringTool.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("WebController")));
     }
@@ -95,7 +93,7 @@ public abstract class AbstractWebController extends BaseController {
      * @return 跳转view
      */
     protected String jump(String message, String target, int waitSeconds) {
-        message = message == null ? Tag.i18n(Lang.CORE.PAGE_WILL_REDIRECT.toString()) : message;
+        message = message == null ? "PAGE_WILL_REDIRECT" : message;
         target = target == null ? "" : target;
         
         String contextPath = this.getServletContext().getContextPath();
@@ -118,8 +116,12 @@ public abstract class AbstractWebController extends BaseController {
         return this.display("/common/jump");
     }
     
+    protected String error() {
+        return this.error(null);
+    }
+    
     protected String error(String message) {
-        message = message == null ? Tag.i18n(Lang.CORE.UNKNOWN_ERROR.toString()) : message;
+        message = message == null ? "UNKNOWN_ERROR": message;
 
         HttpServletRequest request = this.getRequest();
         request.setAttribute("message", message);
@@ -127,8 +129,13 @@ public abstract class AbstractWebController extends BaseController {
         
     }
     
+    protected String success() {
+        return this.success(null);
+    }
+    
+    
     protected String success(String message) {
-        message = message == null ? Tag.i18n(Lang.CORE.SUCCESS.toString()) : message;
+        message = message == null ? "SUCCESS" : message;
 
         HttpServletRequest request = this.getRequest();
         request.setAttribute("message", message);
@@ -147,7 +154,7 @@ public abstract class AbstractWebController extends BaseController {
     @ExceptionHandler({ViewException.class})   
     public String viewException(ViewException e) {
         this.logger.error(e.getMessage(), e);
-        return this.error(e.getLocalizedMessage());
+        return this.error(Tag.i18n(e.getViewInfo()));
     }
 
 }

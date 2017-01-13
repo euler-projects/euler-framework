@@ -1,12 +1,11 @@
 package net.eulerframework.web.module.authentication.exception;
 
 @SuppressWarnings("serial")
-public class IncorrectPasswordException extends UserCheckException {
+public class NullUserNameException extends UserCheckException {
 
     @Override
     public String getViewInfo() {
-        return "INCORRECT_PASSWORD";
+        return "USERNAME_IS_NULL";
     }
-
 
 }

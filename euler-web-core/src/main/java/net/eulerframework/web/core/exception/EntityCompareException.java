@@ -1,9 +1,9 @@
 package net.eulerframework.web.core.exception;
 
-import net.eulerframework.web.core.base.exception.I18NRuntimeException;
+
 
 @SuppressWarnings("serial")
-public class EntityCompareException extends I18NRuntimeException {
+public class EntityCompareException extends RuntimeException {
 
     public EntityCompareException() {
         super();

@@ -71,7 +71,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ExceptionHandler({BadRequestException.class})   
     public Object badRequestException(BadRequestException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     
     /**  
@@ -83,7 +83,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ExceptionHandler({ResourceExistException.class})   
     public Object exception(ResourceExistException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getLocalizedMessage());
+        return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getMessage());
     }
     
     /**  
@@ -95,7 +95,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ExceptionHandler({IllegalParamException.class})   
     public Object illegalParamException(IllegalParamException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     
     /**  
@@ -107,7 +107,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ExceptionHandler({IllegalArgumentException.class})   
     public Object illegalArgumentException(IllegalArgumentException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     
     /**  
@@ -154,7 +154,7 @@ public abstract class BaseController extends WebContextAccessable {
         try {
             return new HttpStatusResponse(Status.FIELD_VALID_FAILED, this.objectMapper.writeValueAsString(e.getAllErrors()));
         } catch (JsonProcessingException e1) {
-            return new HttpStatusResponse(Status.FIELD_VALID_FAILED, e.getLocalizedMessage());
+            return new HttpStatusResponse(Status.FIELD_VALID_FAILED, e.getMessage());
         }
     }
     
@@ -167,7 +167,7 @@ public abstract class BaseController extends WebContextAccessable {
     @ExceptionHandler({MissingServletRequestParameterException.class})   
     public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
         this.logger.error(e.getMessage(), e);
-        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     
     /**  
@@ -179,6 +179,6 @@ public abstract class BaseController extends WebContextAccessable {
     @ExceptionHandler({Exception.class})   
     public Object exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+        return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }

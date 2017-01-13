@@ -1,9 +1,7 @@
-package net.eulerframework.web.core.exception.view;
-
-import net.eulerframework.web.core.i18n.Tag;
+package net.eulerframework.web.core.exception;
 
 @SuppressWarnings("serial")
-public class ViewException extends RuntimeException {
+public abstract class ViewException extends RuntimeException {
     public ViewException() {
         super();
     }
@@ -26,8 +24,6 @@ public class ViewException extends RuntimeException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public String getLocalizedMessage() {
-        return Tag.i18n(this.getMessage());
-    }
+    public abstract String getViewInfo();
 
 }

@@ -10,14 +10,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
-import net.eulerframework.web.module.authentication.Lang;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.exception.UserChangePasswordException;
-import net.eulerframework.web.module.authentication.exception.UserSignUpException;
 import net.eulerframework.web.module.authentication.service.IAuthenticationService;
 
 /**
@@ -49,38 +45,18 @@ public class AuthenticationWebController extends AbstractWebController {
 
     @RequestMapping(value = "litesignup", method = RequestMethod.POST)
     public String litesignup(@Valid User user) {
-        try {
-            String userId = this.authenticationService.signUp(user);
+        this.authenticationService.signUp(user);
 
-            if (!StringTool.isNull(userId)) {
-                user.setPassword(null);
-                this.getRequest().setAttribute("user", user);
-                return this.display(WebConfig.getSignUpSuccessPage());
-            } else
-                throw new UserSignUpException(Lang.USER_SIGNUP.UNKNOWN_USER_SIGNUP_ERROR.toString());
-        } catch (UserSignUpException e) {
-            this.getRequest().setAttribute("errorMsg", e.getLocalizedMessage());
-            return this.display(WebConfig.getSignUpFailPage());
-        } catch (Exception e) {
-            this.logger.error(e.getMessage(), e);
-            this.getRequest().setAttribute("errorMsg", Lang.USER_SIGNUP.UNKNOWN_USER_SIGNUP_ERROR.toString());
-            return this.display(WebConfig.getSignUpFailPage());
-        }
+        this.getRequest().setAttribute("user", user);
+        return this.display(WebConfig.getSignUpSuccessPage());
     }
     
 
     @RequestMapping(value = "changePasswd", method = RequestMethod.POST)
-    public String changePasswd(String oldPassword, String newPassword) throws UserChangePasswordException {
-        try {
-            this.authenticationService.changePassword(oldPassword, newPassword);
-        } catch (UserChangePasswordException e) {
-            return this.error(e.getLocalizedMessage());
-        } catch (Exception e) {
-            this.logger.error(e.getMessage(), e);
-            return this.error(Lang.PASSWD_CHANGE.UNKNOWN_CHANGE_PASSWD_ERROR.toString());
-        }
+    public String changePasswd(String oldPassword, String newPassword) {
         
-        return this.success(null);
+        this.authenticationService.changePassword(oldPassword, newPassword);        
+        return this.success();
     }
 
 }

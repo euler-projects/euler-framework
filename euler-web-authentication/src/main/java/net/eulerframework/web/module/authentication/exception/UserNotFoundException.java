@@ -1,9 +1,9 @@
 package net.eulerframework.web.module.authentication.exception;
 
-import net.eulerframework.web.core.base.exception.I18NException;
+
 
 @SuppressWarnings("serial")
-public class UserNotFoundException extends I18NException {
+public class UserNotFoundException extends Exception {
     public UserNotFoundException() {
         super();
     }
