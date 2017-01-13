@@ -511,4 +511,9 @@ public abstract class WebConfig {
         return result;
     }
 
+    public static boolean getAutoSigninAfterSignup() {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
 }
