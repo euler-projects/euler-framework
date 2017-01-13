@@ -6,6 +6,8 @@ import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.IncorrectPasswordException;
+import net.eulerframework.web.module.authentication.exception.IncorrectPasswordFormatException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 
 public interface IUserService extends IBaseService {
@@ -31,7 +33,7 @@ public interface IUserService extends IBaseService {
      */
     public void updateUser(User user) throws UserNotFoundException;
 
-    public void updateUserIncludePassword(User user) throws UserNotFoundException;
+    public void updateUserPassword(String userId, String oldPassword, String newPassword) throws UserNotFoundException, IncorrectPasswordException, IncorrectPasswordFormatException;
     
     
 }

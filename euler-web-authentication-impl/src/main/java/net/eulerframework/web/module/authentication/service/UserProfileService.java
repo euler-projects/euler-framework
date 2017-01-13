@@ -20,8 +20,14 @@ public class UserProfileService extends BaseService implements IUserProfileServi
     }
 
     @Override
+    public <T extends AbstractUserProfile> void updateUserProfile(T userProfile) {
+        this.userProfileDao.saveOrUpdate(userProfile);
+    }
+
+    @Override
     public AbstractUserProfile loadUserProfile(String userId) {
         return this.userProfileDao.load(userId);
     }
+
 
 }

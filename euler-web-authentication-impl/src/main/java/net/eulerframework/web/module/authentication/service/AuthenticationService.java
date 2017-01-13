@@ -20,6 +20,8 @@ import net.eulerframework.web.module.authentication.Lang;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.IncorrectPasswordException;
+import net.eulerframework.web.module.authentication.exception.IncorrectPasswordFormatException;
 import net.eulerframework.web.module.authentication.exception.UserChangePasswordException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
@@ -123,13 +125,36 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     }
 
     @Override
+    public void update(User user) throws UserNotFoundException {
+        User existUser = this.userService.loadUser(user.getId());
+        
+        if(existUser == null)
+            throw new UserNotFoundException();
+        
+        user.setAccountNonExpired(existUser.isAccountNonExpired());
+        user.setAccountNonLocked(existUser.isAccountNonLocked());
+        user.setCredentialsNonExpired(existUser.isCredentialsNonExpired());
+        user.setEnabled(existUser.isEnabled());
+        user.setGroups(existUser.getGroups());
+        
+        this.userService.updateUser(user);
+        
+    }
+
+    @Override
+    public <T extends AbstractUserProfile> void update(User user, T userProfile) throws UserNotFoundException {
+        this.update(user);
+        this.userProfileService.updateUserProfile(userProfile);        
+    }
+
+    @Override
     public void passwdResetEmailGen(String email) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void passwdResetSMSGen(String email) {
+    public void passwdResetSMSGen(String mobile) {
         // TODO Auto-generated method stub
 
     }
@@ -138,28 +163,9 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     public void changePassword(String oldPassword, String newPassword) throws UserChangePasswordException {
         String userId = UserContext.getCurrentUser().getId();
 
-        User user = this.userService.loadUser(userId);
-
-        if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new UserChangePasswordException(Lang.PASSWD.INCORRECT_PASSWD.toString());
-        }
-
-        String password;
         try {
-            password = newPassword.trim();
-            Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class,
-                    Lang.PASSWD.INCORRECT_PASSWD_FORMAT.toString());
-            Assert.isTrue(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20,
-                    BadRequestException.class, Lang.PASSWD.INCORRECT_PASSWD_LENGTH.toString());
-        } catch (BadRequestException e) {
-            throw new UserChangePasswordException(e.getMessage(), e);
-        }
-        
-        user.setPassword(this.passwordEncoder.encode(password));
-        
-        try {
-            this.userService.updateUserIncludePassword(user);
-        } catch (UserNotFoundException e) {
+            this.userService.updateUserPassword(userId, oldPassword, newPassword);
+        } catch (UserNotFoundException | IncorrectPasswordException | IncorrectPasswordFormatException e) {
             throw new UserChangePasswordException(e.getMessage(), e);
         }
     }

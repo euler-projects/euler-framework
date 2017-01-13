@@ -4,9 +4,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.Lang;
 import net.eulerframework.web.core.exception.WebControllerException;
+import net.eulerframework.web.core.exception.view.ViewException;
 import net.eulerframework.web.core.i18n.Tag;
 
 public abstract class AbstractWebController extends BaseController {
@@ -135,6 +138,16 @@ public abstract class AbstractWebController extends BaseController {
     
     protected String notfound() {
         return this.redirect("/error-404");
+    }
+    
+    /**  
+     * 用于在程序发生{@link ViewException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ExceptionHandler({ViewException.class})   
+    public String viewException(ViewException e) {
+        this.logger.error(e.getMessage(), e);
+        return this.error(e.getLocalizedMessage());
     }
 
 }

@@ -6,6 +6,7 @@ import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserChangePasswordException;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.exception.UserSignUpException;
 
 public interface IAuthenticationService extends IBaseService {
@@ -13,12 +14,16 @@ public interface IAuthenticationService extends IBaseService {
     public String signUp(User user) throws UserSignUpException;
    
     public <T extends AbstractUserProfile> String signUp(User user, T userProfile) throws UserSignUpException;
+
+    public void update(User user) throws UserNotFoundException;
+    
+    public <T extends AbstractUserProfile> void update(User user, T userProfile) throws UserNotFoundException;
     
     @PreAuthorize("isFullyAuthenticated()")
     public void changePassword(String oldPassword, String newPassword) throws UserChangePasswordException;
 
     public void passwdResetEmailGen(String email);
 
-    public void passwdResetSMSGen(String email);
+    public void passwdResetSMSGen(String mobile);
     
 }

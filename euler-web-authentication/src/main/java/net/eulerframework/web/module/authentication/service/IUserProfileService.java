@@ -7,5 +7,7 @@ public interface IUserProfileService extends IBaseService {
 
     public <T extends AbstractUserProfile> void saveUserProfile(T userProfile);
     
+    public <T extends AbstractUserProfile> void updateUserProfile(T userProfile);
+    
     public AbstractUserProfile loadUserProfile(String userId);
 }
