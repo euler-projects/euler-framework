@@ -80,4 +80,16 @@ public class UserService extends BaseService implements IUserService {
         this.userDao.update(user);
         
     }
+
+    @Override
+    public void updateUserIncludePassword(User user) throws UserNotFoundException {
+        Assert.isNotNull(user.getId(), "userid is null");
+        
+        User existedUser = this.userDao.load(user.getId());
+        
+        if(existedUser == null)
+            throw new UserNotFoundException("User id is \"" + user.getId() + "\" not found.");
+        
+        this.userDao.update(user);
+    }
 }

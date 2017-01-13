@@ -30,6 +30,8 @@ public interface IUserService extends IBaseService {
      * @throws UserNotFoundException 被更新的用户不存在
      */
     public void updateUser(User user) throws UserNotFoundException;
+
+    public void updateUserIncludePassword(User user) throws UserNotFoundException;
     
     
 }

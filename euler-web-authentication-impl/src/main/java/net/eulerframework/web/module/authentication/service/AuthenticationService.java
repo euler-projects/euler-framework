@@ -158,7 +158,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         user.setPassword(this.passwordEncoder.encode(password));
         
         try {
-            this.userService.updateUser(user);
+            this.userService.updateUserIncludePassword(user);
         } catch (UserNotFoundException e) {
             throw new UserChangePasswordException(e.getMessage(), e);
         }
