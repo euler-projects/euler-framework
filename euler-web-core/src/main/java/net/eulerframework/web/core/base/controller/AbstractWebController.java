@@ -75,6 +75,15 @@ public abstract class AbstractWebController extends BaseController {
             return this.theme() + view;
     }
     
+    protected String redirect(String action) {
+        Assert.isTrue(!StringTool.isNull(action), "action path is empty");
+
+        if(!action.startsWith("/"))
+            return "redirect:" + "/" + this.getWebControllerName() + "/" + action;
+        else
+            return "redirect:" + action;        
+    }
+    
     /**
      * 显示跳转页面
      * @param message 显示信息
@@ -122,6 +131,10 @@ public abstract class AbstractWebController extends BaseController {
         request.setAttribute("message", message);
         return this.display("/common/success");
         
+    }
+    
+    protected String notfound() {
+        return this.redirect("/error-404");
     }
 
 }
