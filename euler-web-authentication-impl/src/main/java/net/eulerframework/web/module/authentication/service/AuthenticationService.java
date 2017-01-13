@@ -17,9 +17,8 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.BadRequestException;
 import net.eulerframework.web.module.authentication.Lang;
-import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
+import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.Group;
-import net.eulerframework.web.module.authentication.entity.IUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserChangePasswordException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
@@ -33,7 +32,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     @Resource
     private IUserService userService;
     @Resource
-    private IUserProfileDao<IUserProfile> userProfileDao;
+    private IUserProfileService userProfileService;
     @Resource
     private IAuthorityService authorityService;
     @Resource
@@ -104,7 +103,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     }
 
     @Override
-    public <T extends IUserProfile> String signUp(User user, T userProfile) throws UserSignUpException {
+    public <T extends AbstractUserProfile> String signUp(User user, T userProfile) throws UserSignUpException {
 
         try {
             String userId = this.signUp(user);
@@ -113,7 +112,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
                 throw new Exception();
 
             userProfile.setUserId(userId);
-            this.userProfileDao.save(userProfile);
+            this.userProfileService.saveUserProfile(userProfile);
 
             return userId;
         } catch (UserSignUpException userSignUpException) {

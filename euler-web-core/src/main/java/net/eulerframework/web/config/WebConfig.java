@@ -21,6 +21,7 @@ public abstract class WebConfig {
         private final static String PROJECT_VERSION = "project.verison";
         private final static String PROJECT_MODE = "project.mode";
         private final static String PROJECT_BUILDTIME = "project.buildtime";
+        public static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
         
         //[core]
         private final static String CORE_I18N_REFRESH_FREQ = "core.i18n.refreshFreq";
@@ -33,6 +34,7 @@ public abstract class WebConfig {
         private final static String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
         private final static String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         private final static String WEB_API_ROOT_PATH = "web.api.rootPath";
+        public static final String WEB_ASSETS_PATH = "web.asstesPath";
         
         private final static String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
@@ -52,6 +54,8 @@ public abstract class WebConfig {
     }
 
     private static class WebConfigDefault {
+        public static final String PROJECT_COPYRIGHT_HOLDER = "Euler Projects";
+        
         private final static int CORE_I18N_REFRESH_FREQ = 86_400;
         private final static long CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = 60_000L;
         private final static long CORE_CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L;
@@ -61,6 +65,7 @@ public abstract class WebConfig {
         private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private final static String WEB_ADMIN_ROOT_PATH = "/admin";
+        public static final String WEB_ASSETS_PATH = "/assets";
         
         private static final String WEB_MULITPART_LOCATION = null;
         private static final long WEB_MULITPART_MAX_FILE_SIZE = 51_200L;
@@ -75,6 +80,7 @@ public abstract class WebConfig {
         private static final boolean SEC_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         private static final long SEC_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final int SEC_MIN_PASSWORD_LENGTH = 6;
+
     }
 
     protected final static Logger log = LogManager.getLogger();
@@ -476,6 +482,32 @@ public abstract class WebConfig {
         }
 
         CONFIG_CAHCE.put(WebConfigKey.PROJECT_BUILDTIME, result);
+        return result;
+    }
+
+    public static String getCopyrightHolder() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = GlobalProperties1.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER,
+                WebConfigDefault.PROJECT_COPYRIGHT_HOLDER);
+
+        CONFIG_CAHCE.put(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, result);
+        return result;
+    }
+
+    public static String getAssetsPath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ASSETS_PATH);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = GlobalProperties1.get(WebConfigKey.WEB_ASSETS_PATH,
+                WebConfigDefault.WEB_ASSETS_PATH);
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_ASSETS_PATH, result);
         return result;
     }
 

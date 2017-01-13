@@ -25,9 +25,11 @@ public interface IUserService extends IBaseService {
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest);
 
     /**
-     * 更新用户信息,注意用户密码，用户权限，用户组等的处理，如不指定这些字段，原有字段会被删掉。
-     * @param user
-     * @throws UserNotFoundException
+     * 更新处密码外的用户信息,注意用户权限，用户组等的处理，如不指定这些字段，原有字段会被删掉。
+     * @param user 更新用户实体，不需要指定password字段，指定也会无效
+     * @throws UserNotFoundException 被更新的用户不存在
      */
     public void updateUser(User user) throws UserNotFoundException;
+    
+    
 }

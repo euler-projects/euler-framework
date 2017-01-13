@@ -1,11 +1,11 @@
 package net.eulerframework.web.module.authentication.service;
 
-import net.eulerframework.web.module.authentication.entity.IUserProfile;
+import net.eulerframework.web.core.base.service.IBaseService;
+import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 
-//@PreAuthorize("isFullyAuthenticated() and hasAnyAuthority('AUTH_ADMIN','ADMIN','ROOT')")
-public interface IUserProfileService {
+public interface IUserProfileService extends IBaseService {
 
-    public void saveUserProfile(IUserProfile userProfile);
+    public <T extends AbstractUserProfile> void saveUserProfile(T userProfile);
     
-    public IUserProfile loadUserProfile(String userId);
+    public AbstractUserProfile loadUserProfile(String userId);
 }

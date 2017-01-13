@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.service.impl;
+package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 
@@ -74,6 +74,8 @@ public class UserService extends BaseService implements IUserService {
         
         if(existedUser == null)
             throw new UserNotFoundException("User id is \"" + user.getId() + "\" not found.");
+        
+        user.setPassword(existedUser.getPassword());
         
         this.userDao.update(user);
         
