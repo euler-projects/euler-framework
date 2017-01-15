@@ -31,8 +31,21 @@ public interface IUserService extends IBaseService {
      */
     public void updateUser(User user) throws UserNotFoundException;
 
+    /**
+     * 修改密码，需要验证旧密码
+     * @param userId 被修改的用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @throws UserNotFoundException 用户不存在
+     */
     public void updateUserPassword(String userId, String oldPassword, String newPassword) throws UserNotFoundException;
 
+    /**
+     * 修改密码，不校验旧密码
+     * @param userId 被修改的用户ID
+     * @param newPassword 新密码
+     * @throws UserNotFoundException 用户不存在
+     */
     public void updateUserPasswordWithoutCheck(String userId, String newPassword) throws UserNotFoundException;
     
     

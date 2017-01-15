@@ -41,40 +41,6 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
 
     @Override
     public String signUp(User user) {
-
-//        try {
-
-//            try {
-//                Assert.isNotNull(user.getUsername(), BadRequestException.class, Lang.USERNAME.USERNAME_IS_NULL.toString());
-//                Assert.isNotNull(user.getEmail(), BadRequestException.class, Lang.USER_EMAIL.EMAIL_IS_NULL.toString());
-//                Assert.isNotNull(user.getPassword(), BadRequestException.class, Lang.PASSWD.PASSWD_IS_ULL.toString());
-//                // Assert.isNotNull(user.getMobile(), BadRequestException.class,
-//                // "Mobile is null"));
-//
-//                Assert.isTrue(user.getUsername().matches(WebConfig.getUsernameFormat()), BadRequestException.class,
-//                        Lang.USERNAME.INCORRECT_USERNAME_FORMAT.toString());
-//                Assert.isTrue(user.getEmail().matches(WebConfig.getEmailFormat()), BadRequestException.class,
-//                        Lang.USER_EMAIL.INCORRECT_EMAIL_FORMAT.toString());
-//
-//                Assert.isNull(this.userService.loadUserByUsername(user.getUsername()), BadRequestException.class,
-//                        Lang.USERNAME.USERNAME_USED.toString());
-//                Assert.isNull(this.userService.loadUserByEmail(user.getEmail()), BadRequestException.class,
-//                        Lang.USER_EMAIL.EMAIL_USED.toString());
-//
-//                if (user.getMobile() != null)
-//                    Assert.isNull(this.userService.loadUserByMobile(user.getMobile()), BadRequestException.class,
-//                            Lang.USER_MOBILE.MOBILE_USED.toString());
-//
-//                password = user.getPassword().trim();
-//                Assert.isTrue(password.matches(WebConfig.getPasswordFormat()), BadRequestException.class,
-//                        Lang.PASSWD.INCORRECT_PASSWD_FORMAT.toString());
-//                Assert.isTrue(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20,
-//                        BadRequestException.class, Lang.PASSWD.INCORRECT_PASSWD_LENGTH.toString());
-//
-//            } catch (BadRequestException e) {
-//                throw new UserSignUpException(e.getMessage(), e);
-//            }
-
         user.setId(null);
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);
