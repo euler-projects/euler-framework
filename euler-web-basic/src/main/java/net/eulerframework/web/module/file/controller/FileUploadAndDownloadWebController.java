@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
-import net.eulerframework.web.core.base.response.WebServiceResponse;
+import net.eulerframework.web.core.base.response.AjaxResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
@@ -26,13 +26,13 @@ import net.eulerframework.web.module.file.service.IArchivedFileService;
 
 @WebController
 @Scope("prototype")
-@RequestMapping("/file")
+@RequestMapping("/")
 public class FileUploadAndDownloadWebController extends AbstractWebController {
 
     @Resource
     private IArchivedFileService archivedFileService;
     
-    @RequestMapping(value = "download/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "file/{id}", method = RequestMethod.GET)
     public void downloadArchivedFile(@PathVariable("id") String archivedFileId, HttpServletResponse response) throws IOException {
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
@@ -59,9 +59,9 @@ public class FileUploadAndDownloadWebController extends AbstractWebController {
     }
     
     @ResponseBody
-    @RequestMapping(value = "upload", method = RequestMethod.POST)
-    public WebServiceResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
-        return new WebServiceResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
+    @RequestMapping(value = "uploadFile", method = RequestMethod.POST)
+    public AjaxResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
+        return new AjaxResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
     }
 
 }

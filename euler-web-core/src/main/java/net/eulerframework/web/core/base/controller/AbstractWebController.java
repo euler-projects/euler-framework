@@ -237,6 +237,9 @@ public abstract class AbstractWebController extends BaseController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({ResourceNotFoundException.class})   
     public String resourceNotFoundException(ResourceNotFoundException e) {
+        if(WebConfig.isLogDetailsMode()) {
+            this.logger.warn("Resource Not Found: " + e.getMessage(), e);
+        }
         return this.notfound();
     }
     
