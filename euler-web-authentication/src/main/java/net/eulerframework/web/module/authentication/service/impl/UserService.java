@@ -78,6 +78,8 @@ public class UserService extends BaseService implements IUserService {
         Assert.isNotNull(user, "user is null");
         this.validUser(user);
         
+        this.validNewUser(user);
+        
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         user.setSignUpTime(new Date());
         
@@ -124,13 +126,8 @@ public class UserService extends BaseService implements IUserService {
             throw new IncorrectPasswordException();
         }
 
-        String password = newPassword.trim();
-        if(!password.matches(WebConfig.getPasswordFormat())) {
-            throw new IncorrectPasswordFormatException();
-        }
-        if(!(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20)) {
-            throw new IncorrectPasswordLengthException();
-        }
+        String password = user.getPassword().trim();
+        this.validPassword(password);
         
         user.setPassword(this.passwordEncoder.encode(password));
         
@@ -149,14 +146,17 @@ public class UserService extends BaseService implements IUserService {
         }
         // if(!(user.getMobile())) {}
         // "Mobile is null"));
-
+        
         if(!(user.getUsername().matches(WebConfig.getUsernameFormat()))) {
             throw new IncorrectUsernameFormatException(); 
         }
         if(!(user.getEmail().matches(WebConfig.getEmailFormat()))) {
             throw new IncorrectUserEmailFormatException();                 
         }
+    }
 
+    private void validNewUser(User user) {
+    
         if(this.loadUserByUsername(user.getUsername()) != null) {
             throw new UsernameAlreadyUsedFormatException();                 
         }
@@ -164,7 +164,7 @@ public class UserService extends BaseService implements IUserService {
             throw new UserEmailAlreadyUsedFormatException();       
             
         }
-
+    
         if (user.getMobile() != null) {
             if(this.loadUserByMobile(user.getMobile()) != null) {
                 throw new UserMobileAlreadyUsedFormatException();    
@@ -173,11 +173,15 @@ public class UserService extends BaseService implements IUserService {
         }
         
         String password = user.getPassword().trim();
+        this.validPassword(password);
+    }
+    
+    private void validPassword(String password) {
         if(!password.matches(WebConfig.getPasswordFormat())) {
             throw new IncorrectPasswordFormatException();
         }
         if(!(password.length() >= WebConfig.getMinPasswordLength() && password.length() <= 20)) {
             throw new IncorrectPasswordLengthException();
-        }
+        }        
     }
 }
