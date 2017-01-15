@@ -3,12 +3,19 @@ package net.eulerframework.web.core.base.controller;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.common.util.StringTool;
+import net.eulerframework.web.config.ProjectMode;
+import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.base.response.AjaxResponse;
+import net.eulerframework.web.core.base.response.HttpStatusResponse;
+import net.eulerframework.web.core.exception.AjaxException;
 import net.eulerframework.web.core.exception.ViewException;
-import net.eulerframework.web.core.i18n.Tag;
 
 public abstract class AbstractWebController extends BaseController {
 
@@ -76,6 +83,13 @@ public abstract class AbstractWebController extends BaseController {
             return this.theme() + view;
     }
     
+    /**
+     * 发送重定向<br>
+     * 不以'/'开头表示相对路径,
+     * 以'/'表示绝对路径,不需要加contextPath
+     * @param action 重定向目标
+     * @return 重定向字符串
+     */
     protected String redirect(String action) {
         Assert.isTrue(!StringTool.isNull(action), "action path is empty");
 
@@ -109,40 +123,64 @@ public abstract class AbstractWebController extends BaseController {
             }
         }
 
+        this.addMessageToRequest(message);
         HttpServletRequest request = this.getRequest();
-        request.setAttribute("message", message);
         request.setAttribute("target", contextPath + "/" + target);
         request.setAttribute("waitSeconds", waitSeconds);
         return this.display("/common/jump");
     }
     
+    /**
+     * 显示错误页面,错误信息为UNKNOWN_ERROR(未国际化前)
+     * @return 错误页面
+     */
     protected String error() {
         return this.error(null);
     }
     
+    /**
+     * 显示错误页面,并指定错误信息
+     * @param message 未国际化前的错误信息,为<code>null</code>时为UNKNOWN_ERROR
+     * @return 错误页面
+     */
     protected String error(String message) {
         message = message == null ? "UNKNOWN_ERROR": message;
 
-        HttpServletRequest request = this.getRequest();
-        request.setAttribute("message", message);
+        this.addMessageToRequest(message);
         return this.display("/common/error");
         
     }
     
+    /**
+     * 显示成功页面,信息为SUCCESS(未国际化前)
+     * @return 成功页面
+     */
     protected String success() {
         return this.success(null);
     }
     
-    
+    /**
+     * 显示成功页面,并指定信息
+     * @param message 未国际化前的信息,为<code>null</code>时为SUCCESS
+     * @return 成功页面
+     */
     protected String success(String message) {
         message = message == null ? "SUCCESS" : message;
 
-        HttpServletRequest request = this.getRequest();
-        request.setAttribute("message", message);
+        this.addMessageToRequest(message);
         return this.display("/common/success");
         
     }
     
+    private void addMessageToRequest(String message) {
+        HttpServletRequest request = this.getRequest();
+        request.setAttribute("message", message);
+    }
+    
+    /**
+     * 显示404页面
+     * @return
+     */
     protected String notfound() {
         return this.redirect("/error-404");
     }
@@ -153,8 +191,43 @@ public abstract class AbstractWebController extends BaseController {
      */  
     @ExceptionHandler({ViewException.class})   
     public String viewException(ViewException e) {
+        if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
+                WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
+        }
+        return this.error(e.getMsg());
+    }
+    
+    /**  
+     * 用于在程序发生{@link AjaxException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({AjaxException.class})   
+    public AjaxResponse<?> ajaxException(AjaxException e) {
+        if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
+                WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
+        }
+        return new AjaxResponse<>(e);
+    }
+    
+    /**  
+     * 用于在程序发生{@link Exception}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler({Exception.class})   
+    public Object exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return this.error(Tag.i18n(e.getViewInfo()));
+        if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
+                WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+            return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        } else {
+            return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR);            
+        }
     }
 
 }

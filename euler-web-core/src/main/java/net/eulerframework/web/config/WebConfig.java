@@ -55,6 +55,7 @@ public abstract class WebConfig {
 
     private static class WebConfigDefault {
         public static final String PROJECT_COPYRIGHT_HOLDER = "Euler Projects";
+        public static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
         
         private final static int CORE_I18N_REFRESH_FREQ = 86_400;
         private final static long CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = 60_000L;
@@ -80,6 +81,7 @@ public abstract class WebConfig {
         private static final boolean SEC_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         private static final long SEC_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final int SEC_MIN_PASSWORD_LENGTH = 6;
+
 
     }
 
@@ -434,18 +436,15 @@ public abstract class WebConfig {
         return new String[]{"8a775fcf-6f3e-4b57-8a1a-a9bd96a4bf49"};
     }
 
-    public static String getProjectMode() {
+    public static ProjectMode getProjectMode() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_MODE);
         if (cachedConfig != null) {
-            return (String) cachedConfig;
+            return (ProjectMode) cachedConfig;
         }
 
-        String result;
-        try {
-            result = GlobalProperties1.get(WebConfigKey.PROJECT_MODE).toUpperCase();
-        } catch (GlobalPropertyReadException e) {
-            throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_MODE);
-        }
+        ProjectMode result = GlobalProperties1.getEnumValue(WebConfigKey.PROJECT_MODE,
+                WebConfigDefault.PROJECT_MODE,
+                true);
 
         CONFIG_CAHCE.put(WebConfigKey.PROJECT_MODE, result);
         return result;

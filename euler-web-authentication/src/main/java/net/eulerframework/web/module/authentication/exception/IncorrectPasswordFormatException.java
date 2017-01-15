@@ -4,8 +4,14 @@ package net.eulerframework.web.module.authentication.exception;
 public class IncorrectPasswordFormatException extends UserCheckException {
 
     @Override
-    public String getViewInfo() {
+    public String getMsg() {
         return "INCORRECT_PASSWORD_FORMAT";
+    }
+
+    @Override
+    public int getCode() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

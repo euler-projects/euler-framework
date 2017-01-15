@@ -1,27 +1,32 @@
 package net.eulerframework.web.core.exception;
 
 @SuppressWarnings("serial")
-public abstract class ViewException extends WebException {
-    public ViewException() {
+public abstract class AjaxException extends WebException {
+    public AjaxException() {
         super();
     }
 
-    public ViewException(String message) {
+    public AjaxException(String message) {
         super(message);
     }
 
-    public ViewException(String message, Throwable cause) {
+    public AjaxException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ViewException(Throwable cause) {
+    public AjaxException(Throwable cause) {
         super(cause);
     }
     
-    protected ViewException(String message, Throwable cause,
+    protected AjaxException(String message, Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+    }
+    
+    @Override
+    public String getLocalizedMessage() {
+        return getMessage();
     }
 
 }
