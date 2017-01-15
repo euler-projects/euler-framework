@@ -43,7 +43,6 @@ public class EulerFrameworkCoreFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		request.setAttribute("contextPath", request.getContextPath());
 		filterChain.doFilter(request, response);
 	}
 

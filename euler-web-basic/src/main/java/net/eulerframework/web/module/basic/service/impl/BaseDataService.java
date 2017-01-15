@@ -47,7 +47,6 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         //contextPaht
         ServletContext sc = ContextLoader.getCurrentWebApplicationContext().getServletContext();
         String contextPath = sc.getContextPath();
-        sc.setAttribute("contextPath", contextPath);
         
         sc.setAttribute("__CONTEXT_PATH", contextPath);
         sc.setAttribute("__ASSETS_PATH", contextPath + WebConfig.getAssetsPath());
@@ -59,6 +58,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         sc.setAttribute("__SITENAME", WebConfig.getSitename());
         sc.setAttribute("__COPYRIGHT_HOLDER", WebConfig.getCopyrightHolder());
         
+        //TODO:make version real
         sc.setAttribute("__FRAMEWORK_VERSION", "0.2.0");
     }
     

@@ -22,12 +22,12 @@ public abstract class WebConfig {
         private final static String PROJECT_VERSION = "project.verison";
         private final static String PROJECT_MODE = "project.mode";
         private final static String PROJECT_BUILDTIME = "project.buildtime";
-        public static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
+        private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
         
         //[core]
-        private final static String CORE_I18N_REFRESH_FREQ = "core.i18n.refreshFreq";
-        private final static String CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = "core.cache.refreshFreq";
-        private final static String CORE_CACHE_USERCONTEXT_CAHCE_LIFE = "core.cache.userContextCacheLife";
+        private final static String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
+        private final static String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
+        private final static String CORE_CACHE_USERCONTEXT_CAHCE_LIFE = "core.cache.userContext.cacheLife";
 
         //[web]
         private final static String WEB_UPLOAD_PATH = "web.uploadPath";
@@ -35,7 +35,7 @@ public abstract class WebConfig {
         private final static String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
         private final static String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         private final static String WEB_API_ROOT_PATH = "web.api.rootPath";
-        public static final String WEB_ASSETS_PATH = "web.asstesPath";
+        private static final String WEB_ASSETS_PATH = "web.asstesPath";
         
         private final static String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
@@ -47,20 +47,26 @@ public abstract class WebConfig {
         private static final String SEC_WEB_AUTHENTICATION_TYPE = "sec.web.authenticationType";
         private static final String SEC_API_AUTHENTICATION_TYPE = "sec.api.authenticationType";
         private static final String SEC_OAUTH_SERVER_TYPE = "sec.oauth.severType";
+        
         private static final String SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = "sec.authentication.enableEmailSignin";
         private static final String SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "sec.authentication.enableMobileSignin";
         private static final String SEC_AUTHENTICATION_ENABLE_USER_CAHCE = "sec.authentication.enableUserCache";
         private static final String SEC_AUTHENTICATION_USER_CAHCE_LIFE = "sec.authentication.userCacheLife";
-        private static final String SEC_MIN_PASSWORD_LENGTH = "sec.minPasswordLength";
+
+        private static final String SEC_SIGNUP_USERNAME_FORMAT = "sec.signup.username.format";
+        private static final String SEC_SIGNUP_EMAIL_FORMAT = "sec.signup.email.format";
+        private static final String SEC_SIGNUP_PASSWORD_FORMAT = "sec.signup.password.format";
+        private static final String SEC_SIGNUP_PASSWORD_MIN_LENGTH = "sec.signup.password.minLength";
+        private static final String SEC_SIGNUP_AUTO_SIGNIN = "sec.signup.autoSignin";
     }
 
     private static class WebConfigDefault {
         private final static String PROJECT_SITENAME = "DEMO";
-        public static final String PROJECT_COPYRIGHT_HOLDER = "Euler Projects";
-        public static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
+        private static final String PROJECT_COPYRIGHT_HOLDER = "Euler Projects";
+        private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
         
-        private final static int CORE_I18N_REFRESH_FREQ = 86_400;
-        private final static long CORE_CACHE_RAM_CAHCE_REFRESH_FREQ = 60_000L;
+        private final static int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
+        private final static long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
         private final static long CORE_CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L;
 
         private final static String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
@@ -68,7 +74,7 @@ public abstract class WebConfig {
         private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private final static String WEB_ADMIN_ROOT_PATH = "/admin";
-        public static final String WEB_ASSETS_PATH = "/assets";
+        private static final String WEB_ASSETS_PATH = "/assets";
         
         private static final String WEB_MULITPART_LOCATION = null;
         private static final long WEB_MULITPART_MAX_FILE_SIZE = 51_200L;
@@ -82,8 +88,12 @@ public abstract class WebConfig {
         private static final boolean SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
         private static final boolean SEC_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         private static final long SEC_AUTHENTICATION_USER_CAHCE_LIFE = 0;
-        private static final int SEC_MIN_PASSWORD_LENGTH = 6;
 
+        private static final String SEC_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; //至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
+        private static final String SEC_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; //可含有-_.的email
+        private static final String SEC_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; //ASCII可显示非空白字符
+        private static final int SEC_SIGNUP_PASSWORD_MIN_LENGTH = 6;
+        private static final boolean SEC_SIGNUP_AUTO_SIGNIN = true;
 
     }
 
@@ -95,15 +105,15 @@ public abstract class WebConfig {
     }
 
     public static int getI18nRefreshFreq() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_I18N_REFRESH_FREQ);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ);
         if (cachedConfig != null) {
             return (int) cachedConfig;
         }
 
-        int result = GlobalProperties1.getIntValue(WebConfigKey.CORE_I18N_REFRESH_FREQ,
-                WebConfigDefault.CORE_I18N_REFRESH_FREQ);
+        int result = GlobalProperties1.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
+                WebConfigDefault.CORE_CACHE_I18N_REFRESH_FREQ);
 
-        CONFIG_CAHCE.put(WebConfigKey.CORE_I18N_REFRESH_FREQ, result);
+        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ, result);
         return result;
     }
 
@@ -268,15 +278,15 @@ public abstract class WebConfig {
     }
 
     public static long getRamCacheCleanFreq() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ);
         if (cachedConfig != null) {
             return (long) cachedConfig;
         }
 
-        long result = GlobalProperties1.getLongValue(WebConfigKey.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ,
-                WebConfigDefault.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ);
+        long result = GlobalProperties1.getLongValue(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ,
+                WebConfigDefault.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ);
 
-        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_RAM_CAHCE_REFRESH_FREQ, result);
+        CONFIG_CAHCE.put(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ, result);
         return result;
     }
 
@@ -316,53 +326,55 @@ public abstract class WebConfig {
 
     public static int getMinPasswordLength() {
 
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_MIN_PASSWORD_LENGTH);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH);
         if (cachedConfig != null) {
             return (int) cachedConfig;
         }
 
-        int result = GlobalProperties1.getIntValue(WebConfigKey.SEC_MIN_PASSWORD_LENGTH,
-                WebConfigDefault.SEC_MIN_PASSWORD_LENGTH);
+        int result = GlobalProperties1.getIntValue(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH,
+                WebConfigDefault.SEC_SIGNUP_PASSWORD_MIN_LENGTH);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_MIN_PASSWORD_LENGTH, result);
+        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH, result);
         return result;
     }
 
     public static String getUsernameFormat() {
-        // TODO Auto-generated method stub
-        return "^[A-Za-z0-9][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$";
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = GlobalProperties1.get(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT,
+                WebConfigDefault.SEC_SIGNUP_USERNAME_FORMAT);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT, result);
+        return result;
     }
 
     public static String getEmailFormat() {
-        // TODO Auto-generated method stub
-        return "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$";
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = GlobalProperties1.get(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT,
+                WebConfigDefault.SEC_SIGNUP_EMAIL_FORMAT);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT, result);
+        return result;
     }
 
     public static String getPasswordFormat() {
-        // TODO Auto-generated method stub
-        return "^[\\u0021-\\u007e]+$";
-    }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
 
-    public static void main(String[] args) {
-        System.out.println(ApiAuthenticationType.BASIC.getDeclaringClass());
-        // System.out.println(WebConfig.getAdminJspPath());
-        // System.out.println(WebConfig.getAdminRootPath());
-        // System.out.println(WebConfig.getApiAuthenticationType());
-        // System.out.println(WebConfig.getApiRootPath());
-        // System.out.println(WebConfig.getEmailFormat());
-        // System.out.println(WebConfig.getI18nRefreshFreq());
-        // System.out.println(WebConfig.getJspPath());
-        // System.out.println(WebConfig.getMinPasswordLength());
-        // System.out.println(WebConfig.getMultiPartConfig());
-        // System.out.println(WebConfig.getOAuthSeverType());
-        // System.out.println(WebConfig.getPasswordFormat());
-        // System.out.println(WebConfig.getRamCacheCleanFreq());
-        // System.out.println(WebConfig.getSignUpFailPage());
-        // System.out.println(WebConfig.getSignUpSuccessPage());
-        // System.out.println(WebConfig.getUploadPath());
-        // System.out.println(WebConfig.getUserContextCacheLife());
-        // System.out.println(WebConfig.getUsernameFormat());
-        // System.out.println(WebConfig.getWebAuthenticationType());
+        String result = GlobalProperties1.get(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT,
+                WebConfigDefault.SEC_SIGNUP_PASSWORD_FORMAT);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT, result);
+        return result;
     }
 
     public static boolean isEnableEmailSignin() {
@@ -522,8 +534,16 @@ public abstract class WebConfig {
     }
 
     public static boolean getAutoSigninAfterSignup() {
-        // TODO Auto-generated method stub
-        return true;
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN);
+        if (cachedConfig != null) {
+            return (boolean) cachedConfig;
+        }
+
+        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN,
+                WebConfigDefault.SEC_SIGNUP_AUTO_SIGNIN);
+
+        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN, result);
+        return result;
     }
 
 }
