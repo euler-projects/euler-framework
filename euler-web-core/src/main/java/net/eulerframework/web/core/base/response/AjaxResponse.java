@@ -1,9 +1,15 @@
 package net.eulerframework.web.core.base.response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.exception.AjaxException;
 import net.eulerframework.web.core.i18n.Tag;
 
 public class AjaxResponse<T> implements BaseResponse {
+    
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     private T responseData;
     private int errorCode;
@@ -17,6 +23,11 @@ public class AjaxResponse<T> implements BaseResponse {
         this.responseData = data;
     }
     public AjaxResponse(AjaxException ajaxException) {
+        
+        if(WebConfig.isLogDetailsMode()) {
+            this.logger.error("Error Code: " + ajaxException.getCode() + "message: " + ajaxException.getMessage(), ajaxException);
+        }
+        
         this.errorCode = ajaxException.getCode();
         this.errorMsg = ajaxException.getMsg();
         this.localizedErrorMsg = Tag.i18n(this.errorMsg);

@@ -514,6 +514,12 @@ public abstract class WebConfig {
         CONFIG_CAHCE.put(WebConfigKey.WEB_ASSETS_PATH, result);
         return result;
     }
+    
+    public static boolean isLogDetailsMode() {
+        //TODO: make logdetailsmode configable
+        return getProjectMode().equals(ProjectMode.DEVELOP) ||
+                getProjectMode().equals(ProjectMode.DEBUG);
+    }
 
     public static boolean getAutoSigninAfterSignup() {
         // TODO Auto-generated method stub

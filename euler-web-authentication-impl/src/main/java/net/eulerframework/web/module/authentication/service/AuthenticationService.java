@@ -10,7 +10,6 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.eulerframework.web.config.ProjectMode;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
@@ -104,8 +103,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             System.out.println("!!!!!!!!!!Reset token: " + token);
             // TODO send email
         } catch (Exception e) {
-            if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
-                    WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+            if(WebConfig.isLogDetailsMode()) {
                 this.logger.error("passwdResetEmailGen error" ,e);
             } else {
                 //DO_NOTHING            

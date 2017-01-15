@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.config.ProjectMode;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
@@ -46,40 +45,39 @@ public class AuthenticationWebController extends AbstractWebController {
         return this.display("signup");
     }
 
-    @RequestMapping(value = "changePasswd", method = RequestMethod.GET)
-    public String changePasswd() {
-        return this.display("changePasswd");
-    }
-
-    @RequestMapping(value = "litesignup", method = RequestMethod.POST)
+    @RequestMapping(value = "signup", method = RequestMethod.POST)
     public String litesignup(@Valid User user) {
         this.authenticationService.signUp(user);
 
         return this.success("SIGN_UP_SUCCESS");
     }
 
-    @RequestMapping(value = "changePasswd", method = RequestMethod.POST)
-    public String changePasswd(String oldPassword, String newPassword) {
+    @RequestMapping(value = "changePassword", method = RequestMethod.GET)
+    public String changePassword() {
+        return this.display("changePassword");
+    }
+
+    @RequestMapping(value = "changePassword", method = RequestMethod.POST)
+    public String changePassword(String oldPassword, String newPassword) {
 
         this.authenticationService.changePassword(oldPassword, newPassword);
-        return this.success();
+        return this.success("PASSWORD_CHANGED");
     }
 
     @RequestMapping(value = "resetPassword", method = RequestMethod.GET)
-    public String resetPasswordPage(@RequestParam String type, @RequestParam(required = false) String token) {
+    public String resetPasswordPage(@RequestParam(required = true) String type, @RequestParam(required = false) String token) {
         if ("email".equalsIgnoreCase(type)) {
             if (StringTool.isNull(token))
-                return this.display("getPasswordResetEmail");
+                return this.display("resetPasswordWithEmail");
 
             try {
                 this.authenticationService.checkEmailResetToken(token);
-                // this.getRequest().setAttribute("token", token);
-                // this.getRequest().setAttribute("type", "email");
+                this.getRequest().setAttribute("token", token);
+                this.getRequest().setAttribute("type", "email");
                 return this.display("resetPassword");
             } catch (InvalidEmailResetTokenException e) {
 
-                if (WebConfig.getProjectMode().equals(ProjectMode.DEVELOP)
-                        || WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+                if (WebConfig.isLogDetailsMode()) {
                     this.logger.error("resetPassword error", e);
                 } else {
                     // DO_NOTHING
@@ -88,22 +86,22 @@ public class AuthenticationWebController extends AbstractWebController {
 
             }
         } else if ("sms".equalsIgnoreCase(type)) {
-            return this.display("getPasswordResetSMS");
+            return this.display("resetPasswordWithMobile");
         } else {
             return this.notfound();
         }
 
     }
 
-    @RequestMapping(value = "resetPasswordEmail", method = RequestMethod.POST)
-    public String resetPasswordEmail(@RequestParam String email) {
+    @RequestMapping(value = "resetPasswordWithEmail", method = RequestMethod.POST)
+    public String resetPasswordWithEmail(@RequestParam String email) {
         this.authenticationService.passwdResetEmailGen(email);
-        return this.success("RESET_LNIK_WILL_BE_SENT_IF_YOU_INPUT_A_RIGHT_EMAIL");
+        return this.success("EMAIL_HAS_SENT_IF_EMAIL_EXIST");
     }
 
     @ResponseBody
-    @RequestMapping(value = "resetPasswordSMS", method = RequestMethod.POST)
-    public AjaxResponse<String> resetPasswordSMS(@RequestParam String mobile) {
+    @RequestMapping(value = "resetPasswordWithMobile", method = RequestMethod.POST)
+    public AjaxResponse<String> resetPasswordWithMobile(@RequestParam String mobile) {
         this.authenticationService.passwdResetSMSGen(mobile);
         return new AjaxResponse<>();
     }
@@ -114,17 +112,16 @@ public class AuthenticationWebController extends AbstractWebController {
         try {
             if ("email".equalsIgnoreCase(type)) {
                 this.authenticationService.resetPasswordByEmailResetToken(token, password);
-                return this.success("PASSWORD_HAS_CHANGE");
+                return this.success("PASSWORD_CHANGED");
             } else if ("sms".equalsIgnoreCase(type)) {
                 this.authenticationService.resetPasswordBySMSResetCode(token, password);
-                return this.success("PASSWORD_HAS_CHANGE");
+                return this.success("PASSWORD_CHANGED");
             } else {
                 return this.notfound();
             }
         } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSMSResetCodeException e) {
 
-            if (WebConfig.getProjectMode().equals(ProjectMode.DEVELOP)
-                    || WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+            if (WebConfig.isLogDetailsMode()) {
                 this.logger.error("resetPassword error", e);
             } else {
                 // DO_NOTHING

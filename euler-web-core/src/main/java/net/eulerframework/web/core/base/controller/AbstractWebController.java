@@ -1,5 +1,8 @@
 package net.eulerframework.web.core.base.controller;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,11 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.config.ProjectMode;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.response.AjaxResponse;
-import net.eulerframework.web.core.base.response.HttpStatusResponse;
 import net.eulerframework.web.core.exception.AjaxException;
+import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.ViewException;
 
 public abstract class AbstractWebController extends BaseController {
@@ -179,10 +181,30 @@ public abstract class AbstractWebController extends BaseController {
     
     /**
      * 显示404页面
-     * @return
+     * @return 对应主题的404页面
      */
-    protected String notfound() {
-        return this.redirect("/error-404");
+    protected String notfound() {        
+        this.getResponse().setStatus(HttpStatus.NOT_FOUND.value());
+        return this.display("/error/404");
+    }
+    
+    /**
+     * 崩溃页面(500)
+     * @return 对应主题的500错误页面
+     */
+    protected String crashPage(Throwable e) {
+        this.logger.error(e.getMessage(), e);
+        if(WebConfig.isLogDetailsMode()) {
+            this.getRequest().setAttribute("crashInfo", e.getMessage());
+            StringWriter sw = new StringWriter();  
+            PrintWriter pw = new PrintWriter(sw);  
+            e.printStackTrace(pw); 
+            this.getRequest().setAttribute("crashStackTrace", sw.toString());
+        } else {
+            // DO_NOTHING
+        }
+        this.getResponse().setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return this.display("/error/500");
     }
     
     /**  
@@ -191,8 +213,7 @@ public abstract class AbstractWebController extends BaseController {
      */  
     @ExceptionHandler({ViewException.class})   
     public String viewException(ViewException e) {
-        if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
-                WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
+        if(WebConfig.isLogDetailsMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
         return this.error(e.getMsg());
@@ -200,34 +221,33 @@ public abstract class AbstractWebController extends BaseController {
     
     /**  
      * 用于在程序发生{@link AjaxException}异常时统一返回错误信息 
-     * @return  
+     * @return  包含错误信息的Ajax响应体
      */  
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({AjaxException.class})   
     public AjaxResponse<?> ajaxException(AjaxException e) {
-        if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
-                WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
-            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        }
         return new AjaxResponse<>(e);
     }
     
     /**  
-     * 用于在程序发生{@link Exception}异常时统一返回错误信息 
-     * @return  
+     * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息 
+     * @return  对应主题的404页面
      */  
-    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({ResourceNotFoundException.class})   
+    public String resourceNotFoundException(ResourceNotFoundException e) {
+        return this.notfound();
+    }
+    
+    /**  
+     * 用于在程序发生{@link Exception}异常时统一返回错误信息 
+     * @return 崩溃页面(500)
+     */  
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Exception.class})   
-    public Object exception(Exception e) {
-        this.logger.error(e.getMessage(), e);
-        if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
-                WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
-            return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        } else {
-            return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR);            
-        }
+    public String exception(Exception e) {
+        return this.crashPage(e);
     }
 
 }
