@@ -65,7 +65,7 @@ public class AuthenticationWebController extends AbstractWebController {
     }
 
     @RequestMapping(value = "resetPassword", method = RequestMethod.GET)
-    public String resetPasswordPage(@RequestParam(required = true) String type, @RequestParam(required = false) String token) {
+    public String resetPasswordPage(@RequestParam(required = false) String type, @RequestParam(required = false) String token) {
         if ("email".equalsIgnoreCase(type)) {
             if (StringTool.isNull(token))
                 return this.display("resetPasswordWithEmail");
