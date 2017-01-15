@@ -126,12 +126,28 @@ public class UserService extends BaseService implements IUserService {
             throw new IncorrectPasswordException();
         }
 
-        String password = user.getPassword().trim();
+        String password = newPassword.trim();
         this.validPassword(password);
         
         user.setPassword(this.passwordEncoder.encode(password));
         
         this.userDao.update(user);
+    }
+
+    @Override
+    public void updateUserPasswordWithoutCheck(String userId, String newPassword) throws UserNotFoundException {
+        User user = this.loadUser(userId);
+        
+        if(user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        String password = newPassword.trim();
+        this.validPassword(password);
+        
+        user.setPassword(this.passwordEncoder.encode(password));
+        
+        this.userDao.update(user);
+        
     }
     
     private void validUser(User user) {

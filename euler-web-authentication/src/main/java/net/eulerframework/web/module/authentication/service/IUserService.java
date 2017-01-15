@@ -32,6 +32,8 @@ public interface IUserService extends IBaseService {
     public void updateUser(User user) throws UserNotFoundException;
 
     public void updateUserPassword(String userId, String oldPassword, String newPassword) throws UserNotFoundException;
+
+    public void updateUserPasswordWithoutCheck(String userId, String newPassword) throws UserNotFoundException;
     
     
 }

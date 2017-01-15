@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 
 public interface IAuthenticationService extends IBaseService {
@@ -22,7 +23,9 @@ public interface IAuthenticationService extends IBaseService {
 
     public void passwdResetEmailGen(String email);
     
-    public void resetPasswordByResetToken(String token);
+    public void checkEmailResetToken(String token) throws InvalidEmailResetTokenException;
+    
+    public void resetPasswordByEmailResetToken(String token, String password) throws InvalidEmailResetTokenException, UserNotFoundException;
 
     public void passwdResetSMSGen(String mobile);
     

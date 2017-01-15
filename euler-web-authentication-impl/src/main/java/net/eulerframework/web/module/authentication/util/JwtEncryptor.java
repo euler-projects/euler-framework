@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.authentication.util;
 
+import java.io.IOException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.jwt.Jwt;
@@ -79,7 +81,7 @@ public class JwtEncryptor {
         }
     }
     
-    public Jwt decode(String jwtStr) throws InvalidJwtException {
+    private Jwt decodeOnly(String jwtStr) throws InvalidJwtException {
         try {
             return JwtHelper.decode(jwtStr);
         } catch (Exception e) {
@@ -87,9 +89,15 @@ public class JwtEncryptor {
         }
     }
     
-    public Jwt decodeAndVerify(String jwtStr) throws InvalidJwtException {
+    /**
+     * 解码token
+     * @param jwtStr token
+     * @return 解码后的Jwt对象
+     * @throws InvalidJwtException 验证不通过
+     */
+    public Jwt decode(String jwtStr) throws InvalidJwtException {
         try {
-            Jwt jwt = this.decode(jwtStr);
+            Jwt jwt = this.decodeOnly(jwtStr);
 
             jwt.verifySignature(verifier);
             
@@ -99,5 +107,18 @@ public class JwtEncryptor {
         } catch (Exception e) {
             throw new InvalidJwtException("Invalid jwt string", e);
         }
+    }
+    
+    /**
+     * 将token中的claims转为对象
+     * @param jwtStr token
+     * @param claimsType claims对应的对象类型
+     * @return claims对象
+     * @throws InvalidJwtException 验证不通过
+     * @throws IOException 对象Json解析错误
+     */
+    public <T> T decodeClaims(String jwtStr, Class<T> claimsType) throws InvalidJwtException, IOException {
+        Jwt jwt = this.decode(jwtStr);
+        return this.objectMapper.readValue(jwt.getClaims(), claimsType);
     }
 }
