@@ -18,6 +18,7 @@ public abstract class WebConfig {
 
     private static class WebConfigKey {
         //[project]
+        private final static String PROJECT_SITENAME = "project.sitename";
         private final static String PROJECT_VERSION = "project.verison";
         private final static String PROJECT_MODE = "project.mode";
         private final static String PROJECT_BUILDTIME = "project.buildtime";
@@ -54,6 +55,7 @@ public abstract class WebConfig {
     }
 
     private static class WebConfigDefault {
+        private final static String PROJECT_SITENAME = "DEMO";
         public static final String PROJECT_COPYRIGHT_HOLDER = "Euler Projects";
         public static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
         
@@ -494,6 +496,19 @@ public abstract class WebConfig {
                 WebConfigDefault.PROJECT_COPYRIGHT_HOLDER);
 
         CONFIG_CAHCE.put(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, result);
+        return result;
+    }
+
+    public static String getSitename() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_SITENAME);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = GlobalProperties1.get(WebConfigKey.PROJECT_SITENAME,
+                WebConfigDefault.PROJECT_SITENAME);
+
+        CONFIG_CAHCE.put(WebConfigKey.PROJECT_SITENAME, result);
         return result;
     }
 
