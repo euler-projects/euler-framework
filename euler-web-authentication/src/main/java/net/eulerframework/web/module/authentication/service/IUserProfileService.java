@@ -9,5 +9,5 @@ public interface IUserProfileService extends IBaseService {
     
     public <T extends AbstractUserProfile> void updateUserProfile(T userProfile);
     
-    public AbstractUserProfile loadUserProfile(String userId);
+    public <T extends AbstractUserProfile> T loadUserProfile(String userId, Class<T> clazz);
 }

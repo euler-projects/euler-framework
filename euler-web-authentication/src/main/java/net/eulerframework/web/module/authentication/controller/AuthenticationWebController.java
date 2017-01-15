@@ -55,8 +55,7 @@ public class AuthenticationWebController extends AbstractWebController {
     public String litesignup(@Valid User user) {
         this.authenticationService.signUp(user);
 
-        this.getRequest().setAttribute("user", user);
-        return this.display(WebConfig.getSignUpSuccessPage());
+        return this.success("SIGN_UP_SUCCESS");
     }
 
     @RequestMapping(value = "changePasswd", method = RequestMethod.POST)
