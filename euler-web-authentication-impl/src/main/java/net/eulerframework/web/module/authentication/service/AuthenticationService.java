@@ -18,6 +18,7 @@ import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidJwtException;
+import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.util.JwtEncryptor;
 import net.eulerframework.web.module.authentication.util.UserContext;
@@ -135,6 +136,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             String token = this.jwtEncryptor.encode(vo).getEncoded();
             
             System.out.println("!!!!!!!!!!Reset token: " + token);
+            // TODO send email
         } catch (Exception e) {
             if(WebConfig.getProjectMode().equals(ProjectMode.DEVELOP) ||
                     WebConfig.getProjectMode().equals(ProjectMode.DEBUG)) {
@@ -176,6 +178,13 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     public void passwdResetSMSGen(String mobile) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void resetPasswordBySMSResetCode(String code, String password)
+            throws InvalidSMSResetCodeException, UserNotFoundException {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override

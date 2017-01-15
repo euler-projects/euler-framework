@@ -6,6 +6,7 @@ import net.eulerframework.web.core.base.service.IBaseService;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
+import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 
 public interface IAuthenticationService extends IBaseService {
@@ -28,5 +29,7 @@ public interface IAuthenticationService extends IBaseService {
     public void resetPasswordByEmailResetToken(String token, String password) throws InvalidEmailResetTokenException, UserNotFoundException;
 
     public void passwdResetSMSGen(String mobile);
+    
+    public void resetPasswordBySMSResetCode(String code, String password) throws InvalidSMSResetCodeException, UserNotFoundException;
     
 }

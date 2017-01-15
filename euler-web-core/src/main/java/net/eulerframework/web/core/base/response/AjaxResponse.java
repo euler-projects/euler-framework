@@ -10,6 +10,9 @@ public class AjaxResponse<T> implements BaseResponse {
     private String errorMsg;
     private String localizedErrorMsg;
     
+    public AjaxResponse() {
+    }
+    
     public AjaxResponse(T data) {
         this.responseData = data;
     }
