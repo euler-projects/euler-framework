@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
@@ -57,6 +58,12 @@ public class AuthenticationWebController extends AbstractWebController {
         
         this.authenticationService.changePassword(oldPassword, newPassword);        
         return this.success();
+    }
+    
+    @RequestMapping(value = "resetPasswordByEmail", method = RequestMethod.POST)
+    public String resetPasswordByEmail(@RequestParam String email) {        
+        this.authenticationService.passwdResetEmailGen(email);        
+        return this.success("RESET_LNIK_WILL_BE_SENT_IF_YOU_INPUT_A_RIGHT_EMAIL");
     }
 
 }

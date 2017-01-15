@@ -21,6 +21,8 @@ public interface IAuthenticationService extends IBaseService {
     public void changePassword(String oldPassword, String newPassword);
 
     public void passwdResetEmailGen(String email);
+    
+    public void resetPasswordByResetToken(String token);
 
     public void passwdResetSMSGen(String mobile);
     
