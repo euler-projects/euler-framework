@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+    <bean id="clientDao" class="net.eulerframework.web.module.oauth2.dao.impl.ClientDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="resourceDao" class="net.eulerframework.web.module.oauth2.dao.impl.ResourceDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="scopeDao" class="net.eulerframework.web.module.oauth2.dao.impl.ScopeDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+    <bean id="clientService" name="clientDetailsService" class="net.eulerframework.web.module.oauth2.service.impl.ClientService">
+        <property name="clientDao" ref="clientDao"/>
+        <property name="resourceDao" ref="resourceDao"/>
+        <property name="scopeDao" ref="scopeDao"/>
+        <property name="passwordEncoder" ref="passwordEncoder"/>
+        <property name="cacheEnabled" value="${clientDetailsServiceCache.enabled}"/>
+        <property name="cacheSeconds" value="${clientDetailsServiceCache.cacheSeconds}"/>
+    </bean>
+</beans>

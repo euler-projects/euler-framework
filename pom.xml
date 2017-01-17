@@ -2,63 +2,80 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.eulerform</groupId>
-    <artifactId>net-eulerform</artifactId>
-    <version>0.1.2</version>
+
+    <parent>
+        <groupId>net.eulerframework</groupId>
+        <artifactId>euler-parent</artifactId>
+        <version>1</version>
+        <relativePath></relativePath>
+    </parent>
+    
+    <artifactId>euler-framework</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>eulerform.net</name>
-    <description>eulerform.net</description>
+    <name>net.eulerframework:euler-framework</name>
+    <url>https://euler-projects.github.io/euler-framework</url>
+    <description>Parent POM for Euler Framework projects.</description>
 
     <modules>
-        <module>net-eulerform-common</module>
-        <module>net-eulerform-web-core</module>
-        <module>net-eulerform-web-config-provider</module>
-        <module>net-eulerform-web-authentication</module>
-        <module>net-eulerform-web-basedata</module>
-        <module>net-eulerform-web-oauth2-server</module>
-        <module>net-eulerform-web-ueditor</module>
-        <module>net-eulerform-web-cms-basic</module>
-        <module>net-eulerform-web-blog</module>
-    </modules>    
+        <module>euler-common</module>
+        <module>euler-web-core</module>
+        <module>euler-web-authentication</module>
+        <module>euler-web-basic</module>
+        <module>euler-web-config-provider</module>
+        <module>euler-web-authentication-impl</module>
+    </modules>
 
     <properties>
         <jdk.version>1.7</jdk.version>
+
+        <commons-codec.version>1.10</commons-codec.version>
 
         <jsp.version>2.2</jsp.version>
         <servlet.version>3.0.1</servlet.version>
         <jstl.version>1.2</jstl.version>
         <inject.version>1</inject.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
-        <jaxb-api.version>2.2.12</jaxb-api.version>
         <jta.version>1.1</jta.version>
+        <jaxb-api.version>2.2.12</jaxb-api.version>
+        <java-mail.version>1.5.5</java-mail.version>
 
         <springframework.version>4.2.5.RELEASE</springframework.version>
         <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
+        <springsecurity.oauth.version>2.0.9.RELEASE</springsecurity.oauth.version>
+        <springsecurity.oauth.jwt.version>1.0.4.RELEASE</springsecurity.oauth.jwt.version>
+
+        <AspectJ.version>1.8.9</AspectJ.version>
         <jasig.version>3.2.2</jasig.version>
         <quartz.version>2.2.3</quartz.version>
-        
+
         <hibernate.version>5.0.5.Final</hibernate.version>
         <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
         <c3p0.version>0.9.5.2</c3p0.version>
         <mysqljdbc.version>5.1.38</mysqljdbc.version>
-        
-        <jersey.version>2.22.2</jersey.version>
+
+        <!-- <jersey.version>2.22.2</jersey.version> -->
 
         <jackson.version>2.7.3</jackson.version>
+
         <slf4j-api.version>1.7.21</slf4j-api.version>
         <log4j.version>1.2.17</log4j.version>
         <log4j2.version>2.5</log4j2.version>
         <jboss.logging.version>3.3.0.Final</jboss.logging.version>
         <commons-logging.version>1.2</commons-logging.version>
-        <commons-codec.version>1.10</commons-codec.version>
-        
+
         <junit.version>3.8.1</junit.version>
-        
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Basic Jars -->
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+
             <!-- J2EE -->
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -97,12 +114,17 @@
                 <artifactId>jaxb-api</artifactId>
                 <version>${jaxb-api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>javax.mail-api</artifactId>
+                <version>${java-mail.version}</version>
+            </dependency>
 
             <!-- Spring -->
             <dependency>
-              <groupId>org.springframework</groupId>
-              <artifactId>spring-context-support</artifactId>
-              <version>${springframework.version}</version>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${springframework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -113,13 +135,34 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-orm</artifactId>
                 <version>${springframework.version}</version>
-            </dependency>            
+            </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-oxm</artifactId>
                 <version>${springframework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>${AspectJ.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>c3p0</groupId>
+                        <artifactId>c3p0</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
+            <!-- Spring Security -->
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-core</artifactId>
@@ -140,11 +183,15 @@
                 <artifactId>spring-security-config</artifactId>
                 <version>${springsecurity.version}</version>
             </dependency>
+
+            <!-- Spring Security LDAP -->
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-ldap</artifactId>
                 <version>${springsecurity.version}</version>
             </dependency>
+
+            <!-- Spring Security CAS -->
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-cas</artifactId>
@@ -161,16 +208,17 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
+            <!-- Spring Security OAuth2.0 -->
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>2.0.9.RELEASE</version>
+                <version>${springsecurity.oauth.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-jwt</artifactId>
-                <version>1.0.4.RELEASE</version>
+                <version>${springsecurity.oauth.jwt.version}</version>
             </dependency>
 
             <!-- Hibernate ... -->
@@ -194,9 +242,9 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysqljdbc.version}</version>
             </dependency>
-            
+
             <!-- Jersey bean-validator与Hibernate5冲突 -->
-            <dependency>
+            <!-- <dependency>
                 <groupId>org.glassfish.jersey.containers</groupId>
                 <artifactId>jersey-container-servlet</artifactId>
                 <version>${jersey.version}</version>
@@ -216,43 +264,9 @@
                 <groupId>org.glassfish.jersey.media</groupId>
                 <artifactId>jersey-media-json-jackson</artifactId>
                 <version>${jersey.version}</version>
-            </dependency>
-            
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
-            </dependency>
-            
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>${log4j2.version}</version>
-            </dependency>
-            
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            
-            <dependency>
-                <groupId>org.jboss.logging</groupId>
-                <artifactId>jboss-logging</artifactId>
-                <version>${jboss.logging.version}</version>
-            </dependency>
-            
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>${commons-codec.version}</version>
-            </dependency>
+            </dependency> -->
 
+            <!-- Jackson -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
@@ -267,39 +281,38 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>        
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-            
+
+            <!-- Too many loggers ... -->
             <dependency>
-                <groupId>org.quartz-scheduler</groupId>
-                <artifactId>quartz</artifactId>
-                <version>${quartz.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>c3p0</groupId>
-                        <artifactId>c3p0</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j-api.version}</version>
             </dependency>
-            
             <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjweaver</artifactId>
-                <version>1.8.9</version>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j2.version}</version>
             </dependency>
-            
             <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>javax.mail-api</artifactId>
-                <version>1.5.5</version>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>${jboss.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
             </dependency>
 
             <dependency>
@@ -308,9 +321,20 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-cache</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
 
     <build>
         <plugins>
@@ -323,64 +347,13 @@
                     <target>${jdk.version}</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>false</addMavenDescriptor>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>false</addMavenDescriptor>
-                    </archive>
-                </configuration>
-            </plugin>
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-    
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <url>http://nexus.cfrost.net:8081/repository/maven-releases/</url>
-            <!--<url>http://nexus.cfrost.net/content/repositories/releases/</url>-->
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <url>http://nexus.cfrost.net:8081/repository/maven-snapshots/</url>
-            <!--<url>http://nexus.cfrost.net/content/repositories/snapshots/</url>-->
-        </snapshotRepository>
-    </distributionManagement>
 
-    <url>http://www.eulerform.net</url>
+    <scm>
+        <connection>scm:git:https://github.com/euler-projects/euler-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:euler-projects/euler-framework.git</developerConnection>
+        <url>https://github.com/euler-projects/euler-framework</url>
+    </scm>
+
 </project>
