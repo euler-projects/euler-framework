@@ -27,7 +27,9 @@
     </modules>
 
     <properties>
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>1.7</jdk.version>        
+        
+        <euler-cache.version>0.0.1</euler-cache.version>
 
         <commons-codec.version>1.10</commons-codec.version>
 
@@ -325,7 +327,7 @@
             <dependency>
                 <groupId>net.eulerframework</groupId>
                 <artifactId>euler-cache</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${euler-cache.version}</version>
             </dependency>
 
             <dependency>
