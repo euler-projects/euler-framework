@@ -11,9 +11,9 @@
     
     <artifactId>euler-cache</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>net.eulerframework:euler-cache</name>
+    <name>euler-cache</name>
     <url>https://eulerproject.io</url>
-    <description>RAM Object Cache</description>
+    <description>In Memory Object Cache</description>
 
     <properties>
         <jdk.version>1.7</jdk.version>
@@ -48,20 +48,5 @@
         <developerConnection>scm:git:git@github.com:euler-projects/euler-framework.git</developerConnection>
         <url>https://github.com/euler-projects/euler-framework</url>
     </scm>
-    
-    <profiles>
-        <profile>
-            <id>eulerproject-repo-release</id>
-            <distributionManagement>
-                <repository>
-                    <id>releases</id>
-                    <url>http://repo.eulerproject.io/content/repositories/maven-releases/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>snapshots</id>
-                    <url>http://repo.eulerproject.io/content/repositories/maven-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-        </profile>
-    </profiles>
+
 </project>
