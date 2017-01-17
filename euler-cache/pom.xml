@@ -10,7 +10,7 @@
     </parent>
     
     <artifactId>euler-cache</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>euler-cache</name>
     <url>https://eulerproject.io</url>
     <description>In Memory Object Cache</description>
