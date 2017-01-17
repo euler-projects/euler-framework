@@ -19,7 +19,6 @@
 
     <modules>
         <module>euler-common</module>
-        <module>euler-cache</module>
         <module>euler-web-core</module>
         <module>euler-web-authentication</module>
         <module>euler-web-basic</module>
