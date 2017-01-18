@@ -43,4 +43,6 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest);
 
     void flushSession();
+
+    public boolean isMyEntity(Class< ? extends T> clazz);
 }

@@ -242,7 +242,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
     public void flushSession() {
         this.getCurrentSession().flush();
     }
-
+    
+    @Override
+    public boolean isMyEntity(Class<? extends T> clazz) {
+        return clazz.equals(this.entityClass);
+    }
+    
     @SuppressWarnings("unchecked")
     protected List<T> findBy(String hql) {
         List<T> result = this.getSessionFactory().getCurrentSession().createQuery(hql).list();
