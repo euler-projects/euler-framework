@@ -13,6 +13,12 @@ public abstract class AbstractAttachment extends UUIDEntity<AbstractAttachment> 
     @Column(name="FILE_ID", length=36, nullable=false)
     private String fileId;
     
+    public String getFileId() {
+        return fileId;
+    }
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
     public abstract void setOwnerId(Serializable ownerId);
     public abstract Serializable getOwnerId();
 }

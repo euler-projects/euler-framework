@@ -8,7 +8,13 @@ import net.eulerframework.web.module.file.entity.AbstractAttachment;
 
 public interface IAttachmentService extends IBaseService {
 
-    public String addAttachment(AbstractAttachment attachment);
+    public void addAttachment(AbstractAttachment attachment);
+    
     public void updateAttachment(AbstractAttachment attachment);
+    
+    public void deteteAttachment(AbstractAttachment attachment);
+
+    public <T extends AbstractAttachment> T loadAttachment(Serializable ownerId, Class<T> attachmentClass);
+    
     public <T extends AbstractAttachment> List<T> loadAttachments(Serializable ownerId, Class<T> attachmentClass);
 }

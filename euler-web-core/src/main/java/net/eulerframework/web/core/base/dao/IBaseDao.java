@@ -44,5 +44,5 @@ public interface IBaseDao<T extends BaseEntity<?>>{
 
     void flushSession();
 
-    public boolean isMyEntity(Class< ? extends T> clazz);
+    public boolean isMyEntity(Class<? extends T> clazz);
 }
