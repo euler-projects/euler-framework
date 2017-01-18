@@ -34,7 +34,7 @@ import javax.servlet.ServletContextListener;
 
 import org.springframework.stereotype.Component;
 
-import net.eulerframework.cache.ObjectCachePool;
+import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.config.WebConfig;
 
 @Component

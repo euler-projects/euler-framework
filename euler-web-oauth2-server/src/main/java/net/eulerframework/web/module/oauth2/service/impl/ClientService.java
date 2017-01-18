@@ -1,7 +1,7 @@
 package net.eulerframework.web.module.oauth2.service.impl;
 
-import net.eulerframework.cache.DefaultObjectCache;
-import net.eulerframework.cache.ObjectCachePool;
+import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
+import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.core.base.request.QueryRequest;

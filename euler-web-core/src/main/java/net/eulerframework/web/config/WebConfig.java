@@ -4,8 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.context.ContextLoader;
 
-import net.eulerframework.cache.DefaultObjectCache;
-import net.eulerframework.cache.ObjectCachePool;
+import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
+import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.GlobalProperties1;
 import net.eulerframework.common.util.GlobalPropertyReadException;

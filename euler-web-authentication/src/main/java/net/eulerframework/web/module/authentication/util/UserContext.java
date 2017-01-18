@@ -11,8 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import net.eulerframework.cache.DefaultObjectCache;
-import net.eulerframework.cache.ObjectCachePool;
+import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
+import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.IUserService;
