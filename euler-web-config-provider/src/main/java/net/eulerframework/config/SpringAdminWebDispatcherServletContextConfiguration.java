@@ -31,7 +31,7 @@ import net.eulerframework.web.core.annotation.AdminWebController;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = { "**.web.**.controller.admin" }, 
+        basePackages = { "**.web.**.controller.admin.**" }, 
         useDefaultFilters = false, 
         includeFilters = @ComponentScan.Filter(AdminWebController.class)
 )

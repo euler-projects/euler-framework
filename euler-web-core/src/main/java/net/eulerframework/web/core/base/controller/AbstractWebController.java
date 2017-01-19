@@ -16,6 +16,7 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.response.AjaxResponse;
 import net.eulerframework.web.core.exception.AjaxException;
+import net.eulerframework.web.core.exception.PageNotFoundException;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.ViewException;
 
@@ -228,6 +229,17 @@ public abstract class AbstractWebController extends BaseController {
     @ExceptionHandler({AjaxException.class})   
     public AjaxResponse<?> ajaxException(AjaxException e) {
         return new AjaxResponse<>(e);
+    }
+    
+    /**  
+     * 用于在程序发生{@link PageNotFoundException}异常时统一返回错误信息 
+     * @return  对应主题的404页面
+     */  
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({PageNotFoundException.class})   
+    public String pageNotFoundException(PageNotFoundException e) {
+        this.logger.warn("Page Not Found: " + e.getMessage());
+        return this.notfound();
     }
     
     /**  

@@ -31,7 +31,7 @@ import net.eulerframework.web.core.annotation.WebController;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = { "**.web.**.controller" }, 
+        basePackages = { "**.web.**.controller.**" }, 
         useDefaultFilters = false, 
         includeFilters = @ComponentScan.Filter(WebController.class)
 )

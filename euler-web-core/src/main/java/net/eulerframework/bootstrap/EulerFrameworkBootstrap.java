@@ -37,6 +37,7 @@ import javax.servlet.ServletRegistration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.WebApplicationInitializer;
@@ -121,81 +122,90 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         
         MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
         
-        {
-            AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-            try {
-                springWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringWebDispatcherServletContextConfiguration"));
-            } catch (ClassNotFoundException e) {
-                springWebDispatcherServletContext.close();
-                rootContext.close();
-                throw new ServletException(e);
-            }
-            DispatcherServlet springWebDispatcherServlet = new DispatcherServlet(springWebDispatcherServletContext);
-            ServletRegistration.Dynamic springWebDispatcher = container.addServlet("springWebDispatcherServlet", springWebDispatcherServlet);
-            springWebDispatcher.setLoadOnStartup(1);
-            springWebDispatcher.setMultipartConfig(new MultipartConfigElement(
-                    multiPartConfig.getLocation(), 
-                    multiPartConfig.getMaxFileSize(), 
-                    multiPartConfig.getMaxRequestSize(), 
-                    multiPartConfig.getFileSizeThreshold()));
-            springWebDispatcher.addMapping("/");
-            
-            this.log.info("init web root: /");
-        }
+        this.configWebDispatcher(rootContext, container, multiPartConfig);
         
-        {
-            String adminRootPath = WebConfig.getAdminRootPath();
-            
-            AnnotationConfigWebApplicationContext springAdminWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-            try {
-                springAdminWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration"));
-            } catch (ClassNotFoundException e) {
-                springAdminWebDispatcherServletContext.close();
-                rootContext.close();
-                throw new ServletException(e);
-            }
-            DispatcherServlet springAdminWebDispatcherServlet = new DispatcherServlet(springAdminWebDispatcherServletContext);
-            ServletRegistration.Dynamic springAdminWebDispatcher = container.addServlet("springAdminWebDispatcherServlet", springAdminWebDispatcherServlet);
-            springAdminWebDispatcher.setLoadOnStartup(3);
-            springAdminWebDispatcher.setMultipartConfig(new MultipartConfigElement(
-                    multiPartConfig.getLocation(), 
-                    multiPartConfig.getMaxFileSize(), 
-                    multiPartConfig.getMaxRequestSize(), 
-                    multiPartConfig.getFileSizeThreshold()));
-            springAdminWebDispatcher.addMapping(adminRootPath+"/*");
-
-            this.log.info("init admin web root: " + adminRootPath+"/*");
-        }
+        this.configAdminDispatcher(rootContext, container, multiPartConfig);
         
-        {
-            String apiRootPath = WebConfig.getApiRootPath();
-            
-            AnnotationConfigWebApplicationContext springApiDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-            try {
-                springApiDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringApiDispatcherServletContextConfiguration"));
-            } catch (ClassNotFoundException e) {
-                springApiDispatcherServletContext.close();
-                rootContext.close();
-                throw new ServletException(e);
-            }
-            DispatcherServlet springApiDispatcherServlet = new DispatcherServlet(springApiDispatcherServletContext);
-            springApiDispatcherServlet.setDispatchOptionsRequest(true);
-            ServletRegistration.Dynamic springApiDispatcher = container.addServlet("springApiDispatcherServlet", springApiDispatcherServlet);
-            springApiDispatcher.setLoadOnStartup(2);
-            springApiDispatcher.setMultipartConfig(new MultipartConfigElement(
-                    multiPartConfig.getLocation(), 
-                    multiPartConfig.getMaxFileSize(), 
-                    multiPartConfig.getMaxRequestSize(), 
-                    multiPartConfig.getFileSizeThreshold()));        
-            springApiDispatcher.addMapping(apiRootPath+"/*");
-
-            this.log.info("init api root: " + apiRootPath+"/*");
-        }
+        this.configApiDispatcher(rootContext, container, multiPartConfig);
         
         FilterRegistration.Dynamic eulerframeworkCoreFilter = container.addFilter("eulerframeworkCoreFilter", new EulerFrameworkCoreFilter());
         eulerframeworkCoreFilter.addMappingForUrlPatterns(null, false, "/*");
         
         FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
         crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");
+    }
+    
+    private void configWebDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
+        AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
+        try {
+            springWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringWebDispatcherServletContextConfiguration"));
+        } catch (ClassNotFoundException e) {
+            springWebDispatcherServletContext.close();
+            rootContext.close();
+            throw new ServletException(e);
+        }
+        DispatcherServlet springWebDispatcherServlet = new DispatcherServlet(springWebDispatcherServletContext);
+        ServletRegistration.Dynamic springWebDispatcher = container.addServlet("springWebDispatcherServlet", springWebDispatcherServlet);
+        springWebDispatcher.setLoadOnStartup(2);
+        springWebDispatcher.setMultipartConfig(new MultipartConfigElement(
+                multiPartConfig.getLocation(), 
+                multiPartConfig.getMaxFileSize(), 
+                multiPartConfig.getMaxRequestSize(), 
+                multiPartConfig.getFileSizeThreshold()));
+        springWebDispatcher.addMapping("/");
+        
+        this.log.info("init web root: /");
+        
+    }
+    
+    private void configAdminDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
+        String adminRootPath = WebConfig.getAdminRootPath();
+        
+        AnnotationConfigWebApplicationContext springAdminWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
+        try {
+            springAdminWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration"));
+        } catch (ClassNotFoundException e) {
+            springAdminWebDispatcherServletContext.close();
+            rootContext.close();
+            throw new ServletException(e);
+        }
+        DispatcherServlet springAdminWebDispatcherServlet = new DispatcherServlet(springAdminWebDispatcherServletContext);
+        ServletRegistration.Dynamic springAdminWebDispatcher = container.addServlet("springAdminWebDispatcherServlet", springAdminWebDispatcherServlet);
+        springAdminWebDispatcher.setLoadOnStartup(1);
+        springAdminWebDispatcher.setMultipartConfig(new MultipartConfigElement(
+                multiPartConfig.getLocation(), 
+                multiPartConfig.getMaxFileSize(), 
+                multiPartConfig.getMaxRequestSize(), 
+                multiPartConfig.getFileSizeThreshold()));
+        springAdminWebDispatcher.addMapping(adminRootPath+"/*");
+
+        this.log.info("init admin web root: " + adminRootPath+"/*");
+        
+    }
+    
+    private void configApiDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
+        String apiRootPath = WebConfig.getApiRootPath();
+        
+        AnnotationConfigWebApplicationContext springApiDispatcherServletContext = new AnnotationConfigWebApplicationContext();
+        try {
+            springApiDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringApiDispatcherServletContextConfiguration"));
+        } catch (ClassNotFoundException e) {
+            springApiDispatcherServletContext.close();
+            rootContext.close();
+            throw new ServletException(e);
+        }
+        DispatcherServlet springApiDispatcherServlet = new DispatcherServlet(springApiDispatcherServletContext);
+        springApiDispatcherServlet.setDispatchOptionsRequest(true);
+        ServletRegistration.Dynamic springApiDispatcher = container.addServlet("springApiDispatcherServlet", springApiDispatcherServlet);
+        springApiDispatcher.setLoadOnStartup(2);
+        springApiDispatcher.setMultipartConfig(new MultipartConfigElement(
+                multiPartConfig.getLocation(), 
+                multiPartConfig.getMaxFileSize(), 
+                multiPartConfig.getMaxRequestSize(), 
+                multiPartConfig.getFileSizeThreshold()));        
+        springApiDispatcher.addMapping(apiRootPath+"/*");
+
+        this.log.info("init api root: " + apiRootPath+"/*");
+        
     }
 }
