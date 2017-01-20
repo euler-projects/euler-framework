@@ -27,7 +27,12 @@ public class UserProfileService extends BaseService implements IUserProfileServi
     @SuppressWarnings("unchecked")
     @Override
     public <T extends AbstractUserProfile> T loadUserProfile(String userId, Class<T> clazz) {
-        return (T) this.getEntityDao(this.userProfileDaos, clazz).load(userId); 
+        AbstractUserProfile data = this.getEntityDao(this.userProfileDaos, clazz).load(userId);
+        
+        if(data == null)
+            return null;
+        
+        return (T) data;
     }
 
 
