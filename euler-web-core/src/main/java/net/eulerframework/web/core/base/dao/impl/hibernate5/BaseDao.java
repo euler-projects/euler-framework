@@ -179,19 +179,24 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
 
     @Override
     public void deleteByIds(Serializable[] idArray) {
-        StringBuffer hqlBuffer = new StringBuffer();
-        hqlBuffer.append("delete ");
-        hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en where ");
-        for (int i = 0; i < idArray.length; i++) {
-            if (i == 0) {
-                hqlBuffer.append("en.id= ?");
-            } else {
-                hqlBuffer.append(" or en.id= ?");
-            }
+        
+        for(Serializable id : idArray) {
+            this.deleteById(id);
         }
-        final String hql = hqlBuffer.toString();
-        this.update(hql, (Object[])idArray);
+        
+//        StringBuffer hqlBuffer = new StringBuffer();
+//        hqlBuffer.append("delete ");
+//        hqlBuffer.append(this.entityClass.getSimpleName());
+//        hqlBuffer.append(" en where ");
+//        for (int i = 0; i < idArray.length; i++) {
+//            if (i == 0) {
+//                hqlBuffer.append("en.id= ?");
+//            } else {
+//                hqlBuffer.append(" or en.id= ?");
+//            }
+//        }
+//        final String hql = hqlBuffer.toString();
+//        this.update(hql, (Object[])idArray);
     }
 
     @Override

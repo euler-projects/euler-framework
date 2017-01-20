@@ -109,19 +109,24 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
 
     @Override
     public void deleteByIds(Serializable[] idArray) {
-        StringBuffer hqlBuffer = new StringBuffer();
-        hqlBuffer.append("update ");
-        hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en set en.modifyBy = ?, en.modifyDate = ?, en.ifDel = true where ");
-        for(int i=0;i<idArray.length;i++) {
-            if(i==0) {
-                hqlBuffer.append("en.id= ?");
-            } else {
-                hqlBuffer.append(" or en.id= ?");
-            }
+        
+        for(Serializable id : idArray) {
+            this.deleteById(id);
         }
-        final String hql = hqlBuffer.toString();
-        this.update(hql, UserContext.getCurrentUser().getId(), new Date());
+        
+//        StringBuffer hqlBuffer = new StringBuffer();
+//        hqlBuffer.append("update ");
+//        hqlBuffer.append(this.entityClass.getSimpleName());
+//        hqlBuffer.append(" en set en.modifyBy = ?, en.modifyDate = ?, en.ifDel = true where ");
+//        for(int i=0;i<idArray.length;i++) {
+//            if(i==0) {
+//                hqlBuffer.append("en.id= ?");
+//            } else {
+//                hqlBuffer.append(" or en.id= ?");
+//            }
+//        }
+//        final String hql = hqlBuffer.toString();
+//        this.update(hql, UserContext.getCurrentUser().getId(), new Date());
     }
     
     @Override
