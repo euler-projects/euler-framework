@@ -51,7 +51,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         sc.setAttribute("__CONTEXT_PATH", contextPath);
         sc.setAttribute("__ASSETS_PATH", contextPath + WebConfig.getAssetsPath());
         
-        sc.setAttribute("__FILE_DOWNLOAD_PATH", contextPath + "/file/");
+        sc.setAttribute("__FILE_DOWNLOAD_PATH", contextPath + "/file");
         sc.setAttribute("__FILE_UPLOAD_ACTION", contextPath + "/uploadFile");
 
         sc.setAttribute("__PROJECT_VERSION", WebConfig.getProjectVersion());
