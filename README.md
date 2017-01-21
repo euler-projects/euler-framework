@@ -1,15 +1,15 @@
 ## Status
 
-### latest (0.2.0)
+### latest
 [![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/badge/icon)](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/)
 
-### stable (0.1.2)
+### stable
 [![Build Status](https://ci.eulerproject.io/job/euler-framework-stable-jdk7/badge/icon)](https://ci.eulerproject.io/job/euler-framework-stable-jdk7)
 
 ## About
 The Euler Framework is based on Spring MVC, provides a set of base classes to make website building easier.
 
-Visit [eulerproject.io] for more info.
+Visit [eulerproject.io][] for more info.
 
 ## In Processing
 * Change project name to euler-framework
