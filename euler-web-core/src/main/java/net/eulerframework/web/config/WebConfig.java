@@ -7,7 +7,7 @@ import org.springframework.web.context.ContextLoader;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.FilePathTool;
-import net.eulerframework.common.util.GlobalProperties1;
+import net.eulerframework.common.util.GlobalProperties;
 import net.eulerframework.common.util.GlobalPropertyReadException;
 import net.eulerframework.common.util.StringTool;
 
@@ -100,7 +100,7 @@ public abstract class WebConfig {
     protected final static Logger log = LogManager.getLogger();
 
     public static boolean clearWebConfigCache() {
-        GlobalProperties1.refresh();
+        GlobalProperties.refresh();
         return CONFIG_CAHCE.clear();
     }
 
@@ -110,7 +110,7 @@ public abstract class WebConfig {
             return (int) cachedConfig;
         }
 
-        int result = GlobalProperties1.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
+        int result = GlobalProperties.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
                 WebConfigDefault.CORE_CACHE_I18N_REFRESH_FREQ);
 
         CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ, result);
@@ -123,7 +123,7 @@ public abstract class WebConfig {
             return (WebAuthenticationType) cachedConfig;
         }
 
-        WebAuthenticationType result = GlobalProperties1.getEnumValue(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE,
+        WebAuthenticationType result = GlobalProperties.getEnumValue(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE,
                 WebConfigDefault.SEC_WEB_AUTHENTICATION_TYPE,
                 true);
 
@@ -137,7 +137,7 @@ public abstract class WebConfig {
             return (ApiAuthenticationType) cachedConfig;
         }
 
-        ApiAuthenticationType result = GlobalProperties1.getEnumValue(WebConfigKey.SEC_API_AUTHENTICATION_TYPE,
+        ApiAuthenticationType result = GlobalProperties.getEnumValue(WebConfigKey.SEC_API_AUTHENTICATION_TYPE,
                 WebConfigDefault.SEC_API_AUTHENTICATION_TYPE,
                 true);
 
@@ -151,7 +151,7 @@ public abstract class WebConfig {
             return (OAuthServerType) cachedConfig;
         }
 
-        OAuthServerType result = GlobalProperties1.getEnumValue(WebConfigKey.SEC_OAUTH_SERVER_TYPE,
+        OAuthServerType result = GlobalProperties.getEnumValue(WebConfigKey.SEC_OAUTH_SERVER_TYPE,
                 WebConfigDefault.SEC_OAUTH_SERVER_TYPE,
                 true);
 
@@ -167,7 +167,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = GlobalProperties1.get(WebConfigKey.WEB_API_ROOT_PATH);
+            result = GlobalProperties.get(WebConfigKey.WEB_API_ROOT_PATH);
 
             if (StringTool.isNull(result))
                 throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
@@ -196,7 +196,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
+        String result = GlobalProperties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
         if (StringTool.isNull(result))
             throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + "can not be empty");
@@ -222,7 +222,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = FilePathTool.changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_UPLOAD_PATH));
+            result = FilePathTool.changeToUnixFormat(GlobalProperties.get(WebConfigKey.WEB_UPLOAD_PATH));
         } catch (GlobalPropertyReadException e) {
             if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                 log.info("OS is windows");
@@ -254,7 +254,7 @@ public abstract class WebConfig {
         }
 
         String result = FilePathTool
-                .changeToUnixFormat(GlobalProperties1.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
+                .changeToUnixFormat(GlobalProperties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";
 
@@ -269,7 +269,7 @@ public abstract class WebConfig {
         }
 
         String result = FilePathTool.changeToUnixFormat(
-                GlobalProperties1.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
+                GlobalProperties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";
 
@@ -283,7 +283,7 @@ public abstract class WebConfig {
             return (long) cachedConfig;
         }
 
-        long result = GlobalProperties1.getLongValue(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ,
+        long result = GlobalProperties.getLongValue(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ,
                 WebConfigDefault.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ);
 
         CONFIG_CAHCE.put(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ, result);
@@ -296,7 +296,7 @@ public abstract class WebConfig {
             return (long) cachedConfig;
         }
 
-        long result = GlobalProperties1.getLongValue(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE,
+        long result = GlobalProperties.getLongValue(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE,
                 WebConfigDefault.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
 
         CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE, result);
@@ -309,13 +309,13 @@ public abstract class WebConfig {
             return (MultiPartConfig) cachedConfig;
         }
 
-        String location = GlobalProperties1.get(WebConfigKey.WEB_MULITPART_LOCATION,
+        String location = GlobalProperties.get(WebConfigKey.WEB_MULITPART_LOCATION,
                 WebConfigDefault.WEB_MULITPART_LOCATION);
-        long maxFileSize = GlobalProperties1.getLongValue(WebConfigKey.WEB_MULITPART_MAX_FILE_SIZE,
+        long maxFileSize = GlobalProperties.getLongValue(WebConfigKey.WEB_MULITPART_MAX_FILE_SIZE,
                 WebConfigDefault.WEB_MULITPART_MAX_FILE_SIZE);
-        long maxRequestSize = GlobalProperties1.getLongValue(WebConfigKey.WEB_MULITPART_MAX_REQUEST_SIZE,
+        long maxRequestSize = GlobalProperties.getLongValue(WebConfigKey.WEB_MULITPART_MAX_REQUEST_SIZE,
                 WebConfigDefault.WEB_MULITPART_MAX_REQUEST_SIZE);
-        int fileSizeThreshold = GlobalProperties1.getIntValue(WebConfigKey.WEB_MULITPART_FILE_SIZE_THRESHOLD,
+        int fileSizeThreshold = GlobalProperties.getIntValue(WebConfigKey.WEB_MULITPART_FILE_SIZE_THRESHOLD,
                 WebConfigDefault.WEB_MULITPART_FILE_SIZE_THRESHOLD);
 
         MultiPartConfig result = new MultiPartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
@@ -331,7 +331,7 @@ public abstract class WebConfig {
             return (int) cachedConfig;
         }
 
-        int result = GlobalProperties1.getIntValue(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH,
+        int result = GlobalProperties.getIntValue(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH,
                 WebConfigDefault.SEC_SIGNUP_PASSWORD_MIN_LENGTH);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH, result);
@@ -344,7 +344,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT,
+        String result = GlobalProperties.get(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT,
                 WebConfigDefault.SEC_SIGNUP_USERNAME_FORMAT);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT, result);
@@ -357,7 +357,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT,
+        String result = GlobalProperties.get(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT,
                 WebConfigDefault.SEC_SIGNUP_EMAIL_FORMAT);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT, result);
@@ -370,7 +370,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT,
+        String result = GlobalProperties.get(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT,
                 WebConfigDefault.SEC_SIGNUP_PASSWORD_FORMAT);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT, result);
@@ -384,7 +384,7 @@ public abstract class WebConfig {
             return (boolean) cachedConfig;
         }
 
-        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
+        boolean result = GlobalProperties.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
                 WebConfigDefault.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN, result);
@@ -397,7 +397,7 @@ public abstract class WebConfig {
             return (boolean) cachedConfig;
         }
 
-        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
+        boolean result = GlobalProperties.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
                 WebConfigDefault.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN, result);
@@ -410,7 +410,7 @@ public abstract class WebConfig {
             return (boolean) cachedConfig;
         }
 
-        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE,
+        boolean result = GlobalProperties.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE,
                 WebConfigDefault.SEC_AUTHENTICATION_ENABLE_USER_CAHCE);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE, result);
@@ -423,7 +423,7 @@ public abstract class WebConfig {
             return (long) cachedConfig;
         }
 
-        long result = GlobalProperties1.getLongValue(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE,
+        long result = GlobalProperties.getLongValue(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE,
                 WebConfigDefault.SEC_AUTHENTICATION_USER_CAHCE_LIFE);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE, result);
@@ -446,7 +446,7 @@ public abstract class WebConfig {
             return (ProjectMode) cachedConfig;
         }
 
-        ProjectMode result = GlobalProperties1.getEnumValue(WebConfigKey.PROJECT_MODE,
+        ProjectMode result = GlobalProperties.getEnumValue(WebConfigKey.PROJECT_MODE,
                 WebConfigDefault.PROJECT_MODE,
                 true);
 
@@ -462,7 +462,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = GlobalProperties1.get(WebConfigKey.PROJECT_VERSION);
+            result = GlobalProperties.get(WebConfigKey.PROJECT_VERSION);
         } catch (GlobalPropertyReadException e) {
             throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_VERSION);
         }
@@ -479,7 +479,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = GlobalProperties1.get(WebConfigKey.PROJECT_BUILDTIME);
+            result = GlobalProperties.get(WebConfigKey.PROJECT_BUILDTIME);
         } catch (GlobalPropertyReadException e) {
             throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_BUILDTIME);
         }
@@ -494,7 +494,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER,
+        String result = GlobalProperties.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER,
                 WebConfigDefault.PROJECT_COPYRIGHT_HOLDER);
 
         CONFIG_CAHCE.put(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, result);
@@ -507,7 +507,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.PROJECT_SITENAME,
+        String result = GlobalProperties.get(WebConfigKey.PROJECT_SITENAME,
                 WebConfigDefault.PROJECT_SITENAME);
 
         CONFIG_CAHCE.put(WebConfigKey.PROJECT_SITENAME, result);
@@ -520,7 +520,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = GlobalProperties1.get(WebConfigKey.WEB_ASSETS_PATH,
+        String result = GlobalProperties.get(WebConfigKey.WEB_ASSETS_PATH,
                 WebConfigDefault.WEB_ASSETS_PATH);
 
         CONFIG_CAHCE.put(WebConfigKey.WEB_ASSETS_PATH, result);
@@ -539,7 +539,7 @@ public abstract class WebConfig {
             return (boolean) cachedConfig;
         }
 
-        boolean result = GlobalProperties1.getBooleanValue(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN,
+        boolean result = GlobalProperties.getBooleanValue(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN,
                 WebConfigDefault.SEC_SIGNUP_AUTO_SIGNIN);
 
         CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN, result);

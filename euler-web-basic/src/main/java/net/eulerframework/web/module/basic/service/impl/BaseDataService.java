@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
@@ -16,6 +15,7 @@ import org.springframework.web.context.ContextLoader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.FileReader;
+import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -61,8 +61,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         sc.setAttribute("__SITENAME", WebConfig.getSitename());
         sc.setAttribute("__COPYRIGHT_HOLDER", WebConfig.getCopyrightHolder());
         
-        //TODO:make version real
-        sc.setAttribute("__FRAMEWORK_VERSION", "0.2.0");
+        sc.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
     }
     
     @Override
