@@ -18,7 +18,6 @@
     <description>Parent POM for Euler Framework projects.</description>
 
     <modules>
-        <module>euler-common</module>
         <module>euler-web-core</module>
         <module>euler-web-authentication</module>
         <module>euler-web-basic</module>
