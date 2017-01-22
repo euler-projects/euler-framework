@@ -8,8 +8,8 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.FilePathTool;
 import net.eulerframework.common.util.PropertyReader;
-import net.eulerframework.common.util.PropertyReadException;
 import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.exception.PropertyReadException;
 
 public abstract class WebConfig {
 
