@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basic.controller;
+package net.eulerframework.web.module.basic.controller.admin;
 
 import java.util.List;
 

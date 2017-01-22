@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -31,9 +32,15 @@ import net.eulerframework.web.core.annotation.WebController;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = { "**.web.**.controller.**" }, 
+        basePackages = { "**.web.**.controller" }, 
         useDefaultFilters = false, 
-        includeFilters = @ComponentScan.Filter(WebController.class)
+        includeFilters = @ComponentScan.Filter(WebController.class),
+        excludeFilters = @ComponentScan.Filter(
+                type=FilterType.ASPECTJ, 
+                pattern={
+                        "*..web..controller.admin..*",
+                        "*..web..controller.api..*"
+                        })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
 public class SpringWebDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
