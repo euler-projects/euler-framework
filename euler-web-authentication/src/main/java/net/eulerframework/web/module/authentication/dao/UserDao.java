@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.dao.impl;
+package net.eulerframework.web.module.authentication.dao;
 
 import java.util.List;
 import java.util.Set;
@@ -15,13 +15,12 @@ import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
-import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 
-public class UserDao extends BaseDao<User> implements IUserDao {
+public class UserDao extends BaseDao<User> {
 
-    @Override
+    
     public User findUserByName(String username) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
@@ -32,7 +31,7 @@ public class UserDao extends BaseDao<User> implements IUserDao {
         return users.get(0);
     }
 
-    @Override
+    
     public User findUserByEmail(String email) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
@@ -43,7 +42,7 @@ public class UserDao extends BaseDao<User> implements IUserDao {
         return users.get(0);
     }
 
-    @Override
+    
     public User findUserByMobile(String mobile) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
@@ -54,7 +53,7 @@ public class UserDao extends BaseDao<User> implements IUserDao {
         return users.get(0);
     }
 
-    @Override
+    
     public List<User> findUserByNameOrCode(String nameOrCode) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.add(Restrictions.or(Restrictions.like("username", nameOrCode, MatchMode.ANYWHERE).ignoreCase(),
@@ -62,7 +61,7 @@ public class UserDao extends BaseDao<User> implements IUserDao {
         return this.findBy(detachedCriteria);
     }
 
-    @Override
+    
     public PageResponse<User> findUserByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
                 //.setFetchMode("authorities", FetchMode.SELECT)

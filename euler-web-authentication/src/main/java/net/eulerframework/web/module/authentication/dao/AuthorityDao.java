@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.dao.impl;
+package net.eulerframework.web.module.authentication.dao;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,12 +15,11 @@ import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
-import net.eulerframework.web.module.authentication.dao.IAuthorityDao;
 import net.eulerframework.web.module.authentication.entity.Authority;
 
-public class AuthorityDao extends BaseDao<Authority> implements IAuthorityDao {
+public class AuthorityDao extends BaseDao<Authority> {
 
-    @Override
+    
     public PageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         try {
@@ -48,11 +47,11 @@ public class AuthorityDao extends BaseDao<Authority> implements IAuthorityDao {
         return result;
     }
 
-    @Override
+    
     public List<Authority> findAllAuthoritiesInOrder() {
         List<Authority> result = this.findAll();
         Comparator<Authority> c = new Comparator<Authority>() {  
-            @Override  
+              
             public int compare(Authority o1, Authority o2) {  
                 return PinYinTool.toPinYinString(o1.getName()).compareTo(PinYinTool.toPinYinString(o2.getName()));  
             }

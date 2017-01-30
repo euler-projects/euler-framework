@@ -14,8 +14,8 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.dao.IGroupDao;
-import net.eulerframework.web.module.authentication.dao.IUserDao;
+import net.eulerframework.web.module.authentication.dao.GroupDao;
+import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.IncorrectPasswordException;
 import net.eulerframework.web.module.authentication.exception.IncorrectPasswordFormatException;
@@ -34,9 +34,9 @@ import net.eulerframework.web.module.authentication.exception.UsernameAlreadyUse
 public class UserService extends BaseService {
 
     @Resource
-    private IUserDao userDao;
+    private UserDao userDao;
     @Resource
-    private IGroupDao groupDao;
+    private GroupDao groupDao;
     @Resource
     private PasswordEncoder passwordEncoder;
 

@@ -11,13 +11,13 @@ import net.eulerframework.common.util.StringTool;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.module.authentication.dao.IUserDao;
+import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 
 @Service
 public class RootService extends BaseService {
 
-    @Resource private IUserDao userDao;
+    @Resource private UserDao userDao;
     @Resource private PasswordEncoder passwordEncoder;
 
     /**

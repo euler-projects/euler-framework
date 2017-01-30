@@ -12,8 +12,8 @@ import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.dao.IAuthorityDao;
-import net.eulerframework.web.module.authentication.dao.IGroupDao;
+import net.eulerframework.web.module.authentication.dao.AuthorityDao;
+import net.eulerframework.web.module.authentication.dao.GroupDao;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
 
@@ -21,9 +21,9 @@ import net.eulerframework.web.module.authentication.entity.Group;
 public class AuthorityService extends BaseService {
 
     @Resource
-    private IGroupDao groupDao;
+    private GroupDao groupDao;
     @Resource
-    private IAuthorityDao authorityDao;
+    private AuthorityDao authorityDao;
 
     public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
         return this.groupDao.findGroupByPage(pageQueryRequest);

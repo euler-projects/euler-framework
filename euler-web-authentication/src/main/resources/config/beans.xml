@@ -17,13 +17,13 @@
         <property name="userService" ref="userService"/>
     </bean>
     
-    <bean id="userDao" class="net.eulerframework.web.module.authentication.dao.impl.UserDao">
+    <bean id="userDao" class="net.eulerframework.web.module.authentication.dao.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="groupDao" class="net.eulerframework.web.module.authentication.dao.impl.GroupDao">
+    <bean id="groupDao" class="net.eulerframework.web.module.authentication.dao.GroupDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="authorityDao" class="net.eulerframework.web.module.authentication.dao.impl.AuthorityDao">
+    <bean id="authorityDao" class="net.eulerframework.web.module.authentication.dao.AuthorityDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>  
     
