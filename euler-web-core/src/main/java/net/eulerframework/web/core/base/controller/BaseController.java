@@ -14,8 +14,8 @@ import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.eulerframework.common.util.io.FileReadException;
-import net.eulerframework.common.util.io.FileUtil;
+import net.eulerframework.common.util.io.file.FileReadException;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
@@ -33,7 +33,7 @@ public abstract class BaseController extends WebContextAccessable {
     }
 
     protected void writeFile(String fileName, File file) throws FileReadException, IOException {
-        byte[] fileData = FileUtil.readFileByMultiBytes(file, 1024);
+        byte[] fileData = SimpleFileIOUtil.readFileByMultiBytes(file, 1024);
         
         HttpServletResponse response = this.getResponse();
 

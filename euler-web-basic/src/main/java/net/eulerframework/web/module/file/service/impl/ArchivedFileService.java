@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.CalendarTool;
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.common.util.io.FileUtil;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.util.UserContext;
@@ -73,7 +73,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
             return this.saveFileInfo(originalFilename, archivedPathSuffix, targetFile);
         } catch (IllegalStateException | IOException e) {
             if(targetFile.exists())
-                FileUtil.deleteFile(targetFile);
+                SimpleFileIOUtil.deleteFile(targetFile);
             
             throw new FileArchiveException(e);
         }
@@ -101,7 +101,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
             return this.saveFileInfo(originalFilename, archivedPathSuffix, targetFile);
         } catch (IllegalStateException | IOException e) {
             if(targetFile.exists())
-                FileUtil.deleteFile(targetFile);
+                SimpleFileIOUtil.deleteFile(targetFile);
             
             throw new FileArchiveException(e);
         }

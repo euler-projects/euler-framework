@@ -6,10 +6,10 @@ import org.springframework.web.context.ContextLoader;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
-import net.eulerframework.common.util.PropertyReader;
+import net.eulerframework.common.util.OSAdapter;
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.common.util.exception.PropertyReadException;
-import net.eulerframework.common.util.io.FileUtil;
+import net.eulerframework.common.util.property.PropertyReadException;
+import net.eulerframework.common.util.property.PropertyReader;
 
 public abstract class WebConfig {
 
@@ -178,7 +178,7 @@ public abstract class WebConfig {
                 result = result.substring(0, result.length() - 1);
             }
 
-            result = FileUtil.changeToUnixFormat(result);
+            result = OSAdapter.convertDirToUnixFormat(result);
 
             if (!result.startsWith("/"))
                 result = "/" + result;
@@ -207,7 +207,7 @@ public abstract class WebConfig {
             result = result.substring(0, result.length() - 1);
         }
 
-        result = FileUtil.changeToUnixFormat(result);
+        result = OSAdapter.convertDirToUnixFormat(result);
 
         if (!result.startsWith("/"))
             result = "/" + result;
@@ -224,7 +224,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = FileUtil.changeToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
+            result = OSAdapter.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
         } catch (PropertyReadException e) {
             if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                 log.info("OS is windows");
@@ -255,8 +255,8 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = FileUtil
-                .changeToUnixFormat(properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
+        String result = OSAdapter
+                .convertDirToUnixFormat(properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";
 
@@ -270,7 +270,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = FileUtil.changeToUnixFormat(
+        String result = OSAdapter.convertDirToUnixFormat(
                 properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";

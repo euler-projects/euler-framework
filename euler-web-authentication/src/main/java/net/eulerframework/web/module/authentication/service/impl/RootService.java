@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.common.util.io.FileUtil;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
@@ -35,7 +35,7 @@ public class RootService extends BaseService implements IRootService {
         String rootpasswordFilePath = webInfPath + "/.rootpassword";
         
         try {
-            FileUtil.writeFile(rootpasswordFilePath, newPassword, false);
+            SimpleFileIOUtil.writeFile(rootpasswordFilePath, newPassword, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +60,7 @@ public class RootService extends BaseService implements IRootService {
         String adminpasswordFilePath = webInfPath + "/.adminpassword";
         
         try {
-            FileUtil.writeFile(adminpasswordFilePath, newPassword, false);
+            SimpleFileIOUtil.writeFile(adminpasswordFilePath, newPassword, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
