@@ -1,7 +1,6 @@
 package net.eulerframework.web.core.base.controller;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 
@@ -15,7 +14,8 @@ import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.eulerframework.common.util.FileReader;
+import net.eulerframework.common.util.io.FileReadException;
+import net.eulerframework.common.util.io.FileUtil;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
@@ -32,8 +32,8 @@ public abstract class BaseController extends WebContextAccessable {
         this.getResponse().getOutputStream().write(string.getBytes("UTF-8"));
     }
 
-    protected void writeFile(String fileName, File file) throws FileNotFoundException, IOException {
-        byte[] fileData = FileReader.readFileByMultiBytes(file, 1024);
+    protected void writeFile(String fileName, File file) throws FileReadException, IOException {
+        byte[] fileData = FileUtil.readFileByMultiBytes(file, 1024);
         
         HttpServletResponse response = this.getResponse();
 

@@ -14,7 +14,7 @@ import org.springframework.web.context.ContextLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.eulerframework.common.util.FileReader;
+import net.eulerframework.common.util.io.FileUtil;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.QueryRequest;
@@ -90,7 +90,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         if(dict != null && !dict.isEmpty()){
             codeTableMap.put(name, dict);
         }
-        FileReader.deleteFile(codeTableJsFileRealPath);
+        FileUtil.deleteFile(codeTableJsFileRealPath);
         this.writeCodeTableToJs(codeTableMap, codeTableJsFileRealPath);
     }
     
@@ -105,7 +105,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             resutlBuffer.append(this.objectMapper.writer().writeValueAsString(entry.getValue()));
             resutlBuffer.append(';');
             resutlBuffer.append('\n');
-            FileReader.writeFile(path, resutlBuffer.toString(), true);
+            FileUtil.writeFile(path, resutlBuffer.toString(), true);
         }        
     }
 

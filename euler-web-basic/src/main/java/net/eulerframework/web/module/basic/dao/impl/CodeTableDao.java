@@ -90,29 +90,31 @@ public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
 
     @Override
     public EmailConfig findSysEmailConfig() {
-        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
-        detachedCriteria.add(Restrictions.eq("codeType", PROPERTY_TYPE));
-        String[] emailConfigKey = new String[5];
-        emailConfigKey[0] = EmailConfig.DB_CONFIG_KEY_UESRNAME;
-        emailConfigKey[1] = EmailConfig.DB_CONFIG_KEY_PASSWORD;
-        emailConfigKey[2] = EmailConfig.DB_CONFIG_KEY_SMTP;
-        emailConfigKey[3] = EmailConfig.DB_CONFIG_KEY_SYS_SENDER;
-        emailConfigKey[4] = EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER;
-        detachedCriteria.add(Restrictions.in("key", emailConfigKey));
-        List<CodeTable> result = this.findBy(detachedCriteria);
-        if(result == null || result.isEmpty()) return null; 
-        EmailConfig emailConfig = new EmailConfig();
-        for(CodeTable each : result) {
-            String key = each.getKey();
-            switch (key) {
-            case EmailConfig.DB_CONFIG_KEY_UESRNAME:emailConfig.setUsername(each.getValue());break;
-            case EmailConfig.DB_CONFIG_KEY_PASSWORD:emailConfig.setPassword(each.getValue());break;
-            case EmailConfig.DB_CONFIG_KEY_SMTP:emailConfig.setSmtp(each.getValue());break;
-            case EmailConfig.DB_CONFIG_KEY_SYS_SENDER:emailConfig.setSender(each.getValue());break;
-            case EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER:emailConfig.setDefaultReceiver(each.getValue());break;
-            }
-        }
-        return  emailConfig;
+        //TODO;
+        return null;
+//        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
+//        detachedCriteria.add(Restrictions.eq("codeType", PROPERTY_TYPE));
+//        String[] emailConfigKey = new String[5];
+//        emailConfigKey[0] = EmailConfig.DB_CONFIG_KEY_UESRNAME;
+//        emailConfigKey[1] = EmailConfig.DB_CONFIG_KEY_PASSWORD;
+//        emailConfigKey[2] = EmailConfig.DB_CONFIG_KEY_SMTP;
+//        emailConfigKey[3] = EmailConfig.DB_CONFIG_KEY_SYS_SENDER;
+//        emailConfigKey[4] = EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER;
+//        detachedCriteria.add(Restrictions.in("key", emailConfigKey));
+//        List<CodeTable> result = this.findBy(detachedCriteria);
+//        if(result == null || result.isEmpty()) return null; 
+//        EmailConfig emailConfig = new EmailConfig();
+//        for(CodeTable each : result) {
+//            String key = each.getKey();
+//            switch (key) {
+//            case EmailConfig.DB_CONFIG_KEY_UESRNAME:emailConfig.setUsername(each.getValue());break;
+//            case EmailConfig.DB_CONFIG_KEY_PASSWORD:emailConfig.setPassword(each.getValue());break;
+//            case EmailConfig.DB_CONFIG_KEY_SMTP:emailConfig.setSmtp(each.getValue());break;
+//            case EmailConfig.DB_CONFIG_KEY_SYS_SENDER:emailConfig.setSender(each.getValue());break;
+//            case EmailConfig.DB_CONFIG_KEY_DEFAULT_RECEIVER:emailConfig.setDefaultReceiver(each.getValue());break;
+//            }
+//        }
+//        return  emailConfig;
     }
     
 }

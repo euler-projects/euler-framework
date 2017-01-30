@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import net.eulerframework.common.util.io.FileReadException;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
@@ -33,7 +34,7 @@ public class FileUploadAndDownloadWebController extends AbstractWebController {
     private IArchivedFileService archivedFileService;
     
     @RequestMapping(value = "file/{id}", method = RequestMethod.GET)
-    public void downloadArchivedFile(@PathVariable("id") String archivedFileId, HttpServletResponse response) throws IOException {
+    public void downloadArchivedFile(@PathVariable("id") String archivedFileId, HttpServletResponse response) throws FileReadException, IOException {
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
         if(archivedFile == null)
@@ -53,6 +54,8 @@ public class FileUploadAndDownloadWebController extends AbstractWebController {
             this.writeFile(fileName, file);
         } catch (FileNotFoundException e) {
             throw new ResourceNotFoundException(e);
+        } catch (FileReadException e) {
+            throw e;
         } catch (IOException e) {
             throw e;
         }
