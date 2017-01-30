@@ -19,8 +19,8 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IAuthorityService;
-import net.eulerframework.web.module.authentication.service.IUserService;
+import net.eulerframework.web.module.authentication.service.AuthorityService;
+import net.eulerframework.web.module.authentication.service.UserService;
 
 @AdminWebController
 @Scope("prototype")
@@ -29,11 +29,11 @@ public class SecurityWebController extends AbstractWebController {
     
 
 	@Resource
-	private IUserService userService;
+	private UserService userService;
 	@Resource
 	private UserDetailsService userDetailsService;
 	@Resource
-	private IAuthorityService authorityService;
+	private AuthorityService authorityService;
 
     @RequestMapping(value ="user",method=RequestMethod.GET)
     public String user(){

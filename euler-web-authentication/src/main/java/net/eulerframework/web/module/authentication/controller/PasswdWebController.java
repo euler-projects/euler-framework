@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
-import net.eulerframework.web.module.authentication.service.IRootService;
+import net.eulerframework.web.module.authentication.service.RootService;
 import net.eulerframework.web.module.authentication.util.UserContext;
 
 /**
@@ -24,7 +24,7 @@ import net.eulerframework.web.module.authentication.util.UserContext;
 public class PasswdWebController extends AbstractWebController {
     
     @Resource
-    private IRootService rootService;
+    private RootService rootService;
     
     @RequestMapping(value = { "/root" }, method = RequestMethod.GET)
     public void resetRootPwd() {

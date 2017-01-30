@@ -46,20 +46,20 @@ public abstract class WebConfig {
         private static final String WEB_MULITPART_FILE_SIZE_THRESHOLD = "web.multiPart.fileSizeThreshold";
 
         //[security]
-        private static final String SEC_WEB_AUTHENTICATION_TYPE = "sec.web.authenticationType";
-        private static final String SEC_API_AUTHENTICATION_TYPE = "sec.api.authenticationType";
-        private static final String SEC_OAUTH_SERVER_TYPE = "sec.oauth.severType";
+        private static final String SECURITY_WEB_AUTHENTICATION_TYPE = "security.web.authenticationType";
+        private static final String SECURITY_API_AUTHENTICATION_TYPE = "security.api.authenticationType";
+        private static final String SECURITY_OAUTH_SERVER_TYPE = "security.oauth.severType";
         
-        private static final String SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = "sec.authentication.enableEmailSignin";
-        private static final String SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "sec.authentication.enableMobileSignin";
-        private static final String SEC_AUTHENTICATION_ENABLE_USER_CAHCE = "sec.authentication.enableUserCache";
-        private static final String SEC_AUTHENTICATION_USER_CAHCE_LIFE = "sec.authentication.userCacheLife";
+        private static final String SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = "security.authentication.enableEmailSignin";
+        private static final String SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "security.authentication.enableMobileSignin";
+        private static final String SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = "security.authentication.enableUserCache";
+        private static final String SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = "security.authentication.userCacheLife";
 
-        private static final String SEC_SIGNUP_USERNAME_FORMAT = "sec.signup.username.format";
-        private static final String SEC_SIGNUP_EMAIL_FORMAT = "sec.signup.email.format";
-        private static final String SEC_SIGNUP_PASSWORD_FORMAT = "sec.signup.password.format";
-        private static final String SEC_SIGNUP_PASSWORD_MIN_LENGTH = "sec.signup.password.minLength";
-        private static final String SEC_SIGNUP_AUTO_SIGNIN = "sec.signup.autoSignin";
+        private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
+        private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
+        private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "security.signup.password.format";
+        private static final String SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = "security.signup.password.minLength";
+        private static final String SECURITY_SIGNUP_AUTO_SIGNIN = "security.signup.autoSignin";
     }
 
     private static class WebConfigDefault {
@@ -83,19 +83,19 @@ public abstract class WebConfig {
         private static final long WEB_MULITPART_MAX_REQUEST_SIZE = 51_200L;
         private static final int WEB_MULITPART_FILE_SIZE_THRESHOLD = 1_024;
 
-        private static final WebAuthenticationType SEC_WEB_AUTHENTICATION_TYPE = WebAuthenticationType.LOCAL;
-        private static final ApiAuthenticationType SEC_API_AUTHENTICATION_TYPE = ApiAuthenticationType.NONE;
-        private static final OAuthServerType SEC_OAUTH_SERVER_TYPE = OAuthServerType.NEITHER;
-        private static final boolean SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = false;
-        private static final boolean SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
-        private static final boolean SEC_AUTHENTICATION_ENABLE_USER_CAHCE = false;
-        private static final long SEC_AUTHENTICATION_USER_CAHCE_LIFE = 0;
+        private static final WebAuthenticationType SECURITY_WEB_AUTHENTICATION_TYPE = WebAuthenticationType.LOCAL;
+        private static final ApiAuthenticationType SECURITY_API_AUTHENTICATION_TYPE = ApiAuthenticationType.NONE;
+        private static final OAuthServerType SECURITY_OAUTH_SERVER_TYPE = OAuthServerType.NEITHER;
+        private static final boolean SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = false;
+        private static final boolean SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
+        private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
+        private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
 
-        private static final String SEC_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; //至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
-        private static final String SEC_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; //可含有-_.的email
-        private static final String SEC_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; //ASCII可显示非空白字符
-        private static final int SEC_SIGNUP_PASSWORD_MIN_LENGTH = 6;
-        private static final boolean SEC_SIGNUP_AUTO_SIGNIN = true;
+        private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; //至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
+        private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; //可含有-_.的email
+        private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; //ASCII可显示非空白字符
+        private static final int SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = 6;
+        private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
 
     }
 
@@ -120,44 +120,44 @@ public abstract class WebConfig {
     }
 
     public static WebAuthenticationType getWebAuthenticationType() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE);
         if (cachedConfig != null) {
             return (WebAuthenticationType) cachedConfig;
         }
 
-        WebAuthenticationType result = properties.getEnumValue(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE,
-                WebConfigDefault.SEC_WEB_AUTHENTICATION_TYPE,
+        WebAuthenticationType result = properties.getEnumValue(WebConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE,
+                WebConfigDefault.SECURITY_WEB_AUTHENTICATION_TYPE,
                 true);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_WEB_AUTHENTICATION_TYPE, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE, result);
         return result;
     }
 
     public static ApiAuthenticationType getApiAuthenticationType() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_API_AUTHENTICATION_TYPE);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE);
         if (cachedConfig != null) {
             return (ApiAuthenticationType) cachedConfig;
         }
 
-        ApiAuthenticationType result = properties.getEnumValue(WebConfigKey.SEC_API_AUTHENTICATION_TYPE,
-                WebConfigDefault.SEC_API_AUTHENTICATION_TYPE,
+        ApiAuthenticationType result = properties.getEnumValue(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
+                WebConfigDefault.SECURITY_API_AUTHENTICATION_TYPE,
                 true);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_API_AUTHENTICATION_TYPE, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE, result);
         return result;
     }
 
     public static OAuthServerType getOAuthSeverType() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_OAUTH_SERVER_TYPE);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_OAUTH_SERVER_TYPE);
         if (cachedConfig != null) {
             return (OAuthServerType) cachedConfig;
         }
 
-        OAuthServerType result = properties.getEnumValue(WebConfigKey.SEC_OAUTH_SERVER_TYPE,
-                WebConfigDefault.SEC_OAUTH_SERVER_TYPE,
+        OAuthServerType result = properties.getEnumValue(WebConfigKey.SECURITY_OAUTH_SERVER_TYPE,
+                WebConfigDefault.SECURITY_OAUTH_SERVER_TYPE,
                 true);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_OAUTH_SERVER_TYPE, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_OAUTH_SERVER_TYPE, result);
         return result;
     }
 
@@ -328,107 +328,116 @@ public abstract class WebConfig {
 
     public static int getMinPasswordLength() {
 
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH);
         if (cachedConfig != null) {
             return (int) cachedConfig;
         }
 
-        int result = properties.getIntValue(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH,
-                WebConfigDefault.SEC_SIGNUP_PASSWORD_MIN_LENGTH);
+        int result = properties.getIntValue(WebConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH,
+                WebConfigDefault.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH);
+        
+        if(result > getMaxPasswordLength()) {
+            result = getMaxPasswordLength();
+            log.warn("Password length must less than " + result + ", use " + result + " as " + WebConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH);
+        }
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_PASSWORD_MIN_LENGTH, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH, result);
         return result;
+    }
+    
+    public static int getMaxPasswordLength() {
+        return 20;
     }
 
     public static String getUsernameFormat() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT);
         if (cachedConfig != null) {
             return (String) cachedConfig;
         }
 
-        String result = properties.get(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT,
-                WebConfigDefault.SEC_SIGNUP_USERNAME_FORMAT);
+        String result = properties.get(WebConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT,
+                WebConfigDefault.SECURITY_SIGNUP_USERNAME_FORMAT);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_USERNAME_FORMAT, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT, result);
         return result;
     }
 
     public static String getEmailFormat() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT);
         if (cachedConfig != null) {
             return (String) cachedConfig;
         }
 
-        String result = properties.get(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT,
-                WebConfigDefault.SEC_SIGNUP_EMAIL_FORMAT);
+        String result = properties.get(WebConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT,
+                WebConfigDefault.SECURITY_SIGNUP_EMAIL_FORMAT);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_EMAIL_FORMAT, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT, result);
         return result;
     }
 
     public static String getPasswordFormat() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT);
         if (cachedConfig != null) {
             return (String) cachedConfig;
         }
 
-        String result = properties.get(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT,
-                WebConfigDefault.SEC_SIGNUP_PASSWORD_FORMAT);
+        String result = properties.get(WebConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT,
+                WebConfigDefault.SECURITY_SIGNUP_PASSWORD_FORMAT);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_PASSWORD_FORMAT, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT, result);
         return result;
     }
 
     public static boolean isEnableEmailSignin() {
 
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
         if (cachedConfig != null) {
             return (boolean) cachedConfig;
         }
 
-        boolean result = properties.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
-                WebConfigDefault.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
+        boolean result = properties.getBooleanValue(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
+                WebConfigDefault.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_EMAIL_SIGNIN, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN, result);
         return result;
     }
 
     public static boolean isEnableMobileSignin() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
         if (cachedConfig != null) {
             return (boolean) cachedConfig;
         }
 
-        boolean result = properties.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
-                WebConfigDefault.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
+        boolean result = properties.getBooleanValue(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
+                WebConfigDefault.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_MOBILE_SIGNIN, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN, result);
         return result;
     }
 
     public static boolean isEnableUserCache() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE);
         if (cachedConfig != null) {
             return (boolean) cachedConfig;
         }
 
-        boolean result = properties.getBooleanValue(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE,
-                WebConfigDefault.SEC_AUTHENTICATION_ENABLE_USER_CAHCE);
+        boolean result = properties.getBooleanValue(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE,
+                WebConfigDefault.SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_ENABLE_USER_CAHCE, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE, result);
         return result;
     }
 
     public static long getUserAuthenticationCacheLife() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USER_CAHCE_LIFE);
         if (cachedConfig != null) {
             return (long) cachedConfig;
         }
 
-        long result = properties.getLongValue(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE,
-                WebConfigDefault.SEC_AUTHENTICATION_USER_CAHCE_LIFE);
+        long result = properties.getLongValue(WebConfigKey.SECURITY_AUTHENTICATION_USER_CAHCE_LIFE,
+                WebConfigDefault.SECURITY_AUTHENTICATION_USER_CAHCE_LIFE);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_AUTHENTICATION_USER_CAHCE_LIFE, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_AUTHENTICATION_USER_CAHCE_LIFE, result);
         return result;
     }
 
@@ -536,15 +545,15 @@ public abstract class WebConfig {
     }
 
     public static boolean getAutoSigninAfterSignup() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN);
         if (cachedConfig != null) {
             return (boolean) cachedConfig;
         }
 
-        boolean result = properties.getBooleanValue(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN,
-                WebConfigDefault.SEC_SIGNUP_AUTO_SIGNIN);
+        boolean result = properties.getBooleanValue(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN,
+                WebConfigDefault.SECURITY_SIGNUP_AUTO_SIGNIN);
 
-        CONFIG_CAHCE.put(WebConfigKey.SEC_SIGNUP_AUTO_SIGNIN, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN, result);
         return result;
     }
 

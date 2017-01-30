@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.service.impl;
+package net.eulerframework.web.module.authentication.service;
 
 import java.io.IOException;
 
@@ -13,15 +13,16 @@ import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.IUserDao;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IRootService;
 
 @Service
-public class RootService extends BaseService implements IRootService {
+public class RootService extends BaseService {
 
     @Resource private IUserDao userDao;
     @Resource private PasswordEncoder passwordEncoder;
-    
-    @Override
+
+    /**
+     * 重置root用户的密码,只用root用户在数据的密码字段被设置为NaN才能使用,重置的密码保存在WEB-INF下的.rootpassword文件中
+     */
     public void resetRootPasswordRWT() {
         User root = this.userDao.findUserByName("root");
         if(!root.getPassword().equals("NaN"))
@@ -46,7 +47,9 @@ public class RootService extends BaseService implements IRootService {
         System.out.println("root password has been reset, new password was saved in " + rootpasswordFilePath);
     }
 
-    @Override
+    /**
+     * 重置admin用户的密码,只用admin用户在数据的密码字段被设置为NaN才能使用,重置的密码保存在WEB-INF下的.adminpassword文件中
+     */
     public void resetAdminPasswordRWT() {
         User admin = this.userDao.findUserByName("admin");
         if(!admin.getPassword().equals("NaN"))

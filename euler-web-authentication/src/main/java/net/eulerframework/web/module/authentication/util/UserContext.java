@@ -15,12 +15,12 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IUserService;
+import net.eulerframework.web.module.authentication.service.UserService;
 
 public class UserContext {
-    private static IUserService userService;
+    private static UserService userService;
 
-    public static void setUserService(IUserService userService) {
+    public static void setUserService(UserService userService) {
         UserContext.userService = userService;
     }
 

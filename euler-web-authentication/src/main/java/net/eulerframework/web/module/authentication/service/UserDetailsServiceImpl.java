@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.service.impl;
+package net.eulerframework.web.module.authentication.service;
 
 import javax.annotation.Resource;
 
@@ -12,12 +12,12 @@ import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.IUserService;
+import net.eulerframework.web.module.authentication.service.UserService;
 
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Resource private IUserService userSerivce;
+    @Resource private UserService userSerivce;
     
     private boolean enableEmailSignin = WebConfig.isEnableMobileSignin();
     private boolean enableMobileSignin = WebConfig.isEnableMobileSignin();

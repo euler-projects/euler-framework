@@ -28,11 +28,11 @@ import net.eulerframework.web.module.authentication.vo.UserResetInfoVo;
 public class AuthenticationService extends BaseService implements IAuthenticationService {
 
     @Resource
-    private IUserService userService;
+    private UserService userService;
     @Resource
     private IUserProfileService userProfileService;
     @Resource
-    private IAuthorityService authorityService;
+    private AuthorityService authorityService;
     private boolean autoAuthorization = WebConfig.getAutoAuthorization();
     private String[] autoAuthorizationGroupId = WebConfig.getAutoAuthorizationId();
     

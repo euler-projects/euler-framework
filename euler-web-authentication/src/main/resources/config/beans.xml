@@ -27,7 +27,7 @@
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
-    <bean id="authorityService" class="net.eulerframework.web.module.authentication.service.impl.AuthorityService">
+    <bean id="authorityService" class="net.eulerframework.web.module.authentication.service.AuthorityService">
         <property name="authorityDao" ref="authorityDao"/>
         <property name="groupDao" ref="groupDao"/>
     </bean>   
