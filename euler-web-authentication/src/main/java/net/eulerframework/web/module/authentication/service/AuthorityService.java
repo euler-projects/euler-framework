@@ -4,6 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
 import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -13,18 +17,13 @@ import net.eulerframework.web.module.authentication.dao.IGroupDao;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
 
+@Service
 public class AuthorityService extends BaseService {
 
+    @Resource
     private IGroupDao groupDao;
+    @Resource
     private IAuthorityDao authorityDao;
-
-    public void setGroupDao(IGroupDao groupDao) {
-        this.groupDao = groupDao;
-    }
-
-    public void setAuthorityDao(IAuthorityDao authorityDao) {
-        this.authorityDao = authorityDao;
-    }
 
     public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
         return this.groupDao.findGroupByPage(pageQueryRequest);
