@@ -12,10 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
 import net.eulerframework.web.core.base.response.Status;
-import net.eulerframework.web.core.exception.BadRequestException;
-import net.eulerframework.web.core.exception.IllegalParamException;
-import net.eulerframework.web.core.exception.ResourceExistException;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
+import net.eulerframework.web.core.exception.api.BadRequestException;
+import net.eulerframework.web.core.exception.api.ResourceExistsException;
+import net.eulerframework.web.core.exception.api.ResourceNotFoundException;
 
 public abstract class AbstractApiEndpoint extends BaseController {/**  
      * 用于在程序发生{@link BadRequestException}异常时统一返回错误信息 
@@ -30,27 +29,15 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     }
     
     /**  
-     * 用于在程序发生{@link ResourceExistException}异常时统一返回错误信息 
+     * 用于在程序发生{@link ResourceExistsException}异常时统一返回错误信息 
      * @return  
      */  
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ResourceExistException.class})   
-    public Object exception(ResourceExistException e) {
+    @ExceptionHandler({ResourceExistsException.class})   
+    public Object exception(ResourceExistsException e) {
         this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getMessage());
-    }
-    
-    /**  
-     * 用于在程序发生{@link IllegalParamException}异常时统一返回错误信息 
-     * @return  
-     */  
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({IllegalParamException.class})   
-    public Object illegalParamException(IllegalParamException e) {
-        this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     
     /**  
@@ -85,6 +72,7 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler({AccessDeniedException.class})   
     public Object accessDeniedException(AccessDeniedException e) {
+        this.logger.error(e.getMessage(), e);
         return new HttpStatusResponse(HttpStatus.FORBIDDEN);
     }
     

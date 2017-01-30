@@ -1,16 +1,16 @@
-package net.eulerframework.web.core.exception;
+package net.eulerframework.web.core.exception.web;
 
 @SuppressWarnings("serial")
-public class DefaultViewException extends ViewException {
+public class DefaultAjaxException extends AjaxException {
     
     private String msg;
     private int code;
     
-    public DefaultViewException(String displauMsg, Throwable cause) {
+    public DefaultAjaxException(String displauMsg, Throwable cause) {
         this(0, displauMsg, cause);
     }
     
-    public DefaultViewException(int errorCode, String displauMsg, Throwable cause) {
+    public DefaultAjaxException(int errorCode, String displauMsg, Throwable cause) {
         super(cause);
         this.msg = displauMsg;
         this.code = errorCode;

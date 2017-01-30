@@ -32,6 +32,7 @@ public abstract class WebConfig {
         private final static String CORE_CACHE_USERCONTEXT_CAHCE_LIFE = "core.cache.userContext.cacheLife";
 
         //[web]
+        private final static String WEB_DEFAULT_THEME = "web.defaultTheme";
         private final static String WEB_UPLOAD_PATH = "web.uploadPath";
         private final static String WEB_JSP_PATH = "web.jspPath";
         private final static String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
@@ -71,6 +72,7 @@ public abstract class WebConfig {
         private final static long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
         private final static long CORE_CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L;
 
+        private final static String WEB_DEFAULT_THEME = "default";
         private final static String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
         private final static String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
         private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
@@ -554,6 +556,19 @@ public abstract class WebConfig {
                 WebConfigDefault.SECURITY_SIGNUP_AUTO_SIGNIN);
 
         CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN, result);
+        return result;
+    }
+
+    public static String getDefaultTheme() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_THEME);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.WEB_DEFAULT_THEME,
+                WebConfigDefault.WEB_DEFAULT_THEME);
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_DEFAULT_THEME, result);
         return result;
     }
 

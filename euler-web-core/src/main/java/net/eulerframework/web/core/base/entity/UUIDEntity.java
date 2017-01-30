@@ -7,8 +7,6 @@ import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import net.eulerframework.web.core.exception.EntityCompareException;
-
 /**
  * <strong>UUID主键</strong>实体<br>
  * 适用于任何数据库,如Oracle等
@@ -46,7 +44,7 @@ public abstract class UUIDEntity<T extends UUIDEntity<?>> implements BaseEntity<
             return 1;
         
         if (getClass() != obj.getClass())
-            throw new EntityCompareException("两比较对象类型不一致");
+            throw new RuntimeException("两比较对象类型不一致");
         
         if(this.getId() == null)
             return 1;

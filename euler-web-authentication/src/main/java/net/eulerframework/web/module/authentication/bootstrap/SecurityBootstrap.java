@@ -8,12 +8,12 @@ import org.springframework.security.web.context.AbstractSecurityWebApplicationIn
 @Order(200)
 public class SecurityBootstrap extends AbstractSecurityWebApplicationInitializer
 {
-    private static final Logger log = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     @Override
     protected boolean enableHttpSessionEventPublisher()
     {
-        log.info("Executing security bootstrap.");
+        this.logger.info("Executing security bootstrap.");
 
         return true;
     }

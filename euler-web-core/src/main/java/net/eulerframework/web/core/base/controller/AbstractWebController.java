@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.response.AjaxResponse;
-import net.eulerframework.web.core.exception.AjaxException;
-import net.eulerframework.web.core.exception.PageNotFoundException;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.core.exception.ViewException;
+import net.eulerframework.web.core.exception.api.ResourceNotFoundException;
+import net.eulerframework.web.core.exception.web.AjaxException;
+import net.eulerframework.web.core.exception.web.PageNotFoundException;
+import net.eulerframework.web.core.exception.web.ViewException;
 
 public abstract class AbstractWebController extends BaseController {
 
@@ -64,7 +64,7 @@ public abstract class AbstractWebController extends BaseController {
         }
 
         if(StringTool.isNull(theme)) {
-            theme = "default";
+            theme = WebConfig.getDefaultTheme();
         }
 
         return theme;

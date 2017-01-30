@@ -11,8 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -32,6 +30,7 @@ import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.common.util.CalendarTool;
 import net.eulerframework.common.util.Generic;
 import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.log.LogSupport;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
@@ -39,14 +38,9 @@ import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest.OrderMode;
 import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
 import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.core.exception.IllegalParamException;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 
-public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
-
-    protected final Logger logger = LogManager.getLogger(this.getClass());
-
-    protected final Logger log = LogManager.getLogger();
+public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implements IBaseDao<T> {
 
     private SessionFactory sessionFactory;
 
@@ -398,7 +392,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         try {
             this.entityClass.getDeclaredField(property);
         } catch (NoSuchFieldException e) {
-            throw new IllegalParamException("Property '" + property + "' not exist");
+            throw new IllegalArgumentException("Property '" + property + "' not exist");
         }
         
         switch (orderMode) {
@@ -407,7 +401,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         case DESC:
             return Order.desc(property);
         default:
-            throw new IllegalParamException("Unknown order mode: " + orderMode);        
+            throw new IllegalArgumentException("Unknown order mode: " + orderMode);        
         }
     }
 
@@ -416,7 +410,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
         try {
             field = this.entityClass.getDeclaredField(property);
         } catch (NoSuchFieldException e) {
-            throw new IllegalParamException("Property '" + property + "' not exist");
+            throw new IllegalArgumentException("Property '" + property + "' not exist");
         }
         
         
@@ -452,7 +446,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
             Object[] array2 = this.generateValueArray(value, field.getType());
             return Restrictions.not(Restrictions.between(property, array2[0], array2[1]));
         default:
-            throw new IllegalParamException("Unknown query mode: " + queryMode);
+            throw new IllegalArgumentException("Unknown query mode: " + queryMode);
         }
     }
     
@@ -493,7 +487,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
                 try {
                     ret = CalendarTool.parseDate(value, "yyyy-MM-dd HH:mm:ss");
                 } catch (ParseException e1) {
-                    throw new IllegalParamException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss'");
+                    throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss'");
                 }
             }
             return ret;
@@ -501,6 +495,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> implements IBaseDao<T> {
             return new BigDecimal(value);
         } 
         
-        throw new IllegalParamException("Unsupport query property type: " + clazz);
+        throw new IllegalArgumentException("Unsupport query property type: " + clazz);
     }
 }

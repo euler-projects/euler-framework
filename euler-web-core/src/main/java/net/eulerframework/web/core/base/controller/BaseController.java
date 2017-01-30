@@ -7,8 +7,6 @@ import java.util.Date;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -19,8 +17,6 @@ import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
-    
-    protected final Logger logger = LogManager.getLogger(this.getClass());
     
     @Resource private ObjectMapper objectMapper;
     

@@ -1,9 +1,7 @@
-package net.eulerframework.web.core.exception;
-
-
+package net.eulerframework.web.core.exception.api;
 
 @SuppressWarnings("serial")
-public class BadRequestException extends RuntimeException {
+public class BadRequestException extends ApiException {
 
     public BadRequestException() {
         super();

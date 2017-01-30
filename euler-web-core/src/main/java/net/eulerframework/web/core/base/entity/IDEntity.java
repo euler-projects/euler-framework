@@ -6,8 +6,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
-import net.eulerframework.web.core.exception.EntityCompareException;
-
 /**
  * <strong>自增主键</strong>实体<br>
  * 适用与带有主键自增功能的数据库
@@ -44,7 +42,7 @@ public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T> {
             return 1;
         
         if (getClass() != obj.getClass())
-            throw new EntityCompareException("两比较对象类型不一致");
+            throw new RuntimeException("两比较对象类型不一致");
         
         if(this.getId() == null)
             return 1;

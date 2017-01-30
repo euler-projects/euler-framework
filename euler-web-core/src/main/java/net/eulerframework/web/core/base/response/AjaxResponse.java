@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.exception.AjaxException;
+import net.eulerframework.web.core.exception.web.AjaxException;
 import net.eulerframework.web.core.i18n.Tag;
 
 public class AjaxResponse<T> implements BaseResponse {

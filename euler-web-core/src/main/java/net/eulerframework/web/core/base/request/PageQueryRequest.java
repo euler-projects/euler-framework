@@ -3,7 +3,6 @@ package net.eulerframework.web.core.base.request;
 import javax.servlet.http.HttpServletRequest;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.core.exception.IllegalParamException;
 
 public class PageQueryRequest extends QueryRequest {
 
@@ -21,7 +20,7 @@ public class PageQueryRequest extends QueryRequest {
         
         String pageSizeStr = request.getParameter(pageSizeParamName);        
         if(StringTool.isNull(pageSizeStr)){
-            throw new IllegalParamException("Param '" +pageSizeParamName+ "' is required");
+            throw new IllegalArgumentException("Param '" +pageSizeParamName+ "' is required");
         }        
         this.pageSize = Integer.parseInt(request.getParameter(pageSizeParamName));
         
@@ -30,12 +29,12 @@ public class PageQueryRequest extends QueryRequest {
         } else {
             String pageIndexStr = request.getParameter(pageIndexParamName);        
             if(StringTool.isNull(pageIndexStr)){
-                throw new IllegalParamException("Param '" +pageIndexParamName+ "' is required");
+                throw new IllegalArgumentException("Param '" +pageIndexParamName+ "' is required");
             }        
             this.pageIndex = Integer.parseInt(request.getParameter(pageIndexParamName));
             
             if(this.pageIndex < 0) {
-                throw new IllegalParamException("Param '" +pageIndexParamName+ "' must larger than 0");                
+                throw new IllegalArgumentException("Param '" +pageIndexParamName+ "' must larger than 0");                
             }
         }
     }

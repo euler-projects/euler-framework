@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.eulerframework.common.util.StringTool;
-import net.eulerframework.web.core.exception.BadRequestException;
+import net.eulerframework.web.core.exception.api.BadRequestException;
 
 /**
  * 用来接收POST传递进的form参数

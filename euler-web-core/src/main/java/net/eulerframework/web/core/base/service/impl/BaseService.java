@@ -4,11 +4,10 @@ import java.util.Collection;
 
 import javax.servlet.ServletContext;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
+import net.eulerframework.common.util.log.LogSupport;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.service.IBaseService;
@@ -19,9 +18,7 @@ import net.eulerframework.web.core.base.service.IBaseService;
  * @author cFrost
  *
  */
-public abstract class BaseService implements IBaseService {
-    
-    protected final Logger logger = LogManager.getLogger(this.getClass());
+public abstract class BaseService extends LogSupport implements IBaseService {
     
     protected ServletContext getServletContext(){
         WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  

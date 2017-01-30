@@ -9,7 +9,10 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-public abstract class WebContextAccessable {
+import net.eulerframework.common.util.log.LogSupport;
+
+
+public abstract class WebContextAccessable extends LogSupport {
     
     protected ServletContext getServletContext(){
         WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
