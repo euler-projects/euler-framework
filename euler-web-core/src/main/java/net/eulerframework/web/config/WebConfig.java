@@ -6,7 +6,7 @@ import org.springframework.web.context.ContextLoader;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
-import net.eulerframework.common.util.FilePathTool;
+import net.eulerframework.common.util.FileReader;
 import net.eulerframework.common.util.PropertyReader;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.common.util.exception.PropertyReadException;
@@ -178,7 +178,7 @@ public abstract class WebConfig {
                 result = result.substring(0, result.length() - 1);
             }
 
-            result = FilePathTool.changeToUnixFormat(result);
+            result = FileReader.changeToUnixFormat(result);
 
             if (!result.startsWith("/"))
                 result = "/" + result;
@@ -207,7 +207,7 @@ public abstract class WebConfig {
             result = result.substring(0, result.length() - 1);
         }
 
-        result = FilePathTool.changeToUnixFormat(result);
+        result = FileReader.changeToUnixFormat(result);
 
         if (!result.startsWith("/"))
             result = "/" + result;
@@ -224,7 +224,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = FilePathTool.changeToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
+            result = FileReader.changeToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
         } catch (PropertyReadException e) {
             if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                 log.info("OS is windows");
@@ -255,7 +255,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = FilePathTool
+        String result = FileReader
                 .changeToUnixFormat(properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";
@@ -270,7 +270,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = FilePathTool.changeToUnixFormat(
+        String result = FileReader.changeToUnixFormat(
                 properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";
