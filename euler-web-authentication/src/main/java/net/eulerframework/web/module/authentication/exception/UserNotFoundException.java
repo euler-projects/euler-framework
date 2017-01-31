@@ -1,7 +1,5 @@
 package net.eulerframework.web.module.authentication.exception;
 
-
-
 @SuppressWarnings("serial")
 public class UserNotFoundException extends Exception {
     public UserNotFoundException() {
@@ -19,10 +17,9 @@ public class UserNotFoundException extends Exception {
     public UserNotFoundException(Throwable cause) {
         super(cause);
     }
-    
-    protected UserNotFoundException(String message, Throwable cause,
-                               boolean enableSuppression,
-                               boolean writableStackTrace) {
+
+    protected UserNotFoundException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

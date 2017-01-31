@@ -17,6 +17,7 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AbstractWebController;
 import net.eulerframework.web.core.base.response.AjaxResponse;
+import net.eulerframework.web.core.base.response.EmptySuccessAjaxResponse;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
@@ -103,7 +104,7 @@ public class AuthenticationWebController extends AbstractWebController {
     @RequestMapping(value = "resetPasswordWithMobile", method = RequestMethod.POST)
     public AjaxResponse<String> resetPasswordWithMobile(@RequestParam String mobile) {
         this.authenticationService.passwdResetSMSGen(mobile);
-        return new AjaxResponse<>();
+        return new EmptySuccessAjaxResponse();
     }
 
     @RequestMapping(value = "resetPassword", method = RequestMethod.POST)

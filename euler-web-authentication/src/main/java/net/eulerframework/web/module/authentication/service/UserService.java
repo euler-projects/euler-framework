@@ -17,18 +17,18 @@ import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.exception.IncorrectPasswordException;
-import net.eulerframework.web.module.authentication.exception.IncorrectPasswordFormatException;
-import net.eulerframework.web.module.authentication.exception.IncorrectPasswordLengthException;
-import net.eulerframework.web.module.authentication.exception.IncorrectUserEmailFormatException;
-import net.eulerframework.web.module.authentication.exception.IncorrectUsernameFormatException;
-import net.eulerframework.web.module.authentication.exception.NullPasswordException;
-import net.eulerframework.web.module.authentication.exception.NullUserEmailException;
-import net.eulerframework.web.module.authentication.exception.NullUserNameException;
-import net.eulerframework.web.module.authentication.exception.UserEmailAlreadyUsedFormatException;
-import net.eulerframework.web.module.authentication.exception.UserMobileAlreadyUsedFormatException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.exception.UsernameAlreadyUsedFormatException;
+import net.eulerframework.web.module.authentication.exception.signup.IncorrectPasswordException;
+import net.eulerframework.web.module.authentication.exception.signup.IncorrectPasswordFormatException;
+import net.eulerframework.web.module.authentication.exception.signup.IncorrectPasswordLengthException;
+import net.eulerframework.web.module.authentication.exception.signup.IncorrectUserEmailFormatException;
+import net.eulerframework.web.module.authentication.exception.signup.IncorrectUsernameFormatException;
+import net.eulerframework.web.module.authentication.exception.signup.NullPasswordException;
+import net.eulerframework.web.module.authentication.exception.signup.NullUserEmailException;
+import net.eulerframework.web.module.authentication.exception.signup.NullUserNameException;
+import net.eulerframework.web.module.authentication.exception.signup.UserEmailAlreadyUsedFormatException;
+import net.eulerframework.web.module.authentication.exception.signup.UserMobileAlreadyUsedFormatException;
+import net.eulerframework.web.module.authentication.exception.signup.UsernameAlreadyUsedFormatException;
 
 @Service
 public class UserService extends BaseService {
