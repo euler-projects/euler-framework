@@ -17,18 +17,8 @@ import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.SignUpException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.exception.signup.IncorrectPasswordException;
-import net.eulerframework.web.module.authentication.exception.signup.IncorrectPasswordFormatException;
-import net.eulerframework.web.module.authentication.exception.signup.IncorrectPasswordLengthException;
-import net.eulerframework.web.module.authentication.exception.signup.IncorrectUserEmailFormatException;
-import net.eulerframework.web.module.authentication.exception.signup.IncorrectUsernameFormatException;
-import net.eulerframework.web.module.authentication.exception.signup.NullPasswordException;
-import net.eulerframework.web.module.authentication.exception.signup.NullUserEmailException;
-import net.eulerframework.web.module.authentication.exception.signup.NullUserNameException;
-import net.eulerframework.web.module.authentication.exception.signup.UserEmailAlreadyUsedFormatException;
-import net.eulerframework.web.module.authentication.exception.signup.UserMobileAlreadyUsedFormatException;
-import net.eulerframework.web.module.authentication.exception.signup.UsernameAlreadyUsedFormatException;
 
 @Service
 public class UserService extends BaseService {
@@ -131,7 +121,7 @@ public class UserService extends BaseService {
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
 
         if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new IncorrectPasswordException();
+            throw new SignUpException("INCORRECT_PASSWORD");
         }
 
         String password = newPassword.trim();
@@ -169,38 +159,38 @@ public class UserService extends BaseService {
 
     private void validUser(User user) {
         if (user.getUsername() == null) {
-            throw new NullUserNameException();
+            throw new SignUpException("USERNAME_IS_NULL");
         }
         if (user.getEmail() == null) {
-            throw new NullUserEmailException();
+            throw new SignUpException("EMAIL_IS_NULL");
         }
         if (user.getPassword() == null) {
-            throw new NullPasswordException();
+            throw new SignUpException("PASSWORD_IS_NULL");
         }
         // if(!(user.getMobile())) {}
         // "Mobile is null"));
 
         if (!(user.getUsername().matches(WebConfig.getUsernameFormat()))) {
-            throw new IncorrectUsernameFormatException();
+            throw new SignUpException("INCORRECT_USERNAME_FORMAT");
         }
         if (!(user.getEmail().matches(WebConfig.getEmailFormat()))) {
-            throw new IncorrectUserEmailFormatException();
+            throw new SignUpException("INCORRECT_EMAIL_FORMAT");
         }
     }
 
     private void validNewUser(User user) {
 
         if (this.loadUserByUsername(user.getUsername()) != null) {
-            throw new UsernameAlreadyUsedFormatException();
+            throw new SignUpException("USERNAME_ALREADY_BE_USED");
         }
         if (this.loadUserByEmail(user.getEmail()) != null) {
-            throw new UserEmailAlreadyUsedFormatException();
+            throw new SignUpException("EMAIL_ALREADY_BE_USED");
 
         }
 
         if (user.getMobile() != null) {
             if (this.loadUserByMobile(user.getMobile()) != null) {
-                throw new UserMobileAlreadyUsedFormatException();
+                throw new SignUpException("MOBILE_ALREADY_BE_USED");
             }
 
         }
@@ -211,11 +201,11 @@ public class UserService extends BaseService {
 
     private void validPassword(String password) {
         if (!password.matches(WebConfig.getPasswordFormat())) {
-            throw new IncorrectPasswordFormatException();
+            throw new SignUpException("INCORRECT_PASSWORD_FORMAT");
         }
         if (!(password.length() >= WebConfig.getMinPasswordLength()
                 && password.length() <= WebConfig.getMaxPasswordLength())) {
-            throw new IncorrectPasswordLengthException();
+            throw new SignUpException("INCORRECT_PASSWORD_LENGTH");
         }
     }
 }
