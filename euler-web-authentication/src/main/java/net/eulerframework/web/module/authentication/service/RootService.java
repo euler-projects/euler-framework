@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.exception.api.ResourceNotFoundException;
+import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 

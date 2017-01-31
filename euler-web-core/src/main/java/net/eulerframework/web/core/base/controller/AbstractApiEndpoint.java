@@ -12,9 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import net.eulerframework.web.core.base.response.HttpStatusResponse;
 import net.eulerframework.web.core.base.response.Status;
+import net.eulerframework.web.core.exception.ResourceExistsException;
+import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.api.BadRequestException;
-import net.eulerframework.web.core.exception.api.ResourceExistsException;
-import net.eulerframework.web.core.exception.api.ResourceNotFoundException;
 
 public abstract class AbstractApiEndpoint extends BaseController {/**  
      * 用于在程序发生{@link BadRequestException}异常时统一返回错误信息 

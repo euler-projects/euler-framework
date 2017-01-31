@@ -1,7 +1,7 @@
-package net.eulerframework.web.core.exception.api;
+package net.eulerframework.web.core.exception;
 
 @SuppressWarnings("serial")
-public class ResourceNotFoundException extends ApiException {
+public class ResourceNotFoundException extends RuntimeException {
 
     public ResourceNotFoundException() {
         super();
