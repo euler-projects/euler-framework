@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.service.RootService;
 import net.eulerframework.web.module.authentication.util.UserContext;
 
@@ -19,9 +19,8 @@ import net.eulerframework.web.module.authentication.util.UserContext;
  *
  */
 @WebController
-@Scope("prototype")
 @RequestMapping("/passwd")
-public class PasswdWebController extends AbstractWebController {
+public class PasswdWebController extends JspSupportWebController {
     
     @Resource
     private RootService rootService;

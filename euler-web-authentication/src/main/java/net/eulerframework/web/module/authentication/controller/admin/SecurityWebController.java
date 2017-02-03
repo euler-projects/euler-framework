@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.web.core.annotation.AdminWebController;
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.Authority;
@@ -23,9 +23,8 @@ import net.eulerframework.web.module.authentication.service.AuthorityService;
 import net.eulerframework.web.module.authentication.service.UserService;
 
 @AdminWebController
-@Scope("prototype")
 @RequestMapping("security")
-public class SecurityWebController extends AbstractWebController {
+public class SecurityWebController extends JspSupportWebController {
     
 
 	@Resource

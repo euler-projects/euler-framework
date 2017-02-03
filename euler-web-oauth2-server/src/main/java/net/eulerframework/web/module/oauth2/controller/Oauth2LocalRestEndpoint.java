@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 @ApiEndpoint
-@Scope("prototype")
 @RequestMapping("/oauth2")
 public class Oauth2LocalRestEndpoint extends AbstractApiEndpoint {
 	

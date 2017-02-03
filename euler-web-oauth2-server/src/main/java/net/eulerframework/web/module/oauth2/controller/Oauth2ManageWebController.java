@@ -4,7 +4,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.exception.ResourceExistException;
@@ -21,9 +21,8 @@ import net.eulerframework.common.util.BeanTool;
 import net.eulerframework.web.core.annotation.WebController;
 
 @WebController
-@Scope("prototype")
 @RequestMapping("/manage/oauth2")
-public class Oauth2ManageWebController extends AbstractWebController {
+public class Oauth2ManageWebController extends JspSupportWebController {
     
     @Resource
     private IClientService clientService;

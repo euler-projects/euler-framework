@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import net.eulerframework.common.util.io.file.FileReadException;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.response.AjaxResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
@@ -26,9 +26,8 @@ import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.service.IArchivedFileService;
 
 @WebController
-@Scope("prototype")
 @RequestMapping("/")
-public class FileUploadAndDownloadWebController extends AbstractWebController {
+public class FileUploadAndDownloadWebController extends JspSupportWebController {
 
     @Resource
     private IArchivedFileService archivedFileService;

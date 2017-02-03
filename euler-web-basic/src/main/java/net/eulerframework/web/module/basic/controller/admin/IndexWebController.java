@@ -7,13 +7,12 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.AdminWebController;
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 
 @AdminWebController
-@Scope("prototype")
 @RequestMapping("/")
-public class IndexWebController extends AbstractWebController {
+public class IndexWebController extends JspSupportWebController {
     
     @RequestMapping(value={"","index"}, method = RequestMethod.GET)
     public String admin() {

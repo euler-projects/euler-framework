@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.response.AjaxResponse;
 import net.eulerframework.web.core.base.response.EmptySuccessAjaxResponse;
 import net.eulerframework.web.module.authentication.entity.User;
@@ -29,9 +29,8 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
  *
  */
 @WebController
-@Scope("prototype")
 @RequestMapping("/")
-public class AuthenticationWebController extends AbstractWebController {
+public class AuthenticationWebController extends JspSupportWebController {
 
     @Resource
     private IAuthenticationService authenticationService;
