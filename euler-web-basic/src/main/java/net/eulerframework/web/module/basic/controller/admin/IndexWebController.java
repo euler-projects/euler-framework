@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.basic.controller.admin;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.NoHandlerFoundException;

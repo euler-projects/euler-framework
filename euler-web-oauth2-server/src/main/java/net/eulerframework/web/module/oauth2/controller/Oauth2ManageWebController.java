@@ -10,7 +10,6 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.exception.ResourceExistException;
 import net.eulerframework.web.module.oauth2.entity.Client;
 import net.eulerframework.web.module.oauth2.service.IClientService;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

@@ -5,7 +5,6 @@ package net.eulerframework.web.module.authentication.controller;
 
 import javax.annotation.Resource;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 

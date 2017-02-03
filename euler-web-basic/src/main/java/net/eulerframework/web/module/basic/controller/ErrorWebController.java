@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.basic.controller;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
