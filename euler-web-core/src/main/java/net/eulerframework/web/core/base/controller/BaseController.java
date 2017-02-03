@@ -7,9 +7,6 @@ import java.util.Date;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.io.file.FileReadException;
@@ -27,19 +24,18 @@ public abstract class BaseController extends WebContextAccessable {
     protected void writeString(String string) throws IOException{
         this.getResponse().getOutputStream().write(string.getBytes("UTF-8"));
     }
-
+    
     protected void writeFile(String fileName, File file) throws FileReadException, IOException {
-        byte[] fileData = SimpleFileIOUtil.readFileByMultiBytes(file, 1024);
-        
         HttpServletResponse response = this.getResponse();
 
-        response.setCharacterEncoding("utf-8");
-        response.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
+        //response.setCharacterEncoding("utf-8");
+        String contentType = "application/octet-stream";//new MimetypesFileTypeMap().getContentType(fileName);
+        response.setContentType(contentType);
+        //response.setContentType(MimeType.getFileContentType("*"));
         response.setHeader("Content-Disposition", 
                 "attachment;fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
-
-        response.setStatus(HttpStatus.OK.value());
-        response.getOutputStream().write(fileData);
+        response.setHeader("Content-Length", String.valueOf(file.length()));
+        SimpleFileIOUtil.readFileToOutputStream(file, response.getOutputStream());
     }
     
     protected void setNoCacheHeader() {
