@@ -4,13 +4,13 @@ import net.eulerframework.common.util.log.LogSupport;
 
 public class AjaxResponse<T> extends LogSupport implements BaseResponse {
 
-    private T responseData;
+    private T data;
 
     public AjaxResponse(T data) {
-        this.responseData = data;
+        this.data = data;
     }
 
-    public T getResponseData() {
-        return responseData;
+    public T getData() {
+        return data;
     }
 }

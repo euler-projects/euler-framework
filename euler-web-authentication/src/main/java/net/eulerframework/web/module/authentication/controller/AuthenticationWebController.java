@@ -9,14 +9,11 @@ import javax.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
-import net.eulerframework.web.core.base.response.AjaxResponse;
-import net.eulerframework.web.core.base.response.EmptySuccessAjaxResponse;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
@@ -48,7 +45,7 @@ public class AuthenticationWebController extends JspSupportWebController {
     public String litesignup(@Valid User user) {
         this.authenticationService.signUp(user);
 
-        return this.success("SIGN_UP_SUCCESS");
+        return this.success();
     }
 
     @RequestMapping(value = "changePassword", method = RequestMethod.GET)
@@ -57,17 +54,20 @@ public class AuthenticationWebController extends JspSupportWebController {
     }
 
     @RequestMapping(value = "changePassword", method = RequestMethod.POST)
-    public String changePassword(String oldPassword, String newPassword) {
-
+    public String changePassword(
+            @RequestParam(required = true) String oldPassword, 
+            @RequestParam(required = true) String newPassword) {
         this.authenticationService.changePassword(oldPassword, newPassword);
-        return this.success("PASSWORD_CHANGED");
+        return this.success();
     }
 
     @RequestMapping(value = "resetPassword", method = RequestMethod.GET)
-    public String resetPasswordPage(@RequestParam(required = false) String type, @RequestParam(required = false) String token) {
+    public String resetPassword(
+            @RequestParam(required = true) String type, 
+            @RequestParam(required = false) String token) {
         if ("email".equalsIgnoreCase(type)) {
             if (StringTool.isNull(token))
-                return this.display("resetPasswordWithEmail");
+                return this.display("forgotPassword-email");
 
             try {
                 this.authenticationService.checkEmailResetToken(token);
@@ -85,36 +85,26 @@ public class AuthenticationWebController extends JspSupportWebController {
 
             }
         } else if ("sms".equalsIgnoreCase(type)) {
-            return this.display("resetPasswordWithMobile");
+            return this.display("forgotPassword-sms");
         } else {
             return this.notfound();
         }
 
     }
 
-    @RequestMapping(value = "resetPasswordWithEmail", method = RequestMethod.POST)
-    public String resetPasswordWithEmail(@RequestParam String email) {
-        this.authenticationService.passwdResetEmailGen(email);
-        return this.success("EMAIL_HAS_SENT_IF_EMAIL_EXIST");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "resetPasswordWithMobile", method = RequestMethod.POST)
-    public AjaxResponse<String> resetPasswordWithMobile(@RequestParam String mobile) {
-        this.authenticationService.passwdResetSMSGen(mobile);
-        return new EmptySuccessAjaxResponse();
-    }
-
     @RequestMapping(value = "resetPassword", method = RequestMethod.POST)
-    public String resetPassword(@RequestParam String type, @RequestParam String token, @RequestParam String password) {
+    public String resetPassword(
+            @RequestParam(required = true) String type, 
+            @RequestParam(required = true) String token, 
+            @RequestParam(required = true) String password) {
 
         try {
             if ("email".equalsIgnoreCase(type)) {
                 this.authenticationService.resetPasswordByEmailResetToken(token, password);
-                return this.success("PASSWORD_CHANGED");
+                return this.success();
             } else if ("sms".equalsIgnoreCase(type)) {
                 this.authenticationService.resetPasswordBySMSResetCode(token, password);
-                return this.success("PASSWORD_CHANGED");
+                return this.success();
             } else {
                 return this.notfound();
             }
@@ -130,4 +120,9 @@ public class AuthenticationWebController extends JspSupportWebController {
 
     }
 
+    @RequestMapping(value = "getPasswordResetEmail", method = RequestMethod.POST)
+    public String getPasswordResetEmail(@RequestParam String email) {
+        this.authenticationService.passwdResetEmailGen(email);
+        return this.display("forgotPassword-email-sent");
+    }
 }
