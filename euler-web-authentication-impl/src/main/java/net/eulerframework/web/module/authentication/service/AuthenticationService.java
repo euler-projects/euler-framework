@@ -67,18 +67,9 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
 
     @Override
     public void update(User user) throws UserNotFoundException {
-        User existUser = this.userService.loadUser(user.getId());
-        
-        if(existUser == null)
-            throw new UserNotFoundException();
-        
-        user.setAccountNonExpired(existUser.isAccountNonExpired());
-        user.setAccountNonLocked(existUser.isAccountNonLocked());
-        user.setCredentialsNonExpired(existUser.isCredentialsNonExpired());
-        user.setEnabled(existUser.isEnabled());
-        user.setGroups(existUser.getGroups());
-        
-        this.userService.updateUser(user);
+        String userId = user.getId();
+        this.userService.updateAvatar(userId, user.getAvatar());
+        this.userService.updateFullname(userId, user.getFullName());
         
     }
 

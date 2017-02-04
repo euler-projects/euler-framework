@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.BeanTool;
+import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -59,12 +60,20 @@ public class UserService extends BaseService {
     }
 
     public String save(User user) {
-        BeanTool.clearEmptyProperty(user);
         Assert.isNotNull(user, "user is null");
-        this.validUser(user);
-
-        this.validNewUser(user);
-
+        
+        BeanTool.clearEmptyProperty(user);
+        
+        user.setUsername(StringTool.trim(user.getUsername()));
+        user.setEmail(StringTool.trim(user.getEmail()));
+        user.setMobile(StringTool.trim(user.getMobile()));
+        user.setPassword(StringTool.trim(user.getPassword()));
+        
+        this.validPassword(user.getPassword());
+        this.validUsername(user.getUsername());
+        this.validEmail(user.getEmail());
+        this.validMobile(user.getMobile());
+        
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         user.setSignUpTime(new Date());
 
@@ -73,33 +82,6 @@ public class UserService extends BaseService {
 
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
         return this.userDao.findEntityInPage(pageQueryRequest);
-    }
-
-    /**
-     * 更新除密码外的用户信息,注意用户权限，用户组等的处理，如不指定这些字段，原有字段会被删掉。
-     * 
-     * @param user
-     *            更新用户实体，不需要指定password字段，指定也会无效
-     * @throws UserNotFoundException
-     *             被更新的用户不存在
-     */
-
-    public void updateUser(User user) throws UserNotFoundException {
-        BeanTool.clearEmptyProperty(user);
-        Assert.isNotNull(user.getId(), "userid is null");
-
-        User existedUser = this.userDao.load(user.getId());
-
-        if (existedUser == null)
-            throw new UserNotFoundException("User id is \"" + user.getId() + "\" not found.");
-
-        this.validUser(user);
-
-        user.setPassword(existedUser.getPassword());
-        user.setSignUpTime(existedUser.getSignUpTime());
-
-        this.userDao.update(user);
-
     }
 
     /**
@@ -131,6 +113,67 @@ public class UserService extends BaseService {
 
         this.userDao.update(user);
     }
+    
+    public void updateUsername(String userId, String username) throws UserNotFoundException {
+        this.validUsername(username);
+        
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        user.setUsername(username);
+
+        this.userDao.update(user);
+    }
+    
+    public void updateEmail(String userId, String email) throws UserNotFoundException {
+        this.validEmail(email);
+        
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        user.setEmail(email);
+
+        this.userDao.update(user);
+    }
+    
+    public void updateMobile(String userId, String mobile) throws UserNotFoundException {
+        this.validMobile(mobile);
+        
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        user.setMobile(mobile);
+
+        this.userDao.update(user);
+    }
+    
+    public void updateFullname(String userId, String fullname) throws UserNotFoundException {
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        user.setFullName(fullname);
+
+        this.userDao.update(user);
+    }
+    
+    public void updateAvatar(String userId, String avatatFileId) throws UserNotFoundException {
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        user.setAvatar(avatatFileId);
+
+        this.userDao.update(user);
+    }
 
     /**
      * 修改密码，不校验旧密码
@@ -157,49 +200,41 @@ public class UserService extends BaseService {
 
     }
 
-    private void validUser(User user) {
-        if (user.getUsername() == null) {
+    private void validUsername(String username) {
+        if (username == null) {
             throw new UserAuthenticationViewException("USERNAME_IS_NULL");
         }
-        if (user.getEmail() == null) {
-            throw new UserAuthenticationViewException("EMAIL_IS_NULL");
-        }
-        if (user.getPassword() == null) {
-            throw new UserAuthenticationViewException("PASSWORD_IS_NULL");
-        }
-        // if(!(user.getMobile())) {}
-        // "Mobile is null"));
-
-        if (!(user.getUsername().matches(WebConfig.getUsernameFormat()))) {
+        if (!(username.matches(WebConfig.getUsernameFormat()))) {
             throw new UserAuthenticationViewException("INCORRECT_USERNAME_FORMAT");
         }
-        if (!(user.getEmail().matches(WebConfig.getEmailFormat()))) {
+        if (this.loadUserByUsername(username) != null) {
+            throw new UserAuthenticationViewException("USERNAME_ALREADY_BE_USED");
+        }        
+    }
+    
+    private void validEmail(String email) {
+        if (email == null) {
+            throw new UserAuthenticationViewException("EMAIL_IS_NULL");
+        }
+        if (!(email.matches(WebConfig.getEmailFormat()))) {
             throw new UserAuthenticationViewException("INCORRECT_EMAIL_FORMAT");
         }
-    }
-
-    private void validNewUser(User user) {
-
-        if (this.loadUserByUsername(user.getUsername()) != null) {
-            throw new UserAuthenticationViewException("USERNAME_ALREADY_BE_USED");
-        }
-        if (this.loadUserByEmail(user.getEmail()) != null) {
+        if (this.loadUserByEmail(email) != null) {
             throw new UserAuthenticationViewException("EMAIL_ALREADY_BE_USED");
 
-        }
-
-        if (user.getMobile() != null) {
-            if (this.loadUserByMobile(user.getMobile()) != null) {
-                throw new UserAuthenticationViewException("MOBILE_ALREADY_BE_USED");
-            }
-
-        }
-
-        String password = user.getPassword().trim();
-        this.validPassword(password);
+        }       
     }
-
+    
+    private void validMobile(String mobile) {
+        if (mobile != null) {
+            throw new UserAuthenticationViewException("MOBILE_ALREADY_BE_USED");
+        }
+    }
+    
     private void validPassword(String password) {
+        if (password == null) {
+            throw new UserAuthenticationViewException("PASSWORD_IS_NULL");
+        }        
         if (!password.matches(WebConfig.getPasswordFormat())) {
             throw new UserAuthenticationViewException("INCORRECT_PASSWORD_FORMAT");
         }
