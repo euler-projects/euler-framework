@@ -68,7 +68,6 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     @Override
     public void update(User user) throws UserNotFoundException {
         String userId = user.getId();
-        this.userService.updateAvatar(userId, user.getAvatar());
         this.userService.updateFullname(userId, user.getFullName());
         
     }

@@ -164,13 +164,13 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
     
-    public void updateAvatar(String userId, String avatatFileId) throws UserNotFoundException {
+    public void updateAvatar(String userId, String avatarFileId) throws UserNotFoundException {
         User user = this.loadUser(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
         
-        user.setAvatar(avatatFileId);
+        user.setAvatar(avatarFileId);
 
         this.userDao.update(user);
     }
