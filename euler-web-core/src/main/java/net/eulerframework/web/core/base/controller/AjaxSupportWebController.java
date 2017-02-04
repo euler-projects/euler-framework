@@ -21,7 +21,7 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ AjaxException.class })
     public ErrorAjaxResponse ajaxException(AjaxException e) {
-        if (WebConfig.isLogDetailsMode()) {
+        if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
         return new ErrorAjaxResponse(e);

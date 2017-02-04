@@ -2,7 +2,6 @@ package net.eulerframework.web.core.base.controller;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.web.DefaultViewException;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.ViewException;
@@ -108,93 +108,86 @@ public abstract class JspSupportWebController extends AbstractWebController {
     /**
      * 显示跳转页面
      * 
-     * @param message
-     *            显示信息
-     * @param target
-     *            跳转目标,不需要加contextPath
-     * @param waitSeconds
-     *            等待时间(秒)
-     * @return 跳转view
+     * @param message 显示信息
+     * @param target 跳转目标
+     * @param wait 等待时间(秒)
+     * @return 跳转页面
      */
-    protected String jump(String message, String target, int waitSeconds) {
+    protected String jump(String message, Target target, int wait) {
+        Assert.isNotNull(message, "Jump message can not be null"); 
         
-        target = target == null ? "" : target;
-
-        String contextPath = this.getServletContext().getContextPath();
-        if (contextPath.equals("/"))
-            contextPath = "";
-
-        if (target.startsWith("/")) {
-            if (target.length() == 1) {
-                target = "";
-            } else {
-                target = target.substring(1);
-            }
-        }
+        target = target == null ? Target.HOME_TARGET : target;
         
-        if (message != null)
-            this.addMessageToRequest(message);
-
-        this.addMessageToRequest(message);
         HttpServletRequest request = this.getRequest();
-        request.setAttribute("target", contextPath + "/" + target);
-        request.setAttribute("waitSeconds", waitSeconds);
+        request.setAttribute("__message", message);  
+        request.setAttribute("__target", target);  
+        request.setAttribute("__wait", wait);
         return this.display("/common/jump");
     }
-
+    
     /**
-     * 显示错误页面,错误信息为UNKNOWN_ERROR(未国际化前)
+     * 显示默认错误异常错误页面，含有一个指向首页的链接
      * 
      * @return 错误页面
      */
     protected String error() {
         return this.error(new DefaultViewException());
     }
-
-    protected String error(ViewException viewException) {
-        return this.error(viewException.getMessage());
-    }
-
+    
     /**
-     * 显示错误页面,并指定错误信息
+     * 显示自定义错误信息，含有一个指向首页的链接
      * 
-     * @param message
-     *            未国际化前的错误信息,为<code>null</code>时为UNKNOWN_ERROR
      * @return 错误页面
      */
     protected String error(String message) {
-        Assert.isNotNull(message, "Error message can not be null");
-
-        this.addMessageToRequest(message);
+        return this.error(new DefaultViewException(message));
+    }
+    
+    /**
+     * 显示错误页面
+     * 自定义错误信息可在jsp中用<code>${__message}</code>获取
+     * 自定义错误代码信息可在jsp中用<code>${__code}</code>获取
+     * @param viewException 错误异常,不能为<code>null</code>
+     * @return 错误页面
+     */
+    private String error(ViewException viewException) {
+        Assert.isNotNull(viewException, "Error exception can not be null"); 
+        this.getRequest().setAttribute("__message", viewException.getMessage());   
+        this.getRequest().setAttribute("__code", viewException.getCode()); 
         return this.display("/common/error");
     }
 
     /**
-     * 显示成功页面,信息为SUCCESS(未国际化前)
+     * 显示成功页面,不指定信息，含有一个指向首页的链接
      * 
      * @return 成功页面
      */
     protected String success() {
-        return this.success("SUCCESS");
+        return this.success(null, Target.HOME_TARGET);
     }
 
     /**
-     * 显示成功页面,并指定信息
+     * 显示成功页面,指定信息，含有一个指向首页的链接
      * 
-     * @param message
-     *            未国际化前的信息,为<code>null</code>时为SUCCESS
+     * @param message 未国际化前的信息,为<code>null</code>时不显示
      * @return 成功页面
      */
     protected String success(String message) {
-        if (message != null)
-            this.addMessageToRequest(message);
-        return this.display("/common/success");
-
+        return this.success(message, Target.HOME_TARGET);
     }
 
-    private void addMessageToRequest(String message) {
-        HttpServletRequest request = this.getRequest();
-        request.setAttribute("message", message);
+    /**
+     * 显示成功页面，指定一个自定义的文字信息、若干个自定义链接.
+     * 自定义成功信息可在jsp中用<code>${__message}</code>获取
+     * 链接信息可在jsp中用<code>${__targets}</code>获取
+     * @param message 未国际化前的信息
+     * @param target 自定义链接
+     * @return 成功页面
+     */
+    protected String success(String message, Target... target) {
+        this.getRequest().setAttribute("__message", message);   
+        this.getRequest().setAttribute("__targets", target);  
+        return this.display("/common/success");
     }
 
     /**
@@ -214,12 +207,12 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     protected String crashPage(Throwable e) {
         this.logger.error(e.getMessage(), e);
-        if (WebConfig.isLogDetailsMode()) {
-            this.getRequest().setAttribute("crashInfo", e.getMessage());
+        if (WebConfig.isDebugMode()) {
+            this.getRequest().setAttribute("__crashInfo", e.getMessage());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            this.getRequest().setAttribute("crashStackTrace", sw.toString());
+            this.getRequest().setAttribute("__crashStackTrace", sw.toString());
         } else {
             // DO_NOTHING
         }
@@ -246,7 +239,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler({ ViewException.class })
     public String viewException(ViewException e) {
-        if (WebConfig.isLogDetailsMode()) {
+        if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
         return this.error(e);
@@ -262,5 +255,43 @@ public abstract class JspSupportWebController extends AbstractWebController {
     public String exception(Exception e) {
         this.logger.error(e.getMessage(), e);
         return this.crashPage(e);
+    }
+    
+    public static class Target extends WebContextAccessable {
+        private String href;
+        private String name;
+        
+        public String getHref() {
+            return href;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public Target(String href) {
+            this(href, null);
+        }
+        
+        public Target(String href, String name) {
+            Assert.isNotNull(href, "Target href exception can not be null");
+            
+            String contextPath = this.getServletContext().getContextPath();
+            if (!contextPath.endsWith("/"))
+                contextPath += "/";
+
+            if (href.startsWith("/")) {
+                if (href.length() == 1) {
+                    href = "";
+                } else {
+                    href = href.substring(1);
+                }
+            }
+            
+            this.href = contextPath + href;
+            this.name = name == null ? href : name;
+        }
+        
+        public final static Target HOME_TARGET = new Target("/", "_GO_HOME");
     }
 }

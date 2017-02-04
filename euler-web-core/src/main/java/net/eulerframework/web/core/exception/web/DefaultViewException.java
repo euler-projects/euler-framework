@@ -6,6 +6,10 @@ public class DefaultViewException extends ViewException {
         super("UNKNOWN_ERROR", -1);
     }
     
+    public DefaultViewException(String message) {
+        super(message, -1);
+    }
+    
     public DefaultViewException(String message, Throwable e) {
         super(message, -1, e);
     }

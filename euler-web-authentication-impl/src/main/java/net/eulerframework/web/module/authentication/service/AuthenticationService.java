@@ -103,7 +103,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             System.out.println("!!!!!!!!!!Reset token: " + token);
             // TODO send email
         } catch (Exception e) {
-            if(WebConfig.isLogDetailsMode()) {
+            if(WebConfig.isDebugMode()) {
                 this.logger.error("passwdResetEmailGen error" ,e);
             } else {
                 //DO_NOTHING            

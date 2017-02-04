@@ -540,7 +540,12 @@ public abstract class WebConfig {
         return result;
     }
     
-    public static boolean isLogDetailsMode() {
+    /**
+     * 检查当前配置是不是调试模式<br>
+     * <b>注意:</b> 根据配置不同,调试模式可能包含多个{@link ProjectMode},并不是{@link ProjectMode#DEVELOP}
+     * @return
+     */
+    public static boolean isDebugMode() {
         //TODO: make logdetailsmode configable
         return getProjectMode().equals(ProjectMode.DEVELOP) ||
                 getProjectMode().equals(ProjectMode.DEBUG);

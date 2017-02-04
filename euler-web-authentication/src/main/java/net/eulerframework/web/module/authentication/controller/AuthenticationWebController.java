@@ -76,7 +76,7 @@ public class AuthenticationWebController extends JspSupportWebController {
                 return this.display("resetPassword");
             } catch (InvalidEmailResetTokenException e) {
 
-                if (WebConfig.isLogDetailsMode()) {
+                if (WebConfig.isDebugMode()) {
                     this.logger.error("resetPassword error", e);
                 } else {
                     // DO_NOTHING
@@ -120,7 +120,7 @@ public class AuthenticationWebController extends JspSupportWebController {
             }
         } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSMSResetCodeException e) {
 
-            if (WebConfig.isLogDetailsMode()) {
+            if (WebConfig.isDebugMode()) {
                 this.logger.error("resetPassword error", e);
             } else {
                 // DO_NOTHING

@@ -12,7 +12,7 @@ public class ErrorAjaxResponse extends LogSupport implements BaseResponse {
 
     public ErrorAjaxResponse(AjaxException ajaxException) {
 
-        if (WebConfig.isLogDetailsMode()) {
+        if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + ajaxException.getCode() + "message: " + ajaxException.getMessage(),
                     ajaxException);
         }
