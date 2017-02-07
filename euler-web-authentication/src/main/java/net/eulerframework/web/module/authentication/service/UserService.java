@@ -1,6 +1,7 @@
 package net.eulerframework.web.module.authentication.service;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -17,6 +18,7 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
 import net.eulerframework.web.module.authentication.dao.UserDao;
+import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserAuthenticationViewException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
@@ -242,5 +244,55 @@ public class UserService extends BaseService {
                 && password.length() <= WebConfig.getMaxPasswordLength())) {
             throw new UserAuthenticationViewException("INCORRECT_PASSWORD_LENGTH");
         }
+    }
+    
+    /**
+     * 为用户添加用户组
+     * @param userId 用户Id
+     * @param groupId 待添加的用户组ID列表,如果指定的用户组ID不存在则忽略此错误ID
+     * @throws UserNotFoundException 用户不存在
+     */
+    public void addGroup(String userId, String... groupId) throws UserNotFoundException {
+        List<Group> groups = this.groupDao.load(groupId);
+        
+        if(groups == null || groups.isEmpty())
+            return;
+        
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        if(user.getGroups() == null)
+            user.setGroups(new HashSet<Group>());        
+        user.getGroups().addAll(groups);
+        
+        this.userDao.update(user);        
+    }
+    
+    /**
+     * 将用户从用户组移除
+     * @param userId 用户ID
+     * @param groupId 待添加的用户组ID列表,如果指定的用户组ID不存在则忽略此错误ID
+     * @throws UserNotFoundException 用户不存在
+     */
+    public void removeGroup(String userId, String... groupId) throws UserNotFoundException {
+        List<Group> groups = this.groupDao.load(groupId);
+        
+        if(groups == null || groups.isEmpty())
+            return;
+        
+        User user = this.loadUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        if(user.getGroups() == null)
+            return;
+        
+        user.getGroups().removeAll(groups);
+        
+        this.userDao.update(user);   
+        
     }
 }

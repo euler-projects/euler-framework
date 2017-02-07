@@ -25,15 +25,27 @@ public class PasswdWebController extends JspSupportWebController {
     private RootService rootService;
     
     @RequestMapping(value = { "/root" }, method = RequestMethod.GET)
-    public void resetRootPwd() {
-        UserContext.sudo();
-        this.rootService.resetRootPasswordRWT();
+    public String resetRootPwd() {
+        try {
+            UserContext.sudo();
+            this.rootService.resetRootPasswordRWT();
+        } catch (Exception e) {
+            //DO_NOTHING
+        }
+        
+        return this.notfound();
     }
     
     @RequestMapping(value = { "/admin" }, method = RequestMethod.GET)
-    public void resetAdminPwd() {
-        UserContext.sudo();
-        this.rootService.resetAdminPasswordRWT();
+    public String resetAdminPwd() {        
+        try {
+            UserContext.sudo();
+            this.rootService.resetAdminPasswordRWT();
+        } catch (Exception e) {
+            //DO_NOTHING            
+        }
+        
+        return this.notfound();
     }
 
 }

@@ -18,10 +18,15 @@
     <beans:bean id="sessionRegistry"
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
 
-    <http security="none" pattern="/resources/**" />
+    <!-- 静态资源目录 -->
+    <http security="none" pattern="/assets/**" />
+    <!-- 重置管理员密码请求 -->
+    <http security="none" pattern="/passwd/**" />
+    <!-- 网站图标 -->
     <http security="none" pattern="/favicon.ico" />
+    <!-- robot.txt -->
     <http security="none" pattern="/robot.txt" />
-    
+    <!-- 其他要排除安全控制的目录 -->    
     <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
     
     <beans:import resource="classpath*:**/rs-security.xml"/>
