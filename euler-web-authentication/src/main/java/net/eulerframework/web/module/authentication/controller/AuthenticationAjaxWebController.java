@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.response.AjaxResponse;
-import net.eulerframework.web.core.base.response.EmptySuccessAjaxResponse;
 import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.IAuthenticationService;
@@ -35,7 +34,7 @@ public class AuthenticationAjaxWebController extends AjaxSupportWebController {
     @RequestMapping(value = "getPasswordResetSMS_ajax", method = RequestMethod.POST)
     public AjaxResponse<String> getPasswordResetSMS(@RequestParam String mobile) {
         this.authenticationService.passwdResetSMSGen(mobile);
-        return new EmptySuccessAjaxResponse();
+        return AjaxResponse.SUCCESS_RESPONSE;
     }
     
     @ResponseBody
@@ -48,7 +47,7 @@ public class AuthenticationAjaxWebController extends AjaxSupportWebController {
         } catch (UserNotFoundException e) {
             throw new DefaultAjaxException(e.getMessage(), e);
         }
-        return new EmptySuccessAjaxResponse();
+        return AjaxResponse.SUCCESS_RESPONSE;
     }
 
 }

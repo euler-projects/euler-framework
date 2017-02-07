@@ -3,6 +3,8 @@ package net.eulerframework.web.core.base.response;
 import net.eulerframework.common.util.log.LogSupport;
 
 public class AjaxResponse<T> extends LogSupport implements BaseResponse {
+    
+    public final static AjaxResponse<String> SUCCESS_RESPONSE = new AjaxResponse<>("SUCCESS");
 
     private T data;
 
