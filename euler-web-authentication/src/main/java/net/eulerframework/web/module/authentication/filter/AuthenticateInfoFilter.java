@@ -45,7 +45,7 @@ public class AuthenticateInfoFilter extends OncePerRequestFilter {
         }
         
         User curUser = UserContext.getCurrentUser();
-        request.setAttribute("currentUser", curUser);
+        request.setAttribute("__USERINFO", curUser);
         ThreadContext.put("username", curUser.getUsername());
         filterChain.doFilter(request, response);
     }
