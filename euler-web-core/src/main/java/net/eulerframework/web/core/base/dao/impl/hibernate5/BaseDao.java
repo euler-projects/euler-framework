@@ -94,13 +94,13 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public Serializable save(T entity) {
-        this.eraseEmptyProperty(entity);
+        this.cleanBean(entity);
         return this.getSessionFactory().getCurrentSession().save(entity);
     }
 
     @Override
     public void update(T entity) {
-        this.eraseEmptyProperty(entity);
+        this.cleanBean(entity);
         this.getSessionFactory().getCurrentSession().update(entity);
 
     }
@@ -121,7 +121,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public void saveOrUpdate(T entity) {
-        this.eraseEmptyProperty(entity);
+        this.cleanBean(entity);
         this.getSessionFactory().getCurrentSession().saveOrUpdate(entity);
     }
 
@@ -129,7 +129,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     public void saveOrUpdate(Collection<T> entities) {
         if (entities == null || entities.isEmpty())
             return;
-        this.eraseEmptyProperty(entities);
+        this.cleanBeans(entities);
 
         for (T entity : entities) {
             this.saveOrUpdate(entity);
@@ -210,7 +210,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     
     @Override
     public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest) {
-        DetachedCriteria detachedCriteria = this.generateCriteria(pageQueryRequest);
+        DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
         int pageIndex = pageQueryRequest.getPageIndex();
         int pageSize = pageQueryRequest.getPageSize();
@@ -329,16 +329,16 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         }
     }
 
-    protected void eraseEmptyProperty(Collection<T> entities) {
+    protected void cleanBeans(Collection<T> entities) {
         for (T entity : entities)
-            this.eraseEmptyProperty(entity);
+            this.cleanBean(entity);
     }
 
-    protected void eraseEmptyProperty(T entity) {
+    protected void cleanBean(T entity) {
         BeanTool.clearEmptyProperty(entity);
     }   
     
-    protected DetachedCriteria generateCriteria(QueryRequest queryRequest) {
+    protected DetachedCriteria analyzeQueryRequest(QueryRequest queryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         
         Map<String, String> queryMap = queryRequest.getQueryMap();
@@ -363,13 +363,13 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             if(value == null)
                 continue;
             
-            detachedCriteria.addOrder(this.generateOrder(property, value));
+            detachedCriteria.addOrder(this.analyzeOrderMode(property, value));
         }
         
         return detachedCriteria;
     }
     
-    private Order generateOrder(String property, OrderMode orderMode) {
+    private Order analyzeOrderMode(String property, OrderMode orderMode) {
         try {
             this.entityClass.getDeclaredField(property);
         } catch (NoSuchFieldException e) {
@@ -393,7 +393,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         } catch (NoSuchFieldException e) {
             throw new IllegalArgumentException("Property '" + property + "' not exist");
         }
-        
         
         switch (queryMode) {
         case ANYWHERE:

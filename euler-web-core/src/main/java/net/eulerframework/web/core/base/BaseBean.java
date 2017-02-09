@@ -27,12 +27,7 @@ public class BaseBean {
         messageSource.setCacheSeconds(WebConfig.getI18nRefreshFreq());
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
-        messageSource.setBasenames(
-                "classpath*:lang/*",
-                "classpath*:lang/**/*"
-//                "classpath:org/springframework/security/messages", 
-//                "classpath:org/hibernate/validator/ValidationMessages"
-                );
+        messageSource.setBasename("classpath*:language/**/*");
         return messageSource;
     }
     
