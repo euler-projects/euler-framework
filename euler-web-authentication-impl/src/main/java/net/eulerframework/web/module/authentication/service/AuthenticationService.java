@@ -22,6 +22,7 @@ import net.eulerframework.web.module.authentication.exception.UserNotFoundExcept
 import net.eulerframework.web.module.authentication.util.JwtEncryptor;
 import net.eulerframework.web.module.authentication.util.UserContext;
 import net.eulerframework.web.module.authentication.vo.UserResetInfoVo;
+import net.eulerframework.web.util.WebTool;
 
 @Service
 @Transactional
@@ -86,11 +87,12 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             if(user == null)
                 throw new UserNotFoundException("User email is '" + email + "' not found");
             
-            UserResetInfoVo vo = new UserResetInfoVo(user);
+            UserResetInfoVo vo = new UserResetInfoVo(user, 10 * 60);
             
             String token = this.jwtEncryptor.encode(vo).getEncoded();
             
-            System.out.println("!!!!!!!!!!Reset token: " + token);
+            String resetUrl = WebTool.getWebDomain() + WebTool.getServletContext().getContextPath() + "/resetPassword?type=email&token=" + token;
+            System.out.println(resetUrl);
             // TODO send email
         } catch (Exception e) {
             if(WebConfig.isDebugMode()) {

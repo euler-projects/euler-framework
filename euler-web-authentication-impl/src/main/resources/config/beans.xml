@@ -12,8 +12,5 @@
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
-    
-    <bean id="userXDao" class="net.eulerframework.web.module.authentication.dao.UserXDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
+
 </beans>

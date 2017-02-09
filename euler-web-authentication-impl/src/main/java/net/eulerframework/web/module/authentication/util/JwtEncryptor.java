@@ -44,9 +44,6 @@ public class JwtEncryptor {
             logger.info("Configured with RSA signing key");
         }
         else {
-            // Assume it's a MAC key
-//            this.verifierKey = key;
-//            signer = new MacSigner(key);
             throw new IllegalArgumentException(
                     "SigningKey property must be a RSA private key");
         }

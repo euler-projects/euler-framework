@@ -10,11 +10,11 @@ public class UserResetInfoVo {
     private Date genDate;
     private Date expireDate;
     public UserResetInfoVo() {}
-    public UserResetInfoVo(User user) {
+    public UserResetInfoVo(User user, long tokenLifeSecond) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.genDate = new Date();
-        this.expireDate = new Date(this.genDate.getTime() + 1 * 60 * 60 * 1000);
+        this.expireDate = new Date(this.genDate.getTime() + tokenLifeSecond * 1000);
     }
     
     public String getId() {
