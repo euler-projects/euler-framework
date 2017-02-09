@@ -114,4 +114,18 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
         return this.archivedFileDao.load(archivedFileId);
     }
 
+    @Override
+    public void deleteArchivedFile(String archivedFileId) {
+        ArchivedFile archivedFile = this.findArchivedFile(archivedFileId);
+        
+        if(archivedFile == null)
+            return;
+        
+        File file = WebFileTool.getArchivedFile(archivedFile);
+        
+        SimpleFileIOUtil.deleteFile(file);
+        
+        this.archivedFileDao.delete(archivedFile);        
+    }
+
 }

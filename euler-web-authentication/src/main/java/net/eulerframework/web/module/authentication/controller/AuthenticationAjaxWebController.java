@@ -4,6 +4,8 @@
 package net.eulerframework.web.module.authentication.controller;
 
 import javax.annotation.Resource;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +18,7 @@ import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.IAuthenticationService;
 import net.eulerframework.web.module.authentication.service.UserService;
+import net.eulerframework.web.module.authentication.util.UserContext;
 
 /**
  * @author cFrost
@@ -38,12 +41,12 @@ public class AuthenticationAjaxWebController extends AjaxSupportWebController {
     }
     
     @ResponseBody
+    @PreAuthorize("isFullyAuthenticated()")
     @RequestMapping(value = "updateUserAvatar_ajax", method = RequestMethod.POST)
     public AjaxResponse<String> updateUserAvatar(
-            @RequestParam String userId,
             @RequestParam String avatarFileId) {
         try {
-            this.userService.updateAvatar(userId, avatarFileId);
+            this.userService.updateAvatar(UserContext.getCurrentUser().getId(), avatarFileId);
         } catch (UserNotFoundException e) {
             throw new DefaultAjaxException(e.getMessage(), e);
         }

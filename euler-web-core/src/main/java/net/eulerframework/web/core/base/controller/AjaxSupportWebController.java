@@ -1,6 +1,7 @@
 package net.eulerframework.web.core.base.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,7 +14,17 @@ import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 
 @ResponseBody
 public abstract class AjaxSupportWebController extends AbstractWebController {
-
+    /**
+     * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息
+     * 
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler({ AccessDeniedException.class })
+    public ErrorAjaxResponse accessDeniedException(AccessDeniedException e) {
+        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    }
+    
     /**
      * 用于在程序发生{@link MissingServletRequestParameterException}异常时统一返回错误信息
      * 
