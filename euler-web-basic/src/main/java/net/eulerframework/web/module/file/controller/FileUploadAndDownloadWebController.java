@@ -36,7 +36,7 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
         if(archivedFile == null)
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("File id is '" + archivedFileId + "' not exists.");
         
         String archivedFilePath = WebConfig.getUploadPath();
         

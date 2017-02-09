@@ -13,6 +13,7 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringTool;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
+import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.web.DefaultViewException;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.ViewException;
@@ -218,6 +219,18 @@ public abstract class JspSupportWebController extends AbstractWebController {
         }
         this.getResponse().setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return this.display("/error/500");
+    }
+
+    /**
+     * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息
+     * 
+     * @return 对应主题的404页面
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({ ResourceNotFoundException.class })
+    public String resourceNotFoundException(ResourceNotFoundException e) {
+        this.logger.warn(e.getMessage(), e);
+        return this.notfound();
     }
 
     /**
