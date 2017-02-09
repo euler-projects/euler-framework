@@ -78,6 +78,7 @@ public abstract class WebConfig {
         private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private final static String WEB_ADMIN_ROOT_PATH = "/admin";
+        private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
         
         private static final String WEB_MULITPART_LOCATION = null;
@@ -169,29 +170,22 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result;
-        try {
-            result = properties.get(WebConfigKey.WEB_API_ROOT_PATH);
+        String result = properties.get(WebConfigKey.WEB_API_ROOT_PATH, WebConfigDefault.WEB_API_ROOT_PATH);
 
-            if (StringTool.isNull(result))
-                throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
+        if (StringTool.isNull(result))
+            throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
 
-            while (result.endsWith("*")) {
-                result = result.substring(0, result.length() - 1);
-            }
-
-            result = OSAdapter.convertDirToUnixFormat(result);
-
-            if (!result.startsWith("/"))
-                result = "/" + result;
-
-        } catch (PropertyReadException e) {
-            throw new RuntimeException("Couldn't load " + WebConfigKey.WEB_API_ROOT_PATH);
+        while (result.endsWith("*")) {
+            result = result.substring(0, result.length() - 1);
         }
+
+        result = OSAdapter.convertDirToUnixFormat(result);
+
+        if (!result.startsWith("/"))
+            result = "/" + result;
 
         CONFIG_CAHCE.put(WebConfigKey.WEB_API_ROOT_PATH, result);
         return result;
-
     }
 
     public static String getAdminRootPath() {
