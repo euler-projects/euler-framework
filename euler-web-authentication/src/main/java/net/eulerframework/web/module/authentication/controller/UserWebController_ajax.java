@@ -5,7 +5,6 @@ package net.eulerframework.web.module.authentication.controller;
 
 import javax.annotation.Resource;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +25,7 @@ import net.eulerframework.web.module.authentication.util.UserContext;
  */
 @WebController
 @RequestMapping("/")
-public class AuthenticationAjaxWebController extends AjaxSupportWebController {
+public class UserWebController_ajax extends AjaxSupportWebController {
 
     @Resource
     private IAuthenticationService authenticationService;
@@ -41,8 +40,7 @@ public class AuthenticationAjaxWebController extends AjaxSupportWebController {
     }
     
     @ResponseBody
-    @PreAuthorize("isFullyAuthenticated()")
-    @RequestMapping(value = "updateUserAvatar_ajax", method = RequestMethod.POST)
+    @RequestMapping(value = "dashboard/updateUserAvatar_ajax", method = RequestMethod.POST)
     public AjaxResponse<String> updateUserAvatar(
             @RequestParam String avatarFileId) {
         try {
