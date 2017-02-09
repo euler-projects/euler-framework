@@ -1,17 +1,25 @@
 package net.eulerframework.web.module.authentication.entity;
 
-import net.eulerframework.web.core.base.entity.UUIDEntity;
-import org.springframework.security.core.CredentialsContainer;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.springframework.security.core.CredentialsContainer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @SuppressWarnings("serial")
 @Entity
@@ -45,7 +53,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         ROOT_USER.setCredentialsNonExpired(true);
     }
 
-    @NotNull
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
     @Column(name = "EMAIL", unique = true)
@@ -54,7 +61,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private String mobile;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
-    //@NotNull
     @Column(name = "FULL_NAME")
     private String fullName;
     @Column(name = "AVATAR", length=36)
