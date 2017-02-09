@@ -42,7 +42,7 @@ public class AuthorityDao extends BaseDao<Authority> {
         
         detachedCriteria.addOrder(Order.asc("authority"));
         
-        PageResponse<Authority> result = this.findPageBy(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
+        PageResponse<Authority> result = this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
         
         return result;
     }

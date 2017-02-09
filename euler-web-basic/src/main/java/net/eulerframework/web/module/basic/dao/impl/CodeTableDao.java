@@ -26,14 +26,14 @@ public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
         detachedCriteria.add(Restrictions.eq("codeType", JS_DICT_TYPE));
         detachedCriteria.addOrder(Order.asc("name"));
         detachedCriteria.addOrder(Order.asc("showOrder"));
-        return this.findBy(detachedCriteria);
+        return this.query(detachedCriteria);
     }
 
     @Override
     public List<CodeTable> findAllConfig() {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.add(Restrictions.eq("codeType", PROPERTY_TYPE));
-        List<CodeTable> result = this.findBy(detachedCriteria);
+        List<CodeTable> result = this.query(detachedCriteria);
         if(result == null || result.isEmpty()) return null;        
         return  result;
     }
@@ -43,7 +43,7 @@ public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.add(Restrictions.eq("codeType", PROPERTY_TYPE));
         detachedCriteria.add(Restrictions.eq("key", key));
-        List<CodeTable> result = this.findBy(detachedCriteria);
+        List<CodeTable> result = this.query(detachedCriteria);
         if(result == null || result.isEmpty()) return null;      
         return result.get(0);
     }
@@ -85,7 +85,7 @@ public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
         detachedCriteria.addOrder(Order.asc("showOrder"));
         
         
-        return this.findPageBy(detachedCriteria, pageIndex, pageSize);
+        return this.pageQuery(detachedCriteria, pageIndex, pageSize);
     }
 
     @Override

@@ -42,7 +42,7 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
             }
         }
         final String hql = hqlBuffer.toString();
-        return super.findBy(hql, (Object[])idArray);        
+        return super.query(hql, (Object[])idArray);        
     }
 
     @Override
@@ -167,7 +167,7 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
         hqlBuffer.append(this.entityClass.getSimpleName());
         hqlBuffer.append(" en where en.ifDel = false");
         final String hql = hqlBuffer.toString();
-        return super.findBy(hql);
+        return super.query(hql);
     }
 
     @Override
@@ -177,7 +177,7 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
         hqlBuffer.append(this.entityClass.getSimpleName());
         hqlBuffer.append(" en where en.ifDel = false");
         final String hql = hqlBuffer.toString();
-        List<?> l = super.findBy(hql);
+        List<?> l = super.query(hql);
 
         if(l!=null && l.size() == 1)
             return (Long)l.get(0);

@@ -14,6 +14,6 @@ public class UrlMatcherDao extends BaseDao<UrlMatcher> {
     public List<UrlMatcher> findUrlMatcherAuthorities() {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.addOrder(Order.asc("order"));
-        return this.findBy(detachedCriteria);
+        return this.query(detachedCriteria);
     }
 }

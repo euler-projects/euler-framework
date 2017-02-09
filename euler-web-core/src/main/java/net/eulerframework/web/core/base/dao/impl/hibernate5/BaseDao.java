@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +89,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             }
         }
         final String hql = hqlBuffer.toString();
-        return this.findBy(hql, (Object[])idArray);
+        return this.query(hql, (Object[])idArray);
     }
 
     @Override
@@ -143,6 +142,16 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @Override
+    public void deleteAll(Collection<T> entities) {
+        if (entities == null || entities.isEmpty())
+            return;
+
+        for (T entity : entities) {
+            this.delete(entity);
+        }
+    }
+
+    @Override
     public void deleteById(Serializable id) {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("delete ");
@@ -153,16 +162,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @Override
-    public void deleteAll(Collection<T> entities) {
-        if (entities == null || entities.isEmpty())
-            return;
-
-        Collection<Serializable> idList = new HashSet<>();
-        for (T entity : entities) {
-            idList.add(entity.getId());
+    public void deleteByIds(Serializable[] idArray) {        
+        for(Serializable id : idArray) {
+            this.deleteById(id);
         }
-
-        this.deleteByIds(idList);
     }
 
     @Override
@@ -172,33 +175,11 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @Override
-    public void deleteByIds(Serializable[] idArray) {
-        
-        for(Serializable id : idArray) {
-            this.deleteById(id);
-        }
-        
-//        StringBuffer hqlBuffer = new StringBuffer();
-//        hqlBuffer.append("delete ");
-//        hqlBuffer.append(this.entityClass.getSimpleName());
-//        hqlBuffer.append(" en where ");
-//        for (int i = 0; i < idArray.length; i++) {
-//            if (i == 0) {
-//                hqlBuffer.append("en.id= ?");
-//            } else {
-//                hqlBuffer.append(" or en.id= ?");
-//            }
-//        }
-//        final String hql = hqlBuffer.toString();
-//        this.update(hql, (Object[])idArray);
-    }
-
-    @Override
     public List<T> findBy(T entity) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.add(Example.create(entity));
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        List<T> result = this.findBy(detachedCriteria);
+        List<T> result = this.query(detachedCriteria);
         evict(result);
         return result;
     }
@@ -210,7 +191,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         hqlBuffer.append(this.entityClass.getSimpleName());
         hqlBuffer.append(" en");
         final String hql = hqlBuffer.toString();
-        List<T> result = this.findBy(hql);
+        List<T> result = this.query(hql);
         return result;
     }
 
@@ -220,7 +201,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         hqlBuffer.append("select count(*) from ");
         hqlBuffer.append(this.entityClass.getSimpleName());
         final String hql = hqlBuffer.toString();
-        List<?> l = this.findBy(hql);
+        List<?> l = this.query(hql);
 
         if (l != null && l.size() == 1)
             return (Long) l.get(0);
@@ -234,7 +215,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         int pageIndex = pageQueryRequest.getPageIndex();
         int pageSize = pageQueryRequest.getPageSize();
         
-        return this.findPageBy(detachedCriteria, pageIndex, pageSize);   
+        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
     }
 
     @Override
@@ -248,14 +229,14 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @SuppressWarnings("unchecked")
-    protected List<T> findBy(String hql) {
+    protected List<T> query(String hql) {
         List<T> result = this.getSessionFactory().getCurrentSession().createQuery(hql).list();
         evict(result);
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    protected List<T> findBy(String hql, Object... params) {
+    protected List<T> query(String hql, Object... params) {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
@@ -268,14 +249,14 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @SuppressWarnings("unchecked")
-    protected List<T> findBy(DetachedCriteria detachedCriteria) {
+    protected List<T> query(DetachedCriteria detachedCriteria) {
         List<T> result = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list();
         evict(result);
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    protected List<T> findBy(String hql, int maxResults) {
+    protected List<T> limitQuery(String hql, int maxResults) {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
         query.setMaxResults(maxResults);
         List<T> result = query.list();
@@ -284,7 +265,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @SuppressWarnings("unchecked")
-    protected List<T> findByWithMaxResults(String hql, int maxResults, Object... params) {
+    protected List<T> limitQuery(String hql, int maxResults, Object... params) {
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
         query.setMaxResults(maxResults);
         
@@ -298,7 +279,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @SuppressWarnings("unchecked")
-    protected List<T> findByWithMaxResults(DetachedCriteria detachedCriteria, int maxResults) {
+    protected List<T> limitQuery(DetachedCriteria detachedCriteria, int maxResults) {
         Criteria criteria = detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession());
 
         criteria.setMaxResults(maxResults);
@@ -308,12 +289,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         return result;
     }
 
-    protected PageResponse<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
-        return this.findPageBy(detachedCriteria, pageIndex, pageSize, null);
+    protected PageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+        return this.pageQuery(detachedCriteria, pageIndex, pageSize, null);
     }
     
     @SuppressWarnings("unchecked")
-    protected PageResponse<T> findPageBy(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
+    protected PageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
         
         detachedCriteria.setProjection(Projections.rowCount());
         long total = ((Long)detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list().get(0)).longValue();
@@ -424,44 +405,44 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         case EXACT:
             return RestrictionsX.like(property, value, MatchMode.EXACT);
         case GE:
-            return Restrictions.ge(property, this.changeValueType(value, field.getType()));
+            return Restrictions.ge(property, this.analyzeValue(value, field.getType()));
         case GT:
-            return Restrictions.gt(property, this.changeValueType(value, field.getType()));
+            return Restrictions.gt(property, this.analyzeValue(value, field.getType()));
         case LE:
-            return Restrictions.le(property, this.changeValueType(value, field.getType()));
+            return Restrictions.le(property, this.analyzeValue(value, field.getType()));
         case LT:
-            return Restrictions.lt(property, this.changeValueType(value, field.getType()));
+            return Restrictions.lt(property, this.analyzeValue(value, field.getType()));
         case IN:
-            return RestrictionsX.in(property, this.generateValueArray(value, field.getType()));
+            return RestrictionsX.in(property, this.analyzeInterval(value, field.getType()));
         case NOTIN:
-            return Restrictions.not(RestrictionsX.in(property, this.generateValueArray(value, field.getType())));
+            return Restrictions.not(RestrictionsX.in(property, this.analyzeInterval(value, field.getType())));
         case IS:
-            return Restrictions.eq(property, this.changeValueType(value, field.getType()));
+            return Restrictions.eq(property, this.analyzeValue(value, field.getType()));
         case NOT:
-            return Restrictions.ne(property, this.changeValueType(value, field.getType()));
+            return Restrictions.ne(property, this.analyzeValue(value, field.getType()));
         case BETWEEN:
-            Object[] array1 = this.generateValueArray(value, field.getType());
+            Object[] array1 = this.analyzeInterval(value, field.getType());
             return Restrictions.between(property, array1[0], array1[1]);
         case OUTSIDE:
-            Object[] array2 = this.generateValueArray(value, field.getType());
+            Object[] array2 = this.analyzeInterval(value, field.getType());
             return Restrictions.not(Restrictions.between(property, array2[0], array2[1]));
         default:
             throw new IllegalArgumentException("Unknown query mode: " + queryMode);
         }
     }
     
-    private Object[] generateValueArray(String value, Class<?> clazz) {
+    private Object[] analyzeInterval(String value, Class<?> clazz) {
         String[] valueArray = value.split(",");
         
         Object[] result = new Object[valueArray.length];
         
         for(int i = 0; i < valueArray.length; i++) {
-            result[i] = this.changeValueType(valueArray[i], clazz);
+            result[i] = this.analyzeValue(valueArray[i], clazz);
         }
         return result;
     }
 
-    private Object changeValueType(String value, Class<?> clazz) {
+    private Object analyzeValue(String value, Class<?> clazz) {
         if(String.class.equals(clazz)) {
             return value;
         } else if(Integer.class.equals(clazz) || "int".equals(clazz.toString())) {
@@ -477,7 +458,9 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         } else if(Boolean.class.equals(clazz) || "boolean".equals(clazz.toString())) {
             return Boolean.parseBoolean(value);
         } else if(Character.class.equals(clazz) || "char".equals(clazz.toString())) {
-            this.logger.warn("Query property type is Character, only use the first char of value");
+            if(value.length() > 0)
+                this.logger.warn("Query property type is Character, only use the first char of value");
+            
             return value.toCharArray()[0];
         } else if(Date.class.equals(clazz)) {
             Date ret = null;
@@ -487,7 +470,11 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 try {
                     ret = CalendarTool.parseDate(value, "yyyy-MM-dd HH:mm:ss");
                 } catch (ParseException e1) {
-                    throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss'");
+                    try {
+                        ret = CalendarTool.parseDate(value, "yyyy-MM-dd");
+                    } catch (ParseException e2) {
+                        throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss' or 'yyyy-MM-dd'");
+                    }
                 }
             }
             return ret;

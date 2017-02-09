@@ -25,7 +25,7 @@ public class UserDao extends BaseDao<User> {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("username", username));
-        List<User> users = this.findBy(detachedCriteria);
+        List<User> users = this.query(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
         return users.get(0);
@@ -36,7 +36,7 @@ public class UserDao extends BaseDao<User> {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("email", email));
-        List<User> users = this.findBy(detachedCriteria);
+        List<User> users = this.query(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
         return users.get(0);
@@ -47,7 +47,7 @@ public class UserDao extends BaseDao<User> {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         detachedCriteria.add(Restrictions.eq("mobile", mobile));
-        List<User> users = this.findBy(detachedCriteria);
+        List<User> users = this.query(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
         return users.get(0);
@@ -58,7 +58,7 @@ public class UserDao extends BaseDao<User> {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.add(Restrictions.or(Restrictions.like("username", nameOrCode, MatchMode.ANYWHERE).ignoreCase(),
                 Restrictions.like("empName", nameOrCode, MatchMode.ANYWHERE).ignoreCase()));
-        return this.findBy(detachedCriteria);
+        return this.query(detachedCriteria);
     }
 
     
@@ -102,7 +102,7 @@ public class UserDao extends BaseDao<User> {
         
         detachedCriteria.addOrder(Order.asc("username"));
         
-        PageResponse<User> result = this.findPageBy(detachedCriteria, pageIndex, pageSize);
+        PageResponse<User> result = this.pageQuery(detachedCriteria, pageIndex, pageSize);
         
         List<User> users = result.getRows();
 

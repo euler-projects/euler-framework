@@ -40,7 +40,7 @@ public class GroupDao extends BaseDao<Group> {
         
         detachedCriteria.addOrder(Order.asc("name"));        
         
-        PageResponse<Group> result = this.findPageBy(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
+        PageResponse<Group> result = this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
         
         return result;
     }
@@ -65,7 +65,7 @@ public class GroupDao extends BaseDao<Group> {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
                 .setFetchMode("authorities", FetchMode.SELECT);
         detachedCriteria.add(Restrictions.eq("name", Group.SYSTEM_USERS_CROUP_NAME));
-        List<Group> result = this.findBy(detachedCriteria);
+        List<Group> result = this.query(detachedCriteria);
         if(result == null || result.isEmpty())
             throw new RuntimeException("System Users Group Not Found");
         return result.get(0);

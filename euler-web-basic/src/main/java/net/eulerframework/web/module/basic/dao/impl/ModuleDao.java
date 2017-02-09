@@ -17,7 +17,7 @@ public class ModuleDao extends BaseDao<Module> implements IModuleDao {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.addOrder(Order.asc("showOrder"));
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        return this.findBy(detachedCriteria);
+        return this.query(detachedCriteria);
     }
     
 }
