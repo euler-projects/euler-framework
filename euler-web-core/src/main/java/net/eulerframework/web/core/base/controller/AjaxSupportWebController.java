@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.response.ErrorAjaxResponse;
@@ -13,6 +14,28 @@ import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 @ResponseBody
 public abstract class AjaxSupportWebController extends AbstractWebController {
 
+    /**
+     * 用于在程序发生{@link MissingServletRequestParameterException}异常时统一返回错误信息
+     * 
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({ MissingServletRequestParameterException.class })
+    public ErrorAjaxResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    }
+    
+    /**
+     * 用于在程序发生{@link IllegalArgumentException}异常时统一返回错误信息
+     * 
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({ IllegalArgumentException.class })
+    public ErrorAjaxResponse illegalArgumentException(IllegalArgumentException e) {
+        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    }
+    
     /**
      * 用于在程序发生{@link AjaxException}异常时统一返回错误信息
      * 
