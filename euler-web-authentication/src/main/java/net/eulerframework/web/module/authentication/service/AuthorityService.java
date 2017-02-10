@@ -8,7 +8,7 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
-import net.eulerframework.common.util.BeanTool;
+import net.eulerframework.common.util.JavaObjectUtil;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
@@ -54,7 +54,7 @@ public class AuthorityService extends BaseService {
     }
 
     public void saveGroup(Group group) {
-        BeanTool.clearEmptyProperty(group);
+        JavaObjectUtil.clearEmptyProperty(group);
         if (group.getId() != null) {
             Group tmp = null;
             if (group.getAuthorities() == null || group.getAuthorities().isEmpty()) {

@@ -25,10 +25,10 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 
-import net.eulerframework.common.util.BeanTool;
-import net.eulerframework.common.util.CalendarTool;
-import net.eulerframework.common.util.Generic;
-import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.JavaObjectUtil;
+import net.eulerframework.common.util.DateUtil;
+import net.eulerframework.common.util.GenericUtil;
+import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.common.util.log.LogSupport;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
@@ -59,7 +59,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @SuppressWarnings("unchecked")
     public BaseDao() {
-        this.entityClass = (Class<T>) Generic.findSuperClassGenricType(this.getClass(), 0);
+        this.entityClass = (Class<T>) GenericUtil.findSuperClassGenricType(this.getClass(), 0);
     }
 
     @Override
@@ -335,7 +335,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     protected void cleanBean(T entity) {
-        BeanTool.clearEmptyProperty(entity);
+        JavaObjectUtil.clearEmptyProperty(entity);
     }   
     
     protected DetachedCriteria analyzeQueryRequest(QueryRequest queryRequest) {
@@ -347,7 +347,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             String property = entry.getKey();
             String value = entry.getValue();
             
-            if(StringTool.isNull(value))
+            if(StringUtil.isNull(value))
                 continue;
             
             QueryMode queryMode = queryRequest.getQueryMode(property);
@@ -467,10 +467,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 ret = new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
                 try {
-                    ret = CalendarTool.parseDate(value, "yyyy-MM-dd HH:mm:ss");
+                    ret = DateUtil.parseDate(value, "yyyy-MM-dd HH:mm:ss");
                 } catch (ParseException e1) {
                     try {
-                        ret = CalendarTool.parseDate(value, "yyyy-MM-dd");
+                        ret = DateUtil.parseDate(value, "yyyy-MM-dd");
                     } catch (ParseException e2) {
                         throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss' or 'yyyy-MM-dd'");
                     }

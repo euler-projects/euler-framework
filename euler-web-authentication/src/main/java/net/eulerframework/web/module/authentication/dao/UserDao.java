@@ -10,7 +10,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -69,31 +69,31 @@ public class UserDao extends BaseDao<User> {
         try {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("username");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("username", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("empName");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("empName", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("enabled");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("enabled", Boolean.parseBoolean(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("nation");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("nation", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("accountNonExpired");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("accountNonExpired", Boolean.parseBoolean(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("accountNonLocked");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("accountNonLocked", Boolean.parseBoolean(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("credentialsNonExpired");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("credentialsNonExpired", Boolean.parseBoolean(queryValue)));
             }
         } catch (Exception e) {

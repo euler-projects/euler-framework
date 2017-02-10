@@ -2,7 +2,7 @@ package net.eulerframework.web.module.file.util;
 
 import java.io.File;
 
-import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 
@@ -11,7 +11,7 @@ public class WebFileTool {
     public static String extractFileExtension(String fileName) {
         String extension = "";
         
-        if(StringTool.isNull(fileName))
+        if(StringUtil.isNull(fileName))
             return extension;
         
         int dot = fileName.lastIndexOf('.');

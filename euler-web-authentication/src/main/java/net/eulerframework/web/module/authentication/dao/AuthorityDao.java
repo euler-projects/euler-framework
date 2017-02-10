@@ -9,8 +9,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.common.util.PinYinTool;
-import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.PinYinUtil;
+import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -25,15 +25,15 @@ public class AuthorityDao extends BaseDao<Authority> {
         try {
             String queryValue = null;
             queryValue = pageQueryRequest.getQueryValue("name");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("authority");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("authority", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("description");
-            if (!StringTool.isNull(queryValue)) {
+            if (!StringUtil.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public class AuthorityDao extends BaseDao<Authority> {
         Comparator<Authority> c = new Comparator<Authority>() {  
               
             public int compare(Authority o1, Authority o2) {  
-                return PinYinTool.toPinYinString(o1.getName()).compareTo(PinYinTool.toPinYinString(o2.getName()));  
+                return PinYinUtil.toPinYinString(o1.getName()).compareTo(PinYinUtil.toPinYinString(o2.getName()));  
             }
         };
         Collections.sort(result, c);

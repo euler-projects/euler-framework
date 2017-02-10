@@ -7,7 +7,7 @@ import org.springframework.web.context.ContextLoader;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.OSAdapter;
-import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.common.util.property.PropertyReadException;
 import net.eulerframework.common.util.property.PropertyReader;
 
@@ -172,7 +172,7 @@ public abstract class WebConfig {
 
         String result = properties.get(WebConfigKey.WEB_API_ROOT_PATH, WebConfigDefault.WEB_API_ROOT_PATH);
 
-        if (StringTool.isNull(result))
+        if (StringUtil.isNull(result))
             throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
 
         while (result.endsWith("*")) {
@@ -196,7 +196,7 @@ public abstract class WebConfig {
 
         String result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
-        if (StringTool.isNull(result))
+        if (StringUtil.isNull(result))
             throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + "can not be empty");
 
         while (result.endsWith("*")) {

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.common.util.CalendarTool;
-import net.eulerframework.common.util.StringTool;
+import net.eulerframework.common.util.DateUtil;
+import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
@@ -58,7 +58,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
     @Override
     public ArchivedFile saveFile(File file) throws FileArchiveException {
         String archiveFilePath = WebConfig.getUploadPath();
-        String archivedPathSuffix = CalendarTool.formatDate(new Date(), "yyyy-MM-dd");        
+        String archivedPathSuffix = DateUtil.formatDate(new Date(), "yyyy-MM-dd");        
         
         String originalFilename = file.getName();     
         String targetFilename = UUID.randomUUID().toString();
@@ -82,7 +82,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
     @Override
     public ArchivedFile saveMultipartFile(MultipartFile multipartFile) throws FileArchiveException {
         String archiveFilePath = WebConfig.getUploadPath(); 
-        String archivedPathSuffix = CalendarTool.formatDate(new Date(), "yyyy-MM-dd");          
+        String archivedPathSuffix = DateUtil.formatDate(new Date(), "yyyy-MM-dd");          
         
         String originalFilename = multipartFile.getOriginalFilename();        
         String targetFilename = UUID.randomUUID().toString();
@@ -109,7 +109,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
 
     @Override
     public ArchivedFile findArchivedFile(String archivedFileId) {
-        Assert.isFalse(StringTool.isNull(archivedFileId), "archivedFileId is null");
+        Assert.isFalse(StringUtil.isNull(archivedFileId), "archivedFileId is null");
         
         return this.archivedFileDao.load(archivedFileId);
     }
