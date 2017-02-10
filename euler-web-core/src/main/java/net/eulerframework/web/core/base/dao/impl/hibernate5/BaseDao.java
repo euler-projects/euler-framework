@@ -347,7 +347,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             String property = entry.getKey();
             String value = entry.getValue();
             
-            if(StringUtil.isNull(value))
+            if(StringUtil.isEmpty(value))
                 continue;
             
             QueryMode queryMode = queryRequest.getQueryMode(property);

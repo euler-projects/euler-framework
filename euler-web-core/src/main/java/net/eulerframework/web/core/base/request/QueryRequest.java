@@ -99,11 +99,11 @@ public class QueryRequest implements BaseRequest {
         String sorts = request.getParameter(SORT_PARAM_NAME);
         String orders = request.getParameter(ORDER_PARAM_NAME);
         
-        if(StringUtil.isNull(sorts)) {
+        if(StringUtil.isEmpty(sorts)) {
             return result;
         }
         
-        if(StringUtil.isNull(orders)) {
+        if(StringUtil.isEmpty(orders)) {
             throw new BadRequestException("order is required when request has sort params");
         }
         
@@ -151,7 +151,7 @@ public class QueryRequest implements BaseRequest {
             String key = entry.getKey();
             if(key.startsWith(prefix)) {
                 String valueStr = entry.getValue().length > 0 ? entry.getValue()[0].trim() : null;
-                if(StringUtil.isNull(valueStr))
+                if(StringUtil.isEmpty(valueStr))
                     continue;
                 
                 T value = paramFormatter.extract(valueStr);

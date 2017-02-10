@@ -48,7 +48,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
         String themeParamName = "_theme";
 
         String theme = this.getRequest().getParameter(themeParamName);
-        if (StringUtil.isNull(theme)) {
+        if (StringUtil.isEmpty(theme)) {
             Cookie[] cookies = this.getRequest().getCookies();
 
             if (cookies != null) {
@@ -64,7 +64,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
             this.getResponse().addCookie(cookie);
         }
 
-        if (StringUtil.isNull(theme)) {
+        if (StringUtil.isEmpty(theme)) {
             theme = WebConfig.getDefaultTheme();
         }
 
