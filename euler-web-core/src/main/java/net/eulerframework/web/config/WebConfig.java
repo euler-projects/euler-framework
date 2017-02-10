@@ -571,4 +571,9 @@ public abstract class WebConfig {
         return result;
     }
 
+    public static Object getProjectLogoForAdminDashboard() {
+        // TODO Auto-generated method stub
+        return "/assets/system/admin-dashboard-brand.png";
+    }
+
 }
