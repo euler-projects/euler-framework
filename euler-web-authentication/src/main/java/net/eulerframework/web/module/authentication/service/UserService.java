@@ -34,35 +34,35 @@ public class UserService extends BaseService {
     private PasswordEncoder passwordEncoder;
 
     public User loadUserByUsername(String username) {
-        Assert.isNotNull(username, "username is null");
+        Assert.notNull(username, "username is null");
         User user = this.userDao.findUserByName(username);
         return user;
     }
 
     public User loadUserByEmail(String email) {
-        Assert.isNotNull(email, "email is null");
+        Assert.notNull(email, "email is null");
         User user = this.userDao.findUserByEmail(email);
         return user;
     }
 
     public User loadUserByMobile(String mobile) {
-        Assert.isNotNull(mobile, "mobile is null");
+        Assert.notNull(mobile, "mobile is null");
         User user = this.userDao.findUserByEmail(mobile);
         return user;
     }
 
     public List<User> loadUserByNameOrCodeFuzzy(String nameOrCode) {
-        Assert.isNotNull(nameOrCode, "nameOrCode is null");
+        Assert.notNull(nameOrCode, "nameOrCode is null");
         return this.userDao.findUserByNameOrCode(nameOrCode);
     }
 
     public User loadUser(String userId) {
-        Assert.isNotNull(userId, "userId is null");
+        Assert.notNull(userId, "userId is null");
         return this.userDao.load(userId);
     }
 
     public String save(User user) {
-        Assert.isNotNull(user, "user is null");
+        Assert.notNull(user, "user is null");
         
         JavaObjectUtil.clearEmptyProperty(user);
         

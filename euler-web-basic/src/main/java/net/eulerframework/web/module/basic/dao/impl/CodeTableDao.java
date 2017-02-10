@@ -54,27 +54,27 @@ public class CodeTableDao extends BaseDao<CodeTable> implements ICodeTableDao {
         try {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("name");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("codeType");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("codeType", Integer.parseInt(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("description");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("value");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("value", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("valueZhCn");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueZhCn", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("valueEnUs");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueEnUs", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {

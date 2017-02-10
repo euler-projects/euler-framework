@@ -21,8 +21,8 @@ public class AttachmentService extends BaseService implements IAttachmentService
 
     @Override
     public void addAttachment(AbstractAttachment attachment) {
-        Assert.isNotNull(attachment, "attachment is null");
-        Assert.isNotNull(attachment.getOwnerId(), "attachment owner id is null");
+        Assert.notNull(attachment, "attachment is null");
+        Assert.notNull(attachment.getOwnerId(), "attachment owner id is null");
         
         
         this.getEntityDao(attachmentDaos, attachment.getClass()).save(attachment);
@@ -30,16 +30,16 @@ public class AttachmentService extends BaseService implements IAttachmentService
 
     @Override
     public void updateAttachment(AbstractAttachment attachment) {
-        Assert.isNotNull(attachment, "attachment is null");
-        Assert.isNotNull(attachment.getOwnerId(), "attachment owner id is null");
+        Assert.notNull(attachment, "attachment is null");
+        Assert.notNull(attachment.getOwnerId(), "attachment owner id is null");
         
         this.getEntityDao(attachmentDaos, attachment.getClass()).saveOrUpdate(attachment);
     }
 
     @Override
     public void deleteAttachment(AbstractAttachment attachment) {
-        Assert.isNotNull(attachment, "attachment is null");
-        Assert.isNotNull(attachment.getOwnerId(), "attachment owner id is null");
+        Assert.notNull(attachment, "attachment is null");
+        Assert.notNull(attachment.getOwnerId(), "attachment owner id is null");
         
         this.getEntityDao(attachmentDaos, attachment.getClass()).delete(attachment);
     }
@@ -47,8 +47,8 @@ public class AttachmentService extends BaseService implements IAttachmentService
     @Override
     public <T extends AbstractAttachment> void deleteAttachment(Serializable ownerId, String attachmentId,
             Class<T> attachmentClass) throws AttachmentNotFoundException {
-        Assert.isNotNull(ownerId, "attachment owner id is null");
-        Assert.isNotNull(attachmentId, "attachment id is null");
+        Assert.notNull(ownerId, "attachment owner id is null");
+        Assert.notNull(attachmentId, "attachment id is null");
         
 
         @SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public class AttachmentService extends BaseService implements IAttachmentService
 
     @Override
     public <T extends AbstractAttachment> void deleteAllAttachment(Serializable ownerId, Class<T> attachmentClass) {
-        Assert.isNotNull(ownerId, "attachment owner id is null");
+        Assert.notNull(ownerId, "attachment owner id is null");
         
         List<T> data = this.loadAttachments(ownerId, attachmentClass);
         
@@ -79,7 +79,7 @@ public class AttachmentService extends BaseService implements IAttachmentService
 
     @Override
     public <T extends AbstractAttachment> T loadAttachment(Serializable ownerId, Class<T> attachmentClass) {
-        Assert.isNotNull(ownerId, "attachment owner id is null");
+        Assert.notNull(ownerId, "attachment owner id is null");
         
         List<T> data = this.loadAttachments(ownerId, attachmentClass);
         
@@ -91,7 +91,7 @@ public class AttachmentService extends BaseService implements IAttachmentService
 
     @Override
     public <T extends AbstractAttachment> List<T> loadAttachments(Serializable ownerId, Class<T> attachmentClass) {
-        Assert.isNotNull(ownerId, "attachment owner id is null");
+        Assert.notNull(ownerId, "attachment owner id is null");
         
         @SuppressWarnings("unchecked")
         IAttachmentDao<T> dao = (IAttachmentDao<T>) this.getEntityDao(attachmentDaos, attachmentClass);

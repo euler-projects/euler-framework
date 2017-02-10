@@ -69,31 +69,31 @@ public class UserDao extends BaseDao<User> {
         try {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("username");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("username", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("empName");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("empName", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("enabled");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("enabled", Boolean.parseBoolean(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("nation");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("nation", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("accountNonExpired");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("accountNonExpired", Boolean.parseBoolean(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("accountNonLocked");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("accountNonLocked", Boolean.parseBoolean(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("credentialsNonExpired");
-            if (!StringUtil.isNull(queryValue)) {
+            if (!StringUtil.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("credentialsNonExpired", Boolean.parseBoolean(queryValue)));
             }
         } catch (Exception e) {

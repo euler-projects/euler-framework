@@ -11,7 +11,7 @@ public class WebFileTool {
     public static String extractFileExtension(String fileName) {
         String extension = "";
         
-        if(StringUtil.isNull(fileName))
+        if(StringUtil.isEmpty(fileName))
             return extension;
         
         int dot = fileName.lastIndexOf('.');

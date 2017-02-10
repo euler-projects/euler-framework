@@ -66,7 +66,7 @@ public class AuthenticationWebController extends JspSupportWebController {
             @RequestParam(required = true) String type, 
             @RequestParam(required = false) String token) {
         if ("email".equalsIgnoreCase(type)) {
-            if (StringUtil.isNull(token))
+            if (StringUtil.isEmpty(token))
                 return this.display("forgotPassword-email");
 
             try {

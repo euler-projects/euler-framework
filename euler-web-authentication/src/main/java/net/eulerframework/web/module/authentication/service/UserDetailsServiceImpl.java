@@ -27,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Assert.isNotNull(username, "username is null");
+        Assert.notNull(username, "username is null");
         
         User user = null;
         if(enableUserCache) {
