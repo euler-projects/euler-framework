@@ -81,7 +81,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return view在JspPath下的路径
      */
     protected String display(String view) {
-        Assert.isNotNull(view, "view path is empty");
+        Assert.notNull(view, "view path is empty");
 
         if (!view.startsWith("/"))
             return this.theme() + "/" + this.getWebControllerName() + "/" + view;
@@ -98,7 +98,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 重定向字符串
      */
     protected String redirect(String action) {
-        Assert.isNotNull(action, "action path is empty");
+        Assert.notNull(action, "action path is empty");
 
         if (!action.startsWith("/"))
             return "redirect:" + "/" + this.getWebControllerName() + "/" + action;
@@ -115,7 +115,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 跳转页面
      */
     protected String jump(String message, Target target, int wait) {
-        Assert.isNotNull(message, "Jump message can not be null"); 
+        Assert.notNull(message, "Jump message can not be null"); 
         
         target = target == null ? Target.HOME_TARGET : target;
         
@@ -152,7 +152,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     private String error(ViewException viewException) {
-        Assert.isNotNull(viewException, "Error exception can not be null"); 
+        Assert.notNull(viewException, "Error exception can not be null"); 
         this.getRequest().setAttribute("__message", viewException.getMessage());   
         this.getRequest().setAttribute("__code", viewException.getCode()); 
         return this.display("/common/error");
@@ -287,7 +287,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
         }
         
         public Target(String href, String name) {
-            Assert.isNotNull(href, "Target href exception can not be null");
+            Assert.notNull(href, "Target href exception can not be null");
             
             String contextPath = this.getServletContext().getContextPath();
             if (!contextPath.endsWith("/"))
