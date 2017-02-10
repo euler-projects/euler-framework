@@ -45,7 +45,7 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         this.refreshModules();
         
         //contextPaht
-        ServletContext sc = ContextLoader.getCurrentWebApplicationContext().getServletContext();
+        ServletContext sc = this.getServletContext();
         String contextPath = sc.getContextPath();
         
         sc.setAttribute("__CONTEXT_PATH", contextPath);
@@ -55,13 +55,15 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         sc.setAttribute("__FILE_UPLOAD_ACTION", contextPath + "/uploadFile");
 
         sc.setAttribute("__DEBUG_MODE", WebConfig.isDebugMode());
-        sc.setAttribute("__ADMIN_DASHBOARD_BRAND", contextPath + WebConfig.getProjectLogoForAdminDashboard());
         sc.setAttribute("__PROJECT_VERSION", WebConfig.getProjectVersion());
         sc.setAttribute("__PROJECT_MODE", WebConfig.getProjectMode());
         sc.setAttribute("__PROJECT_BUILDTIME", WebConfig.getProjectBuildtime());
 
         sc.setAttribute("__SITENAME", WebConfig.getSitename());
         sc.setAttribute("__COPYRIGHT_HOLDER", WebConfig.getCopyrightHolder());
+        
+        sc.setAttribute("__ADMIN_DASHBOARD_BRAND_ICON", contextPath + WebConfig.getAdminDashboardBrandIcon());
+        sc.setAttribute("__ADMIN_DASHBOARD_BRAND_TEXT", WebConfig.getAdminDashboardBrandText());
         
         sc.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
     }

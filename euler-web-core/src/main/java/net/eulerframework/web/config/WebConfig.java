@@ -20,7 +20,6 @@ public abstract class WebConfig {
 
     private static class WebConfigKey {
         //[project]
-        private final static String PROJECT_SITENAME = "project.sitename";
         private final static String PROJECT_VERSION = "project.verison";
         private final static String PROJECT_MODE = "project.mode";
         private final static String PROJECT_BUILDTIME = "project.buildtime";
@@ -32,11 +31,14 @@ public abstract class WebConfig {
         private final static String CORE_CACHE_USERCONTEXT_CAHCE_LIFE = "core.cache.userContext.cacheLife";
 
         //[web]
+        private final static String WEB_SITENAME = "web.sitename";
         private final static String WEB_DEFAULT_THEME = "web.defaultTheme";
         private final static String WEB_UPLOAD_PATH = "web.uploadPath";
         private final static String WEB_JSP_PATH = "web.jspPath";
         private final static String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
         private final static String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
+        private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
+        private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
         private final static String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
         
@@ -64,20 +66,22 @@ public abstract class WebConfig {
     }
 
     private static class WebConfigDefault {
-        private final static String PROJECT_SITENAME = "DEMO";
-        private static final String PROJECT_COPYRIGHT_HOLDER = "Euler Projects";
+        private static final String PROJECT_COPYRIGHT_HOLDER = "Copyright Holder";
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
         
         private final static int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
         private final static long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
         private final static long CORE_CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L;
 
+        private final static String WEB_SITENAME = "DEMO";
         private final static String WEB_DEFAULT_THEME = "default";
         private final static String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
         private final static String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
         private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private final static String WEB_ADMIN_ROOT_PATH = "/admin";
+        private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "/assets/system/admin-dashboard-brand.png";
+        private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "Manage Dashboard";
         private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
         
@@ -509,15 +513,15 @@ public abstract class WebConfig {
     }
 
     public static String getSitename() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.PROJECT_SITENAME);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_SITENAME);
         if (cachedConfig != null) {
             return (String) cachedConfig;
         }
 
-        String result = properties.get(WebConfigKey.PROJECT_SITENAME,
-                WebConfigDefault.PROJECT_SITENAME);
+        String result = properties.get(WebConfigKey.WEB_SITENAME,
+                WebConfigDefault.WEB_SITENAME);
 
-        CONFIG_CAHCE.put(WebConfigKey.PROJECT_SITENAME, result);
+        CONFIG_CAHCE.put(WebConfigKey.WEB_SITENAME, result);
         return result;
     }
 
@@ -571,9 +575,30 @@ public abstract class WebConfig {
         return result;
     }
 
-    public static Object getProjectLogoForAdminDashboard() {
-        // TODO Auto-generated method stub
-        return "/assets/system/admin-dashboard-brand.png";
+    public static String getAdminDashboardBrandIcon() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON,
+                WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_ICON);
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON, result);
+        return result;
+    }
+    
+    public static String getAdminDashboardBrandText() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT,
+                WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_TEXT);
+
+        CONFIG_CAHCE.put(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT, result);
+        return result;
     }
 
 }
