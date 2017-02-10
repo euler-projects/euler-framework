@@ -79,6 +79,28 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
             throw new ServletException(e);
         }
         
+        this.setConfigurableEnvironment(rootContext);        
+        
+        container.addListener(new ContextLoaderListener(rootContext));
+        //container.addListener(new RequestContextListener());
+        container.addListener(new EulerFrameworkCoreListener());
+        
+        MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
+        
+        this.configWebDispatcher(rootContext, container, multiPartConfig);
+        
+        this.configAdminDispatcher(rootContext, container, multiPartConfig);
+        
+        this.configApiDispatcher(rootContext, container, multiPartConfig);
+        
+        FilterRegistration.Dynamic eulerframeworkCoreFilter = container.addFilter("eulerframeworkCoreFilter", new EulerFrameworkCoreFilter());
+        eulerframeworkCoreFilter.addMappingForUrlPatterns(null, false, "/*");
+        
+        FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
+        crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");
+    }
+    
+    private void setConfigurableEnvironment(AbstractApplicationContext rootContext) {
         ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
         
         switch(WebConfig.getWebAuthenticationType()){
@@ -115,24 +137,6 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         case NEITHER:
             break; 
         }
-        
-        container.addListener(new ContextLoaderListener(rootContext));
-        //container.addListener(new RequestContextListener());
-        container.addListener(new EulerFrameworkCoreListener());
-        
-        MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
-        
-        this.configWebDispatcher(rootContext, container, multiPartConfig);
-        
-        this.configAdminDispatcher(rootContext, container, multiPartConfig);
-        
-        this.configApiDispatcher(rootContext, container, multiPartConfig);
-        
-        FilterRegistration.Dynamic eulerframeworkCoreFilter = container.addFilter("eulerframeworkCoreFilter", new EulerFrameworkCoreFilter());
-        eulerframeworkCoreFilter.addMappingForUrlPatterns(null, false, "/*");
-        
-        FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
-        crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");
     }
     
     private void configWebDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
