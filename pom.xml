@@ -29,7 +29,8 @@
         <jdk.version>1.7</jdk.version>        
         
         <euler-cache.version>0.0.3</euler-cache.version>
-
+        <euler-common.version>0.0.1-SNAPSHOT</euler-common.version>
+        
         <commons-codec.version>1.10</commons-codec.version>
 
         <jsp.version>2.2</jsp.version>
@@ -326,7 +327,7 @@
             <dependency>
                 <groupId>net.eulerframework</groupId>
                 <artifactId>euler-common</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${euler-common.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

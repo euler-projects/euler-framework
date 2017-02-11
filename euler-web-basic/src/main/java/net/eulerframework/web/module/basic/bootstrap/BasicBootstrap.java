@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.file.bootstrap;
+package net.eulerframework.web.module.basic.bootstrap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -7,14 +7,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 
 import net.eulerframework.common.util.log.LogSupport;
-import net.eulerframework.web.module.file.listener.FileStoreListener;
+import net.eulerframework.web.module.basic.listener.BasicListener;
 
 @Order(1)
-public class FileStoreBootstrap extends LogSupport implements WebApplicationInitializer {
+public class BasicBootstrap extends LogSupport implements WebApplicationInitializer {
     
     @Override
     public void onStartup(ServletContext container) throws ServletException {
-        this.logger.info("Executing file store bootstrap.");
-        container.addListener(new FileStoreListener());
+        this.logger.info("Executing Basic bootstrap.");
+        container.addListener(new BasicListener());
     }
 }

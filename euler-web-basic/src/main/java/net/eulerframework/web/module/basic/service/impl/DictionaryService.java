@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.ContextLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,29 +20,19 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.basic.dao.ICodeTableDao;
-import net.eulerframework.web.module.basic.dao.IModuleDao;
-import net.eulerframework.web.module.basic.dao.IPageDao;
-import net.eulerframework.web.module.basic.entity.CodeTable;
-import net.eulerframework.web.module.basic.entity.Module;
-import net.eulerframework.web.module.basic.entity.Page;
-import net.eulerframework.web.module.basic.service.IBaseDataService;
+import net.eulerframework.web.module.basic.dao.IDictionaryDao;
+import net.eulerframework.web.module.basic.entity.Dictionary;
+import net.eulerframework.web.module.basic.service.IDictionaryService;
 
 @Service
-public class BaseDataService extends BaseService implements IBaseDataService {
+public class DictionaryService extends BaseService implements IDictionaryService {
     
-    @Resource private ICodeTableDao codeTableDao;
-    
-    @Resource private IModuleDao moduleDao;
-    @Resource private IPageDao pageDao;
+    @Resource private IDictionaryDao dictionaryDao;
     
     @Resource private ObjectMapper objectMapper;
 
     @Override
     public void loadBaseData() {
-        
-        //allModules
-        this.refreshModules();
         
         //contextPaht
         ServletContext sc = this.getServletContext();
@@ -76,11 +66,11 @@ public class BaseDataService extends BaseService implements IBaseDataService {
         String codeTableJsFileRealPath = webRootRealPath+codeTableJsFilePath;
         this.logger.info("createCodeDict:"+codeTableJsFileRealPath);
 
-        List<CodeTable> codes = this.codeTableDao.findAllCodeOrderByName();
+        List<Dictionary> codes = this.dictionaryDao.findAllDictionaryOrderByName();
         Map<String, List<Dict>> codeTableMap = new HashMap<>();
         List<Dict> dict = null;
         String name = "";
-        for(CodeTable code : codes) {
+        for(Dictionary code : codes) {
             if(!name.equals(code.getName())){
                 if(dict != null && !dict.isEmpty()){
                     codeTableMap.put(name, dict);
@@ -136,84 +126,29 @@ public class BaseDataService extends BaseService implements IBaseDataService {
             return style;
         }
 
-        private Dict(CodeTable codeTable){
-            this.key = codeTable.getKey();
-            this.value = codeTable.getValue();
-            this.valuei18n = codeTable.getValueI18nCode();
-            this.style = codeTable.getCssStyle();
+        private Dict(Dictionary dictionary){
+            this.key = dictionary.getKey();
+            this.value = dictionary.getValue();
+            this.valuei18n = dictionary.getValueI18nCode();
+            this.style = dictionary.getCssStyle();
         }
     }
     
     //==================================================================================
 
     @Override
-    public PageResponse<CodeTable> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        return this.codeTableDao.findCodeTableByPage(queryRequest, pageIndex, pageSize);
+    public PageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+        return this.dictionaryDao.findDictionaryByPage(queryRequest, pageIndex, pageSize);
     }
 
     @Override
-    public void saveCodeTable(CodeTable codeTable) {
-        this.codeTableDao.saveOrUpdate(codeTable);
+    public void saveCodeTable(Dictionary dictionary) {
+        this.dictionaryDao.saveOrUpdate(dictionary);
     }
 
     @Override
     public void deleteCodeTables(Serializable[] idArray) {
-        this.codeTableDao.deleteByIds(idArray);
+        this.dictionaryDao.deleteByIds(idArray);
         
-    }
-
-    @Override
-    public List<Module> findAllModuleFromDB() {
-        return this.moduleDao.findAllInOrder();
-    }
-
-    @Override
-    public Module findModuleById(String id) {
-        return this.moduleDao.load(id);
-    }
-
-    @Override
-    public Page findPageById(String id) {
-        return this.pageDao.load(id);
-    }
-
-    @Override
-    public void savePage(Page page) {
-        if(page.getModuleId() == null)
-            throw new RuntimeException("Module Id 不能为空");
-        this.pageDao.saveOrUpdate(page);
-        this.refreshModules();
-    }
-
-    @Override
-    public void deletePage(Serializable id) {
-        this.pageDao.deleteById(id);
-        this.refreshModules();
-    }
-
-    @Override
-    public void saveModule(Module module) {
-        if(module.getId() != null){
-            List<Page> pages = this.moduleDao.load(module.getId()).getPages();
-            if(module.getPages() == null || module.getPages().isEmpty()) {
-                module.setPages(pages);
-            }
-        }
-        this.moduleDao.saveOrUpdate(module);
-        this.refreshModules();
-    }
-
-    @Override
-    public void deleteModule(Serializable id) {
-        List<Page> pages = this.moduleDao.load(id).getPages();
-        this.pageDao.deleteAll(pages);
-        this.moduleDao.deleteById(id);
-        this.refreshModules();
-    }
-    
-    private void refreshModules(){
-        this.moduleDao.flushSession();
-        List<Module> allModules = this.moduleDao.findAllInOrder();
-        ContextLoader.getCurrentWebApplicationContext().getServletContext().setAttribute("menu", allModules);        
     }
 }

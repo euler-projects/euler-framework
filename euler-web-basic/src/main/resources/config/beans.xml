@@ -16,14 +16,7 @@
     <bean id="archivedFileDao" class="net.eulerframework.web.module.file.dao.impl.ArchivedFileDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    
-    <bean id="moduleDao" class="net.eulerframework.web.module.basic.dao.impl.ModuleDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="pageDao" class="net.eulerframework.web.module.basic.dao.impl.PageDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="codeTableDao" class="net.eulerframework.web.module.basic.dao.impl.CodeTableDao">
+    <bean id="dictionaryDao" class="net.eulerframework.web.module.basic.dao.impl.DictionaryDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 </beans>

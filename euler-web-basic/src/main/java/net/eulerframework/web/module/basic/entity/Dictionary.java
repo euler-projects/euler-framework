@@ -15,9 +15,9 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  *
  */
 @SuppressWarnings("serial")
-//@Entity
-@Table(name = "SYS_CODE_TABLE")
-public class CodeTable extends UUIDEntity<CodeTable> {
+@Entity
+@Table(name = "SYS_DICT")
+public class Dictionary extends UUIDEntity<Dictionary> {
 
     @NotNull
     @Pattern(regexp="[a-z][a-zA-Z0-9_]*", message="{validation.codeTable.name}")
@@ -35,8 +35,8 @@ public class CodeTable extends UUIDEntity<CodeTable> {
     private Integer showOrder;  
     @Column(name = "CSS_STYLE")
     private String cssStyle;
-    @Column(name="DESCRIPTION")
-    private String description;
+    @Column(name="REMARK")
+    private String remark;
     public String getName() {
         return name;
     }
@@ -73,10 +73,11 @@ public class CodeTable extends UUIDEntity<CodeTable> {
     public void setCssStyle(String cssStyle) {
         this.cssStyle = cssStyle;
     }
-    public String getDescription() {
-        return description;
+    public String getRemark() {
+        return remark;
     }
-    public void setDescription(String description) {
-        this.description = description;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
+    
 }
