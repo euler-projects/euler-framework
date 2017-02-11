@@ -129,8 +129,8 @@ public class DictionaryService extends BaseService implements IDictionaryService
         private Dict(Dictionary dictionary){
             this.key = dictionary.getKey();
             this.value = dictionary.getValue();
-            this.valuei18n = dictionary.getValueI18nCode();
             this.style = dictionary.getCssStyle();
+            this.valuei18n = dictionary.getValuei18n();
         }
     }
     

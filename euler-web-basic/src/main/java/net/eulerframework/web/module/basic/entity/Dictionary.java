@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
+import net.eulerframework.web.core.i18n.Tag;
 
 /**
  * CODE_TABLE<br>
@@ -69,6 +70,9 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     }
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+    public String getValuei18n() {
+        return Tag.i18n(this.value);
     }
     
 }
