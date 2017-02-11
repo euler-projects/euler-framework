@@ -20,7 +20,7 @@ public class BasicListener implements ServletContextListener {
         
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
         
-        IDictionaryService dictionaryService= (DictionaryService)rwp.getBean("baseDataService");
+        IDictionaryService dictionaryService= (DictionaryService)rwp.getBean("dictionaryService");
         try {
             dictionaryService.createCodeDict();
         } catch (IOException e) {
