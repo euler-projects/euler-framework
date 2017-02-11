@@ -83,7 +83,7 @@ public class UserService extends BaseService {
     }
 
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
-        return this.userDao.findEntityInPage(pageQueryRequest);
+        return this.userDao.findEntityInPageUseOr(pageQueryRequest, "groups");
     }
 
     /**

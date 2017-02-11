@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.controller.admin;
+package net.eulerframework.web.module.authentication.controller.admin.user;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.web.core.annotation.AdminWebController;
-import net.eulerframework.web.core.base.controller.JspSupportWebController;
+import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.Authority;
@@ -23,7 +23,7 @@ import net.eulerframework.web.module.authentication.service.UserService;
 
 @AdminWebController
 @RequestMapping("security")
-public class SecurityWebController extends JspSupportWebController {
+public class SecurityWebController_ajax extends AjaxSupportWebController {
     
 
 	@Resource
@@ -32,22 +32,6 @@ public class SecurityWebController extends JspSupportWebController {
 	private UserDetailsService userDetailsService;
 	@Resource
 	private AuthorityService authorityService;
-
-    @RequestMapping(value ="user",method=RequestMethod.GET)
-    public String user(){
-        return this.display("user");
-    }
-    
-    @RequestMapping(value ="group",method=RequestMethod.GET)
-    public String group(){
-        return this.display("group");
-    }
-    
-    @RequestMapping(value ="authority",method=RequestMethod.GET)
-    public String authority(){
-        return this.display("authority");
-    }
-
     /*=============== user page =================*/
     
     @RequestMapping(value ="findUserByPage")

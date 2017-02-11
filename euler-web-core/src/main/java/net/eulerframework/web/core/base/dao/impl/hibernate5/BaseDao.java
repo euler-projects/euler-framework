@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -217,6 +219,44 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         
         return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
     }
+    
+    @Override
+    public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
+        DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
+        
+        for(String c : propertySetToSelectMode) {
+            detachedCriteria.setFetchMode(c, FetchMode.SELECT);
+        }
+        
+        int pageIndex = pageQueryRequest.getPageIndex();
+        int pageSize = pageQueryRequest.getPageSize();
+        
+        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
+    }
+    
+    @Override
+    public PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest) {
+        DetachedCriteria detachedCriteria = this.analyzeOrQueryRequest(pageQueryRequest);
+        
+        int pageIndex = pageQueryRequest.getPageIndex();
+        int pageSize = pageQueryRequest.getPageSize();
+        
+        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
+    }
+    
+    @Override
+    public PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
+        DetachedCriteria detachedCriteria = this.analyzeOrQueryRequest(pageQueryRequest);
+        
+        for(String c : propertySetToSelectMode) {
+            detachedCriteria.setFetchMode(c, FetchMode.SELECT);
+        }
+        
+        int pageIndex = pageQueryRequest.getPageIndex();
+        int pageSize = pageQueryRequest.getPageSize();
+        
+        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
+    }
 
     @Override
     public void flushSession() {
@@ -353,6 +393,41 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             QueryMode queryMode = queryRequest.getQueryMode(property);
             detachedCriteria.add(this.generateRestriction(property, value, queryMode));
         }
+        
+        LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
+        
+        for (Map.Entry<String, OrderMode> entry : sortMap.entrySet()) {
+            String property = entry.getKey();
+            OrderMode value = entry.getValue();
+            
+            if(value == null)
+                continue;
+            
+            detachedCriteria.addOrder(this.analyzeOrderMode(property, value));
+        }
+        
+        return detachedCriteria;
+    }
+    
+    protected DetachedCriteria analyzeOrQueryRequest(QueryRequest queryRequest) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
+        
+        Map<String, String> queryMap = queryRequest.getQueryMap();
+        
+        List<Criterion> criterions = new ArrayList<>();
+        
+        for (Map.Entry<String, String> entry : queryMap.entrySet()) {
+            String property = entry.getKey();
+            String value = entry.getValue();
+            
+            if(StringUtil.isEmpty(value))
+                continue;
+            
+            QueryMode queryMode = queryRequest.getQueryMode(property);
+            criterions.add(this.generateRestriction(property, value, queryMode));
+        }
+        
+        detachedCriteria.add(Restrictions.or(criterions.toArray(new Criterion [0])));
         
         LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
         

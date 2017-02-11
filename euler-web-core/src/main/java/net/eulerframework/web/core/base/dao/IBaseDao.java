@@ -41,6 +41,12 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     long findCount();
     
     PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest);
+    
+    public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
+    
+    PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest);
+    
+    public PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
 
     void flushSession();
 
