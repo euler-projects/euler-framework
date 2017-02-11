@@ -24,13 +24,10 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     @Column(name = "NAME", nullable = false)
     private String name;
     @NotNull
-    @Column(name = "KEY", nullable = false)
+    @Column(name = "DICT_KEY", nullable = false)
     private String key;
-    @NotNull
-    @Column(name = "VALUE")
-    private String value;
-    @Column(name = "VALUE_I18N_CODE")
-    private String valueI18nCode;    
+    @Column(name = "DICT_VALUE")
+    private String value;   
     @Column(name = "SHOW_ORDER")
     private Integer showOrder;  
     @Column(name = "CSS_STYLE")
@@ -54,12 +51,6 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     }
     public void setValue(String value) {
         this.value = value;
-    }
-    public String getValueI18nCode() {
-        return valueI18nCode;
-    }
-    public void setValueI18nCode(String valueI18nCode) {
-        this.valueI18nCode = valueI18nCode;
     }
     public Integer getShowOrder() {
         return showOrder;
