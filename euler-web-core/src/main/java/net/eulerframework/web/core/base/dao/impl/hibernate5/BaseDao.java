@@ -30,7 +30,6 @@ import org.hibernate.transform.Transformers;
 import net.eulerframework.common.util.JavaObjectUtil;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.DateUtil;
-import net.eulerframework.common.util.GenericUtil;
 import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
@@ -61,7 +60,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @SuppressWarnings("unchecked")
     public BaseDao() {
-        this.entityClass = (Class<T>) GenericUtil.findSuperClassGenricType(this.getClass(), 0);
+        this.entityClass = (Class<T>) JavaObjectUtil.findSuperClassGenricType(this.getClass(), 0);
     }
 
     @Override
