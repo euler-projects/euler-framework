@@ -8,7 +8,7 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.CommonUtil;
 import net.eulerframework.common.util.StringUtil;
-import net.eulerframework.common.util.property.PropertyReadException;
+import net.eulerframework.common.util.property.PropertyNotFoundException;
 import net.eulerframework.common.util.property.PropertyReader;
 
 public abstract class WebConfig {
@@ -28,7 +28,6 @@ public abstract class WebConfig {
         //[core]
         private final static String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
         private final static String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
-        private final static String CORE_CACHE_USERCONTEXT_CAHCE_LIFE = "core.cache.userContext.cacheLife";
 
         //[web]
         private final static String WEB_SITENAME = "web.sitename";
@@ -57,6 +56,7 @@ public abstract class WebConfig {
         private static final String SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "security.authentication.enableMobileSignin";
         private static final String SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = "security.authentication.enableUserCache";
         private static final String SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = "security.authentication.userCacheLife";
+        private final static String SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = "security.authentication.userContext.cacheLife";
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
@@ -71,7 +71,6 @@ public abstract class WebConfig {
         
         private final static int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
         private final static long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
-        private final static long CORE_CACHE_USERCONTEXT_CAHCE_LIFE = 600_000L;
 
         private final static String WEB_SITENAME = "DEMO";
         private final static String WEB_DEFAULT_THEME = "default";
@@ -97,6 +96,7 @@ public abstract class WebConfig {
         private static final boolean SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
         private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
+        private final static long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; //至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; //可含有-_.的email
@@ -225,7 +225,7 @@ public abstract class WebConfig {
         String result;
         try {
             result = CommonUtil.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
-        } catch (PropertyReadException e) {
+        } catch (PropertyNotFoundException e) {
             if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                 log.info("OS is windows");
                 result = WebConfigDefault.WEB_UPLOAD_PATH_WIN;
@@ -429,15 +429,15 @@ public abstract class WebConfig {
     }
 
     public static long getUserContextCacheLife() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE);
         if (cachedConfig != null) {
             return (long) cachedConfig;
         }
     
-        long result = properties.getLongValue(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE,
-                WebConfigDefault.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
+        long result = properties.getLongValue(WebConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE,
+                WebConfigDefault.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE);
     
-        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE, result);
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE, result);
         return result;
     }
 
@@ -487,7 +487,7 @@ public abstract class WebConfig {
         String result;
         try {
             result = properties.get(WebConfigKey.PROJECT_VERSION);
-        } catch (PropertyReadException e) {
+        } catch (PropertyNotFoundException e) {
             throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_VERSION);
         }
 
@@ -504,7 +504,7 @@ public abstract class WebConfig {
         String result;
         try {
             result = properties.get(WebConfigKey.PROJECT_BUILDTIME);
-        } catch (PropertyReadException e) {
+        } catch (PropertyNotFoundException e) {
             throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_BUILDTIME);
         }
 

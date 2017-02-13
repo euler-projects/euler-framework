@@ -1,6 +1,6 @@
 package net.eulerframework.web.config;
 
-import net.eulerframework.common.util.property.PropertyReadException;
+import net.eulerframework.common.util.property.PropertyNotFoundException;
 import net.eulerframework.common.util.property.PropertyReader;
 
 /**
@@ -15,7 +15,7 @@ public final class SystemProperties {
     public static String frameworkVersion() {
         try {
             return properties.get("version");
-        } catch (PropertyReadException e) {
+        } catch (PropertyNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
