@@ -28,7 +28,7 @@ public class PasswdWebController extends JspSupportWebController {
     public String resetRootPwd() {
         try {
             UserContext.sudo();
-            this.rootService.resetRootPasswordRWT();
+            this.rootService.resetRootPassword();
         } catch (Exception e) {
             //DO_NOTHING
         }
@@ -40,7 +40,7 @@ public class PasswdWebController extends JspSupportWebController {
     public String resetAdminPwd() {        
         try {
             UserContext.sudo();
-            this.rootService.resetAdminPasswordRWT();
+            this.rootService.resetAdminPassword();
         } catch (Exception e) {
             //DO_NOTHING            
         }

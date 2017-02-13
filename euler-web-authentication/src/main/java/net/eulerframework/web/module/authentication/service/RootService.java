@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.eulerframework.common.util.StringUtil;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
@@ -15,6 +16,7 @@ import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 
 @Service
+@Transactional
 public class RootService extends BaseService {
 
     @Resource private UserDao userDao;
@@ -23,7 +25,7 @@ public class RootService extends BaseService {
     /**
      * 重置root用户的密码,只用root用户在数据的密码字段被设置为NaN才能使用,重置的密码保存在WEB-INF下的.rootpassword文件中
      */
-    public void resetRootPasswordRWT() {
+    public void resetRootPassword() {
         User root = this.userDao.findUserByName("root");
         if(!root.getPassword().equals("NaN"))
             throw new ResourceNotFoundException();
@@ -50,7 +52,7 @@ public class RootService extends BaseService {
     /**
      * 重置admin用户的密码,只用admin用户在数据的密码字段被设置为NaN才能使用,重置的密码保存在WEB-INF下的.adminpassword文件中
      */
-    public void resetAdminPasswordRWT() {
+    public void resetAdminPassword() {
         User admin = this.userDao.findUserByName("admin");
         if(!admin.getPassword().equals("NaN"))
             throw new ResourceNotFoundException();
