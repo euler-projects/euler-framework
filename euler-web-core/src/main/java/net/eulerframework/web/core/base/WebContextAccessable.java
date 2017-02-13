@@ -9,7 +9,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import net.eulerframework.common.util.log.LogSupport;
+import net.eulerframework.common.base.log.LogSupport;
 
 
 public abstract class WebContextAccessable extends LogSupport {

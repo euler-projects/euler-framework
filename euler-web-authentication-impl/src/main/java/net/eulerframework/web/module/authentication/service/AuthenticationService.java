@@ -34,8 +34,8 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     private IUserProfileService userProfileService;
     @Resource
     private AuthorityService authorityService;
-    private boolean autoAuthorization = WebConfig.getAutoAuthorization();
-    private String[] autoAuthorizationGroupId = WebConfig.getAutoAuthorizationId();
+    private boolean enableAutoAuthorize = WebConfig.isEnableAutoAuthorizeAfterSignup();
+    private String[] autoAuthorizeGroupId = WebConfig.getAutoAuthorizeGroupId();
     
     @Resource private JwtEncryptor jwtEncryptor;
 
@@ -47,8 +47,8 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         user.setCredentialsNonExpired(true);
         user.setEnabled(true);
 
-        if (this.autoAuthorization) {
-            List<Group> groups = this.authorityService.findGroupByIds(autoAuthorizationGroupId);
+        if (this.enableAutoAuthorize) {
+            List<Group> groups = this.authorityService.findGroupByIds(autoAuthorizeGroupId);
             user.setGroups(new HashSet<>(groups));
         }
 

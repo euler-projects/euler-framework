@@ -23,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private boolean enableMobileSignin = WebConfig.isEnableMobileSignin();
     private boolean enableUserCache = WebConfig.isEnableUserCache();
     
-    private static final DefaultObjectCache<String, User> USER_CACHE = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserAuthenticationCacheLife());
+    private static final DefaultObjectCache<String, User> USER_CACHE = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserCacheLife());
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

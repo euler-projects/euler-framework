@@ -292,19 +292,6 @@ public abstract class WebConfig {
         return result;
     }
 
-    public static long getUserContextCacheLife() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
-        if (cachedConfig != null) {
-            return (long) cachedConfig;
-        }
-
-        long result = properties.getLongValue(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE,
-                WebConfigDefault.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
-
-        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE, result);
-        return result;
-    }
-
     public static MultiPartConfig getMultiPartConfig() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_MULITPART);
         if (cachedConfig != null) {
@@ -428,7 +415,7 @@ public abstract class WebConfig {
         return result;
     }
 
-    public static long getUserAuthenticationCacheLife() {
+    public static long getUserCacheLife() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USER_CAHCE_LIFE);
         if (cachedConfig != null) {
             return (long) cachedConfig;
@@ -441,12 +428,38 @@ public abstract class WebConfig {
         return result;
     }
 
-    public static boolean getAutoAuthorization() {
+    public static long getUserContextCacheLife() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
+        if (cachedConfig != null) {
+            return (long) cachedConfig;
+        }
+    
+        long result = properties.getLongValue(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE,
+                WebConfigDefault.CORE_CACHE_USERCONTEXT_CAHCE_LIFE);
+    
+        CONFIG_CAHCE.put(WebConfigKey.CORE_CACHE_USERCONTEXT_CAHCE_LIFE, result);
+        return result;
+    }
+
+    public static boolean isEnableAutoSigninAfterSignup() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN);
+        if (cachedConfig != null) {
+            return (boolean) cachedConfig;
+        }
+    
+        boolean result = properties.getBooleanValue(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN,
+                WebConfigDefault.SECURITY_SIGNUP_AUTO_SIGNIN);
+    
+        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN, result);
+        return result;
+    }
+
+    public static boolean isEnableAutoAuthorizeAfterSignup() {
         // TODO Auto-generated method stub
         return true;
     }
 
-    public static String[] getAutoAuthorizationId() {
+    public static String[] getAutoAuthorizeGroupId() {
         // TODO Auto-generated method stub
         return new String[]{"8a775fcf-6f3e-4b57-8a1a-a9bd96a4bf49"};
     }
@@ -547,19 +560,6 @@ public abstract class WebConfig {
         //TODO: make logdetailsmode configable
         return getProjectMode().equals(ProjectMode.DEVELOP) ||
                 getProjectMode().equals(ProjectMode.DEBUG);
-    }
-
-    public static boolean getAutoSigninAfterSignup() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN);
-        if (cachedConfig != null) {
-            return (boolean) cachedConfig;
-        }
-
-        boolean result = properties.getBooleanValue(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN,
-                WebConfigDefault.SECURITY_SIGNUP_AUTO_SIGNIN);
-
-        CONFIG_CAHCE.put(WebConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN, result);
-        return result;
     }
 
     public static String getDefaultTheme() {

@@ -3,7 +3,7 @@ package net.eulerframework.web.module.authentication.bootstrap;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 
-import net.eulerframework.common.util.log.LogSupport;
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.module.authentication.filter.AuthenticateInfoFilter;
 
 import javax.servlet.FilterRegistration;

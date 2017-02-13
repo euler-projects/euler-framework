@@ -1,6 +1,6 @@
 package net.eulerframework.web.core.base.response;
 
-import net.eulerframework.common.util.log.LogSupport;
+import net.eulerframework.common.base.log.LogSupport;
 
 public class AjaxResponse<T> extends LogSupport implements BaseResponse {
     

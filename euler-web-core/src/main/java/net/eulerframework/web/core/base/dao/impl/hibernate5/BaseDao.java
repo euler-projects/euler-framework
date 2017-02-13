@@ -28,10 +28,10 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 
 import net.eulerframework.common.util.JavaObjectUtil;
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.DateUtil;
 import net.eulerframework.common.util.GenericUtil;
 import net.eulerframework.common.util.StringUtil;
-import net.eulerframework.common.util.log.LogSupport;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;

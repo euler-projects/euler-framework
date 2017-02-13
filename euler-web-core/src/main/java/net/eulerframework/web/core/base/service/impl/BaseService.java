@@ -7,7 +7,7 @@ import javax.servlet.ServletContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
-import net.eulerframework.common.util.log.LogSupport;
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.service.IBaseService;

@@ -6,9 +6,9 @@ import java.io.FileNotFoundException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.io.file.FileReadException;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
-import net.eulerframework.common.util.log.LogSupport;
 import net.eulerframework.web.module.authentication.util.JwtEncryptor;
 
 @Configuration
