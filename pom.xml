@@ -29,7 +29,7 @@
         <jdk.version>1.7</jdk.version>        
         
         <euler-cache.version>0.0.3</euler-cache.version>
-        <euler-common.version>0.0.2-SNAPSHOT</euler-common.version>
+        <euler-common.version>0.0.2</euler-common.version>
         
         <commons-codec.version>1.10</commons-codec.version>
 
