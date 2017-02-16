@@ -2,19 +2,20 @@ package net.eulerframework.web.module.authentication.vo;
 
 import java.util.Date;
 
+import net.eulerframework.common.util.DateUtils;
+import net.eulerframework.common.util.jwt.BasicJwtClaims;
 import net.eulerframework.web.module.authentication.entity.User;
 
-public class UserResetInfoVo {
+public class UserResetInfoVo extends BasicJwtClaims {
     private String id;
     private String username;
-    private Date genDate;
-    private Date expireDate;
     public UserResetInfoVo() {}
     public UserResetInfoVo(User user, long tokenLifeSecond) {
         this.id = user.getId();
         this.username = user.getUsername();
-        this.genDate = new Date();
-        this.expireDate = new Date(this.genDate.getTime() + tokenLifeSecond * 1000);
+        Date now = new Date();
+        super.setIat(DateUtils.getUnixTimestamp(now));
+        super.setExp(super.getIat() + tokenLifeSecond);
     }
     
     public String getId() {
@@ -22,11 +23,5 @@ public class UserResetInfoVo {
     }
     public String getUsername() {
         return username;
-    }
-    public Date getGenDate() {
-        return genDate;
-    }
-    public Date getExpireDate() {
-        return expireDate;
     }
 }

@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.authentication.service;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -106,12 +105,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     @Override
     public void checkEmailResetToken(String token) throws InvalidEmailResetTokenException {
         try {            
-            UserResetInfoVo vo = this.jwtEncryptor.decodeClaims(token, UserResetInfoVo.class);
-            Date expireDate = vo.getExpireDate();
-            
-            if(expireDate.getTime() <= new Date().getTime())
-                throw new InvalidJwtException("token expired");
-            
+            this.jwtEncryptor.decodeClaims(token, UserResetInfoVo.class);            
         } catch (InvalidJwtException e) {
             throw new InvalidEmailResetTokenException(e.getMessage(), e);
         }
