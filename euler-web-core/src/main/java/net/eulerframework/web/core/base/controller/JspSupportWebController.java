@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
@@ -36,7 +36,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
             throw new RuntimeException(
                     "If you want to use this.display(), WebController's class name must end with 'WebController'");
 
-        return StringUtil.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("WebController")));
+        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("WebController")));
     }
 
     /**
@@ -48,7 +48,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
         String themeParamName = "_theme";
 
         String theme = this.getRequest().getParameter(themeParamName);
-        if (StringUtil.isEmpty(theme)) {
+        if (StringUtils.isEmpty(theme)) {
             Cookie[] cookies = this.getRequest().getCookies();
 
             if (cookies != null) {
@@ -64,7 +64,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
             this.getResponse().addCookie(cookie);
         }
 
-        if (StringUtil.isEmpty(theme)) {
+        if (StringUtils.isEmpty(theme)) {
             theme = WebConfig.getDefaultTheme();
         }
 

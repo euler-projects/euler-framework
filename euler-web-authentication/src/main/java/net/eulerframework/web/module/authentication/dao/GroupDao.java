@@ -10,7 +10,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -26,11 +26,11 @@ public class GroupDao extends BaseDao<Group> {
         try {
             String queryValue = null;
             queryValue = pageQueryRequest.getQueryValue("name");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("description");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {
@@ -51,7 +51,7 @@ public class GroupDao extends BaseDao<Group> {
         Comparator<Group> c = new Comparator<Group>() {  
               
             public int compare(Group o1, Group o2) {  
-                return StringUtil.toPinYinString(o1.getName()).compareTo(StringUtil.toPinYinString(o2.getName()));  
+                return StringUtils.toPinYinString(o1.getName()).compareTo(StringUtils.toPinYinString(o2.getName()));  
             }
         };
         

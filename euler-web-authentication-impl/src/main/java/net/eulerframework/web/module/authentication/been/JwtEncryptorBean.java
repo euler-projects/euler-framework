@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.io.file.FileReadException;
-import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
-import net.eulerframework.web.module.authentication.util.JwtEncryptor;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
+import net.eulerframework.common.util.jwt.JwtEncryptor;
 
 @Configuration
 public class JwtEncryptorBean extends LogSupport {
@@ -26,7 +26,7 @@ public class JwtEncryptorBean extends LogSupport {
         String path = this.getClass().getResource("/").getPath() + "rsa/resetPasswdPrivKey.pem";
         String key;
         try {
-            key = new String(SimpleFileIOUtil.readFileByByte(new File(path)));
+            key = new String(SimpleFileIOUtils.readFileByByte(new File(path)));
         } catch (FileNotFoundException | FileReadException e) {
             throw new RuntimeException(e);
         }
@@ -38,7 +38,7 @@ public class JwtEncryptorBean extends LogSupport {
         String path = this.getClass().getResource("/").getPath() + "rsa/resetPasswdPubKey.pem";
         String key;
         try {
-            key = new String(SimpleFileIOUtil.readFileByByte(new File(path)));
+            key = new String(SimpleFileIOUtils.readFileByByte(new File(path)));
         } catch (FileNotFoundException | FileReadException e) {
             throw new RuntimeException(e);
         }

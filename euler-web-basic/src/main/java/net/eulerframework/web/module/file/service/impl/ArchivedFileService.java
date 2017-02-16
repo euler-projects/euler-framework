@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.common.util.DateUtil;
-import net.eulerframework.common.util.StringUtil;
-import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
+import net.eulerframework.common.util.DateUtils;
+import net.eulerframework.common.util.StringUtils;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.util.UserContext;
@@ -58,7 +58,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
     @Override
     public ArchivedFile saveFile(File file) throws FileArchiveException {
         String archiveFilePath = WebConfig.getUploadPath();
-        String archivedPathSuffix = DateUtil.formatDate(new Date(), "yyyy-MM-dd");        
+        String archivedPathSuffix = DateUtils.formatDate(new Date(), "yyyy-MM-dd");        
         
         String originalFilename = file.getName();     
         String targetFilename = UUID.randomUUID().toString();
@@ -73,7 +73,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
             return this.saveFileInfo(originalFilename, archivedPathSuffix, targetFile);
         } catch (IllegalStateException | IOException e) {
             if(targetFile.exists())
-                SimpleFileIOUtil.deleteFile(targetFile);
+                SimpleFileIOUtils.deleteFile(targetFile);
             
             throw new FileArchiveException(e);
         }
@@ -82,7 +82,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
     @Override
     public ArchivedFile saveMultipartFile(MultipartFile multipartFile) throws FileArchiveException {
         String archiveFilePath = WebConfig.getUploadPath(); 
-        String archivedPathSuffix = DateUtil.formatDate(new Date(), "yyyy-MM-dd");          
+        String archivedPathSuffix = DateUtils.formatDate(new Date(), "yyyy-MM-dd");          
         
         String originalFilename = multipartFile.getOriginalFilename();        
         String targetFilename = UUID.randomUUID().toString();
@@ -101,7 +101,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
             return this.saveFileInfo(originalFilename, archivedPathSuffix, targetFile);
         } catch (IllegalStateException | IOException e) {
             if(targetFile.exists())
-                SimpleFileIOUtil.deleteFile(targetFile);
+                SimpleFileIOUtils.deleteFile(targetFile);
             
             throw new FileArchiveException(e);
         }
@@ -109,7 +109,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
 
     @Override
     public ArchivedFile findArchivedFile(String archivedFileId) {
-        Assert.isFalse(StringUtil.isEmpty(archivedFileId), "archivedFileId is null");
+        Assert.isFalse(StringUtils.isEmpty(archivedFileId), "archivedFileId is null");
         
         return this.archivedFileDao.load(archivedFileId);
     }
@@ -123,7 +123,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
         
         File file = WebFileTool.getArchivedFile(archivedFile);
         
-        SimpleFileIOUtil.deleteFile(file);
+        SimpleFileIOUtils.deleteFile(file);
         
         this.archivedFileDao.delete(archivedFile);        
     }

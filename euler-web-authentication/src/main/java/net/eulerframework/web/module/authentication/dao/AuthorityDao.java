@@ -9,7 +9,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -24,15 +24,15 @@ public class AuthorityDao extends BaseDao<Authority> {
         try {
             String queryValue = null;
             queryValue = pageQueryRequest.getQueryValue("name");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("authority");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("authority", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("description");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {
@@ -52,7 +52,7 @@ public class AuthorityDao extends BaseDao<Authority> {
         Comparator<Authority> c = new Comparator<Authority>() {  
               
             public int compare(Authority o1, Authority o2) {  
-                return StringUtil.toPinYinString(o1.getName()).compareTo(StringUtil.toPinYinString(o2.getName()));  
+                return StringUtils.toPinYinString(o1.getName()).compareTo(StringUtils.toPinYinString(o2.getName()));  
             }
         };
         Collections.sort(result, c);

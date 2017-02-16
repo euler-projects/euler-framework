@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.exception.api.BadRequestException;
 
 /**
@@ -99,11 +99,11 @@ public class QueryRequest implements BaseRequest {
         String sorts = request.getParameter(SORT_PARAM_NAME);
         String orders = request.getParameter(ORDER_PARAM_NAME);
         
-        if(StringUtil.isEmpty(sorts)) {
+        if(StringUtils.isEmpty(sorts)) {
             return result;
         }
         
-        if(StringUtil.isEmpty(orders)) {
+        if(StringUtils.isEmpty(orders)) {
             throw new BadRequestException("order is required when request has sort params");
         }
         
@@ -151,7 +151,7 @@ public class QueryRequest implements BaseRequest {
             String key = entry.getKey();
             if(key.startsWith(prefix)) {
                 String valueStr = entry.getValue().length > 0 ? entry.getValue()[0].trim() : null;
-                if(StringUtil.isEmpty(valueStr))
+                if(StringUtils.isEmpty(valueStr))
                     continue;
                 
                 T value = paramFormatter.extract(valueStr);

@@ -6,8 +6,8 @@ import org.springframework.web.context.ContextLoader;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
-import net.eulerframework.common.util.CommonUtil;
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.CommonUtils;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.property.PropertyNotFoundException;
 import net.eulerframework.common.util.property.PropertyReader;
 
@@ -176,14 +176,14 @@ public abstract class WebConfig {
 
         String result = properties.get(WebConfigKey.WEB_API_ROOT_PATH, WebConfigDefault.WEB_API_ROOT_PATH);
 
-        if (StringUtil.isEmpty(result))
+        if (StringUtils.isEmpty(result))
             throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
 
         while (result.endsWith("*")) {
             result = result.substring(0, result.length() - 1);
         }
 
-        result = CommonUtil.convertDirToUnixFormat(result);
+        result = CommonUtils.convertDirToUnixFormat(result);
 
         if (!result.startsWith("/"))
             result = "/" + result;
@@ -200,14 +200,14 @@ public abstract class WebConfig {
 
         String result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
-        if (StringUtil.isEmpty(result))
+        if (StringUtils.isEmpty(result))
             throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + "can not be empty");
 
         while (result.endsWith("*")) {
             result = result.substring(0, result.length() - 1);
         }
 
-        result = CommonUtil.convertDirToUnixFormat(result);
+        result = CommonUtils.convertDirToUnixFormat(result);
 
         if (!result.startsWith("/"))
             result = "/" + result;
@@ -224,7 +224,7 @@ public abstract class WebConfig {
 
         String result;
         try {
-            result = CommonUtil.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
+            result = CommonUtils.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
         } catch (PropertyNotFoundException e) {
             if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                 log.info("OS is windows");
@@ -255,7 +255,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = CommonUtil
+        String result = CommonUtils
                 .convertDirToUnixFormat(properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";
@@ -270,7 +270,7 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = CommonUtil.convertDirToUnixFormat(
+        String result = CommonUtils.convertDirToUnixFormat(
                 properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
         // 统一添加/结尾，这样在controller中就可以不加/前缀
         result = result + "/";

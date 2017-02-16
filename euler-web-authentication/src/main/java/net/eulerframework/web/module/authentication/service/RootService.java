@@ -8,8 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.eulerframework.common.util.StringUtil;
-import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
+import net.eulerframework.common.util.StringUtils;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.UserDao;
@@ -30,7 +30,7 @@ public class RootService extends BaseService {
         if(!root.getPassword().equals("NaN"))
             throw new ResourceNotFoundException();
         
-        String newPassword = StringUtil.randomString(16);
+        String newPassword = StringUtils.randomString(16);
         
         root.setPassword(passwordEncoder.encode(newPassword));
         
@@ -38,7 +38,7 @@ public class RootService extends BaseService {
         String rootpasswordFilePath = webInfPath + "/.rootpassword";
         
         try {
-            SimpleFileIOUtil.writeFile(rootpasswordFilePath, newPassword, false);
+            SimpleFileIOUtils.writeFile(rootpasswordFilePath, newPassword, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -57,7 +57,7 @@ public class RootService extends BaseService {
         if(!admin.getPassword().equals("NaN"))
             throw new ResourceNotFoundException();
 
-        String newPassword = StringUtil.randomString(16);
+        String newPassword = StringUtils.randomString(16);
         
         admin.setPassword(passwordEncoder.encode(newPassword));
         
@@ -65,7 +65,7 @@ public class RootService extends BaseService {
         String adminpasswordFilePath = webInfPath + "/.adminpassword";
         
         try {
-            SimpleFileIOUtil.writeFile(adminpasswordFilePath, newPassword, false);
+            SimpleFileIOUtils.writeFile(adminpasswordFilePath, newPassword, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

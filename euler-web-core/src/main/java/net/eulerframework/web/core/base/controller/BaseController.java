@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.io.file.FileReadException;
-import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
@@ -35,7 +35,7 @@ public abstract class BaseController extends WebContextAccessable {
         response.setHeader("Content-Disposition", 
                 "attachment;fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
         response.setHeader("Content-Length", String.valueOf(file.length()));
-        SimpleFileIOUtil.readFileToOutputStream(file, response.getOutputStream());
+        SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream());
     }
     
     protected void setNoCacheHeader() {

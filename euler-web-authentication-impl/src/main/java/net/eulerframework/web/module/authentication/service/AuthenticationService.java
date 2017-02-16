@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.authentication.service;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -10,16 +9,16 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.eulerframework.common.util.jwt.InvalidJwtException;
+import net.eulerframework.common.util.jwt.JwtEncryptor;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
-import net.eulerframework.web.module.authentication.exception.InvalidJwtException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.util.JwtEncryptor;
 import net.eulerframework.web.module.authentication.util.UserContext;
 import net.eulerframework.web.module.authentication.vo.UserResetInfoVo;
 import net.eulerframework.web.util.WebTool;
@@ -113,7 +112,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             if(expireDate.getTime() <= new Date().getTime())
                 throw new InvalidJwtException("token expired");
             
-        } catch (InvalidJwtException | IOException e) {
+        } catch (InvalidJwtException e) {
             throw new InvalidEmailResetTokenException(e.getMessage(), e);
         }
     }
@@ -124,7 +123,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             UserResetInfoVo vo = this.jwtEncryptor.decodeClaims(token, UserResetInfoVo.class);
             
             this.userService.updateUserPasswordWithoutCheck(vo.getId(), password);
-        } catch (InvalidJwtException | IOException e) {
+        } catch (InvalidJwtException e) {
             throw new InvalidEmailResetTokenException(e.getMessage(), e);
         }
         

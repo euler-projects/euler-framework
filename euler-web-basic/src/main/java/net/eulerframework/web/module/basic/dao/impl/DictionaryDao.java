@@ -7,7 +7,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -30,27 +30,27 @@ public class DictionaryDao extends BaseDao<Dictionary> implements IDictionaryDao
         try {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("name");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("codeType");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("codeType", Integer.parseInt(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("description");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("value");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("value", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("valueZhCn");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueZhCn", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("valueEnUs");
-            if (!StringUtil.isEmpty(queryValue)) {
+            if (!StringUtils.isEmpty(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueEnUs", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {

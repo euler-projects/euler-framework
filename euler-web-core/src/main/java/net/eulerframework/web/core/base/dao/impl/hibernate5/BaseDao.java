@@ -27,10 +27,10 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 
-import net.eulerframework.common.util.JavaObjectUtil;
+import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.common.util.DateUtil;
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.DateUtils;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
@@ -60,7 +60,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @SuppressWarnings("unchecked")
     public BaseDao() {
-        this.entityClass = (Class<T>) JavaObjectUtil.findSuperClassGenricType(this.getClass(), 0);
+        this.entityClass = (Class<T>) JavaObjectUtils.findSuperClassGenricType(this.getClass(), 0);
     }
 
     @Override
@@ -374,7 +374,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     protected void cleanBean(T entity) {
-        JavaObjectUtil.clearEmptyProperty(entity);
+        JavaObjectUtils.clearEmptyProperty(entity);
     }   
     
     protected DetachedCriteria analyzeQueryRequest(QueryRequest queryRequest) {
@@ -386,7 +386,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             String property = entry.getKey();
             String value = entry.getValue();
             
-            if(StringUtil.isEmpty(value))
+            if(StringUtils.isEmpty(value))
                 continue;
             
             QueryMode queryMode = queryRequest.getQueryMode(property);
@@ -419,7 +419,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             String property = entry.getKey();
             String value = entry.getValue();
             
-            if(StringUtil.isEmpty(value))
+            if(StringUtils.isEmpty(value))
                 continue;
             
             QueryMode queryMode = queryRequest.getQueryMode(property);
@@ -541,10 +541,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 ret = new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
                 try {
-                    ret = DateUtil.parseDate(value, "yyyy-MM-dd HH:mm:ss");
+                    ret = DateUtils.parseDate(value, "yyyy-MM-dd HH:mm:ss");
                 } catch (ParseException e1) {
                     try {
-                        ret = DateUtil.parseDate(value, "yyyy-MM-dd");
+                        ret = DateUtils.parseDate(value, "yyyy-MM-dd");
                     } catch (ParseException e2) {
                         throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss' or 'yyyy-MM-dd'");
                     }

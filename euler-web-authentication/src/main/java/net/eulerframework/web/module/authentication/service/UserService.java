@@ -10,8 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.common.util.JavaObjectUtil;
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.JavaObjectUtils;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -64,12 +64,12 @@ public class UserService extends BaseService {
     public String save(User user) {
         Assert.notNull(user, "user is null");
         
-        JavaObjectUtil.clearEmptyProperty(user);
+        JavaObjectUtils.clearEmptyProperty(user);
         
-        user.setUsername(StringUtil.trim(user.getUsername()));
-        user.setEmail(StringUtil.trim(user.getEmail()));
-        user.setMobile(StringUtil.trim(user.getMobile()));
-        user.setPassword(StringUtil.trim(user.getPassword()));
+        user.setUsername(StringUtils.trim(user.getUsername()));
+        user.setEmail(StringUtils.trim(user.getEmail()));
+        user.setMobile(StringUtils.trim(user.getMobile()));
+        user.setPassword(StringUtils.trim(user.getPassword()));
         
         this.validPassword(user.getPassword());
         this.validUsername(user.getUsername());

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
@@ -66,7 +66,7 @@ public class AuthenticationWebController extends JspSupportWebController {
             @RequestParam(required = true) String type, 
             @RequestParam(required = false) String token) {
         if ("email".equalsIgnoreCase(type)) {
-            if (StringUtil.isEmpty(token))
+            if (StringUtils.isEmpty(token))
                 return this.display("forgotPassword-email");
 
             try {

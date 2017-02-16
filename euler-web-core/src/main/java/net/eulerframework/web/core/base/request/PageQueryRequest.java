@@ -2,7 +2,7 @@ package net.eulerframework.web.core.base.request;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.eulerframework.common.util.StringUtil;
+import net.eulerframework.common.util.StringUtils;
 
 public class PageQueryRequest extends QueryRequest {
 
@@ -19,7 +19,7 @@ public class PageQueryRequest extends QueryRequest {
         super(request);
         
         String pageSizeStr = request.getParameter(pageSizeParamName);        
-        if(StringUtil.isEmpty(pageSizeStr)){
+        if(StringUtils.isEmpty(pageSizeStr)){
             throw new IllegalArgumentException("Param '" +pageSizeParamName+ "' is required");
         }        
         this.pageSize = Integer.parseInt(request.getParameter(pageSizeParamName));
@@ -28,7 +28,7 @@ public class PageQueryRequest extends QueryRequest {
             this.pageIndex = -1;
         } else {
             String pageIndexStr = request.getParameter(pageIndexParamName);        
-            if(StringUtil.isEmpty(pageIndexStr)){
+            if(StringUtils.isEmpty(pageIndexStr)){
                 throw new IllegalArgumentException("Param '" +pageIndexParamName+ "' is required");
             }        
             this.pageIndex = Integer.parseInt(request.getParameter(pageIndexParamName));

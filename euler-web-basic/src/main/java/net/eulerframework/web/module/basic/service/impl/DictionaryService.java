@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.eulerframework.common.util.io.file.SimpleFileIOUtil;
+import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.QueryRequest;
@@ -84,7 +84,7 @@ public class DictionaryService extends BaseService implements IDictionaryService
         if(dict != null && !dict.isEmpty()){
             codeTableMap.put(name, dict);
         }
-        SimpleFileIOUtil.deleteFile(codeTableJsFileRealPath);
+        SimpleFileIOUtils.deleteFile(codeTableJsFileRealPath);
         this.writeCodeTableToJs(codeTableMap, codeTableJsFileRealPath);
     }
     
@@ -99,7 +99,7 @@ public class DictionaryService extends BaseService implements IDictionaryService
             resutlBuffer.append(this.objectMapper.writer().writeValueAsString(entry.getValue()));
             resutlBuffer.append(';');
             resutlBuffer.append('\n');
-            SimpleFileIOUtil.writeFile(path, resutlBuffer.toString(), true);
+            SimpleFileIOUtils.writeFile(path, resutlBuffer.toString(), true);
         }        
     }
 
