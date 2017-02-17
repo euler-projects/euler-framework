@@ -13,7 +13,7 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.base.request.PageQueryRequest;
+import net.eulerframework.web.core.base.request.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
@@ -82,8 +82,8 @@ public class UserService extends BaseService {
         return (String) this.userDao.save(user);
     }
 
-    public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest, String groupId) {
-        return this.userDao.findUserByPage(pageQueryRequest, groupId);
+    public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
+        return this.userDao.findUserByPage(queryRequest);
     }
 
     /**

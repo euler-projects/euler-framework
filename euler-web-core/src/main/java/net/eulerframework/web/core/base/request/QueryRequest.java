@@ -6,9 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.exception.api.BadRequestException;
 
@@ -17,9 +15,7 @@ import net.eulerframework.web.core.exception.api.BadRequestException;
  * @author cFrost
  *
  */
-public class QueryRequest implements BaseRequest {
-
-    protected final Logger logger = LogManager.getLogger(this.getClass());
+public class QueryRequest extends LogSupport implements BaseRequest {
     
     private final static String QUERY_PREFIX = "query.";
     private static final String MODE_PREFIX = "mode.";

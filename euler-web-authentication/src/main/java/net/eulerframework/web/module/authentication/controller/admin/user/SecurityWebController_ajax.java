@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.web.core.annotation.AdminWebController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
+import net.eulerframework.web.core.base.request.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.Authority;
@@ -37,7 +38,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     @RequestMapping(value ="findUserByPage")
     @ResponseBody
     public PageResponse<User> findUserByPage(String groupId){
-        return this.userService.findUserByPage(new PageQueryRequest(this.getRequest(), "page", "rows"), groupId);
+        return this.userService.findUserByPage(new EasyUiQueryReqeuset(this.getRequest()));
     }
     
     @ResponseBody
