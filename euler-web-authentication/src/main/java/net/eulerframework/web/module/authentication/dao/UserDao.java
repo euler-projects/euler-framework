@@ -1,21 +1,18 @@
 package net.eulerframework.web.module.authentication.dao;
 
 import java.util.List;
-import java.util.Set;
 
 import org.hibernate.FetchMode;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.util.StringUtils;
 
-import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerframework.web.core.base.request.QueryRequest;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
-import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 
 public class UserDao extends BaseDao<User> {
@@ -62,59 +59,79 @@ public class UserDao extends BaseDao<User> {
     }
 
     
-    public PageResponse<User> findUserByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
-                //.setFetchMode("authorities", FetchMode.SELECT)
-                .setFetchMode("groups", FetchMode.SELECT);
-        try {
-            String queryValue = null;
-            queryValue = queryRequest.getQueryValue("username");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(RestrictionsX.like("username", queryValue, MatchMode.ANYWHERE).ignoreCase());
-            }
-            queryValue = queryRequest.getQueryValue("empName");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(RestrictionsX.like("empName", queryValue, MatchMode.ANYWHERE).ignoreCase());
-            }
-            queryValue = queryRequest.getQueryValue("enabled");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(Restrictions.eq("enabled", Boolean.parseBoolean(queryValue)));
-            }
-            queryValue = queryRequest.getQueryValue("nation");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(RestrictionsX.like("nation", queryValue, MatchMode.ANYWHERE).ignoreCase());
-            }
-            queryValue = queryRequest.getQueryValue("accountNonExpired");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(Restrictions.eq("accountNonExpired", Boolean.parseBoolean(queryValue)));
-            }
-            queryValue = queryRequest.getQueryValue("accountNonLocked");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(Restrictions.eq("accountNonLocked", Boolean.parseBoolean(queryValue)));
-            }
-            queryValue = queryRequest.getQueryValue("credentialsNonExpired");
-            if (!StringUtils.isEmpty(queryValue)) {
-                detachedCriteria.add(Restrictions.eq("credentialsNonExpired", Boolean.parseBoolean(queryValue)));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest, String groupId) {
         
-        detachedCriteria.addOrder(Order.asc("username"));
         
-        PageResponse<User> result = this.pageQuery(detachedCriteria, pageIndex, pageSize);
+        DetachedCriteria detachedCriteria = this.analyzeOrQueryRequest(pageQueryRequest);
         
-        List<User> users = result.getRows();
+        detachedCriteria.setFetchMode("groups", FetchMode.SELECT);
 
-        for(User user : users){
-            user.eraseCredentials();
-            user.setAuthorities(null);
-            Set<Group> groups = user.getGroups();
-            for(Group group : groups){
-                group.setAuthorities(null);
-            }
+        if(!StringUtils.isEmpty(groupId)) {
+            @SuppressWarnings("unchecked")
+            List<String> userIdList = this.getCurrentSession().createSQLQuery("select USER_ID from SYS_USER_GROUP where GROUP_ID = :groupId").setString("groupId", groupId).list();
+            detachedCriteria.add(RestrictionsX.in("id", userIdList));            
         }
         
-        return result;
+        int pageIndex = pageQueryRequest.getPageIndex();
+        int pageSize = pageQueryRequest.getPageSize();
+        
+        PageResponse<User> ret = this.pageQuery(detachedCriteria, pageIndex, pageSize);  
+        
+        return ret;
+        
+        //return this.findEntityInPageUseOr(pageQueryRequest, "groups");
+//        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
+//                //.setFetchMode("authorities", FetchMode.SELECT)
+//                .setFetchMode("groups", FetchMode.SELECT);
+//        try {
+//            String queryValue = null;
+//            queryValue = queryRequest.getQueryValue("username");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(RestrictionsX.like("username", queryValue, MatchMode.ANYWHERE).ignoreCase());
+//            }
+//            queryValue = queryRequest.getQueryValue("empName");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(RestrictionsX.like("empName", queryValue, MatchMode.ANYWHERE).ignoreCase());
+//            }
+//            queryValue = queryRequest.getQueryValue("enabled");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(Restrictions.eq("enabled", Boolean.parseBoolean(queryValue)));
+//            }
+//            queryValue = queryRequest.getQueryValue("nation");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(RestrictionsX.like("nation", queryValue, MatchMode.ANYWHERE).ignoreCase());
+//            }
+//            queryValue = queryRequest.getQueryValue("accountNonExpired");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(Restrictions.eq("accountNonExpired", Boolean.parseBoolean(queryValue)));
+//            }
+//            queryValue = queryRequest.getQueryValue("accountNonLocked");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(Restrictions.eq("accountNonLocked", Boolean.parseBoolean(queryValue)));
+//            }
+//            queryValue = queryRequest.getQueryValue("credentialsNonExpired");
+//            if (!StringUtils.isEmpty(queryValue)) {
+//                detachedCriteria.add(Restrictions.eq("credentialsNonExpired", Boolean.parseBoolean(queryValue)));
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        
+//        detachedCriteria.addOrder(Order.asc("username"));
+//        
+//        PageResponse<User> result = this.pageQuery(detachedCriteria, pageIndex, pageSize);
+//        
+//        List<User> users = result.getRows();
+//
+//        for(User user : users){
+//            user.eraseCredentials();
+//            user.setAuthorities(null);
+//            Set<Group> groups = user.getGroups();
+//            for(Group group : groups){
+//                group.setAuthorities(null);
+//            }
+//        }
+//        
+//        return result;
     }
 }

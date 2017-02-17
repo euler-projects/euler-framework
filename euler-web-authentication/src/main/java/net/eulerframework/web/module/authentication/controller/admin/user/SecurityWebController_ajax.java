@@ -36,8 +36,8 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     
     @RequestMapping(value ="findUserByPage")
     @ResponseBody
-    public PageResponse<User> findUserByPage(){
-        return this.userService.findUserByPage(new PageQueryRequest(this.getRequest(), "page", "rows"));
+    public PageResponse<User> findUserByPage(String groupId){
+        return this.userService.findUserByPage(new PageQueryRequest(this.getRequest(), "page", "rows"), groupId);
     }
     
     @ResponseBody

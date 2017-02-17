@@ -82,8 +82,8 @@ public class UserService extends BaseService {
         return (String) this.userDao.save(user);
     }
 
-    public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
-        return this.userDao.findEntityInPageUseOr(pageQueryRequest, "groups");
+    public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest, String groupId) {
+        return this.userDao.findUserByPage(pageQueryRequest, groupId);
     }
 
     /**
