@@ -456,7 +456,7 @@ public abstract class WebConfig {
 
     public static boolean isEnableAutoAuthorizeAfterSignup() {
         // TODO Auto-generated method stub
-        return true;
+        return false;
     }
 
     public static String[] getAutoAuthorizeGroupId() {

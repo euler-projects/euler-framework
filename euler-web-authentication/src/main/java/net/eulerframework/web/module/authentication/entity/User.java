@@ -240,5 +240,16 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     	result.setCredentialsNonExpired(userDetails.isCredentialsNonExpired());
     	return result;
     }
+    
+    @Transient
+    private String userGroups;
 
+    public String getUserGroups() {
+        return userGroups;
+    }
+
+    public void setUserGroups(String userGroups) {
+        this.userGroups = userGroups;
+    }
+    
 }

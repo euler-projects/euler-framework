@@ -3,6 +3,7 @@ package net.eulerframework.web.module.authentication.service;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -83,7 +84,22 @@ public class UserService extends BaseService {
     }
 
     public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
-        return this.userDao.findUserByPage(queryRequest);
+        PageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
+
+        for(User user : ret.getRows()){
+            Set<Group> groups = user.getGroups();
+            
+            if(groups != null) {
+                for(Group group : groups) {
+                    if(StringUtils.isEmpty(user.getUserGroups()))
+                        user.setUserGroups(group.getName());
+                    else
+                        user.setUserGroups(user.getUserGroups() + "; " +  group.getName());   
+                }
+            }
+        }
+        
+        return ret;
     }
 
     /**

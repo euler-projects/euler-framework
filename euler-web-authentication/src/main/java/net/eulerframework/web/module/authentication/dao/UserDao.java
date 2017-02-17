@@ -69,7 +69,11 @@ public class UserDao extends BaseDao<User> {
         if(!StringUtils.isEmpty(filterValue)) {
             @SuppressWarnings("unchecked")
             List<String> userIdList = this.getCurrentSession().createSQLQuery("select USER_ID from SYS_USER_GROUP where GROUP_ID = :groupId").setString("groupId", filterValue).list();
-            detachedCriteria.add(RestrictionsX.in("id", userIdList));            
+            
+            if(userIdList == null || userIdList.isEmpty())
+                detachedCriteria.add(RestrictionsX.in("id", new String[] {""}));
+            else
+                detachedCriteria.add(RestrictionsX.in("id", userIdList));
         }
         filterValue = queryRequest.getFilterValue("enabled");
         if(!StringUtils.isEmpty(filterValue)) {

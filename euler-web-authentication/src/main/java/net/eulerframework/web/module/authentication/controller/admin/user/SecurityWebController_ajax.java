@@ -35,14 +35,14 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
 	private AuthorityService authorityService;
     /*=============== user page =================*/
     
-    @RequestMapping(value ="findUserByPage")
+    @RequestMapping(value ="findUserByPage_ajax")
     @ResponseBody
     public PageResponse<User> findUserByPage(String groupId){
         return this.userService.findUserByPage(new EasyUiQueryReqeuset(this.getRequest()));
     }
     
     @ResponseBody
-    @RequestMapping(value="findAllGroups")
+    @RequestMapping(value="findAllGroups_ajax")
     public List<Group> findAllGroups() {
         return this.authorityService.findAllGroups();
     }
