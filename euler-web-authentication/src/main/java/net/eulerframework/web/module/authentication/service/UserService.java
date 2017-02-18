@@ -48,7 +48,7 @@ public class UserService extends BaseService {
 
     public User loadUserByMobile(String mobile) {
         Assert.notNull(mobile, "mobile is null");
-        User user = this.userDao.findUserByEmail(mobile);
+        User user = this.userDao.findUserByMobile(mobile);
         return user;
     }
 
@@ -121,7 +121,7 @@ public class UserService extends BaseService {
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
 
         if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new UserAuthenticationViewException("INCORRECT_PASSWORD");
+            throw new UserAuthenticationViewException("_INCORRECT_PASSWORD");
         }
 
         String password = newPassword.trim();
@@ -220,45 +220,48 @@ public class UserService extends BaseService {
 
     private void validUsername(String username) {
         if (username == null) {
-            throw new UserAuthenticationViewException("USERNAME_IS_NULL");
+            throw new UserAuthenticationViewException("_USERNAME_IS_NULL");
         }
         if (!(username.matches(WebConfig.getUsernameFormat()))) {
-            throw new UserAuthenticationViewException("INCORRECT_USERNAME_FORMAT");
+            throw new UserAuthenticationViewException("_INCORRECT_USERNAME_FORMAT");
         }
         if (this.loadUserByUsername(username) != null) {
-            throw new UserAuthenticationViewException("USERNAME_ALREADY_BE_USED");
+            throw new UserAuthenticationViewException("_USERNAME_ALREADY_BE_USED");
         }        
     }
     
     private void validEmail(String email) {
         if (email == null) {
-            throw new UserAuthenticationViewException("EMAIL_IS_NULL");
+            throw new UserAuthenticationViewException("_EMAIL_IS_NULL");
         }
         if (!(email.matches(WebConfig.getEmailFormat()))) {
-            throw new UserAuthenticationViewException("INCORRECT_EMAIL_FORMAT");
+            throw new UserAuthenticationViewException("_INCORRECT_EMAIL_FORMAT");
         }
         if (this.loadUserByEmail(email) != null) {
-            throw new UserAuthenticationViewException("EMAIL_ALREADY_BE_USED");
+            throw new UserAuthenticationViewException("_EMAIL_ALREADY_BE_USED");
 
         }       
     }
     
     private void validMobile(String mobile) {
         if (mobile != null) {
-            throw new UserAuthenticationViewException("MOBILE_ALREADY_BE_USED");
+            if (this.loadUserByMobile(mobile) != null) {
+                throw new UserAuthenticationViewException("_MOBILE_ALREADY_BE_USED");
+
+            }
         }
     }
     
     private void validPassword(String password) {
         if (password == null) {
-            throw new UserAuthenticationViewException("PASSWORD_IS_NULL");
+            throw new UserAuthenticationViewException("_PASSWORD_IS_NULL");
         }        
         if (!password.matches(WebConfig.getPasswordFormat())) {
-            throw new UserAuthenticationViewException("INCORRECT_PASSWORD_FORMAT");
+            throw new UserAuthenticationViewException("_INCORRECT_PASSWORD_FORMAT");
         }
         if (!(password.length() >= WebConfig.getMinPasswordLength()
                 && password.length() <= WebConfig.getMaxPasswordLength())) {
-            throw new UserAuthenticationViewException("INCORRECT_PASSWORD_LENGTH");
+            throw new UserAuthenticationViewException("_INCORRECT_PASSWORD_LENGTH");
         }
     }
     

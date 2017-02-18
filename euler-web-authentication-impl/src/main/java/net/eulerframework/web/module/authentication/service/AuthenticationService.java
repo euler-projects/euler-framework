@@ -68,6 +68,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     public void update(User user) throws UserNotFoundException {
         String userId = user.getId();
         this.userService.updateFullname(userId, user.getFullName());
+        this.userService.updateMobile(userId, user.getMobile());
         
     }
 
