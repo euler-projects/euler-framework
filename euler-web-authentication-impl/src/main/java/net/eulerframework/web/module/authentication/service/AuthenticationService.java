@@ -73,6 +73,9 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
 
     @Override
     public <T extends AbstractUserProfile> void update(User user, T userProfile) throws UserNotFoundException {
+        if(!user.getId().equals(userProfile.getUserId()))
+            throw new RuntimeException("userProfile's userId must equals with user's id");
+        
         this.update(user);
         this.userProfileService.updateUserProfile(userProfile);        
     }
