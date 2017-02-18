@@ -241,7 +241,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({ PageNotFoundException.class })
     public String pageNotFoundException(PageNotFoundException e) {
-        this.logger.warn("Page Not Found: " + e.getMessage());
+        this.logger.warn(e.getMessage());
         return this.notfound();
     }
 
