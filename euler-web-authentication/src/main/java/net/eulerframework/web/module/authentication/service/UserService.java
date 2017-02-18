@@ -133,12 +133,18 @@ public class UserService extends BaseService {
     }
     
     public void updateUsername(String userId, String username) throws UserNotFoundException {
-        this.validUsername(username);
+        Assert.notNull(username, "username is null");
         
         User user = this.loadUser(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+        
+        if(user.getUsername() != null && user.getUsername().equals(username)){
+            return;
+        }
+        
+        this.validUsername(username);
         
         user.setUsername(username);
 
@@ -146,12 +152,18 @@ public class UserService extends BaseService {
     }
     
     public void updateEmail(String userId, String email) throws UserNotFoundException {
-        this.validEmail(email);
+        Assert.notNull(email, "email is null");
         
         User user = this.loadUser(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+
+        if(user.getEmail() != null && user.getEmail().equals(email)){
+            return;
+        }
+        
+        this.validEmail(email);
         
         user.setEmail(email);
 
@@ -159,23 +171,34 @@ public class UserService extends BaseService {
     }
     
     public void updateMobile(String userId, String mobile) throws UserNotFoundException {
-        this.validMobile(mobile);
+        Assert.notNull(mobile, "mobile is null");
         
         User user = this.loadUser(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
         
+        if(user.getMobile() != null && user.getMobile().equals(mobile)){
+            return;
+        }
+        
+        this.validMobile(mobile);
         user.setMobile(mobile);
 
         this.userDao.update(user);
     }
     
     public void updateFullname(String userId, String fullname) throws UserNotFoundException {
+        Assert.notNull(fullname, "fullname is null");
+        
         User user = this.loadUser(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+
+        if(user.getFullName() != null && user.getFullName().equals(fullname)){
+            return;
+        }
         
         user.setFullName(fullname);
 
