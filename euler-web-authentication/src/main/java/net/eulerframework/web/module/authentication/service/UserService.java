@@ -71,6 +71,7 @@ public class UserService extends BaseService {
         user.setEmail(StringUtils.trim(user.getEmail()));
         user.setMobile(StringUtils.trim(user.getMobile()));
         user.setPassword(StringUtils.trim(user.getPassword()));
+        user.setFullName(StringUtils.trim(user.getFullName()));
         
         this.validPassword(user.getPassword());
         this.validUsername(user.getUsername());
@@ -134,7 +135,7 @@ public class UserService extends BaseService {
     
     public void updateUsername(String userId, String username) throws UserNotFoundException {
         Assert.notNull(username, "username is null");
-        
+        username = username.trim();
         User user = this.loadUser(userId);
 
         if (user == null)
@@ -153,7 +154,7 @@ public class UserService extends BaseService {
     
     public void updateEmail(String userId, String email) throws UserNotFoundException {
         Assert.notNull(email, "email is null");
-        
+        email = email.trim();        
         User user = this.loadUser(userId);
 
         if (user == null)
@@ -172,7 +173,7 @@ public class UserService extends BaseService {
     
     public void updateMobile(String userId, String mobile) throws UserNotFoundException {
         Assert.notNull(mobile, "mobile is null");
-        
+        mobile = mobile.trim();
         User user = this.loadUser(userId);
 
         if (user == null)
@@ -190,7 +191,7 @@ public class UserService extends BaseService {
     
     public void updateFullname(String userId, String fullname) throws UserNotFoundException {
         Assert.notNull(fullname, "fullname is null");
-        
+        fullname = fullname.trim();
         User user = this.loadUser(userId);
 
         if (user == null)

@@ -15,10 +15,13 @@ import net.eulerframework.web.core.annotation.AdminWebController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.request.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
+import net.eulerframework.web.core.base.response.AjaxResponse;
 import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.AuthorityService;
 import net.eulerframework.web.module.authentication.service.UserService;
 
@@ -45,6 +48,18 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     @RequestMapping(value="findAllGroups_ajax")
     public List<Group> findAllGroups() {
         return this.authorityService.findAllGroups();
+    }
+
+    @ResponseBody
+    @RequestMapping(value="addUser_ajax", method = RequestMethod.POST)
+    public AjaxResponse<String> addUser(User user, String groupId) {
+        this.userService.save(user);
+        try {
+            this.userService.addGroup(user.getId(), groupId);
+        } catch (UserNotFoundException e) {
+            throw new DefaultAjaxException(e.getMessage(), e);
+        }
+        return AjaxResponse.SUCCESS_RESPONSE;
     }
     
     /*=============== group page =================*/
