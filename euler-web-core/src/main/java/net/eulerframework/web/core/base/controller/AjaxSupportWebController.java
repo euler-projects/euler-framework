@@ -11,6 +11,7 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.response.ErrorAjaxResponse;
 import net.eulerframework.web.core.exception.web.AjaxException;
 import net.eulerframework.web.core.exception.web.DefaultAjaxException;
+import net.eulerframework.web.core.exception.web.ViewException;
 
 @ResponseBody
 public abstract class AjaxSupportWebController extends AbstractWebController {
@@ -59,6 +60,20 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
         return new ErrorAjaxResponse(e);
+    }
+    
+    /**
+     * 用于在程序发生{@link ViewException}异常时统一返回错误信息
+     * 
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({ ViewException.class })
+    public ErrorAjaxResponse viewException(ViewException e) {
+        if (WebConfig.isDebugMode()) {
+            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
+        }
+        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
     }
     
     /**

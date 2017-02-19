@@ -40,7 +40,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     
     @RequestMapping(value ="findUserByPage_ajax")
     @ResponseBody
-    public PageResponse<User> findUserByPage(String groupId){
+    public PageResponse<User> findUserByPage(){
         return this.userService.findUserByPage(new EasyUiQueryReqeuset(this.getRequest()));
     }
     
@@ -51,11 +51,46 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     }
 
     @ResponseBody
+    @RequestMapping(value="loadUser_ajax", method = RequestMethod.POST)
+    public AjaxResponse<User> loadUser(@RequestParam String userId) {
+        return new AjaxResponse<>(this.userService.loadUser(userId));
+    }
+    
+    @ResponseBody
     @RequestMapping(value="addUser_ajax", method = RequestMethod.POST)
-    public AjaxResponse<String> addUser(User user, String groupId) {
+    public AjaxResponse<String> addUser(User user, @RequestParam String groupId) {
         this.userService.save(user);
         try {
             this.userService.addGroup(user.getId(), groupId);
+        } catch (UserNotFoundException e) {
+            throw new DefaultAjaxException(e.getMessage(), e);
+        }
+        return AjaxResponse.SUCCESS_RESPONSE;
+    }
+    
+    @ResponseBody
+    @RequestMapping(value="updateUser_ajax", method = RequestMethod.POST)
+    public AjaxResponse<String> updateUser(User user, @RequestParam String groupId) {
+        try {
+            this.userService.updateUsername(user.getId(), user.getUsername());
+            this.userService.updateFullname(user.getId(), user.getFullName());
+            this.userService.updateMobile(user.getId(), user.getMobile());
+            this.userService.updateEmail(user.getId(), user.getEmail());
+            this.userService.updateStatus(user.getId(), user.isEnabled());
+            this.userService.removeAllAndAddGroup(user.getId(), groupId);
+        } catch (UserNotFoundException e) {
+            throw new DefaultAjaxException(e.getMessage(), e);
+        }
+        return AjaxResponse.SUCCESS_RESPONSE;
+    }
+    
+    @ResponseBody
+    @RequestMapping(value="resetPassword_ajax", method = RequestMethod.POST)
+    public AjaxResponse<String> resetPassword(
+            @RequestParam String userId, 
+            @RequestParam String password) {
+        try {
+            this.userService.updateUserPasswordWithoutCheck(userId, password);
         } catch (UserNotFoundException e) {
             throw new DefaultAjaxException(e.getMessage(), e);
         }
