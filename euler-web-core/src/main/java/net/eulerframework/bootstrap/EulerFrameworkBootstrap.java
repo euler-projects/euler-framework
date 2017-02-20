@@ -58,7 +58,6 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
     private static final String WEB_SECURITY_LOCAL = "web-security-local";
     private static final String WEB_SECURITY_LDAP = "web-security-ldap";
     private static final String WEB_SECURITY_CAS = "web-security-cas";
-    private static final String WEB_SECURITY_NONE = "web-security-none";
 
     private static final String REST_SECURITY_OAUTH = "rest-security-oauth";
     private static final String REST_SECURITY_BASIC = "rest-security-basic";
@@ -110,8 +109,6 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
             configurableEnvironment.addActiveProfile(WEB_SECURITY_LDAP);break;
         case CAS:
             configurableEnvironment.addActiveProfile(WEB_SECURITY_CAS);break;
-        case NONE:
-            configurableEnvironment.addActiveProfile(WEB_SECURITY_NONE);break; 
         }
         
         switch(WebConfig.getApiAuthenticationType()){

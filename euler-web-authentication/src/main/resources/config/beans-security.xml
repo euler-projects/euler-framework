@@ -29,19 +29,14 @@
     <!-- 其他要排除安全控制的目录 -->    
     <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
     
-    <beans:import resource="classpath*:**/rs-security.xml"/>
-    
-    
+    <!-- API暂无权限控制 --> 
     <http security="none" pattern="${web.api.rootPath}/**" />
 
-    <beans:beans profile="web-security-none">
-        <http security="none" pattern="/**" />
+    <beans:beans profile="web-security-local,web-security-ldap">    
+        <beans:import resource="classpath:**/web-security-web-config.xml"/>
     </beans:beans>
-
-    <beans:beans profile="web-security-local">
     
-        <beans:import resource="classpath:**/web-security-local-config.xml"/>
-        
+    <beans:beans profile="web-security-local">
         <authentication-manager>
             <authentication-provider user-service-ref="userDetailsService">
                 <password-encoder ref="passwordEncoder" />
@@ -50,8 +45,6 @@
     </beans:beans>
 
     <beans:beans profile="web-security-ldap">
-    
-        <beans:import resource="classpath:**/web-security-ldap-config.xml"/>
         
         <authentication-manager>
             <authentication-provider ref="ldapAuthenticationProvider" />
