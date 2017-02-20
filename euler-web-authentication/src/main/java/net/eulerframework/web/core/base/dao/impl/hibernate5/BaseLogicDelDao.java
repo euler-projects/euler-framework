@@ -155,13 +155,13 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
     }
 
     @Override
-    public List<T> findBy(T entity) {        
+    public List<T> queryByEntity(T entity) {        
         entity.setIfDel(false);
-        return super.findBy(entity);
+        return super.queryByEntity(entity);
     }
 
     @Override
-    public List<T> findAll() {
+    public List<T> queryAll() {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("select en from ");
         hqlBuffer.append(this.entityClass.getSimpleName());
@@ -171,7 +171,7 @@ public abstract class BaseLogicDelDao<T extends BaseLogicDelEntity<?>> extends B
     }
 
     @Override
-    public long findCount() {
+    public long countAll() {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("select count(*) from ");
         hqlBuffer.append(this.entityClass.getSimpleName());

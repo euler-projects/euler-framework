@@ -34,19 +34,15 @@ public interface IBaseDao<T extends BaseEntity<?>>{
 
     void deleteByIds(Serializable[] idArray);
     
-    List<T> findBy(T entity);
+    List<T> queryByEntity(T entity);
     
-    List<T> findAll();
+    List<T> queryAll();
     
-    long findCount();
+    long countAll();
     
-    PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest);
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
     
-    public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
-    
-    PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest);
-    
-    public PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
 
     void flushSession();
 

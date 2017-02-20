@@ -59,7 +59,7 @@ public class UserDao extends BaseDao<User> {
     
     public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {        
         
-        DetachedCriteria detachedCriteria = this.analyzeOrQueryRequest(queryRequest);
+        DetachedCriteria detachedCriteria = this.analyzeQueryRequest(queryRequest);
         
         detachedCriteria.setFetchMode("groups", FetchMode.SELECT);
 

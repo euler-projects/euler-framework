@@ -176,7 +176,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @Override
-    public List<T> findBy(T entity) {
+    public List<T> queryByEntity(T entity) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.add(Example.create(entity));
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
@@ -186,7 +186,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @Override
-    public List<T> findAll() {
+    public List<T> queryAll() {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("select en from ");
         hqlBuffer.append(this.entityClass.getSimpleName());
@@ -197,7 +197,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
 
     @Override
-    public long findCount() {
+    public long countAll() {
         StringBuffer hqlBuffer = new StringBuffer();
         hqlBuffer.append("select count(*) from ");
         hqlBuffer.append(this.entityClass.getSimpleName());
@@ -210,7 +210,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @Override
-    public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest) {
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
         int pageIndex = pageQueryRequest.getPageIndex();
@@ -220,32 +220,8 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @Override
-    public PageResponse<T> findEntityInPage(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
-        
-        for(String c : propertySetToSelectMode) {
-            detachedCriteria.setFetchMode(c, FetchMode.SELECT);
-        }
-        
-        int pageIndex = pageQueryRequest.getPageIndex();
-        int pageSize = pageQueryRequest.getPageSize();
-        
-        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
-    }
-    
-    @Override
-    public PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest) {
-        DetachedCriteria detachedCriteria = this.analyzeOrQueryRequest(pageQueryRequest);
-        
-        int pageIndex = pageQueryRequest.getPageIndex();
-        int pageSize = pageQueryRequest.getPageSize();
-        
-        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
-    }
-    
-    @Override
-    public PageResponse<T> findEntityInPageUseOr(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
-        DetachedCriteria detachedCriteria = this.analyzeOrQueryRequest(pageQueryRequest);
         
         for(String c : propertySetToSelectMode) {
             detachedCriteria.setFetchMode(c, FetchMode.SELECT);
@@ -382,51 +358,33 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         
         Map<String, String> queryMap = queryRequest.getQueryMap();
         
-        for (Map.Entry<String, String> entry : queryMap.entrySet()) {
-            String property = entry.getKey();
-            String value = entry.getValue();
+        if(queryRequest.useOr()) {
+            List<Criterion> criterions = new ArrayList<>();
             
-            if(StringUtils.isEmpty(value))
-                continue;
+            for (Map.Entry<String, String> entry : queryMap.entrySet()) {
+                String property = entry.getKey();
+                String value = entry.getValue();
+                
+                if(StringUtils.isEmpty(value))
+                    continue;
+                
+                QueryMode queryMode = queryRequest.getQueryMode(property);
+                criterions.add(this.generateRestriction(property, value, queryMode));
+            }
             
-            QueryMode queryMode = queryRequest.getQueryMode(property);
-            detachedCriteria.add(this.generateRestriction(property, value, queryMode));
+            detachedCriteria.add(Restrictions.or(criterions.toArray(new Criterion [0])));
+        } else {
+            for (Map.Entry<String, String> entry : queryMap.entrySet()) {
+                String property = entry.getKey();
+                String value = entry.getValue();
+                
+                if(StringUtils.isEmpty(value))
+                    continue;
+                
+                QueryMode queryMode = queryRequest.getQueryMode(property);
+                detachedCriteria.add(this.generateRestriction(property, value, queryMode));
+            }            
         }
-        
-        LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
-        
-        for (Map.Entry<String, OrderMode> entry : sortMap.entrySet()) {
-            String property = entry.getKey();
-            OrderMode value = entry.getValue();
-            
-            if(value == null)
-                continue;
-            
-            detachedCriteria.addOrder(this.analyzeOrderMode(property, value));
-        }
-        
-        return detachedCriteria;
-    }
-    
-    protected DetachedCriteria analyzeOrQueryRequest(QueryRequest queryRequest) {
-        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
-        
-        Map<String, String> queryMap = queryRequest.getQueryMap();
-        
-        List<Criterion> criterions = new ArrayList<>();
-        
-        for (Map.Entry<String, String> entry : queryMap.entrySet()) {
-            String property = entry.getKey();
-            String value = entry.getValue();
-            
-            if(StringUtils.isEmpty(value))
-                continue;
-            
-            QueryMode queryMode = queryRequest.getQueryMode(property);
-            criterions.add(this.generateRestriction(property, value, queryMode));
-        }
-        
-        detachedCriteria.add(Restrictions.or(criterions.toArray(new Criterion [0])));
         
         LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
         

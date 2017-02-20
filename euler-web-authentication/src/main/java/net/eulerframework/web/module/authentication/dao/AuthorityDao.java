@@ -48,7 +48,7 @@ public class AuthorityDao extends BaseDao<Authority> {
 
     
     public List<Authority> findAllAuthoritiesInOrder() {
-        List<Authority> result = this.findAll();
+        List<Authority> result = this.queryAll();
         Comparator<Authority> c = new Comparator<Authority>() {  
               
             public int compare(Authority o1, Authority o2) {  

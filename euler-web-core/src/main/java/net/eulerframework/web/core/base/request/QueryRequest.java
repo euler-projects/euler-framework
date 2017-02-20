@@ -24,8 +24,10 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     private static final String SPLIT = ",";
     
     private static final String CASE_SENSITIVE_NAME="caseSensitive";
+    private static final String OR_QUERY_NAME="useOr";
     
     private boolean caseSensitive;
+    private boolean useOr;
     
     private Map<String, QueryMode> modeMap = new HashMap<>();
     private LinkedHashMap<String, OrderMode> sortMap = new LinkedHashMap<>();
@@ -38,6 +40,7 @@ public class QueryRequest extends LogSupport implements BaseRequest {
      */
     public QueryRequest(HttpServletRequest request){
         this.caseSensitive = Boolean.parseBoolean(request.getParameter(CASE_SENSITIVE_NAME));
+        this.useOr = Boolean.parseBoolean(request.getParameter(OR_QUERY_NAME));
         
         this.queryMap = this.extractParams(request, QUERY_PREFIX);
         
@@ -87,6 +90,10 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     
     public boolean caseSensitive() {
         return this.caseSensitive;
+    }
+    
+    public boolean useOr() {
+        return this.useOr;
     }
     
     private LinkedHashMap<String, OrderMode> extractOrderMode(HttpServletRequest request) {

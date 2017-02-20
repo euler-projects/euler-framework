@@ -46,7 +46,7 @@ public class GroupDao extends BaseDao<Group> {
 
     
     public List<Group> findAllGroupsInOrder() {
-        List<Group> result = this.findAll();
+        List<Group> result = this.queryAll();
 
         Comparator<Group> c = new Comparator<Group>() {  
               
