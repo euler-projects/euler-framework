@@ -60,52 +60,33 @@ public class UserService extends BaseService {
     public User loadUser(String userId) {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
-        
-        if(user != null)
+
+        if (user != null)
             user.eraseCredentials();
-        
+
         return user;
     }
 
     public String save(User user) {
         Assert.notNull(user, "user is null");
-        
+
         JavaObjectUtils.clearEmptyProperty(user);
-        
+
         user.setUsername(StringUtils.trim(user.getUsername()));
         user.setEmail(StringUtils.trim(user.getEmail()));
         user.setMobile(StringUtils.trim(user.getMobile()));
         user.setPassword(StringUtils.trim(user.getPassword()));
         user.setFullName(StringUtils.trim(user.getFullName()));
-        
+
         this.validPassword(user.getPassword());
         this.validUsername(user.getUsername());
         this.validEmail(user.getEmail());
         this.validMobile(user.getMobile());
-        
+
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         user.setSignUpTime(new Date());
 
         return (String) this.userDao.save(user);
-    }
-
-    public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
-        PageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
-
-        for(User user : ret.getRows()){
-            Set<Group> groups = user.getGroups();
-            
-            if(groups != null) {
-                for(Group group : groups) {
-                    if(StringUtils.isEmpty(user.getUserGroups()))
-                        user.setUserGroups(group.getName());
-                    else
-                        user.setUserGroups(user.getUserGroups() + "; " +  group.getName());   
-                }
-            }
-        }
-        
-        return ret;
     }
 
     /**
@@ -138,7 +119,7 @@ public class UserService extends BaseService {
 
         this.userDao.update(user);
     }
-    
+
     public void updateUsername(String userId, String username) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(username, "username is null");
@@ -147,38 +128,38 @@ public class UserService extends BaseService {
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
-        if(user.getUsername() != null && user.getUsername().equals(username)){
+
+        if (user.getUsername() != null && user.getUsername().equals(username)) {
             return;
         }
-        
+
         this.validUsername(username);
-        
+
         user.setUsername(username);
 
         this.userDao.update(user);
     }
-    
+
     public void updateEmail(String userId, String email) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(email, "email is null");
-        email = email.trim();        
+        email = email.trim();
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
 
-        if(user.getEmail() != null && user.getEmail().equals(email)){
+        if (user.getEmail() != null && user.getEmail().equals(email)) {
             return;
         }
-        
+
         this.validEmail(email);
-        
+
         user.setEmail(email);
 
         this.userDao.update(user);
     }
-    
+
     public void updateMobile(String userId, String mobile) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(mobile, "mobile is null");
@@ -187,17 +168,17 @@ public class UserService extends BaseService {
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
-        if(user.getMobile() != null && user.getMobile().equals(mobile)){
+
+        if (user.getMobile() != null && user.getMobile().equals(mobile)) {
             return;
         }
-        
+
         this.validMobile(mobile);
         user.setMobile(mobile);
 
         this.userDao.update(user);
     }
-    
+
     public void updateFullname(String userId, String fullname) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(fullname, "fullname is null");
@@ -207,37 +188,37 @@ public class UserService extends BaseService {
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
 
-        if(user.getFullName() != null && user.getFullName().equals(fullname)){
+        if (user.getFullName() != null && user.getFullName().equals(fullname)) {
             return;
         }
-        
+
         user.setFullName(fullname);
 
         this.userDao.update(user);
     }
-    
+
     public void updateAvatar(String userId, String avatarFileId) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
+
         user.setAvatar(avatarFileId);
 
         this.userDao.update(user);
     }
-    
+
     public void updateStatus(String userId, boolean enabled) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
+
         user.setEnabled(enabled);
 
-        this.userDao.update(user);        
+        this.userDao.update(user);
     }
 
     /**
@@ -275,9 +256,9 @@ public class UserService extends BaseService {
         }
         if (this.loadUserByUsername(username) != null) {
             throw new UserAuthenticationViewException("_USERNAME_ALREADY_BE_USED");
-        }        
+        }
     }
-    
+
     private void validEmail(String email) {
         if (email == null) {
             throw new UserAuthenticationViewException("_EMAIL_IS_NULL");
@@ -288,9 +269,9 @@ public class UserService extends BaseService {
         if (this.loadUserByEmail(email) != null) {
             throw new UserAuthenticationViewException("_EMAIL_ALREADY_BE_USED");
 
-        }       
+        }
     }
-    
+
     private void validMobile(String mobile) {
         if (mobile != null) {
             if (this.loadUserByMobile(mobile) != null) {
@@ -299,11 +280,11 @@ public class UserService extends BaseService {
             }
         }
     }
-    
+
     private void validPassword(String password) {
         if (password == null) {
             throw new UserAuthenticationViewException("_PASSWORD_IS_NULL");
-        }        
+        }
         if (!password.matches(WebConfig.getPasswordFormat())) {
             throw new UserAuthenticationViewException("_INCORRECT_PASSWORD_FORMAT");
         }
@@ -312,90 +293,117 @@ public class UserService extends BaseService {
             throw new UserAuthenticationViewException("_INCORRECT_PASSWORD_LENGTH");
         }
     }
-    
+
     /**
      * 为用户添加用户组
-     * @param userId 用户Id
-     * @param groupId 待添加的用户组ID列表,如果指定的用户组ID不存在则忽略此错误ID
-     * @throws UserNotFoundException 用户不存在
+     * 
+     * @param userId
+     *            用户Id
+     * @param groupId
+     *            待添加的用户组ID列表,如果指定的用户组ID不存在则忽略此错误ID
+     * @throws UserNotFoundException
+     *             用户不存在
      */
     public void addGroup(String userId, String... groupId) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         List<Group> groups = this.groupDao.load(groupId);
-        
-        if(groups == null || groups.isEmpty())
+
+        if (groups == null || groups.isEmpty())
             return;
-        
+
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
-        if(user.getGroups() == null)
-            user.setGroups(new HashSet<Group>());        
+
+        if (user.getGroups() == null)
+            user.setGroups(new HashSet<Group>());
         user.getGroups().addAll(groups);
-        
-        this.userDao.update(user);        
+
+        this.userDao.update(user);
     }
-    
+
     /**
      * 将用户从用户组移除
-     * @param userId 用户ID
-     * @param groupId 待添加的用户组ID列表,如果指定的用户组ID不存在则忽略此错误ID
-     * @throws UserNotFoundException 用户不存在
+     * 
+     * @param userId
+     *            用户ID
+     * @param groupId
+     *            待添加的用户组ID列表,如果指定的用户组ID不存在则忽略此错误ID
+     * @throws UserNotFoundException
+     *             用户不存在
      */
     public void removeGroup(String userId, String... groupId) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         List<Group> groups = this.groupDao.load(groupId);
-        
-        if(groups == null || groups.isEmpty())
+
+        if (groups == null || groups.isEmpty())
             return;
-        
+
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
-        if(user.getGroups() == null)
+
+        if (user.getGroups() == null)
             return;
-        
+
         user.getGroups().removeAll(groups);
-        
-        this.userDao.update(user);   
-        
+
+        this.userDao.update(user);
+
     }
-    
+
     public void removeAllGroup(String userId) throws UserNotFoundException {
-        
+
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
-        if(user.getGroups() == null)
+
+        if (user.getGroups() == null)
             return;
-        
+
         user.setGroups(null);
-        
-        this.userDao.update(user);           
+
+        this.userDao.update(user);
     }
-    
+
     public void removeAllAndAddGroup(String userId, String... groupId) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         List<Group> groups = this.groupDao.load(groupId);
-        
-        if(groups == null || groups.isEmpty())
+
+        if (groups == null || groups.isEmpty())
             return;
-        
+
         User user = this.userDao.load(userId);
 
         if (user == null)
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
-        
-        user.setGroups(new HashSet<Group>());        
+
+        user.setGroups(new HashSet<Group>());
         user.getGroups().addAll(groups);
-        
-        this.userDao.update(user);   
+
+        this.userDao.update(user);
+    }
+
+    public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
+        PageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
+
+        for (User user : ret.getRows()) {
+            Set<Group> groups = user.getGroups();
+
+            if (groups != null) {
+                for (Group group : groups) {
+                    if (StringUtils.isEmpty(user.getUserGroups()))
+                        user.setUserGroups(group.getName());
+                    else
+                        user.setUserGroups(user.getUserGroups() + "; " + group.getName());
+                }
+            }
+        }
+
+        return ret;
     }
 }

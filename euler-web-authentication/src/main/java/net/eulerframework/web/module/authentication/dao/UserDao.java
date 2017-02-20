@@ -15,7 +15,6 @@ import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.authentication.entity.User;
 
 public class UserDao extends BaseDao<User> {
-
     
     public User findUserByName(String username) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
