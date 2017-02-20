@@ -369,7 +369,11 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                     continue;
                 
                 QueryMode queryMode = queryRequest.getQueryMode(property);
-                criterions.add(this.generateRestriction(property, value, queryMode));
+                try {
+                    criterions.add(this.generateRestriction(property, value, queryMode));
+                } catch (NumberFormatException e) {
+                    this.logger.warn(e.getMessage() + " property:" + property);
+                }
             }
             
             detachedCriteria.add(Restrictions.or(criterions.toArray(new Criterion [0])));
