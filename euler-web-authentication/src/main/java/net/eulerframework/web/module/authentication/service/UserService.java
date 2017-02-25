@@ -396,7 +396,7 @@ public class UserService extends BaseService {
 
             if (groups != null) {
                 for (Group group : groups) {
-                    if (StringUtils.isEmpty(user.getUserGroups()))
+                    if (StringUtils.isNull(user.getUserGroups()))
                         user.setUserGroups(group.getName());
                     else
                         user.setUserGroups(user.getUserGroups() + "; " + group.getName());

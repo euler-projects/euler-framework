@@ -102,11 +102,11 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         String sorts = request.getParameter(SORT_PARAM_NAME);
         String orders = request.getParameter(ORDER_PARAM_NAME);
         
-        if(StringUtils.isEmpty(sorts)) {
+        if(StringUtils.isNull(sorts)) {
             return result;
         }
         
-        if(StringUtils.isEmpty(orders)) {
+        if(StringUtils.isNull(orders)) {
             throw new BadRequestException("order is required when request has sort params");
         }
         
@@ -154,7 +154,7 @@ public class QueryRequest extends LogSupport implements BaseRequest {
             String key = entry.getKey();
             if(key.startsWith(prefix)) {
                 String valueStr = entry.getValue().length > 0 ? entry.getValue()[0].trim() : null;
-                if(StringUtils.isEmpty(valueStr))
+                if(StringUtils.isNull(valueStr))
                     continue;
                 
                 T value = paramFormatter.extract(valueStr);

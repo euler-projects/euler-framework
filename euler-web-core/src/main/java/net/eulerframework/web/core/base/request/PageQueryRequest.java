@@ -19,7 +19,7 @@ public class PageQueryRequest extends QueryRequest {
         super(request);
         
         String pageSizeStr = request.getParameter(pageSizeParamName);        
-        if(StringUtils.isEmpty(pageSizeStr)){
+        if(StringUtils.isNull(pageSizeStr)){
             throw new IllegalArgumentException("Param '" +pageSizeParamName+ "' is required");
         }        
         this.pageSize = Integer.parseInt(request.getParameter(pageSizeParamName));
@@ -28,7 +28,7 @@ public class PageQueryRequest extends QueryRequest {
             this.pageIndex = -1;
         } else {
             String pageIndexStr = request.getParameter(pageIndexParamName);        
-            if(StringUtils.isEmpty(pageIndexStr)){
+            if(StringUtils.isNull(pageIndexStr)){
                 throw new IllegalArgumentException("Param '" +pageIndexParamName+ "' is required");
             }        
             this.pageIndex = Integer.parseInt(request.getParameter(pageIndexParamName));

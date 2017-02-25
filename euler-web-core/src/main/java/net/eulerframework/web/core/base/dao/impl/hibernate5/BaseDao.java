@@ -365,7 +365,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 String property = entry.getKey();
                 String value = entry.getValue();
                 
-                if(StringUtils.isEmpty(value))
+                if(StringUtils.isNull(value))
                     continue;
                 
                 QueryMode queryMode = queryRequest.getQueryMode(property);
@@ -382,7 +382,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 String property = entry.getKey();
                 String value = entry.getValue();
                 
-                if(StringUtils.isEmpty(value))
+                if(StringUtils.isNull(value))
                     continue;
                 
                 QueryMode queryMode = queryRequest.getQueryMode(property);

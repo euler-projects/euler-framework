@@ -24,15 +24,15 @@ public class AuthorityDao extends BaseDao<Authority> {
         try {
             String queryValue = null;
             queryValue = pageQueryRequest.getQueryValue("name");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("authority");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("authority", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("description");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {

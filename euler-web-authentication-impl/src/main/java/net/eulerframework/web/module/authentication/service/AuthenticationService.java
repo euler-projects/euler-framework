@@ -109,7 +109,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     @Override
     public void checkEmailResetToken(String token) throws InvalidEmailResetTokenException {
         try {            
-            this.jwtEncryptor.decodeClaims(token, UserResetInfoVo.class);            
+            this.jwtEncryptor.decode(token);            
         } catch (InvalidJwtException e) {
             throw new InvalidEmailResetTokenException(e.getMessage(), e);
         }
@@ -118,7 +118,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     @Override
     public void resetPasswordByEmailResetToken(String token, String password) throws InvalidEmailResetTokenException, UserNotFoundException {
         try {
-            UserResetInfoVo vo = this.jwtEncryptor.decodeClaims(token, UserResetInfoVo.class);
+            UserResetInfoVo vo = this.jwtEncryptor.decode(token, UserResetInfoVo.class);
             
             this.userService.updateUserPasswordWithoutCheck(vo.getId(), password);
         } catch (InvalidJwtException e) {

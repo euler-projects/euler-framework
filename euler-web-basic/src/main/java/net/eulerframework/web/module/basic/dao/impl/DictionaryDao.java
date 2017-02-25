@@ -30,27 +30,27 @@ public class DictionaryDao extends BaseDao<Dictionary> implements IDictionaryDao
         try {
             String queryValue = null;
             queryValue = queryRequest.getQueryValue("name");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("codeType");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.eq("codeType", Integer.parseInt(queryValue)));
             }
             queryValue = queryRequest.getQueryValue("description");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("value");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("value", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("valueZhCn");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueZhCn", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = queryRequest.getQueryValue("valueEnUs");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(Restrictions.like("valueEnUs", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {

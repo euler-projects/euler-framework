@@ -176,7 +176,7 @@ public abstract class WebConfig {
 
         String result = properties.get(WebConfigKey.WEB_API_ROOT_PATH, WebConfigDefault.WEB_API_ROOT_PATH);
 
-        if (StringUtils.isEmpty(result))
+        if (StringUtils.isNull(result))
             throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
 
         while (result.endsWith("*")) {
@@ -200,7 +200,7 @@ public abstract class WebConfig {
 
         String result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
-        if (StringUtils.isEmpty(result))
+        if (StringUtils.isNull(result))
             throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + "can not be empty");
 
         while (result.endsWith("*")) {

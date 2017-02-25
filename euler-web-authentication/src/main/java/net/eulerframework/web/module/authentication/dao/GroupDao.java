@@ -26,11 +26,11 @@ public class GroupDao extends BaseDao<Group> {
         try {
             String queryValue = null;
             queryValue = pageQueryRequest.getQueryValue("name");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("name", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
             queryValue = pageQueryRequest.getQueryValue("description");
-            if (!StringUtils.isEmpty(queryValue)) {
+            if (!StringUtils.isNull(queryValue)) {
                 detachedCriteria.add(RestrictionsX.like("description", queryValue, MatchMode.ANYWHERE).ignoreCase());
             }
         } catch (Exception e) {

@@ -109,7 +109,7 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
 
     @Override
     public ArchivedFile findArchivedFile(String archivedFileId) {
-        Assert.isFalse(StringUtils.isEmpty(archivedFileId), "archivedFileId is null");
+        Assert.isFalse(StringUtils.isNull(archivedFileId), "archivedFileId is null");
         
         return this.archivedFileDao.load(archivedFileId);
     }
