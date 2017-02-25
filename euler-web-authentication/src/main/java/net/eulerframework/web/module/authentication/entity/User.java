@@ -198,7 +198,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     }
 
     public Boolean isRoot() {
-        return root;
+        return root == null ? false : root;
     }
 
     public Date getSignUpTime() {
