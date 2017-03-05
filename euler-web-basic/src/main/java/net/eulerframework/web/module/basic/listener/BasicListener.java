@@ -1,7 +1,5 @@
 package net.eulerframework.web.module.basic.listener;
 
-import java.io.IOException;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -9,8 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import net.eulerframework.web.module.basic.service.IDictionaryService;
-import net.eulerframework.web.module.basic.service.impl.DictionaryService;
+import net.eulerframework.web.module.basic.service.DictionaryService;
 
 @Component
 public class BasicListener implements ServletContextListener {
@@ -20,12 +17,7 @@ public class BasicListener implements ServletContextListener {
         
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
         
-        IDictionaryService dictionaryService= (DictionaryService)rwp.getBean("dictionaryService");
-        try {
-            dictionaryService.createCodeDict();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        DictionaryService dictionaryService= (DictionaryService)rwp.getBean("dictionaryService");
         
         dictionaryService.loadBaseData();
     }

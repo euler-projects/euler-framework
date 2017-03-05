@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basic.dao.impl;
+package net.eulerframework.web.module.basic.dao;
 
 import java.util.List;
 
@@ -11,12 +11,10 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
-import net.eulerframework.web.module.basic.dao.IDictionaryDao;
 import net.eulerframework.web.module.basic.entity.Dictionary;
 
-public class DictionaryDao extends BaseDao<Dictionary> implements IDictionaryDao {
+public class DictionaryDao extends BaseDao<Dictionary> {
 
-    @Override
     public List<Dictionary> findAllDictionaryOrderByName() {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         detachedCriteria.addOrder(Order.asc("name"));
@@ -24,7 +22,6 @@ public class DictionaryDao extends BaseDao<Dictionary> implements IDictionaryDao
         return this.query(detachedCriteria);
     }
 
-    @Override
     public PageResponse<Dictionary> findDictionaryByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         try {

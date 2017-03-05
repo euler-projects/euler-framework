@@ -16,7 +16,7 @@
     <bean id="archivedFileDao" class="net.eulerframework.web.module.file.dao.impl.ArchivedFileDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="dictionaryDao" class="net.eulerframework.web.module.basic.dao.impl.DictionaryDao">
+    <bean id="dictionaryDao" class="net.eulerframework.web.module.basic.dao.DictionaryDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 </beans>
