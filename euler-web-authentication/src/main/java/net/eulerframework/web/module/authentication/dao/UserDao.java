@@ -6,8 +6,8 @@ import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.util.StringUtils;
 
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.response.PageResponse;
@@ -65,7 +65,7 @@ public class UserDao extends BaseDao<User> {
 
         String filterValue = null;
         filterValue = queryRequest.getFilterValue("groupId");
-        if(!StringUtils.isEmpty(filterValue)) {
+        if(StringUtils.hasText(filterValue)) {
             @SuppressWarnings("unchecked")
             List<String> userIdList = this.getCurrentSession().createSQLQuery("select USER_ID from SYS_USER_GROUP where GROUP_ID = :groupId").setString("groupId", filterValue).list();
             
