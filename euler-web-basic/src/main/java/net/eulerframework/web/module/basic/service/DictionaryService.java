@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.basic.service;
 
-import java.io.Serializable;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
@@ -10,16 +9,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.base.request.QueryRequest;
-import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.basic.dao.DictionaryDao;
-import net.eulerframework.web.module.basic.entity.Dictionary;
 
 @Service
 public class DictionaryService extends BaseService {
     
-    @Resource private DictionaryDao dictionaryDao;
+    //@Resource private DictionaryDao dictionaryDao;
     
     @Resource private ObjectMapper objectMapper;
 
@@ -49,16 +44,16 @@ public class DictionaryService extends BaseService {
         sc.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
     }
 
-    public PageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-        return this.dictionaryDao.findDictionaryByPage(queryRequest, pageIndex, pageSize);
-    }
-
-    public void saveCodeTable(Dictionary dictionary) {
-        this.dictionaryDao.saveOrUpdate(dictionary);
-    }
-
-    public void deleteCodeTables(Serializable[] idArray) {
-        this.dictionaryDao.deleteByIds(idArray);
-        
-    }
+//    public PageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+//        return this.dictionaryDao.findDictionaryByPage(queryRequest, pageIndex, pageSize);
+//    }
+//
+//    public void saveCodeTable(Dictionary dictionary) {
+//        this.dictionaryDao.saveOrUpdate(dictionary);
+//    }
+//
+//    public void deleteCodeTables(Serializable[] idArray) {
+//        this.dictionaryDao.deleteByIds(idArray);
+//        
+//    }
 }

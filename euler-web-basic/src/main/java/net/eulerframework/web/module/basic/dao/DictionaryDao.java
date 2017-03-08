@@ -14,6 +14,7 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.basic.entity.Dictionary;
 
 public class DictionaryDao extends BaseDao<Dictionary> {
+    
 
     public List<Dictionary> findAllDictionaryOrderByName() {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);

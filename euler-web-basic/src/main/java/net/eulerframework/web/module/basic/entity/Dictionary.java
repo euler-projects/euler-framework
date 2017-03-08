@@ -3,11 +3,10 @@ package net.eulerframework.web.module.basic.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
-import net.eulerframework.web.core.i18n.Tag;
 
 /**
  * CODE_TABLE<br>
@@ -17,29 +16,26 @@ import net.eulerframework.web.core.i18n.Tag;
  */
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "SYS_DICT")
+@Table(name = "SYS_DICT", uniqueConstraints = {
+        @UniqueConstraint(columnNames={"CODE", "DICT_KEY"}),
+        @UniqueConstraint(columnNames={"CODE", "DICT_VALUE"}),
+        @UniqueConstraint(columnNames={"CODE", "SHOW_ORDER"})})
 public class Dictionary extends UUIDEntity<Dictionary> {
 
-    @NotNull
-    @Pattern(regexp="[a-z][a-zA-Z0-9_]*", message="{validation.codeTable.name}")
-    @Column(name = "NAME", nullable = false)
-    private String name;
+    @Column(name = "CODE", nullable = false)
+    private String code;
     @NotNull
     @Column(name = "DICT_KEY", nullable = false)
     private String key;
     @Column(name = "DICT_VALUE")
     private String value;   
-    @Column(name = "SHOW_ORDER")
-    private Integer showOrder;  
-    @Column(name = "CSS_STYLE")
-    private String cssStyle;
-    @Column(name="REMARK")
-    private String remark;
-    public String getName() {
-        return name;
+    @Column(name = "SHOW_ORDER", nullable = false)
+    private Integer showOrder;
+    public String getCode() {
+        return code;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setCode(String code) {
+        this.code = code;
     }
     public String getKey() {
         return key;
@@ -58,21 +54,6 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     }
     public void setShowOrder(Integer showOrder) {
         this.showOrder = showOrder;
-    }
-    public String getCssStyle() {
-        return cssStyle;
-    }
-    public void setCssStyle(String cssStyle) {
-        this.cssStyle = cssStyle;
-    }
-    public String getRemark() {
-        return remark;
-    }
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-    public String getValuei18n() {
-        return Tag.i18n(this.value);
     }
     
 }

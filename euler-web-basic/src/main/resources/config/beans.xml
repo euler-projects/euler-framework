@@ -19,4 +19,7 @@
     <bean id="dictionaryDao" class="net.eulerframework.web.module.basic.dao.DictionaryDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
+    <bean id="dictionaryCodeDao" class="net.eulerframework.web.module.basic.dao.DictionaryCodeDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
 </beans>

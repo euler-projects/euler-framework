@@ -6,6 +6,10 @@ public class DefaultAjaxException extends AjaxException {
         super("UNKNOWN_ERROR", -1);
     }
     
+    public DefaultAjaxException(String message) {
+        super(message, -1);
+    }
+    
     public DefaultAjaxException(Throwable e) {
         super("UNKNOWN_ERROR", -1, e);
     }
