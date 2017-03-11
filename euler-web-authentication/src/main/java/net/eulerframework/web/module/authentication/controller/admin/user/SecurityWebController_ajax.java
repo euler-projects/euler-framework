@@ -70,14 +70,14 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     
     @ResponseBody
     @RequestMapping(value="updateUser_ajax", method = RequestMethod.POST)
-    public AjaxResponse<String> updateUser(User user, @RequestParam String groupId) {
+    public AjaxResponse<String> updateUser(User user) {
         try {
             this.userService.updateUsername(user.getId(), user.getUsername());
             this.userService.updateFullname(user.getId(), user.getFullName());
             this.userService.updateMobile(user.getId(), user.getMobile());
             this.userService.updateEmail(user.getId(), user.getEmail());
             this.userService.updateStatus(user.getId(), user.isEnabled());
-            this.userService.removeAllAndAddGroup(user.getId(), groupId);
+            //this.userService.removeAllAndAddGroup(user.getId(), groupId);
         } catch (UserNotFoundException e) {
             throw new DefaultAjaxException(e.getMessage(), e);
         }
