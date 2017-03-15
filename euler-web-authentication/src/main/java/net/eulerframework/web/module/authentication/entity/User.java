@@ -252,4 +252,16 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         this.userGroups = userGroups;
     }
     
+
+    @Transient
+    private String customText;
+
+    public String getCustomText() {
+        return customText;
+    }
+
+    public void setCustomText(String customText) {
+        this.customText = customText;
+    }
+    
 }
