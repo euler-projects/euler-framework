@@ -26,7 +26,7 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
  */
 @WebController
 @RequestMapping("/")
-public class AuthenticationWebController extends JspSupportWebController {
+public class UserWebController extends JspSupportWebController {
 
     @Resource
     private IAuthenticationService authenticationService;
@@ -67,13 +67,13 @@ public class AuthenticationWebController extends JspSupportWebController {
             @RequestParam(required = false) String token) {
         if ("email".equalsIgnoreCase(type)) {
             if (StringUtils.isNull(token))
-                return this.display("forgotPassword-email");
+                return this.display("reset-password-email-collector");
 
             try {
                 this.authenticationService.checkEmailResetToken(token);
                 this.getRequest().setAttribute("token", token);
                 this.getRequest().setAttribute("type", "email");
-                return this.display("resetPassword");
+                return this.display("reset-password-new-password");
             } catch (InvalidEmailResetTokenException e) {
 
                 if (WebConfig.isDebugMode()) {
@@ -85,7 +85,7 @@ public class AuthenticationWebController extends JspSupportWebController {
 
             }
         } else if ("sms".equalsIgnoreCase(type)) {
-            return this.display("forgotPassword-sms");
+            return this.display("reset-password-sms-collector");
         } else {
             return this.notfound();
         }
@@ -123,6 +123,6 @@ public class AuthenticationWebController extends JspSupportWebController {
     @RequestMapping(value = "reset-password-email", method = RequestMethod.POST)
     public String getPasswordResetEmail(@RequestParam String email) {
         this.authenticationService.passwdResetEmailGen(email);
-        return this.display("forgotPassword-email-sent");
+        return this.display("reset-password-email-sent");
     }
 }

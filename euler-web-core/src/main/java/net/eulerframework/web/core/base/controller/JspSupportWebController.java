@@ -20,6 +20,18 @@ import net.eulerframework.web.core.exception.web.ViewException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
     
+    private String webControllerName;
+    
+    protected void setWebControllerName(String webControllerName) {
+        Assert.notNull(webControllerName);
+        
+        while(webControllerName.startsWith("/"))
+            webControllerName = webControllerName.substring(1);
+        
+        Assert.hasText(webControllerName);
+        this.webControllerName = webControllerName;
+    }
+    
     /**
      * 获取WebController的名字<br>
      * 要使用此方法, WebController必须以WebController结尾<br>
@@ -28,6 +40,9 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return ExampleControllerWebController的名字为exampleController
      */
     private String getWebControllerName() {
+        if(StringUtils.hasText(this.webControllerName))
+            return this.webControllerName;
+        
         String className = this.getClass().getSimpleName();
 
         int indexOfWebController = className.lastIndexOf("WebController");

@@ -93,7 +93,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             
             String token = this.jwtEncryptor.encode(vo).getEncoded();
             
-            String resetUrl = WebTool.getWebDomain() + WebTool.getServletContext().getContextPath() + "/resetPassword?type=email&token=" + token;
+            String resetUrl = WebTool.getWebDomain() + WebTool.getServletContext().getContextPath() + "/reset-password?type=email&token=" + token;
             System.out.println(resetUrl);
             // TODO send email
         } catch (Exception e) {
