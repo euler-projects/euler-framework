@@ -48,12 +48,12 @@ public class AuthenticationWebController extends JspSupportWebController {
         return this.success();
     }
 
-    @RequestMapping(value = "changePassword", method = RequestMethod.GET)
+    @RequestMapping(value = "change-password", method = RequestMethod.GET)
     public String changePassword() {
         return this.display("changePassword");
     }
 
-    @RequestMapping(value = "changePassword", method = RequestMethod.POST)
+    @RequestMapping(value = "change-password", method = RequestMethod.POST)
     public String changePassword(
             @RequestParam(required = true) String oldPassword, 
             @RequestParam(required = true) String newPassword) {
@@ -61,7 +61,7 @@ public class AuthenticationWebController extends JspSupportWebController {
         return this.success();
     }
 
-    @RequestMapping(value = "resetPassword", method = RequestMethod.GET)
+    @RequestMapping(value = "reset-password", method = RequestMethod.GET)
     public String resetPassword(
             @RequestParam(required = true) String type, 
             @RequestParam(required = false) String token) {
@@ -92,7 +92,7 @@ public class AuthenticationWebController extends JspSupportWebController {
 
     }
 
-    @RequestMapping(value = "resetPassword", method = RequestMethod.POST)
+    @RequestMapping(value = "reset-password", method = RequestMethod.POST)
     public String resetPassword(
             @RequestParam(required = true) String type, 
             @RequestParam(required = true) String token, 
@@ -120,7 +120,7 @@ public class AuthenticationWebController extends JspSupportWebController {
 
     }
 
-    @RequestMapping(value = "getPasswordResetEmail", method = RequestMethod.POST)
+    @RequestMapping(value = "reset-password-email", method = RequestMethod.POST)
     public String getPasswordResetEmail(@RequestParam String email) {
         this.authenticationService.passwdResetEmailGen(email);
         return this.display("forgotPassword-email-sent");
