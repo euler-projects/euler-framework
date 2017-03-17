@@ -2,12 +2,15 @@ package net.eulerframework.web.module.file.service.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.file.dao.IAttachmentDao;
 import net.eulerframework.web.module.file.entity.AbstractAttachment;
+import net.eulerframework.web.module.file.entity.AbstractFileAttachment;
 import net.eulerframework.web.module.file.exception.AttachmentNotFoundException;
 import net.eulerframework.web.module.file.service.IAttachmentService;
 
@@ -59,7 +62,13 @@ public class AttachmentService extends BaseService implements IAttachmentService
         if(data == null || !data.getOwnerId().equals(ownerId))
             throw new AttachmentNotFoundException("Attachment id is "+attachmentId+" and owner id is "+ownerId+" not found");
         
-        dao.deleteById(attachmentId);        
+        dao.deleteById(attachmentId); 
+
+        if(AbstractFileAttachment.class.isAssignableFrom(attachmentClass)) {
+            String fileId = ((AbstractFileAttachment)data).getFileId();
+            System.out.println("delete archived file " + fileId);
+            //TODO: delete archived file
+        }
     }
 
     @Override
@@ -75,6 +84,16 @@ public class AttachmentService extends BaseService implements IAttachmentService
         IAttachmentDao<T> dao = (IAttachmentDao<T>) this.getEntityDao(attachmentDaos, attachmentClass);
         dao.deleteAll(data);
         
+        if(AbstractFileAttachment.class.isAssignableFrom(attachmentClass)) {
+            Set<String> fileIdSet = new HashSet<>();
+            for(AbstractAttachment each : data) {
+                fileIdSet.add(((AbstractFileAttachment)each).getFileId());
+            }
+            if(!fileIdSet.isEmpty()) {
+                System.out.println("delete archived file " + fileIdSet);
+                //TODO: delete archived file
+            }
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -115,17 +116,20 @@ public class ArchivedFileService extends BaseService implements IArchivedFileSer
     }
 
     @Override
-    public void deleteArchivedFile(String archivedFileId) {
-        ArchivedFile archivedFile = this.findArchivedFile(archivedFileId);
+    public void deleteArchivedFile(String... archivedFileId) {
+        Assert.notNull(archivedFileId);
+        
+        List<ArchivedFile> archivedFile = this.archivedFileDao.load(archivedFileId);
         
         if(archivedFile == null)
             return;
         
-        File file = WebFileTool.getArchivedFile(archivedFile);
+        this.archivedFileDao.deleteByIds(archivedFileId);
         
-        SimpleFileIOUtils.deleteFile(file);
-        
-        this.archivedFileDao.delete(archivedFile);        
+        for(ArchivedFile each : archivedFile) {            
+            File file = WebFileTool.getArchivedFile(each);            
+            SimpleFileIOUtils.deleteFile(file);           
+        }
     }
 
 }

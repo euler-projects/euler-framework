@@ -16,6 +16,6 @@ public interface IArchivedFileService extends IBaseService {
 
     public ArchivedFile findArchivedFile(String archivedFileId);
 
-    public void deleteArchivedFile(String archivedFileId);
+    public void deleteArchivedFile(String... archivedFileId);
 
 }

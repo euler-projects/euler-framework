@@ -8,12 +8,6 @@ import javax.validation.constraints.NotNull;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-/**
- * CODE_TABLE<br>
- * 用来存储JS字典数据或系统配置参数
- * @author cFrost
- *
- */
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_DICT", uniqueConstraints = {
