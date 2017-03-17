@@ -22,14 +22,14 @@ import net.eulerframework.web.core.base.response.AjaxResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
-import net.eulerframework.web.module.file.service.IArchivedFileService;
+import net.eulerframework.web.module.file.service.ArchivedFileService;
 
 @WebController
 @RequestMapping("/")
 public class FileUploadAndDownloadWebController extends JspSupportWebController {
 
     @Resource
-    private IArchivedFileService archivedFileService;
+    private ArchivedFileService archivedFileService;
     
     @RequestMapping(value = "file/{id}", method = RequestMethod.GET)
     public void downloadArchivedFile(@PathVariable("id") String archivedFileId, HttpServletResponse response) throws FileReadException, IOException {
