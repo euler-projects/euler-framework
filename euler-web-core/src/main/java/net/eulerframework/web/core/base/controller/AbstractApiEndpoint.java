@@ -8,25 +8,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import net.eulerframework.web.core.base.response.HttpStatusResponse;
-import net.eulerframework.web.core.base.response.Status;
-import net.eulerframework.web.core.exception.ResourceExistsException;
+import net.eulerframework.web.core.base.response.ErrorResponse;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.core.exception.api.BadRequestException;
+import net.eulerframework.web.core.exception.api.ResourceExistsException;
 
-public abstract class AbstractApiEndpoint extends BaseController {/**  
-     * 用于在程序发生{@link BadRequestException}异常时统一返回错误信息 
-     * @return  
-     */  
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({BadRequestException.class})   
-    public Object badRequestException(BadRequestException e) {
-        this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
+public abstract class AbstractApiEndpoint extends BaseController {
     
     /**  
      * 用于在程序发生{@link ResourceExistsException}异常时统一返回错误信息 
@@ -37,19 +23,7 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ExceptionHandler({ResourceExistsException.class})   
     public Object exception(ResourceExistsException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(Status.RESOURCE_EXIST, e.getMessage());
-    }
-    
-    /**  
-     * 用于在程序发生{@link IllegalArgumentException}异常时统一返回错误信息 
-     * @return  
-     */  
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({IllegalArgumentException.class})   
-    public Object illegalArgumentException(IllegalArgumentException e) {
-        this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        return new ErrorResponse(e);
     }
     
     /**  
@@ -61,7 +35,19 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ExceptionHandler({ResourceNotFoundException.class})   
     public Object resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.NOT_FOUND);
+        return new ErrorResponse(e);
+    }
+    
+    /**  
+     * 用于在程序发生{@link IllegalArgumentException}异常时统一返回错误信息 
+     * @return  
+     */  
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalArgumentException.class})   
+    public Object illegalArgumentException(IllegalArgumentException e) {
+        this.logger.error(e.getMessage(), e);
+        return new ErrorResponse(e);
     }
     
     /**  
@@ -73,7 +59,7 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ExceptionHandler({AccessDeniedException.class})   
     public Object accessDeniedException(AccessDeniedException e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.FORBIDDEN);
+        return new ErrorResponse(e);
     }
     
     /**  
@@ -85,20 +71,7 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ExceptionHandler({BindException.class})   
     public Object bindException(BindException e) {
         this.logger.error(e.getMessage(), e);
-//        this.logger.error(e.getMessage(), e);
-//        List<ObjectError> errors = e.getAllErrors();
-//        List<String> errMsg = new ArrayList<>();
-//        for(ObjectError err : errors){
-//            if(FieldError.class.isAssignableFrom(err.getClass()))
-//                errMsg.add(((FieldError)err).getField()+ ": " + err.getDefaultMessage());
-//            else
-//                errMsg.add(err.getDefaultMessage());
-//        }
-        try {
-            return new HttpStatusResponse(Status.FIELD_VALID_FAILED, this.getObjectMapper().writeValueAsString(e.getAllErrors()));
-        } catch (JsonProcessingException e1) {
-            return new HttpStatusResponse(Status.FIELD_VALID_FAILED, e.getMessage());
-        }
+        return new ErrorResponse(e);
     }
     
     /**  
@@ -110,7 +83,7 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ExceptionHandler({MissingServletRequestParameterException.class})   
     public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
         this.logger.error(e.getMessage(), e);
-        return  new HttpStatusResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        return new ErrorResponse(e);
     }
     
     /**  
@@ -122,7 +95,7 @@ public abstract class AbstractApiEndpoint extends BaseController {/**
     @ExceptionHandler({Exception.class})   
     public Object exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        return new ErrorResponse(e);
     }
 
 }

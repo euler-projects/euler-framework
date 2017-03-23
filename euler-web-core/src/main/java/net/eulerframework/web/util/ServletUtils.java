@@ -9,7 +9,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-public class WebTool {
+public class ServletUtils {
     
     public static ServletContext getServletContext(){
         WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  

@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.StringUtils;
-import net.eulerframework.web.core.exception.api.BadRequestException;
 
 /**
  * 用来接收POST传递进的form参数
@@ -63,7 +62,7 @@ public class QueryRequest extends LogSupport implements BaseRequest {
                 case "anywhere" : return QueryMode.ANYWHERE;
                 case "start" : return QueryMode.START;
                 case "end" : return QueryMode.END;
-                default:throw new BadRequestException("unkonwn query mode "+ value);               
+                default:throw new IllegalArgumentException("unkonwn query mode "+ value);               
                 }
             }
         });
@@ -107,14 +106,14 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         }
         
         if(StringUtils.isNull(orders)) {
-            throw new BadRequestException("order is required when request has sort params");
+            throw new IllegalArgumentException("order is required when request has sort params");
         }
         
         String[] sortArray = sorts.split(SPLIT);
         String[] orderArray = orders.split(SPLIT);
         
         if(sortArray.length > orderArray.length) {
-            throw new BadRequestException("Miss order params, require " + sortArray.length + "actually + " + orderArray.length);            
+            throw new IllegalArgumentException("Miss order params, require " + sortArray.length + "actually + " + orderArray.length);            
         } else if(sortArray.length < orderArray.length) {
             this.logger.warn("Request only has " + sortArray.length + " sort properties, but there are " + orderArray.length + " order params, ingnore the extra.");
         }
@@ -125,7 +124,7 @@ public class QueryRequest extends LogSupport implements BaseRequest {
             switch(orderArray[i]) {
             case"asc":ordermode = OrderMode.ASC;break;
             case"desc":ordermode = OrderMode.DESC;break;
-            default:throw new BadRequestException("unkonwn order mode "+ orderArray[i]);
+            default:throw new IllegalArgumentException("unkonwn order mode "+ orderArray[i]);
             }
             
             result.put(sortArray[i], ordermode);

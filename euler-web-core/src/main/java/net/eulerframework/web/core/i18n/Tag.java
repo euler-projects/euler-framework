@@ -9,6 +9,9 @@ import org.springframework.web.servlet.support.RequestContext;
 public class Tag {
 
     public static String i18n(String msgKey) {
+        if(msgKey == null)
+            return null;
+        
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();  
 
         RequestContext requestContext = new RequestContext(request);

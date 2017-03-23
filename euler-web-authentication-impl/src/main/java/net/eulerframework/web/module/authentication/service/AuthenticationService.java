@@ -20,7 +20,7 @@ import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCod
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.util.UserContext;
 import net.eulerframework.web.module.authentication.vo.UserResetInfoVo;
-import net.eulerframework.web.util.WebTool;
+import net.eulerframework.web.util.ServletUtils;
 
 @Service
 @Transactional
@@ -93,7 +93,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             
             String token = this.jwtEncryptor.encode(vo).getEncoded();
             
-            String resetUrl = WebTool.getWebDomain() + WebTool.getServletContext().getContextPath() + "/reset-password?type=email&token=" + token;
+            String resetUrl = ServletUtils.getWebDomain() + ServletUtils.getServletContext().getContextPath() + "/reset-password?type=email&token=" + token;
             System.out.println(resetUrl);
             // TODO send email
         } catch (Exception e) {

@@ -2,12 +2,12 @@ package net.eulerframework.web.core.base.controller;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringUtils;
@@ -241,7 +241,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 对应主题的404页面
      */
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({ ResourceNotFoundException.class })
     public String resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.warn(e.getMessage(), e);
@@ -253,7 +252,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 对应主题的404页面
      */
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({ PageNotFoundException.class })
     public String pageNotFoundException(PageNotFoundException e) {
         this.logger.warn(e.getMessage());
@@ -278,7 +276,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 崩溃页面(500)
      */
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({ Exception.class })
     public String exception(Exception e) {
         this.logger.error(e.getMessage(), e);

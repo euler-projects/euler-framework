@@ -6,6 +6,6 @@ import net.eulerframework.web.core.exception.web.ViewException;
 public class UserAuthenticationViewException extends ViewException {
 
     public UserAuthenticationViewException(String message) {
-        super(message, -101);
+        super(message, "user_authentication_error", -101);
     }
 }

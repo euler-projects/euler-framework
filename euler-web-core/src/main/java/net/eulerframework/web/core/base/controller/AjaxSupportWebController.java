@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 
-import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.base.response.ErrorAjaxResponse;
+import net.eulerframework.web.core.base.response.ErrorResponse;
 import net.eulerframework.web.core.exception.web.AjaxException;
 import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 import net.eulerframework.web.core.exception.web.ViewException;
@@ -22,8 +21,8 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler({ AccessDeniedException.class })
-    public ErrorAjaxResponse accessDeniedException(AccessDeniedException e) {
-        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    public ErrorResponse accessDeniedException(AccessDeniedException e) {
+        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
     }
     
     /**
@@ -33,8 +32,8 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ MissingServletRequestParameterException.class })
-    public ErrorAjaxResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    public ErrorResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
     }
     
     /**
@@ -44,8 +43,8 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ IllegalArgumentException.class })
-    public ErrorAjaxResponse illegalArgumentException(IllegalArgumentException e) {
-        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    public ErrorResponse illegalArgumentException(IllegalArgumentException e) {
+        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
     }
     
     /**
@@ -55,11 +54,8 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ AjaxException.class })
-    public ErrorAjaxResponse ajaxException(AjaxException e) {
-        if (WebConfig.isDebugMode()) {
-            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        }
-        return new ErrorAjaxResponse(e);
+    public ErrorResponse ajaxException(AjaxException e) {
+        return new ErrorResponse(e);
     }
     
     /**
@@ -69,11 +65,8 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ ViewException.class })
-    public ErrorAjaxResponse viewException(ViewException e) {
-        if (WebConfig.isDebugMode()) {
-            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        }
-        return new ErrorAjaxResponse(new DefaultAjaxException(e.getMessage(), e));
+    public ErrorResponse viewException(ViewException e) {
+        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
     }
     
     /**
@@ -83,8 +76,8 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({ Exception.class })
-    public ErrorAjaxResponse exception(Exception e) {
+    public ErrorResponse exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorAjaxResponse(new DefaultAjaxException(e));
+        return new ErrorResponse(new DefaultAjaxException("_UNKNOWN_ERROR", e));
     }
 }

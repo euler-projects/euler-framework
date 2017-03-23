@@ -1,17 +1,28 @@
 package net.eulerframework.web.core.exception.web;
 
+import net.eulerframework.web.core.exception.WebException;
+
 @SuppressWarnings("serial")
 public abstract class ViewException extends WebException {
-    public ViewException(String message, int code) {
-        super(message, code);
+    
+    public ViewException(String error, int code) {
+        super(error, code);
+    }
+    
+    public ViewException(String message, String error, int code) {
+        super(message, error, code);
     }
 
-    public ViewException(String message, int code, Throwable cause) {
-        super(message, code, cause);
+    public ViewException(String error, int code, Throwable cause) {
+        super(error, code, cause);
     }
 
-    protected ViewException(String message, int code, Throwable cause, boolean enableSuppression,
+    public ViewException(String message, String error, int code, Throwable cause) {
+        super(message, error, code, cause);
+    }
+
+    protected ViewException(String message, String error, int code, Throwable cause, boolean enableSuppression,
             boolean writableStackTrace) {
-        super(message, code, cause, enableSuppression, writableStackTrace);
+        super(message, error, code, cause, enableSuppression, writableStackTrace);
     }
 }
