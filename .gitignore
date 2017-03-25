@@ -1,12 +1,11 @@
-target/
+target
 .project
 .classpath
-.settings/
+.settings
 #config.properties
 node_modules
 pom.xml.releaseBackup
 pom.xml.versionsBackup
-.idea/
+.idea
 *.iml
 *.pem
-
