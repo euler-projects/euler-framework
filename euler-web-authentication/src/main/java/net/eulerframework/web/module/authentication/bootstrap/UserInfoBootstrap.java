@@ -4,20 +4,20 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.web.module.authentication.filter.AuthenticateInfoFilter;
+import net.eulerframework.web.module.authentication.filter.UserInfoFilter;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 @Order(300)
-public class AuthenticateBootstrap extends LogSupport implements WebApplicationInitializer {
+public class UserInfoBootstrap extends LogSupport implements WebApplicationInitializer {
 
     @Override
     public void onStartup(ServletContext container) throws ServletException {
-        this.logger.info("Executing authenticate logging bootstrap.");
+        this.logger.info("Executing user info bootstrap.");
 
-        FilterRegistration.Dynamic authenticateInfoFilter = container.addFilter("authenticateInfoFilter", new AuthenticateInfoFilter("oauth/token","oauth/check_token"));
+        FilterRegistration.Dynamic authenticateInfoFilter = container.addFilter("authenticateInfoFilter", new UserInfoFilter("oauth/token","oauth/check_token"));
         authenticateInfoFilter.addMappingForUrlPatterns(null, false, "/*");
     }
 }

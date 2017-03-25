@@ -13,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.util.UserContext;
 
-public class AuthenticateInfoFilter extends OncePerRequestFilter {
+public class UserInfoFilter extends OncePerRequestFilter {
     
     private String[] excludeServletPath;
 
@@ -21,11 +21,11 @@ public class AuthenticateInfoFilter extends OncePerRequestFilter {
         this.excludeServletPath = excludeServletPath;
     }
 
-    public AuthenticateInfoFilter() {
+    public UserInfoFilter() {
         
     }
     
-    public AuthenticateInfoFilter(String... excludeServletPath) {
+    public UserInfoFilter(String... excludeServletPath) {
         this.excludeServletPath = excludeServletPath;        
     }
 
