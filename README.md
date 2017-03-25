@@ -6,6 +6,8 @@
 ## About
 The Euler Framework is based on Spring MVC, provides a set of base classes to make website building easier.
 
+Visit [eulerproject.io][] for more info.
+
 ## In Processing
 * Change project name to euler-framework
 * Streamline modules
@@ -31,3 +33,4 @@ The Euler Framework is based on Spring MVC, provides a set of base classes to ma
 The Euler Framework is released under the [MIT License][].
 
 [MIT License]: https://opensource.org/licenses/MIT
+[eulerproject.io]: https://eulerproject.io
