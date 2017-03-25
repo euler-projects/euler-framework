@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2015-2016 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2015-2017 cFrost.sun(孙宾, SUN BIN) 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,8 @@
  * 
  * For more information, please visit the following website
  * 
- * https://github.com/euler-form/web-form
- * http://eulerframework.net
- * http://cfrost.net
+ * https://eulerproject.io/euler-framework
+ * https://cfrost.net
  */
 package net.eulerframework.bootstrap;
 
@@ -35,8 +34,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -45,6 +42,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.CrosFilter;
@@ -52,8 +50,7 @@ import net.eulerframework.web.core.filter.EulerFrameworkCoreFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
-public class EulerFrameworkBootstrap implements WebApplicationInitializer {
-    private final Logger log = LogManager.getLogger();
+public class EulerFrameworkBootstrap extends LogSupport implements WebApplicationInitializer {
     
     private static final String WEB_SECURITY_LOCAL = "web-security-local";
     private static final String WEB_SECURITY_LDAP = "web-security-ldap";
@@ -68,7 +65,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
     private static final String OAUTH_RESOURCE_SERVER = "oauth-resource-server";
     @Override
     public void onStartup(ServletContext container) throws ServletException {
-        log.info("Executing Euler-Framework bootstrap.");
+        this.logger.info("Executing Euler-Framework bootstrap.");
         
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         try {
@@ -155,7 +152,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
                 multiPartConfig.getFileSizeThreshold()));
         springWebDispatcher.addMapping("/");
         
-        this.log.info("init web root: /");
+        this.logger.info("init web root: /");
         
     }
     
@@ -180,7 +177,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
                 multiPartConfig.getFileSizeThreshold()));
         springAdminWebDispatcher.addMapping(adminRootPath+"/*");
 
-        this.log.info("init admin web root: " + adminRootPath+"/*");
+        this.logger.info("init admin web root: " + adminRootPath+"/*");
         
     }
     
@@ -206,7 +203,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
                 multiPartConfig.getFileSizeThreshold()));        
         springApiDispatcher.addMapping(apiRootPath+"/*");
 
-        this.log.info("init api root: " + apiRootPath+"/*");
+        this.logger.info("init api root: " + apiRootPath+"/*");
         
     }
 }
