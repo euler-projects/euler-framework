@@ -10,6 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
+/**
+ * 支持手动切换语言的RequestWrapper
+ * @author cFrost
+ *
+ */
 public class LocaleRequestWrapper extends HttpServletRequestWrapper {
     protected final Logger logger = LogManager.getLogger();
 
