@@ -1,0 +1,5 @@
+.project
+*.versionsBackup
+.settings
+.classpath
+target
