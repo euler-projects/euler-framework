@@ -72,7 +72,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         try {
-            rootContext.register(Class.forName("net.eulerframework.config.RootContextConfiguration"));
+            rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
         } catch (ClassNotFoundException e) {
             rootContext.close();
             throw new ServletException(e);
@@ -139,7 +139,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
     private void configWebDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
         AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
-            springWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringWebDispatcherServletContextConfiguration"));
+            springWebDispatcherServletContext.register(Class.forName(WebConfig.getWebConfigClassName()));
         } catch (ClassNotFoundException e) {
             springWebDispatcherServletContext.close();
             rootContext.close();
@@ -164,7 +164,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         
         AnnotationConfigWebApplicationContext springAdminWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
-            springAdminWebDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration"));
+            springAdminWebDispatcherServletContext.register(Class.forName(WebConfig.getAdminWebConfigClassName()));
         } catch (ClassNotFoundException e) {
             springAdminWebDispatcherServletContext.close();
             rootContext.close();
@@ -189,7 +189,7 @@ public class EulerFrameworkBootstrap implements WebApplicationInitializer {
         
         AnnotationConfigWebApplicationContext springApiDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
-            springApiDispatcherServletContext.register(Class.forName("net.eulerframework.config.SpringApiDispatcherServletContextConfiguration"));
+            springApiDispatcherServletContext.register(Class.forName(WebConfig.getApiConfigClassName()));
         } catch (ClassNotFoundException e) {
             springApiDispatcherServletContext.close();
             rootContext.close();

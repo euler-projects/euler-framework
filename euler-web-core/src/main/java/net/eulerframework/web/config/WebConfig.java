@@ -26,6 +26,10 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
         
         //[core]
+        private final static String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
+        private final static String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
+        private final static String CORE_ADMIN_WEB_CONFIG_CLASS = "core.adminWebConfigClass";
+        private final static String CORE_API_CONFIG_CLASS = "core.apiConfigClass";
         private final static String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
         private final static String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
 
@@ -69,6 +73,11 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "Copyright Holder";
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
         
+
+        private final static String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.RootContextConfiguration";
+        private final static String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringWebDispatcherServletContextConfiguration";
+        private final static String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration";
+        private final static String CORE_API_CONFIG_CLASS = "net.eulerframework.config.SpringApiDispatcherServletContextConfiguration";
         private final static int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
         private final static long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
 
@@ -598,6 +607,58 @@ public abstract class WebConfig {
                 WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_TEXT);
 
         CONFIG_CAHCE.put(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT, result);
+        return result;
+    }
+
+    public static String getRootContextConfigClassName() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_ROOT_CONTEXT_CONFIG_CLASS);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.CORE_ROOT_CONTEXT_CONFIG_CLASS,
+                WebConfigDefault.CORE_ROOT_CONTEXT_CONFIG_CLASS);
+
+        CONFIG_CAHCE.put(WebConfigKey.CORE_ROOT_CONTEXT_CONFIG_CLASS, result);
+        return result;
+    }
+    
+    public static String getWebConfigClassName() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_WEB_CONFIG_CLASS);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.CORE_WEB_CONFIG_CLASS,
+                WebConfigDefault.CORE_WEB_CONFIG_CLASS);
+
+        CONFIG_CAHCE.put(WebConfigKey.CORE_WEB_CONFIG_CLASS, result);
+        return result;
+    }
+    
+    public static String getAdminWebConfigClassName() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_ADMIN_WEB_CONFIG_CLASS);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.CORE_ADMIN_WEB_CONFIG_CLASS,
+                WebConfigDefault.CORE_ADMIN_WEB_CONFIG_CLASS);
+
+        CONFIG_CAHCE.put(WebConfigKey.CORE_ADMIN_WEB_CONFIG_CLASS, result);
+        return result;
+    }
+    
+    public static String getApiConfigClassName() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_API_CONFIG_CLASS);
+        if (cachedConfig != null) {
+            return (String) cachedConfig;
+        }
+
+        String result = properties.get(WebConfigKey.CORE_API_CONFIG_CLASS,
+                WebConfigDefault.CORE_API_CONFIG_CLASS);
+
+        CONFIG_CAHCE.put(WebConfigKey.CORE_API_CONFIG_CLASS, result);
         return result;
     }
 
