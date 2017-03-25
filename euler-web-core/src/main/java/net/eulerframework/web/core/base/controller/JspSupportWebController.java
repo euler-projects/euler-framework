@@ -63,7 +63,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
         String themeParamName = "_theme";
 
         String theme = this.getRequest().getParameter(themeParamName);
-        if (StringUtils.isNull(theme)) {
+        if (StringUtils.isEmpty(theme)) {
             Cookie[] cookies = this.getRequest().getCookies();
 
             if (cookies != null) {
