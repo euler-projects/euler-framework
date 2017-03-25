@@ -38,12 +38,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import net.eulerframework.web.core.extend.LocaleRequestWrapper;
+
 public class EulerFrameworkCoreFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		filterChain.doFilter(request, response);
+		filterChain.doFilter(new LocaleRequestWrapper(request), response);
 	}
 
 }
