@@ -11,7 +11,7 @@
     </parent>
     
     <artifactId>euler-framework</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>net.eulerframework:euler-framework</name>
     <url>https://euler-projects.github.io/euler-framework</url>
