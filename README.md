@@ -1,4 +1,6 @@
 [![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/badge/icon)](https://ci.eulerproject.io/job/euler-framework-latest-jdk7/)
+[![GitHub issues](https://img.shields.io/github/issues/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/issues)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/euler-projects/euler-framework/master/LICENSE)
 
 ## About
 The Euler Framework is based on Spring MVC, provides a set of base classes to make website building easier.
