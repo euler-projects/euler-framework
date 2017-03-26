@@ -37,7 +37,7 @@ import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest.OrderMode;
 import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
-import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 
 public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implements IBaseDao<T> {
@@ -210,7 +210,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @Override
-    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
+    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
         int pageIndex = pageQueryRequest.getPageIndex();
@@ -220,7 +220,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @Override
-    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
+    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
         for(String c : propertySetToSelectMode) {
@@ -304,12 +304,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         return result;
     }
 
-    protected PageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+    protected EasyUIPageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
         return this.pageQuery(detachedCriteria, pageIndex, pageSize, null);
     }
     
     @SuppressWarnings("unchecked")
-    protected PageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
+    protected EasyUIPageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
         
         detachedCriteria.setProjection(Projections.rowCount());
         long total = ((Long)detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list().get(0)).longValue();
@@ -324,7 +324,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         criteria.setMaxResults(pageSize);
         List<T> result = criteria.list();
         evict(result);
-        return new PageResponse<>(result, total, pageIndex, pageSize);
+        return new EasyUIPageResponse<>(result, total, pageIndex, pageSize);
     }
 
     protected final void evict(Object entity) {

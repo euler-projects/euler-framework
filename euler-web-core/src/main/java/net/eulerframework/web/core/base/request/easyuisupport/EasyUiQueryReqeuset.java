@@ -1,9 +1,11 @@
-package net.eulerframework.web.core.base.request;
+package net.eulerframework.web.core.base.request.easyuisupport;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
+import net.eulerframework.web.core.base.request.PageQueryRequest;
 
 public class EasyUiQueryReqeuset extends PageQueryRequest {
     

@@ -1,7 +1,9 @@
-package net.eulerframework.web.core.base.response;
+package net.eulerframework.web.core.base.response.easyuisupport;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import net.eulerframework.web.core.base.response.BaseResponse;
 
 /**
  * 用来作为分页查询的响应实体
@@ -10,7 +12,7 @@ import java.util.List;
  *
  * @param <T> 返回数据类型
  */
-public class PageResponse<T> implements BaseResponse {
+public class EasyUIPageResponse<T> implements BaseResponse {
 
     private final List<T> rows;
 
@@ -27,7 +29,7 @@ public class PageResponse<T> implements BaseResponse {
      * @param pageIndex 页码
      * @param pageSize 每页数据量
      */
-    public PageResponse(List<T> rows, long total, int pageIndex, int pageSize) {
+    public EasyUIPageResponse(List<T> rows, long total, int pageIndex, int pageSize) {
         if(rows == null)
             this.rows = new ArrayList<>();
         else

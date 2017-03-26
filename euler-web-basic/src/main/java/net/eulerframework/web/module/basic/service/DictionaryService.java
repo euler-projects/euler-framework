@@ -44,7 +44,7 @@ public class DictionaryService extends BaseService {
         sc.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
     }
 
-//    public PageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+//    public EasyUIPageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
 //        return this.dictionaryDao.findDictionaryByPage(queryRequest, pageIndex, pageSize);
 //    }
 //

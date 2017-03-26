@@ -9,8 +9,8 @@ import org.hibernate.criterion.Restrictions;
 
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerframework.web.core.base.request.EasyUiQueryReqeuset;
-import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.authentication.entity.User;
 
@@ -57,7 +57,7 @@ public class UserDao extends BaseDao<User> {
     }
 
     
-    public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {        
+    public EasyUIPageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {        
         
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(queryRequest);
         
@@ -82,7 +82,7 @@ public class UserDao extends BaseDao<User> {
         int pageIndex = queryRequest.getPageIndex();
         int pageSize = queryRequest.getPageSize();
         
-        PageResponse<User> ret = this.pageQuery(detachedCriteria, pageIndex, pageSize);  
+        EasyUIPageResponse<User> ret = this.pageQuery(detachedCriteria, pageIndex, pageSize);  
         for(User user : ret.getRows()){
             user.eraseCredentials();
         }
