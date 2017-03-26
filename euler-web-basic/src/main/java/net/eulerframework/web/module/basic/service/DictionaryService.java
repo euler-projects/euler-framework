@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.util.ServletUtils;
 
 @Service
 public class DictionaryService extends BaseService {
@@ -21,7 +22,7 @@ public class DictionaryService extends BaseService {
     public void loadBaseData() {
         
         //contextPaht
-        ServletContext sc = this.getServletContext();
+        ServletContext sc = ServletUtils.getServletContext();
         String contextPath = sc.getContextPath();
         
         sc.setAttribute("__CONTEXT_PATH", contextPath);

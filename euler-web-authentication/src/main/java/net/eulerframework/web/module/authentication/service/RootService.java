@@ -14,6 +14,7 @@ import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.util.ServletUtils;
 
 @Service
 @Transactional
@@ -34,7 +35,7 @@ public class RootService extends BaseService {
         
         root.setPassword(passwordEncoder.encode(newPassword));
         
-        String webInfPath = this.getServletContext().getRealPath("/WEB-INF");
+        String webInfPath = ServletUtils.getServletContext().getRealPath("/WEB-INF");
         String rootpasswordFilePath = webInfPath + "/.rootpassword";
         
         try {
@@ -61,7 +62,7 @@ public class RootService extends BaseService {
         
         admin.setPassword(passwordEncoder.encode(newPassword));
         
-        String webInfPath = this.getServletContext().getRealPath("/WEB-INF");
+        String webInfPath = ServletUtils.getServletContext().getRealPath("/WEB-INF");
         String adminpasswordFilePath = webInfPath + "/.adminpassword";
         
         try {
