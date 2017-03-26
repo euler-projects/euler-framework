@@ -40,7 +40,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import net.eulerframework.web.core.extend.LocaleRequestWrapper;
 
-public class EulerFrameworkCoreFilter extends OncePerRequestFilter {
+public class LocaleFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

@@ -1,21 +1,23 @@
 package net.eulerframework.web.core.exception.api;
 
+import org.springframework.http.HttpStatus;
+
 @SuppressWarnings("serial")
 public class ResourceExistsException extends ApiException {
 
     public ResourceExistsException() {
-        super("resource_exists", 100);
+        super(Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value());
     }
 
     public ResourceExistsException(String message) {
-        super(message,"resource_exists", 100);
+        super(message,Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value());
     }
 
     public ResourceExistsException(String message, Throwable cause) {
-        super(message,"resource_exists", 100, cause);
+        super(message,Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value(), cause);
     }
 
     public ResourceExistsException(Throwable cause) {
-        super("resource_exists", 100, cause);
+        super(Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value(), cause);
     }
 }

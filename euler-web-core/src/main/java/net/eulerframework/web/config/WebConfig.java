@@ -2,6 +2,8 @@ package net.eulerframework.web.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.ContextLoader;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
@@ -11,6 +13,7 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.property.PropertyNotFoundException;
 import net.eulerframework.common.util.property.PropertyReader;
 
+@Configuration
 public abstract class WebConfig {
 
     private final static DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
@@ -177,13 +180,19 @@ public abstract class WebConfig {
         return result;
     }
 
+    @Bean
     public static String getApiRootPath() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ROOT_PATH);
         if (cachedConfig != null) {
             return (String) cachedConfig;
         }
 
-        String result = properties.get(WebConfigKey.WEB_API_ROOT_PATH, WebConfigDefault.WEB_API_ROOT_PATH);
+        String result;
+        try {
+            result = properties.get(WebConfigKey.WEB_API_ROOT_PATH);
+        } catch (PropertyNotFoundException e) {
+            throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + " can not be empty");
+        }
 
         if (!StringUtils.hasText(result))
             throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
@@ -207,7 +216,12 @@ public abstract class WebConfig {
             return (String) cachedConfig;
         }
 
-        String result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
+        String result;
+        try {
+            result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH);
+        } catch (PropertyNotFoundException e) {
+            throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + " can not be empty");
+        }
 
         if (!StringUtils.hasText(result))
             throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + " can not be empty");

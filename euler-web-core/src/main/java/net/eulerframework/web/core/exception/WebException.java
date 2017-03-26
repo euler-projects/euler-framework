@@ -51,5 +51,36 @@ public abstract class WebException extends RuntimeException {
     public String getError() {
         return this.error;
     }
+    
+    protected enum Error {
+        RESOURCE_STATUS_LOCKED(7431, "resource_status_locked"),
+        RESOURCE_EXISTS(409, "resource_exists"),
+        UNDEFINED_ERROR(-1, "undefined_error"),
+        UNKNOWN_ERROR(-1, "unknown_error");
+        
+        private final int value;
+
+        private final String reasonPhrase;
+
+
+        private Error(int value, String reasonPhrase) {
+            this.value = value;
+            this.reasonPhrase = reasonPhrase;
+        }
+
+        /**
+         * Return the integer value of this status code.
+         */
+        public int value() {
+            return this.value;
+        }
+
+        /**
+         * Return the reason phrase of this status code.
+         */
+        public String getReasonPhrase() {
+            return reasonPhrase;
+        }
+    }
 
 }

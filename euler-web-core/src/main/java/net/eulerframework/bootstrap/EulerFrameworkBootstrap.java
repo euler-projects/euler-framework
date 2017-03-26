@@ -46,7 +46,7 @@ import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.CrosFilter;
-import net.eulerframework.web.core.filter.EulerFrameworkCoreFilter;
+import net.eulerframework.web.core.filter.LocaleFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
@@ -89,8 +89,8 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         
         this.configApiDispatcher(rootContext, container, multiPartConfig);
         
-        FilterRegistration.Dynamic eulerframeworkCoreFilter = container.addFilter("eulerframeworkCoreFilter", new EulerFrameworkCoreFilter());
-        eulerframeworkCoreFilter.addMappingForUrlPatterns(null, false, "/*");
+        FilterRegistration.Dynamic localeFilter = container.addFilter("localeFilter", new LocaleFilter());
+        localeFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet", "springAdminWebDispatcherServlet");
         
         FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
         crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");

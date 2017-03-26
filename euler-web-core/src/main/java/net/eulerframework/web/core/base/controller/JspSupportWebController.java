@@ -13,9 +13,9 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
+import net.eulerframework.web.core.exception.PageNotFoundException;
 import net.eulerframework.web.core.exception.ResourceNotFoundException;
 import net.eulerframework.web.core.exception.web.DefaultViewException;
-import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.ViewException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
@@ -161,14 +161,16 @@ public abstract class JspSupportWebController extends AbstractWebController {
     
     /**
      * 显示错误页面
-     * 自定义错误信息可在jsp中用<code>${__message}</code>获取
-     * 自定义错误代码信息可在jsp中用<code>${__code}</code>获取
-     * @param viewException 错误异常,不能为<code>null</code>
+     * 自定义错误信息可在jsp中用{@code ${__error}}获取
+     * 自定义错误代码可在jsp中用{@code ${__code}}获取
+     * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
+     * @param viewException 错误异常
      * @return 错误页面
      */
     private String error(ViewException viewException) {
         Assert.notNull(viewException, "Error exception can not be null"); 
-        this.getRequest().setAttribute("__message", viewException.getMessage());   
+        this.getRequest().setAttribute("__error_description", viewException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", viewException.getError());
         this.getRequest().setAttribute("__code", viewException.getCode()); 
         return this.display("/common/error");
     }
