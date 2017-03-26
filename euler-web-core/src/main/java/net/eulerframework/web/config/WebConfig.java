@@ -16,39 +16,39 @@ import net.eulerframework.common.util.property.PropertyReader;
 @Configuration
 public abstract class WebConfig {
 
-    private final static DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
+    private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
     
-    private final static PropertyReader properties = new PropertyReader("/config.properties");
+    private static final PropertyReader properties = new PropertyReader("/config.properties");
 
     private static class WebConfigKey {
         //[project]
-        private final static String PROJECT_VERSION = "project.verison";
-        private final static String PROJECT_MODE = "project.mode";
-        private final static String PROJECT_BUILDTIME = "project.buildtime";
+        private static final String PROJECT_VERSION = "project.verison";
+        private static final String PROJECT_MODE = "project.mode";
+        private static final String PROJECT_BUILDTIME = "project.buildtime";
         private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
         
         //[core]
-        private final static String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
-        private final static String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
-        private final static String CORE_ADMIN_WEB_CONFIG_CLASS = "core.adminWebConfigClass";
-        private final static String CORE_API_CONFIG_CLASS = "core.apiConfigClass";
-        private final static String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
-        private final static String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
+        private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
+        private static final String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
+        private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "core.adminWebConfigClass";
+        private static final String CORE_API_CONFIG_CLASS = "core.apiConfigClass";
+        private static final String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
+        private static final String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
 
         //[web]
-        private final static String WEB_SITENAME = "web.sitename";
-        private final static String WEB_DEFAULT_THEME = "web.defaultTheme";
-        private final static String WEB_UPLOAD_PATH = "web.uploadPath";
-        private final static String WEB_JSP_PATH = "web.jspPath";
-        private final static String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
-        private final static String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
+        private static final String WEB_SITENAME = "web.sitename";
+        private static final String WEB_DEFAULT_THEME = "web.defaultTheme";
+        private static final String WEB_UPLOAD_PATH = "web.uploadPath";
+        private static final String WEB_JSP_PATH = "web.jspPath";
+        private static final String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
+        private static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
-        private final static String WEB_API_ROOT_PATH = "web.api.rootPath";
+        private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
         
-        private final static String WEB_MULITPART = "web.multipart";
+        private static final String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
         private static final String WEB_MULITPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
         private static final String WEB_MULITPART_MAX_REQUEST_SIZE = "web.multiPart.maxRequestSize";
@@ -63,7 +63,7 @@ public abstract class WebConfig {
         private static final String SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "security.authentication.enableMobileSignin";
         private static final String SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = "security.authentication.enableUserCache";
         private static final String SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = "security.authentication.userCacheLife";
-        private final static String SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = "security.authentication.userContext.cacheLife";
+        private static final String SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = "security.authentication.userContext.cacheLife";
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
@@ -77,23 +77,23 @@ public abstract class WebConfig {
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
         
 
-        private final static String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.RootContextConfiguration";
-        private final static String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringWebDispatcherServletContextConfiguration";
-        private final static String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration";
-        private final static String CORE_API_CONFIG_CLASS = "net.eulerframework.config.SpringApiDispatcherServletContextConfiguration";
-        private final static int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
-        private final static long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
+        private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.RootContextConfiguration";
+        private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringWebDispatcherServletContextConfiguration";
+        private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration";
+        private static final String CORE_API_CONFIG_CLASS = "net.eulerframework.config.SpringApiDispatcherServletContextConfiguration";
+        private static final int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
+        private static final long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
 
-        private final static String WEB_SITENAME = "DEMO";
-        private final static String WEB_DEFAULT_THEME = "default";
-        private final static String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
-        private final static String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
-        private final static String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
-        private final static String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
-        private final static String WEB_ADMIN_ROOT_PATH = "/admin";
+        private static final String WEB_SITENAME = "DEMO";
+        private static final String WEB_DEFAULT_THEME = "default";
+        private static final String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
+        private static final String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
+        private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
+        private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
+        //private static final String WEB_ADMIN_ROOT_PATH = "/admin";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "/assets/system/admin-dashboard-brand.png";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "Manage Dashboard";
-        private static final String WEB_API_ROOT_PATH = "/api";
+        //private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
         
         private static final String WEB_MULITPART_LOCATION = null;
@@ -108,7 +108,7 @@ public abstract class WebConfig {
         private static final boolean SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
         private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
-        private final static long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
+        private static final long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; //至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; //可含有-_.的email
@@ -118,7 +118,7 @@ public abstract class WebConfig {
 
     }
 
-    protected final static Logger log = LogManager.getLogger();
+    protected static final Logger log = LogManager.getLogger();
 
     public static boolean clearWebConfigCache() {
         properties.refresh();
