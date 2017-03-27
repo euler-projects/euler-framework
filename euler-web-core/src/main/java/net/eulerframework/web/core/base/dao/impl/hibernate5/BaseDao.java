@@ -139,7 +139,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public void delete(T entity) {
-        this.deleteById(entity.getId());//.getSessionFactory().getCurrentSession().delete(entity);
+        this.getCurrentSession().delete(entity);
     }
 
     @Override

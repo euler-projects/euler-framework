@@ -39,7 +39,7 @@ public class AttachmentService extends BaseService {
         Assert.notNull(attachment, "attachment is null");
         Assert.notNull(attachment.getOwnerId(), "attachment owner id is null");
 
-        this.getEntityDao(attachmentDaos, attachment.getClass()).delete(attachment);
+        this.getEntityDao(attachmentDaos, attachment.getClass()).deleteById(attachment.getId());
     }
 
     public <T extends AbstractAttachment> void deleteAttachment(Serializable ownerId, String attachmentId,
@@ -75,7 +75,12 @@ public class AttachmentService extends BaseService {
 
         @SuppressWarnings("unchecked")
         IAttachmentDao<T> dao = (IAttachmentDao<T>) this.getEntityDao(attachmentDaos, attachmentClass);
-        dao.deleteAll(data);
+        
+        Set<Serializable> ids = new HashSet<>();
+        for(T each : data) {
+            ids.add(each.getId());
+        }
+        dao.deleteByIds(ids);
 
         if (AbstractFileAttachment.class.isAssignableFrom(attachmentClass)) {
             Set<String> fileIdSet = new HashSet<>();
