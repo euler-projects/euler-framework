@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
@@ -18,6 +19,7 @@ import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.UserService;
 
 public class UserContext {
+    private static final String oauthUserPrefix = "__OAUTH_";
     private static UserService userService;
 
     public static void setUserService(UserService userService) {
@@ -64,56 +66,84 @@ public class UserContext {
     }
 
     public static User getCurrentUser() {
-        try {
-            SecurityContext context = SecurityContextHolder.getContext();
-            if (context != null && context.getAuthentication() != null) {
-                Object principal = context.getAuthentication().getPrincipal();
+        SecurityContext context = SecurityContextHolder.getContext();
 
-                if (User.class.isAssignableFrom(principal.getClass())) {
-                    User user = (User) principal;
-                    USER_CACHE.put(user.getUsername(), user);
+        if (context == null)
+            return User.ANONYMOUS_USER;
+
+        Authentication authentication = context.getAuthentication();
+
+        if (authentication == null)
+            return User.ANONYMOUS_USER;
+
+        if (OAuth2Authentication.class.isAssignableFrom(authentication.getClass())) {
+            OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
+            authentication = oauth2Authentication.getUserAuthentication();
+
+            if (authentication == null) {
+                String clientId = (String) oauth2Authentication.getPrincipal();
+                String username = oauthUserPrefix + clientId;
+
+                User user = USER_CACHE.get(username);
+                if (user != null) {
                     return user;
                 }
-                
-                if (UserDetails.class.isAssignableFrom(principal.getClass())) {
-                    UserDetails userDetails = (UserDetails)principal;
-                    principal = userDetails.getUsername();
-                }
 
-                if (String.class.isAssignableFrom(principal.getClass())
-                        && (!User.ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
-                    String username = (String) principal;
-                    User user = USER_CACHE.get(username);
+                user = new User();
+                user.setId(username);
+                user.setUsername(username);
 
-                    if (user != null) {
-                        return user;
-                    }
+                USER_CACHE.put(user.getUsername(), user);
 
-                    UserDetails userDetails = userService.loadUserByUsername(username);
-                    if(userDetails == null) {
-                        throw new UsernameNotFoundException("User \"" + username + "\" not found.");
-                    }
-                    
-                    if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
-                        ((CredentialsContainer) userDetails).eraseCredentials();
-                    }
-
-                    if (User.class.isAssignableFrom(userDetails.getClass())) {
-                        user = (User) userDetails;
-                    } else {
-                        user = new User();
-                        user.loadDataFromOtherUserDetails(userDetails);
-                    }
-
-                    USER_CACHE.put(user.getUsername(), user);
-
-                    return user;
-                }
+                return user;
             }
-        } catch (Exception e) {
-            // DO NOTHING
         }
-        return User.ANONYMOUS_USER;
+
+        Object principal = context.getAuthentication().getPrincipal();
+
+        if (User.class.isAssignableFrom(principal.getClass())) {
+            User user = (User) principal;
+            USER_CACHE.put(user.getUsername(), user);
+            return user;
+        }
+
+        if (UserDetails.class.isAssignableFrom(principal.getClass())) {
+            UserDetails userDetails = (UserDetails) principal;
+            principal = userDetails.getUsername();
+        }
+
+        if (String.class.isAssignableFrom(principal.getClass())
+                && (!User.ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
+
+            String username = (String) principal;
+            User user = USER_CACHE.get(username);
+
+            if (user != null) {
+                return user;
+            }
+
+            UserDetails userDetails = userService.loadUserByUsername(username);
+            
+            if(userDetails == null)
+                return User.ANONYMOUS_USER;
+            
+            if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
+                ((CredentialsContainer) userDetails).eraseCredentials();
+            }
+
+            if (User.class.isAssignableFrom(userDetails.getClass())) {
+                user = (User) userDetails;
+            } else {
+                user = new User();
+                user.loadDataFromOtherUserDetails(userDetails);
+            }
+
+            USER_CACHE.put(user.getUsername(), user);
+
+            return user;
+        } else {
+            return User.ANONYMOUS_USER;
+        }
     }
     
     public static void sudo() {
