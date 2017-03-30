@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import net.eulerframework.web.core.base.response.ErrorResponse;
+import net.eulerframework.web.core.exception.DefaultWebException;
+import net.eulerframework.web.core.exception.WebException;
+import net.eulerframework.web.core.exception.WebException.WebError;
 import net.eulerframework.web.core.exception.web.AjaxException;
-import net.eulerframework.web.core.exception.web.DefaultAjaxException;
 import net.eulerframework.web.core.exception.web.ViewException;
 
 @ResponseBody
@@ -20,9 +22,9 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler({ AccessDeniedException.class })
+    @ExceptionHandler(AccessDeniedException.class)
     public ErrorResponse accessDeniedException(AccessDeniedException e) {
-        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
+        return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ACCESS_DENIED, e));
     }
     
     /**
@@ -31,9 +33,9 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ MissingServletRequestParameterException.class })
+    @ExceptionHandler(MissingServletRequestParameterException.class)
     public ErrorResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
+        return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ILLEGAL_PARAM, e));
     }
     
     /**
@@ -42,9 +44,9 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ IllegalArgumentException.class })
+    @ExceptionHandler(IllegalArgumentException.class)
     public ErrorResponse illegalArgumentException(IllegalArgumentException e) {
-        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
+        return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ILLEGAL_ARGUMENT, e));
     }
     
     /**
@@ -53,7 +55,7 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ AjaxException.class })
+    @ExceptionHandler(AjaxException.class)
     public ErrorResponse ajaxException(AjaxException e) {
         return new ErrorResponse(e);
     }
@@ -64,9 +66,20 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ ViewException.class })
+    @ExceptionHandler(ViewException.class)
     public ErrorResponse viewException(ViewException e) {
-        return new ErrorResponse(new DefaultAjaxException(e.getMessage(), e));
+        return new ErrorResponse(e);
+    }
+    
+    /**
+     * 用于在程序发生{@link WebException}异常时统一返回错误信息
+     * 
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(WebException.class)
+    public ErrorResponse webException(WebException e) {
+        return new ErrorResponse(e);
     }
     
     /**
@@ -75,9 +88,9 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler({ Exception.class })
+    @ExceptionHandler(Exception.class)
     public ErrorResponse exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(new DefaultAjaxException("_UNKNOWN_ERROR", e));
+        return new ErrorResponse();
     }
 }

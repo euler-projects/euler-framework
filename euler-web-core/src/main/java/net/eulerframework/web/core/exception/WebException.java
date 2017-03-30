@@ -52,9 +52,17 @@ public abstract class WebException extends RuntimeException {
         return this.error;
     }
     
-    protected enum Error {
-        RESOURCE_STATUS_LOCKED(7431, "resource_status_locked"),
-        RESOURCE_EXISTS(409, "resource_exists"),
+    public enum WebError {
+        
+        ACCESS_DENIED(70301, "access_denied"),
+        
+        ILLEGAL_ARGUMENT(70401, "illegal_argument"),
+        ILLEGAL_PARAM(70402, "illegal_param"),
+        
+        RESOURCE_NOT_FOUND(70701, "resource_not_found"),
+        RESOURCE_EXISTS(70702, "resource_exists"),
+        RESOURCE_STATUS_LOCKED(70703, "resource_status_locked"),
+        
         UNDEFINED_ERROR(-1, "undefined_error"),
         UNKNOWN_ERROR(-1, "unknown_error");
         
@@ -63,7 +71,7 @@ public abstract class WebException extends RuntimeException {
         private final String reasonPhrase;
 
 
-        private Error(int value, String reasonPhrase) {
+        private WebError(int value, String reasonPhrase) {
             this.value = value;
             this.reasonPhrase = reasonPhrase;
         }

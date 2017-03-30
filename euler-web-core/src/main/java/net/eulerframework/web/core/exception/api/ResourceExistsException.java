@@ -6,18 +6,18 @@ import org.springframework.http.HttpStatus;
 public class ResourceExistsException extends ApiException {
 
     public ResourceExistsException() {
-        super(Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value());
+        super(WebError.RESOURCE_EXISTS.getReasonPhrase(), WebError.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value());
     }
 
     public ResourceExistsException(String message) {
-        super(message,Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value());
+        super(message,WebError.RESOURCE_EXISTS.getReasonPhrase(), WebError.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value());
     }
 
     public ResourceExistsException(String message, Throwable cause) {
-        super(message,Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value(), cause);
+        super(message,WebError.RESOURCE_EXISTS.getReasonPhrase(), WebError.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value(), cause);
     }
 
     public ResourceExistsException(Throwable cause) {
-        super(Error.RESOURCE_EXISTS.getReasonPhrase(), Error.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value(), cause);
+        super(WebError.RESOURCE_EXISTS.getReasonPhrase(), WebError.RESOURCE_EXISTS.value(), HttpStatus.CONFLICT.value(), cause);
     }
 }
