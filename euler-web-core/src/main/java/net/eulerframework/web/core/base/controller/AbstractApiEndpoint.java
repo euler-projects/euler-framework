@@ -35,7 +35,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler({ResourceNotFoundException.class})   
     public Object resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(e);
+        return new ErrorResponse();
     }
     
     /**  
@@ -47,7 +47,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler({IllegalArgumentException.class})   
     public Object illegalArgumentException(IllegalArgumentException e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(e);
+        return new ErrorResponse();
     }
     
     /**  
@@ -59,7 +59,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler({AccessDeniedException.class})   
     public Object accessDeniedException(AccessDeniedException e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(e);
+        return new ErrorResponse();
     }
     
     /**  
@@ -71,7 +71,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler({BindException.class})   
     public Object bindException(BindException e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(e);
+        return new ErrorResponse();
     }
     
     /**  
@@ -83,7 +83,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler({MissingServletRequestParameterException.class})   
     public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(e);
+        return new ErrorResponse();
     }
     
     /**  
@@ -95,7 +95,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler({Exception.class})   
     public Object exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(e);
+        return new ErrorResponse();
     }
 
 }
