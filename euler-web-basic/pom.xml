@@ -17,11 +17,12 @@
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>jsp-api</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>euler-web-authentication</artifactId>
+            <artifactId>euler-web-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 </project>

@@ -28,6 +28,8 @@ public class UserInfoFilter extends ExcluedableFilter {
             throws ServletException, IOException {        
         User curUser = UserContext.getCurrentUser();
         request.setAttribute("__USERINFO", curUser);
+        request.setAttribute("__USER_ID", curUser.getId());
+        request.setAttribute("__USER_NAME", curUser.getUsername());
         ThreadContext.put("username", curUser.getUsername());
         filterChain.doFilter(request, response);
     }
