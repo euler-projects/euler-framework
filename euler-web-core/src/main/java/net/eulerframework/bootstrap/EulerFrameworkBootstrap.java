@@ -44,6 +44,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.MultiPartConfig;
+import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.CrosFilter;
 import net.eulerframework.web.core.filter.LocaleFilter;
@@ -88,6 +89,8 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         this.configAdminDispatcher(rootContext, container, multiPartConfig);
         
         this.configApiDispatcher(rootContext, container, multiPartConfig);
+        
+        this.initBaseData(container);
         
         FilterRegistration.Dynamic localeFilter = container.addFilter("localeFilter", new LocaleFilter());
         localeFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet", "springAdminWebDispatcherServlet");
@@ -204,6 +207,30 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         springApiDispatcher.addMapping(apiRootPath+"/*");
 
         this.logger.info("init api root: " + apiRootPath+"/*");
+        
+    }
+    
+    private void initBaseData(ServletContext container) {
+        String contextPath = container.getContextPath();
+        
+        container.setAttribute("__CONTEXT_PATH", contextPath);
+        container.setAttribute("__ASSETS_PATH", contextPath + WebConfig.getAssetsPath());
+        
+        container.setAttribute("__FILE_DOWNLOAD_PATH", contextPath + "/file");
+        container.setAttribute("__FILE_UPLOAD_ACTION", contextPath + "/uploadFile");
+
+        container.setAttribute("__DEBUG_MODE", WebConfig.isDebugMode());
+        container.setAttribute("__PROJECT_VERSION", WebConfig.getProjectVersion());
+        container.setAttribute("__PROJECT_MODE", WebConfig.getProjectMode());
+        container.setAttribute("__PROJECT_BUILDTIME", WebConfig.getProjectBuildtime());
+
+        container.setAttribute("__SITENAME", WebConfig.getSitename());
+        container.setAttribute("__COPYRIGHT_HOLDER", WebConfig.getCopyrightHolder());
+        
+        container.setAttribute("__ADMIN_DASHBOARD_BRAND_ICON", contextPath + WebConfig.getAdminDashboardBrandIcon());
+        container.setAttribute("__ADMIN_DASHBOARD_BRAND_TEXT", WebConfig.getAdminDashboardBrandText());
+        
+        container.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
         
     }
 }
