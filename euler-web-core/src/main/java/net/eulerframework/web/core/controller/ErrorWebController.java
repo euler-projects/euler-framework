@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basic.controller;
+package net.eulerframework.web.core.controller;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
