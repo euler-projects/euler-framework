@@ -87,7 +87,7 @@ public abstract class WebConfig {
         private static final String WEB_SITENAME = "DEMO";
         private static final String WEB_DEFAULT_THEME = "default";
         private static final String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
-        private static final String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\files";
+        private static final String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\\files";
         private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         //private static final String WEB_ADMIN_ROOT_PATH = "/admin";
