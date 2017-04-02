@@ -22,4 +22,6 @@ public interface BaseEntity<T extends BaseEntity<?>> extends Serializable, Compa
      * @return
      */
     public Serializable getId();
+    
+    public void setSerializableId(Serializable id);
 }

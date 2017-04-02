@@ -160,12 +160,20 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public void deleteById(Serializable id) {
-        StringBuffer hqlBuffer = new StringBuffer();
-        hqlBuffer.append("delete ");
-        hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en where en.id = ?");
-        final String hql = hqlBuffer.toString();
-        this.update(hql, id);
+        try {
+            this.logger.info("!!!!delete by id");
+            T entity = this.entityClass.newInstance();
+            entity.setSerializableId(id);            
+            this.delete(entity);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+//        StringBuffer hqlBuffer = new StringBuffer();
+//        hqlBuffer.append("delete ");
+//        hqlBuffer.append(this.entityClass.getSimpleName());
+//        hqlBuffer.append(" en where en.id = ?");
+//        final String hql = hqlBuffer.toString();
+//        this.update(hql, id);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.basic.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -36,6 +38,11 @@ public class Config extends NonIDEntity<Config> {
     @Override
     public String getId() {
         return this.key;
+    }
+    
+    @Override
+    public void setSerializableId(Serializable id) {
+        this.setKey((String) id);
     }
 
     @Override

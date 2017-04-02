@@ -1,5 +1,6 @@
 package net.eulerframework.web.module.basic.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -37,9 +38,14 @@ public class DictionaryCode extends NonIDEntity<DictionaryCode> {
     
     @Override
     public String getId() {
-        // TODO Auto-generated method stub
         return code;
     }
+    
+    @Override
+    public void setSerializableId(Serializable id) {
+        this.setCode((String) id);
+    }
+    
     @Override
     public int compareTo(DictionaryCode o) {
         return this.getId().compareTo(o.getId());

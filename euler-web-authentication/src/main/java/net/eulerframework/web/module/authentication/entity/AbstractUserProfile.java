@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.authentication.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -27,6 +29,11 @@ public abstract class AbstractUserProfile implements BaseEntity<AbstractUserProf
     @JsonIgnore
     public String getId() {
         return this.userId;
+    }
+    
+    @Override
+    public void setSerializableId(Serializable id) {
+        this.setUserId((String) id);
     }
 
     @Override
