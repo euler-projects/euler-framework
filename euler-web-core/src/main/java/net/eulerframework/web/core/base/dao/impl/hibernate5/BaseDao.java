@@ -29,6 +29,7 @@ import org.hibernate.transform.Transformers;
 
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.base.log.LogSupport;
+import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.DateUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.IBaseDao;
@@ -65,6 +66,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public T load(Serializable id) {
+        Assert.notNull(id);
         T entity = this.getCurrentSession().get(this.entityClass, id);
         evict(entity);
         return entity;
@@ -72,45 +74,47 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public List<T> load(Collection<Serializable> ids) {
+        Assert.notNull(ids);
         Serializable[] idArray = ids.toArray(new Serializable[0]);
         return this.load(idArray);
     }
 
     @Override
     public List<T> load(Serializable[] idArray) {
-        StringBuffer hqlBuffer = new StringBuffer();
-        hqlBuffer.append("select en from ");
-        hqlBuffer.append(this.entityClass.getSimpleName());
-        hqlBuffer.append(" en where ");
-        for (int i = 0; i < idArray.length; i++) {
-            if (i == 0) {
-                hqlBuffer.append("en.id= ?");
-            } else {
-                hqlBuffer.append(" or en.id= ?");
+        Assert.notNull(idArray);
+        List<T> ret = new ArrayList<>();
+        for(Serializable id : idArray){
+            T entity = this.load(id);
+            if(entity != null) {
+                ret.add(entity);
             }
         }
-        final String hql = hqlBuffer.toString();
-        return this.query(hql, (Object[])idArray);
+        return ret;
     }
 
     @Override
     public Serializable save(T entity) {
+        Assert.notNull(entity);
         this.cleanBean(entity);
         return this.getSessionFactory().getCurrentSession().save(entity);
     }
 
     @Override
     public void update(T entity) {
+        Assert.notNull(entity);
         this.cleanBean(entity);
         this.getSessionFactory().getCurrentSession().update(entity);
 
     }
 
     protected void update(String hql) {
+        Assert.notNull(hql);
         this.getSessionFactory().getCurrentSession().createQuery(hql).executeUpdate();
     }
 
     protected void update(String hql, Object... params) {
+        Assert.notNull(hql);
+        Assert.notNull(params);
         Query query = this.getSessionFactory().getCurrentSession().createQuery(hql);
 
         for (int i = 0; i < params.length; i++) {
@@ -122,14 +126,14 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public void saveOrUpdate(T entity) {
+        Assert.notNull(entity);
         this.cleanBean(entity);
         this.getSessionFactory().getCurrentSession().saveOrUpdate(entity);
     }
 
     @Override
-    public void saveOrUpdate(Collection<T> entities) {
-        if (entities == null || entities.isEmpty())
-            return;
+    public void saveOrUpdateBatch(Collection<T> entities) {
+        Assert.notNull(entities);
         this.cleanBeans(entities);
 
         for (T entity : entities) {
@@ -139,11 +143,13 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
 
     @Override
     public void delete(T entity) {
+        Assert.notNull(entity);
         this.getCurrentSession().delete(entity);
     }
 
     @Override
-    public void deleteAll(Collection<T> entities) {
+    public void deleteBatch(Collection<T> entities) {
+        Assert.notNull(entities);
         if (entities == null || entities.isEmpty())
             return;
 
@@ -405,7 +411,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         return detachedCriteria;
     }
     
-    private Order analyzeOrderMode(String property, OrderMode orderMode) {
+    protected Order analyzeOrderMode(String property, OrderMode orderMode) {
         try {
             this.entityClass.getDeclaredField(property);
         } catch (NoSuchFieldException e) {
@@ -422,7 +428,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         }
     }
 
-    private Criterion generateRestriction(String property, String value, QueryMode queryMode) {
+    protected Criterion generateRestriction(String property, String value, QueryMode queryMode) {
         Field field;
         try {
             field = this.entityClass.getDeclaredField(property);

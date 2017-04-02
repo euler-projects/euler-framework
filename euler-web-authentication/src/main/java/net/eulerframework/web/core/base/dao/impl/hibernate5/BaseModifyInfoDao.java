@@ -36,11 +36,11 @@ public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> exten
     }
     
     @Override
-    public void saveOrUpdate(Collection<T> entities){
+    public void saveOrUpdateBatch(Collection<T> entities){
         for(T entity : entities){
             this.setModifyInfo(entity);
         }
-        super.saveOrUpdate(entities);
+        super.saveOrUpdateBatch(entities);
     }
     
     private void setModifyInfo(T entity){

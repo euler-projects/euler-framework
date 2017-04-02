@@ -22,13 +22,13 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     
     void saveOrUpdate(T entity);
     
-    void saveOrUpdate(Collection<T> entities);
+    void saveOrUpdateBatch(Collection<T> entities);
 
     void delete(T entity);
     
     void deleteById(Serializable id);
 
-    void deleteAll(Collection<T> entities);
+    void deleteBatch(Collection<T> entities);
 
     void deleteByIds(Collection<Serializable> ids);
 
