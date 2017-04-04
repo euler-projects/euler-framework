@@ -31,7 +31,11 @@ public class UserInfoFilter extends ExcluedableFilter {
         request.setAttribute("__USER_ID", curUser.getId());
         request.setAttribute("__USER_NAME", curUser.getUsername());
         ThreadContext.put("username", curUser.getUsername());
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            ThreadContext.remove("username");
+        }
     }
 
 }

@@ -48,6 +48,7 @@ import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.CrosFilter;
 import net.eulerframework.web.core.filter.LocaleFilter;
+import net.eulerframework.web.core.filter.RequestIdFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
@@ -91,6 +92,9 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         this.configApiDispatcher(rootContext, container, multiPartConfig);
         
         this.initBaseData(container);
+        
+        FilterRegistration.Dynamic requestIdFilter = container.addFilter("requestIdFilter", new RequestIdFilter());
+        requestIdFilter.addMappingForUrlPatterns(null, false, "/*");
         
         FilterRegistration.Dynamic localeFilter = container.addFilter("localeFilter", new LocaleFilter());
         localeFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet", "springAdminWebDispatcherServlet");

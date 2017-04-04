@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class PreLoggingFilter extends OncePerRequestFilter {
+public class RequestIdFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -22,7 +22,6 @@ public class PreLoggingFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		} finally {
 			ThreadContext.remove("id");
-			ThreadContext.remove("username");
 		}
 	}
 
