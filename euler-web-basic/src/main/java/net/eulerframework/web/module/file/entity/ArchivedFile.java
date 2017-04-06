@@ -10,7 +10,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "ARCHIVE_FILE")
+@Table(name = "BASIC_UPLOADED_FILE")
 public class ArchivedFile extends UUIDEntity<ArchivedFile> {
 
     @Column(name = "ORIGINAL_FILENAME", nullable = false)
