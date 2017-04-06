@@ -48,12 +48,12 @@ public class ArchivedFileService extends BaseService {
         af.setExtension(WebFileTool.extractFileExtension(originalFilename));
         af.setFileByteSize(fileSize);
         af.setMd5(md5);
-        af.setArchiveDate(new Date());
+        af.setUploadedDate(new Date());
         Object userId = ServletUtils.getRequest().getAttribute("__USER_ID");
         if(userId != null)
-            af.setArchiveUserId(userId.toString());
+            af.setUploadedUserId(userId.toString());
         else
-            af.setArchiveUserId("anonymousUser");
+            af.setUploadedUserId("anonymousUser");
 
         this.archivedFileDao.save(af);
 
