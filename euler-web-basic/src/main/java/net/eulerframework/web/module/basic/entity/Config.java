@@ -18,6 +18,10 @@ public class Config extends NonIDEntity<Config> {
     private String key;
     @Column(name = "CONF_VALUE")
     private String value;
+    @Column(name = "CONF_DESCRIPTION")
+    private String description;
+    @Column(name = "ENABLED", nullable = false)
+    private Boolean enabled;
 
     public String getKey() {
         return key;
@@ -33,6 +37,22 @@ public class Config extends NonIDEntity<Config> {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     @Override
