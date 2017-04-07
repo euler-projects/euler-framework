@@ -11,7 +11,7 @@ import net.eulerframework.web.module.basic.context.DBConfigContext;
 import net.eulerframework.web.module.basic.service.ConfigService;
 
 @Component
-public class BasicListener implements ServletContextListener {
+public class ConfigContextListener implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {

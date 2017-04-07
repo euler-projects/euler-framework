@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.util;
+package net.eulerframework.web.module.authentication.context;
 
 import java.io.Serializable;
 import java.util.ArrayList;

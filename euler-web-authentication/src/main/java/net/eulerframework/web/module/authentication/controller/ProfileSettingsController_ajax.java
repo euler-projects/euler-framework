@@ -14,9 +14,9 @@ import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.core.exception.web.DefaultAjaxException;
+import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.UserService;
-import net.eulerframework.web.module.authentication.util.UserContext;
 
 /**
  * @author cFrost

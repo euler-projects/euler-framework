@@ -7,8 +7,8 @@ import java.util.Date;
 import net.eulerframework.web.core.base.dao.IBaseModifyInfoDao;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.entity.BaseModifyInfoEntity;
+import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.util.UserContext;
 
 public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> extends BaseDao<T> implements IBaseModifyInfoDao<T> {
 

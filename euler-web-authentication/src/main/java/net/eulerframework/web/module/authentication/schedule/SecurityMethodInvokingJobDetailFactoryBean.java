@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 
-import net.eulerframework.web.module.authentication.util.UserContext;
+import net.eulerframework.web.module.authentication.context.UserContext;
 
 public class SecurityMethodInvokingJobDetailFactoryBean extends MethodInvokingJobDetailFactoryBean {
 

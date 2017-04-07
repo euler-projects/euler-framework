@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.ThreadContext;
 import net.eulerframework.web.core.filter.ExcluedableFilter;
+import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.util.UserContext;
 
 public class UserInfoFilter extends ExcluedableFilter {
     
