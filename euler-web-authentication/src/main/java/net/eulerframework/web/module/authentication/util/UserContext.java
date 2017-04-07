@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.config.WebConfig;
@@ -44,16 +45,14 @@ public class UserContext {
     }
     
     public static User getUserById(String userId){
-        User user = USER_CACHE_ID.get(userId);
-        
-        if(user == null) {
-            user = userService.loadUser(userId);
+        User user = USER_CACHE_ID.get(userId, new DataGetter<Serializable, User>() {
+
+            @Override
+            public User getData(Serializable key) {
+                return userService.loadUser((String) key);
+            }
             
-            if(user == null)
-                return null;
-            
-            USER_CACHE_ID.put(user.getId(), user);
-        }
+        });
         
         return user;        
     }
@@ -84,17 +83,22 @@ public class UserContext {
                 String clientId = (String) oauth2Authentication.getPrincipal();
                 String username = oauthUserPrefix + clientId;
 
-                User user = USER_CACHE.get(username);
-                if (user != null) {
-                    return user;
+                User user = USER_CACHE.get(username, new DataGetter<String, User>() {
+
+                    @Override
+                    public User getData(String key) {
+                        User user = new User();
+                        user.setId(key);
+                        user.setUsername(key);
+                        return user;
+                    }
+                    
+                });
+
+                if(user == null) {
+                    return User.ANONYMOUS_USER;
                 }
-
-                user = new User();
-                user.setId(username);
-                user.setUsername(username);
-
-                USER_CACHE.put(user.getUsername(), user);
-
+                
                 return user;
             }
         }
@@ -116,29 +120,34 @@ public class UserContext {
                 && (!User.ANONYMOUS_USERNAME.equalsIgnoreCase((String) principal))) {
 
             String username = (String) principal;
-            User user = USER_CACHE.get(username);
+            User user = USER_CACHE.get(username, new DataGetter<String, User>() {
 
-            if (user != null) {
-                return user;
-            }
+                @Override
+                public User getData(String username) {
 
-            UserDetails userDetails = userService.loadUserByUsername(username);
-            
-            if(userDetails == null)
+                    UserDetails userDetails = userService.loadUserByUsername(username);
+                    
+                    if(userDetails == null)
+                        return User.ANONYMOUS_USER;
+                    
+                    if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
+                        ((CredentialsContainer) userDetails).eraseCredentials();
+                    }
+
+                    if (User.class.isAssignableFrom(userDetails.getClass())) {
+                        return (User) userDetails;
+                    } else {
+                        User user = new User();
+                        user.loadDataFromOtherUserDetails(userDetails);
+                        return user;
+                    }
+                }
+                
+            });
+
+            if(user == null) {
                 return User.ANONYMOUS_USER;
-            
-            if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
-                ((CredentialsContainer) userDetails).eraseCredentials();
             }
-
-            if (User.class.isAssignableFrom(userDetails.getClass())) {
-                user = (User) userDetails;
-            } else {
-                user = new User();
-                user.loadDataFromOtherUserDetails(userDetails);
-            }
-
-            USER_CACHE.put(user.getUsername(), user);
 
             return user;
         } else {

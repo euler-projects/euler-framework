@@ -1,5 +1,6 @@
 package net.eulerframework.web.module.basic.context;
 
+import net.eulerframework.cache.inMemoryCache.DataNotFoundException;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.module.basic.entity.Config;
@@ -17,9 +18,10 @@ public class DBConfigContext {
     }
 
     public static String getConfig(String key) throws ConfigNotFoundException {
-        String result = CONF_CACHE.get(key);
-        
-        if(result == null) {
+        String result;
+        try {
+            result = CONF_CACHE.get(key);
+        } catch (DataNotFoundException e) {
             Config config = configService.findConfig(key);
             
             if(config == null)
