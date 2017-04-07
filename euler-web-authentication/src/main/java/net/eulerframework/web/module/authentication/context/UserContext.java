@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -83,22 +82,9 @@ public class UserContext {
                 String clientId = (String) oauth2Authentication.getPrincipal();
                 String username = oauthUserPrefix + clientId;
 
-                User user = USER_CACHE.get(username, new DataGetter<String, User>() {
-
-                    @Override
-                    public User getData(String key) {
-                        User user = new User();
-                        user.setId(key);
-                        user.setUsername(key);
-                        return user;
-                    }
-                    
-                });
-
-                if(user == null) {
-                    return User.ANONYMOUS_USER;
-                }
-                
+                User user = new User();
+                user.setId(username);
+                user.setUsername(username);
                 return user;
             }
         }
@@ -107,6 +93,7 @@ public class UserContext {
 
         if (User.class.isAssignableFrom(principal.getClass())) {
             User user = (User) principal;
+            user.eraseCredentials();
             USER_CACHE.put(user.getUsername(), user);
             return user;
         }
@@ -125,22 +112,14 @@ public class UserContext {
                 @Override
                 public User getData(String username) {
 
-                    UserDetails userDetails = userService.loadUserByUsername(username);
+                    User user = userService.loadUserByUsername(username);                    
                     
-                    if(userDetails == null)
-                        return User.ANONYMOUS_USER;
-                    
-                    if (userDetails.getClass().isAssignableFrom(CredentialsContainer.class)) {
-                        ((CredentialsContainer) userDetails).eraseCredentials();
+                    if(user == null) {
+                        return null;
                     }
-
-                    if (User.class.isAssignableFrom(userDetails.getClass())) {
-                        return (User) userDetails;
-                    } else {
-                        User user = new User();
-                        user.loadDataFromOtherUserDetails(userDetails);
-                        return user;
-                    }
+                                          
+                    user.eraseCredentials();
+                    return user;
                 }
                 
             });
