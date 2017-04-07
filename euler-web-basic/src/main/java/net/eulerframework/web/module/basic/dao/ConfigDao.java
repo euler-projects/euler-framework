@@ -10,7 +10,7 @@ public class ConfigDao extends BaseDao<Config> {
     @Override
     public Config load(Serializable id) {
         Config entity = super.load(id);
-        if (entity.getEnabled() == null || entity.getEnabled() == false)
+        if (entity == null || entity.getEnabled() == null || entity.getEnabled() == false)
             return null;
         return entity;
     }

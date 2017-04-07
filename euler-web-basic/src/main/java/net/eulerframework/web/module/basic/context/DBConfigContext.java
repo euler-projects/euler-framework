@@ -6,14 +6,14 @@ import net.eulerframework.web.module.basic.entity.Config;
 import net.eulerframework.web.module.basic.exception.ConfigNotFoundException;
 import net.eulerframework.web.module.basic.service.ConfigService;
 
-public class EulerConfigContext {
+public class DBConfigContext {
     
     private final static DefaultObjectCache<String, String> CONF_CACHE = ObjectCachePool.generateDefaultObjectCache(60_000);
     
     private static ConfigService configService;
 
     public static void setConfigService(ConfigService configService) {
-        EulerConfigContext.configService = configService;
+        DBConfigContext.configService = configService;
     }
 
     public static String getConfig(String key) throws ConfigNotFoundException {
