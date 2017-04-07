@@ -19,68 +19,73 @@ import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.UserService;
 
 public class UserContext {
-    private static final String oauthUserPrefix = "__OAUTH_";
+    private static final String OAUTH_CLIENT_PREFIX = "__OAUTH_";
+    private static final String UNKNOWN_USER_PREFIX = "__UNKOWN_";
     private static UserService userService;
 
     public static void setUserService(UserService userService) {
         UserContext.userService = userService;
     }
 
-    private final static DefaultObjectCache<String, User> USER_CACHE = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
+    private final static DefaultObjectCache<String, User> USER_CACHE = ObjectCachePool
+            .generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
 
-    private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = ObjectCachePool.generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
-    
+    private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = ObjectCachePool
+            .generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
+
     public static List<User> getUserByNameOrCode(String nameOrCode) {
         return userService.loadUserByNameOrCodeFuzzy(nameOrCode);
     }
-    
+
     public static List<Serializable> getUserIdByNameOrCode(String nameOrCode) {
         List<User> users = getUserByNameOrCode(nameOrCode);
         List<Serializable> result = new ArrayList<>();
-        for(User user : users){
+        for (User user : users) {
             result.add(user.getId());
         }
         return result;
     }
-    
-    public static User getUserById(String userId){
+
+    public static User getUserById(String userId) {
         User user = USER_CACHE_ID.get(userId, new DataGetter<Serializable, User>() {
 
             @Override
             public User getData(Serializable key) {
                 return userService.loadUser((String) key);
             }
-            
+
         });
-        
-        return user;        
+
+        return user;
     }
 
     public static String getUserNameAndCodeById(String id) {
         User user = getUserById(id);
-        if(user == null)
-            return "UNKOWN-"+id;
-        return user.getFullName()+"("+user.getUsername()+")";
+        if (user == null)
+            return UNKNOWN_USER_PREFIX + id;
+        return user.getFullName() + "(" + user.getUsername() + ")";
     }
 
     public static User getCurrentUser() {
         SecurityContext context = SecurityContextHolder.getContext();
-
         if (context == null)
             return User.ANONYMOUS_USER;
 
         Authentication authentication = context.getAuthentication();
-
         if (authentication == null)
             return User.ANONYMOUS_USER;
 
+        /*
+         * No user OAuth client request. Such as an api request with a token
+         * which was granted using client_credentials mode
+         */
         if (OAuth2Authentication.class.isAssignableFrom(authentication.getClass())) {
             OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
             authentication = oauth2Authentication.getUserAuthentication();
 
             if (authentication == null) {
                 String clientId = (String) oauth2Authentication.getPrincipal();
-                String username = oauthUserPrefix + clientId;
+                String username = OAUTH_CLIENT_PREFIX + clientId;
 
                 User user = new User();
                 user.setId(username);
@@ -91,6 +96,7 @@ public class UserContext {
 
         Object principal = context.getAuthentication().getPrincipal();
 
+        // Euler User
         if (User.class.isAssignableFrom(principal.getClass())) {
             User user = (User) principal;
             user.eraseCredentials();
@@ -98,6 +104,7 @@ public class UserContext {
             return user;
         }
 
+        // Others
         if (UserDetails.class.isAssignableFrom(principal.getClass())) {
             UserDetails userDetails = (UserDetails) principal;
             principal = userDetails.getUsername();
@@ -111,32 +118,26 @@ public class UserContext {
 
                 @Override
                 public User getData(String username) {
-
-                    User user = userService.loadUserByUsername(username);                    
-                    
-                    if(user == null) {
-                        return null;
+                    User user = userService.loadUserByUsername(username);
+                    if (user != null) {
+                        user.eraseCredentials();
                     }
-                                          
-                    user.eraseCredentials();
                     return user;
                 }
-                
+
             });
 
-            if(user == null) {
-                return User.ANONYMOUS_USER;
+            if (user != null) {
+                return user;
             }
 
-            return user;
-        } else {
-            return User.ANONYMOUS_USER;
         }
+
+        return User.ANONYMOUS_USER;
     }
-    
+
     public static void sudo() {
-        UsernamePasswordAuthenticationToken systemToken = new UsernamePasswordAuthenticationToken(
-                User.ROOT_USER, null,
+        UsernamePasswordAuthenticationToken systemToken = new UsernamePasswordAuthenticationToken(User.ROOT_USER, null,
                 User.ROOT_USER.getAuthorities());
         systemToken.setDetails(User.ROOT_USER);
         SecurityContext context = SecurityContextHolder.getContext();
