@@ -77,10 +77,10 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "Copyright Holder";
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
 
-        private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.RootContextConfiguration";
-        private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringWebDispatcherServletContextConfiguration";
-        private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.SpringAdminWebDispatcherServletContextConfiguration";
-        private static final String CORE_API_CONFIG_CLASS = "net.eulerframework.config.SpringApiDispatcherServletContextConfiguration";
+        private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.RootContextConfig";
+        private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.WebServletContextConfig";
+        private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.AdminWebServletContextConfig";
+        private static final String CORE_API_CONFIG_CLASS = "net.eulerframework.config.ApiServletContextConfig";
         private static final int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
         private static final long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;
 

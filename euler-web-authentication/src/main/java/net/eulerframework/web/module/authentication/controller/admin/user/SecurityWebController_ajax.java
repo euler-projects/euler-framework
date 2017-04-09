@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import net.eulerframework.web.core.annotation.AdminWebController;
+import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
@@ -25,7 +25,7 @@ import net.eulerframework.web.module.authentication.exception.UserNotFoundExcept
 import net.eulerframework.web.module.authentication.service.AuthorityService;
 import net.eulerframework.web.module.authentication.service.UserService;
 
-@AdminWebController
+@WebController
 @RequestMapping("security")
 public class SecurityWebController_ajax extends AjaxSupportWebController {
     

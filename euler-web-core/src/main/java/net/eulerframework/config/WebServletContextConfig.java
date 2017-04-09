@@ -39,11 +39,12 @@ import net.eulerframework.web.core.annotation.WebController;
                 type=FilterType.ASPECTJ, 
                 pattern={
                         "*..web..controller.admin..*",
-                        "*..web..controller.api..*"
+                        "*..web..controller.api..*",
+                        "*..web..controller.ajax..*"
                         })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class SpringWebDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
+public class WebServletContextConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     public ViewResolver viewResolver() {

@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -26,17 +27,22 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.AdminWebController;
+import net.eulerframework.web.core.annotation.WebController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = { "**.web.**.controller.admin" }, 
         useDefaultFilters = false, 
-        includeFilters = @ComponentScan.Filter(AdminWebController.class)
+        includeFilters = @ComponentScan.Filter(WebController.class),
+        excludeFilters = @ComponentScan.Filter(
+                type=FilterType.ASPECTJ, 
+                pattern={
+                        "*..web..controller.admin.ajax..*"
+                        })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class SpringAdminWebDispatcherServletContextConfiguration
+public class AdminWebServletContextConfig
         extends WebMvcConfigurerAdapter {
     
     @Bean

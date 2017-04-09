@@ -30,7 +30,7 @@ import net.eulerframework.web.core.annotation.ApiEndpoint;
         includeFilters = @ComponentScan.Filter(ApiEndpoint.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class SpringApiDispatcherServletContextConfiguration extends WebMvcConfigurerAdapter {
+public class ApiServletContextConfig extends WebMvcConfigurerAdapter {
     
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 //    @Resource(name="jaxb2Marshaller") Marshaller marshaller;
