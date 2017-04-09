@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basic.controller.admin;
+package net.eulerframework.web.core.controller.admin;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

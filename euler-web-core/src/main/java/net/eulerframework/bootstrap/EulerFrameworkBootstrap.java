@@ -53,7 +53,7 @@ import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
 public class EulerFrameworkBootstrap extends LogSupport implements WebApplicationInitializer {
-    
+
     private static final String WEB_SECURITY_LOCAL = "web-security-local";
     private static final String WEB_SECURITY_LDAP = "web-security-ldap";
     private static final String WEB_SECURITY_CAS = "web-security-cas";
@@ -61,14 +61,15 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
     private static final String REST_SECURITY_OAUTH = "rest-security-oauth";
     private static final String REST_SECURITY_BASIC = "rest-security-basic";
     private static final String REST_SECURITY_WEB = "rest-security-web";
-    private static final String REST_SECURITY_NONE = "rest-security-none";    
+    private static final String REST_SECURITY_NONE = "rest-security-none";
 
     private static final String OAUTH_AUTHORIZATION_SERVER = "oauth-authorization-server";
     private static final String OAUTH_RESOURCE_SERVER = "oauth-resource-server";
+
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         this.logger.info("Executing Euler-Framework bootstrap.");
-        
+
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         try {
             rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
@@ -76,150 +77,124 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
             rootContext.close();
             throw new ServletException(e);
         }
-        
-        this.setConfigurableEnvironment(rootContext);        
-        
+
+        this.setConfigurableEnvironment(rootContext);
+
         container.addListener(new ContextLoaderListener(rootContext));
-        //container.addListener(new RequestContextListener());
+        // container.addListener(new RequestContextListener());
         container.addListener(new EulerFrameworkCoreListener());
+
+        this.initSpringMVCDispatcher(
+                container, 
+                "springWebDispatcherServlet", 
+                1, 
+                WebConfig.getWebConfigClassName(),
+                "/");
         
-        MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
+        this.initSpringMVCDispatcher(container, 
+                "springAdminWebDispatcherServlet", 
+                1,
+                WebConfig.getAdminWebConfigClassName(), 
+                WebConfig.getAdminRootPath() + "/*");
         
-        this.configWebDispatcher(rootContext, container, multiPartConfig);
-        
-        this.configAdminDispatcher(rootContext, container, multiPartConfig);
-        
-        this.configApiDispatcher(rootContext, container, multiPartConfig);
-        
+        this.initSpringMVCDispatcher(container, 
+                "springApiDispatcherServlet", 
+                1, 
+                WebConfig.getApiConfigClassName(),
+                WebConfig.getApiRootPath() + "/*");
+
         this.initBaseData(container);
-        
+
         FilterRegistration.Dynamic requestIdFilter = container.addFilter("requestIdFilter", new RequestIdFilter());
         requestIdFilter.addMappingForUrlPatterns(null, false, "/*");
-        
+
         FilterRegistration.Dynamic localeFilter = container.addFilter("localeFilter", new LocaleFilter());
-        localeFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet", "springAdminWebDispatcherServlet");
-        
+        localeFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet",
+                "springAdminWebDispatcherServlet");
+
         FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
         crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");
     }
-    
+
     private void setConfigurableEnvironment(AbstractApplicationContext rootContext) {
         ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
-        
-        switch(WebConfig.getWebAuthenticationType()){
+
+        switch (WebConfig.getWebAuthenticationType()) {
         case LOCAL:
-            configurableEnvironment.addActiveProfile(WEB_SECURITY_LOCAL);break;
+            configurableEnvironment.addActiveProfile(WEB_SECURITY_LOCAL);
+            break;
         case LDAP:
-            configurableEnvironment.addActiveProfile(WEB_SECURITY_LDAP);break;
+            configurableEnvironment.addActiveProfile(WEB_SECURITY_LDAP);
+            break;
         case CAS:
-            configurableEnvironment.addActiveProfile(WEB_SECURITY_CAS);break;
+            configurableEnvironment.addActiveProfile(WEB_SECURITY_CAS);
+            break;
         }
-        
-        switch(WebConfig.getApiAuthenticationType()){
+
+        switch (WebConfig.getApiAuthenticationType()) {
         case OAUTH:
-            configurableEnvironment.addActiveProfile(REST_SECURITY_OAUTH);break;
+            configurableEnvironment.addActiveProfile(REST_SECURITY_OAUTH);
+            break;
         case BASIC:
-            configurableEnvironment.addActiveProfile(REST_SECURITY_BASIC);break;
+            configurableEnvironment.addActiveProfile(REST_SECURITY_BASIC);
+            break;
         case WEB:
-            configurableEnvironment.addActiveProfile(REST_SECURITY_WEB);break;
+            configurableEnvironment.addActiveProfile(REST_SECURITY_WEB);
+            break;
         case NONE:
-            configurableEnvironment.addActiveProfile(REST_SECURITY_NONE);break; 
+            configurableEnvironment.addActiveProfile(REST_SECURITY_NONE);
+            break;
         }
-        
-        switch(WebConfig.getOAuthSeverType()){
+
+        switch (WebConfig.getOAuthSeverType()) {
         case AUTHORIZATION_SERVER:
-            configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);break;
+            configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);
+            break;
         case RESOURCE_SERVER:
-            configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);break;
+            configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
+            break;
         case BOTH:
             configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);
             configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
             break;
         case NEITHER:
-            break; 
+            break;
         }
     }
-    
-    private void configWebDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
-        AnnotationConfigWebApplicationContext springWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-        try {
-            springWebDispatcherServletContext.register(Class.forName(WebConfig.getWebConfigClassName()));
-        } catch (ClassNotFoundException e) {
-            springWebDispatcherServletContext.close();
-            rootContext.close();
-            throw new ServletException(e);
-        }
-        DispatcherServlet springWebDispatcherServlet = new DispatcherServlet(springWebDispatcherServletContext);
-        ServletRegistration.Dynamic springWebDispatcher = container.addServlet("springWebDispatcherServlet", springWebDispatcherServlet);
-        springWebDispatcher.setLoadOnStartup(2);
-        springWebDispatcher.setMultipartConfig(new MultipartConfigElement(
-                multiPartConfig.getLocation(), 
-                multiPartConfig.getMaxFileSize(), 
-                multiPartConfig.getMaxRequestSize(), 
-                multiPartConfig.getFileSizeThreshold()));
-        springWebDispatcher.addMapping("/");
-        
-        this.logger.info("init web root: /");
-        
-    }
-    
-    private void configAdminDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
-        String adminRootPath = WebConfig.getAdminRootPath();
-        
-        AnnotationConfigWebApplicationContext springAdminWebDispatcherServletContext = new AnnotationConfigWebApplicationContext();
-        try {
-            springAdminWebDispatcherServletContext.register(Class.forName(WebConfig.getAdminWebConfigClassName()));
-        } catch (ClassNotFoundException e) {
-            springAdminWebDispatcherServletContext.close();
-            rootContext.close();
-            throw new ServletException(e);
-        }
-        DispatcherServlet springAdminWebDispatcherServlet = new DispatcherServlet(springAdminWebDispatcherServletContext);
-        ServletRegistration.Dynamic springAdminWebDispatcher = container.addServlet("springAdminWebDispatcherServlet", springAdminWebDispatcherServlet);
-        springAdminWebDispatcher.setLoadOnStartup(1);
-        springAdminWebDispatcher.setMultipartConfig(new MultipartConfigElement(
-                multiPartConfig.getLocation(), 
-                multiPartConfig.getMaxFileSize(), 
-                multiPartConfig.getMaxRequestSize(), 
-                multiPartConfig.getFileSizeThreshold()));
-        springAdminWebDispatcher.addMapping(adminRootPath+"/*");
 
-        this.logger.info("init admin web root: " + adminRootPath+"/*");
-        
-    }
-    
-    private void configApiDispatcher(AbstractApplicationContext rootContext, ServletContext container, MultiPartConfig multiPartConfig) throws ServletException {
-        String apiRootPath = WebConfig.getApiRootPath();
-        
-        AnnotationConfigWebApplicationContext springApiDispatcherServletContext = new AnnotationConfigWebApplicationContext();
+    private void initSpringMVCDispatcher(
+            ServletContext container, 
+            String servletName, 
+            int loadOnStartup,
+            String configClassName, 
+            String... urlPatterns) throws ServletException {
+        AnnotationConfigWebApplicationContext springDispatcherServletContext = new AnnotationConfigWebApplicationContext();
         try {
-            springApiDispatcherServletContext.register(Class.forName(WebConfig.getApiConfigClassName()));
+            springDispatcherServletContext.register(Class.forName(configClassName));
         } catch (ClassNotFoundException e) {
-            springApiDispatcherServletContext.close();
-            rootContext.close();
+            springDispatcherServletContext.close();
             throw new ServletException(e);
         }
-        DispatcherServlet springApiDispatcherServlet = new DispatcherServlet(springApiDispatcherServletContext);
-        springApiDispatcherServlet.setDispatchOptionsRequest(true);
-        ServletRegistration.Dynamic springApiDispatcher = container.addServlet("springApiDispatcherServlet", springApiDispatcherServlet);
-        springApiDispatcher.setLoadOnStartup(2);
-        springApiDispatcher.setMultipartConfig(new MultipartConfigElement(
-                multiPartConfig.getLocation(), 
-                multiPartConfig.getMaxFileSize(), 
-                multiPartConfig.getMaxRequestSize(), 
-                multiPartConfig.getFileSizeThreshold()));        
-        springApiDispatcher.addMapping(apiRootPath+"/*");
+        DispatcherServlet springDispatcherServlet = new DispatcherServlet(springDispatcherServletContext);
+        springDispatcherServlet.setDispatchOptionsRequest(true);
+        ServletRegistration.Dynamic springDispatcherServletDynamic = container.addServlet(servletName,
+                springDispatcherServlet);
+        springDispatcherServletDynamic.setLoadOnStartup(loadOnStartup);
 
-        this.logger.info("init api root: " + apiRootPath+"/*");
-        
+        MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
+
+        springDispatcherServletDynamic.setMultipartConfig(
+                new MultipartConfigElement(multiPartConfig.getLocation(), multiPartConfig.getMaxFileSize(),
+                        multiPartConfig.getMaxRequestSize(), multiPartConfig.getFileSizeThreshold()));
+        springDispatcherServletDynamic.addMapping(urlPatterns);
     }
-    
+
     private void initBaseData(ServletContext container) {
         String contextPath = container.getContextPath();
-        
+
         container.setAttribute("__CONTEXT_PATH", contextPath);
         container.setAttribute("__ASSETS_PATH", contextPath + WebConfig.getAssetsPath());
-        
+
         container.setAttribute("__FILE_DOWNLOAD_PATH", contextPath + "/file");
         container.setAttribute("__FILE_UPLOAD_ACTION", contextPath + "/uploadFile");
 
@@ -230,11 +205,10 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
 
         container.setAttribute("__SITENAME", WebConfig.getSitename());
         container.setAttribute("__COPYRIGHT_HOLDER", WebConfig.getCopyrightHolder());
-        
+
         container.setAttribute("__ADMIN_DASHBOARD_BRAND_ICON", contextPath + WebConfig.getAdminDashboardBrandIcon());
         container.setAttribute("__ADMIN_DASHBOARD_BRAND_TEXT", WebConfig.getAdminDashboardBrandText());
-        
+
         container.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
-        
     }
 }
