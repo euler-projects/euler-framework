@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.web.core.base.response.ErrorResponse;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.core.exception.api.ResourceExistsException;
+import net.eulerframework.web.core.exception.web.api.ResourceExistsException;
+import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class AbstractApiEndpoint extends BaseController {
     

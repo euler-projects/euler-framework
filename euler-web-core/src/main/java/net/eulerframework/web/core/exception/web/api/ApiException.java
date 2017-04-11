@@ -1,6 +1,6 @@
-package net.eulerframework.web.core.exception.api;
+package net.eulerframework.web.core.exception.web.api;
 
-import net.eulerframework.web.core.exception.WebException;
+import net.eulerframework.web.core.exception.web.WebException;
 
 @SuppressWarnings("serial")
 public abstract class ApiException extends WebException {

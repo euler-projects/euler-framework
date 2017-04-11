@@ -1,21 +1,21 @@
 package net.eulerframework.web.core.exception.web;
 
 @SuppressWarnings("serial")
-public class DefaultViewException extends ViewException {
+public class UndefinedWebException extends WebException {
     
-    public DefaultViewException() {
+    public UndefinedWebException() {
         super(WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value());
     }
     
-    public DefaultViewException(Throwable e) {
+    public UndefinedWebException(Throwable e) {
         super(WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value(), e);
     }
     
-    public DefaultViewException(String message) {
+    public UndefinedWebException(String message) {
         super(message, WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value());
     }
     
-    public DefaultViewException(String message, Throwable e) {
+    public UndefinedWebException(String message, Throwable e) {
         super(message, WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value(), e);
     }
 }

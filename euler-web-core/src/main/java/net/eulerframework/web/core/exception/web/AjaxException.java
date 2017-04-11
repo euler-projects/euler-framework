@@ -1,7 +1,5 @@
 package net.eulerframework.web.core.exception.web;
 
-import net.eulerframework.web.core.exception.WebException;
-
 @SuppressWarnings("serial")
 public abstract class AjaxException extends WebException {
     

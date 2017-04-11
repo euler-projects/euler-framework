@@ -32,9 +32,9 @@ public abstract class WebConfig {
         // [core]
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
         private static final String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
-        public static final String CORE_AJAX_CONFIG_CLASS = "core.webAjaxConfigClass";
+        private static final String CORE_AJAX_CONFIG_CLASS = "core.webAjaxConfigClass";
         private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "core.adminWebConfigClass";
-        public static final String CORE_ADMIN_AJAX_CONFIG_CLASS = "core.adminWebAjaxConfigClass";
+        private static final String CORE_ADMIN_AJAX_CONFIG_CLASS = "core.adminWebAjaxConfigClass";
         private static final String CORE_API_CONFIG_CLASS = "core.apiConfigClass";
         private static final String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
         private static final String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
@@ -81,9 +81,9 @@ public abstract class WebConfig {
 
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.RootContextConfig";
         private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.WebServletContextConfig";
-        protected static final String CORE_AJAX_CONFIG_CLASS = "net.eulerframework.config.AjaxServletContextConfig";
+        private static final String CORE_AJAX_CONFIG_CLASS = "net.eulerframework.config.AjaxServletContextConfig";
         private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.AdminWebServletContextConfig";
-        protected static final String CORE_ADMIN_AJAX_CONFIG_CLASS = "net.eulerframework.config.AdminAjaxServletContextConfig";
+        private static final String CORE_ADMIN_AJAX_CONFIG_CLASS = "net.eulerframework.config.AdminAjaxServletContextConfig";
         private static final String CORE_API_CONFIG_CLASS = "net.eulerframework.config.ApiServletContextConfig";
         private static final int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
         private static final long CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = 60_000L;

@@ -14,9 +14,9 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.PageNotFoundException;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.core.exception.web.DefaultViewException;
-import net.eulerframework.web.core.exception.web.ViewException;
+import net.eulerframework.web.core.exception.web.UndefinedWebException;
+import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
     
@@ -147,7 +147,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error() {
-        return this.error(new DefaultViewException());
+        return this.error(new UndefinedWebException());
     }
     
     /**
@@ -156,7 +156,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error(String message) {
-        return this.error(new DefaultViewException(message));
+        return this.error(new UndefinedWebException(message));
     }
     
     /**
@@ -167,7 +167,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @param viewException 错误异常
      * @return 错误页面
      */
-    private String error(ViewException viewException) {
+    private String error(WebException viewException) {
         Assert.notNull(viewException, "Error exception can not be null"); 
         this.getRequest().setAttribute("__error_description", viewException.getLocalizedMessage());   
         this.getRequest().setAttribute("__error", viewException.getError());
@@ -261,12 +261,12 @@ public abstract class JspSupportWebController extends AbstractWebController {
     }
 
     /**
-     * 用于在程序发生{@link ViewException}异常时统一返回错误信息
+     * 用于在程序发生{@link WebException}异常时统一返回错误信息
      * 
      * @return
      */
-    @ExceptionHandler({ ViewException.class })
-    public String viewException(ViewException e) {
+    @ExceptionHandler({ WebException.class })
+    public String webException(WebException e) {
         if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }

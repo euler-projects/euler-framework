@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.exception.api;
+package net.eulerframework.web.core.exception.web.api;
 
 import org.springframework.http.HttpStatus;
 

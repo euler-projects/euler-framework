@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
+import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.util.ServletUtils;

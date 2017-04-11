@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.exception;
+package net.eulerframework.web.core.exception.web;
 
 @SuppressWarnings("serial")
 public class DefaultWebException extends WebException {

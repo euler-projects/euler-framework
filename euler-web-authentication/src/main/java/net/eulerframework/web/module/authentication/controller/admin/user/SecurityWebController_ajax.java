@@ -17,7 +17,7 @@ import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
-import net.eulerframework.web.core.exception.web.DefaultAjaxException;
+import net.eulerframework.web.core.exception.web.UndefinedWebException;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
@@ -63,7 +63,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
         try {
             this.userService.addGroup(user.getId(), groupId);
         } catch (UserNotFoundException e) {
-            throw new DefaultAjaxException(e.getMessage(), e);
+            throw new UndefinedWebException(e.getMessage(), e);
         }
         return EasyUIAjaxResponse.SUCCESS_RESPONSE;
     }
@@ -79,7 +79,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
             this.userService.updateStatus(user.getId(), user.isEnabled());
             //this.userService.removeAllAndAddGroup(user.getId(), groupId);
         } catch (UserNotFoundException e) {
-            throw new DefaultAjaxException(e.getMessage(), e);
+            throw new UndefinedWebException(e.getMessage(), e);
         }
         return EasyUIAjaxResponse.SUCCESS_RESPONSE;
     }
@@ -92,7 +92,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
         try {
             this.userService.updateUserPasswordWithoutCheck(userId, password);
         } catch (UserNotFoundException e) {
-            throw new DefaultAjaxException(e.getMessage(), e);
+            throw new UndefinedWebException(e.getMessage(), e);
         }
         return EasyUIAjaxResponse.SUCCESS_RESPONSE;
     }

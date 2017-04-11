@@ -2,8 +2,8 @@ package net.eulerframework.web.core.base.response;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.exception.WebException;
-import net.eulerframework.web.core.exception.WebException.WebError;
+import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.WebException.WebError;
 
 public class ErrorResponse extends LogSupport implements BaseResponse {
 
