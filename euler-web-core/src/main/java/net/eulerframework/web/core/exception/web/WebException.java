@@ -69,9 +69,10 @@ public abstract class WebException extends RuntimeException {
     public enum WebError {
         
         ACCESS_DENIED(703001, "access_denied"),
-        
+
         ILLEGAL_ARGUMENT(704001, "illegal_argument"),
-        ILLEGAL_PARAM(704002, "illegal_param"),
+        ILLEGAL_PARAMETER(704002, "illegal_parameter"),
+        PARAMETER_NOT_MEET_REQUIREMENT(704003, "parameter_not_meet_requirement"),
         
         RESOURCE_NOT_FOUND(707001, "resource_not_found"),
         RESOURCE_EXISTS(707002, "resource_exists"),

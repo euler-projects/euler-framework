@@ -14,6 +14,7 @@ import net.eulerframework.web.core.exception.web.WebException.WebError;
 
 @ResponseBody
 public abstract class AjaxSupportWebController extends AbstractWebController {
+
     /**
      * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息
      * 
@@ -21,10 +22,10 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
-    public ErrorResponse accessDeniedException(AccessDeniedException e) {
+    public Object accessDeniedException(AccessDeniedException e) {
         return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ACCESS_DENIED, e));
     }
-    
+
     /**
      * 用于在程序发生{@link MissingServletRequestParameterException}异常时统一返回错误信息
      * 
@@ -32,10 +33,10 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ErrorResponse missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ILLEGAL_PARAM, e));
+    public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ILLEGAL_PARAMETER, e));
     }
-    
+
     /**
      * 用于在程序发生{@link IllegalArgumentException}异常时统一返回错误信息
      * 
@@ -43,10 +44,10 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException.class)
-    public ErrorResponse illegalArgumentException(IllegalArgumentException e) {
+    public Object illegalArgumentException(IllegalArgumentException e) {
         return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ILLEGAL_ARGUMENT, e));
     }
-    
+
     /**
      * 用于在程序发生{@link WebException}异常时统一返回错误信息
      * 
@@ -54,10 +55,10 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(WebException.class)
-    public ErrorResponse webException(WebException e) {
+    public Object webException(WebException e) {
         return new ErrorResponse(e);
     }
-    
+
     /**
      * 用于在程序发生{@link Exception}异常时统一返回错误信息
      * 
@@ -65,7 +66,7 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public ErrorResponse exception(Exception e) {
+    public Object exception(Exception e) {
         this.logger.error(e.getMessage(), e);
         return new ErrorResponse();
     }
