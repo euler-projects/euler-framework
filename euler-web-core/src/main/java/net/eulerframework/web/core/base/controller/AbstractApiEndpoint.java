@@ -23,7 +23,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
      */
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ BindException.class })
+    @ExceptionHandler(BindException.class)
     public Object bindException(BindException e) {
         this.logger.error(e.getMessage(), e);
         return new ErrorResponse(new DefaultWebException(e.getMessage(), WebError.ILLEGAL_PARAMETER, e));
@@ -36,7 +36,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
      */
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({ ResourceNotFoundException.class })
+    @ExceptionHandler(ResourceNotFoundException.class)
     public Object resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.error(e.getMessage(), e);
         return new ErrorResponse();

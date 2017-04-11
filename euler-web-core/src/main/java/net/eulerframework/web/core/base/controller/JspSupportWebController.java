@@ -243,7 +243,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 对应主题的404页面
      */
-    @ExceptionHandler({ ResourceNotFoundException.class })
+    @ExceptionHandler(ResourceNotFoundException.class)
     public String resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.warn(e.getMessage(), e);
         return this.notfound();
@@ -254,7 +254,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 对应主题的404页面
      */
-    @ExceptionHandler({ PageNotFoundException.class })
+    @ExceptionHandler(PageNotFoundException.class)
     public String pageNotFoundException(PageNotFoundException e) {
         this.logger.warn(e.getMessage());
         return this.notfound();
@@ -265,7 +265,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return
      */
-    @ExceptionHandler({ WebException.class })
+    @ExceptionHandler(WebException.class)
     public String webException(WebException e) {
         if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
@@ -278,7 +278,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 崩溃页面(500)
      */
-    @ExceptionHandler({ Exception.class })
+    @ExceptionHandler(Exception.class)
     public String exception(Exception e) {
         this.logger.error(e.getMessage(), e);
         return this.crashPage(e);
