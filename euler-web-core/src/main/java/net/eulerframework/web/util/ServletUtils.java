@@ -40,4 +40,25 @@ public class ServletUtils {
         String contextPath = httpServletRequest.getContextPath();        
         return requestURI.replaceFirst(contextPath, "").trim();
     }
+    
+    public static String getRealIP() {
+        return getRealIP(getRequest());
+    }
+    
+    public static String getRealIP(HttpServletRequest httpServletRequest) {
+        String ip = httpServletRequest.getHeader("X-Forwarded-For");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = httpServletRequest.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = httpServletRequest.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = httpServletRequest.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = httpServletRequest.getRemoteAddr();
+        }
+        return ip;
+    }
 }
