@@ -4,9 +4,11 @@
     <parent>
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>0.3.0</version>
+        <version>0.3.1</version>
     </parent>
     <artifactId>euler-web-basic</artifactId>
+    <name>Euler Web Basic</name>
+    <url>https://eulerproject.io/euler-framework</url>
 
     <dependencies>
         <dependency>
