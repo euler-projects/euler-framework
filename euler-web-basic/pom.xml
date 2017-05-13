@@ -7,6 +7,8 @@
         <version>0.3.0</version>
     </parent>
     <artifactId>euler-web-basic</artifactId>
+    <name>Euler Web Basic</name>
+    <url>https://eulerproject.io/euler-framework</url>
 
     <dependencies>
         <dependency>

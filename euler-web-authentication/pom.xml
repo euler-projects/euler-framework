@@ -7,9 +7,8 @@
         <version>0.3.0</version>
     </parent>
     <artifactId>euler-web-authentication</artifactId>
-    <name>net.eulerframework:euler-web-authentication</name>
-    <url>https://euler-projects.github.io/euler-framework</url>
-    <description>euler-web-authentication</description>
+    <name>Euler Web Authentication</name>
+    <url>https://eulerproject.io/euler-framework</url>
 
     <dependencies>
         <dependency>

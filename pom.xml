@@ -13,8 +13,8 @@
     <artifactId>euler-framework</artifactId>
     <version>0.3.0</version>
     <packaging>pom</packaging>
-    <name>net.eulerframework:euler-framework</name>
-    <url>https://euler-projects.github.io/euler-framework</url>
+    <name>Euler Framework Parent Pom</name>
+    <url>https://eulerproject.io/euler-framework</url>
     <description>Parent POM for Euler Framework projects.</description>
 
     <modules>
