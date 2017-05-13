@@ -13,10 +13,10 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
-import net.eulerframework.web.core.exception.web.DefaultViewException;
-import net.eulerframework.web.core.exception.web.PageNotFoundException;
-import net.eulerframework.web.core.exception.web.ViewException;
+import net.eulerframework.web.core.exception.PageNotFoundException;
+import net.eulerframework.web.core.exception.web.UndefinedWebException;
+import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
     
@@ -147,7 +147,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error() {
-        return this.error(new DefaultViewException());
+        return this.error(new UndefinedWebException());
     }
     
     /**
@@ -156,19 +156,21 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error(String message) {
-        return this.error(new DefaultViewException(message));
+        return this.error(new UndefinedWebException(message));
     }
     
     /**
      * 显示错误页面
-     * 自定义错误信息可在jsp中用<code>${__message}</code>获取
-     * 自定义错误代码信息可在jsp中用<code>${__code}</code>获取
-     * @param viewException 错误异常,不能为<code>null</code>
+     * 自定义错误信息可在jsp中用{@code ${__error}}获取
+     * 自定义错误代码可在jsp中用{@code ${__code}}获取
+     * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
+     * @param viewException 错误异常
      * @return 错误页面
      */
-    private String error(ViewException viewException) {
+    private String error(WebException viewException) {
         Assert.notNull(viewException, "Error exception can not be null"); 
-        this.getRequest().setAttribute("__message", viewException.getMessage());   
+        this.getRequest().setAttribute("__error_description", viewException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", viewException.getError());
         this.getRequest().setAttribute("__code", viewException.getCode()); 
         return this.display("/common/error");
     }
@@ -241,7 +243,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 对应主题的404页面
      */
-    @ExceptionHandler({ ResourceNotFoundException.class })
+    @ExceptionHandler(ResourceNotFoundException.class)
     public String resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.warn(e.getMessage(), e);
         return this.notfound();
@@ -252,19 +254,19 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 对应主题的404页面
      */
-    @ExceptionHandler({ PageNotFoundException.class })
+    @ExceptionHandler(PageNotFoundException.class)
     public String pageNotFoundException(PageNotFoundException e) {
         this.logger.warn(e.getMessage());
         return this.notfound();
     }
 
     /**
-     * 用于在程序发生{@link ViewException}异常时统一返回错误信息
+     * 用于在程序发生{@link WebException}异常时统一返回错误信息
      * 
      * @return
      */
-    @ExceptionHandler({ ViewException.class })
-    public String viewException(ViewException e) {
+    @ExceptionHandler(WebException.class)
+    public String webException(WebException e) {
         if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
@@ -276,7 +278,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 
      * @return 崩溃页面(500)
      */
-    @ExceptionHandler({ Exception.class })
+    @ExceptionHandler(Exception.class)
     public String exception(Exception e) {
         this.logger.error(e.getMessage(), e);
         return this.crashPage(e);

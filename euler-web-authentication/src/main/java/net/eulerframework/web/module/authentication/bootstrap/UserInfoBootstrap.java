@@ -5,6 +5,7 @@ import org.springframework.web.WebApplicationInitializer;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.module.authentication.filter.UserInfoFilter;
+import net.eulerframework.web.module.authentication.listener.UserContextListener;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -16,6 +17,7 @@ public class UserInfoBootstrap extends LogSupport implements WebApplicationIniti
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         this.logger.info("Executing user info bootstrap.");
+        container.addListener(new UserContextListener());
 
         FilterRegistration.Dynamic authenticateInfoFilter = container.addFilter("authenticateInfoFilter", new UserInfoFilter("oauth/token","oauth/check_token"));
         authenticateInfoFilter.addMappingForUrlPatterns(null, false, "/*");

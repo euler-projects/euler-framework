@@ -2,22 +2,18 @@ package net.eulerframework.web.core.base.response;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.exception.WebException;
+import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.WebException.WebError;
 
 public class ErrorResponse extends LogSupport implements BaseResponse {
 
     private String error;
-    private int error_code;
+    private Integer error_code;
     private String error_description;
     
     public ErrorResponse() {
-        
-    }
-    
-    public ErrorResponse(Exception exception) {
-        this.error = exception.getMessage();
-        this.error_code = -1;
-        this.error_description = exception.getLocalizedMessage();
+        this.error = WebError.UNDEFINED_ERROR.getReasonPhrase();
+        this.error_code = WebError.UNDEFINED_ERROR.value();        
     }
 
     public ErrorResponse(WebException webException) {
@@ -35,23 +31,45 @@ public class ErrorResponse extends LogSupport implements BaseResponse {
         return error;
     }
 
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public int getError_code() {
+    public Integer getError_code() {
         return error_code;
-    }
-
-    public void setError_code(int error_code) {
-        this.error_code = error_code;
     }
 
     public String getError_description() {
         return error_description;
     }
 
-    public void setError_description(String error_description) {
-        this.error_description = error_description;
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        boolean first = true;
+        buffer.append('{');
+        if(this.error != null) {
+            buffer.append("\"error\":");
+            buffer.append('\"');
+            buffer.append(error);
+            buffer.append('\"');
+            first = false;
+        }
+        if(this.error_code != null) {
+            if(!first) {
+                buffer.append(',');
+            }            
+            buffer.append("\"error_code\":");
+            buffer.append(error_code);
+            first = false;
+        }
+        if(this.error_description != null) {
+            if(!first) {
+                buffer.append(',');
+            }            
+            buffer.append("\"error_description\":");
+            buffer.append('\"');
+            buffer.append(error_description);
+            buffer.append('\"');
+        }
+        buffer.append('}');
+        
+        return buffer.toString();
     }
 }

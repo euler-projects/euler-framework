@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>0.3.0-SNAPSHOT</version>
+        <version>0.3.0</version>
     </parent>
     <artifactId>euler-web-basic</artifactId>
 
@@ -17,11 +17,12 @@
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>jsp-api</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>euler-web-authentication</artifactId>
+            <artifactId>euler-web-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 </project>

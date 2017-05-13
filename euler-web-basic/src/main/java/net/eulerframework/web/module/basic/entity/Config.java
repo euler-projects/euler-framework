@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.basic.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,6 +18,10 @@ public class Config extends NonIDEntity<Config> {
     private String key;
     @Column(name = "CONF_VALUE")
     private String value;
+    @Column(name = "CONF_DESCRIPTION")
+    private String description;
+    @Column(name = "ENABLED", nullable = false)
+    private Boolean enabled;
 
     public String getKey() {
         return key;
@@ -33,9 +39,30 @@ public class Config extends NonIDEntity<Config> {
         this.value = value;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public String getId() {
         return this.key;
+    }
+    
+    @Override
+    public void setSerializableId(Serializable id) {
+        this.setKey((String) id);
     }
 
     @Override

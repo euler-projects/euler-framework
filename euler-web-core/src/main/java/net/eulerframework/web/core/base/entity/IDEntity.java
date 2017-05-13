@@ -1,5 +1,7 @@
 package net.eulerframework.web.core.base.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,6 +29,11 @@ public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T> {
     @Override 
     public Long getId() {
         return id;
+    }
+    
+    @Override
+    public void setSerializableId(Serializable id) {
+        this.setId((Long) id);
     }
 
     public void setId(Long id) {

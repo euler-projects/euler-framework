@@ -12,13 +12,13 @@ import net.eulerframework.common.util.jwt.InvalidJwtException;
 import net.eulerframework.common.util.jwt.JwtEncryptor;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.util.UserContext;
 import net.eulerframework.web.module.authentication.vo.UserResetInfoVo;
 import net.eulerframework.web.util.ServletUtils;
 

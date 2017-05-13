@@ -6,7 +6,7 @@ import java.util.List;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
-import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 
 public interface IBaseDao<T extends BaseEntity<?>>{
 
@@ -22,13 +22,13 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     
     void saveOrUpdate(T entity);
     
-    void saveOrUpdate(Collection<T> entities);
-    
+    void saveOrUpdateBatch(Collection<T> entities);
+
     void delete(T entity);
     
     void deleteById(Serializable id);
 
-    void deleteAll(Collection<T> entities);
+    void deleteBatch(Collection<T> entities);
 
     void deleteByIds(Collection<Serializable> ids);
 
@@ -40,9 +40,9 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     
     long countAll();
     
-    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
+    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
     
-    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
+    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
 
     void flushSession();
 

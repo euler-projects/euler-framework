@@ -8,46 +8,34 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.ThreadContext;
-import org.springframework.web.filter.OncePerRequestFilter;
-
+import net.eulerframework.web.core.filter.ExcluedableFilter;
+import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.util.UserContext;
 
-public class UserInfoFilter extends OncePerRequestFilter {
+public class UserInfoFilter extends ExcluedableFilter {
     
-    private String[] excludeServletPath;
-
-    public void setExcludeServletPath(String[] excludeServletPath) {
-        this.excludeServletPath = excludeServletPath;
-    }
-
     public UserInfoFilter() {
+        super();
         
     }
     
     public UserInfoFilter(String... excludeServletPath) {
-        this.excludeServletPath = excludeServletPath;        
+        super(excludeServletPath);       
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        
-        String servletPath = request.getServletPath();
-        
-        if(excludeServletPath  != null) {
-            for(String each : excludeServletPath) {
-                if(servletPath.endsWith(each)){
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-            }
-        }
-        
+    protected void doFilterIn(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {        
         User curUser = UserContext.getCurrentUser();
         request.setAttribute("__USERINFO", curUser);
+        request.setAttribute("__USER_ID", curUser.getId());
+        request.setAttribute("__USER_NAME", curUser.getUsername());
         ThreadContext.put("username", curUser.getUsername());
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            ThreadContext.remove("username");
+        }
     }
 
 }

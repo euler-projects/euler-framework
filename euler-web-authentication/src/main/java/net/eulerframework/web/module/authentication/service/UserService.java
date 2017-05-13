@@ -14,14 +14,14 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.base.request.EasyUiQueryReqeuset;
-import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.Group;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.exception.UserAuthenticationViewException;
+import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 
 @Service
@@ -109,7 +109,7 @@ public class UserService extends BaseService {
             throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
 
         if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new UserAuthenticationViewException("_INCORRECT_PASSWORD");
+            throw new UserInfoCheckWebException("_INCORRECT_PASSWORD");
         }
 
         String password = newPassword.trim();
@@ -249,25 +249,25 @@ public class UserService extends BaseService {
 
     private void validUsername(String username) {
         if (username == null) {
-            throw new UserAuthenticationViewException("_USERNAME_IS_NULL");
+            throw new UserInfoCheckWebException("_USERNAME_IS_NULL");
         }
         if (!(username.matches(WebConfig.getUsernameFormat()))) {
-            throw new UserAuthenticationViewException("_INCORRECT_USERNAME_FORMAT");
+            throw new UserInfoCheckWebException("_INCORRECT_USERNAME_FORMAT");
         }
         if (this.loadUserByUsername(username) != null) {
-            throw new UserAuthenticationViewException("_USERNAME_ALREADY_BE_USED");
+            throw new UserInfoCheckWebException("_USERNAME_ALREADY_BE_USED");
         }
     }
 
     private void validEmail(String email) {
         if (email == null) {
-            throw new UserAuthenticationViewException("_EMAIL_IS_NULL");
+            throw new UserInfoCheckWebException("_EMAIL_IS_NULL");
         }
         if (!(email.matches(WebConfig.getEmailFormat()))) {
-            throw new UserAuthenticationViewException("_INCORRECT_EMAIL_FORMAT");
+            throw new UserInfoCheckWebException("_INCORRECT_EMAIL_FORMAT");
         }
         if (this.loadUserByEmail(email) != null) {
-            throw new UserAuthenticationViewException("_EMAIL_ALREADY_BE_USED");
+            throw new UserInfoCheckWebException("_EMAIL_ALREADY_BE_USED");
 
         }
     }
@@ -275,7 +275,7 @@ public class UserService extends BaseService {
     private void validMobile(String mobile) {
         if (mobile != null) {
             if (this.loadUserByMobile(mobile) != null) {
-                throw new UserAuthenticationViewException("_MOBILE_ALREADY_BE_USED");
+                throw new UserInfoCheckWebException("_MOBILE_ALREADY_BE_USED");
 
             }
         }
@@ -283,14 +283,14 @@ public class UserService extends BaseService {
 
     private void validPassword(String password) {
         if (password == null) {
-            throw new UserAuthenticationViewException("_PASSWORD_IS_NULL");
+            throw new UserInfoCheckWebException("_PASSWORD_IS_NULL");
         }
         if (!password.matches(WebConfig.getPasswordFormat())) {
-            throw new UserAuthenticationViewException("_INCORRECT_PASSWORD_FORMAT");
+            throw new UserInfoCheckWebException("_INCORRECT_PASSWORD_FORMAT");
         }
         if (!(password.length() >= WebConfig.getMinPasswordLength()
                 && password.length() <= WebConfig.getMaxPasswordLength())) {
-            throw new UserAuthenticationViewException("_INCORRECT_PASSWORD_LENGTH");
+            throw new UserInfoCheckWebException("_INCORRECT_PASSWORD_LENGTH");
         }
     }
 
@@ -388,8 +388,8 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
-        PageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
+    public EasyUIPageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
+        EasyUIPageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
 
         for (User user : ret.getRows()) {
             Set<Group> groups = user.getGroups();

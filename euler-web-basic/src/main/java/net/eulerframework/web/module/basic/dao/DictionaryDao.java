@@ -10,7 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.QueryRequest;
-import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.module.basic.entity.Dictionary;
 
 public class DictionaryDao extends BaseDao<Dictionary> {
@@ -23,7 +23,7 @@ public class DictionaryDao extends BaseDao<Dictionary> {
         return this.query(detachedCriteria);
     }
 
-    public PageResponse<Dictionary> findDictionaryByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+    public EasyUIPageResponse<Dictionary> findDictionaryByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         try {
             String queryValue = null;

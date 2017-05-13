@@ -18,8 +18,8 @@ import net.eulerframework.common.util.io.file.FileReadException;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
-import net.eulerframework.web.core.base.response.AjaxResponse;
-import net.eulerframework.web.core.exception.ResourceNotFoundException;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
+import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.service.ArchivedFileService;
@@ -61,8 +61,8 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     
     @ResponseBody
     @RequestMapping(value = "uploadFile", method = RequestMethod.POST)
-    public AjaxResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
-        return new AjaxResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
+    public EasyUIAjaxResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
+        return new EasyUIAjaxResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
     }
 
 }

@@ -10,7 +10,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "ARCHIVE_FILE")
+@Table(name = "BASIC_UPLOADED_FILE")
 public class ArchivedFile extends UUIDEntity<ArchivedFile> {
 
     @Column(name = "ORIGINAL_FILENAME", nullable = false)
@@ -25,10 +25,10 @@ public class ArchivedFile extends UUIDEntity<ArchivedFile> {
     private String md5;
     @Column(name = "FILE_BYTE_SIZE", nullable = false)
     private Long fileByteSize;
-    @Column(name = "ARCHIVED_DATE", nullable = false)
-    private Date archiveDate;
-    @Column(name = "ARCHIVED_USER_ID", nullable = false)
-    private String archiveUserId;
+    @Column(name = "UPLOADED_DATE", nullable = false)
+    private Date uploadedDate;
+    @Column(name = "UPLOADED_USER_ID", nullable = false)
+    private String uploadedUserId;
 
     public String getOriginalFilename() {
         return originalFilename;
@@ -78,21 +78,21 @@ public class ArchivedFile extends UUIDEntity<ArchivedFile> {
         this.fileByteSize = fileByteSize;
     }
 
-    public Date getArchiveDate() {
-        return this.archiveDate;
+    public Date getUploadedDate() {
+        return this.uploadedDate;
     }
 
-    public void setArchiveDate(Date archiveDate) {
-        this.archiveDate = archiveDate;
+    public void setUploadedDate(Date archiveDate) {
+        this.uploadedDate = archiveDate;
 
     }
 
-    public String getArchiveUserId() {
-        return this.archiveUserId;
+    public String getUploadedUserId() {
+        return this.uploadedUserId;
     }
 
-    public void setArchiveUserId(String archiveUserId) {
-        this.archiveUserId = archiveUserId;
+    public void setUploadedUserId(String archiveUserId) {
+        this.uploadedUserId = archiveUserId;
     }
 
 }

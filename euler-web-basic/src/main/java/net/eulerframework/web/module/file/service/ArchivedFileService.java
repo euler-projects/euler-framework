@@ -21,11 +21,11 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.util.UserContext;
 import net.eulerframework.web.module.file.dao.IArchivedFileDao;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.util.WebFileTool;
+import net.eulerframework.web.util.ServletUtils;
 
 @Service
 public class ArchivedFileService extends BaseService {
@@ -48,8 +48,12 @@ public class ArchivedFileService extends BaseService {
         af.setExtension(WebFileTool.extractFileExtension(originalFilename));
         af.setFileByteSize(fileSize);
         af.setMd5(md5);
-        af.setArchiveDate(new Date());
-        af.setArchiveUserId(UserContext.getCurrentUser().getId());
+        af.setUploadedDate(new Date());
+        Object userId = ServletUtils.getRequest().getAttribute("__USER_ID");
+        if(userId != null)
+            af.setUploadedUserId(userId.toString());
+        else
+            af.setUploadedUserId("anonymousUser");
 
         this.archivedFileDao.save(af);
 

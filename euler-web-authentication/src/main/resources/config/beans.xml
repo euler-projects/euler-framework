@@ -13,10 +13,6 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
     
-    <bean id="userContext" class="net.eulerframework.web.module.authentication.util.UserContext">
-        <property name="userService" ref="userService"/>
-    </bean>
-    
     <bean id="userDao" class="net.eulerframework.web.module.authentication.dao.UserDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
@@ -29,5 +25,10 @@
     
     <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
     
-    <import resource="beans-security.xml"/>
+    <!-- Spring Security 白名单 -->
+    <import resource="beans-security-exclude-conf.xml"/>
+    <!-- Spring Security WEB 验证方式配置 -->
+    <import resource="beans-security-web-conf.xml"/>
+    <!-- Spring Security API 验证方式配置 -->
+    <import resource="classpath*:config/beans-security-api-conf.xml"/>
 </beans>

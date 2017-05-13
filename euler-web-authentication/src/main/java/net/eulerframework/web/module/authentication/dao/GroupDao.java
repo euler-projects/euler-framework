@@ -13,14 +13,14 @@ import org.hibernate.criterion.Restrictions;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
-import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.authentication.entity.Group;
 
 public class GroupDao extends BaseDao<Group> {
 
     
-    public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
+    public EasyUIPageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass)
                 .setFetchMode("authorities", FetchMode.SELECT);
         try {
@@ -39,7 +39,7 @@ public class GroupDao extends BaseDao<Group> {
         
         detachedCriteria.addOrder(Order.asc("name"));        
         
-        PageResponse<Group> result = this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
+        EasyUIPageResponse<Group> result = this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
         
         return result;
     }

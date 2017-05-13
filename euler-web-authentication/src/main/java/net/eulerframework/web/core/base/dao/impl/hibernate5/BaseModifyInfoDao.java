@@ -7,8 +7,8 @@ import java.util.Date;
 import net.eulerframework.web.core.base.dao.IBaseModifyInfoDao;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.entity.BaseModifyInfoEntity;
+import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.util.UserContext;
 
 public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> extends BaseDao<T> implements IBaseModifyInfoDao<T> {
 
@@ -36,11 +36,11 @@ public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> exten
     }
     
     @Override
-    public void saveOrUpdate(Collection<T> entities){
+    public void saveOrUpdateBatch(Collection<T> entities){
         for(T entity : entities){
             this.setModifyInfo(entity);
         }
-        super.saveOrUpdate(entities);
+        super.saveOrUpdateBatch(entities);
     }
     
     private void setModifyInfo(T entity){
