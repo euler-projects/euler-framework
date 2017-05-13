@@ -5,9 +5,11 @@
     <parent>
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>0.3.0</version>
+        <version>0.3.1</version>
     </parent>
     <artifactId>euler-web-core</artifactId>
+    <name>Euler Web Core</name>
+    <url>https://eulerproject.io/euler-framework</url>
 
     <dependencies>
         <dependency>
