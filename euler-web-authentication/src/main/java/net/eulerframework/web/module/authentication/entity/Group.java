@@ -22,7 +22,7 @@ public class Group extends UUIDEntity<Group> {
     @Column(name="NAME", nullable = false, unique = true)
     private String name;
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "SYS_GROUP_AUTHORITY", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
+    @JoinTable(name = "SYS_GROUP_AUTHORITY", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY") })
     private Set<Authority> authorities;
     @Column(name="DESCRIPTION")
     private String description;

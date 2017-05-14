@@ -78,8 +78,6 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     @Column(name = "SIGN_UP_TIME", nullable = false)
     private Date signUpTime;
     
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    @JoinTable(name = "SYS_USER_AUTHORITY", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
     @Transient
     private Set<Authority> authorities;
     
