@@ -33,6 +33,7 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.DateUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.IBaseDao;
+import net.eulerframework.web.core.base.entity.BaseEmbeddable;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest;
@@ -439,8 +440,22 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     protected Criterion generateRestriction(String property, String value, QueryMode queryMode) {
         Field field;
         try {
-            field = this.entityClass.getDeclaredField(property);
+            String fieldName = property;            
+            if(property.indexOf('.') > 0) {
+                fieldName = property.substring(0, property.indexOf('.'));
+            }
+            field = this.entityClass.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
+            throw new IllegalArgumentException("Property '" + property + "' not exist");
+        }
+        
+        if(BaseEmbeddable.class.isAssignableFrom(field.getType())){
+            try {
+                field = field.getType().getDeclaredField(property.substring(property.indexOf('.') + 1));
+            } catch (NoSuchFieldException e) {
+                throw new IllegalArgumentException("Property '" + property + "' not exist");
+            }
+        } else {
             throw new IllegalArgumentException("Property '" + property + "' not exist");
         }
         
@@ -462,7 +477,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         case LT:
             return Restrictions.lt(property, this.analyzeValue(value, field.getType()));
         case IN:
-            return RestrictionsX.in(property, this.analyzeInterval(value, field.getType()));
+            return Restrictions.in(property, this.analyzeInterval(value, field.getType()));
         case NOTIN:
             return Restrictions.not(RestrictionsX.in(property, this.analyzeInterval(value, field.getType())));
         case IS:
@@ -517,13 +532,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 ret = new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
                 try {
-                    ret = DateUtils.parseDate(value, "yyyy-MM-dd HH:mm:ss");
+                    ret = DateUtils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                 } catch (ParseException e1) {
-                    try {
-                        ret = DateUtils.parseDate(value, "yyyy-MM-dd");
-                    } catch (ParseException e2) {
-                        throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss' or 'yyyy-MM-dd'");
-                    }
+                    throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"");
+
                 }
             }
             return ret;
