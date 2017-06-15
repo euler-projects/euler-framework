@@ -455,8 +455,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             } catch (NoSuchFieldException e) {
                 throw new IllegalArgumentException("Property '" + property + "' not exist");
             }
-        } else {
-            throw new IllegalArgumentException("Property '" + property + "' not exist");
         }
         
         switch (queryMode) {
