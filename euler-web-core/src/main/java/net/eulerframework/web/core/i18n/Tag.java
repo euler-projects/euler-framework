@@ -15,7 +15,6 @@ public class Tag {
         HttpServletRequest request = ServletUtils.getRequest();  
 
         RequestContext requestContext = new RequestContext(request);
-        System.out.println("!!!!!!" + requestContext.getLocale());
         String message = requestContext.getMessage(msgKey);
         return message;
     }

@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.multipart.MultipartResolver;
@@ -23,11 +24,12 @@ public class BaseBean {
     
     @Bean
     public MessageSource messageSource() {
-        ClassPathReloadableResourceBundleMessageSource messageSource = new ClassPathReloadableResourceBundleMessageSource();
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setCacheSeconds(WebConfig.getI18nRefreshFreq());
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
-        messageSource.setBasename("classpath*:language/**/*");
+        messageSource.setBasenames("WEB-INF/classes/language/general", "WEB-INF/classes/language/admin");
+        //messageSource.setBasename("classpath*:language/**/*");
         return messageSource;
     }
     
