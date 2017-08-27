@@ -21,7 +21,7 @@ import net.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessage
 
 @Configuration
 public class BaseBean {
-    
+
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -29,10 +29,10 @@ public class BaseBean {
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setBasenames("WEB-INF/classes/language/general", "WEB-INF/classes/language/admin");
-        //messageSource.setBasename("classpath*:language/**/*");
+        // messageSource.setBasename("classpath*:language/**/*");
         return messageSource;
     }
-    
+
     @Bean
     public LocalValidatorFactoryBean localValidatorFactoryBean() throws ClassNotFoundException {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
@@ -40,7 +40,7 @@ public class BaseBean {
         validator.setValidationMessageSource(this.messageSource());
         return validator;
     }
-    
+
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() throws ClassNotFoundException {
         MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
@@ -65,11 +65,11 @@ public class BaseBean {
         return mapper;
     }
 
-//     @Bean(name="jaxb2Marshaller")
-//     public Jaxb2Marshaller jaxb2Marshaller() {
-//     Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-//     jaxb2Marshaller.setPackagesToScan("net.eulerframework.**.entity",
-//                                       "net.eulerframework.web.core.base.response");
-//     return jaxb2Marshaller;
-//     }
+    // @Bean(name="jaxb2Marshaller")
+    // public Jaxb2Marshaller jaxb2Marshaller() {
+    // Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+    // jaxb2Marshaller.setPackagesToScan("net.eulerframework.**.entity",
+    // "net.eulerframework.web.core.base.response");
+    // return jaxb2Marshaller;
+    // }
 }
