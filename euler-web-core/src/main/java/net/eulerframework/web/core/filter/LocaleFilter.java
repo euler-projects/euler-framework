@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,11 +42,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import net.eulerframework.web.core.extend.LocaleRequestWrapper;
 
 public class LocaleFilter extends OncePerRequestFilter {
+    private final static String LOCALE_PARAM_NAME = "_locale";
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		filterChain.doFilter(new LocaleRequestWrapper(request), response);
+
+        Cookie cookie = new Cookie(LOCALE_PARAM_NAME, request.getLocale().toString());
+        response.addCookie(cookie);
 	}
 
 }
