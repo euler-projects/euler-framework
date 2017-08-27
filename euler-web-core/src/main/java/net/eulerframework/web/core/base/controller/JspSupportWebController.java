@@ -1,3 +1,32 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * For more information, please visit the following website
+ * 
+ * https://eulerproject.io
+ * https://github.com/euler-form/web-form
+ * https://cfrost.net
+ */
 package net.eulerframework.web.core.base.controller;
 
 import java.io.PrintWriter;
@@ -19,6 +48,8 @@ import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
+    private final static String THEME_PARAM_NAME = "_theme";
+    private final static String THEME_COOKIE_NAME = "EULER_THEME";
     
     private String webControllerName;
     
@@ -60,22 +91,21 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 主题名称,默认为default
      */
     protected String theme() {
-        String themeParamName = "_theme";
 
-        String theme = this.getRequest().getParameter(themeParamName);
+        String theme = this.getRequest().getParameter(THEME_PARAM_NAME);
         if (StringUtils.isEmpty(theme)) {
             Cookie[] cookies = this.getRequest().getCookies();
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(themeParamName)) {
+                    if (cookie.getName().equals(THEME_COOKIE_NAME)) {
                         theme = cookie.getValue();
                     }
                 }
             }
 
         } else {
-            Cookie cookie = new Cookie(themeParamName, theme);
+            Cookie cookie = new Cookie(THEME_COOKIE_NAME, theme);
             this.getResponse().addCookie(cookie);
         }
 
