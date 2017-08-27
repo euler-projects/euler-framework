@@ -53,6 +53,7 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
     private final static String LOCALE_PARAM_NAME = "_locale";
     private final static String LOCALE_SESSION_ATTR_NAME = "__EULER_LOCALE__";
     private final static String LOCALE_COOKIE_NAME = "EULER_LOCALE";
+    private final static int LOCALE_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
     private Locale locale;
 
     /**
@@ -136,6 +137,7 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
 
     private void addLocaleIntoCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(LOCALE_COOKIE_NAME, this.locale.toString());
+        cookie.setMaxAge(LOCALE_COOKIE_AGE);
         response.addCookie(cookie);
     }
 

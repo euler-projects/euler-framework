@@ -50,6 +50,7 @@ import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 public abstract class JspSupportWebController extends AbstractWebController {
     private final static String THEME_PARAM_NAME = "_theme";
     private final static String THEME_COOKIE_NAME = "EULER_THEME";
+    private final static int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
     
     private String webControllerName;
     
@@ -106,6 +107,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
 
         } else {
             Cookie cookie = new Cookie(THEME_COOKIE_NAME, theme);
+            cookie.setMaxAge(THEME_COOKIE_AGE);
             this.getResponse().addCookie(cookie);
         }
 
