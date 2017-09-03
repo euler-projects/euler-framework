@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2015-2016 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,9 @@
  * 
  * For more information, please visit the following website
  * 
+ * https://eulerproject.io
  * https://github.com/euler-form/web-form
- * http://eulerframework.net
- * http://cfrost.net
+ * https://cfrost.net
  */
 package net.eulerframework.web.core.filter;
 
@@ -33,7 +33,6 @@ import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,15 +41,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import net.eulerframework.web.core.extend.LocaleRequestWrapper;
 
 public class LocaleFilter extends OncePerRequestFilter {
-    private final static String LOCALE_PARAM_NAME = "_locale";
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		filterChain.doFilter(new LocaleRequestWrapper(request), response);
-
-        Cookie cookie = new Cookie(LOCALE_PARAM_NAME, request.getLocale().toString());
-        response.addCookie(cookie);
+	    LocaleRequestWrapper localeRequest = new LocaleRequestWrapper(request, response);
+		filterChain.doFilter(localeRequest, response);
 	}
 
 }
