@@ -11,7 +11,7 @@
     </parent>
     
     <artifactId>euler-framework</artifactId>
-    <version>0.3.2</version>
+    <version>0.3.3</version>
     <packaging>pom</packaging>
     <name>Euler Framework Parent Pom</name>
     <url>https://eulerproject.io/euler-framework</url>
