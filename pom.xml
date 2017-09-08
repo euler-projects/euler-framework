@@ -31,7 +31,7 @@
         <jdk.version>1.8</jdk.version>        
         
         <euler-cache.version>0.0.4</euler-cache.version>
-        <euler-common.version>0.0.3</euler-common.version>
+        <euler-common.version>0.0.4-SNAPSHOT</euler-common.version>
         
         <commons-codec.version>1.10</commons-codec.version>
 
@@ -60,8 +60,7 @@
         <!-- <jersey.version>2.22.2</jersey.version> -->
 
         <jackson.version>2.7.3</jackson.version>
-
-        <slf4j-api.version>1.7.21</slf4j-api.version>
+        
         <log4j.version>1.2.17</log4j.version>
         <jboss.logging.version>3.3.0.Final</jboss.logging.version>
         <commons-logging.version>1.2</commons-logging.version>
@@ -284,18 +283,13 @@
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-
-            <!-- Too many loggers ... -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
-            </dependency>
+            
+            <!-- Loggers -->
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
-            </dependency>
+            </dependency>            
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
@@ -306,24 +300,29 @@
                 <artifactId>commons-logging</artifactId>
                 <version>${commons-logging.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
             
             <dependency>
                 <groupId>net.eulerframework</groupId>
                 <artifactId>euler-cache</artifactId>
                 <version>${euler-cache.version}</version>
             </dependency>
-
+            
             <dependency>
                 <groupId>net.eulerframework</groupId>
-                <artifactId>euler-common</artifactId>
+                <artifactId>euler-common-logging</artifactId>
                 <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-common-util</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
