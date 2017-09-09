@@ -2,7 +2,6 @@ package net.eulerframework.web.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.ContextLoader;
 
@@ -49,6 +48,8 @@ public abstract class WebConfig {
         private static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
+
+        private static final String WEB_API_ENABLED = "web.api.enabled";
         private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
 
@@ -95,10 +96,12 @@ public abstract class WebConfig {
         private static final String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\\files";
         private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
-        // private static final String WEB_ADMIN_ROOT_PATH = "/admin";
+        private static final String WEB_ADMIN_ROOT_PATH = "/admin";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "/assets/system/admin-dashboard-brand.png";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "Manage Dashboard";
-        // private static final String WEB_API_ROOT_PATH = "/api";
+        
+        private static final boolean WEB_API_ENABLED = true;
+        private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
 
         private static final String WEB_MULITPART_LOCATION = null;
@@ -129,93 +132,64 @@ public abstract class WebConfig {
     }
 
     public static int getI18nRefreshFreq() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
-                new DataGetter<String, Object>() {
-
-                    @Override
-                    public Object getData(String key) {
-                        return properties.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
-                                WebConfigDefault.CORE_CACHE_I18N_REFRESH_FREQ);
-                    }
-
-                });
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ, key -> {
+            return properties.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
+                    WebConfigDefault.CORE_CACHE_I18N_REFRESH_FREQ);
+        });
 
         return (int) cachedConfig;
     }
 
     public static WebAuthenticationType getWebAuthenticationType() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE,
-                new DataGetter<String, Object>() {
-
-                    @Override
-                    public Object getData(String key) {
-                        return properties.getEnumValue(WebConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE,
-                                WebConfigDefault.SECURITY_WEB_AUTHENTICATION_TYPE, true);
-                    }
-
-                });
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE, key -> {
+            return properties.getEnumValue(key,
+                        WebConfigDefault.SECURITY_WEB_AUTHENTICATION_TYPE, true);
+        });
 
         return (WebAuthenticationType) cachedConfig;
     }
 
     public static ApiAuthenticationType getApiAuthenticationType() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
-                new DataGetter<String, Object>() {
-
-                    @Override
-                    public Object getData(String key) {
-                        return properties.getEnumValue(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE, key -> {
+            return properties.getEnumValue(WebConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
                                 WebConfigDefault.SECURITY_API_AUTHENTICATION_TYPE, true);
-                    }
-
-                });
-
+        });
         return (ApiAuthenticationType) cachedConfig;
     }
 
     public static OAuthServerType getOAuthSeverType() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_OAUTH_SERVER_TYPE,
-                new DataGetter<String, Object>() {
-
-                    @Override
-                    public Object getData(String key) {
-                        return properties.getEnumValue(WebConfigKey.SECURITY_OAUTH_SERVER_TYPE,
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_OAUTH_SERVER_TYPE, key -> {
+            return properties.getEnumValue(key,
                                 WebConfigDefault.SECURITY_OAUTH_SERVER_TYPE, true);
-                    }
-
-                });
-
+        });
         return (OAuthServerType) cachedConfig;
     }
 
-    @Bean
+    public static boolean isApiEnabled() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ENABLED, key -> {
+            return properties.getBooleanValue(key, WebConfigDefault.WEB_API_ENABLED);
+        });
+        
+        return (boolean) cachedConfig;
+    }
+    
     public static String getApiRootPath() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ROOT_PATH, new DataGetter<String, Object>() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ROOT_PATH, key -> {
+            String result = properties.get(key, WebConfigDefault.WEB_API_ROOT_PATH);
 
-            @Override
-            public Object getData(String key) {
-                String result;
-                try {
-                    result = properties.get(WebConfigKey.WEB_API_ROOT_PATH);
-                } catch (PropertyNotFoundException e) {
-                    throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + " can not be empty");
-                }
+            if (!StringUtils.hasText(result))
+                throw new RuntimeException(key + "can not be empty");
 
-                if (!StringUtils.hasText(result))
-                    throw new RuntimeException(WebConfigKey.WEB_API_ROOT_PATH + "can not be empty");
-
-                while (result.endsWith("*")) {
-                    result = result.substring(0, result.length() - 1);
-                }
-
-                result = CommonUtils.convertDirToUnixFormat(result);
-
-                if (!result.startsWith("/"))
-                    result = "/" + result;
-
-                return result;
+            while (result.endsWith("*")) {
+                result = result.substring(0, result.length() - 1);
             }
 
+            result = CommonUtils.convertDirToUnixFormat(result);
+
+            if (!result.startsWith("/"))
+                result = "/" + result;
+
+            return result;
         });
 
         return (String) cachedConfig;
@@ -227,12 +201,7 @@ public abstract class WebConfig {
             @Override
             public Object getData(String key) {
 
-                String result;
-                try {
-                    result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH);
-                } catch (PropertyNotFoundException e) {
-                    throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + " can not be empty");
-                }
+                String result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
                 if (!StringUtils.hasText(result))
                     throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + " can not be empty");
@@ -248,7 +217,6 @@ public abstract class WebConfig {
 
                 return result;
             }
-
         });
 
         return (String) cachedConfig;

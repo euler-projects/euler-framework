@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  * @author cFrost
  *
  */
-public class LocaleRequestWrapper extends HttpServletRequestWrapper {
+public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final static String LOCALE_PARAM_NAME = "_locale";
@@ -57,7 +57,7 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
     private Locale locale;
 
     /**
-     * 本构造函数会先检查请求中有无{@link LocaleRequestWrapper#LOCALE_PARAM_NAME}参数。
+     * 本构造函数会先检查请求中有无{@link WebLanguageRequestWrapper#LOCALE_PARAM_NAME}参数。
      * 如有，则以此参数值确定语言，并将语言信息放入Session和Cookie中 如没有，则依次尝试从Session和Cookie中获取
      * 
      * @param request
@@ -65,7 +65,7 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
      * @param response
      *            响应，只会向响应中添加关于语言的Cookie
      */
-    public LocaleRequestWrapper(HttpServletRequest request, HttpServletResponse response) {
+    public WebLanguageRequestWrapper(HttpServletRequest request, HttpServletResponse response) {
         super(request);
 
         try {

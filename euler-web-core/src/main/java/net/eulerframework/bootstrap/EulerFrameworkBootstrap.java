@@ -42,13 +42,14 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import net.eulerframework.EulerFilters;
+import net.eulerframework.EulerServlets;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.CrosFilter;
-import net.eulerframework.web.core.filter.LocaleFilter;
-import net.eulerframework.web.core.filter.RequestIdFilter;
+import net.eulerframework.web.core.filter.WebLanguageFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
@@ -86,34 +87,32 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
 
         this.initSpringMVCDispatcher(
                 container, 
-                "springWebDispatcherServlet", 
+                EulerServlets.WEB_SERVLET, 
                 1, 
                 WebConfig.getWebConfigClassName(),
                 "/");
         
         this.initSpringMVCDispatcher(container, 
-                "springAdminWebDispatcherServlet", 
+                EulerServlets.WEB_ADMIN_SERVLET, 
                 1,
                 WebConfig.getAdminWebConfigClassName(), 
                 WebConfig.getAdminRootPath() + "/*");
-        
-        this.initSpringMVCDispatcher(container, 
-                "springApiDispatcherServlet", 
-                1, 
-                WebConfig.getApiConfigClassName(),
-                WebConfig.getApiRootPath() + "/*");
 
         this.initBaseData(container);
 
-        FilterRegistration.Dynamic requestIdFilter = container.addFilter("requestIdFilter", new RequestIdFilter());
-        requestIdFilter.addMappingForUrlPatterns(null, false, "/*");
+        FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.WEB_LANGUAGE_FILTER, new WebLanguageFilter());
+        webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
 
-        FilterRegistration.Dynamic localeFilter = container.addFilter("localeFilter", new LocaleFilter());
-        localeFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet",
-                "springAdminWebDispatcherServlet");
-
-        FilterRegistration.Dynamic crosFilter = container.addFilter("crosFilter", new CrosFilter());
-        crosFilter.addMappingForUrlPatterns(null, false, "/oauth/check_token", "/oauth/token");
+        if(WebConfig.isApiEnabled()) {
+            this.initSpringMVCDispatcher(container, 
+                    EulerServlets.API_SERVLET, 
+                    1, 
+                    WebConfig.getApiConfigClassName(),
+                    WebConfig.getApiRootPath() + "/*");
+            
+            FilterRegistration.Dynamic crosFilter = container.addFilter(EulerFilters.CROS_FILTER, new CrosFilter());
+            crosFilter.addMappingForServletNames(null, false, EulerServlets.API_SERVLET);
+        }
     }
 
     private void setConfigurableEnvironment(AbstractApplicationContext rootContext) {
