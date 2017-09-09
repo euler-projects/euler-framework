@@ -1,4 +1,4 @@
-package net.eulerframework.bootstrap;
+package net.eulerframework.boot;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;

@@ -1,4 +1,4 @@
-package net.eulerframework.config;
+package net.eulerframework.config.controller;
 
 import java.util.Arrays;
 import java.util.HashMap;

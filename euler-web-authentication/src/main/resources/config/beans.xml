@@ -12,13 +12,11 @@
            http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
-    
-    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
-    
+               
     <!-- Spring Security 白名单 -->
-    <import resource="beans-security-exclude-conf.xml"/>
+    <!-- <import resource="beans-security-exclude-conf.xml"/> -->
     <!-- Spring Security WEB 验证方式配置 -->
-    <import resource="beans-security-web-conf.xml"/>
+    <!-- <import resource="beans-security-web-conf.xml"/> -->
     <!-- Spring Security API 验证方式配置 -->
-    <import resource="classpath*:config/beans-security-api-conf.xml"/>
+    <!-- <import resource="classpath*:config/beans-security-api-conf.xml"/> -->
 </beans>

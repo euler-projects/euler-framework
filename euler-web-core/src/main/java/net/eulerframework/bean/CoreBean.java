@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.base;
+package net.eulerframework.bean;
 
 import java.nio.charset.StandardCharsets;
 
@@ -19,7 +19,7 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
 
 @Configuration
-public class BaseBean {
+public class CoreBean {
 
     @Bean
     public MessageSource messageSource() {

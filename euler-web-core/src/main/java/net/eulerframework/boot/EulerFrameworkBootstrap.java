@@ -26,7 +26,7 @@
  * https://eulerproject.io/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.bootstrap;
+package net.eulerframework.boot;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.MultipartConfigElement;
