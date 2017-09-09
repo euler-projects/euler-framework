@@ -5,15 +5,13 @@ import java.io.File;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.WebConfig;
 
 @Component
-public class FileStoreListener implements ServletContextListener {
-    private final Logger log = LogManager.getLogger();
+public class FileStoreListener extends LogSupport implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -23,9 +21,9 @@ public class FileStoreListener implements ServletContextListener {
         
         if(!targetDir.exists()) {
             targetDir.mkdirs();
-            this.log.info("Create File Archive Dir: " + targetDir.getAbsolutePath());
+            this.logger.info("Create File Archive Dir: " + targetDir.getAbsolutePath());
         } else {
-            this.log.info("File Archive Dir exist: " + targetDir.getAbsolutePath());
+            this.logger.info("File Archive Dir exist: " + targetDir.getAbsolutePath());
         }
     }
 

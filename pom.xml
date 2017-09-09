@@ -30,7 +30,7 @@
     <properties>
         <jdk.version>1.8</jdk.version>        
         
-        <euler-cache.version>0.0.4</euler-cache.version>
+        <euler-cache.version>0.0.5-SNAPSHOT</euler-cache.version>
         <euler-common.version>0.0.4-SNAPSHOT</euler-common.version>
         
         <commons-codec.version>1.10</commons-codec.version>

@@ -1,7 +1,7 @@
 package net.eulerframework.web.config;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.ContextLoader;
@@ -16,6 +16,7 @@ import net.eulerframework.common.util.property.PropertyReader;
 
 @Configuration
 public abstract class WebConfig {
+    protected static final Logger LOGGER = LoggerFactory.getLogger(WebConfig.class);
 
     private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
@@ -121,8 +122,6 @@ public abstract class WebConfig {
         private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
 
     }
-
-    protected static final Logger log = LogManager.getLogger();
 
     public static boolean clearWebConfigCache() {
         properties.refresh();
@@ -266,13 +265,13 @@ public abstract class WebConfig {
                     result = CommonUtils.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
                 } catch (PropertyNotFoundException e) {
                     if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
-                        log.info("OS is windows");
+                        LOGGER.info("OS is windows");
                         result = WebConfigDefault.WEB_UPLOAD_PATH_WIN;
                     } else {
-                        log.info("OS isn't windows");
+                        LOGGER.info("OS isn't windows");
                         result = WebConfigDefault.WEB_UPLOAD_PATH_UNIX;
                     }
-                    log.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + result + " for default.");
+                    LOGGER.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + result + " for default.");
                 }
 
                 if (!result.startsWith("/") && !result.startsWith("file://")) {
@@ -381,7 +380,7 @@ public abstract class WebConfig {
 
                         if (result > getMaxPasswordLength()) {
                             result = getMaxPasswordLength();
-                            log.warn("Password length must less than " + result + ", use " + result + " as "
+                            LOGGER.warn("Password length must less than " + result + ", use " + result + " as "
                                     + WebConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH);
                         }
 

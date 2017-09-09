@@ -1,14 +1,13 @@
 package net.eulerframework.web.module.authentication.bootstrap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
 @Order(200)
-public class SecurityBootstrap extends AbstractSecurityWebApplicationInitializer
-{
-    private final Logger logger = LogManager.getLogger();
+public class SecurityBootstrap extends AbstractSecurityWebApplicationInitializer {
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     protected boolean enableHttpSessionEventPublisher()
