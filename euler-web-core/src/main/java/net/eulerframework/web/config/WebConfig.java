@@ -699,20 +699,16 @@ public abstract class WebConfig {
     }
 
     /**
-     * @return
+     * 获得站点默认语言
+     * @return 站点默认语言, 例如 zh_CN, en_US
      */
     public static String getDefaultLanguage() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_LANGUAGE, new DataGetter<String, Object>() {
-
-            @Override
-            public Object getData(String key) {
-                try {
-                    return properties.get(key);
-                } catch (PropertyNotFoundException e) {
-                    return null;
-                }
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_LANGUAGE, key -> {
+            try {
+                return properties.get(key);
+            } catch (PropertyNotFoundException e) {
+                return null;
             }
-
         });
 
         if(cachedConfig == null) {

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.annotation.WebController;
 
-@SuppressWarnings("unused")
 @Configuration
 @ImportResource({"classpath*:config/beans.xml"})
 @ComponentScan(
