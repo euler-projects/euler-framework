@@ -41,6 +41,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
+import net.eulerframework.web.config.WebConfig;
+
 /**
  * 支持手动切换语言的RequestWrapper
  * 
@@ -90,7 +92,11 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
                             this.locale = localeFromCookie;
                             session.setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
                         } else {
-                            this.locale = request.getLocale();
+                            if(StringUtils.hasText(WebConfig.getDefaultLanguage())) {
+                                this.locale = this.generateLocale(WebConfig.getDefaultLanguage());
+                            } else {
+                                this.locale = request.getLocale();                                
+                            }
                         }
                     }
                 }
