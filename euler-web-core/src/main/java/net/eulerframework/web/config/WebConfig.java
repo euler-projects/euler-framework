@@ -50,6 +50,7 @@ public abstract class WebConfig {
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
         private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
+        public static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
 
         private static final String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
@@ -734,6 +735,30 @@ public abstract class WebConfig {
 
         });
 
+        return (String) cachedConfig;
+    }
+
+    /**
+     * @return
+     */
+    public static String getDefaultLanguage() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_LANGUAGE, new DataGetter<String, Object>() {
+
+            @Override
+            public Object getData(String key) {
+                try {
+                    return properties.get(key);
+                } catch (PropertyNotFoundException e) {
+                    return null;
+                }
+            }
+
+        });
+
+        if(cachedConfig == null) {
+            return null;            
+        }
+        
         return (String) cachedConfig;
     }
 
