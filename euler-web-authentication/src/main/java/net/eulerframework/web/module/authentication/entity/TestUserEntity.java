@@ -30,22 +30,22 @@
 package net.eulerframework.web.module.authentication.entity;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * @author cFrost
  *
  */
 @SuppressWarnings("serial")
-public class User implements UserDetails {
+public class TestUserEntity implements IUserEntity {
 
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetails#getAuthorities()
      */
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -102,6 +102,33 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         // TODO Auto-generated method stub
         return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.security.core.CredentialsContainer#eraseCredentials()
+     */
+    @Override
+    public void eraseCredentials() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see net.eulerframework.web.module.authentication.entity.IUserEntity#getUserId()
+     */
+    @Override
+    public UUID getUserId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see net.eulerframework.web.module.authentication.entity.IUserEntity#isRoot()
+     */
+    @Override
+    public boolean isRoot() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }
