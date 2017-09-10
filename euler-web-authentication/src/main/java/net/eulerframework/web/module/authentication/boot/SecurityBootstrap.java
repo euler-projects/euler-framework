@@ -1,4 +1,4 @@
-package net.eulerframework.boot;
+package net.eulerframework.web.module.authentication.boot;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;

@@ -41,6 +41,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
+import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.entity.EulerUserDetails;
 import net.eulerframework.web.module.authentication.service.EulerUserDetailsService;
@@ -74,19 +75,23 @@ public class UserContext {
      * 当试图从一个携带client_credentials模式token的请求获取用户信息时，会抛出此异常
      * @author cFrost
      */
-    public static class ClientCredentialsOAuthRequestException extends RuntimeException {
-        private ClientCredentialsOAuthRequestException() {
+    public static class ClientCredentialsOAuth2AuthenticationException extends RuntimeException {
+        private ClientCredentialsOAuth2AuthenticationException() {
             super("An OAuth client request which was granted with client_credentials mode has no user information.");
         }
     }
 
     private static EulerUserDetailsService userDetailsServicel;
+    
+    public static void setUserDetailsServicel(EulerUserDetailsService userDetailsServicel) {
+        UserContext.userDetailsServicel = userDetailsServicel;
+    }
 
     /**
      * 获取当前用户
      * @return 当前用户
      * @throws UnAuthenticatedException 没有用户认证信息
-     * @throws ClientCredentialsOAuthRequestException 当前处在授权模式为client credentials的OAuth请求中
+     * @throws ClientCredentialsOAuth2AuthenticationException 当前处在授权模式为client credentials的OAuth请求中
      * @throws PrincipalException 不支持的验证主体
      */
     public static EulerUserDetails getCurrentUser() {
@@ -98,8 +103,8 @@ public class UserContext {
         if (authentication == null)
             throw new UnAuthenticatedException();
 
-        if (isClientCredentialsOAuthRequest(authentication)) {
-            throw new ClientCredentialsOAuthRequestException();
+        if (isOAuth2Authentication(authentication)) {
+            authentication = getOAuth2UserAuthentication(authentication);
         }
 
         Object principal = authentication.getPrincipal();
@@ -114,42 +119,32 @@ public class UserContext {
         // Other UserDetails principal
         if (UserDetails.class.isAssignableFrom(principal.getClass())) {
             UserDetails userDetails = (UserDetails) principal;
-            principal = userDetails.getUsername();
-        }
-
-        // String principal
-        if (String.class.isAssignableFrom(principal.getClass())) {
-
-            String username = (String) principal;
-            EulerUserDetails user = USER_CACHE.get(username, key -> {
-                EulerUserDetails userDetails = userDetailsServicel.loadUserByUsername(key);
-                if (userDetails != null) {
-                    userDetails.eraseCredentials();
-                }
-                return userDetails;
+            String username = userDetails.getUsername();
+            return USER_CACHE.get(username, key -> {
+                EulerUserDetails eulerUserDetails = userDetailsServicel.loadUserByUsername(key);
+                eulerUserDetails.eraseCredentials();
+                return eulerUserDetails;
             });
-
-            if (user != null) {
-                return user;
-            } else {
-                throw new PrincipalException("The security context has a string principal, but may be not an username.");
-            }
-
-        } else {
-            throw new PrincipalException("Unsupported principal type.");
         }
+
+        throw new PrincipalException("Unsupported principal type.");
     }
     
-    private static boolean isClientCredentialsOAuthRequest(Authentication authentication) {
-        if (OAuth2Authentication.class.isAssignableFrom(authentication.getClass())) {
-            OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
-            authentication = oauth2Authentication.getUserAuthentication();
+    private static boolean isOAuth2Authentication(Authentication authentication) {
+        return OAuth2Authentication.class.isAssignableFrom(authentication.getClass());
+    }
+    
+    private static Authentication getOAuth2UserAuthentication(Authentication authentication) {
+        Assert.isTrue(isOAuth2Authentication(authentication));
+        
+        OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
+        Authentication oauth2UserAuthentication = oauth2Authentication.getUserAuthentication();
 
-            if (authentication == null) {
-                return true;
-            }
+        if (oauth2UserAuthentication == null) {
+            throw new ClientCredentialsOAuth2AuthenticationException();
         }
-        return false;
+        
+        return oauth2UserAuthentication;
     }
     
     /**

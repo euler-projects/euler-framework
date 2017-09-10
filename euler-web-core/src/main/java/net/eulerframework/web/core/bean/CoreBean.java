@@ -1,4 +1,4 @@
-package net.eulerframework.bean;
+package net.eulerframework.web.core.bean;
 
 import java.nio.charset.StandardCharsets;
 

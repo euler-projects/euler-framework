@@ -12,21 +12,10 @@ import net.eulerframework.web.core.annotation.WebController;
 @ImportResource({"classpath*:config/beans.xml"})
 @ComponentScan(
         basePackages = {"net.eulerframework.web",
-                        "com.eulerframework.web",
-                        "net.eulerframework.bean",
-                        "net.eulerframework.config.root"},
+                        "com.eulerframework.web"},
         excludeFilters = {@ComponentScan.Filter(Controller.class),
                           @ComponentScan.Filter(WebController.class),
                           @ComponentScan.Filter(ApiEndpoint.class)}
-//                          @ComponentScan.Filter(
-//                                  type = FilterType.ASSIGNABLE_TYPE,
-//                                  classes={
-//                                          AdminAjaxServletContextConfig.class,
-//                                          AjaxServletContextConfig.class,
-//                                          WebServletContextConfig.class,
-//                                          AdminWebServletContextConfig.class,
-//                                          ApiServletContextConfig.class,
-//                                          })}
 )
 public class RootContextConfig {
     
