@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2017 cFrost.sun (孙宾, SUN BIN) 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,17 +27,59 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.service;
+package net.eulerframework.web.module.authentication.entity;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import java.util.Collection;
+import java.util.UUID;
 
-import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
+public class User implements EulerUserDetailsEntity {
+    @Override
+    public UUID getUserId() {
+        return null;
+    }
 
-/**
- * @author cFrost
- *
- */
-public interface EulerUserDetailsService extends UserDetailsService {
-    EulerUserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    @Override
+    public Boolean isRoot() {
+        return false;
+    }
+
+    @Override
+    public Collection<EulerAuthorityEntity> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getPassword() {
+        return "$2a$10$sS8B/EcIu5aSlw6Js9bosO3OG/Hn/LiJFwp13b.ep5Dlr3v0twJRy";
+    }
+
+    @Override
+    public String getUsername() {
+        return "admin";
+    }
+
+    @Override
+    public Boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public Boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public Boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public Boolean isEnabled() {
+        return false;
+    }
+
+    @Override
+    public void eraseCredentials() {
+
+    }
 }

@@ -21,7 +21,6 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.ClientDetails;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_CLIENT")
 public class Client extends UUIDEntity<Client> implements ClientDetails {

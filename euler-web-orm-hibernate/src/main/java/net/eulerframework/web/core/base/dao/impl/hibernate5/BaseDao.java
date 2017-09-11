@@ -42,7 +42,7 @@ import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 
-public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implements IBaseDao<T> {
+public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport implements IBaseDao<T> {
 
     private SessionFactory sessionFactory;
 
@@ -162,19 +162,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     @Override
     public void deleteById(Serializable id) {
         try {
-            this.logger.info("!!!!delete by id");
             T entity = this.entityClass.newInstance();
-            entity.setSerializableId(id);            
+            entity.setSerializable(id);           
             this.delete(entity);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-//        StringBuffer hqlBuffer = new StringBuffer();
-//        hqlBuffer.append("delete ");
-//        hqlBuffer.append(this.entityClass.getSimpleName());
-//        hqlBuffer.append(" en where en.id = ?");
-//        final String hql = hqlBuffer.toString();
-//        this.update(hql, id);
     }
 
     @Override

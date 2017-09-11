@@ -1,7 +1,5 @@
 package net.eulerframework.web.core.base.entity;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,9 +15,8 @@ import javax.persistence.MappedSuperclass;
  * @see NonIDEntity
  * @see UUIDEntity
  */
-@SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T> {    
+public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T, Long> {    
 
     @Id
     @Column(name="ID")
@@ -30,12 +27,8 @@ public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T> {
     public Long getId() {
         return id;
     }
-    
-    @Override
-    public void setSerializableId(Serializable id) {
-        this.setId((Long) id);
-    }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }

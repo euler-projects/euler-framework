@@ -1,7 +1,5 @@
 package net.eulerframework.web.module.authentication.entity;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,10 +11,9 @@ import org.springframework.security.core.GrantedAuthority;
 
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_AUTHORITY")
-public class Authority extends NonIDEntity<Authority> implements GrantedAuthority {
+public class Authority extends NonIDEntity<Authority, String> implements GrantedAuthority {
 
     public final static String ANONYMOUS = "ANONYMOUS";
     public final static String ROOT = "ROOT";
@@ -71,8 +68,8 @@ public class Authority extends NonIDEntity<Authority> implements GrantedAuthorit
     }
 
     @Override
-    public void setSerializableId(Serializable id) {
-        this.authority = (String) id;
+    public void setId(String id) {
+        this.authority = id;
     }
 
     @Override

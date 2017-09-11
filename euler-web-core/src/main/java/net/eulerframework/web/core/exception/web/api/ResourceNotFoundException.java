@@ -2,7 +2,6 @@ package net.eulerframework.web.core.exception.web.api;
 
 import net.eulerframework.web.core.exception.web.WebException;
 
-@SuppressWarnings("serial")
 public class ResourceNotFoundException extends WebException {
 
     public ResourceNotFoundException() {

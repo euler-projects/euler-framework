@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.authentication.exception;
 
-@SuppressWarnings("serial")
 public class InvalidEmailResetTokenException extends Exception {
 
     public InvalidEmailResetTokenException() {

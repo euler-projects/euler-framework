@@ -6,7 +6,6 @@ import javax.persistence.MappedSuperclass;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @MappedSuperclass
 public abstract class AbstractAttachment extends UUIDEntity<AbstractAttachment> {
     public abstract void setOwnerId(Serializable ownerId);

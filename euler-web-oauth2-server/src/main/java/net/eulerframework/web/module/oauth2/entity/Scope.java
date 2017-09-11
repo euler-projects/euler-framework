@@ -8,7 +8,6 @@ import javax.validation.constraints.Pattern;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name="SYS_SCOPE")
 public class Scope extends UUIDEntity<Scope> {

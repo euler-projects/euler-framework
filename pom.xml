@@ -25,6 +25,7 @@
         <module>euler-web-authentication-hibernate-impl</module>
         <module>euler-web-basic-hibernate</module>
         <module>euler-web-orm-mybatis</module>
+        <module>euler-web-authentication-impl-hibernate</module>
     </modules>
 
     <properties>

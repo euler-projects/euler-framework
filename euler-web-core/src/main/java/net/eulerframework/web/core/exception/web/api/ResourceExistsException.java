@@ -2,7 +2,6 @@ package net.eulerframework.web.core.exception.web.api;
 
 import org.springframework.http.HttpStatus;
 
-@SuppressWarnings("serial")
 public class ResourceExistsException extends ApiException {
 
     public ResourceExistsException() {

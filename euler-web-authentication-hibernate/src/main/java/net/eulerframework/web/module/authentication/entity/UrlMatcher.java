@@ -11,7 +11,6 @@ import javax.persistence.Table;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 //@Entity
 @Table(name="SYS_URL_MATCHER")
 public class UrlMatcher extends UUIDEntity<UrlMatcher> {

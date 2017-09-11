@@ -1,6 +1,6 @@
 package net.eulerframework.web.core.base.entity;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -18,27 +18,22 @@ import org.hibernate.annotations.GenericGenerator;
  * @see NonIDEntity
  * @see IDEntity
  */
-@SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class UUIDEntity<T extends UUIDEntity<?>> implements BaseEntity<T> {    
+public abstract class UUIDEntity<T extends UUIDEntity<?>> implements BaseEntity<T, UUID> {    
 
     @Id
     @Column(name="ID", length=36)
     @GenericGenerator(name="systemUUID",strategy="uuid2")
     @GeneratedValue(generator="systemUUID")
-    private String id;
+    private UUID id;
     
     @Override 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
-    
-    @Override
-    public void setSerializableId(Serializable id) {
-        this.setId((String) id);
-    }
 
-    public void setId(String id) {
+    @Override
+    public void setId(UUID id) {
         this.id = id;
     }
 

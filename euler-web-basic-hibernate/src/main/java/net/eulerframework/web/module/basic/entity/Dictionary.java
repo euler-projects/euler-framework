@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_DICT", uniqueConstraints = {
         @UniqueConstraint(columnNames={"CODE", "DICT_KEY"}),

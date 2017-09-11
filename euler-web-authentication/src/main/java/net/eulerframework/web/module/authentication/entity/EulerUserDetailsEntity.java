@@ -33,13 +33,14 @@ import java.util.Collection;
 import java.util.UUID;
 
 import org.springframework.security.core.CredentialsContainer;
-import org.springframework.security.core.GrantedAuthority;
+
+import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
 
 /**
  * @author cFrost
  *
  */
-public interface IUserEntity extends CredentialsContainer {
+public interface EulerUserDetailsEntity extends CredentialsContainer {
 
     /**
      * Returns the id of the user.
@@ -52,16 +53,16 @@ public interface IUserEntity extends CredentialsContainer {
      * Returns if the user is a root user
      * 
      * @return <code>true</code> the user is a root user,
-    * <code>false</code> the user isn't a root user
+    * <code>false</code> or <code>null</code> the user isn't a root user
      */
-    boolean isRoot();
+    Boolean isRoot();
     
     /**
-     * Returns the authorities granted to the user. Cannot return <code>null</code>.
+     * Returns the authorities granted to the user.
     *
-    * @return the authorities, sorted by natural key (never <code>null</code>)
+    * @return the authorities
     */
-   Collection<GrantedAuthority> getAuthorities();
+    Collection<EulerAuthorityEntity> getAuthorities();
 
    /**
     * Returns the password used to authenticate the user.
@@ -74,7 +75,7 @@ public interface IUserEntity extends CredentialsContainer {
     * Returns the username used to authenticate the user. Cannot return <code>null</code>
     * .
     *
-    * @return the username (never <code>null</code>)
+    * @return the username
     */
    String getUsername();
 
@@ -83,26 +84,27 @@ public interface IUserEntity extends CredentialsContainer {
     * authenticated.
     *
     * @return <code>true</code> if the user's account is valid (ie non-expired),
-    * <code>false</code> if no longer valid (ie expired)
+    * <code>false</code> or <code>null</code> if no longer valid (ie expired)
     */
-   boolean isAccountNonExpired();
+   Boolean isAccountNonExpired();
 
    /**
     * Indicates whether the user is locked or unlocked. A locked user cannot be
     * authenticated.
     *
-    * @return <code>true</code> if the user is not locked, <code>false</code> otherwise
+    * @return <code>true</code> if the user is not locked, 
+    * <code>false</code> or <code>null</code> otherwise
     */
-   boolean isAccountNonLocked();
+   Boolean isAccountNonLocked();
 
    /**
     * Indicates whether the user's credentials (password) has expired. Expired
     * credentials prevent authentication.
     *
     * @return <code>true</code> if the user's credentials are valid (ie non-expired),
-    * <code>false</code> if no longer valid (ie expired)
+    * <code>false</code> or <code>null</code> if no longer valid (ie expired)
     */
-   boolean isCredentialsNonExpired();
+   Boolean isCredentialsNonExpired();
 
    /**
     * Indicates whether the user is enabled or disabled. A disabled user cannot be
@@ -110,6 +112,9 @@ public interface IUserEntity extends CredentialsContainer {
     *
     * @return <code>true</code> if the user is enabled, <code>false</code> otherwise
     */
-   boolean isEnabled();
+   Boolean isEnabled();
 
+   default EulerUserDetails toEulerUserDetails() {
+       return new EulerUserDetails(this);
+   }
 }

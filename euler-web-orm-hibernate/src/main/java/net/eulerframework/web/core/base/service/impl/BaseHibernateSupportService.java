@@ -8,7 +8,7 @@ import net.eulerframework.web.core.base.service.impl.BaseService;
 
 public class BaseHibernateSupportService extends BaseService {
     
-    protected <D extends IBaseDao<ABSTRACT_E>, E extends ABSTRACT_E, ABSTRACT_E extends BaseEntity<ABSTRACT_E>> D getEntityDao(Collection<D> daoCollection, Class<E> entityClass) {
+    protected <D extends IBaseDao<ABSTRACT_E>, E extends ABSTRACT_E, ABSTRACT_E extends BaseEntity<ABSTRACT_E, ?>> D getEntityDao(Collection<D> daoCollection, Class<E> entityClass) {
         
         for(D dao : daoCollection) {
             if(dao.isMyEntity(entityClass)) {

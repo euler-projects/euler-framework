@@ -43,7 +43,7 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
-import net.eulerframework.web.module.authentication.entity.EulerUserDetails;
+import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
 import net.eulerframework.web.module.authentication.service.EulerUserDetailsService;
 
 public class UserContext {

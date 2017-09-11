@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.authentication.exception;
 
-@SuppressWarnings("serial")
 public class UserNotFoundException extends Exception {
     public UserNotFoundException() {
         super();

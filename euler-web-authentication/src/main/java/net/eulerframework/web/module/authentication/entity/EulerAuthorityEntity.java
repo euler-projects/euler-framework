@@ -24,20 +24,22 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-form/web-form
+ * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.service;
+package net.eulerframework.web.module.authentication.entity;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.util.StringUtils;
 
 /**
  * @author cFrost
  *
  */
-public interface EulerUserDetailsService extends UserDetailsService {
-    EulerUserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+public interface EulerAuthorityEntity extends GrantedAuthority {
+
+    default SimpleGrantedAuthority toSimpleGrantedAuthority() {
+        return StringUtils.hasText(this.getAuthority()) ? new SimpleGrantedAuthority(this.getAuthority()) : null;
+    }
 }

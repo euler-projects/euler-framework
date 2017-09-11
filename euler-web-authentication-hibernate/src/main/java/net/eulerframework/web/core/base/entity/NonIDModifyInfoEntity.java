@@ -1,5 +1,6 @@
 package net.eulerframework.web.core.base.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -16,9 +17,8 @@ import net.eulerframework.web.core.base.entity.NonIDEntity;
  * @see IDModifyInfoEntity
  * @see UUIDModifyInfoEntity
  */
-@SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class NonIDModifyInfoEntity<T extends NonIDModifyInfoEntity<?>> extends NonIDEntity<T> implements BaseModifyInfoEntity<T> {    
+public abstract class NonIDModifyInfoEntity<T extends NonIDModifyInfoEntity<?, ?>, ID_TYPE extends Serializable> extends NonIDEntity<T, ID_TYPE> implements BaseModifyInfoEntity<T, ID_TYPE> {    
 
     @Column(name="CREATE_BY", nullable=false)
     private String createBy;

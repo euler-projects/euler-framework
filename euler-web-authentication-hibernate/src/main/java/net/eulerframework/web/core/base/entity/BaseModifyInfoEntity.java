@@ -1,5 +1,6 @@
 package net.eulerframework.web.core.base.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
@@ -18,7 +19,7 @@ import net.eulerframework.web.core.base.entity.BaseEntity;
  * @see IDModifyInfoEntity
  * @see UUIDModifyInfoEntity
  */
-public interface BaseModifyInfoEntity<T extends BaseModifyInfoEntity<?>> extends BaseEntity<T> {
+public interface BaseModifyInfoEntity<T extends BaseModifyInfoEntity<?, ?>, ID_TYPE extends Serializable> extends BaseEntity<T, ID_TYPE> {
 
     /**
      * 获取记录创建者<br>

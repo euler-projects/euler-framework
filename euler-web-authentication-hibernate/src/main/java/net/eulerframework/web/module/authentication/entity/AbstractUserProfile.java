@@ -1,7 +1,5 @@
 package net.eulerframework.web.module.authentication.entity;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -10,9 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
 
-@SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class AbstractUserProfile implements BaseEntity<AbstractUserProfile> {
+public abstract class AbstractUserProfile implements BaseEntity<AbstractUserProfile, String> {
     @Id
     @Column(name = "USER_ID", length = 36)
     private String userId;
@@ -32,8 +29,8 @@ public abstract class AbstractUserProfile implements BaseEntity<AbstractUserProf
     }
     
     @Override
-    public void setSerializableId(Serializable id) {
-        this.setUserId((String) id);
+    public void setId(String id) {
+        this.setUserId(id);
     }
 
     @Override

@@ -8,7 +8,7 @@ import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 
-public interface IBaseDao<T extends BaseEntity<?>>{
+public interface IBaseDao<T extends BaseEntity<?, ?>>{
 
     T load(Serializable id);
 

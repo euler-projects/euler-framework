@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
-@SuppressWarnings("serial")
 @MappedSuperclass
 public abstract class AbstractFileAttachment extends AbstractAttachment {
     @Column(name="FILE_ID", length=36, nullable=false)
