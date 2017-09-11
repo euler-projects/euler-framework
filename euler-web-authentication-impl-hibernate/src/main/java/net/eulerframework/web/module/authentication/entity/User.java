@@ -32,15 +32,37 @@ package net.eulerframework.web.module.authentication.entity;
 import java.util.Collection;
 import java.util.UUID;
 
-public class User implements EulerUserDetailsEntity {
-    @Override
-    public UUID getUserId() {
-        return null;
-    }
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import net.eulerframework.web.core.base.entity.UUIDEntity;
+
+@Entity
+@Table(name = "SYS_USER")
+public class User extends UUIDEntity<User> implements EulerUserDetailsEntity {
+
+    @Column(name = "USERNAME", nullable = false, unique = true)
+    private String username;
+    @Column(name = "EMAIL", unique = true)
+    private String email;
+    @Column(name = "MOBILE", unique = true)
+    private String mobile;
+    @Column(name = "PASSWORD", nullable = false)
+    private String password;
+    @Column(name = "ENABLED", nullable = false)
+    private Boolean enabled;
+    @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
+    private Boolean accountNonExpired;
+    @Column(name = "ACCOUNT_NON_LOCKED", nullable = false)
+    private Boolean accountNonLocked;
+    @Column(name = "CREDENTIALS_NON_EXPIRED", nullable = false)
+    private Boolean credentialsNonExpired;
+    @Column(name = "ROOT")
+    private Boolean root;
 
     @Override
     public Boolean isRoot() {
-        return false;
+        return this.root;
     }
 
     @Override
@@ -50,36 +72,87 @@ public class User implements EulerUserDetailsEntity {
 
     @Override
     public String getPassword() {
-        return "$2a$10$sS8B/EcIu5aSlw6Js9bosO3OG/Hn/LiJFwp13b.ep5Dlr3v0twJRy";
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return "admin";
+        return this.username;
     }
 
     @Override
     public Boolean isAccountNonExpired() {
-        return false;
+        return this.accountNonExpired;
     }
 
     @Override
     public Boolean isAccountNonLocked() {
-        return false;
+        return this.accountNonLocked;
     }
 
     @Override
     public Boolean isCredentialsNonExpired() {
-        return false;
+        return this.credentialsNonExpired;
     }
 
     @Override
     public Boolean isEnabled() {
-        return false;
+        return this.enabled;
     }
 
     @Override
     public void eraseCredentials() {
-
+        this.password = "";
     }
+
+    @Override
+    public UUID getUserId() {
+        return this.getId();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setAccountNonExpired(Boolean accountNonExpired) {
+        this.accountNonExpired = accountNonExpired;
+    }
+
+    public void setAccountNonLocked(Boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
+    public void setCredentialsNonExpired(Boolean credentialsNonExpired) {
+        this.credentialsNonExpired = credentialsNonExpired;
+    }
+
+    public void setRoot(Boolean root) {
+        this.root = root;
+    }
+    
+    
 }
