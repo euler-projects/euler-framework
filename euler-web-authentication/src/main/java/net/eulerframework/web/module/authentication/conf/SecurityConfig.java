@@ -191,16 +191,10 @@ public abstract class SecurityConfig {
     }
 
     public static long getUserContextCacheLife() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE,
-                new DataGetter<String, Object>() {
-
-                    @Override
-                    public Object getData(String key) {
-                        return properties.getLongValue(WebConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE,
-                                WebConfigDefault.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE);
-                    }
-
-                });
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE, configKey -> 
+            properties.getLongValue(configKey,
+                    WebConfigDefault.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE)
+        );
 
         return (long) cachedConfig;
     }

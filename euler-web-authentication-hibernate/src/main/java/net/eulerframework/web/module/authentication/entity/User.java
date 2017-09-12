@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,7 +31,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     
     static {
         ANONYMOUS_USER = new User();
-        ANONYMOUS_USER.setId(new UUID(-1, -1));
+        ANONYMOUS_USER.setId(ANONYMOUS_USERNAME);
         ANONYMOUS_USER.setUsername(ANONYMOUS_USERNAME);
         ANONYMOUS_USER.setAuthorities(null);
         ANONYMOUS_USER.setAccountNonExpired(false);
@@ -42,7 +40,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
         ANONYMOUS_USER.setCredentialsNonExpired(false);
         
         ROOT_USER = new User();
-        ROOT_USER.setId(new UUID(0, 0));
+        ROOT_USER.setId(ROOT_USERNAME);
         ROOT_USER.setUsername(ROOT_USERNAME);
         Set<Authority> authorities = new HashSet<>();
         authorities.add(Authority.ROOT_AUTHORITY);
@@ -217,7 +215,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public User loadDataFromOtherUserDetails(UserDetails userDetails) {
     	User result = new User();
-    	result.setId(UUID.randomUUID());
+    	result.setId("123");
     	result.setUsername(userDetails.getUsername());
     	Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
     	if(authorities == null){

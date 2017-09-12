@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -102,7 +101,7 @@ public class UserService extends BaseService {
      * @throws UserNotFoundException
      *             用户不存在
      */
-    public void updateUserPassword(UUID userId, String oldPassword, String newPassword) throws UserNotFoundException {
+    public void updateUserPassword(String userId, String oldPassword, String newPassword) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
@@ -121,7 +120,7 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public void updateUsername(UUID userId, String username) throws UserNotFoundException {
+    public void updateUsername(String userId, String username) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(username, "username is null");
         username = username.trim();
@@ -141,7 +140,7 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public void updateEmail(UUID userId, String email) throws UserNotFoundException {
+    public void updateEmail(String userId, String email) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(email, "email is null");
         email = email.trim();
@@ -161,7 +160,7 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public void updateMobile(UUID userId, String mobile) throws UserNotFoundException {
+    public void updateMobile(String userId, String mobile) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(mobile, "mobile is null");
         mobile = mobile.trim();
@@ -180,7 +179,7 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public void updateFullname(UUID userId, String fullname) throws UserNotFoundException {
+    public void updateFullname(String userId, String fullname) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         Assert.notNull(fullname, "fullname is null");
         fullname = fullname.trim();
@@ -198,7 +197,7 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public void updateAvatar(UUID userId, String avatarFileId) throws UserNotFoundException {
+    public void updateAvatar(String userId, String avatarFileId) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
@@ -210,7 +209,7 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public void updateStatus(UUID userId, boolean enabled) throws UserNotFoundException {
+    public void updateStatus(String userId, boolean enabled) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
@@ -232,7 +231,7 @@ public class UserService extends BaseService {
      * @throws UserNotFoundException
      *             用户不存在
      */
-    public void updateUserPasswordWithoutCheck(UUID userId, String newPassword) throws UserNotFoundException {
+    public void updateUserPasswordWithoutCheck(String userId, String newPassword) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         User user = this.userDao.load(userId);
 
@@ -305,7 +304,7 @@ public class UserService extends BaseService {
      * @throws UserNotFoundException
      *             用户不存在
      */
-    public void addGroup(UUID userId, String... groupId) throws UserNotFoundException {
+    public void addGroup(String userId, String... groupId) throws UserNotFoundException {
         Assert.notNull(userId, "userId is null");
         List<Group> groups = this.groupDao.load(groupId);
 

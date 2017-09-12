@@ -30,16 +30,16 @@
 package net.eulerframework.web.module.authentication.entity;
 
 import java.util.Collection;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
 @Table(name = "SYS_USER")
-public class User extends UUIDEntity<User> implements EulerUserDetailsEntity {
+public class User extends UUIDEntity<User> implements EulerUserEntity {
 
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
@@ -106,7 +106,7 @@ public class User extends UUIDEntity<User> implements EulerUserDetailsEntity {
     }
 
     @Override
-    public UUID getUserId() {
+    public String getUserId() {
         return this.getId();
     }
 
@@ -130,6 +130,7 @@ public class User extends UUIDEntity<User> implements EulerUserDetailsEntity {
         this.username = username;
     }
 
+    @Override
     public void setPassword(String password) {
         this.password = password;
     }
@@ -152,7 +153,5 @@ public class User extends UUIDEntity<User> implements EulerUserDetailsEntity {
 
     public void setRoot(Boolean root) {
         this.root = root;
-    }
-    
-    
+    }  
 }

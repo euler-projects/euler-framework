@@ -1,13 +1,10 @@
 package net.eulerframework.web.core.base.entity;
 
 import java.util.Date;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-
-import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 /**
  * 具有修改人记录功能的<strong>UUID主键</strong>实体<br>
@@ -18,7 +15,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  * @see IDModifyInfoEntity
  */
 @MappedSuperclass
-public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T, UUID> {    
+public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T, String> {    
 
     @Column(name="CREATE_BY", nullable=false)
     private String createBy;

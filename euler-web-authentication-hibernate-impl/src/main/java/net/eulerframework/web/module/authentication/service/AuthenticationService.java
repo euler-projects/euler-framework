@@ -2,7 +2,6 @@ package net.eulerframework.web.module.authentication.service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -68,7 +67,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
 
     @Override
     public void update(User user) throws UserNotFoundException {
-        UUID userId = user.getId();
+        String userId = user.getId();
         this.userService.updateFullname(userId, user.getFullName());
         this.userService.updateMobile(userId, user.getMobile());
         
@@ -144,7 +143,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
 
     @Override
     public void changePassword(String oldPassword, String newPassword) {
-        UUID userId = UserContext.getCurrentUser().getId();
+        String userId = UserContext.getCurrentUser().getId();
 
         try {
             this.userService.updateUserPassword(userId, oldPassword, newPassword);

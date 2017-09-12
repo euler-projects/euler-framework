@@ -13,8 +13,8 @@ public class UserContextListener implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());        
-        EulerUserDetailsService userDetailsService= (EulerUserDetailsService)rwp.getBean("userDetailsService");        
+        WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
+        EulerUserDetailsService userDetailsService= (EulerUserDetailsService)rwp.getBean("userDetailsService");
         UserContext.setUserDetailsServicel(userDetailsService);
     }
 

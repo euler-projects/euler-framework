@@ -1,7 +1,6 @@
 package net.eulerframework.web.module.authentication.controller.admin.user;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
@@ -88,7 +87,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     @ResponseBody
     @RequestMapping(value="resetPassword_ajax", method = RequestMethod.POST)
     public EasyUIAjaxResponse<String> resetPassword(
-            @RequestParam UUID userId, 
+            @RequestParam String userId, 
             @RequestParam String password) {
         try {
             this.userService.updateUserPasswordWithoutCheck(userId, password);

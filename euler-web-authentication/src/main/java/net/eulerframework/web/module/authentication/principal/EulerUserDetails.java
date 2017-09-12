@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import net.eulerframework.web.module.authentication.entity.EulerAuthorityEntity;
-import net.eulerframework.web.module.authentication.entity.EulerUserDetailsEntity;
+import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 
 /**
  * @author cFrost
@@ -61,11 +61,11 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
     private boolean credentialsNonExpired;
     private boolean enabled;
 
-    public EulerUserDetails(EulerUserDetailsEntity userEntity) {
+    public EulerUserDetails(EulerUserEntity userEntity) {
         Assert.hasText(userEntity.getUsername());
         Assert.hasText(userEntity.getPassword());
         
-        this.userId = userEntity.getUserId();
+        this.userId = UUID.fromString(userEntity.getUserId());
         this.username = userEntity.getUsername();
         this.password = userEntity.getPassword();
         

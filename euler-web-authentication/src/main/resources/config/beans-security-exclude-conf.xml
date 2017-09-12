@@ -13,7 +13,7 @@
     <!-- 静态资源目录 -->
     <http security="none" pattern="/assets/**" />
     <!-- 重置管理员密码请求 -->
-    <http security="none" pattern="/passwd/**" />
+    <http security="none" pattern="/admin/passwd/**" />
     <!-- 网站图标 -->
     <http security="none" pattern="/favicon.ico" />
     <!-- robot.txt -->

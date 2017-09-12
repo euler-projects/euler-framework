@@ -3,7 +3,6 @@ package net.eulerframework.web.module.authentication.context;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -89,7 +88,7 @@ public class UserContext {
                 String username = OAUTH_CLIENT_PREFIX + clientId;
 
                 User user = new User();
-                user.setId(new UUID(0, 0));
+                user.setId(username);
                 user.setUsername(username);
                 return user;
             }
