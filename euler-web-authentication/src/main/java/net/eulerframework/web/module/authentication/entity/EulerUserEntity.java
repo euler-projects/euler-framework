@@ -124,4 +124,19 @@ public interface EulerUserEntity extends CredentialsContainer {
     default EulerUserDetails toEulerUserDetails() {
         return new EulerUserDetails(this);
     }
+
+    /**
+     * @param username
+     */
+    void setUsername(String username);
+
+    /**
+     * @param email
+     */
+    void setEmail(String email);
+
+    /**
+     * @param mobile
+     */
+    void setMobile(String mobile);
 }

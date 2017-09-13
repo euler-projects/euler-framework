@@ -24,19 +24,28 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-projects/euler-framework
+ * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework;
+package net.eulerframework.web.module.authentication.service;
+
+import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
+import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 
 /**
  * @author cFrost
  *
  */
-public abstract class EulerServlets {
-    public final static String WEB_SERVLET = "springWebDispatcherServlet";
-    public final static String WEB_ADMIN_SERVLET = "springAdminWebDispatcherServlet";
-    public final static String WEB_AJAX_SERVLET = "springWebAjaxDispatcherServlet";
-    public final static String WEB_ADMIN_AJAX_SERVLET = "springAdminWebAjaxDispatcherServlet";
-    public final static String API_SERVLET = "springApiDispatcherServlet";
+public interface PasswordService {
+    
+    void passwdResetSMSGen(String mobile);
+
+    void passwdResetEmailGen(String email);
+    
+    void resetPasswordBySMSResetCode(String code, String password)
+            throws InvalidSMSResetCodeException, UserNotFoundException;
+    
+    void resetPasswordByEmailResetToken(String token, String password) 
+            throws InvalidEmailResetTokenException, UserNotFoundException;
 }

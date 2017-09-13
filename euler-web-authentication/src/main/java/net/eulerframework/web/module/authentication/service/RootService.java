@@ -41,6 +41,7 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.exception.PasswordResetException;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
 import net.eulerframework.web.util.ServletUtils;
 
@@ -57,26 +58,22 @@ public class RootService{
     @Resource private EulerUserEntityService eulerUserEntityService;
     @Resource private PasswordEncoder passwordEncoder;
 
-    public void resetRootPassword() throws PasswordResetException {
+    public void resetRootPassword() throws PasswordResetException, UserNotFoundException {
         String webInfPath = ServletUtils.getServletContext().getRealPath("/WEB-INF");
         String rootpasswordFilePath = webInfPath + "/.rootpassword";
         
         this.resetPasswd(EulerUserDetails.ROOT_USERNAME, rootpasswordFilePath);
     }
 
-    public void resetAdminPassword() throws PasswordResetException {
+    public void resetAdminPassword() throws PasswordResetException, UserNotFoundException {
         String webInfPath = ServletUtils.getServletContext().getRealPath("/WEB-INF");
         String adminpasswordFilePath = webInfPath + "/.adminpassword";
         
         this.resetPasswd(ADMIN_USERNAME, adminpasswordFilePath);
     }
     
-    private void resetPasswd(String username, String passwdFilePath) throws PasswordResetException {
+    private void resetPasswd(String username, String passwdFilePath) throws PasswordResetException, UserNotFoundException {
         EulerUserEntity user = this.eulerUserEntityService.loadUserByUsername(username);
-        
-        if(user == null) {
-            throw new PasswordResetException();
-        }
         
         if(!NAN_PASSWD.equals(user.getPassword()))
             throw new PasswordResetException();

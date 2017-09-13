@@ -29,7 +29,12 @@
  */
 package net.eulerframework.web.module.authentication.service;
 
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
+import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
  * @author cFrost
@@ -37,7 +42,61 @@ import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
  */
 public interface EulerUserEntityService {
 
-    public EulerUserEntity loadUserByUsername(String username);
+    PasswordEncoder getPasswordEncoder();
 
-    public void updateUser(EulerUserEntity eulerUserEntity);
+    EulerUserEntity loadUserByUserId(String userId) throws UserNotFoundException;
+
+    EulerUserEntity loadUserByUsername(String username) throws UserNotFoundException;
+
+    EulerUserEntity loadUserByEmail(String email) throws UserNotFoundException;
+
+    EulerUserEntity loadUserByMobile(String mobile) throws UserNotFoundException;
+
+    void updateUser(EulerUserEntity eulerUserEntity);
+
+    default void updateUsername(String userId, String newUsername) throws UserNotFoundException {
+        UserDataValidator.validUsername(newUsername);
+        EulerUserEntity user = this.loadUserByUserId(userId);
+        user.setUsername(newUsername.trim());
+        this.updateUser(user);
+    }
+
+    default void updateEmail(String userId, String newEmail) throws UserNotFoundException {
+        UserDataValidator.validEmail(newEmail);
+        EulerUserEntity user = this.loadUserByUserId(userId);
+        user.setEmail(newEmail.trim());
+        this.updateUser(user);
+    }
+
+    default void updateMobile(String userId, String newMobile) throws UserNotFoundException {
+        UserDataValidator.validMobile(newMobile);
+        EulerUserEntity user = this.loadUserByUserId(userId);
+        user.setMobile(newMobile.trim());
+        this.updateUser(user);
+    }
+
+    default void checkPassword(String userId, String password) throws UserNotFoundException, BadCredentialsException {
+        EulerUserEntity user = this.loadUserByUserId(userId);
+
+        if (this.getPasswordEncoder().matches(password.trim(), user.getPassword())) {
+            // Password matches successful, do nothing.
+        }
+
+        throw new BadCredentialsException("Bad Credentials");
+    }
+
+    default void updatePassword(String userId, String newPassword) throws UserNotFoundException {
+        UserDataValidator.validPassword(newPassword);
+        EulerUserEntity user = this.loadUserByUserId(userId);
+        user.setPassword(this.getPasswordEncoder().encode(newPassword));
+        this.updateUser(user);
+    }
+
+    default void updatePassword(String userId, String oldPassword, String newPassword) throws UserNotFoundException {
+        this.checkPassword(userId, oldPassword);
+        UserDataValidator.validPassword(newPassword);
+        EulerUserEntity user = this.loadUserByUserId(userId);
+        user.setPassword(this.getPasswordEncoder().encode(newPassword.trim()));
+        this.updateUser(user);
+    }
 }

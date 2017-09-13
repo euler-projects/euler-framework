@@ -32,5 +32,10 @@
             <artifactId>euler-web-orm-hibernate</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>net.eulerframework</groupId>
+            <artifactId>euler-common-jwt</artifactId>
+        </dependency>
     </dependencies>
 </project>

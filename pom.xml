@@ -318,6 +318,11 @@
                 <artifactId>euler-common-util</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-common-jwt</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>

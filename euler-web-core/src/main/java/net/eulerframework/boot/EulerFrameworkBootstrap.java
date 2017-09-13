@@ -96,6 +96,19 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                 1,
                 WebConfig.getAdminWebConfigClassName(), 
                 WebConfig.getAdminRootPath() + "/*");
+        
+        this.initSpringMVCDispatcher(
+                container, 
+                EulerServlets.WEB_AJAX_SERVLET, 
+                1, 
+                WebConfig.getAjaxConfigClassName(),
+                "/ajax/*");
+        
+        this.initSpringMVCDispatcher(container, 
+                EulerServlets.WEB_ADMIN_AJAX_SERVLET, 
+                1,
+                WebConfig.getAdminAjaxConfigClassName(), 
+                WebConfig.getAdminRootPath() + "/ajax/*");
 
         this.initBaseData(container);
 
