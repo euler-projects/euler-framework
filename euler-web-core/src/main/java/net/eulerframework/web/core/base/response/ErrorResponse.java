@@ -2,8 +2,8 @@ package net.eulerframework.web.core.base.response;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.exception.web.WebException;
-import net.eulerframework.web.core.exception.web.WebException.WebError;
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
+import net.eulerframework.web.core.exception.web.WebError;
 
 public class ErrorResponse extends LogSupport implements BaseResponse {
 
@@ -16,15 +16,15 @@ public class ErrorResponse extends LogSupport implements BaseResponse {
         this.error_code = WebError.UNDEFINED_ERROR.value();        
     }
 
-    public ErrorResponse(WebException webException) {
+    public ErrorResponse(WebRuntimeException webRuntimeException) {
         if (WebConfig.isDebugMode()) {
-            this.logger.error("WebException throwed," + " error: " + webException.getError() + " code: " + webException.getCode() + " message: " + webException.getMessage(),
-                    webException);
+            this.logger.error("WebRuntimeException throwed," + " error: " + webRuntimeException.getError() + " code: " + webRuntimeException.getCode() + " message: " + webRuntimeException.getMessage(),
+                    webRuntimeException);
         }
 
-        this.error = webException.getError();
-        this.error_code = webException.getCode();
-        this.error_description = webException.getLocalizedMessage();
+        this.error = webRuntimeException.getError();
+        this.error_code = webRuntimeException.getCode();
+        this.error_description = webRuntimeException.getLocalizedMessage();
     }
 
     public String getError() {

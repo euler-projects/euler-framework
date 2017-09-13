@@ -1,8 +1,9 @@
 package net.eulerframework.web.core.exception.web.api;
 
-import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.WebError;
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
 
-public class ResourceNotFoundException extends WebException {
+public class ResourceNotFoundException extends WebRuntimeException {
 
     public ResourceNotFoundException() {
         super(WebError.RESOURCE_NOT_FOUND.getReasonPhrase(), WebError.RESOURCE_NOT_FOUND.value());

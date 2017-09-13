@@ -153,5 +153,10 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
 
     public void setRoot(Boolean root) {
         this.root = root;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }  
 }

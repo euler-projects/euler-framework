@@ -1,26 +1,6 @@
 package net.eulerframework.web.module.authentication.exception;
 
-public class InvalidEmailResetTokenException extends Exception {
+import net.eulerframework.web.core.exception.web.WebException;
 
-    public InvalidEmailResetTokenException() {
-        super();
-    }
-
-    public InvalidEmailResetTokenException(String message) {
-        super(message);
-    }
-
-    public InvalidEmailResetTokenException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidEmailResetTokenException(Throwable cause) {
-        super(cause);
-    }
-    
-    protected InvalidEmailResetTokenException(String message, Throwable cause,
-                               boolean enableSuppression,
-                               boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+public class InvalidEmailResetTokenException extends WebException {
 }

@@ -46,7 +46,7 @@ public abstract class UserDataValidator {
         UserDataValidator.eulerUserEntityService = eulerUserEntityService;
     }
     
-    public static void validUsername(String username) {
+    public static void validUsername(String username) throws UserInfoCheckWebException {
         if (username == null) {
             throw new UserInfoCheckWebException("_USERNAME_IS_NULL");
         }
@@ -67,7 +67,7 @@ public abstract class UserDataValidator {
         }
     }
 
-    public static void validEmail(String email) {
+    public static void validEmail(String email) throws UserInfoCheckWebException {
         if (email == null) {
             throw new UserInfoCheckWebException("_EMAIL_IS_NULL");
         }
@@ -87,7 +87,7 @@ public abstract class UserDataValidator {
         }
     }
 
-    public static void validMobile(String mobile) {
+    public static void validMobile(String mobile) throws UserInfoCheckWebException {
         if (mobile != null) {
             try {
                 eulerUserEntityService.loadUserByMobile(mobile);
@@ -103,7 +103,7 @@ public abstract class UserDataValidator {
         }
     }
 
-    public static void validPassword(String password) {
+    public static void validPassword(String password) throws UserInfoCheckWebException {
         if (password == null) {
             throw new UserInfoCheckWebException("_PASSWORD_IS_NULL");
         }

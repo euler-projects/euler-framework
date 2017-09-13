@@ -29,23 +29,137 @@
  */
 package net.eulerframework.web.module.authentication.service;
 
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
+import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
+import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
+ * 用户密码相关业务逻辑接口
  * @author cFrost
  *
  */
 public interface PasswordService {
+
+    /**
+     * 获取密码加密器
+     * @return 密码加密器
+     */
+    PasswordEncoder getPasswordEncoder();
     
+    /**
+     * 获取用户信息相关业务逻辑接口实现类
+     * @return 用户信息相关业务逻辑接口实现类
+     */
+    EulerUserEntityService getEulerUserEntityService();
+     
+    /**
+     * 发送密码重置短信
+     * @param mobile 注册手机号，当注册手机号不存在时此方法不做任何响应
+     */
     void passwdResetSMSGen(String mobile);
 
+    /**
+     * 发送密码重置邮件
+     * @param email 注册邮箱，当注册邮箱不存在时此方法不做任何响应
+     */
     void passwdResetEmailGen(String email);
     
-    void resetPasswordBySMSResetCode(String code, String password)
-            throws InvalidSMSResetCodeException, UserNotFoundException;
+    /**
+     * 从密码重置短信验证码中解析用户ID
+     * @param code 密码重置短信验证码
+     * @return 用户ID
+     * @throws InvalidSMSResetCodeException 密码重置短信验证码不合法
+     */
+    String analyzeUserIdFromSMSResetCode(String code)
+            throws InvalidSMSResetCodeException;
     
-    void resetPasswordByEmailResetToken(String token, String password) 
-            throws InvalidEmailResetTokenException, UserNotFoundException;
+    /**
+     * 从密码重置邮件token中解析用户ID
+     * @param token 密码重置邮件token
+     * @return 用户ID
+     * @throws InvalidEmailResetTokenException 密码重置邮件token不合法
+     */
+    String analyzeUserIdFromEmailResetToken(String token)
+            throws InvalidEmailResetTokenException;
+
+    /**
+     * 校验用户密码，抛出{@link BadCredentialsException}表示密码不正确
+     * @param userId 被校验的用户ID
+     * @param password 被校验的密码
+     * @throws UserNotFoundException 用户不存在
+     * @throws BadCredentialsException 密码不正确
+     */
+    default void checkPassword(String userId, String password) throws UserNotFoundException, BadCredentialsException {
+        EulerUserEntity user = this.getEulerUserEntityService().loadUserByUserId(userId);
+
+        if (this.getPasswordEncoder().matches(password.trim(), user.getPassword())) {
+            // Password matched successful, do nothing.
+        }
+
+        throw new BadCredentialsException("Bad Credentials");
+    }
+
+    /**
+     * 直接更新用户密码
+     * @param userId 被更新的用户的ID
+     * @param newPassword 新密码
+     * @throws UserNotFoundException 用户不存在
+     * @throws UserInfoCheckWebException 新密码不符合要求
+     */
+    default void updatePassword(String userId, String newPassword) throws UserNotFoundException, UserInfoCheckWebException {
+        UserDataValidator.validPassword(newPassword);
+        EulerUserEntity user = this.getEulerUserEntityService().loadUserByUserId(userId);
+        user.setPassword(this.getPasswordEncoder().encode(newPassword));
+        this.getEulerUserEntityService().updateUser(user);
+    }
+    
+    /**
+     * 验证现密码后更新用户密码
+     * @param userId 被更新的用户的ID
+     * @param oldPassword 现密码
+     * @param newPassword 新密码
+     * @throws UserNotFoundException 用户不存在
+     * @throws BadCredentialsException 现密码不正确
+     * @throws UserInfoCheckWebException 新密码不符合要求
+     */
+    default void updatePassword(String userId, String oldPassword, String newPassword)
+            throws UserNotFoundException, UserInfoCheckWebException {
+        this.checkPassword(userId, oldPassword);
+        UserDataValidator.validPassword(newPassword);
+        EulerUserEntity user = this.getEulerUserEntityService().loadUserByUserId(userId);
+        user.setPassword(this.getPasswordEncoder().encode(newPassword.trim()));
+        this.getEulerUserEntityService().updateUser(user);
+    }
+    
+    /**
+     * 通过密码重置短信验证码重置密码
+     * @param code 密码重置短信验证码
+     * @param password 新密码
+     * @throws InvalidSMSResetCodeException 密码重置短信验证码不合法
+     * @throws UserNotFoundException 用户不存在
+     * @throws UserInfoCheckWebException 新密码不符合要求
+     */
+    default void resetPasswordBySMSResetCode(String code, String password)
+            throws InvalidSMSResetCodeException, UserNotFoundException, UserInfoCheckWebException {
+        this.updatePassword(this.analyzeUserIdFromSMSResetCode(code), password);
+    }
+
+    /**
+     * 通过密码重置邮件token重置密码
+     * @param token 密码重置邮件token
+     * @param password 新密码
+     * @throws InvalidEmailResetTokenException 密码重置邮件token不合法
+     * @throws UserNotFoundException 用户不存在
+     * @throws UserInfoCheckWebException 新密码不符合要求
+     */
+    default void resetPasswordByEmailResetToken(String token, String password) 
+            throws InvalidEmailResetTokenException, UserNotFoundException, UserInfoCheckWebException {
+        this.updatePassword(this.analyzeUserIdFromEmailResetToken(token), password);
+    }
 }

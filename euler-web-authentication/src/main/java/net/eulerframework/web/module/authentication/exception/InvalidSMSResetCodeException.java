@@ -1,26 +1,6 @@
 package net.eulerframework.web.module.authentication.exception;
 
-public class InvalidSMSResetCodeException extends Exception {
+import net.eulerframework.web.core.exception.web.WebException;
 
-    public InvalidSMSResetCodeException() {
-        super();
-    }
-
-    public InvalidSMSResetCodeException(String message) {
-        super(message);
-    }
-
-    public InvalidSMSResetCodeException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidSMSResetCodeException(Throwable cause) {
-        super(cause);
-    }
-    
-    protected InvalidSMSResetCodeException(String message, Throwable cause,
-                               boolean enableSuppression,
-                               boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+public class InvalidSMSResetCodeException extends WebException {
 }

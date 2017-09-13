@@ -3,7 +3,6 @@ package net.eulerframework.web.module.authentication.service;
 import javax.annotation.Resource;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.Assert;
@@ -33,12 +32,6 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
     }
 
     @Override
-    public PasswordEncoder getPasswordEncoder() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public EulerUserEntity loadUserByUserId(String userId) throws UserNotFoundException {
         // TODO Auto-generated method stub
         return null;
@@ -52,6 +45,13 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
 
     @Override
     public EulerUserEntity loadUserByMobile(String mobile) throws UserNotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EulerUserEntity createUser(String username, String email, String mobile, boolean accountNonExpired,
+            boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled) {
         // TODO Auto-generated method stub
         return null;
     }

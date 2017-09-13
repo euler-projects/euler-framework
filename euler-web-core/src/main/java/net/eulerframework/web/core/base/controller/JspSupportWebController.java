@@ -43,8 +43,8 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.PageNotFoundException;
-import net.eulerframework.web.core.exception.web.UndefinedWebException;
-import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
@@ -179,7 +179,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error() {
-        return this.error(new UndefinedWebException());
+        return this.error(new UndefinedWebRuntimeException());
     }
     
     /**
@@ -188,7 +188,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error(String message) {
-        return this.error(new UndefinedWebException(message));
+        return this.error(new UndefinedWebRuntimeException(message));
     }
     
     /**
@@ -199,7 +199,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @param viewException 错误异常
      * @return 错误页面
      */
-    private String error(WebException viewException) {
+    private String error(WebRuntimeException viewException) {
         Assert.notNull(viewException, "Error exception can not be null"); 
         this.getRequest().setAttribute("__error_description", viewException.getLocalizedMessage());   
         this.getRequest().setAttribute("__error", viewException.getError());
@@ -293,12 +293,12 @@ public abstract class JspSupportWebController extends AbstractWebController {
     }
 
     /**
-     * 用于在程序发生{@link WebException}异常时统一返回错误信息
+     * 用于在程序发生{@link WebRuntimeException}异常时统一返回错误信息
      * 
      * @return
      */
-    @ExceptionHandler(WebException.class)
-    public String webException(WebException e) {
+    @ExceptionHandler(WebRuntimeException.class)
+    public String webRuntimeException(WebRuntimeException e) {
         if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }

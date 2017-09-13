@@ -139,4 +139,9 @@ public interface EulerUserEntity extends CredentialsContainer {
      * @param mobile
      */
     void setMobile(String mobile);
+
+    /**
+     * @param enabled
+     */
+    void setEnabled(boolean enabled);
 }

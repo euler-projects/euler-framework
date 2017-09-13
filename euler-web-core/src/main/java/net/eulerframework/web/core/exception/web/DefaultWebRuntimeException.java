@@ -1,20 +1,20 @@
 package net.eulerframework.web.core.exception.web;
 
-public class DefaultWebException extends WebException {
+public class DefaultWebRuntimeException extends WebRuntimeException {
     
-    public DefaultWebException(WebError webError) {
+    public DefaultWebRuntimeException(WebError webError) {
         super(webError.getReasonPhrase(), webError.value());
     }
     
-    public DefaultWebException(WebError webError, Throwable e) {
+    public DefaultWebRuntimeException(WebError webError, Throwable e) {
         super(webError.getReasonPhrase(), webError.value(), e);
     }
     
-    public DefaultWebException(String message, WebError webError) {
+    public DefaultWebRuntimeException(String message, WebError webError) {
         super(message, webError.getReasonPhrase(), webError.value());
     }
     
-    public DefaultWebException(String message, WebError webError, Throwable e) {
+    public DefaultWebRuntimeException(String message, WebError webError, Throwable e) {
         super(message, webError.getReasonPhrase(), webError.value(), e);
     }
 }

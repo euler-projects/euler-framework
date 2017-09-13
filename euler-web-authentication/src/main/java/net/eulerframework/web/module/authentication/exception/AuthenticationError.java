@@ -27,25 +27,42 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.service;
-
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
+package net.eulerframework.web.module.authentication.exception;
 
 /**
+ * 系统预定义用户认证模块异常代码
+ * 
+ * <p>所有系统预定义用户认证模块异常代范围为{@code 710000 ~ 719999}</p>
+ * 
  * @author cFrost
  *
  */
-public interface EulerUserDetailsService extends UserDetailsService {
+public enum AuthenticationError {
     
+    PASSWD_RESET_ERROR(710000, "passwd_reset_error"), 
+    USER_NOT_FOUND(710404, "user_not_found");
+    
+    private final int value;
+
+    private final String reasonPhrase;
+
+
+    private AuthenticationError(int value, String reasonPhrase) {
+        this.value = value;
+        this.reasonPhrase = reasonPhrase;
+    }
+
     /**
-     * 通过用户名查找用户主体信息
-     * 
-     * @param username 用户名
-     * @return 用户主体信息
-     * @throws UsernameNotFoundException 查找的用户不存在
+     * Return the integer value of this web error code.
      */
-    EulerUserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    public int value() {
+        return this.value;
+    }
+
+    /**
+     * Return the reason phrase of this web error code.
+     */
+    public String getReasonPhrase() {
+        return reasonPhrase;
+    }
 }

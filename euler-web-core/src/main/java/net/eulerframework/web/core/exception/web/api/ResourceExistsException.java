@@ -2,6 +2,8 @@ package net.eulerframework.web.core.exception.web.api;
 
 import org.springframework.http.HttpStatus;
 
+import net.eulerframework.web.core.exception.web.WebError;
+
 public class ResourceExistsException extends ApiException {
 
     public ResourceExistsException() {
