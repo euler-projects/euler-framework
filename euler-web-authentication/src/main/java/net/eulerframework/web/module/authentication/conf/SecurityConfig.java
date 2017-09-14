@@ -28,6 +28,8 @@ public abstract class SecurityConfig {
         // private static final String SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = "security.authentication.enableUserCache";
         // private static final String SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = "security.authentication.userCacheLife";
         private static final String SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = "security.authentication.userContext.cacheLife";
+        private static final String SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED = "security.authentication.userDetails.cacheEnabled";
+        private static final String SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE = "security.authentication.userDetails.cacheLife";
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
@@ -45,6 +47,8 @@ public abstract class SecurityConfig {
         // private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         // private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
+        private static final boolean SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED = true;
+        private static final long SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE = 10_000L;
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; // 至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; // 可含有-_.的email
@@ -177,17 +181,29 @@ public abstract class SecurityConfig {
 
     public static boolean isEnableMobileSignin() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
-                new DataGetter<String, Object>() {
-
-                    @Override
-                    public Object getData(String key) {
-                        return properties.getBooleanValue(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
-                                WebConfigDefault.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
-                    }
-
-                });
+                key -> properties.getBooleanValue(WebConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
+                        WebConfigDefault.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN)
+        );
 
         return (boolean) cachedConfig;
+    }
+
+    public static boolean isEnableUserDetailsCache() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED, configKey -> 
+        properties.getBooleanValue(configKey,
+                WebConfigDefault.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED)
+    );
+
+    return (boolean) cachedConfig;
+    }
+
+    public static long getUserDetailsCacheLife() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE, configKey -> 
+            properties.getLongValue(configKey,
+                    WebConfigDefault.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE)
+        );
+
+        return (long) cachedConfig;
     }
 
     public static long getUserContextCacheLife() {

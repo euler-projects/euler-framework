@@ -76,35 +76,24 @@ public interface EulerUserEntityService {
      * @throws UserNotFoundException 查找的用户不存在
      */
     EulerUserEntity loadUserByMobile(String mobile) throws UserNotFoundException;
-    
+
     /**
-     * 仅指定用户名创建新用户，新用户的注册邮箱和注册手机号为空，账号未过期、账号未锁定、密码未过期、已激活
+     * 通过用户名、注册邮箱、注册手机号组合查找用户实体类，有一个参数满足要求即返回，如有多个参数满足要求，则按用户名、邮箱、手机号的优先级返回
+     * 
      * @param username 用户名
-     * @return 新用户实体
+     * @param email 注册邮箱
+     * @param mobile 注册手机号
+     * @return 用户实体类
+     * @throws UserNotFoundException 查找的用户不存在
      */
-    default EulerUserEntity createUser(String username) {
-        return this.createUser(username, null, null, true, true, true, true);
-    }
+    //EulerUserEntity loadUserCombox(String username, String email, String mobile) throws UserNotFoundException;
     
     /**
-     * 创建新用户并指定各项参数
-     * @param username 用户名，不可为空
-     * @param email 注册邮箱，可为空
-     * @param mobile 注册手机号，可为空
-     * @param accountNonExpired 账号是否过期
-     * @param accountNonLocked 账号是否未锁定
-     * @param credentialsNonExpired 账号密码是否未过期
-     * @param enabled 账号是否已激活
-     * @return 新用户实体
+     * 创建新用户
+     * @param eulerUserEntity 用户实体(无用户ID)
+     * @return 用户实体(于传入参数的实体时一个对象实例，增加了用户ID)
      */
-    EulerUserEntity createUser(
-            String username,
-            String email,
-            String mobile,
-            boolean accountNonExpired,
-            boolean accountNonLocked,
-            boolean credentialsNonExpired,
-            boolean enabled);
+    EulerUserEntity createUser(EulerUserEntity eulerUserEntity);
     
     /**
      * 更新用户信息

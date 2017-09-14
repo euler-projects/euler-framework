@@ -50,8 +50,7 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
     }
 
     @Override
-    public EulerUserEntity createUser(String username, String email, String mobile, boolean accountNonExpired,
-            boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled) {
+    public EulerUserEntity createUser(EulerUserEntity eulerUserEntity) {
         // TODO Auto-generated method stub
         return null;
     }

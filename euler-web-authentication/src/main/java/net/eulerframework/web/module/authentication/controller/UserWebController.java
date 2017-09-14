@@ -4,14 +4,15 @@
 package net.eulerframework.web.module.authentication.controller;
 
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.common.util.StringUtils;
-import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.WebController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
+import net.eulerframework.web.module.authentication.enums.ResetPasswordType;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
@@ -50,9 +51,9 @@ public class UserWebController extends JspSupportWebController {
     
     @RequestMapping(value = "reset-password", method = RequestMethod.GET)
     public String resetPassword(
-            @RequestParam(required = true) String type,
+            @RequestParam(required = true) ResetPasswordType type,
             @RequestParam(required = false) String token) {
-        if ("email".equalsIgnoreCase(type)) {
+        if (ResetPasswordType.EMAIL.equals(type)) {
             if (StringUtils.isNull(token))
                 return this.display("reset-password-email-collector");
 
@@ -62,16 +63,10 @@ public class UserWebController extends JspSupportWebController {
                 this.getRequest().setAttribute("type", "email");
                 return this.display("reset-password-new-password");
             } catch (InvalidEmailResetTokenException e) {
-
-                if (WebConfig.isDebugMode()) {
-                    this.logger.error("resetPassword error", e);
-                } else {
-                    // DO_NOTHING
-                }
+                this.logger.debug("resetPassword error", e);
                 return this.notfound();
-
             }
-        } else if ("sms".equalsIgnoreCase(type)) {
+        } else if (ResetPasswordType.SMS.equals(type)) {
             return this.display("reset-password-sms-collector");
         } else {
             return this.notfound();
@@ -86,27 +81,22 @@ public class UserWebController extends JspSupportWebController {
 
     @RequestMapping(value = "reset-password", method = RequestMethod.POST)
     public String resetPassword(
-            @RequestParam(required = true) String type, 
+            @RequestParam(required = true) ResetPasswordType type, 
             @RequestParam(required = true) String token, 
             @RequestParam(required = true) String password) {
 
         try {
-            if ("email".equalsIgnoreCase(type)) {
+            if (ResetPasswordType.EMAIL.equals(type)) {
                 this.passwordService.resetPasswordByEmailResetToken(token, password);
                 return this.success();
-            } else if ("sms".equalsIgnoreCase(type)) {
+            } else if (ResetPasswordType.SMS.equals(type)) {
                 this.passwordService.resetPasswordBySMSResetCode(token, password);
                 return this.success();
             } else {
                 return this.notfound();
             }
         } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSMSResetCodeException | UserInfoCheckWebException e) {
-
-            if (WebConfig.isDebugMode()) {
-                this.logger.error("resetPassword error", e);
-            } else {
-                // DO_NOTHING
-            }
+            this.logger.debug("resetPassword error", e);
             return this.notfound();
         }
 
