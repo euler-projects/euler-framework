@@ -99,7 +99,8 @@ public interface PasswordService {
         EulerUserEntity user = this.getEulerUserEntityService().loadUserByUserId(userId);
 
         if (this.getPasswordEncoder().matches(password.trim(), user.getPassword())) {
-            // Password matched successful, do nothing.
+            // Password matched successful.
+            return;
         }
 
         throw new BadCredentialsException("Bad Credentials");
