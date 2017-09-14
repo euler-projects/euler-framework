@@ -30,6 +30,7 @@
 package net.eulerframework.web.module.authentication.entity;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.springframework.security.core.CredentialsContainer;
 
@@ -61,7 +62,7 @@ public interface EulerUserEntity extends CredentialsContainer {
      *
      * @return the authorities
      */
-    Collection<EulerAuthorityEntity> getAuthorities();
+    Collection<? extends EulerAuthorityEntity> getAuthorities();
 
     /**
      * @param encode
@@ -141,7 +142,41 @@ public interface EulerUserEntity extends CredentialsContainer {
     void setMobile(String mobile);
 
     /**
+     * @return
+     */
+    String getEmail();
+
+    /**
+     * @return
+     */
+    String getMobile();
+
+    /**
      * @param enabled
      */
-    void setEnabled(boolean enabled);
+    void setEnabled(Boolean enabled);
+
+    /**
+     * @param accountNonExpired
+     */
+    void setAccountNonExpired(Boolean accountNonExpired);
+
+    /**
+     * @param accountNonLocked
+     */
+    void setAccountNonLocked(Boolean accountNonLocked);
+
+    /**
+     * @param credentialsNonExpired
+     */
+    void setCredentialsNonExpired(Boolean credentialsNonExpired);
+
+    /**
+     * @param root
+     */
+    void setRoot(Boolean root);
+    
+    void setRegistTime(Date registDate);
+    
+    Date getRegistTime();
 }

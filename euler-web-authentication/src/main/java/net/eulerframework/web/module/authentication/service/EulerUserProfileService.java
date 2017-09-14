@@ -29,25 +29,28 @@
  */
 package net.eulerframework.web.module.authentication.service;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
+import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 
 /**
  * @author cFrost
  *
  */
-public interface EulerUserDetailsService extends UserDetailsService {
+public interface EulerUserProfileService {
 
     /**
-     * 通过用户名查找用户主体信息
+     * 判断一个用户档案实体类是否可由此实现类处理
      * 
-     * @param username
-     *            用户名
-     * @return 用户主体信息
-     * @throws UsernameNotFoundException
-     *             查找的用户不存在
+     * @param userProfile 用户档案
+     * @return <code>true</code>表示时自己可以处理的用户档案
      */
-    @Override
-    public EulerUserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    boolean isMyProfile(EulerUserProfileEntity userProfile);
+
+    /**
+     * 创建用户档案
+     * 
+     * @param userProfile 用户档案
+     * @return 新创建的用户档案实体，与传入参数是同一个实例
+     */
+    EulerUserProfileEntity createUserProfile(EulerUserProfileEntity userProfile);
+
 }

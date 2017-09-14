@@ -27,14 +27,22 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.controller.admin;
+package net.eulerframework.web.module.authentication.controller;
 
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import net.eulerframework.web.core.annotation.JspController;
+import net.eulerframework.web.core.base.controller.JspSupportWebController;
 
 /**
  * @author cFrost
  *
  */
-public class UserAdminWebContorller extends AbstractWebController {
-
+@JspController
+@RequestMapping("/")
+public class AuthenticationJspController extends JspSupportWebController {
+    @RequestMapping(value = "signin", method = RequestMethod.GET)
+    public String login() {
+        return this.display("signin");
+    }
 }

@@ -5,14 +5,14 @@ package net.eulerframework.web.module.authentication.controller.ajax.settings.pr
 
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import net.eulerframework.web.core.annotation.AjaxWebController;
+import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 
 /**
  * @author cFrost
  *
  */
-@AjaxWebController
+@AjaxController
 @RequestMapping("/settings/profile")
 public class ProfileSettingsController_ajax extends AjaxSupportWebController {
 

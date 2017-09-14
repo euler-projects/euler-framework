@@ -29,6 +29,8 @@
  */
 package net.eulerframework.web.module.authentication.service;
 
+import javax.annotation.Resource;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,29 +43,30 @@ import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCod
  */
 @Service("passwordService")
 public class PasswordServiceImpl implements PasswordService {
+    
+    @Resource private PasswordEncoder passwordEncoder;
+    @Resource private EulerUserEntityService eulerUserEntityService;
 
     @Override
     public PasswordEncoder getPasswordEncoder() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.passwordEncoder;
     }
 
     @Override
     public EulerUserEntityService getEulerUserEntityService() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.eulerUserEntityService;
     }
 
     @Override
     public void passwdResetSMSGen(String mobile) {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
     public void passwdResetEmailGen(String email) {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override

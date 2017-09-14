@@ -27,48 +27,45 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.controller.settings.account;
+package net.eulerframework.web.module.authentication.controller;
 
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
-import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
-import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.PasswordService;
+import net.eulerframework.web.module.authentication.service.UserRegistService;
 
 /**
  * @author cFrost
  *
  */
 @JspController
-@RequestMapping("/settings/account")
-public class AccountSettingsWebController extends JspSupportWebController {
-    
-    public AccountSettingsWebController() {
-        super();
-        this.setWebControllerName("settings/account");
-    }
+@RequestMapping("/")
+public class UserRegistJspController extends JspSupportWebController {
 
     @Resource
-    private PasswordService passwordService;    
+    private UserRegistService userRegistService;
+    @Resource
+    private PasswordService passwordService;
 
-    @RequestMapping(value = "change-password", method = RequestMethod.GET)
-    public String changePassword() {
-        return this.display("change-password");
+    @RequestMapping(value = "signup", method = RequestMethod.GET)
+    public String signup() {
+        return this.display("signup");
     }
 
-    @RequestMapping(value = "change-password", method = RequestMethod.POST)
-    public String changePassword(
-            @RequestParam(required = true) String oldPassword, 
-            @RequestParam(required = true) String newPassword) 
-                    throws UserNotFoundException, UserInfoCheckWebException {
-        String userId = UserContext.getCurrentUser().getUserId().toString();
-        this.passwordService.updatePassword(userId, oldPassword, newPassword);
+    @RequestMapping(value = "signup", method = RequestMethod.POST)
+    public String litesignup(
+            @RequestParam String username, 
+            @RequestParam(required = false) String email, 
+            @RequestParam(required = false) String mobile, 
+            @RequestParam String password) throws UserInfoCheckWebException {
+        this.userRegistService.signUp(username, email, mobile, password);
         return this.success();
     }
 }

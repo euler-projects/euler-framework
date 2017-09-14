@@ -30,6 +30,7 @@
 package net.eulerframework.web.module.authentication.context;
 
 import java.util.Collection;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,11 +38,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
-import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
 import net.eulerframework.web.module.authentication.service.EulerUserDetailsService;
@@ -103,9 +102,9 @@ public class UserContext {
         if (authentication == null)
             throw new UnAuthenticatedException();
 
-        if (isOAuth2Authentication(authentication)) {
-            authentication = getOAuth2UserAuthentication(authentication);
-        }
+//        if (isOAuth2Authentication(authentication)) {
+//            authentication = getOAuth2UserAuthentication(authentication);
+//        }
 
         Object principal = authentication.getPrincipal();
 
@@ -130,22 +129,22 @@ public class UserContext {
         throw new PrincipalException("Unsupported principal type.");
     }
     
-    private static boolean isOAuth2Authentication(Authentication authentication) {
-        return OAuth2Authentication.class.isAssignableFrom(authentication.getClass());
-    }
-    
-    private static Authentication getOAuth2UserAuthentication(Authentication authentication) {
-        Assert.isTrue(isOAuth2Authentication(authentication));
-        
-        OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
-        Authentication oauth2UserAuthentication = oauth2Authentication.getUserAuthentication();
-
-        if (oauth2UserAuthentication == null) {
-            throw new ClientCredentialsOAuth2AuthenticationException();
-        }
-        
-        return oauth2UserAuthentication;
-    }
+//    private static boolean isOAuth2Authentication(Authentication authentication) {
+//        return OAuth2Authentication.class.isAssignableFrom(authentication.getClass());
+//    }
+//    
+//    private static Authentication getOAuth2UserAuthentication(Authentication authentication) {
+//        Assert.isTrue(isOAuth2Authentication(authentication));
+//        
+//        OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
+//        Authentication oauth2UserAuthentication = oauth2Authentication.getUserAuthentication();
+//
+//        if (oauth2UserAuthentication == null) {
+//            throw new ClientCredentialsOAuth2AuthenticationException();
+//        }
+//        
+//        return oauth2UserAuthentication;
+//    }
     
     /**
      * 提权模式, 仅提升用户权限, 不会改变用户其他信息

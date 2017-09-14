@@ -27,30 +27,31 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = { "**.web.**.controller.admin" }, 
+        basePackages = { "**.web.**.controller" }, 
         useDefaultFilters = false, 
-        includeFilters = @ComponentScan.Filter(WebController.class),
+        includeFilters = @ComponentScan.Filter(JspController.class),
         excludeFilters = @ComponentScan.Filter(
                 type=FilterType.ASPECTJ, 
                 pattern={
-                        "*..web..controller.admin.ajax..*"
+                        "*..web..controller.admin..*",
+                        "*..web..controller.api..*",
+                        "*..web..controller.ajax..*"
                         })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class AdminWebServletContextConfig
-        extends WebMvcConfigurerAdapter {
-    
+public class JspServletContextConfig extends WebMvcConfigurerAdapter {
+
     @Bean
     public ViewResolver viewResolver() {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
         resolver.setViewClass(org.springframework.web.servlet.view.JstlView.class);
 
-        resolver.setPrefix(WebConfig.getAdminJspPath());
+        resolver.setPrefix(WebConfig.getJspPath());
         resolver.setSuffix(".jsp");
         return resolver;
     }

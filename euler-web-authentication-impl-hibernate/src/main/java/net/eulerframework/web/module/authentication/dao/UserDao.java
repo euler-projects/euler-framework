@@ -58,4 +58,32 @@ public class UserDao extends BaseDao<User> {
         return users.get(0);
     }
 
+    /**
+     * @param email
+     * @return
+     */
+    public User loadUserByEmail(String email) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        detachedCriteria.add(Restrictions.eq("email", email));
+        List<User> users = this.query(detachedCriteria);
+        if (users == null || users.isEmpty())
+            return null;
+        return users.get(0);
+    }
+
+    /**
+     * @param mobile
+     * @return
+     */
+    public User loadUserByMobile(String mobile) {
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        detachedCriteria.add(Restrictions.eq("mobile", mobile));
+        List<User> users = this.query(detachedCriteria);
+        if (users == null || users.isEmpty())
+            return null;
+        return users.get(0);
+    }
+
 }

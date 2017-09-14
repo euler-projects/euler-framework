@@ -4,13 +4,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.exception.PageNotFoundException;
 
-@WebController
+@JspController
 @RequestMapping("/")
-public class IndexWebController extends JspSupportWebController {
+public class IndexJspController extends JspSupportWebController {
     
     @RequestMapping(value={""}, method = RequestMethod.GET)
     public String index() {

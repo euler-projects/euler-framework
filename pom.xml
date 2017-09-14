@@ -45,8 +45,8 @@
         <jaxb-api.version>2.2.12</jaxb-api.version>
         <java-mail.version>1.5.5</java-mail.version>
 
-        <springframework.version>4.2.5.RELEASE</springframework.version>
-        <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
+        <springframework.version>4.3.11.RELEASE</springframework.version>
+        <springsecurity.version>4.2.3.RELEASE</springsecurity.version>
         <springsecurity.oauth.version>2.0.9.RELEASE</springsecurity.oauth.version>
         <springsecurity.oauth.jwt.version>1.0.4.RELEASE</springsecurity.oauth.jwt.version>
 

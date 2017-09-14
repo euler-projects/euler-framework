@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import net.eulerframework.web.core.annotation.AjaxWebController;
+import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.module.authentication.service.PasswordService;
@@ -19,9 +19,9 @@ import net.eulerframework.web.module.authentication.service.PasswordService;
  * @author cFrost
  *
  */
-@AjaxWebController
+@AjaxController
 @RequestMapping("/")
-public class UserWebController_ajax extends AjaxSupportWebController {
+public class PasswordResetAjaxController extends AjaxSupportWebController {
 
     @Resource
     private PasswordService passwordService;  

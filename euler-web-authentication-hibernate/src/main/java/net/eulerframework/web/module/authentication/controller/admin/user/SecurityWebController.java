@@ -4,12 +4,12 @@ import javax.annotation.Resource;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.service.AuthorityService;
 import net.eulerframework.web.module.authentication.service.UserService;
 
-@WebController
+@JspController
 @RequestMapping("security")
 public class SecurityWebController extends JspSupportWebController {
     

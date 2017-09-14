@@ -1,11 +1,12 @@
 package net.eulerframework.web.module.authentication.service;
 
+import java.util.Date;
+
 import javax.annotation.Resource;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
-import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
@@ -18,40 +19,56 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
     @Resource private UserDao userDao;
 
     @Override
-    public EulerUserEntity loadUserByUsername(String username) throws UsernameNotFoundException {
-        Assert.notNull(username, "username can not be null");
+    public User loadUserByUserId(String userId) throws UserNotFoundException {
+        return this.userDao.load(userId);
+    }
+
+    @Override
+    public User loadUserByUsername(String username) throws UserNotFoundException {
+        User result = this.userDao.loadUserByUsername(username);
         
-        return this.userDao.loadUserByUsername(username);
+        if(result == null) {
+            throw new UserNotFoundException();
+        }
+        
+        return result;
+    }
+
+    @Override
+    public User loadUserByEmail(String email) throws UserNotFoundException {
+        User result = this.userDao.loadUserByEmail(email);
+        
+        if(result == null) {
+            throw new UserNotFoundException();
+        }
+        
+        return result;
+    }
+
+    @Override
+    public User loadUserByMobile(String mobile) throws UserNotFoundException {
+        User result = this.userDao.loadUserByMobile(mobile);
+        
+        if(result == null) {
+            throw new UserNotFoundException();
+        }
+        
+        return result;
+    }
+
+    @Override
+    public User createUser(EulerUserEntity eulerUserEntity) {
+        Assert.isTrue(User.class.isAssignableFrom(eulerUserEntity.getClass()));
+        User user = (User)eulerUserEntity;
+        user.setRegistTime(new Date());
+        this.userDao.save(user);
+        return user;
     }
 
     @Override
     public void updateUser(EulerUserEntity eulerUserEntity) {
-        if(User.class.isAssignableFrom(eulerUserEntity.getClass())) {
-            this.userDao.update((User)eulerUserEntity);
-        }
-    }
-
-    @Override
-    public EulerUserEntity loadUserByUserId(String userId) throws UserNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public EulerUserEntity loadUserByEmail(String email) throws UserNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public EulerUserEntity loadUserByMobile(String mobile) throws UserNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public EulerUserEntity createUser(EulerUserEntity eulerUserEntity) {
-        // TODO Auto-generated method stub
-        return null;
+        Assert.isTrue(User.class.isAssignableFrom(eulerUserEntity.getClass()));
+        User user = (User)eulerUserEntity;
+        this.userDao.update(user);
     }
 }

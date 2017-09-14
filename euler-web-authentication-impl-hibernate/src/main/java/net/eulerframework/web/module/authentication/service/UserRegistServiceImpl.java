@@ -29,7 +29,17 @@
  */
 package net.eulerframework.web.module.authentication.service;
 
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
+import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
  * @author cFrost
@@ -37,11 +47,33 @@ import org.springframework.stereotype.Service;
  */
 @Service("userRegistService")
 public class UserRegistServiceImpl implements UserRegistService {
+    @Resource private EulerUserEntityService eulerUserEntityService;
+    @Resource private PasswordEncoder passwordEncoder;
+    @Autowired(required = false) private List<EulerUserProfileService> eulerUserProfileServices;
 
     @Override
-    public void signUp(String username, String password) {
-        // TODO Auto-generated method stub
+    public EulerUserEntityService getEulerUserEntityService() {
+        return this.eulerUserEntityService;
+    }
 
+    @Override
+    public List<EulerUserProfileService> getEulerUserProfileServices() {
+        return this.eulerUserProfileServices;
+    }
+
+    @Override
+    public User signUp(String username, String email, String mobile, String password)
+            throws UserInfoCheckWebException {
+        UserDataValidator.validUsername(username);
+        UserDataValidator.validEmail(email);
+        UserDataValidator.validMobile(mobile);
+        UserDataValidator.validPassword(password);
+        User user = new User();
+        user.setUsername(username.trim());
+        user.setEmail(email.trim());
+        user.setMobile(mobile.trim());
+        user.setPassword(this.passwordEncoder.encode(password.trim()));
+        return (User) this.eulerUserEntityService.createUser(user);
     }
 
 }

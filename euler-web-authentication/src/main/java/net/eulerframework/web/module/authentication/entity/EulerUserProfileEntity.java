@@ -24,33 +24,16 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-projects/euler-framework
+ * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.conf;
-
-import javax.annotation.Resource;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+package net.eulerframework.web.module.authentication.entity;
 
 /**
  * @author cFrost
  *
  */
-@EnableWebSecurity
-public class SecurityRootContextConfig {
-    
-    @Resource private PasswordEncoder passwordEncoder;
-    @Resource private UserDetailsService userDetailsService;
-    
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("user").password("password").roles("USER");
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
-    }
+public interface EulerUserProfileEntity {
+    void setUserId(String userId);
+    String getUserId();
 }

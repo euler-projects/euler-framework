@@ -74,7 +74,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         this.credentialsNonExpired = userEntity.isCredentialsNonExpired() == null ? false : userEntity.isCredentialsNonExpired();
         this.enabled = userEntity.isEnabled() == null ? false : userEntity.isEnabled();
         
-        Collection<EulerAuthorityEntity> authorities = userEntity.getAuthorities();
+        Collection<? extends EulerAuthorityEntity> authorities = userEntity.getAuthorities();
         this.authorities = 
                 CollectionUtils.isEmpty(authorities) ? new HashSet<>() : authorities
                     .stream()

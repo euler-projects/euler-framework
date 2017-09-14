@@ -66,9 +66,9 @@ public abstract class WebConfig {
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
 
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.root.RootContextConfig";
-        private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.controller.WebServletContextConfig";
+        private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.controller.JspServletContextConfig";
         private static final String CORE_AJAX_CONFIG_CLASS = "net.eulerframework.config.controller.AjaxServletContextConfig";
-        private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.controller.AdminWebServletContextConfig";
+        private static final String CORE_ADMIN_WEB_CONFIG_CLASS = "net.eulerframework.config.controller.AdminJspServletContextConfig";
         private static final String CORE_ADMIN_AJAX_CONFIG_CLASS = "net.eulerframework.config.controller.AdminAjaxServletContextConfig";
         private static final String CORE_API_CONFIG_CLASS = "net.eulerframework.config.controller.ApiServletContextConfig";
         private static final int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;

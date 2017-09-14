@@ -30,10 +30,20 @@
 package net.eulerframework.web.module.authentication.entity;
 
 import java.util.Collection;
-
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.springframework.util.CollectionUtils;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
@@ -59,6 +69,15 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     private Boolean credentialsNonExpired;
     @Column(name = "ROOT")
     private Boolean root;
+    @Column(name = "REGIST_TIME")
+    private Date registTime;
+    
+    @Transient
+    private Set<Authority> authorities;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "SYS_USER_GROUP", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "GROUP_ID") })
+    private Set<Group> groups;
 
     @Override
     public Boolean isRoot() {
@@ -66,8 +85,21 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     }
 
     @Override
-    public Collection<EulerAuthorityEntity> getAuthorities() {
-        return null;
+    public Collection<Authority> getAuthorities() {
+        Collection<Authority> result =  new HashSet<>();
+        
+        if(!CollectionUtils.isEmpty(this.groups)) {
+            result.addAll(this.groups
+                    .stream()
+                    .flatMap(group -> group.getAuthorities().stream())
+                    .collect(Collectors.toSet()));            
+        }        
+        
+        if(!CollectionUtils.isEmpty(this.authorities)) {
+            result.addAll(this.authorities);
+        }
+        
+        return result;
     }
 
     @Override
@@ -110,22 +142,27 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
         return this.getId();
     }
 
+    @Override
     public String getEmail() {
         return email;
     }
 
+    @Override
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @Override
     public String getMobile() {
         return mobile;
     }
 
+    @Override
     public void setMobile(String mobile) {
         this.mobile = mobile;
     }
 
+    @Override
     public void setUsername(String username) {
         this.username = username;
     }
@@ -135,28 +172,38 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
         this.password = password;
     }
 
+    @Override
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
+    @Override
     public void setAccountNonExpired(Boolean accountNonExpired) {
         this.accountNonExpired = accountNonExpired;
     }
 
+    @Override
     public void setAccountNonLocked(Boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
     }
 
+    @Override
     public void setCredentialsNonExpired(Boolean credentialsNonExpired) {
         this.credentialsNonExpired = credentialsNonExpired;
     }
 
+    @Override
     public void setRoot(Boolean root) {
         this.root = root;
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }  
+    public void setRegistTime(Date registTime) {
+        this.registTime = registTime;
+    }
+
+    @Override
+    public Date getRegistTime() {
+        return this.registTime;
+    }
 }

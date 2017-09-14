@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.service.IAuthenticationService;
 
@@ -16,7 +16,7 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
  * @author cFrost
  *
  */
-@WebController
+@JspController
 @RequestMapping("/settings/account")
 public class AccountSettingsWebController extends JspSupportWebController {
     

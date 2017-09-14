@@ -29,16 +29,49 @@
  */
 package net.eulerframework.web.module.authentication.service;
 
+import java.util.List;
+
+import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
+import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
+import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
+
 /**
  * @author cFrost
  *
  */
 public interface UserRegistService {
+    
+    EulerUserEntityService getEulerUserEntityService();
+    List<EulerUserProfileService> getEulerUserProfileServices();
 
     /**
-     * @param username
-     * @param password
+     * 注册新用户
+     * @param username 用户名
+     * @param email 注册邮箱
+     * @param mobile 注册手机号
+     * @param password 密码
+     * @return 注册生成的用户实体
      */
-    void signUp(String username, String password);
+    EulerUserEntity signUp(String username, String email, String mobile, String password) 
+            throws UserInfoCheckWebException;
+
+    /**
+     * 注册新用户
+     * @param username 用户名
+     * @param email 注册邮箱
+     * @param mobile 注册手机号
+     * @param password 密码
+     * @param userProfile 用户档案
+     */
+    default void signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
+            throws UserInfoCheckWebException {
+        EulerUserEntity user = this.signUp(username, email, mobile, password);
+        userProfile.setUserId(user.getUserId());
+        for(EulerUserProfileService eulerUserProfileService : getEulerUserProfileServices()) {
+            if(eulerUserProfileService.isMyProfile(userProfile)) {
+                eulerUserProfileService.createUserProfile(userProfile);
+            }
+        }
+    }
 
 }

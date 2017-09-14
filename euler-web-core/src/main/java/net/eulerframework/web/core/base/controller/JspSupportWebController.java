@@ -44,12 +44,14 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
+import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
     private final static String THEME_PARAM_NAME = "_theme";
     private final static String THEME_COOKIE_NAME = "EULER_THEME";
+    private final static String CONTROLLER_NAME_SUFFIX = "JspController";
     private final static int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
     
     private String webControllerName;
@@ -77,13 +79,13 @@ public abstract class JspSupportWebController extends AbstractWebController {
         
         String className = this.getClass().getSimpleName();
 
-        int indexOfWebController = className.lastIndexOf("WebController");
+        int indexOfWebController = className.lastIndexOf(CONTROLLER_NAME_SUFFIX);
 
         if (indexOfWebController <= 0)
             throw new RuntimeException(
-                    "If you want to use this.display(), WebController's class name must end with 'WebController'");
+                    "If you want to use this.display(), JspController's class name must end with '" + CONTROLLER_NAME_SUFFIX + "'");
 
-        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("WebController")));
+        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("JspController")));
     }
 
     /**
@@ -196,14 +198,30 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 自定义错误信息可在jsp中用{@code ${__error}}获取
      * 自定义错误代码可在jsp中用{@code ${__code}}获取
      * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
-     * @param viewException 错误异常
+     * @param webRuntimeException 错误异常
      * @return 错误页面
      */
-    private String error(WebRuntimeException viewException) {
-        Assert.notNull(viewException, "Error exception can not be null"); 
-        this.getRequest().setAttribute("__error_description", viewException.getLocalizedMessage());   
-        this.getRequest().setAttribute("__error", viewException.getError());
-        this.getRequest().setAttribute("__code", viewException.getCode()); 
+    private String error(WebRuntimeException webRuntimeException) {
+        Assert.notNull(webRuntimeException, "Error exception can not be null"); 
+        this.getRequest().setAttribute("__error_description", webRuntimeException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", webRuntimeException.getError());
+        this.getRequest().setAttribute("__code", webRuntimeException.getCode()); 
+        return this.display("/common/error");
+    }
+    
+    /**
+     * 显示错误页面
+     * 自定义错误信息可在jsp中用{@code ${__error}}获取
+     * 自定义错误代码可在jsp中用{@code ${__code}}获取
+     * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
+     * @param webException 错误异常
+     * @return 错误页面
+     */
+    private String error(WebException webException) {
+        Assert.notNull(webException, "Error exception can not be null"); 
+        this.getRequest().setAttribute("__error_description", webException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", webException.getError());
+        this.getRequest().setAttribute("__code", webException.getCode()); 
         return this.display("/common/error");
     }
 
@@ -299,6 +317,19 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(WebRuntimeException.class)
     public String webRuntimeException(WebRuntimeException e) {
+        if (WebConfig.isDebugMode()) {
+            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
+        }
+        return this.error(e);
+    }
+
+    /**
+     * 用于在程序发生{@link WebException}异常时统一返回错误信息
+     * 
+     * @return
+     */
+    @ExceptionHandler(WebException.class)
+    public String webException(WebException e) {
         if (WebConfig.isDebugMode()) {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
