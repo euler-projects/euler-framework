@@ -29,11 +29,6 @@
  */
 package net.eulerframework.web.core.listener;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -41,9 +36,6 @@ import org.springframework.stereotype.Component;
 
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.exception.EulerFrameworkInitException;
-import net.eulerframework.web.core.exception.web.WebError;
-import net.eulerframework.web.util.ClassUtils;
 
 @Component
 public class EulerFrameworkCoreListener implements ServletContextListener {
@@ -57,34 +49,6 @@ public class EulerFrameworkCoreListener implements ServletContextListener {
 //            this.initJarJspPages(sce);
         
         ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq());
-        
-        //this.checkWebErrors();
-    }
-
-    private void checkWebErrors() {
-        List<WebError> webErrors;
-        try {
-            webErrors = ClassUtils.getEnumConstants(WebError.class, "net.eulerframework");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        
-        if(webErrors != null) {
-            Set<Integer> errorCodes = new HashSet<>();
-            Set<String> errors = new HashSet<>();
-            for(WebError webError : webErrors) {
-                if(errorCodes.contains(webError.value())) {
-                    throw new EulerFrameworkInitException("错误代码重复: " + webError.value() + " @" + webError.getClass().getName());
-                } else {
-                    errorCodes.add(webError.value());
-                }
-                if(errors.contains(webError.getReasonPhrase())) {
-                    throw new EulerFrameworkInitException("错误代码重复: " + webError.getReasonPhrase() + " @" + webError.getClass().getName());
-                } else {
-                    errors.add(webError.getReasonPhrase());
-                }
-            }
-        }
     }
 
     @Override

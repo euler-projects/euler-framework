@@ -41,8 +41,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
+ * 未完成
  * @author cFrost
- *
+ * @deprecated
  */
 public class ClassUtils {
     private final static ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
