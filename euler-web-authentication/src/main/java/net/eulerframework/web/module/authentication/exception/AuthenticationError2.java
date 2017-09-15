@@ -39,7 +39,7 @@ import net.eulerframework.web.core.exception.web.WebError;
  * @author cFrost
  *
  */
-public enum AuthenticationError implements WebError {
+public enum AuthenticationError2 implements WebError {
     
     PASSWD_RESET_ERROR(710000, "passwd_reset_error"),
     USER_NOT_FOUND(710404, "user_not_found");
@@ -49,7 +49,7 @@ public enum AuthenticationError implements WebError {
     private final String reasonPhrase;
 
 
-    private AuthenticationError(int value, String reasonPhrase) {
+    private AuthenticationError2(int value, String reasonPhrase) {
         this.value = value;
         this.reasonPhrase = reasonPhrase;
     }
