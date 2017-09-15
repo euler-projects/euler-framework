@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -44,8 +45,9 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
-import net.eulerframework.web.core.exception.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.BadCredentialsWebException;
+import net.eulerframework.web.core.exception.web.PageNotFoundException;
+import net.eulerframework.web.core.exception.web.SystemWebError;
 import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
 import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
@@ -309,7 +311,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(PageNotFoundException.class)
     public String pageNotFoundException(PageNotFoundException e) {
-        this.logger.warn(e.getMessage());
         return this.notfound();
     }
 
@@ -320,9 +321,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(WebRuntimeException.class)
     public String webRuntimeException(WebRuntimeException e) {
-        if (WebConfig.isDebugMode()) {
-            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        }
+        this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
     }
 
@@ -333,9 +332,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(WebException.class)
     public String webException(WebException e) {
-        if (WebConfig.isDebugMode()) {
-            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        }
+        this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
     }
     
@@ -344,9 +341,15 @@ public abstract class JspSupportWebController extends AbstractWebController {
         return this.error(new BadCredentialsWebException());
     }
     
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public String missingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return this.error(new WebRuntimeException(e.getMessage(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
+    }
+    
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public String methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        return this.error(e.getMessage());
+        return this.error(new WebRuntimeException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), 
+                SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
 
     /**
