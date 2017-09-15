@@ -3,7 +3,7 @@ package net.eulerframework.web.core.base.response;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
-import net.eulerframework.web.core.exception.web.WebError;
+import net.eulerframework.web.core.exception.web.SystemWebError;
 
 public class ErrorResponse extends LogSupport implements BaseResponse {
 
@@ -12,8 +12,8 @@ public class ErrorResponse extends LogSupport implements BaseResponse {
     private String error_description;
     
     public ErrorResponse() {
-        this.error = WebError.UNDEFINED_ERROR.getReasonPhrase();
-        this.error_code = WebError.UNDEFINED_ERROR.value();        
+        this.error = SystemWebError.UNDEFINED_ERROR.getReasonPhrase();
+        this.error_code = SystemWebError.UNDEFINED_ERROR.value();        
     }
 
     public ErrorResponse(WebRuntimeException webRuntimeException) {

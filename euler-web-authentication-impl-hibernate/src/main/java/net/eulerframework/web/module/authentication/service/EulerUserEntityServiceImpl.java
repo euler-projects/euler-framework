@@ -58,7 +58,8 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
 
     @Override
     public User createUser(EulerUserEntity eulerUserEntity) {
-        Assert.isTrue(User.class.isAssignableFrom(eulerUserEntity.getClass()));
+        Assert.isTrue(User.class.isAssignableFrom(eulerUserEntity.getClass()), 
+                "eulerUserEntity must be an instance of net.eulerframework.web.module.authentication.entity.User");
         User user = (User)eulerUserEntity;
         user.setRegistTime(new Date());
         this.userDao.save(user);
@@ -67,7 +68,8 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
 
     @Override
     public void updateUser(EulerUserEntity eulerUserEntity) {
-        Assert.isTrue(User.class.isAssignableFrom(eulerUserEntity.getClass()));
+        Assert.isTrue(User.class.isAssignableFrom(eulerUserEntity.getClass()), 
+                "eulerUserEntity must be an instance of net.eulerframework.web.module.authentication.entity.User");
         User user = (User)eulerUserEntity;
         this.userDao.update(user);
     }

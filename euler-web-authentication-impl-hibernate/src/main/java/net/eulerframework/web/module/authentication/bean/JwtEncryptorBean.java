@@ -1,15 +1,8 @@
 package net.eulerframework.web.module.authentication.bean;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.common.util.io.file.FileReadException;
-import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
-import net.eulerframework.common.util.jwt.JwtEncryptor;
 
 @Configuration
 public class JwtEncryptorBean extends LogSupport {

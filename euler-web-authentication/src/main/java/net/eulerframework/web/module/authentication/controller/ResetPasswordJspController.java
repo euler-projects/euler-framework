@@ -51,13 +51,13 @@ import net.eulerframework.web.module.authentication.service.PasswordService;
  */
 @JspController
 @RequestMapping("/")
-public class PasswordReseJspController extends JspSupportWebController {
+public class ResetPasswordJspController extends JspSupportWebController {
     @Resource
     private PasswordService passwordService;
     
     @RequestMapping(value = "reset-password", method = RequestMethod.GET)
     public String resetPassword(
-            @RequestParam(required = true) ResetPasswordType type,
+            @RequestParam(required = false) ResetPasswordType type,
             @RequestParam(required = false) String token) {
         if (ResetPasswordType.EMAIL.equals(type)) {
             if (StringUtils.isNull(token))
@@ -75,7 +75,7 @@ public class PasswordReseJspController extends JspSupportWebController {
         } else if (ResetPasswordType.SMS.equals(type)) {
             return this.display("reset-password-sms-collector");
         } else {
-            return this.notfound();
+            return this.display("reset-password");
         }
     }
 

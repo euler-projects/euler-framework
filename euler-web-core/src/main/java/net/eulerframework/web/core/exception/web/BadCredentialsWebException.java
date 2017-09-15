@@ -27,42 +27,19 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.exception;
+package net.eulerframework.web.core.exception.web;
 
 /**
- * 系统预定义用户认证模块异常代码
- * 
- * <p>所有系统预定义用户认证模块异常代范围为{@code 710000 ~ 719999}</p>
- * 
  * @author cFrost
  *
  */
-public enum AuthenticationError {
+public class BadCredentialsWebException extends WebRuntimeException {
     
-    PASSWD_RESET_ERROR(710000, "passwd_reset_error"),
-    USER_NOT_FOUND(710404, "user_not_found");
-    
-    private final int value;
-
-    private final String reasonPhrase;
-
-
-    private AuthenticationError(int value, String reasonPhrase) {
-        this.value = value;
-        this.reasonPhrase = reasonPhrase;
+    public BadCredentialsWebException() {
+        this("_BAD_CREDENTIALS");
     }
 
-    /**
-     * Return the integer value of this web error code.
-     */
-    public int value() {
-        return this.value;
-    }
-
-    /**
-     * Return the reason phrase of this web error code.
-     */
-    public String getReasonPhrase() {
-        return reasonPhrase;
+    public BadCredentialsWebException(String message) {
+        super(message, SystemWebError.BAD_CREDENTIALS);
     }
 }

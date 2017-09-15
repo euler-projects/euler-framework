@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.web.core.base.response.ErrorResponse;
-import net.eulerframework.web.core.exception.web.DefaultWebRuntimeException;
+import net.eulerframework.web.core.exception.web.SystemWebError;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
-import net.eulerframework.web.core.exception.web.WebError;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class AbstractApiEndpoint extends BaseController {
@@ -26,7 +25,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ExceptionHandler(BindException.class)
     public Object bindException(BindException e) {
         this.logger.error(e.getMessage(), e);
-        return new ErrorResponse(new DefaultWebRuntimeException(e.getMessage(), WebError.ILLEGAL_PARAMETER, e));
+        return new ErrorResponse(new WebRuntimeException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
     }
 
     /**
@@ -50,7 +49,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public Object accessDeniedException(AccessDeniedException e) {
-        return new ErrorResponse(new DefaultWebRuntimeException(e.getMessage(), WebError.ACCESS_DENIED, e));
+        return new ErrorResponse(new WebRuntimeException(e.getMessage(), SystemWebError.ACCESS_DENIED, e));
     }
 
     /**
@@ -61,7 +60,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public Object missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        return new ErrorResponse(new DefaultWebRuntimeException(e.getMessage(), WebError.ILLEGAL_PARAMETER, e));
+        return new ErrorResponse(new WebRuntimeException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
     }
 
     /**
@@ -72,7 +71,7 @@ public abstract class AbstractApiEndpoint extends BaseController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException.class)
     public Object illegalArgumentException(IllegalArgumentException e) {
-        return new ErrorResponse(new DefaultWebRuntimeException(e.getMessage(), WebError.ILLEGAL_ARGUMENT, e));
+        return new ErrorResponse(new WebRuntimeException(e.getMessage(), SystemWebError.ILLEGAL_ARGUMENT, e));
     }
 
     /**

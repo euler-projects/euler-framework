@@ -36,13 +36,16 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.PageNotFoundException;
+import net.eulerframework.web.core.exception.web.BadCredentialsWebException;
 import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
 import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
@@ -334,6 +337,16 @@ public abstract class JspSupportWebController extends AbstractWebController {
             this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         }
         return this.error(e);
+    }
+    
+    @ExceptionHandler(BadCredentialsException.class)
+    public String badCredentialsException(BadCredentialsException e) {
+        return this.error(new BadCredentialsWebException());
+    }
+    
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public String methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        return this.error(e.getMessage());
     }
 
     /**

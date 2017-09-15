@@ -62,8 +62,8 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
     private boolean enabled;
 
     public EulerUserDetails(EulerUserEntity userEntity) {
-        Assert.hasText(userEntity.getUsername());
-        Assert.hasText(userEntity.getPassword());
+        Assert.hasText(userEntity.getUsername(), "Username can not be null");
+        Assert.hasText(userEntity.getPassword(), "Password can not be null");
         
         this.userId = UUID.fromString(userEntity.getUserId());
         this.username = userEntity.getUsername();
