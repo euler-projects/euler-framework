@@ -32,6 +32,7 @@ package net.eulerframework.web.module.authentication.service;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import net.eulerframework.common.util.Assert;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
 import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
@@ -72,11 +73,11 @@ public interface PasswordService {
     
     /**
      * 从密码重置短信验证码中解析用户ID
-     * @param code 密码重置短信验证码
+     * @param pin 密码重置短信验证码
      * @return 用户ID
      * @throws InvalidSMSResetCodeException 密码重置短信验证码不合法
      */
-    String analyzeUserIdFromSMSResetCode(String code)
+    String analyzeUserIdFromSMSResetPin(String pin)
             throws InvalidSMSResetCodeException;
     
     /**
@@ -140,15 +141,17 @@ public interface PasswordService {
     
     /**
      * 通过密码重置短信验证码重置密码
-     * @param code 密码重置短信验证码
+     * @param pin 密码重置短信验证码
      * @param password 新密码
      * @throws InvalidSMSResetCodeException 密码重置短信验证码不合法
      * @throws UserNotFoundException 用户不存在
      * @throws UserInfoCheckWebException 新密码不符合要求
      */
-    default void resetPasswordBySMSResetCode(String code, String password)
+    default void resetPasswordBySMSResetPin(String pin, String password)
             throws InvalidSMSResetCodeException, UserNotFoundException, UserInfoCheckWebException {
-        this.updatePassword(this.analyzeUserIdFromSMSResetCode(code), password);
+        Assert.hasText(pin, "A pin is required to reset your password");
+        Assert.hasText(password, "New password can not be null");
+        this.updatePassword(this.analyzeUserIdFromSMSResetPin(pin), password);
     }
 
     /**
@@ -161,6 +164,8 @@ public interface PasswordService {
      */
     default void resetPasswordByEmailResetToken(String token, String password) 
             throws InvalidEmailResetTokenException, UserNotFoundException, UserInfoCheckWebException {
+        Assert.hasText(token, "A token is required to reset your password");
+        Assert.hasText(password, "New password can not be null");
         this.updatePassword(this.analyzeUserIdFromEmailResetToken(token), password);
     }
 }

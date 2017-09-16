@@ -58,7 +58,8 @@ public class ResetPasswordJspController extends JspSupportWebController {
     @RequestMapping(value = "reset-password", method = RequestMethod.GET)
     public String resetPassword(
             @RequestParam(required = false) ResetPasswordType type,
-            @RequestParam(required = false) String token) {
+            @RequestParam(required = false) String token,
+            @RequestParam(required = false) String pin) {
         if (ResetPasswordType.EMAIL.equals(type)) {
             if (StringUtils.isNull(token))
                 return this.display("reset-password-email-collector");
@@ -66,14 +67,25 @@ public class ResetPasswordJspController extends JspSupportWebController {
             try {
                 this.passwordService.analyzeUserIdFromEmailResetToken(token);
                 this.getRequest().setAttribute("token", token);
-                this.getRequest().setAttribute("type", "email");
+                this.getRequest().setAttribute("type", ResetPasswordType.EMAIL);
                 return this.display("reset-password-new-password");
             } catch (InvalidEmailResetTokenException e) {
                 this.logger.debug("resetPassword error", e);
                 return this.notfound();
             }
         } else if (ResetPasswordType.SMS.equals(type)) {
-            return this.display("reset-password-sms-collector");
+            if (StringUtils.isNull(pin))
+                return this.display("reset-password-sms-collector");
+
+            try {
+                this.passwordService.analyzeUserIdFromSMSResetPin(pin);
+                this.getRequest().setAttribute("pin", pin);
+                this.getRequest().setAttribute("type", ResetPasswordType.SMS);
+                return this.display("reset-password-new-password");
+            } catch (InvalidSMSResetCodeException e) {
+                this.logger.debug("resetPassword error", e);
+                return this.notfound();
+            }
         } else {
             return this.display("reset-password");
         }
@@ -88,7 +100,8 @@ public class ResetPasswordJspController extends JspSupportWebController {
     @RequestMapping(value = "reset-password", method = RequestMethod.POST)
     public String resetPassword(
             @RequestParam(required = true) ResetPasswordType type, 
-            @RequestParam(required = true) String token, 
+            @RequestParam(required = false) String token, 
+            @RequestParam(required = false) String pin, 
             @RequestParam(required = true) String password) {
 
         try {
@@ -96,7 +109,7 @@ public class ResetPasswordJspController extends JspSupportWebController {
                 this.passwordService.resetPasswordByEmailResetToken(token, password);
                 return this.success();
             } else if (ResetPasswordType.SMS.equals(type)) {
-                this.passwordService.resetPasswordBySMSResetCode(token, password);
+                this.passwordService.resetPasswordBySMSResetPin(pin, password);
                 return this.success();
             } else {
                 return this.notfound();

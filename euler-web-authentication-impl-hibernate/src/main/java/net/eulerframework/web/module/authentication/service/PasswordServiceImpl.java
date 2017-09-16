@@ -70,7 +70,7 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     @Override
-    public String analyzeUserIdFromSMSResetCode(String code) throws InvalidSMSResetCodeException {
+    public String analyzeUserIdFromSMSResetPin(String pin) throws InvalidSMSResetCodeException {
         // TODO Auto-generated method stub
         return null;
     }
