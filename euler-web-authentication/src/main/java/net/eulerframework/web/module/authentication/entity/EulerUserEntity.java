@@ -170,11 +170,6 @@ public interface EulerUserEntity extends CredentialsContainer {
      * @param credentialsNonExpired
      */
     void setCredentialsNonExpired(Boolean credentialsNonExpired);
-
-    /**
-     * @param root
-     */
-    void setRoot(Boolean root);
     
     void setRegistTime(Date registDate);
     

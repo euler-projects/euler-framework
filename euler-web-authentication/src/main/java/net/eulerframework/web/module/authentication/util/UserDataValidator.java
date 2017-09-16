@@ -29,6 +29,8 @@
  */
 package net.eulerframework.web.module.authentication.util;
 
+import org.springframework.util.StringUtils;
+
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
@@ -42,12 +44,12 @@ public abstract class UserDataValidator {
 
     private static EulerUserEntityService eulerUserEntityService;
     
-    public static void setUserDetailsServicel(EulerUserEntityService eulerUserEntityService) {
+    public static void setEulerUserEntityService(EulerUserEntityService eulerUserEntityService) {
         UserDataValidator.eulerUserEntityService = eulerUserEntityService;
     }
     
     public static void validUsername(String username) throws UserInfoCheckWebException {
-        if (username == null) {
+        if (!StringUtils.hasText(username)) {
             throw new UserInfoCheckWebException("_USERNAME_IS_NULL");
         }
         if (!(username.matches(SecurityConfig.getUsernameFormat()))) {
@@ -68,7 +70,7 @@ public abstract class UserDataValidator {
     }
 
     public static void validEmail(String email) throws UserInfoCheckWebException {
-        if (email == null) {
+        if (!StringUtils.hasText(email)) {
             throw new UserInfoCheckWebException("_EMAIL_IS_NULL");
         }
         if (!(email.matches(SecurityConfig.getEmailFormat()))) {
@@ -88,18 +90,22 @@ public abstract class UserDataValidator {
     }
 
     public static void validMobile(String mobile) throws UserInfoCheckWebException {
-        if (mobile != null) {
-            try {
-                eulerUserEntityService.loadUserByMobile(mobile);
-                /*
-                 * Program running here means this mobile has already been used!
-                 */
-                throw new UserInfoCheckWebException("_MOBILE_ALREADY_BE_USED");
-            } catch (UserNotFoundException e) {
-                /*
-                 * User not found means this mobile has not been used!
-                 */
-            }
+        if (!StringUtils.hasText(mobile)) {
+            throw new UserInfoCheckWebException("_MOBILE_IS_NULL");
+        }
+        if (!(mobile.matches(SecurityConfig.getMobileFormat()))) {
+            throw new UserInfoCheckWebException("_INCORRECT_MOBILE_FORMAT");
+        }
+        try {
+            eulerUserEntityService.loadUserByMobile(mobile);
+            /*
+             * Program running here means this mobile has already been used!
+             */
+            throw new UserInfoCheckWebException("_MOBILE_ALREADY_BE_USED");
+        } catch (UserNotFoundException e) {
+            /*
+             * User not found means this mobile has not been used!
+             */
         }
     }
 

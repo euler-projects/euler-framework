@@ -9,6 +9,8 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.service.EulerUserDetailsService;
+import net.eulerframework.web.module.authentication.service.EulerUserEntityService;
+import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 public class UserContextListener extends LogSupport implements ServletContextListener {
     
@@ -17,6 +19,8 @@ public class UserContextListener extends LogSupport implements ServletContextLis
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
         EulerUserDetailsService userDetailsService= rwp.getBean("userDetailsService", EulerUserDetailsService.class);
         UserContext.setUserDetailsServicel(userDetailsService);
+        EulerUserEntityService eulerUserEntityService= rwp.getBean(EulerUserEntityService.class);
+        UserDataValidator.setEulerUserEntityService(eulerUserEntityService);
     }
 
     @Override

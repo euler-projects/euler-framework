@@ -29,10 +29,17 @@
  */
 package net.eulerframework.web.module.authentication.controller;
 
+import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
+import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
+import net.eulerframework.web.module.authentication.service.PasswordService;
+import net.eulerframework.web.module.authentication.service.UserRegistService;
 
 /**
  * @author cFrost
@@ -44,5 +51,25 @@ public class AuthenticationJspController extends JspSupportWebController {
     @RequestMapping(value = "signin", method = RequestMethod.GET)
     public String login() {
         return this.display("signin");
+    }
+
+    @Resource
+    private UserRegistService userRegistService;
+    @Resource
+    private PasswordService passwordService;
+
+    @RequestMapping(value = "signup", method = RequestMethod.GET)
+    public String signup() {
+        return this.display("signup");
+    }
+
+    @RequestMapping(value = "signup", method = RequestMethod.POST)
+    public String litesignup(
+            @RequestParam String username, 
+            @RequestParam(required = false) String email, 
+            @RequestParam(required = false) String mobile, 
+            @RequestParam String password) throws UserInfoCheckWebException {
+        this.userRegistService.signUp(username, email, mobile, password);
+        return this.success();
     }
 }

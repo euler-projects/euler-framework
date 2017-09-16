@@ -33,6 +33,7 @@ public abstract class SecurityConfig {
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
+        private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "security.signup.mobile.format";
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "security.signup.password.format";
         private static final String SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = "security.signup.password.minLength";
         private static final String SECURITY_SIGNUP_AUTO_SIGNIN = "security.signup.autoSignin";
@@ -52,6 +53,7 @@ public abstract class SecurityConfig {
 
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; // 至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; // 可含有-_.的email
+        private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "^[0-9\\+][0-9\\-]+$"; //以数字或+开头，后续可含有数组或-
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; // ASCII可显示非空白字符
         private static final int SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = 6;
         private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
@@ -144,6 +146,14 @@ public abstract class SecurityConfig {
                     }
 
                 });
+
+        return (String) cachedConfig;
+    }
+
+    public static String getMobileFormat() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_MOBILE_FORMAT,
+                configKey -> properties.get(configKey,
+                        WebConfigDefault.SECURITY_SIGNUP_MOBILE_FORMAT));
 
         return (String) cachedConfig;
     }

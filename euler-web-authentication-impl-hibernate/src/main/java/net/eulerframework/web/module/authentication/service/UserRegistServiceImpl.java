@@ -36,6 +36,7 @@ import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
@@ -64,15 +65,27 @@ public class UserRegistServiceImpl implements UserRegistService {
     @Override
     public User signUp(String username, String email, String mobile, String password)
             throws UserInfoCheckWebException {
-        UserDataValidator.validUsername(username);
-        UserDataValidator.validEmail(email);
-        UserDataValidator.validMobile(mobile);
-        UserDataValidator.validPassword(password);
         User user = new User();
+        
+        UserDataValidator.validUsername(username);
         user.setUsername(username.trim());
-        user.setEmail(email.trim());
-        user.setMobile(mobile.trim());
+        
+        if(StringUtils.hasText(email)) {
+            UserDataValidator.validEmail(email);
+            user.setEmail(email.trim());
+        }
+        
+        if(StringUtils.hasText(mobile)) {
+            UserDataValidator.validMobile(mobile);
+            user.setMobile(mobile.trim());
+        }
+        
+        UserDataValidator.validPassword(password);
         user.setPassword(this.passwordEncoder.encode(password.trim()));
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
         return (User) this.eulerUserEntityService.createUser(user);
     }
 

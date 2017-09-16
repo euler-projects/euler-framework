@@ -259,7 +259,8 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     protected String success(String message, Target... target) {
         this.getRequest().setAttribute("__message", message);   
-        this.getRequest().setAttribute("__targets", target);  
+        this.getRequest().setAttribute("__targets", target);
+        //return this.redirect("/common/success");
         return this.display("/common/success");
     }
 
