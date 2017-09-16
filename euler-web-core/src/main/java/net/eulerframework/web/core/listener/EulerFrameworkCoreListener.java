@@ -35,10 +35,11 @@ import javax.servlet.ServletContextListener;
 import org.springframework.stereotype.Component;
 
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.config.WebConfig;
 
 @Component
-public class EulerFrameworkCoreListener implements ServletContextListener {
+public class EulerFrameworkCoreListener extends LogSupport implements ServletContextListener {
 //    private final Logger logger = LogManager.getLogger();
 //
 //    private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -47,7 +48,7 @@ public class EulerFrameworkCoreListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
 //        if(WebConfig.isJspAutoDeployEnabled())
 //            this.initJarJspPages(sce);
-        
+        this.logger.info("Init euler framework core listener");
         ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq());
     }
 
