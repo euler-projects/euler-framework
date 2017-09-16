@@ -205,6 +205,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
 
         container.setAttribute("__CONTEXT_PATH", contextPath);
         container.setAttribute("__ASSETS_PATH", contextPath + WebConfig.getAssetsPath());
+        container.setAttribute("__ADMIN_PATH", contextPath + WebConfig.getAdminRootPath());
 
         container.setAttribute("__FILE_DOWNLOAD_PATH", contextPath + "/file");
         container.setAttribute("__FILE_UPLOAD_ACTION", contextPath + "/uploadFile");

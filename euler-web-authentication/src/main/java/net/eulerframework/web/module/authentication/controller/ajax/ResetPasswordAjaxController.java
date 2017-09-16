@@ -8,7 +8,6 @@ import javax.annotation.Resource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
@@ -21,13 +20,12 @@ import net.eulerframework.web.module.authentication.service.PasswordService;
  */
 @AjaxController
 @RequestMapping("/")
-public class PasswordResetAjaxController extends AjaxSupportWebController {
+public class ResetPasswordAjaxController extends AjaxSupportWebController {
 
     @Resource
     private PasswordService passwordService;  
 
-    @ResponseBody
-    @RequestMapping(value = "getPasswordResetSMS", method = RequestMethod.POST)
+    @RequestMapping(value = "reset-password-email-sms", method = RequestMethod.POST)
     public EasyUIAjaxResponse<String> getPasswordResetSMS(@RequestParam String mobile) {
         this.passwordService.passwdResetSMSGen(mobile);
         return EasyUIAjaxResponse.SUCCESS_RESPONSE;

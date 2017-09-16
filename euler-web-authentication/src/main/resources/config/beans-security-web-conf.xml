@@ -20,11 +20,37 @@
 
     <beans:import resource="classpath:**/web-security-web-config.xml"/>
 
-    <authentication-manager>
+    <authentication-manager alias="authenticationManager">
         <authentication-provider user-service-ref="userDetailsService">
             <password-encoder ref="passwordEncoder" />
         </authentication-provider>
     </authentication-manager>
+    
+    <beans:bean id="authenticationEntryPoint"  
+        class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">  
+        <beans:constructor-arg  value="${security.loginPage}" />  
+    </beans:bean> 
+    
+    <beans:bean id="formLoginFilter" class="net.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  
+        <beans:property name="authenticationManager" ref="authenticationManager"/>
+        <beans:property name="requiresAuthenticationRequestMatcher" ref="requiresAuthenticationRequestMatcher"/>  
+        <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>   
+        <beans:property name="authenticationFailureHandler" ref="authenticationFailureHandler"/> 
+        <beans:property name="enableCaptcha" value="${security.login.enableCaptcha}"/>
+    </beans:bean> 
+    
+    <beans:bean id="requiresAuthenticationRequestMatcher" class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <beans:constructor-arg  value="${security.login.processingUrl}" />
+        <beans:constructor-arg  value="POST" />
+    </beans:bean>
+    
+    <beans:bean id="authenticationSuccessHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler"> 
+        <beans:property name="defaultTargetUrl" value="${security.login.defaultTargetUrl}"/> 
+    </beans:bean>
+    
+    <beans:bean id="authenticationFailureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+        <beans:property name="defaultFailureUrl" value="${security.login.defaultFailureUrl}"/>     
+    </beans:bean>
 
     <beans:beans profile="web-security-ldap">
         

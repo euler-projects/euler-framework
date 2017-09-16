@@ -34,8 +34,9 @@ import javax.annotation.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
-import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
+import net.eulerframework.web.module.authentication.exception.InvalidSmsResetPinException;
 
 /**
  * @author cFrost
@@ -59,8 +60,7 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void passwdResetSMSGen(String mobile) {
-        // TODO Auto-generated method stub
-        
+        throw new WebRuntimeException();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     @Override
-    public String analyzeUserIdFromSMSResetPin(String pin) throws InvalidSMSResetCodeException {
+    public String analyzeUserIdFromSmsResetPin(String pin) throws InvalidSmsResetPinException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -40,7 +40,7 @@ import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.enums.ResetPasswordType;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
-import net.eulerframework.web.module.authentication.exception.InvalidSMSResetCodeException;
+import net.eulerframework.web.module.authentication.exception.InvalidSmsResetPinException;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.PasswordService;
@@ -61,34 +61,42 @@ public class ResetPasswordJspController extends JspSupportWebController {
             @RequestParam(required = false) String token,
             @RequestParam(required = false) String pin) {
         if (ResetPasswordType.EMAIL.equals(type)) {
-            if (StringUtils.isNull(token))
-                return this.display("reset-password-email-collector");
-
-            try {
-                this.passwordService.analyzeUserIdFromEmailResetToken(token);
-                this.getRequest().setAttribute("token", token);
-                this.getRequest().setAttribute("type", ResetPasswordType.EMAIL);
-                return this.display("reset-password-new-password");
-            } catch (InvalidEmailResetTokenException e) {
-                this.logger.debug("resetPassword error", e);
-                return this.notfound();
-            }
+            return this.resetPasswordByEmail(token);
         } else if (ResetPasswordType.SMS.equals(type)) {
-            if (StringUtils.isNull(pin))
-                return this.display("reset-password-sms-collector");
-
-            try {
-                this.passwordService.analyzeUserIdFromSMSResetPin(pin);
-                this.getRequest().setAttribute("pin", pin);
-                this.getRequest().setAttribute("type", ResetPasswordType.SMS);
-                return this.display("reset-password-new-password");
-            } catch (InvalidSMSResetCodeException e) {
-                this.logger.debug("resetPassword error", e);
-                return this.notfound();
-            }
+            return this.resetPasswordBySms(pin);
         } else {
             return this.display("reset-password");
         }
+    }
+    
+    private String resetPasswordByEmail(String token) {
+        if (StringUtils.isNull(token))
+            return this.display("reset-password-email-collector");
+
+        try {
+            this.passwordService.analyzeUserIdFromEmailResetToken(token);
+            this.getRequest().setAttribute("token", token);
+            this.getRequest().setAttribute("type", ResetPasswordType.EMAIL);
+            return this.display("reset-password-new-password");
+        } catch (InvalidEmailResetTokenException e) {
+            this.logger.debug("resetPassword error", e);
+            return this.notfound();
+        }        
+    }
+    
+    private String resetPasswordBySms(String pin) {
+        if (StringUtils.isNull(pin))
+            return this.display("reset-password-sms-collector");
+
+        try {
+            this.passwordService.analyzeUserIdFromSmsResetPin(pin);
+            this.getRequest().setAttribute("pin", pin);
+            this.getRequest().setAttribute("type", ResetPasswordType.SMS);
+            return this.display("reset-password-new-password");
+        } catch (InvalidSmsResetPinException e) {
+            this.logger.debug("resetPassword error", e);
+            return this.notfound();
+        }        
     }
 
     @RequestMapping(value = "reset-password-email", method = RequestMethod.POST)
@@ -109,12 +117,12 @@ public class ResetPasswordJspController extends JspSupportWebController {
                 this.passwordService.resetPasswordByEmailResetToken(token, password);
                 return this.success();
             } else if (ResetPasswordType.SMS.equals(type)) {
-                this.passwordService.resetPasswordBySMSResetPin(pin, password);
+                this.passwordService.resetPasswordBySmsResetPin(pin, password);
                 return this.success();
             } else {
                 return this.notfound();
             }
-        } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSMSResetCodeException | UserInfoCheckWebException e) {
+        } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSmsResetPinException | UserInfoCheckWebException e) {
             this.logger.debug("resetPassword error", e);
             return this.notfound();
         }
