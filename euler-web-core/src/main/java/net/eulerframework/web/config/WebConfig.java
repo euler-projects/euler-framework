@@ -44,6 +44,7 @@ public abstract class WebConfig {
         private static final String WEB_DEFAULT_THEME = "web.defaultTheme";
         private static final String WEB_UPLOAD_PATH = "web.uploadPath";
         private static final String WEB_JSP_PATH = "web.jspPath";
+        private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
         private static final String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
         private static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
@@ -78,6 +79,7 @@ public abstract class WebConfig {
         private static final String WEB_DEFAULT_THEME = "default";
         private static final String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
         private static final String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\\files";
+        private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
         private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private static final String WEB_ADMIN_ROOT_PATH = "/admin";
@@ -218,6 +220,19 @@ public abstract class WebConfig {
         });
 
         return (String) cachedConfig;
+    }
+    
+
+    /**
+     * @return
+     */
+    public static boolean isJspAutoDeployEnabled() {
+        Object cachedConfig = CONFIG_CAHCE.get(
+                WebConfigKey.WEB_JSP_AUTO_DEPLOY_ENABLED, 
+                key -> properties.getBooleanValue(key, WebConfigDefault.WEB_JSP_AUTO_DEPLOY_ENABLED)
+        );
+        
+        return (boolean) cachedConfig;
     }
 
     public static String getAdminJspPath() {

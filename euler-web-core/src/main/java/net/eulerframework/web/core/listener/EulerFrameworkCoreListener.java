@@ -56,8 +56,8 @@ public class EulerFrameworkCoreListener extends LogSupport implements ServletCon
     public void contextDestroyed(ServletContextEvent sce) {
     }
 
-//    private final static String JAR_JSP_PATH = "classpath*:**/web/module/*/META-INF/pages/*";
-//    private final static String JAR_MODULE_JSP_FOLDER = "/META-INF/pages";
+//    private final static String JAR_JSP_PATH = "classpath*:jsp/**/*.jsp";
+//    private final static String WEB_JSP_PATH = WebCongfig.get
 //    private void initJarJspPages(ServletContextEvent sce) {
 //        Resource[] resources = null;
 //        InputStream inputStream = null;
