@@ -42,9 +42,9 @@ public abstract class WebConfig {
         // [web]
         private static final String WEB_SITENAME = "web.sitename";
         private static final String WEB_DEFAULT_THEME = "web.defaultTheme";
-        private static final String WEB_UPLOAD_PATH = "web.uploadPath";
+        private static final String WEB_FILE_SAVE_PATH = "web.fileSavePath";
         private static final String WEB_JSP_PATH = "web.jspPath";
-        private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
+        //private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
         private static final String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
         private static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
@@ -77,9 +77,9 @@ public abstract class WebConfig {
 
         private static final String WEB_SITENAME = "DEMO";
         private static final String WEB_DEFAULT_THEME = "default";
-        private static final String WEB_UPLOAD_PATH_UNIX = "file:///var/lib/euler-framework/archive/files";
-        private static final String WEB_UPLOAD_PATH_WIN = "file://C:\\euler-framework-data\\archive\\files";
-        private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
+        private static final String WEB_FILE_SAVE_PATH_UNIX = "file:///var/lib/euler-framework/";
+        private static final String WEB_FILE_SAVE_PATH_WIN = "file://C:\\euler-framework\\";
+        //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
         private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private static final String WEB_ADMIN_ROOT_PATH = "/admin";
@@ -130,6 +130,10 @@ public abstract class WebConfig {
             }
 
             result = CommonUtils.convertDirToUnixFormat(result);
+            
+            while(result.endsWith("/")) {
+                result = result.substring(0, result.length() - 1);
+            }
 
             if (!result.startsWith("/"))
                 result = "/" + result;
@@ -156,6 +160,10 @@ public abstract class WebConfig {
                 }
 
                 result = CommonUtils.convertDirToUnixFormat(result);
+                
+                while(result.endsWith("/")) {
+                    result = result.substring(0, result.length() - 1);
+                }
 
                 if (!result.startsWith("/"))
                     result = "/" + result;
@@ -167,26 +175,27 @@ public abstract class WebConfig {
         return (String) cachedConfig;
     }
 
-    public static String getUploadPath() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_UPLOAD_PATH, new DataGetter<String, Object>() {
+    public static String getFileSavePath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_FILE_SAVE_PATH, new DataGetter<String, Object>() {
 
             @Override
             public Object getData(String key) {
 
                 String result;
                 try {
-                    result = CommonUtils.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
+                    result = properties.get(WebConfigKey.WEB_FILE_SAVE_PATH);
                 } catch (PropertyNotFoundException e) {
                     if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                         LOGGER.info("OS is windows");
-                        result = WebConfigDefault.WEB_UPLOAD_PATH_WIN;
+                        result = WebConfigDefault.WEB_FILE_SAVE_PATH_WIN;
                     } else {
                         LOGGER.info("OS isn't windows");
-                        result = WebConfigDefault.WEB_UPLOAD_PATH_UNIX;
+                        result = WebConfigDefault.WEB_FILE_SAVE_PATH_UNIX;
                     }
-                    LOGGER.warn("Couldn't load " + WebConfigKey.WEB_UPLOAD_PATH + " , use " + result + " for default.");
+                    LOGGER.warn("Couldn't load " + WebConfigKey.WEB_FILE_SAVE_PATH + " , use " + result + " for default.");
                 }
 
+                result = CommonUtils.convertDirToUnixFormat(result);
                 if (!result.startsWith("/") && !result.startsWith("file://")) {
                     result = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(result);
                 } else {
@@ -209,12 +218,8 @@ public abstract class WebConfig {
             @Override
             public Object getData(String key) {
 
-                String result = CommonUtils.convertDirToUnixFormat(
+                return CommonUtils.convertDirToUnixFormat(
                         properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
-                // 统一添加/结尾，这样在controller中就可以不加/前缀
-                result = result + "/";
-
-                return result;
             }
 
         });
@@ -222,18 +227,14 @@ public abstract class WebConfig {
         return (String) cachedConfig;
     }
     
-
-    /**
-     * @return
-     */
-    public static boolean isJspAutoDeployEnabled() {
-        Object cachedConfig = CONFIG_CAHCE.get(
-                WebConfigKey.WEB_JSP_AUTO_DEPLOY_ENABLED, 
-                key -> properties.getBooleanValue(key, WebConfigDefault.WEB_JSP_AUTO_DEPLOY_ENABLED)
-        );
-        
-        return (boolean) cachedConfig;
-    }
+//    public static boolean isJspAutoDeployEnabled() {
+//        Object cachedConfig = CONFIG_CAHCE.get(
+//                WebConfigKey.WEB_JSP_AUTO_DEPLOY_ENABLED, 
+//                key -> properties.getBooleanValue(key, WebConfigDefault.WEB_JSP_AUTO_DEPLOY_ENABLED)
+//        );
+//        
+//        return (boolean) cachedConfig;
+//    }
 
     public static String getAdminJspPath() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_JSP_PATH, new DataGetter<String, Object>() {
@@ -241,12 +242,8 @@ public abstract class WebConfig {
             @Override
             public Object getData(String key) {
 
-                String result = CommonUtils.convertDirToUnixFormat(
+                return CommonUtils.convertDirToUnixFormat(
                         properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
-                // 统一添加/结尾，这样在controller中就可以不加/前缀
-                result = result + "/";
-
-                return result;
             }
 
         });

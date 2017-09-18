@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.common.util.io.file.FileReadException;
-import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
+import net.eulerframework.web.module.file.conf.FileConfig;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.service.ArchivedFileService;
@@ -38,10 +38,10 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         if(archivedFile == null)
             throw new ResourceNotFoundException("File id is '" + archivedFileId + "' not exists.");
         
-        String archivedFilePath = WebConfig.getUploadPath();
+        String archivedFilePath = FileConfig.getFileArchivedPath();
         
         if(archivedFile.getArchivedPathSuffix() != null)
-            archivedFilePath += "/" + archivedFile.getArchivedPathSuffix();
+            archivedFilePath += archivedFile.getArchivedPathSuffix();
         
         File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
         String fileName = archivedFile.getOriginalFilename();

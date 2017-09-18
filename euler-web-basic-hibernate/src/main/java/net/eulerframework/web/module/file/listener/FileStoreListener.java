@@ -8,14 +8,14 @@ import javax.servlet.ServletContextListener;
 import org.springframework.stereotype.Component;
 
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.module.file.conf.FileConfig;
 
 @Component
 public class FileStoreListener extends LogSupport implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        String archiveFilePath = WebConfig.getUploadPath();   
+        String archiveFilePath = FileConfig.getFileArchivedPath();   
 
         File targetDir = new File(archiveFilePath);
         

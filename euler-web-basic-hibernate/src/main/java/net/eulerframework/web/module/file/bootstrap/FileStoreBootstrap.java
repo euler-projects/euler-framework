@@ -15,6 +15,12 @@ public class FileStoreBootstrap extends LogSupport implements WebApplicationInit
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         this.logger.info("Executing file store bootstrap.");
+        
+        String contextPath = container.getContextPath();
+
+        container.setAttribute("__FILE_DOWNLOAD_PATH", contextPath + "/file");
+        container.setAttribute("__FILE_UPLOAD_ACTION", contextPath + "/uploadFile");
+        
         container.addListener(new FileStoreListener());
     }
 }
