@@ -30,6 +30,11 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
 
     @Resource
     private ArchivedFileService archivedFileService;
+
+    @RequestMapping(value = "plupload", method = RequestMethod.GET)
+    public String plupload() {
+        return this.display("/common/plupload");
+    }
     
     @RequestMapping(value = "file/{id}", method = RequestMethod.GET)
     public void downloadArchivedFile(@PathVariable("id") String archivedFileId, HttpServletResponse response) throws FileReadException, IOException {
