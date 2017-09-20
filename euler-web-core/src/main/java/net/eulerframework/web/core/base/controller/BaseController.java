@@ -38,6 +38,19 @@ public abstract class BaseController extends WebContextAccessable {
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
     
+    protected void writeImage(String fileName, File file, String extension) throws FileReadException, IOException {
+        HttpServletResponse response = this.getResponse();
+
+        //response.setCharacterEncoding("utf-8");
+        String contentType = "image/" + extension.substring(1);//new MimetypesFileTypeMap().getContentType(fileName);
+        response.setContentType(contentType);
+        //response.setContentType(MimeType.getFileContentType("*"));
+//        response.setHeader("Content-Disposition", 
+//                "attachment;fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+        response.setHeader("Content-Length", String.valueOf(file.length()));
+        SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
+    }
+    
     protected void setNoCacheHeader() {
         HttpServletResponse response = this.getResponse();
         response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
