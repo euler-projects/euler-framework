@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projection;
+
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
@@ -41,7 +45,39 @@ public interface IBaseDao<T extends BaseEntity<?, ?>>{
     long countAll();
     
     EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
+
+    /**
+     * @param pageQueryRequest
+     * @param criterions
+     * @return
+     */
+    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions);
+
+    /**
+     * @param pageQueryRequest
+     * @param criterions
+     * @param orders
+     * @return
+     */
+    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders);
+
+    /**
+     * @param pageQueryRequest
+     * @param criterions
+     * @param orders
+     * @param projection
+     * @return
+     */
+    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders,
+            Projection projection);
     
+    /**
+     * 
+     * @param pageQueryRequest
+     * @param propertySetToSelectMode
+     * @return
+     * @deprecated
+     */
     public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
 
     void flushSession();

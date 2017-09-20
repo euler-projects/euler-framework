@@ -26,6 +26,7 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
+import org.springframework.util.CollectionUtils;
 
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.base.log.LogSupport;
@@ -219,12 +220,45 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
     
     @Override
     public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
+        return this.pageQuery(pageQueryRequest, null, null, null);        
+    }
+    
+    @Override
+    public EasyUIPageResponse<T> pageQuery(
+            PageQueryRequest pageQueryRequest, 
+            List<Criterion> criterions) {
+        return this.pageQuery(pageQueryRequest, criterions, null, null);  
+    }
+    
+    @Override
+    public EasyUIPageResponse<T> pageQuery(
+            PageQueryRequest pageQueryRequest, 
+            List<Criterion> criterions,
+            List<Order> orders) {
+        return this.pageQuery(pageQueryRequest, criterions, orders, null);  
+    }
+    
+    @Override
+    public EasyUIPageResponse<T> pageQuery(
+            PageQueryRequest pageQueryRequest, 
+            List<Criterion> criterions,
+            List<Order> orders,
+            Projection projection) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
-        int pageIndex = pageQueryRequest.getPageIndex();
-        int pageSize = pageQueryRequest.getPageSize();
+        if(!CollectionUtils.isEmpty(criterions)) {
+            for(Criterion c : criterions) {
+                detachedCriteria.add(c);
+            }
+        }
         
-        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
+        if(!CollectionUtils.isEmpty(orders)) {
+            for(Order d : orders) {
+                detachedCriteria.addOrder(d);
+            }
+        }
+        
+        return this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize(), projection);        
     }
     
     @Override
