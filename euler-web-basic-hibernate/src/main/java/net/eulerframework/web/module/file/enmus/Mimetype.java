@@ -34,7 +34,7 @@ package net.eulerframework.web.module.file.enmus;
  *
  */
 public enum Mimetype {
-    IMAGE_FILES("image", "jpeg,jpg,png,git,bmp");
+    IMAGE_FILES("image", "jpeg,gif,jpg,png,bmp,pic");
     
     Mimetype(String title, String extensions) {
         this.title = title;
