@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,11 +16,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.common.util.io.file.FileReadException;
+import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import net.eulerframework.web.module.file.conf.FileConfig;
+import net.eulerframework.web.module.file.enmus.Mimetype;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.service.ArchivedFileService;
@@ -32,7 +35,15 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     private ArchivedFileService archivedFileService;
 
     @RequestMapping(value = "plupload", method = RequestMethod.GET)
-    public String plupload() {
+    public String plupload(
+            @RequestParam boolean multi,
+            @RequestParam Mimetype mimeType, 
+            @RequestParam String app) {
+        this.getRequest().setAttribute("multi", multi);
+        this.getRequest().setAttribute("mimeType", mimeType.toJson());
+        this.getRequest().setAttribute("extensions", mimeType.getExtensions());
+        this.getRequest().setAttribute("app", app);
+        this.getRequest().setAttribute("maxFileSize", WebConfig.getMultiPartConfig().getMaxFileSize() / 1024 / 1014);
         return this.display("/common/plupload");
     }
     
