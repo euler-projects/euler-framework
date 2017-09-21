@@ -114,6 +114,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
 
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.WEB_LANGUAGE_FILTER, new WebLanguageFilter());
         webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
+        webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
 
         if(WebConfig.isApiEnabled()) {
             this.initSpringMVCDispatcher(container, 

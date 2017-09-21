@@ -43,6 +43,7 @@ public abstract class WebConfig {
         private static final String WEB_SITENAME = "web.sitename";
         private static final String WEB_DEFAULT_THEME = "web.defaultTheme";
         private static final String WEB_FILE_SAVE_PATH = "web.fileSavePath";
+        private static final String WEB_STATIC_PAGES_PATH = "web.staticPagesPath";
         private static final String WEB_JSP_PATH = "web.jspPath";
         //private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
         private static final String WEB_ADMIN_JSP_PATH = "web.admin.JspPath";
@@ -80,6 +81,7 @@ public abstract class WebConfig {
         private static final String WEB_FILE_SAVE_PATH_UNIX = "file:///var/lib/euler-framework/";
         private static final String WEB_FILE_SAVE_PATH_WIN = "file://C:\\euler-framework\\";
         //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
+        private static final String WEB_STATIC_PAGES_PATH = "/pages";
         private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private static final String WEB_ADMIN_ROOT_PATH = "/admin";
@@ -129,11 +131,7 @@ public abstract class WebConfig {
                 result = result.substring(0, result.length() - 1);
             }
 
-            result = CommonUtils.convertDirToUnixFormat(result);
-            
-            while(result.endsWith("/")) {
-                result = result.substring(0, result.length() - 1);
-            }
+            result = CommonUtils.convertDirToUnixFormat(result, false);
 
             if (!result.startsWith("/"))
                 result = "/" + result;
@@ -159,17 +157,70 @@ public abstract class WebConfig {
                     result = result.substring(0, result.length() - 1);
                 }
 
-                result = CommonUtils.convertDirToUnixFormat(result);
-                
-                while(result.endsWith("/")) {
-                    result = result.substring(0, result.length() - 1);
-                }
+                result = CommonUtils.convertDirToUnixFormat(result, false);
 
                 if (!result.startsWith("/"))
                     result = "/" + result;
 
                 return result;
             }
+        });
+
+        return (String) cachedConfig;
+    }
+    
+    public static String getStaticPagesRootPath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_STATIC_PAGES_PATH, new DataGetter<String, Object>() {
+
+            @Override
+            public Object getData(String key) {
+
+                String result = properties.get(key, WebConfigDefault.WEB_STATIC_PAGES_PATH);
+
+                if (!StringUtils.hasText(result))
+                    throw new RuntimeException(key + " can not be empty");
+
+                while (result.endsWith("*")) {
+                    result = result.substring(0, result.length() - 1);
+                }
+
+                result = CommonUtils.convertDirToUnixFormat(result, false);
+
+                if (!result.startsWith("/"))
+                    result = "/" + result;
+
+                return result;
+            }
+        });
+
+        return (String) cachedConfig;
+    }
+
+    public static String getJspPath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_JSP_PATH, new DataGetter<String, Object>() {
+
+            @Override
+            public Object getData(String key) {
+
+                return CommonUtils.convertDirToUnixFormat(
+                        properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH), true);
+            }
+
+        });
+
+        return (String) cachedConfig;
+    }
+
+    public static String getAdminJspPath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_JSP_PATH, new DataGetter<String, Object>() {
+
+            @Override
+            public Object getData(String key) {
+
+                return CommonUtils.convertDirToUnixFormat(
+                        properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH), true);
+            }
+
         });
 
         return (String) cachedConfig;
@@ -195,7 +246,7 @@ public abstract class WebConfig {
                     LOGGER.warn("Couldn't load " + WebConfigKey.WEB_FILE_SAVE_PATH + " , use " + result + " for default.");
                 }
 
-                result = CommonUtils.convertDirToUnixFormat(result);
+                result = CommonUtils.convertDirToUnixFormat(result, true);
                 if (!result.startsWith("/") && !result.startsWith("file://")) {
                     result = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(result);
                 } else {
@@ -205,45 +256,6 @@ public abstract class WebConfig {
                 }
 
                 return result;
-            }
-
-        });
-
-        return (String) cachedConfig;
-    }
-
-    public static String getJspPath() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_JSP_PATH, new DataGetter<String, Object>() {
-
-            @Override
-            public Object getData(String key) {
-
-                return CommonUtils.convertDirToUnixFormat(
-                        properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
-            }
-
-        });
-
-        return (String) cachedConfig;
-    }
-    
-//    public static boolean isJspAutoDeployEnabled() {
-//        Object cachedConfig = CONFIG_CAHCE.get(
-//                WebConfigKey.WEB_JSP_AUTO_DEPLOY_ENABLED, 
-//                key -> properties.getBooleanValue(key, WebConfigDefault.WEB_JSP_AUTO_DEPLOY_ENABLED)
-//        );
-//        
-//        return (boolean) cachedConfig;
-//    }
-
-    public static String getAdminJspPath() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_JSP_PATH, new DataGetter<String, Object>() {
-
-            @Override
-            public Object getData(String key) {
-
-                return CommonUtils.convertDirToUnixFormat(
-                        properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
             }
 
         });
