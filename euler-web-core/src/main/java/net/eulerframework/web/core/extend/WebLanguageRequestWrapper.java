@@ -117,10 +117,10 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
 
     private Locale generateLocale(String localeStr) {
         Locale locale;
-        if (localeStr.indexOf('_') < 0) {
+        if (localeStr.indexOf('-') < 0) {
             locale = new Locale(localeStr);
         } else {
-            String[] localeStrs = localeStr.split("_");
+            String[] localeStrs = localeStr.split("-");
             locale = new Locale(localeStrs[0], localeStrs[1]);
         }
         return locale;
@@ -142,10 +142,24 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private void addLocaleIntoCookie(HttpServletRequest request, HttpServletResponse response) {
-        Cookie cookie = new Cookie(LOCALE_COOKIE_NAME, this.locale.toString());
-        cookie.setMaxAge(LOCALE_COOKIE_AGE);
-        cookie.setPath(request.getContextPath() + "/");
-        response.addCookie(cookie);
+        String language = this.locale.getLanguage();
+        String country = this.locale.getCountry();
+        String localeStr = null;
+        
+        if(StringUtils.hasText(language) && StringUtils.hasText(country)) {
+            localeStr = language.toLowerCase() + "-" + country.toLowerCase();
+        } else if(StringUtils.hasText(language)){
+            localeStr = language.toLowerCase();
+        } else if(StringUtils.hasText(country)) {
+            localeStr = country.toLowerCase();
+        }
+        
+        if(StringUtils.hasText(localeStr)) {
+            Cookie cookie = new Cookie(LOCALE_COOKIE_NAME, localeStr);
+            cookie.setMaxAge(LOCALE_COOKIE_AGE);
+            cookie.setPath(request.getContextPath() + "/");
+            response.addCookie(cookie);            
+        }
     }
 
     @Override
