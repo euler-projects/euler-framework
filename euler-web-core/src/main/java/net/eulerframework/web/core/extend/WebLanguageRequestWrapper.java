@@ -144,7 +144,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     private void addLocaleIntoCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie cookie = new Cookie(LOCALE_COOKIE_NAME, this.locale.toString());
         cookie.setMaxAge(LOCALE_COOKIE_AGE);
-        cookie.setPath(request.getContextPath());
+        cookie.setPath(request.getContextPath() + "/");
         response.addCookie(cookie);
     }
 
