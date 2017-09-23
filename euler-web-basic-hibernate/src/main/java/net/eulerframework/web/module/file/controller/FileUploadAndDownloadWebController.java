@@ -69,8 +69,6 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     public void image(@PathVariable("param") String param) throws FileReadException, IOException {
         ArchivedFile archivedFile = this.getRequestFile(param);
         
-        this.setNoCacheHeader();
-        
         try {
             this.writeFile(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile());
         } catch (FileNotFoundException e) {

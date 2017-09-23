@@ -41,7 +41,7 @@ public abstract class BaseController extends WebContextAccessable {
         }
         response.setContentType(mime.getContentType());
         response.setHeader("Content-Disposition", mime.getContentDisposition() + 
-                ";fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+                ";fileName=\"" + new String(fileName.getBytes("utf-8"), "ISO8859-1") + "\"");
         response.setHeader("Content-Length", String.valueOf(file.length()));
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
