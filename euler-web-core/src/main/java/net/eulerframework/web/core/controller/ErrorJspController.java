@@ -12,7 +12,6 @@ public class ErrorJspController extends JspSupportWebController {
     
     @RequestMapping("error-{errorCode}")
     public String error(@PathVariable("errorCode") String errorCode) {
-        System.out.println("eee:" + this.getRequest().getRequestURI());
         return this.display(errorCode);
     }
     

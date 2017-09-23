@@ -1,5 +1,8 @@
 package net.eulerframework.boot;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,7 +32,15 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
         requestIdFilter.addMappingForUrlPatterns(null, false, "/*");
 
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.WEB_LANGUAGE_FILTER, new WebLanguageFilter());
-        webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
+        
+        EnumSet<DispatcherType> webLanguageFilterDispatcherType = EnumSet.of(
+                DispatcherType.ERROR,
+                //DispatcherType.ASYNC,
+                //DispatcherType.FORWARD,
+                //DispatcherType.INCLUDE,
+                DispatcherType.REQUEST);
+        
+        webLanguageFilter.addMappingForServletNames(webLanguageFilterDispatcherType, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
         webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
     }
 }
