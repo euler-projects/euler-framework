@@ -9,8 +9,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
+import net.eulerframework.EulerFilters;
+import net.eulerframework.EulerServlets;
 import net.eulerframework.common.base.log.LogSupport;
+import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.RequestIdFilter;
+import net.eulerframework.web.core.filter.WebLanguageFilter;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class HighestPrecedenceFiltersBootstrap extends LogSupport implements WebApplicationInitializer {
@@ -23,5 +27,9 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
 
         FilterRegistration.Dynamic requestIdFilter = container.addFilter("requestIdFilter", new RequestIdFilter());
         requestIdFilter.addMappingForUrlPatterns(null, false, "/*");
+
+        FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.WEB_LANGUAGE_FILTER, new WebLanguageFilter());
+        webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
+        webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
     }
 }

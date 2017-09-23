@@ -45,6 +45,7 @@ public class WebLanguageFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+	    System.out.println("fff:" + request.getRequestURI());
 	    WebLanguageRequestWrapper localeRequest = new WebLanguageRequestWrapper(request, response);
 		filterChain.doFilter(localeRequest, response);
 	}

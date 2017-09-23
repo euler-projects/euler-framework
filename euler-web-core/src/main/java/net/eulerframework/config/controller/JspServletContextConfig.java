@@ -21,6 +21,7 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -56,6 +57,7 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
         return resolver;
     }
     
+    
     @Resource
     private SpringValidatorAdapter validator;
     
@@ -78,11 +80,16 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
         converters.add(jsonConverter);
 
     }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
+    }
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         Map<String, MediaType> mediaTypes = new HashMap<>();
-        ;
+        
         mediaTypes.put("json", MediaType.APPLICATION_JSON_UTF8);
 
         configurer.favorPathExtension(false).favorParameter(false).ignoreAcceptHeader(false)

@@ -23,6 +23,7 @@ import net.eulerframework.web.module.file.enmus.Mimetype;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.service.ArchivedFileService;
+import net.eulerframework.web.module.file.util.WebFileTool;
 
 @JspController
 @RequestMapping("/")
@@ -43,10 +44,13 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         this.getRequest().setAttribute("maxFileSize", WebConfig.getMultiPartConfig().getMaxFileSize() / 1024 / 1014);
         return this.display("/common/plupload");
     }
-
+    
     @ResponseBody
-    @RequestMapping(value = "file/{id}", method = RequestMethod.GET)
-    public void downloadArchivedFile(@PathVariable("id") String archivedFileId) throws FileReadException, IOException {
+    @RequestMapping(value = "file/{param}", method = RequestMethod.GET)
+    public void downloadArchivedFile(
+            @PathVariable("param") String param) throws FileReadException, IOException {
+        String extensions = WebFileTool.extractFileExtension(param);
+        String archivedFileId = WebFileTool.extractFileNameWithoutExtension(param);
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
         if(archivedFile == null)
@@ -74,8 +78,10 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     }
     
     @ResponseBody
-    @RequestMapping(value = "image/{id}", method = RequestMethod.GET)
-    public void image(@PathVariable("id") String archivedFileId) throws FileReadException, IOException {
+    @RequestMapping(value = "image/{param}", method = RequestMethod.GET)
+    public void image(@PathVariable("param") String param) throws FileReadException, IOException {
+        String extensions = WebFileTool.extractFileExtension(param);
+        String archivedFileId = WebFileTool.extractFileNameWithoutExtension(param);
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
         if(archivedFile == null)

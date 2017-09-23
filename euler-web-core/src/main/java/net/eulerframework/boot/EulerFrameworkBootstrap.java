@@ -48,7 +48,6 @@ import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.CrosFilter;
-import net.eulerframework.web.core.filter.WebLanguageFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
@@ -111,10 +110,6 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                 WebConfig.getAdminRootPath() + "/ajax/*");
 
         this.initBaseData(container);
-
-        FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.WEB_LANGUAGE_FILTER, new WebLanguageFilter());
-        webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
-        webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
 
         if(WebConfig.isApiEnabled()) {
             this.initSpringMVCDispatcher(container, 
