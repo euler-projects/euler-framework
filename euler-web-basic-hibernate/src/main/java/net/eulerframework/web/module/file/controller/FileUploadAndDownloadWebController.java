@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.eulerframework.common.util.io.file.FileReadException;
+import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import net.eulerframework.web.module.file.conf.FileConfig;
-import net.eulerframework.web.module.file.enmus.Mimetype;
+import net.eulerframework.web.module.file.enmus.FileType;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
 import net.eulerframework.web.module.file.service.ArchivedFileService;
-import net.eulerframework.web.module.file.util.WebFileTool;
 
 @JspController
 @RequestMapping("/")
@@ -35,11 +35,11 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     @RequestMapping(value = "plupload", method = RequestMethod.GET)
     public String plupload(
             @RequestParam boolean multi,
-            @RequestParam Mimetype mimeType, 
+            @RequestParam FileType fileType, 
             @RequestParam String app) {
         this.getRequest().setAttribute("multi", multi);
-        this.getRequest().setAttribute("mimeType", mimeType.toJson());
-        this.getRequest().setAttribute("extensions", mimeType.getExtensions());
+        this.getRequest().setAttribute("fileType", fileType.toJson());
+        this.getRequest().setAttribute("extensions", fileType.getExtensions());
         this.getRequest().setAttribute("app", app);
         this.getRequest().setAttribute("maxFileSize", WebConfig.getMultiPartConfig().getMaxFileSize() / 1024 / 1014);
         return this.display("/common/plupload");
@@ -49,25 +49,12 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     @RequestMapping(value = "file/{param}", method = RequestMethod.GET)
     public void downloadArchivedFile(
             @PathVariable("param") String param) throws FileReadException, IOException {
-        String extensions = WebFileTool.extractFileExtension(param);
-        String archivedFileId = WebFileTool.extractFileNameWithoutExtension(param);
-        ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
-        
-        if(archivedFile == null)
-            throw new ResourceNotFoundException("File id is '" + archivedFileId + "' not exists.");
-        
-        String archivedFilePath = FileConfig.getFileArchivedPath();
-        
-        if(archivedFile.getArchivedPathSuffix() != null)
-            archivedFilePath += archivedFile.getArchivedPathSuffix();
-        
-        File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
-        String fileName = archivedFile.getOriginalFilename();
+        ArchivedFile archivedFile = this.getRequestFile(param);
         
         this.setNoCacheHeader();
         
         try {
-            this.writeFile(fileName, file);
+            this.writeFile(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile());
         } catch (FileNotFoundException e) {
             throw new ResourceNotFoundException(e);
         } catch (FileReadException e) {
@@ -80,25 +67,12 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     @ResponseBody
     @RequestMapping(value = "image/{param}", method = RequestMethod.GET)
     public void image(@PathVariable("param") String param) throws FileReadException, IOException {
-        String extensions = WebFileTool.extractFileExtension(param);
-        String archivedFileId = WebFileTool.extractFileNameWithoutExtension(param);
-        ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
-        
-        if(archivedFile == null)
-            throw new ResourceNotFoundException("File id is '" + archivedFileId + "' not exists.");
-        
-        String archivedFilePath = FileConfig.getFileArchivedPath();
-        
-        if(archivedFile.getArchivedPathSuffix() != null)
-            archivedFilePath += archivedFile.getArchivedPathSuffix();
-        
-        File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
-        String fileName = archivedFile.getOriginalFilename();
+        ArchivedFile archivedFile = this.getRequestFile(param);
         
         this.setNoCacheHeader();
         
         try {
-            this.writeImage(fileName, file, archivedFile.getExtension());
+            this.writeFile(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile());
         } catch (FileNotFoundException e) {
             throw new ResourceNotFoundException(e);
         } catch (FileReadException e) {
@@ -106,6 +80,30 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         } catch (IOException e) {
             throw e;
         }
+    }
+    
+    private ArchivedFile getRequestFile(String requestParam) {
+        String extensions = FileUtils.extractFileExtension(requestParam);
+        String archivedFileId = FileUtils.extractFileNameWithoutExtension(requestParam);
+        ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
+        
+        if(archivedFile == null)
+            throw new ResourceNotFoundException("File id is '" + archivedFileId + "' not exists.");
+        
+        if(extensions != null) {
+            if(!extensions.equals(archivedFile.getExtension())) {
+                throw new ResourceNotFoundException("The file extension does not match, specified as " + extensions + ", actually " + archivedFile.getExtension());
+            }
+        }
+        
+        String archivedFilePath = FileConfig.getFileArchivedPath();
+        
+        if(archivedFile.getArchivedPathSuffix() != null)
+            archivedFilePath += archivedFile.getArchivedPathSuffix();
+        
+        File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
+        archivedFile.setArchivedFile(file);
+        return archivedFile;
     }
     
     @ResponseBody

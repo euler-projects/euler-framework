@@ -7,10 +7,15 @@ import java.util.Date;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.io.file.FileReadException;
+import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
+import net.eulerframework.web.config.MIME;
+import net.eulerframework.web.config.MIMEConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
@@ -27,26 +32,16 @@ public abstract class BaseController extends WebContextAccessable {
     
     protected void writeFile(String fileName, File file) throws FileReadException, IOException {
         HttpServletResponse response = this.getResponse();
-
-        //response.setCharacterEncoding("utf-8");
-        String contentType = "application/octet-stream";//new MimetypesFileTypeMap().getContentType(fileName);
-        response.setContentType(contentType);
-        //response.setContentType(MimeType.getFileContentType("*"));
-        response.setHeader("Content-Disposition", 
-                "attachment;fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
-    }
-    
-    protected void writeImage(String fileName, File file, String extension) throws FileReadException, IOException {
-        HttpServletResponse response = this.getResponse();
-
-        //response.setCharacterEncoding("utf-8");
-        String contentType = "image/" + extension.substring(1);//new MimetypesFileTypeMap().getContentType(fileName);
-        response.setContentType(contentType);
-        //response.setContentType(MimeType.getFileContentType("*"));
-//        response.setHeader("Content-Disposition", 
-//                "attachment;fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+        String extension = FileUtils.extractFileExtension(fileName);
+        MIME mime;
+        if(StringUtils.hasText(extension)) {
+            mime = MIMEConfig.getMIME(extension);
+        } else {
+            mime = MIMEConfig.getDefaultMIME();
+        }
+        response.setContentType(mime.getContentType());
+        response.setHeader("Content-Disposition", mime.getContentDisposition() + 
+                ";fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
         response.setHeader("Content-Length", String.valueOf(file.length()));
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
