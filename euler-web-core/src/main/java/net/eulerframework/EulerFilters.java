@@ -36,4 +36,5 @@ package net.eulerframework;
 public abstract class EulerFilters {
     public final static String CROS_FILTER = "crosFilter";
     public final static String WEB_LANGUAGE_FILTER = "webLanguageFilter";
+    public final static String E_TAG_FILTER = "eTagFilter";
 }
