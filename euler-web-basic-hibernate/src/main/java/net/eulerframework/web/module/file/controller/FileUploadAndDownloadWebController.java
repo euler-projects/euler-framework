@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,7 +19,7 @@ import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
-import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
+import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.module.file.conf.FileConfig;
 import net.eulerframework.web.module.file.enmus.FileType;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
@@ -46,35 +47,16 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     }
     
     @ResponseBody
-    @RequestMapping(value = "file/{param}", method = RequestMethod.GET)
+    @RequestMapping(value = {"file/{param}", "image/{param}"}, method = RequestMethod.GET)
     public void downloadArchivedFile(
             @PathVariable("param") String param) throws FileReadException, IOException {
         ArchivedFile archivedFile = this.getRequestFile(param);
         
-        this.setNoCacheHeader();
-        
         try {
             this.writeFile(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile());
         } catch (FileNotFoundException e) {
-            throw new ResourceNotFoundException(e);
-        } catch (FileReadException e) {
-            throw e;
-        } catch (IOException e) {
-            throw e;
-        }
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "image/{param}", method = RequestMethod.GET)
-    public void image(@PathVariable("param") String param) throws FileReadException, IOException {
-        ArchivedFile archivedFile = this.getRequestFile(param);
-        
-        try {
-            this.writeFile(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile());
-        } catch (FileNotFoundException e) {
-            throw new ResourceNotFoundException(e);
-        } catch (FileReadException e) {
-            throw e;
+            this.logger.warn(e.getMessage(), e);
+            throw new PageNotFoundException();
         } catch (IOException e) {
             throw e;
         }
@@ -86,11 +68,14 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         ArchivedFile archivedFile = this.archivedFileService.findArchivedFile(archivedFileId);
         
         if(archivedFile == null)
-            throw new ResourceNotFoundException("File id is '" + archivedFileId + "' not exists.");
+            throw new PageNotFoundException();
         
         if(extensions != null) {
             if(!extensions.equals(archivedFile.getExtension())) {
-                throw new ResourceNotFoundException("The file extension does not match, specified as " + extensions + ", actually " + archivedFile.getExtension());
+                if(this.logger.isInfoEnabled()) {
+                    this.logger.info("The file extension does not match, specified as " + extensions + ", actually " + archivedFile.getExtension());
+                }
+                throw new PageNotFoundException();
             }
         }
         
