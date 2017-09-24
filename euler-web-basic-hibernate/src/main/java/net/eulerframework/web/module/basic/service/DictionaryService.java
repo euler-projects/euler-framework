@@ -1,29 +1,28 @@
 package net.eulerframework.web.module.basic.service;
 
+import java.util.List;
+import java.util.Locale;
+
 import javax.annotation.Resource;
+
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.module.basic.dao.DictionaryCodeDao;
+import net.eulerframework.web.module.basic.dao.DictionaryDao;
+import net.eulerframework.web.module.basic.entity.Dictionary;
 
 @Service
 public class DictionaryService extends BaseService {
     
-    //@Resource private DictionaryDao dictionaryDao;
+    @Resource DictionaryCodeDao dictionaryCodeDao;
+    @Resource DictionaryDao dictionaryDao;
     
-    @Resource private ObjectMapper objectMapper;
-
-//    public EasyUIPageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
-//        return this.dictionaryDao.findDictionaryByPage(queryRequest, pageIndex, pageSize);
-//    }
-//
-//    public void saveCodeTable(Dictionary dictionary) {
-//        this.dictionaryDao.saveOrUpdate(dictionary);
-//    }
-//
-//    public void deleteCodeTables(Serializable[] idArray) {
-//        this.dictionaryDao.deleteByIds(idArray);
-//        
-//    }
+    public List<Dictionary> findDictionariesByCode(String code, Locale locale) {
+        return this.dictionaryCodeDao.findDictionariesByCode(code, locale);
+    }
+    
+    public Dictionary findDictionaryByKey(String key, Locale locale) {
+        return this.dictionaryDao.findDictionaryByKey(key, locale);
+    }
 }
