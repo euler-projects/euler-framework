@@ -3,7 +3,7 @@
   <parent>
     <groupId>net.eulerframework</groupId>
     <artifactId>euler-framework</artifactId>
-    <version>0.3.4</version>
+    <version>0.3.5</version>
   </parent>
   <artifactId>euler-web-authentication-impl</artifactId>
   <name>Euler Web Authentication Implement</name>

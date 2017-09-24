@@ -6,6 +6,8 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
@@ -60,6 +62,19 @@ public class DictionaryDao extends BaseDao<Dictionary> {
         
         
         return this.pageQuery(detachedCriteria, pageIndex, pageSize);
+    }
+
+    /**
+     * @param key
+     * @return
+     */
+    public Dictionary findDictionaryByKey(String key) {
+        Assert.hasText(key);
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
+        detachedCriteria.add(Restrictions.eq("key", key));
+        List<Dictionary> ret = this.query(detachedCriteria);
+        
+        return CollectionUtils.isEmpty(ret) ? null : ret.get(0);
     }
     
 }
