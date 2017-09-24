@@ -79,12 +79,10 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
                 if (StringUtils.hasText(localeParamValue)) {
                     this.locale = this.generateLocale(localeParamValue);
                     session.setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
-                    this.addLocaleIntoCookie(response);
                 } else {
                     Object locale = request.getSession().getAttribute(LOCALE_SESSION_ATTR_NAME);
                     if (locale != null) {
                         this.locale = (Locale) locale;
-                        this.addLocaleIntoCookie(response);
                     } else {
                         Locale localeFromCookie = this.getLocaleFromCookie(request);
 
@@ -109,6 +107,7 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
                     this.locale = request.getLocale();
                 }
             }
+            this.addLocaleIntoCookie(request, response);
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
             this.locale = request.getLocale();
@@ -141,9 +140,10 @@ public class LocaleRequestWrapper extends HttpServletRequestWrapper {
         return null;
     }
 
-    private void addLocaleIntoCookie(HttpServletResponse response) {
+    private void addLocaleIntoCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie cookie = new Cookie(LOCALE_COOKIE_NAME, this.locale.toString());
         cookie.setMaxAge(LOCALE_COOKIE_AGE);
+        cookie.setPath(request.getContextPath() + "/");
         response.addCookie(cookie);
     }
 
