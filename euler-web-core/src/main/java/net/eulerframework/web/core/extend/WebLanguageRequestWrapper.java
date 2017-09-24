@@ -79,12 +79,10 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
                 if (StringUtils.hasText(localeParamValue)) {
                     this.locale = this.generateLocale(localeParamValue);
                     session.setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
-                    this.addLocaleIntoCookie(request, response);
                 } else {
                     Object locale = request.getSession().getAttribute(LOCALE_SESSION_ATTR_NAME);
                     if (locale != null) {
                         this.locale = (Locale) locale;
-                        this.addLocaleIntoCookie(request, response);
                     } else {
                         Locale localeFromCookie = this.getLocaleFromCookie(request);
 
@@ -109,6 +107,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
                     this.locale = request.getLocale();
                 }
             }
+            this.addLocaleIntoCookie(request, response);
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
             this.locale = request.getLocale();

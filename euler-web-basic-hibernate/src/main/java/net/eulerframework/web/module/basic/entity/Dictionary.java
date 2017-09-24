@@ -21,7 +21,9 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     @Column(name = "DICT_KEY", nullable = false)
     private String key;
     @Column(name = "DICT_VALUE")
-    private String value;   
+    private String value;  
+    @Column(name = "DICT_VALUE_ENUS")
+    private String valueEnUs;   
     @Column(name = "SHOW_ORDER", nullable = false)
     private Integer showOrder;
     public String getCode() {
@@ -41,6 +43,12 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     }
     public void setValue(String value) {
         this.value = value;
+    }
+    public String getValueEnUs() {
+        return valueEnUs;
+    }
+    public void setValueEnUs(String valueEnUs) {
+        this.valueEnUs = valueEnUs;
     }
     public Integer getShowOrder() {
         return showOrder;
