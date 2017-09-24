@@ -38,7 +38,13 @@ import net.eulerframework.web.config.WebConfig;
 public class FileConfig {
     public final static String FILE_DOWNLOAD_PATH_ATTR = "__FILE_DOWNLOAD_PATH";
     public final static String IMAGE_DOWNLOAD_PATH_ATTR = "__IMAGE_DOWNLOAD_PATH";
+    public final static String VIDEO_DOWNLOAD_PATH_ATTR = "__VIDEO_DOWNLOAD_PATH";
     public final static String FILE_UPLOAD_ACTION_ATTR = "__FILE_UPLOAD_ACTION";
+    
+    public final static String FILE_DOWNLOAD_PATH = "/file";
+    public final static String IMAGE_DOWNLOAD_PATH = "/image";
+    public final static String VIDEO_DOWNLOAD_PATH = "/video";
+    public final static String FILE_UPLOAD_ACTION = "/uploadFile";
 
     public static String getFileArchivedPath() {
         return WebConfig.getFileSavePath() + "archived/file/";

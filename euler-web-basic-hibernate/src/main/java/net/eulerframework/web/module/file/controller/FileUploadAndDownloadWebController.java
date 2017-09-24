@@ -47,7 +47,12 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     }
     
     @ResponseBody
-    @RequestMapping(value = {"file/{param}", "image/{param}"}, method = RequestMethod.GET)
+    @RequestMapping(
+            path = {
+                FileConfig.FILE_DOWNLOAD_PATH +"/{param}", 
+                FileConfig.IMAGE_DOWNLOAD_PATH +"/{param}", 
+                FileConfig.VIDEO_DOWNLOAD_PATH +"/{param}"}, 
+            method = RequestMethod.GET)
     public void downloadArchivedFile(
             @PathVariable("param") String param) throws FileReadException, IOException {
         ArchivedFile archivedFile = this.getRequestFile(param);
@@ -90,7 +95,7 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     }
     
     @ResponseBody
-    @RequestMapping(value = "uploadFile", method = RequestMethod.POST)
+    @RequestMapping(path = FileConfig.FILE_UPLOAD_ACTION, method = RequestMethod.POST)
     public EasyUIAjaxResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
         return new EasyUIAjaxResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
     }
