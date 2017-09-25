@@ -1,8 +1,11 @@
 package net.eulerframework.web.config;
 
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ContextLoader;
 
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
@@ -54,7 +57,9 @@ public abstract class WebConfig {
         private static final String WEB_API_ENABLED = "web.api.enabled";
         private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
-        public static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
+        private static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
+        private final static String WEB_SUPPORT_LANGUAGES = "web.supportLanguages";
+        private static final String WEB_PATH_LANGUAGE_CONTROL_ENABLED = "web.pathLanguageControlEnabled";
 
         private static final String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
@@ -91,6 +96,9 @@ public abstract class WebConfig {
         private static final boolean WEB_API_ENABLED = true;
         private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
+        private static final Locale WEB_DEFAULT_LANGUAGE = Locale.CHINA;
+        private final static Locale[] WEB_SUPPORT_LANGUAGES = new Locale[] {Locale.CHINA, Locale.US};
+        private static final boolean WEB_PATH_LANGUAGE_CONTROL_ENABLED = false;
 
         private static final String WEB_MULITPART_LOCATION = null;
         private static final long WEB_MULITPART_MAX_FILE_SIZE = 51_200L;
@@ -520,22 +528,45 @@ public abstract class WebConfig {
 
     /**
      * 获得站点默认语言
-     * @return 站点默认语言, 例如 zh_CN, en_US
+     * @return 站点默认语言
      */
-    public static String getDefaultLanguage() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_LANGUAGE, key -> {
+    public static Locale getDefaultLanguage() {
+        return (Locale) CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_LANGUAGE, key -> {
             try {
-                return properties.get(key);
+                String defaultLanguagesStr = properties.get(key);
+                Assert.hasText(defaultLanguagesStr, WebConfigKey.WEB_DEFAULT_LANGUAGE + " can not be empty");
+                String[] defaultLanguagesStrArray = defaultLanguagesStr.split("-");
+                return new Locale(defaultLanguagesStrArray[0], defaultLanguagesStrArray[1]);
             } catch (PropertyNotFoundException e) {
-                return null;
+                return WebConfigDefault.WEB_DEFAULT_LANGUAGE;
             }
         });
+    }
 
-        if(cachedConfig == null) {
-            return null;            
-        }
-        
-        return (String) cachedConfig;
+    public static Locale[] getSupportLanguages() {
+        return (Locale[]) CONFIG_CAHCE.get(WebConfigKey.WEB_SUPPORT_LANGUAGES, key -> {
+            try {
+                String supportLanguagesStr = properties.get(key);
+                String[] supportLanguagesStrArray = supportLanguagesStr.split(",");
+                Locale[] ret = new Locale[supportLanguagesStrArray.length];
+                
+                for(int i = 0; i < supportLanguagesStrArray.length; i++) {
+                    ret[i] = new Locale(supportLanguagesStrArray[i]);
+                }
+                return ret;
+            } catch (PropertyNotFoundException e) {
+                return WebConfigDefault.WEB_SUPPORT_LANGUAGES;
+            }
+        });
+    }
+
+    /**
+     * 判断路径语言控制是否启用
+     * @return <code>true</code> 路径语言控制已启用 <code>false</code> 路径语言控制已禁用 
+     * @deprecated
+     */
+    public static boolean isPathLocaleControlEnabled() {
+        return (boolean) CONFIG_CAHCE.get(WebConfigKey.WEB_PATH_LANGUAGE_CONTROL_ENABLED, key -> properties.getBooleanValue(key, WebConfigDefault.WEB_PATH_LANGUAGE_CONTROL_ENABLED));
     }
 
 }

@@ -29,6 +29,7 @@
  */
 package net.eulerframework.web.core.extend;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import javax.servlet.http.Cookie;
@@ -69,60 +70,60 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
      */
     public WebLanguageRequestWrapper(HttpServletRequest request, HttpServletResponse response) {
         super(request);
-
         try {
-            HttpSession session = request.getSession();
-
-            if (session != null) {
-                String localeParamValue = this.getRequest().getParameter(LOCALE_PARAM_NAME);
-
-                if (StringUtils.hasText(localeParamValue)) {
-                    this.locale = this.generateLocale(localeParamValue);
-                    session.setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
-                } else {
-                    Object locale = request.getSession().getAttribute(LOCALE_SESSION_ATTR_NAME);
-                    if (locale != null) {
-                        this.locale = (Locale) locale;
-                    } else {
-                        Locale localeFromCookie = this.getLocaleFromCookie(request);
-
-                        if (localeFromCookie != null) {
-                            this.locale = localeFromCookie;
-                            session.setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
-                        } else {
-                            if(StringUtils.hasText(WebConfig.getDefaultLanguage())) {
-                                this.locale = this.generateLocale(WebConfig.getDefaultLanguage());
-                            } else {
-                                this.locale = request.getLocale();                                
-                            }
-                        }
-                    }
-                }
-            } else {
-                Locale localeFromCookie = this.getLocaleFromCookie(request);
-
-                if (localeFromCookie != null) {
-                    this.locale = localeFromCookie;
-                } else {
-                    this.locale = request.getLocale();
-                }
+            this.locale = this.getLocaleFromParam(request);
+            
+            if(this.locale == null) {
+                this.locale = this.getLocaleFromCookie(request);
             }
+            
+            if(this.locale == null) {
+                this.locale = this.getLocaleFromSession(request);
+            }
+            
+            if(this.locale == null) {
+                this.locale = WebConfig.getDefaultLanguage();
+            }
+            
+            Locale[] supportLocales = WebConfig.getSupportLanguages();
+            
+            if(!Arrays.asList(supportLocales).contains(this.locale)) {
+                this.locale = WebConfig.getDefaultLanguage();
+            }
+            
             this.addLocaleIntoCookie(request, response);
+            this.addLocaleIntoSession(request);
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
             this.locale = request.getLocale();
         }
     }
 
-    private Locale generateLocale(String localeStr) {
-        Locale locale;
-        if (localeStr.indexOf('-') < 0) {
-            locale = new Locale(localeStr);
-        } else {
-            String[] localeStrs = localeStr.split("-");
-            locale = new Locale(localeStrs[0], localeStrs[1]);
+    /**
+     * @param request
+     * @return
+     */
+    private Locale getLocaleFromParam(HttpServletRequest request) {
+        String localeParamValue = this.getRequest().getParameter(LOCALE_PARAM_NAME);
+        if (StringUtils.hasText(localeParamValue)) {
+            return this.generateLocale(localeParamValue);
         }
-        return locale;
+        return null;
+    }
+
+    /**
+     * @param request
+     * @return
+     */
+    private Locale getLocaleFromSession(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if(session != null) {
+            Object locale = session.getAttribute(LOCALE_SESSION_ATTR_NAME);
+            if (locale != null) {
+                this.locale = (Locale) locale;
+            }            
+        }        
+        return null;
     }
 
     private Locale getLocaleFromCookie(HttpServletRequest request) {
@@ -138,6 +139,17 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         }
 
         return null;
+    }
+
+    private Locale generateLocale(String localeStr) {
+        Locale locale;
+        if (localeStr.indexOf('-') < 0) {
+            locale = new Locale(localeStr);
+        } else {
+            String[] localeStrs = localeStr.split("-");
+            locale = new Locale(localeStrs[0], localeStrs[1]);
+        }
+        return locale;
     }
 
     private void addLocaleIntoCookie(HttpServletRequest request, HttpServletResponse response) {
@@ -159,6 +171,13 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
             cookie.setPath(request.getContextPath() + "/");
             response.addCookie(cookie);            
         }
+    }
+
+    /**
+     * @param request
+     */
+    private void addLocaleIntoSession(HttpServletRequest request) {
+        request.getSession().setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
     }
 
     @Override

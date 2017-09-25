@@ -15,7 +15,6 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import net.eulerframework.EulerFilters;
 import net.eulerframework.EulerServlets;
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.filter.RequestIdFilter;
 import net.eulerframework.web.core.filter.WebLanguageFilter;
 
@@ -41,6 +40,6 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
                 DispatcherType.REQUEST);
         
         webLanguageFilter.addMappingForServletNames(webLanguageFilterDispatcherType, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
-        webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
+        //webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
     }
 }
