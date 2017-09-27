@@ -1,5 +1,6 @@
 package net.eulerframework.web.core.base.controller;
 
+import java.beans.PropertyEditorSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,6 +10,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,6 +22,21 @@ import net.eulerframework.web.config.MIMEConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
+    
+    @InitBinder  
+    protected void initBinder(WebDataBinder binder) {  
+        binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {  
+            @Override  
+            public void setAsText(String value) {
+                if(StringUtils.hasText(value)) {
+                    setValue(new Date(Long.valueOf(value)));                    
+                } else {
+                    setValue(null);
+                }
+            }  
+        });  
+    
+    } 
     
     @Resource private ObjectMapper objectMapper;
     
