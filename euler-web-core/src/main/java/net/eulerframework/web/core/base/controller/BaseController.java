@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.InitBinder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.eulerframework.common.util.MIMEUtils;
+import net.eulerframework.common.util.MIMEUtils.MIME;
 import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
-import net.eulerframework.web.config.MIME;
-import net.eulerframework.web.config.MIMEConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
@@ -53,9 +53,9 @@ public abstract class BaseController extends WebContextAccessable {
         String extension = FileUtils.extractFileExtension(fileName);
         MIME mime;
         if(StringUtils.hasText(extension)) {
-            mime = MIMEConfig.getMIME(extension);
+            mime = MIMEUtils.getMIME(extension);
         } else {
-            mime = MIMEConfig.getDefaultMIME();
+            mime = MIMEUtils.getDefaultMIME();
         }
         response.setContentType(mime.getContentType());
         response.setHeader("Content-Disposition", mime.getContentDisposition() + 

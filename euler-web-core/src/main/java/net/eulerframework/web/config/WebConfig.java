@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ContextLoader;
 
@@ -16,7 +15,6 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.property.PropertyNotFoundException;
 import net.eulerframework.common.util.property.PropertyReader;
 
-@Configuration
 public abstract class WebConfig {
     protected static final Logger LOGGER = LoggerFactory.getLogger(WebConfig.class);
 
