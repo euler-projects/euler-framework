@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.web.config.WebConfig;
 
 /**
@@ -51,12 +52,11 @@ import net.eulerframework.web.config.WebConfig;
  *
  */
 public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final static String LOCALE_PARAM_NAME = "_locale";
     private final static String LOCALE_SESSION_ATTR_NAME = "__EULER_LOCALE__";
-    private final static String LOCALE_COOKIE_NAME = "EULER_LOCALE";
-    private final static int LOCALE_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
+    
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    
     private Locale locale;
 
     /**
@@ -131,7 +131,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(LOCALE_COOKIE_NAME)) {
+                if (cookie.getName().equals(LocaleCookies.LOCALE.getCookieName())) {
                     String localeStr = cookie.getValue();
                     return this.generateLocale(localeStr);
                 }
@@ -166,9 +166,9 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         }
         
         if(StringUtils.hasText(localeStr)) {
-            Cookie cookie = new Cookie(LOCALE_COOKIE_NAME, localeStr);
-            cookie.setMaxAge(LOCALE_COOKIE_AGE);
-            cookie.setPath(request.getContextPath() + "/");
+            Cookie cookie = new Cookie(LocaleCookies.LOCALE.getCookieName(), localeStr);
+            cookie.setMaxAge(LocaleCookies.LOCALE.getCookieAge());
+            cookie.setPath(request.getContextPath() + LocaleCookies.LOCALE.getCookiePath());
             response.addCookie(cookie);            
         }
     }

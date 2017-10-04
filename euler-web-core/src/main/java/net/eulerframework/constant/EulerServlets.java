@@ -24,25 +24,19 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-form/web-form
+ * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.file.conf;
-
-import net.eulerframework.web.config.WebConfig;
+package net.eulerframework.constant;
 
 /**
  * @author cFrost
  *
  */
-public class FileConfig {
-    
-    public final static String FILE_DOWNLOAD_PATH = "/file";
-    public final static String IMAGE_DOWNLOAD_PATH = "/image";
-    public final static String VIDEO_DOWNLOAD_PATH = "/video";
-    public final static String FILE_UPLOAD_ACTION = "/uploadFile";
-
-    public static String getFileArchivedPath() {
-        return WebConfig.getFileSavePath() + "archived/file/";
-    }
+public abstract class EulerServlets {
+    public final static String WEB_SERVLET = "springWebDispatcherServlet";
+    public final static String WEB_ADMIN_SERVLET = "springAdminWebDispatcherServlet";
+    public final static String WEB_AJAX_SERVLET = "springWebAjaxDispatcherServlet";
+    public final static String WEB_ADMIN_AJAX_SERVLET = "springAdminWebAjaxDispatcherServlet";
+    public final static String API_SERVLET = "springApiDispatcherServlet";
 }

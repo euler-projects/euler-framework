@@ -27,16 +27,14 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework;
+package net.eulerframework.constant;
 
 /**
  * @author cFrost
  *
  */
-public abstract class EulerServlets {
-    public final static String WEB_SERVLET = "springWebDispatcherServlet";
-    public final static String WEB_ADMIN_SERVLET = "springAdminWebDispatcherServlet";
-    public final static String WEB_AJAX_SERVLET = "springWebAjaxDispatcherServlet";
-    public final static String WEB_ADMIN_AJAX_SERVLET = "springAdminWebAjaxDispatcherServlet";
-    public final static String API_SERVLET = "springApiDispatcherServlet";
+public abstract class EulerFilters {
+    public final static String CROS_FILTER = "crosFilter";
+    public final static String WEB_LANGUAGE_FILTER = "webLanguageFilter";
+    public final static String E_TAG_FILTER = "eTagFilter";
 }

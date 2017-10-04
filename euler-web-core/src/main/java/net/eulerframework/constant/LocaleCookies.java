@@ -27,22 +27,41 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.file.conf;
-
-import net.eulerframework.web.config.WebConfig;
+package net.eulerframework.constant;
 
 /**
  * @author cFrost
  *
  */
-public class FileConfig {
+public enum LocaleCookies implements EulerCookies {
+    LOCALE("EULER_LOCALE", 10 * 365 * 24 * 60 * 60, "/");
     
-    public final static String FILE_DOWNLOAD_PATH = "/file";
-    public final static String IMAGE_DOWNLOAD_PATH = "/image";
-    public final static String VIDEO_DOWNLOAD_PATH = "/video";
-    public final static String FILE_UPLOAD_ACTION = "/uploadFile";
-
-    public static String getFileArchivedPath() {
-        return WebConfig.getFileSavePath() + "archived/file/";
+    LocaleCookies(String name, int age, String path) {
+        this.age = age;
+        this.name = name;
+        this.path = path;
     }
+    
+    private String name;
+    private int age;
+    private String path;
+
+    @Override
+    public String getCookieName() {
+        // TODO Auto-generated method stub
+        return name;
+    }
+
+    @Override
+    public int getCookieAge() {
+        // TODO Auto-generated method stub
+        return age;
+    }
+
+    @Override
+    public String getCookiePath() {
+        // TODO Auto-generated method stub
+        return path;
+    }
+
 }

@@ -42,9 +42,11 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import net.eulerframework.EulerFilters;
-import net.eulerframework.EulerServlets;
 import net.eulerframework.common.base.log.LogSupport;
+import net.eulerframework.constant.EulerSysAttributes;
+import net.eulerframework.constant.LocaleCookies;
+import net.eulerframework.constant.EulerFilters;
+import net.eulerframework.constant.EulerServlets;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
@@ -204,21 +206,23 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
     private void initBaseData(ServletContext container) {
         String contextPath = container.getContextPath();
 
-        container.setAttribute("__CONTEXT_PATH", contextPath);
-        container.setAttribute("__ASSETS_PATH", contextPath + WebConfig.getAssetsPath());
-        container.setAttribute("__ADMIN_PATH", contextPath + WebConfig.getAdminRootPath());
+        container.setAttribute(EulerSysAttributes.CONTEXT_PATH, contextPath);
+        container.setAttribute(EulerSysAttributes.ASSETS_PATH, contextPath + WebConfig.getAssetsPath());
+        container.setAttribute(EulerSysAttributes.ADMIN_PATH, contextPath + WebConfig.getAdminRootPath());
 
-        container.setAttribute("__DEBUG_MODE", WebConfig.isDebugMode());
-        container.setAttribute("__PROJECT_VERSION", WebConfig.getProjectVersion());
-        container.setAttribute("__PROJECT_MODE", WebConfig.getProjectMode());
-        container.setAttribute("__PROJECT_BUILDTIME", WebConfig.getProjectBuildtime());
+        container.setAttribute(EulerSysAttributes.DEBUG_MODE, WebConfig.isDebugMode());
+        container.setAttribute(EulerSysAttributes.PROJECT_VERSION, WebConfig.getProjectVersion());
+        container.setAttribute(EulerSysAttributes.PROJECT_MODE, WebConfig.getProjectMode());
+        container.setAttribute(EulerSysAttributes.PROJECT_BUILDTIME, WebConfig.getProjectBuildtime());
 
-        container.setAttribute("__SITENAME", WebConfig.getSitename());
-        container.setAttribute("__COPYRIGHT_HOLDER", WebConfig.getCopyrightHolder());
+        container.setAttribute(EulerSysAttributes.SITENAME, WebConfig.getSitename());
+        container.setAttribute(EulerSysAttributes.COPYRIGHT_HOLDER, WebConfig.getCopyrightHolder());
 
-        container.setAttribute("__ADMIN_DASHBOARD_BRAND_ICON", contextPath + WebConfig.getAdminDashboardBrandIcon());
-        container.setAttribute("__ADMIN_DASHBOARD_BRAND_TEXT", WebConfig.getAdminDashboardBrandText());
+        container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_ICON, contextPath + WebConfig.getAdminDashboardBrandIcon());
+        container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_TEXT, WebConfig.getAdminDashboardBrandText());
 
-        container.setAttribute("__FRAMEWORK_VERSION", SystemProperties.frameworkVersion());
+        container.setAttribute(EulerSysAttributes.FRAMEWORK_VERSION, SystemProperties.frameworkVersion());
+
+        container.setAttribute(EulerSysAttributes.LOCALE_COOKIE_NAME, LocaleCookies.LOCALE.getCookieName());
     }
 }

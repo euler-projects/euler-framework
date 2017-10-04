@@ -12,9 +12,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
-import net.eulerframework.EulerFilters;
-import net.eulerframework.EulerServlets;
 import net.eulerframework.common.base.log.LogSupport;
+import net.eulerframework.constant.EulerFilters;
+import net.eulerframework.constant.EulerServlets;
 import net.eulerframework.web.core.filter.RequestIdFilter;
 import net.eulerframework.web.core.filter.WebLanguageFilter;
 

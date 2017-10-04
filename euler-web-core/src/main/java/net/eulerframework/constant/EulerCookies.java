@@ -24,17 +24,17 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-projects/euler-framework
+ * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework;
+package net.eulerframework.constant;
 
 /**
  * @author cFrost
  *
  */
-public abstract class EulerFilters {
-    public final static String CROS_FILTER = "crosFilter";
-    public final static String WEB_LANGUAGE_FILTER = "webLanguageFilter";
-    public final static String E_TAG_FILTER = "eTagFilter";
+public interface EulerCookies {
+    public String getCookieName();
+    public int getCookieAge();
+    public String getCookiePath();
 }
