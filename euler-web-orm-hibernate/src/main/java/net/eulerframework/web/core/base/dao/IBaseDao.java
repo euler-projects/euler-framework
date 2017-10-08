@@ -10,7 +10,7 @@ import org.hibernate.criterion.Projection;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
+import net.eulerframework.web.core.base.response.PageResponse;
 
 public interface IBaseDao<T extends BaseEntity<?, ?>>{
 
@@ -44,14 +44,14 @@ public interface IBaseDao<T extends BaseEntity<?, ?>>{
     
     long countAll();
     
-    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
 
     /**
      * @param pageQueryRequest
      * @param criterions
      * @return
      */
-    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions);
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions);
 
     /**
      * @param pageQueryRequest
@@ -59,7 +59,7 @@ public interface IBaseDao<T extends BaseEntity<?, ?>>{
      * @param orders
      * @return
      */
-    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders);
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders);
 
     /**
      * @param pageQueryRequest
@@ -68,7 +68,7 @@ public interface IBaseDao<T extends BaseEntity<?, ?>>{
      * @param projection
      * @return
      */
-    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders,
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders,
             Projection projection);
     
     /**
@@ -78,7 +78,7 @@ public interface IBaseDao<T extends BaseEntity<?, ?>>{
      * @return
      * @deprecated
      */
-    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
 
     void flushSession();
 
