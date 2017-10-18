@@ -549,7 +549,8 @@ public abstract class WebConfig {
                 Locale[] ret = new Locale[supportLanguagesStrArray.length];
                 
                 for(int i = 0; i < supportLanguagesStrArray.length; i++) {
-                    ret[i] = new Locale(supportLanguagesStrArray[i]);
+                    String[] languageStr = supportLanguagesStrArray[i].split("_");
+                    ret[i] = new Locale(languageStr[0], languageStr[1]);
                 }
                 return ret;
             } catch (PropertyNotFoundException e) {
