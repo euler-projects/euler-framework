@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.service.PasswordService;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
@@ -60,7 +61,11 @@ public class AuthenticationJspController extends JspSupportWebController {
 
     @RequestMapping(value = "signup", method = RequestMethod.GET)
     public String signup() {
-        return this.display("signup");
+        if(SecurityConfig.isSignUpEnabled()) {
+            return this.display("signup");
+        } else {
+            return this.notfound();
+        }
     }
 
     @RequestMapping(value = "signup", method = RequestMethod.POST)
@@ -69,7 +74,11 @@ public class AuthenticationJspController extends JspSupportWebController {
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile, 
             @RequestParam String password) throws UserInfoCheckWebException {
-        this.userRegistService.signUp(username, email, mobile, password);
-        return this.success();
+        if(SecurityConfig.isSignUpEnabled()) {
+            this.userRegistService.signUp(username, email, mobile, password);
+            return this.success();
+        } else {
+            return this.notfound();
+        }
     }
 }
