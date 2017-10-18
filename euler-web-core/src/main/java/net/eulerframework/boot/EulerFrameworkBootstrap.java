@@ -50,6 +50,7 @@ import net.eulerframework.constant.EulerServlets;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.filter.AdminPageRedirectFilter;
 import net.eulerframework.web.core.filter.CrosFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
@@ -88,7 +89,8 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.E_TAG_FILTER, new ShallowEtagHeaderFilter());
         webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
-        
+        FilterRegistration.Dynamic adminPageRedirectFilter = container.addFilter(EulerFilters.ADMIN_PAGE_REDIRECT_FILTER, new AdminPageRedirectFilter());
+        adminPageRedirectFilter.addMappingForUrlPatterns(null, false, WebConfig.getAdminRootPath());
 
         this.initSpringMVCDispatcher(
                 container, 
