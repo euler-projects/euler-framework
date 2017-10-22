@@ -46,14 +46,10 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
         String fileName = archivedFile.getOriginalFilename();
         
-        this.setNoCacheHeader();
-        
         try {
             this.writeFile(fileName, file);
         } catch (FileNotFoundException e) {
             throw new ResourceNotFoundException(e);
-        } catch (FileReadException e) {
-            throw e;
         } catch (IOException e) {
             throw e;
         }

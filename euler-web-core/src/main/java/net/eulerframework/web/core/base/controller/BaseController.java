@@ -1,6 +1,7 @@
 package net.eulerframework.web.core.base.controller;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 
@@ -9,9 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.eulerframework.common.util.io.file.FileReadException;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.WebContextAccessable;
+import net.eulerframework.web.core.base.controller.MIMEUtils.MIME;
 
 public abstract class BaseController extends WebContextAccessable {
     
@@ -25,15 +27,18 @@ public abstract class BaseController extends WebContextAccessable {
         this.getResponse().getOutputStream().write(string.getBytes("UTF-8"));
     }
     
-    protected void writeFile(String fileName, File file) throws FileReadException, IOException {
+    protected void writeFile(String fileName, File file) throws FileNotFoundException, IOException {
         HttpServletResponse response = this.getResponse();
-
-        //response.setCharacterEncoding("utf-8");
-        String contentType = "application/octet-stream";//new MimetypesFileTypeMap().getContentType(fileName);
-        response.setContentType(contentType);
-        //response.setContentType(MimeType.getFileContentType("*"));
-        response.setHeader("Content-Disposition", 
-                "attachment;fileName=" + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+        String extension = FileUtils.extractFileExtension(fileName);
+        MIME mime;
+        if(StringUtils.hasText(extension)) {
+            mime = MIMEUtils.getMIME(extension);
+        } else {
+            mime = MIMEUtils.getDefaultMIME();
+        }
+        response.setContentType(mime.getContentType());
+        response.setHeader("Content-Disposition", mime.getContentDisposition() + 
+                ";fileName=\"" + new String(fileName.getBytes("utf-8"), "ISO8859-1") + "\"");
         response.setHeader("Content-Length", String.valueOf(file.length()));
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
