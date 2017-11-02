@@ -12,7 +12,7 @@ public class WebRuntimeException extends RuntimeException {
         super();
         this.generateErrorAndCode();
     }
-
+    
     public WebRuntimeException(String message) {
         super(message);
         this.generateErrorAndCode();
