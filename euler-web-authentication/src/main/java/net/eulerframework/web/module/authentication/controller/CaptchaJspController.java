@@ -29,59 +29,28 @@
  */
 package net.eulerframework.web.module.authentication.controller;
 
-import javax.annotation.Resource;
+import java.io.IOException;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
-import net.eulerframework.web.module.authentication.conf.SecurityConfig;
-import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
-import net.eulerframework.web.module.authentication.service.PasswordService;
-import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.Captcha;
-import net.eulerframework.web.module.authentication.util.Captcha.InvalidCaptchaException;
 
 /**
  * @author cFrost
  *
  */
 @JspController
-@RequestMapping("/")
-public class AuthenticationJspController extends JspSupportWebController {
-    @RequestMapping(value = "signin", method = RequestMethod.GET)
-    public String login() {
-        return this.display("signin");
-    }
-
-    @Resource
-    private UserRegistService userRegistService;
-    @Resource
-    private PasswordService passwordService;
-
-    @RequestMapping(value = "signup", method = RequestMethod.GET)
-    public String signup() {
-        if(SecurityConfig.isSignUpEnabled()) {
-            return this.display("signup");
-        } else {
-            return this.notfound();
-        }
-    }
-
-    @RequestMapping(value = "signup", method = RequestMethod.POST)
-    public String litesignup(
-            @RequestParam String username, 
-            @RequestParam(required = false) String email, 
-            @RequestParam(required = false) String mobile, 
-            @RequestParam String password) throws UserInfoCheckWebException, InvalidCaptchaException {
-        if(SecurityConfig.isSignUpEnabled()) {
-            Captcha.validCaptcha(this.getRequest());
-            this.userRegistService.signUp(username, email, mobile, password);
-            return this.success();
-        } else {
-            return this.notfound();
-        }
+@RequestMapping("captcha")
+public class CaptchaJspController extends JspSupportWebController {
+    
+    @RequestMapping(path = "simple", method = RequestMethod.GET)
+    @ResponseBody
+    public void captcha() throws IOException {
+        Captcha c = new Captcha();
+        c.getRandcode(this.getRequest(), this.getResponse());
     }
 }

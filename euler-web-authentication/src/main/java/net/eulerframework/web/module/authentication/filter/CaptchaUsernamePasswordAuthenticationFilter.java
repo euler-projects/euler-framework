@@ -21,15 +21,15 @@ public class CaptchaUsernamePasswordAuthenticationFilter extends UsernamePasswor
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
             HttpServletResponse response) throws AuthenticationException {
-        String captcha= "";
-        String captchaUser="";
+        String realCaptcha= "";
+        String userCaptcha="";
         
         if(enableCaptcha) {
-            captcha = String.valueOf(request.getSession().getAttribute(Captcha.RANDOMCODEKEY));
-            captchaUser = request.getParameter("captcha");            
+            realCaptcha = Captcha.getRealCaptcha(request);
+            userCaptcha = request.getParameter("captcha");            
         }
         
-        if(!enableCaptcha || (StringUtils.hasText(captcha) && captcha.equalsIgnoreCase(captchaUser))) {
+        if(!enableCaptcha || (StringUtils.hasText(realCaptcha) && realCaptcha.equalsIgnoreCase(userCaptcha))) {
             Authentication result = super.attemptAuthentication(request, response);
             request.getSession().setAttribute("__USERINFO", result.getPrincipal());
             return result;
