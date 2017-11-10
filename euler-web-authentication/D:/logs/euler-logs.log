@@ -1,2 +1,0 @@
-INFO  2017-09-16 23:56:51,483 - No config file path defined, search at root classpath path [main] net.eulerframework.common.util.property.PropertyReader.<init>(PropertyReader.java:29)
-INFO  2017-09-16 23:57:07,745 - No config file path defined, search at root classpath path [main] net.eulerframework.common.util.property.PropertyReader.<init>(PropertyReader.java:29)
