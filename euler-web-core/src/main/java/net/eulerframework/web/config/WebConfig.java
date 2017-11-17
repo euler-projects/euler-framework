@@ -1,7 +1,7 @@
 package net.eulerframework.web.config;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.ContextLoader;
@@ -123,7 +123,7 @@ public abstract class WebConfig {
 
     }
 
-    protected static final Logger log = LogManager.getLogger();
+    protected static final Logger log = LoggerFactory.getLogger(WebConfig.class);
 
     public static boolean clearWebConfigCache() {
         properties.refresh();
@@ -210,7 +210,7 @@ public abstract class WebConfig {
                     result = result.substring(0, result.length() - 1);
                 }
 
-                result = CommonUtils.convertDirToUnixFormat(result);
+                result = CommonUtils.convertDirToUnixFormat(result, false);
 
                 if (!result.startsWith("/"))
                     result = "/" + result;
@@ -243,7 +243,7 @@ public abstract class WebConfig {
                     result = result.substring(0, result.length() - 1);
                 }
 
-                result = CommonUtils.convertDirToUnixFormat(result);
+                result = CommonUtils.convertDirToUnixFormat(result, false);
 
                 if (!result.startsWith("/"))
                     result = "/" + result;
@@ -264,7 +264,7 @@ public abstract class WebConfig {
 
                 String result;
                 try {
-                    result = CommonUtils.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH));
+                    result = CommonUtils.convertDirToUnixFormat(properties.get(WebConfigKey.WEB_UPLOAD_PATH), false);
                 } catch (PropertyNotFoundException e) {
                     if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
                         log.info("OS is windows");
@@ -299,7 +299,7 @@ public abstract class WebConfig {
             public Object getData(String key) {
 
                 String result = CommonUtils.convertDirToUnixFormat(
-                        properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH));
+                        properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH), false);
                 // 统一添加/结尾，这样在controller中就可以不加/前缀
                 result = result + "/";
 
@@ -318,7 +318,7 @@ public abstract class WebConfig {
             public Object getData(String key) {
 
                 String result = CommonUtils.convertDirToUnixFormat(
-                        properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH));
+                        properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH), false);
                 // 统一添加/结尾，这样在controller中就可以不加/前缀
                 result = result + "/";
 

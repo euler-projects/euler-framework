@@ -26,6 +26,11 @@
         </dependency>
 
         <dependency>
+            <groupId>net.eulerframework</groupId>
+            <artifactId>euler-common-jwt</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>euler-web-authentication</artifactId>
             <version>${project.version}</version>

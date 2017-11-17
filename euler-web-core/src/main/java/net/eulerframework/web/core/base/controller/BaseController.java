@@ -3,17 +3,18 @@ package net.eulerframework.web.core.base.controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.eulerframework.common.util.MIMEUtils;
+import net.eulerframework.common.util.MIMEUtils.MIME;
 import net.eulerframework.common.util.StringUtils;
+import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.WebContextAccessable;
-import net.eulerframework.web.core.base.controller.MIMEUtils.MIME;
 
 public abstract class BaseController extends WebContextAccessable {
     
@@ -43,11 +44,11 @@ public abstract class BaseController extends WebContextAccessable {
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
     
-    protected void setNoCacheHeader() {
-        HttpServletResponse response = this.getResponse();
-        response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Date", new Date().getTime());
-        response.setIntHeader("Expires", 0);
-    }
+//    protected void setNoCacheHeader() {
+//        HttpServletResponse response = this.getResponse();
+//        response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
+//        response.setHeader("Pragma", "no-cache");
+//        response.setDateHeader("Date", new Date().getTime());
+//        response.setIntHeader("Expires", 0);
+//    }
 }

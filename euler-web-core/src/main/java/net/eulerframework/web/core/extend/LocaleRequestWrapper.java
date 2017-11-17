@@ -37,8 +37,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.util.StringUtils;
 
 import net.eulerframework.web.config.WebConfig;
@@ -50,7 +50,7 @@ import net.eulerframework.web.config.WebConfig;
  *
  */
 public class LocaleRequestWrapper extends HttpServletRequestWrapper {
-    protected final Logger logger = LogManager.getLogger();
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final static String LOCALE_PARAM_NAME = "_locale";
     private final static String LOCALE_SESSION_ATTR_NAME = "__EULER_LOCALE__";

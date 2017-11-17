@@ -27,8 +27,8 @@
     <properties>
         <jdk.version>1.7</jdk.version>        
         
-        <euler-cache.version>0.0.4</euler-cache.version>
-        <euler-common.version>0.0.3</euler-common.version>
+        <euler-cache.version>0.0.6</euler-cache.version>
+        <euler-common.version>0.0.4</euler-common.version>
         
         <commons-codec.version>1.10</commons-codec.version>
 
@@ -284,24 +284,9 @@
 
             <!-- Too many loggers ... -->
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.logging</groupId>
-                <artifactId>jboss-logging</artifactId>
-                <version>${jboss.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
             </dependency>
 
             <dependency>
@@ -319,7 +304,17 @@
 
             <dependency>
                 <groupId>net.eulerframework</groupId>
-                <artifactId>euler-common</artifactId>
+                <artifactId>euler-common-logging</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-common-util</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.eulerframework</groupId>
+                <artifactId>euler-common-jwt</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
         </dependencies>

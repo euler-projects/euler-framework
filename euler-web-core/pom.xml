@@ -82,23 +82,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
         </dependency>
 
         <dependency>
@@ -135,7 +120,11 @@
 
         <dependency>
             <groupId>net.eulerframework</groupId>
-            <artifactId>euler-common</artifactId>
+            <artifactId>euler-common-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.eulerframework</groupId>
+            <artifactId>euler-common-util</artifactId>
         </dependency>
     </dependencies>
     
