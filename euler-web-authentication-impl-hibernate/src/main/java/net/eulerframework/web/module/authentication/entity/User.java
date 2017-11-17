@@ -201,4 +201,12 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     public Date getRegistTime() {
         return this.registTime;
     }
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
 }

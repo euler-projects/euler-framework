@@ -52,5 +52,7 @@ public interface EulerUserProfileService {
      * @return 新创建的用户档案实体，与传入参数是同一个实例
      */
     EulerUserProfileEntity createUserProfile(EulerUserProfileEntity userProfile);
+    
+    <T extends EulerUserProfileEntity> T loadUserProfile(String userId, Class<? extends T> profileClass);
 
 }
