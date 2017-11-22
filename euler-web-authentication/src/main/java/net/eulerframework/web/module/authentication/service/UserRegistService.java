@@ -31,6 +31,8 @@ package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
@@ -65,6 +67,7 @@ public interface UserRegistService {
      */
     default void signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
             throws UserInfoCheckWebException {
+        Assert.notNull(getEulerUserProfileServices(), "At least one EulerUserProfileServices should be implemented");
         EulerUserEntity user = this.signUp(username, email, mobile, password);
         userProfile.setUserId(user.getUserId());
         for(EulerUserProfileService eulerUserProfileService : getEulerUserProfileServices()) {

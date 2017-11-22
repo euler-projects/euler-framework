@@ -120,6 +120,102 @@ public class BasicUserProfile extends NonIDEntity<BasicUserProfile, String> impl
     @Enumerated(EnumType.STRING)
     private NameOrder nameOrder;
 
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+
+    public String getFamilyName() {
+        return familyName;
+    }
+
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getEthnicity() {
+        return ethnicity;
+    }
+
+    public void setEthnicity(String ethnicity) {
+        this.ethnicity = ethnicity;
+    }
+
+    public String getCountryOrRegion() {
+        return countryOrRegion;
+    }
+
+    public void setCountryOrRegion(String countryOrRegion) {
+        this.countryOrRegion = countryOrRegion;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public Locale getPreferredLanguage() {
+        return preferredLanguage;
+    }
+
+    public void setPreferredLanguage(Locale preferredLanguage) {
+        this.preferredLanguage = preferredLanguage;
+    }
+
+    public NameOrder getNameOrder() {
+        return nameOrder;
+    }
+
+    public void setNameOrder(NameOrder nameOrder) {
+        this.nameOrder = nameOrder;
+    }
+
     @Override
     public void setUserId(String userId) {
         this.userId = userId;
