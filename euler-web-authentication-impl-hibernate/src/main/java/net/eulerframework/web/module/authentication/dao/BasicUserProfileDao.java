@@ -27,12 +27,15 @@
  * https://github.com/euler-form/web-form
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.enums;
+package net.eulerframework.web.module.authentication.dao;
+
+import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
+import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
 
 /**
  * @author cFrost
  *
  */
-public enum Gender {
-    MALE,FEMALE,OTHER;
+public class BasicUserProfileDao extends BaseDao<BasicUserProfile> {
+
 }

@@ -30,23 +30,95 @@
 package net.eulerframework.web.module.authentication.entity;
 
 import java.util.Date;
+import java.util.Locale;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 import net.eulerframework.web.module.authentication.enums.Gender;
+import net.eulerframework.web.module.authentication.enums.NameOrder;
 
 /**
  * @author cFrost
  *
  */
+@Entity
+@Table(name = "SYS_BASIC_USER_PROFILE")
 public class BasicUserProfile extends NonIDEntity<BasicUserProfile, String> implements EulerUserProfileEntity {
     
+    /**
+     * 用户ID
+     */
+    @Id
+    @Column(name = "USER_ID", length = 36)
     private String userId;
-    private String firstName;
-    private String lastName;
+    /**
+     * 名字
+     */
+    @Column(name = "GIVEN_NAME", length = 255, nullable = true)
+    private String givenName;
+    /**
+     * 姓氏
+     */
+    @Column(name = "FAMILY_NAME", length = 255, nullable = true)
+    private String familyName;
+    /**
+     * 性别
+     */
+    @Column(name = "GENDER", length = 6, nullable = true)
+    @Enumerated(EnumType.STRING)
     private Gender gender;
-    private String country;
-    private Date birthDate;
-    private Boolean lastNameDisplayFirst;
+    /**
+     * 国籍
+     */
+    @Column(name = "NATIONALITY", length = 255, nullable = true)
+    private String nationality;
+    /**
+     * 州/省
+     */
+    @Column(name = "PROVINCE", length = 255, nullable = true)
+    private String province;
+    /**
+     * 民族
+     */
+    @Column(name = "ETHNICITY", length = 255, nullable = true)
+    private String ethnicity;
+    /**
+     * 国家/地区
+     */
+    @Column(name = "COUNTRY_OR_REGION", length = 255, nullable = true)
+    private String countryOrRegion;
+    /**
+     * 城市
+     */
+    @Column(name = "CITY", length = 255, nullable = true)
+    private String city;
+    /**
+     * 地址
+     */
+    @Column(name = "ADDRESS", length = 2000, nullable = true)
+    private String address;
+    /**
+     * 出生日期
+     */
+    @Column(name = "DATE_OF_BIRTH", nullable = true)
+    private Date dateOfBirth;
+    /**
+     * 偏好语言
+     */
+    @Column(name = "PREFERRED_LANG", length = 20, nullable = true)
+    private Locale preferredLanguage;
+    /**
+     * 姓名显示顺序
+     */
+    @Column(name = "NAME_ORDER", length = 17, nullable = true)
+    @Enumerated(EnumType.STRING)
+    private NameOrder nameOrder;
 
     @Override
     public void setUserId(String userId) {
