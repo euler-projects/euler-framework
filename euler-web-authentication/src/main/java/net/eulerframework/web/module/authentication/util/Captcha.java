@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -27,7 +28,9 @@ import net.eulerframework.web.core.exception.web.WebException;
 public class Captcha {
 
     private static final String RANDOMCODEKEY = "__euler_simple_captcha";// 放到session中的key
+    private static final String RANDOMCODEADDTIME = "__euler_simple_captcha_add_time";// 放到session中的时刻
     private static final String REQUEST_PARAM_NAME = "captcha";// 默认用于传递验证码的参数
+    private static final long LIFE_TIME = 10 * 60* 1000;// 验证码有效期
     
     private Random random = new Random();
     private String randString = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -113,7 +116,9 @@ public class Captcha {
             randomString = drowString(g, randomString, i);
         }
         session.removeAttribute(RANDOMCODEKEY);
+        session.removeAttribute(RANDOMCODEADDTIME);
         session.setAttribute(RANDOMCODEKEY, randomString);
+        session.setAttribute(RANDOMCODEADDTIME, new Date());
         g.dispose();
         ImageIO.write(image, "JPEG", response.getOutputStream());// 将内存中的图片通过流动形式输出到客户端
 
@@ -121,6 +126,10 @@ public class Captcha {
     
     public static String getRealCaptcha(HttpServletRequest request) {
         HttpSession session = request.getSession();
+        Object addTime = session.getAttribute(RANDOMCODEADDTIME);
+        if(addTime == null || new Date().getTime() - ((Date) addTime).getTime() > LIFE_TIME) {
+            return null;
+        }
         return session.getAttribute(RANDOMCODEKEY).toString();
     }
     
