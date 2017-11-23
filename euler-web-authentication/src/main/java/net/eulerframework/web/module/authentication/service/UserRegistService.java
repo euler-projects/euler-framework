@@ -31,6 +31,7 @@ package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
@@ -41,6 +42,7 @@ import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebEx
  * @author cFrost
  *
  */
+@Transactional
 public interface UserRegistService {
     
     EulerUserEntityService getEulerUserEntityService();

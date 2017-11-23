@@ -36,6 +36,7 @@ import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import net.eulerframework.web.module.authentication.entity.User;
@@ -46,6 +47,7 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
  * @author cFrost
  *
  */
+@Transactional
 @Service("userRegistService")
 public class UserRegistServiceImpl implements UserRegistService {
     @Resource private EulerUserEntityService eulerUserEntityService;
