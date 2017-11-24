@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import net.eulerframework.web.core.base.response.ErrorResponse;
+import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.SystemWebError;
 import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
@@ -46,6 +47,15 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
     @ExceptionHandler(IllegalArgumentException.class)
     public Object illegalArgumentException(IllegalArgumentException e) {
         return new ErrorResponse(new WebRuntimeException(e.getMessage(), SystemWebError.ILLEGAL_ARGUMENT, e));
+    }
+
+    /**
+     * 用于在程序发生{@link PageNotFoundException}异常时统一返回错误信息
+     * 
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(PageNotFoundException.class)
+    public void pageNotFoundException(PageNotFoundException e) {
     }
 
     /**

@@ -3,6 +3,8 @@
  */
 package net.eulerframework.web.module.authentication.controller.ajax;
 
+import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import net.eulerframework.common.util.CommonUtils;
 import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
+import net.eulerframework.web.core.exception.web.PageNotFoundException;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
+import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.Captcha;
 import net.eulerframework.web.module.authentication.util.Captcha.InvalidCaptchaException;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
@@ -23,6 +28,9 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
 @AjaxController
 @RequestMapping("/")
 public class AuthenticationAjaxController extends AjaxSupportWebController {
+    
+    @Resource
+    private UserRegistService userRegistService;
 
     @RequestMapping(path="validUsername", method = RequestMethod.GET)
     public void validUsername(@RequestParam String username) throws UserInfoCheckWebException {
@@ -48,6 +56,20 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
     public void validCaptcha(@RequestParam String captcha) throws InvalidCaptchaException {
         CommonUtils.sleep(1);
         Captcha.validCaptcha(captcha, this.getRequest());
+    }
+
+    @RequestMapping(value = "signup", method = RequestMethod.POST)
+    public String litesignup(
+            @RequestParam String username, 
+            @RequestParam(required = false) String email, 
+            @RequestParam(required = false) String mobile, 
+            @RequestParam String password) throws UserInfoCheckWebException, InvalidCaptchaException {
+        if(SecurityConfig.isSignUpEnabled()) {
+            Captcha.validCaptcha(this.getRequest());
+            return this.userRegistService.signUp(username, email, mobile, password).getUserId();
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 
 }
