@@ -24,17 +24,22 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-form/web-form
+ * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.controller.admin;
+package net.eulerframework.web.module.authentication.service.admin;
 
-import net.eulerframework.web.core.base.controller.AbstractWebController;
+import net.eulerframework.web.core.base.request.PageQueryRequest;
+import net.eulerframework.web.core.base.response.PageResponse;
+import net.eulerframework.web.core.base.service.IBaseService;
+import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 
 /**
  * @author cFrost
  *
  */
-public class UserManageJspContorller extends AbstractWebController {
+public interface UserManageService extends IBaseService {
+
+    PageResponse<? extends EulerUserEntity> findUserByPage(PageQueryRequest pageQueryRequest);
 
 }

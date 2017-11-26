@@ -8,6 +8,9 @@ public class PageQueryRequest extends QueryRequest {
 
     private static final String PAGE_SIZE_NAME = "pageSize";
     private static final String PAGE_INDEX_NAME = "pageIndex";
+
+    public static final String EASYUI_PAGE_SIZE_NAME = "rows";
+    public static final String EASYUI_PAGE_INDEX_NAME = "page";
     
     private int pageIndex;
     private int pageSize;
