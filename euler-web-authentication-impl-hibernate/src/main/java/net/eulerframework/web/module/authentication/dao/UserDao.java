@@ -51,7 +51,7 @@ public class UserDao extends BaseDao<User> {
     public User loadUserByUsername(String username) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        detachedCriteria.add(Restrictions.eq("username", username));
+        detachedCriteria.add(Restrictions.eq("username", username).ignoreCase());
         List<User> users = this.query(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
@@ -65,7 +65,7 @@ public class UserDao extends BaseDao<User> {
     public User loadUserByEmail(String email) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        detachedCriteria.add(Restrictions.eq("email", email));
+        detachedCriteria.add(Restrictions.eq("email", email).ignoreCase());
         List<User> users = this.query(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
@@ -79,7 +79,7 @@ public class UserDao extends BaseDao<User> {
     public User loadUserByMobile(String mobile) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(super.entityClass);
         detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        detachedCriteria.add(Restrictions.eq("mobile", mobile));
+        detachedCriteria.add(Restrictions.eq("mobile", mobile).ignoreCase());
         List<User> users = this.query(detachedCriteria);
         if (users == null || users.isEmpty())
             return null;
