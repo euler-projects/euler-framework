@@ -29,15 +29,23 @@
  */
 package net.eulerframework.web.module.authentication.service.admin;
 
+import java.util.Date;
+
 import javax.annotation.Resource;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
+import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
  * @author cFrost
@@ -45,18 +53,107 @@ import net.eulerframework.web.module.authentication.entity.User;
  */
 @Service
 public class UserManageServiceImpl extends BaseService implements UserManageService {
-    
-    @Resource private UserDao userDao;
+
+    @Resource
+    private UserDao userDao;
+    @Resource
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
         PageResponse<User> ret = this.userDao.pageQuery(pageQueryRequest);
-        
-        if(!ret.getRows().isEmpty()) {
+
+        if (!ret.getRows().isEmpty()) {
             ret.getRows().forEach(user -> user.eraseCredentials());
         }
-        
+
         return ret;
+    }
+
+    @Override
+    public void addUser(String username, String email, String mobile, String password, boolean enabled,
+            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired)
+            throws UserInfoCheckWebException {
+        Assert.hasText(username, "Param 'username' can not be empty");
+        Assert.hasText(password, "Param 'password' can not be empty");
+        
+        User user = new User();
+        
+        UserDataValidator.validUsername(username);
+        user.setUsername(username);
+        
+        if(StringUtils.hasText(email)) {
+            UserDataValidator.validEmail(email);
+            user.setEmail(email);
+        }
+        
+        if(StringUtils.hasText(mobile)) {
+            UserDataValidator.validMobile(mobile);
+            user.setMobile(mobile);
+        }
+        
+        UserDataValidator.validPassword(password);
+        user.setPassword(this.passwordEncoder.encode(password));
+        user.setEnabled(enabled);
+        user.setAccountNonExpired(accountNonExpired);
+        user.setAccountNonLocked(accountNonLocked);
+        user.setCredentialsNonExpired(credentialsNonExpired);
+        user.setRegistTime(new Date());
+        
+        this.userDao.save(user);
+    }
+
+    @Override
+    public void updateUser(String userId, String username, String email, String mobile, boolean enabled,
+            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired)
+            throws UserNotFoundException, UserInfoCheckWebException {
+        Assert.hasText(userId, "Param 'userId' can not be empty");
+        Assert.hasText(username, "Param 'username' can not be empty");
+        
+        User user = this.userDao.load(userId);
+        
+        if(user == null) {
+            throw new UserNotFoundException();
+        }
+        
+        if(!user.getUsername().equalsIgnoreCase(username)) {
+            UserDataValidator.validUsername(username);            
+        }
+        user.setUsername(username);
+
+        if(StringUtils.hasText(email) && !email.equalsIgnoreCase(user.getEmail())) {
+            UserDataValidator.validEmail(email);       
+        }
+        user.setEmail(email);
+        
+        if(StringUtils.hasText(mobile) && !mobile.equalsIgnoreCase(user.getMobile())) {
+            UserDataValidator.validMobile(mobile);    
+        }
+        user.setMobile(mobile);
+        
+        user.setEnabled(enabled);
+        user.setAccountNonExpired(accountNonExpired);
+        user.setAccountNonLocked(accountNonLocked);
+        user.setCredentialsNonExpired(credentialsNonExpired);
+        
+        this.userDao.update(user);
+    }
+
+    @Override
+    public void resetPassword(String userId, String password) throws UserNotFoundException, UserInfoCheckWebException {
+        Assert.hasText(userId, "Param 'userId' can not be empty");
+        Assert.hasText(password, "Param 'password' can not be empty");
+        
+        User user = this.userDao.load(userId);
+        
+        if(user == null) {
+            throw new UserNotFoundException();
+        }
+        
+        UserDataValidator.validPassword(password);
+        user.setPassword(this.passwordEncoder.encode(password));
+
+        this.userDao.update(user);
     }
 
 }
