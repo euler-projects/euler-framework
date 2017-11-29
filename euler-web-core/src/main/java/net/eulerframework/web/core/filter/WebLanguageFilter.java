@@ -48,7 +48,7 @@ public class WebLanguageFilter implements Filter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 	    WebLanguageRequestWrapper localeRequest = new WebLanguageRequestWrapper(request, response);
-	    localeRequest.setAttribute(EulerSysAttributes.LOCALE, localeRequest.getLocale());
+	    localeRequest.setAttribute(EulerSysAttributes.LOCALE.value(), localeRequest.getLocale());
 		filterChain.doFilter(localeRequest, response);
 	}
 

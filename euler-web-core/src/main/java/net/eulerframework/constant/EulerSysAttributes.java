@@ -29,35 +29,54 @@
  */
 package net.eulerframework.constant;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * @author cFrost
  *
  */
-public abstract class EulerSysAttributes {
-    public final static String SYS_ATTR = "__SYS_ATTR";    
+public enum EulerSysAttributes { 
     
-    public final static String CONTEXT_PATH = "__CONTEXT_PATH";
-    public final static String ASSETS_PATH = "__ASSETS_PATH";
-    public final static String ADMIN_PATH = "__ADMIN_PATH";
+    CONTEXT_PATH("__CONTEXT_PATH"),
+    ASSETS_PATH("__ASSETS_PATH"),
+    ADMIN_PATH("__ADMIN_PATH"),
     
-    public final static String DEBUG_MODE = "__DEBUG_MODE";
+    DEBUG_MODE("__DEBUG_MODE"),
     
-    public final static String PROJECT_VERSION = "__PROJECT_VERSION";
-    public final static String PROJECT_MODE = "__PROJECT_MODE";
-    public final static String PROJECT_BUILDTIME = "__PROJECT_BUILDTIME";
+    PROJECT_VERSION("__PROJECT_VERSION"),
+    PROJECT_MODE("__PROJECT_MODE"),
+    PROJECT_BUILDTIME("__PROJECT_BUILDTIME"),
     
-    public final static String SITENAME = "__SITENAME";
-    public final static String COPYRIGHT_HOLDER = "__COPYRIGHT_HOLDER";
-    public final static String ADMIN_DASHBOARD_BRAND_ICON = "__ADMIN_DASHBOARD_BRAND_ICON";
-    public final static String ADMIN_DASHBOARD_BRAND_TEXT = "__ADMIN_DASHBOARD_BRAND_TEXT";
+    SITENAME("__SITENAME"),
+    COPYRIGHT_HOLDER("__COPYRIGHT_HOLDER"),
+    ADMIN_DASHBOARD_BRAND_ICON("__ADMIN_DASHBOARD_BRAND_ICON"),
+    ADMIN_DASHBOARD_BRAND_TEXT("__ADMIN_DASHBOARD_BRAND_TEXT"),
     
-    public final static String FRAMEWORK_VERSION = "__FRAMEWORK_VERSION";
+    FRAMEWORK_VERSION("__FRAMEWORK_VERSION"),
     
-    public final static String LOCALE_COOKIE_NAME = "__LOCALE_COOKIE_NAME";
-    public final static String LOCALE = "__LOCALE";
+    LOCALE_COOKIE_NAME("__LOCALE_COOKIE_NAME"),
+    LOCALE("__LOCALE"),
     
-    public final static String FILE_DOWNLOAD_PATH_ATTR = "__FILE_DOWNLOAD_PATH";
-    public final static String IMAGE_DOWNLOAD_PATH_ATTR = "__IMAGE_DOWNLOAD_PATH";
-    public final static String VIDEO_DOWNLOAD_PATH_ATTR = "__VIDEO_DOWNLOAD_PATH";
-    public final static String FILE_UPLOAD_ACTION_ATTR = "__FILE_UPLOAD_ACTION";
+    FILE_DOWNLOAD_PATH_ATTR("__FILE_DOWNLOAD_PATH"),
+    IMAGE_DOWNLOAD_PATH_ATTR("__IMAGE_DOWNLOAD_PATH"),
+    VIDEO_DOWNLOAD_PATH_ATTR("__VIDEO_DOWNLOAD_PATH"),
+    FILE_UPLOAD_ACTION_ATTR("__FILE_UPLOAD_ACTION");
+    
+    private String value;
+    
+    EulerSysAttributes(String value) {
+        this.value = value;
+    }
+    
+    public String value() {
+        return this.value;
+    }
+    
+    public static Set<String> getEulerSysAttributeNames() {
+        Class<EulerSysAttributes> clz = EulerSysAttributes.class;
+        EulerSysAttributes[] eulerSysAttributes= clz.getEnumConstants();
+        return Arrays.asList(eulerSysAttributes).stream().map(eulerSysAttribute -> eulerSysAttribute.value()).collect(Collectors.toSet());
+    }
 }

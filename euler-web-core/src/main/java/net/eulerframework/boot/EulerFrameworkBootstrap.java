@@ -208,23 +208,23 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
     private void initBaseData(ServletContext container) {
         String contextPath = container.getContextPath();
 
-        container.setAttribute(EulerSysAttributes.CONTEXT_PATH, contextPath);
-        container.setAttribute(EulerSysAttributes.ASSETS_PATH, contextPath + WebConfig.getAssetsPath());
-        container.setAttribute(EulerSysAttributes.ADMIN_PATH, contextPath + WebConfig.getAdminRootPath());
+        container.setAttribute(EulerSysAttributes.CONTEXT_PATH.value(), contextPath);
+        container.setAttribute(EulerSysAttributes.ASSETS_PATH.value(), contextPath + WebConfig.getAssetsPath());
+        container.setAttribute(EulerSysAttributes.ADMIN_PATH.value(), contextPath + WebConfig.getAdminRootPath());
 
-        container.setAttribute(EulerSysAttributes.DEBUG_MODE, WebConfig.isDebugMode());
-        container.setAttribute(EulerSysAttributes.PROJECT_VERSION, WebConfig.getProjectVersion());
-        container.setAttribute(EulerSysAttributes.PROJECT_MODE, WebConfig.getProjectMode());
-        container.setAttribute(EulerSysAttributes.PROJECT_BUILDTIME, WebConfig.getProjectBuildtime());
+        container.setAttribute(EulerSysAttributes.DEBUG_MODE.value(), WebConfig.isDebugMode());
+        container.setAttribute(EulerSysAttributes.PROJECT_VERSION.value(), WebConfig.getProjectVersion());
+        container.setAttribute(EulerSysAttributes.PROJECT_MODE.value(), WebConfig.getProjectMode());
+        container.setAttribute(EulerSysAttributes.PROJECT_BUILDTIME.value(), WebConfig.getProjectBuildtime());
 
-        container.setAttribute(EulerSysAttributes.SITENAME, WebConfig.getSitename());
-        container.setAttribute(EulerSysAttributes.COPYRIGHT_HOLDER, WebConfig.getCopyrightHolder());
+        container.setAttribute(EulerSysAttributes.SITENAME.value(), WebConfig.getSitename());
+        container.setAttribute(EulerSysAttributes.COPYRIGHT_HOLDER.value(), WebConfig.getCopyrightHolder());
 
-        container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_ICON, contextPath + WebConfig.getAdminDashboardBrandIcon());
-        container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_TEXT, WebConfig.getAdminDashboardBrandText());
+        container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_ICON.value(), contextPath + WebConfig.getAdminDashboardBrandIcon());
+        container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_TEXT.value(), WebConfig.getAdminDashboardBrandText());
 
-        container.setAttribute(EulerSysAttributes.FRAMEWORK_VERSION, SystemProperties.frameworkVersion());
+        container.setAttribute(EulerSysAttributes.FRAMEWORK_VERSION.value(), SystemProperties.frameworkVersion());
 
-        container.setAttribute(EulerSysAttributes.LOCALE_COOKIE_NAME, LocaleCookies.LOCALE.getCookieName());
+        container.setAttribute(EulerSysAttributes.LOCALE_COOKIE_NAME.value(), LocaleCookies.LOCALE.getCookieName());
     }
 }
