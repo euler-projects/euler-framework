@@ -54,6 +54,7 @@ public abstract class EulerSysAttributes {
     public final static String FRAMEWORK_VERSION = "__FRAMEWORK_VERSION";
     
     public final static String LOCALE_COOKIE_NAME = "__LOCALE_COOKIE_NAME";
+    public final static String LOCALE = "__LOCALE";
     
     public final static String FILE_DOWNLOAD_PATH_ATTR = "__FILE_DOWNLOAD_PATH";
     public final static String IMAGE_DOWNLOAD_PATH_ATTR = "__IMAGE_DOWNLOAD_PATH";

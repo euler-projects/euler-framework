@@ -40,6 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.eulerframework.constant.EulerSysAttributes;
 import net.eulerframework.web.core.extend.WebLanguageRequestWrapper;
 
 public class WebLanguageFilter implements Filter {
@@ -47,6 +48,7 @@ public class WebLanguageFilter implements Filter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 	    WebLanguageRequestWrapper localeRequest = new WebLanguageRequestWrapper(request, response);
+	    localeRequest.setAttribute(EulerSysAttributes.LOCALE, localeRequest.getLocale());
 		filterChain.doFilter(localeRequest, response);
 	}
 
