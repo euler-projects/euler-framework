@@ -84,6 +84,20 @@ public interface UserManageService extends IBaseService {
      * @throws UserNotFoundException 当用户ID不存在时抛出此异常
      * @throws UserInfoCheckWebException 当密码校验不符合要求时抛出此异常
      */
-    void resetPassword(String userId, String password) throws UserNotFoundException, UserInfoCheckWebException;
+    void updatePassword(String userId, String password) throws UserNotFoundException, UserInfoCheckWebException;
+
+    /**
+     * 后台管理 - 启用用户
+     * @param userId 待启用的用户ID
+     * @throws UserNotFoundException 当用户ID不存在时抛出此异常
+     */
+    void activeUser(String userId) throws UserNotFoundException;
+
+    /**
+     * 后台管理 - 禁用用户
+     * @param userId 待禁用的用户ID
+     * @throws UserNotFoundException 当用户ID不存在时抛出此异常
+     */
+    void blockUser(String userId) throws UserNotFoundException;
 
 }

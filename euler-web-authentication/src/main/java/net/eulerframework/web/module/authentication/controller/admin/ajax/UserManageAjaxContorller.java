@@ -76,7 +76,19 @@ public class UserManageAjaxContorller extends AjaxSupportWebController {
     @RequestMapping(path="resetPassword", method = RequestMethod.POST)
     public void resetPassword(
             @RequestParam(required = true) String userId,
-            @RequestParam(required = true) String password) throws UserNotFoundException, UserInfoCheckWebException {
-        this.userManageService.resetPassword(userId, password);
+            @RequestParam(required = true) String newPassword) throws UserNotFoundException, UserInfoCheckWebException {
+        this.userManageService.updatePassword(userId, newPassword);
+    }
+    
+    @RequestMapping(path="activeUser", method = RequestMethod.POST)
+    public void activeUser(
+            @RequestParam(required = true) String userId) throws UserNotFoundException {
+        this.userManageService.activeUser(userId);
+    }
+    
+    @RequestMapping(path="blockUser", method = RequestMethod.POST)
+    public void blockUser(
+            @RequestParam(required = true) String userId) throws UserNotFoundException {
+        this.userManageService.blockUser(userId);
     }
 }

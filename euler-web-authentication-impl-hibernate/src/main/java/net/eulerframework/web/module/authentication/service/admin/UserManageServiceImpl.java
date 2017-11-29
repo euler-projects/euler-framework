@@ -35,6 +35,7 @@ import javax.annotation.Resource;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -140,7 +141,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
     }
 
     @Override
-    public void resetPassword(String userId, String password) throws UserNotFoundException, UserInfoCheckWebException {
+    public void updatePassword(String userId, String password) throws UserNotFoundException, UserInfoCheckWebException {
         Assert.hasText(userId, "Param 'userId' can not be empty");
         Assert.hasText(password, "Param 'password' can not be empty");
         
@@ -153,6 +154,38 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         UserDataValidator.validPassword(password);
         user.setPassword(this.passwordEncoder.encode(password));
 
+        this.userDao.update(user);
+    }
+
+    @Override
+    @Transactional
+    public void activeUser(String userId) throws UserNotFoundException {
+        Assert.hasText(userId, "Param 'userId' can not be empty");
+        
+        User user = this.userDao.load(userId);
+        
+        if(user == null) {
+            throw new UserNotFoundException();
+        }
+
+        user.setEnabled(true);
+        
+        this.userDao.update(user);
+    }
+
+    @Override
+    @Transactional
+    public void blockUser(String userId) throws UserNotFoundException {
+        Assert.hasText(userId, "Param 'userId' can not be empty");
+        
+        User user = this.userDao.load(userId);
+        
+        if(user == null) {
+            throw new UserNotFoundException();
+        }
+
+        user.setEnabled(false);
+        
         this.userDao.update(user);
     }
 
