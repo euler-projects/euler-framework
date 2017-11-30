@@ -3,7 +3,7 @@
   <parent>
     <groupId>net.eulerframework</groupId>
     <artifactId>euler-framework</artifactId>
-    <version>0.3.6</version>
+    <version>0.3.7</version>
   </parent>
   <artifactId>euler-web-authentication-impl</artifactId>
   <name>Euler Web Authentication Implement</name>
@@ -23,6 +23,11 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-jwt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.eulerframework</groupId>
+            <artifactId>euler-common-jwt</artifactId>
         </dependency>
 
         <dependency>
