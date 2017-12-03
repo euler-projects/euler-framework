@@ -21,7 +21,7 @@
         <module>euler-web-core</module>
         <module>euler-web-authentication</module>
         <module>euler-web-basic</module>
-        <module>euler-web-authentication-impl</module>
+        <module>euler-web-authentication-impl-hibernate</module>
     </modules>
 
     <properties>

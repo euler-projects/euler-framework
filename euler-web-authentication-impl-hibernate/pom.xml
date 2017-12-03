@@ -5,7 +5,7 @@
     <artifactId>euler-framework</artifactId>
     <version>0.3.8-SNAPSHOT</version>
   </parent>
-  <artifactId>euler-web-authentication-impl</artifactId>
+  <artifactId>euler-web-authentication-impl-hibernate</artifactId>
   <name>Euler Web Authentication Implement</name>
   <url>https://eulerproject.io/euler-framework</url>
   <description>Default Implement of Euler Web Authentication</description>
