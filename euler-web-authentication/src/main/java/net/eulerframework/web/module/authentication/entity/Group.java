@@ -12,7 +12,6 @@ import javax.persistence.Table;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name="SYS_GROUP")
 public class Group extends UUIDEntity<Group> {

@@ -10,7 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name="SYS_AUTHORITY")
 public class Authority extends UUIDEntity<Authority> implements GrantedAuthority {

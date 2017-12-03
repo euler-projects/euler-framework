@@ -8,7 +8,6 @@ import javax.persistence.Table;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "BASIC_UPLOADED_FILE")
 public class ArchivedFile extends UUIDEntity<ArchivedFile> {

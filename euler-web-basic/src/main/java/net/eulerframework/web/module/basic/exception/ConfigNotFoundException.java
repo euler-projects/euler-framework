@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.basic.exception;
 
-@SuppressWarnings("serial")
 public class ConfigNotFoundException extends Exception {
     public ConfigNotFoundException() {
         super();

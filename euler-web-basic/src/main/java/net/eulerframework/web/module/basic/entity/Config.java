@@ -8,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_CONF")
 public class Config extends NonIDEntity<Config> {

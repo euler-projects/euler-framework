@@ -21,7 +21,6 @@ import net.eulerframework.web.core.base.entity.NonIDEntity;
  * @author cFrost
  *
  */
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "SYS_DICT_CODE")
 public class DictionaryCode extends NonIDEntity<DictionaryCode> {

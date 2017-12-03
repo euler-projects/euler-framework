@@ -2,7 +2,6 @@ package net.eulerframework.web.core.exception.web;
 
 import net.eulerframework.web.core.i18n.Tag;
 
-@SuppressWarnings("serial")
 public abstract class WebException extends RuntimeException {
     
     private String error;

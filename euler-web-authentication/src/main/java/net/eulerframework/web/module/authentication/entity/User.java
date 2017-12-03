@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(name = "SYS_USER")

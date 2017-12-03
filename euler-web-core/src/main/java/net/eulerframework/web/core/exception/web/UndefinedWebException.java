@@ -1,6 +1,5 @@
 package net.eulerframework.web.core.exception.web;
 
-@SuppressWarnings("serial")
 public class UndefinedWebException extends WebException {
     
     public UndefinedWebException() {
