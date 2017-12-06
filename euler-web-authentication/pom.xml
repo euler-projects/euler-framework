@@ -9,6 +9,7 @@
     <artifactId>euler-web-authentication</artifactId>
     <name>Euler Web Authentication</name>
     <url>https://eulerproject.io/euler-framework</url>
+    <description>Provide Authentication API for Euler Framework.</description>
 
     <dependencies>
         <dependency>

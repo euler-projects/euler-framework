@@ -7,6 +7,8 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>euler-web-orm-hibernate</artifactId>
+    <name>Euler ORM Hibernate</name>
+    <url>https://eulerproject.io/euler-framework</url>
     <description>An ORM module use hibernate</description>
 
     <dependencies>

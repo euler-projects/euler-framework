@@ -10,6 +10,7 @@
     <artifactId>euler-web-core</artifactId>
     <name>Euler Web Core</name>
     <url>https://eulerproject.io/euler-framework</url>
+    <description>The Core Module of Euler Framework.</description>
 
     <dependencies>
         <dependency>
