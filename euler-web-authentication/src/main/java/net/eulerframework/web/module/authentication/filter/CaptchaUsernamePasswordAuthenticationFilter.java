@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StringUtils;
+
+import net.eulerframework.constant.EulerSysAttributes;
 import net.eulerframework.web.module.authentication.util.Captcha;
 
 public class CaptchaUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -31,7 +33,7 @@ public class CaptchaUsernamePasswordAuthenticationFilter extends UsernamePasswor
         
         if(!enableCaptcha || (StringUtils.hasText(realCaptcha) && realCaptcha.equalsIgnoreCase(userCaptcha))) {
             Authentication result = super.attemptAuthentication(request, response);
-            request.getSession().setAttribute("__USERINFO", result.getPrincipal());
+            request.getSession().setAttribute(EulerSysAttributes.USER_INFO.value(), result.getPrincipal());
             return result;
         } else {
             throw new InternalAuthenticationServiceException("captcha_error");

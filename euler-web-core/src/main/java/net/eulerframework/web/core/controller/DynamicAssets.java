@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,6 +72,18 @@ public class DynamicAssets extends JspSupportWebController {
             String arrtibuteName = attributeNames.nextElement();
             if(eulerSysAttributeNames.contains(arrtibuteName)) {
                 m.put(arrtibuteName, this.getServletContext().getAttribute(arrtibuteName));
+            }
+        }
+        
+        HttpSession session = this.getRequest().getSession();
+        
+        if(session != null) {
+            attributeNames = this.getRequest().getSession().getAttributeNames();
+            while(attributeNames.hasMoreElements()) {
+                String arrtibuteName = attributeNames.nextElement();
+                if(eulerSysAttributeNames.contains(arrtibuteName)) {
+                    m.put(arrtibuteName, this.getRequest().getSession().getAttribute(arrtibuteName));
+                }
             }
         }
         
