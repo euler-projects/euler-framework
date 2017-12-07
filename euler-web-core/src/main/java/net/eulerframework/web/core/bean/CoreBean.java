@@ -31,20 +31,20 @@ public class CoreBean {
         return messageSource;
     }
 
-    @Bean
-    public LocalValidatorFactoryBean localValidatorFactoryBean() throws ClassNotFoundException {
-        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setProviderClass(Class.forName("org.hibernate.validator.HibernateValidator"));
-        validator.setValidationMessageSource(this.messageSource());
-        return validator;
-    }
-
-    @Bean
-    public MethodValidationPostProcessor methodValidationPostProcessor() throws ClassNotFoundException {
-        MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
-        processor.setValidator(this.localValidatorFactoryBean());
-        return processor;
-    }
+//    @Bean
+//    public LocalValidatorFactoryBean localValidatorFactoryBean() throws ClassNotFoundException {
+//        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+//        validator.setProviderClass(Class.forName("org.hibernate.validator.HibernateValidator"));
+//        validator.setValidationMessageSource(this.messageSource());
+//        return validator;
+//    }
+//
+//    @Bean
+//    public MethodValidationPostProcessor methodValidationPostProcessor() throws ClassNotFoundException {
+//        MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+//        processor.setValidator(this.localValidatorFactoryBean());
+//        return processor;
+//    }
 
     @Bean
     public MultipartResolver multipartResolver() {

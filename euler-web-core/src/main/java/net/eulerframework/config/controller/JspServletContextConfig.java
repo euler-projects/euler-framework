@@ -58,13 +58,13 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
     }
     
     
-    @Resource
-    private SpringValidatorAdapter validator;
-    
-    @Override
-    public Validator getValidator() {
-        return this.validator;
-    }
+//    @Resource
+//    private SpringValidatorAdapter validator;
+//    
+//    @Override
+//    public Validator getValidator() {
+//        return this.validator;
+//    }
 
     @Resource(name = "objectMapper")
     ObjectMapper objectMapper;
