@@ -110,7 +110,7 @@ public class ResetPasswordJspController extends JspSupportWebController {
             @RequestParam(required = true) ResetPasswordType type, 
             @RequestParam(required = false) String token, 
             @RequestParam(required = false) String pin, 
-            @RequestParam(required = true) String password) {
+            @RequestParam(required = true) String password) throws UserInfoCheckWebException {
 
         try {
             if (ResetPasswordType.EMAIL.equals(type)) {
@@ -122,9 +122,12 @@ public class ResetPasswordJspController extends JspSupportWebController {
             } else {
                 return this.notfound();
             }
-        } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSmsResetPinException | UserInfoCheckWebException e) {
+        } catch (InvalidEmailResetTokenException | UserNotFoundException | InvalidSmsResetPinException e) {
             this.logger.debug("resetPassword error", e);
             return this.notfound();
+        } catch (UserInfoCheckWebException e) {
+            this.logger.debug("resetPassword error", e);
+            throw e;
         }
 
     }

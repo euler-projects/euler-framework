@@ -154,7 +154,7 @@ public interface PasswordService {
         Assert.hasText(password, "New password can not be null");
         
         String userId = this.analyzeUserIdFromSmsResetPin(pin);
-        if(StringUtils.hasText(userId)) {
+        if(!StringUtils.hasText(userId)) {
             throw new InvalidSmsResetPinException();
         }
         
@@ -175,7 +175,7 @@ public interface PasswordService {
         Assert.hasText(password, "New password can not be null");
         
         String userId = this.analyzeUserIdFromEmailResetToken(token);
-        if(StringUtils.hasText(token)) {
+        if(!StringUtils.hasText(token)) {
             throw new InvalidEmailResetTokenException();
         }
         
