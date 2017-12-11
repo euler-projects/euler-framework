@@ -1,3 +1,4 @@
+show_downloads: true
 theme: jekyll-theme-slate
 github:
     zip_url: https://eulerproject.io/euler-framework/zipball/master
