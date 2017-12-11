@@ -1,5 +1,5 @@
 show_downloads: true
-theme: jekyll-theme-slate
+theme: jekyll-theme-cayman
 github:
     zip_url: https://eulerproject.io/euler-framework/zipball/master
     tar_url: https://eulerproject.io/euler-framework/tarball/master
