@@ -40,6 +40,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import net.eulerframework.common.base.log.LogSupport;
@@ -104,6 +105,9 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                 WebConfig.getApiRootPath() + "/*");
 
         this.initBaseData(container);
+        
+        FilterRegistration.Dynamic webLanguageFilter = container.addFilter("ETAGFilter", new ShallowEtagHeaderFilter());
+        webLanguageFilter.addMappingForServletNames(null, false, "springWebDispatcherServlet", "springAdminWebDispatcherServlet");
 
         FilterRegistration.Dynamic requestIdFilter = container.addFilter("requestIdFilter", new RequestIdFilter());
         requestIdFilter.addMappingForUrlPatterns(null, false, "/*");
