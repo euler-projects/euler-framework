@@ -17,14 +17,14 @@ public class IndexWebController extends JspSupportWebController {
         return this.display("index");
     }
     
-    /**
-     * 捕获所有未定义的请求，只有满足[contextPaht]/AdminRootPath才会被重定向到[contextPaht]/AdminRootPath/，其他请求返回404
-     * @return 后台管理首页
-     */
-    @RequestMapping(value={"**"}, method = RequestMethod.GET)
-    public String adminRedirect() {
-        if(this.getRequest().getRequestURI().replace(this.getRequest().getContextPath(), "").equals(WebConfig.getAdminRootPath()))
-            return this.redirect(WebConfig.getAdminRootPath() + "/");
-        throw new PageNotFoundException(this.getRequest());
-    }
+//    /**
+//     * 捕获所有未定义的请求，只有满足[contextPaht]/AdminRootPath才会被重定向到[contextPaht]/AdminRootPath/，其他请求返回404
+//     * @return 后台管理首页
+//     */
+//    @RequestMapping(value={"**"}, method = RequestMethod.GET)
+//    public String adminRedirect() {
+//        if(this.getRequest().getRequestURI().replace(this.getRequest().getContextPath(), "").equals(WebConfig.getAdminRootPath()))
+//            return this.redirect(WebConfig.getAdminRootPath() + "/");
+//        throw new PageNotFoundException(this.getRequest());
+//    }
 }

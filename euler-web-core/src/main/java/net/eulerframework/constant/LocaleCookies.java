@@ -24,29 +24,44 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-form/web-form
+ * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.core.filter;
+package net.eulerframework.constant;
 
-import java.io.IOException;
+/**
+ * @author cFrost
+ *
+ */
+public enum LocaleCookies implements EulerCookies {
+    LOCALE("EULER_LOCALE", 10 * 365 * 24 * 60 * 60, "/");
+    
+    LocaleCookies(String name, int age, String path) {
+        this.age = age;
+        this.name = name;
+        this.path = path;
+    }
+    
+    private String name;
+    private int age;
+    private String path;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+    @Override
+    public String getCookieName() {
+        // TODO Auto-generated method stub
+        return name;
+    }
 
-import org.springframework.web.filter.OncePerRequestFilter;
+    @Override
+    public int getCookieAge() {
+        // TODO Auto-generated method stub
+        return age;
+    }
 
-import net.eulerframework.web.core.extend.LocaleRequestWrapper;
-
-public class LocaleFilter extends OncePerRequestFilter {
-
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-	    LocaleRequestWrapper localeRequest = new LocaleRequestWrapper(request, response);
-		filterChain.doFilter(localeRequest, response);
-	}
+    @Override
+    public String getCookiePath() {
+        // TODO Auto-generated method stub
+        return path;
+    }
 
 }

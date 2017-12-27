@@ -762,4 +762,11 @@ public abstract class WebConfig {
         return (String) cachedConfig;
     }
 
+    /**
+     * @return
+     */
+    public static boolean isApiEnabled() {
+        return true;
+    }
+
 }
