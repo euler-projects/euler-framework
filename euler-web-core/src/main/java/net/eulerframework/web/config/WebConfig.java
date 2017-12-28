@@ -31,6 +31,7 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
 
         // [core]
+        private static final String WEB_URL = "web.url";
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
         private static final String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
         private static final String CORE_AJAX_CONFIG_CLASS = "core.webAjaxConfigClass";
@@ -116,6 +117,31 @@ public abstract class WebConfig {
         });
 
         return (int) cachedConfig;
+    }
+
+    /**
+     * 获取网站域名
+     * @return 末尾不带/的网站域名
+     * <p> 如<br>
+     * http://localhost:8080<br>
+     * http://123.123.123.123:1234<br>
+     * http://123.123.123.123<br>
+     * https://eulerproject.io
+     */
+    public static String getWebUrl() {
+        try {
+            String result = properties.get(WebConfigKey.WEB_URL);
+            if (!StringUtils.hasText(result))
+                throw new RuntimeException(WebConfigKey.WEB_URL + "can not be empty");
+
+            while (result.endsWith("/")) {
+                result = result.substring(0, result.length() - 1);
+            }
+            
+            return result;
+        } catch (PropertyNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean isApiEnabled() {

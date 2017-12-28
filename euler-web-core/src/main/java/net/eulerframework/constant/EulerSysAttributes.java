@@ -38,10 +38,14 @@ import java.util.stream.Collectors;
  *
  */
 public enum EulerSysAttributes { 
+
+    WEB_URL("__WEB_URL"),
     
     CONTEXT_PATH("__CONTEXT_PATH"),
     ASSETS_PATH("__ASSETS_PATH"),
+    AJAX_PATH("__AJAX_PATH"),
     ADMIN_PATH("__ADMIN_PATH"),
+    ADMIN_AJAX_PATH("__ADMIN_AJAX_PATH"),
     
     DEBUG_MODE("__DEBUG_MODE"),
     
