@@ -24,7 +24,7 @@ import net.eulerframework.web.core.annotation.AjaxWebController;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = {"**.web.**.controller.admin.ajax"},
+        basePackages = {"**.web.**.controller.admin"},
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(AjaxWebController.class)
 )

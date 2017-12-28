@@ -207,10 +207,13 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
 
     private void initBaseData(ServletContext container) {
         String contextPath = container.getContextPath();
+        container.setAttribute(EulerSysAttributes.WEB_URL.value(), WebConfig.getWebUrl());
 
         container.setAttribute(EulerSysAttributes.CONTEXT_PATH.value(), contextPath);
         container.setAttribute(EulerSysAttributes.ASSETS_PATH.value(), contextPath + WebConfig.getAssetsPath());
         container.setAttribute(EulerSysAttributes.ADMIN_PATH.value(), contextPath + WebConfig.getAdminRootPath());
+        container.setAttribute(EulerSysAttributes.AJAX_PATH.value(), contextPath + "/ajax");
+        container.setAttribute(EulerSysAttributes.ADMIN_AJAX_PATH.value(), contextPath + WebConfig.getAdminRootPath() + "/ajax");
 
         container.setAttribute(EulerSysAttributes.DEBUG_MODE.value(), WebConfig.isDebugMode());
         container.setAttribute(EulerSysAttributes.PROJECT_VERSION.value(), WebConfig.getProjectVersion());

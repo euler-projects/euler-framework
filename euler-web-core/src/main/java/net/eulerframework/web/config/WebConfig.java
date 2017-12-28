@@ -40,6 +40,7 @@ public abstract class WebConfig {
         private static final String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
 
         // [web]
+        private static final String WEB_URL = "web.url";
         private static final String WEB_SITENAME = "web.sitename";
         private static final String WEB_DEFAULT_THEME = "web.defaultTheme";
         private static final String WEB_UPLOAD_PATH = "web.uploadPath";
@@ -50,7 +51,7 @@ public abstract class WebConfig {
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
         private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
-        public static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
+        private static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
 
         private static final String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
@@ -767,6 +768,17 @@ public abstract class WebConfig {
      */
     public static boolean isApiEnabled() {
         return true;
+    }
+
+    /**
+     * @return
+     */
+    public static String getWebUrl() {
+        try {
+            return properties.get(WebConfigKey.WEB_URL);
+        } catch (PropertyNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
