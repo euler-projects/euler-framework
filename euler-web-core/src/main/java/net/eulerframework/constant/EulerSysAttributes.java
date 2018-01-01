@@ -47,6 +47,8 @@ public enum EulerSysAttributes {
     ADMIN_PATH("__ADMIN_PATH"),
     ADMIN_AJAX_PATH("__ADMIN_AJAX_PATH"),
     
+    SIGN_OUT_ACTION("__SIGN_OUT_ACTION"),
+    
     DEBUG_MODE("__DEBUG_MODE"),
     
     PROJECT_VERSION("__PROJECT_VERSION"),

@@ -185,4 +185,8 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         return this.sortMap;
     }
 
+    public Map<String, QueryMode> getModeMap() {
+        return modeMap;
+    }
+
 }
