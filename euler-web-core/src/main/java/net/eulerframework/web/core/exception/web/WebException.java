@@ -7,6 +7,13 @@ public abstract class WebException extends RuntimeException {
     private String error;
     private int code;
 
+
+    public WebException(String message) {
+        super(message);
+        this.error = "undefined";
+        this.code = -1;
+    }
+    
     public WebException(String error, int code) {
         super();
         this.error = error;
