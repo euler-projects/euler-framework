@@ -61,7 +61,7 @@ public class DynamicAssets extends JspSupportWebController {
     @ResponseBody
     @RequestMapping(path = "system.js", method = RequestMethod.GET)
     public void systemAttribute() throws JsonProcessingException, IOException {
-        this.getResponse().setContentType("application/javascript");
+        this.getResponse().setHeader("Content-Type", "application/javascript");
         
         Map<String, Object> m = new HashMap<>();
         
