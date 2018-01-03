@@ -155,8 +155,6 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
             .outputQuality(1f) 
             .toOutputStream(response.getOutputStream());
         }
-        
-        SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
     
     @ResponseBody
