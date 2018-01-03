@@ -146,7 +146,7 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         this.getResponse().setHeader("Content-Type", mime.getContentType());
         response.setHeader("Content-Disposition", mime.getContentDisposition() + 
                 ";fileName=\"" + new String(fileName.getBytes("utf-8"), "ISO8859-1") + "\"");
-        response.setHeader("Transfer-Encoding", "chunked");
+        //response.setHeader("Transfer-Encoding", "chunked");
         //response.setHeader("Content-Length", String.valueOf(file.length()));
         
         if(scale != 1) {
