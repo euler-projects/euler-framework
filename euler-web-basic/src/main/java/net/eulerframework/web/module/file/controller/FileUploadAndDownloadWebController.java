@@ -150,11 +150,14 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         //response.setHeader("Content-Length", String.valueOf(file.length()));
         
         if(scale != 1) {
-            Thumbnails.of(file) 
+            Thumbnails.of(file)
             .scale(scale) 
             .outputQuality(1f) 
             .toOutputStream(response.getOutputStream());
+        } else {
+            SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
         }
+        
     }
     
     @ResponseBody
