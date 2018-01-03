@@ -18,9 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
 import net.eulerframework.common.util.MIMEUtils;
-import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.MIMEUtils.MIME;
-import net.eulerframework.common.util.io.file.FileReadException;
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.config.WebConfig;
@@ -64,7 +63,7 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
             @RequestParam(required = false, defaultValue = "-1") int perfectWidth,
             @RequestParam(required = false, defaultValue = "-1") int perfectHeight) throws IOException {
         
-        if(perfectWidth < 1 && perfectHeight < 1) {
+        if(perfectHeight <= 0 && perfectWidth <= 0) {
             this.downloadArchivedFile(param);
         } else {
             ArchivedFile archivedFile = this.getRequestFile(param);
@@ -74,22 +73,31 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
             int originalWidth = bufferedImage.getWidth();
 
             double scale= 1;
-
-            double scaleHeight = (double) perfectHeight / (double) originalHeight;
-            double scaleWidth = (double) perfectWidth / (double) originalWidth;
             
-            if(0 < scaleHeight && scaleHeight < 1 && 0 < scaleWidth && scaleWidth < 1) { // 高和宽都为缩小的情况
-                scale = scaleHeight < scaleWidth ? scaleHeight : scaleWidth;
-            } else if (0 < scaleHeight && scaleHeight < 1){ // 只有高为缩小
-                scale = scaleHeight;
-            } else if (0 < scaleWidth && scaleWidth < 1){ // 只有宽为缩小
+            if (perfectHeight <= 0 && perfectWidth <= 0){ // 高宽都不为正,不缩放
+                scale = 1;
+            } else if (perfectHeight <= 0){ // 高不为正,以宽为基准缩放
+                double scaleWidth = (double) perfectWidth / (double) originalWidth;
                 scale = scaleWidth;
-            } else {
+            } else if (perfectWidth <= 0){ // 宽不为正,以高为基准缩放
+                double scaleHeight = (double) perfectHeight / (double) originalHeight;
+                scale = scaleHeight;
+            } else { // 其他情况以缩放比较大的为基准
+                double scaleHeight = (double) perfectHeight / (double) originalHeight;
+                double scaleWidth = (double) perfectWidth / (double) originalWidth;
+                scale = scaleHeight > scaleWidth ? scaleHeight : scaleWidth;
+            }
+            
+            if(scale > 1) { //不允许放大
                 scale = 1;
             }
 
             try {
-                this.writeImage(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile(), scale);
+                if(scale == 1) {
+                    this.writeFile(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile());
+                } else {
+                    this.writeImage(archivedFile.getOriginalFilename(), archivedFile.getArchivedFile(), scale);
+                }
             } catch (FileNotFoundException e) {
                 this.logger.warn(e.getMessage(), e);
                 throw new ResourceNotFoundException();
