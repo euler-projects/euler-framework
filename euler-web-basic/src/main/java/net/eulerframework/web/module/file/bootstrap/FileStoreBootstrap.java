@@ -22,6 +22,7 @@ public class FileStoreBootstrap extends LogSupport implements WebApplicationInit
 
 
         container.setAttribute(EulerSysAttributes.FILE_DOWNLOAD_PATH_ATTR.value(), contextPath + "/file");
+        container.setAttribute(EulerSysAttributes.IMAGE_DOWNLOAD_PATH_ATTR.value(), contextPath + "/image");
         container.setAttribute(EulerSysAttributes.FILE_UPLOAD_ACTION_ATTR.value(), contextPath + "/uploadFile");
 
     }

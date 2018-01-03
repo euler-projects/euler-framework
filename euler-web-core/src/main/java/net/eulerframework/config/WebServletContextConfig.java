@@ -21,6 +21,7 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -62,6 +63,11 @@ public class WebServletContextConfig extends WebMvcConfigurerAdapter {
     @Override
     public Validator getValidator() {
         return this.validator;
+    }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
     }
 
     @Resource(name = "objectMapper")
