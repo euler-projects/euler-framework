@@ -71,9 +71,9 @@ public class QueryRequest extends LogSupport implements BaseRequest {
             }
         });
         
-        this.queryMap = this.extractParams(request, F_QUERY_PREFIX);
+        this.fqueryMap = this.extractParams(request, F_QUERY_PREFIX);
         
-        this.modeMap = this.extractParams(request, F_MODE_PREFIX, new ParamExtractor<QueryMode>() {
+        this.fmodeMap = this.extractParams(request, F_MODE_PREFIX, new ParamExtractor<QueryMode>() {
 
             @Override
             public QueryMode extract(String value) {
