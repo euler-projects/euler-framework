@@ -2,9 +2,11 @@ package net.eulerframework.web.core.bean;
 
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.multipart.MultipartResolver;
@@ -61,6 +63,18 @@ public class CoreBean {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(Include.NON_NULL);
         return mapper;
+    }
+    
+    @Bean(name = "secretPropertyConfigurer")
+    public PropertyPlaceholderConfigurer secretPropertyConfigurer() {
+        PropertyPlaceholderConfigurer propertyPlaceholderConfigurer = new PropertyPlaceholderConfigurer();
+        propertyPlaceholderConfigurer.setFileEncoding("utf-8");
+        propertyPlaceholderConfigurer.setOrder(1);
+        propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
+        propertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
+        FileSystemResource resource = new FileSystemResource(WebConfig.getConfigPath());
+        propertyPlaceholderConfigurer.setLocation(resource);
+        return propertyPlaceholderConfigurer;
     }
 
     // @Bean(name="jaxb2Marshaller")

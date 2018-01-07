@@ -15,6 +15,7 @@
 
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="fileEncoding" value="utf-8" />
+        <property name="order" value="2"/>
         <property name="ignoreUnresolvablePlaceholders" value="true" />
         <property name="location" value="classpath:config.properties"/>
     </bean>

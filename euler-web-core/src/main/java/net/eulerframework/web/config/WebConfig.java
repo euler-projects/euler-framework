@@ -5,8 +5,6 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import org.springframework.web.context.ContextLoader;
-
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
@@ -31,7 +29,7 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
 
         // [core]
-        private static final String WEB_URL = "web.url";
+        private static final String CORE_RUNTIME_PATH = "core.runtimePath";
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
         private static final String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
         private static final String CORE_AJAX_CONFIG_CLASS = "core.webAjaxConfigClass";
@@ -42,9 +40,9 @@ public abstract class WebConfig {
         private static final String CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
 
         // [web]
+        private static final String WEB_URL = "web.url";
         private static final String WEB_SITENAME = "web.sitename";
         private static final String WEB_DEFAULT_THEME = "web.defaultTheme";
-        private static final String WEB_FILE_SAVE_PATH = "web.fileSavePath";
         private static final String WEB_STATIC_PAGES_PATH = "web.staticPagesPath";
         private static final String WEB_JSP_PATH = "web.jspPath";
         //private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
@@ -71,6 +69,8 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "Copyright Holder";
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
 
+        private static final String CORE_RUNTIME_PATH_UNIX = "file:///var/lib/euler-framework/";
+        private static final String CORE_RUNTIME_PATH_WIN = "file://C:\\euler-framework\\";
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "net.eulerframework.config.root.RootContextConfig";
         private static final String CORE_WEB_CONFIG_CLASS = "net.eulerframework.config.controller.JspServletContextConfig";
         private static final String CORE_AJAX_CONFIG_CLASS = "net.eulerframework.config.controller.AjaxServletContextConfig";
@@ -82,8 +82,6 @@ public abstract class WebConfig {
 
         private static final String WEB_SITENAME = "DEMO";
         private static final String WEB_DEFAULT_THEME = "default";
-        private static final String WEB_FILE_SAVE_PATH_UNIX = "file:///var/lib/euler-framework/";
-        private static final String WEB_FILE_SAVE_PATH_WIN = "file://C:\\euler-framework\\";
         //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
         private static final String WEB_STATIC_PAGES_PATH = "/pages";
         private static final String WEB_JSP_PATH = "/WEB-INF/jsp/themes";
@@ -258,36 +256,37 @@ public abstract class WebConfig {
         return (String) cachedConfig;
     }
 
-    public static String getFileSavePath() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_FILE_SAVE_PATH, new DataGetter<String, Object>() {
+    public static String getRuntimePath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_RUNTIME_PATH, new DataGetter<String, Object>() {
 
             @Override
             public Object getData(String key) {
 
                 String result;
                 try {
-                    result = properties.get(WebConfigKey.WEB_FILE_SAVE_PATH);
+                    result = properties.get(WebConfigKey.CORE_RUNTIME_PATH);
                 } catch (PropertyNotFoundException e) {
-                    if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+                    if (isWindows()) {
                         LOGGER.info("OS is windows");
-                        result = WebConfigDefault.WEB_FILE_SAVE_PATH_WIN;
+                        result = WebConfigDefault.CORE_RUNTIME_PATH_WIN;
                     } else {
                         LOGGER.info("OS isn't windows");
-                        result = WebConfigDefault.WEB_FILE_SAVE_PATH_UNIX;
+                        result = WebConfigDefault.CORE_RUNTIME_PATH_UNIX;
                     }
-                    LOGGER.warn("Couldn't load " + WebConfigKey.WEB_FILE_SAVE_PATH + " , use " + result + " for default.");
+                    LOGGER.warn("Couldn't load " + WebConfigKey.CORE_RUNTIME_PATH + " , use " + result + " for default.");
                 }
 
                 result = CommonUtils.convertDirToUnixFormat(result, true);
                 if (!result.startsWith("/") && !result.startsWith("file://")) {
-                    result = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(result);
+                    throw new RuntimeException(WebConfigKey.CORE_RUNTIME_PATH + " must bengin with file:// or /");
+                    //result = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(result);
                 } else {
                     if (result.startsWith("file://")) {
                         result = result.substring("file://".length());
                     }
                 }
 
-                return result;
+                return CommonUtils.convertDirToUnixFormat(result, false);
             }
 
         });
@@ -592,6 +591,18 @@ public abstract class WebConfig {
      */
     public static boolean isPathLocaleControlEnabled() {
         return (boolean) CONFIG_CAHCE.get(WebConfigKey.WEB_PATH_LANGUAGE_CONTROL_ENABLED, key -> properties.getBooleanValue(key, WebConfigDefault.WEB_PATH_LANGUAGE_CONTROL_ENABLED));
+    }
+
+    /**
+     * 获取外部配置文件路径
+     * @return
+     */
+    public static String getConfigPath() {
+        return getRuntimePath() + "/conf/config.properties";
+    }
+    
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().indexOf("windows") > -1;
     }
 
 }

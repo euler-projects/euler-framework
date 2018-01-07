@@ -43,6 +43,6 @@ public class FileConfig {
     public final static String FILE_UPLOAD_ACTION = "/uploadFile";
 
     public static String getFileArchivedPath() {
-        return WebConfig.getFileSavePath() + "archived/file/";
+        return WebConfig.getRuntimePath() + "/archived/file";
     }
 }

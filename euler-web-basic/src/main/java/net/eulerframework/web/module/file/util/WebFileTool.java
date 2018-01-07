@@ -12,7 +12,7 @@ public class WebFileTool {
         String archivedFilePath = FileConfig.getFileArchivedPath();
         
         if(archivedFile.getArchivedPathSuffix() != null)
-            archivedFilePath += archivedFile.getArchivedPathSuffix();
+            archivedFilePath = archivedFilePath + "/" + archivedFile.getArchivedPathSuffix();
         
         return new File(archivedFilePath, archivedFile.getArchivedFilename());
     }

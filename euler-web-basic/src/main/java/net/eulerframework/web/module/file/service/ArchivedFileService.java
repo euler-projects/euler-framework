@@ -68,7 +68,7 @@ public class ArchivedFileService extends BaseService {
         String originalFilename = file.getName();
         String targetFilename = UUID.randomUUID().toString();
 
-        File targetFile = new File(archiveFilePath + archivedPathSuffix, targetFilename);
+        File targetFile = new File(archiveFilePath + "/" + archivedPathSuffix, targetFilename);
 
         try {
             Files.copy(file.toPath(), targetFile.toPath());
@@ -91,7 +91,7 @@ public class ArchivedFileService extends BaseService {
         String originalFilename = multipartFile.getOriginalFilename();
         String targetFilename = UUID.randomUUID().toString();
 
-        File targetFile = new File(archiveFilePath + archivedPathSuffix, targetFilename);
+        File targetFile = new File(archiveFilePath + "/" + archivedPathSuffix, targetFilename);
 
         if (!targetFile.getParentFile().exists()) {
             targetFile.getParentFile().mkdirs();

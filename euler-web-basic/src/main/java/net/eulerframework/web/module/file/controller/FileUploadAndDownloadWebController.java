@@ -87,7 +87,7 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         String archivedFilePath = FileConfig.getFileArchivedPath();
         
         if(archivedFile.getArchivedPathSuffix() != null)
-            archivedFilePath += archivedFile.getArchivedPathSuffix();
+            archivedFilePath = archivedFilePath + "/" + archivedFile.getArchivedPathSuffix();
         
         File file = new File(archivedFilePath, archivedFile.getArchivedFilename());
         archivedFile.setArchivedFile(file);
