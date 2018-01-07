@@ -55,7 +55,7 @@ public abstract class WebConfig {
         private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
         private static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
-        private final static String WEB_SUPPORT_LANGUAGES = "web.supportLanguages";
+        private static final String WEB_SUPPORT_LANGUAGES = "web.supportLanguages";
         private static final String WEB_PATH_LANGUAGE_CONTROL_ENABLED = "web.pathLanguageControlEnabled";
 
         private static final String WEB_MULITPART = "web.multipart";
@@ -94,7 +94,7 @@ public abstract class WebConfig {
         private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
         private static final Locale WEB_DEFAULT_LANGUAGE = Locale.CHINA;
-        private final static Locale[] WEB_SUPPORT_LANGUAGES = new Locale[] {Locale.CHINA, Locale.US};
+        private static final Locale[] WEB_SUPPORT_LANGUAGES = new Locale[] {Locale.CHINA, Locale.US};
         private static final boolean WEB_PATH_LANGUAGE_CONTROL_ENABLED = false;
 
         private static final String WEB_MULITPART_LOCATION = null;

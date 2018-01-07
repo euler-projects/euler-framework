@@ -61,7 +61,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
 
     /**
      * 本构造函数会先检查请求中有无{@link WebLanguageRequestWrapper#LOCALE_PARAM_NAME}参数。
-     * 如有，则以此参数值确定语言，并将语言信息放入Session和Cookie中 如没有，则依次尝试从Session和Cookie中获取
+     * 如有，则以此参数值确定语言，并将语言信息放入Cookie和Session中 如没有，则依次尝试从Cookie和Session中获取
      * 
      * @param request
      *            请求，不会对请求做任何修改
