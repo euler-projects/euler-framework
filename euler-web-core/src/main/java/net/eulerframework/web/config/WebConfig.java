@@ -558,8 +558,7 @@ public abstract class WebConfig {
             try {
                 String defaultLanguagesStr = properties.get(key);
                 Assert.hasText(defaultLanguagesStr, WebConfigKey.WEB_DEFAULT_LANGUAGE + " can not be empty");
-                String[] defaultLanguagesStrArray = defaultLanguagesStr.split("-");
-                return new Locale(defaultLanguagesStrArray[0], defaultLanguagesStrArray[1]);
+                return CommonUtils.parseLocale(defaultLanguagesStr);
             } catch (PropertyNotFoundException e) {
                 return WebConfigDefault.WEB_DEFAULT_LANGUAGE;
             }
@@ -574,8 +573,7 @@ public abstract class WebConfig {
                 Locale[] ret = new Locale[supportLanguagesStrArray.length];
                 
                 for(int i = 0; i < supportLanguagesStrArray.length; i++) {
-                    String[] languageStr = supportLanguagesStrArray[i].split("_");
-                    ret[i] = new Locale(languageStr[0], languageStr[1]);
+                    ret[i] = CommonUtils.parseLocale(supportLanguagesStrArray[i]);;
                 }
                 return ret;
             } catch (PropertyNotFoundException e) {
