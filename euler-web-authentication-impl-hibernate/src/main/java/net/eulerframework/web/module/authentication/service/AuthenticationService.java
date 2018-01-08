@@ -12,6 +12,7 @@ import net.eulerframework.common.util.jwt.InvalidJwtException;
 import net.eulerframework.common.util.jwt.JwtEncryptor;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.authentication.entity.Group;
@@ -32,8 +33,8 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     private IUserProfileService userProfileService;
     @Resource
     private AuthorityService authorityService;
-    private boolean enableAutoAuthorize = WebConfig.isEnableAutoAuthorizeAfterSignup();
-    private String[] autoAuthorizeGroupId = WebConfig.getAutoAuthorizeGroupId();
+    private boolean enableAutoAuthorize = SecurityConfig.isEnableAutoAuthorizeAfterSignup();
+    private String[] autoAuthorizeGroupId = SecurityConfig.getAutoAuthorizeGroupId();
     
     @Resource private JwtEncryptor jwtEncryptor;
 

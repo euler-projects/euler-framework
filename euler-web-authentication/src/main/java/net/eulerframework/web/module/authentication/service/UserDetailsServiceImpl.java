@@ -8,17 +8,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.entity.User;
-import net.eulerframework.web.module.authentication.service.UserService;
 
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Resource private UserService userSerivce;
     
-    private boolean enableEmailSignin = WebConfig.isEnableMobileSignin();
-    private boolean enableMobileSignin = WebConfig.isEnableMobileSignin();
+    private boolean enableEmailSignin = SecurityConfig.isEnableMobileSignin();
+    private boolean enableMobileSignin = SecurityConfig.isEnableMobileSignin();
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

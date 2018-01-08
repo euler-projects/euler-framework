@@ -46,6 +46,6 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
                 EulerServlets.WEB_ADMIN_SERVLET, 
                 EulerServlets.WEB_AJAX_SERVLET, 
                 EulerServlets.WEB_ADMIN_AJAX_SERVLET);
-        //webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
+        //webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfigOld.getStaticPagesRootPath() + "/*");
     }
 }

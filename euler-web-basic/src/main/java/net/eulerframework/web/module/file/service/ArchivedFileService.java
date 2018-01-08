@@ -19,8 +19,8 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.DateUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
-import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.module.file.conf.FileConfig;
 import net.eulerframework.web.module.file.dao.IArchivedFileDao;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
@@ -61,7 +61,7 @@ public class ArchivedFileService extends BaseService {
     }
 
     public ArchivedFile saveFile(File file) throws FileArchiveException {
-        String archiveFilePath = WebConfig.getUploadPath();
+        String archiveFilePath = FileConfig.getFileArchivedPath();
         String archivedPathSuffix = DateUtils.formatDate(new Date(), "yyyy-MM-dd");
 
         String originalFilename = file.getName();
@@ -84,7 +84,7 @@ public class ArchivedFileService extends BaseService {
     }
 
     public ArchivedFile saveMultipartFile(MultipartFile multipartFile) throws FileArchiveException {
-        String archiveFilePath = WebConfig.getUploadPath();
+        String archiveFilePath = FileConfig.getFileArchivedPath();
         String archivedPathSuffix = DateUtils.formatDate(new Date(), "yyyy-MM-dd");
 
         String originalFilename = multipartFile.getOriginalFilename();

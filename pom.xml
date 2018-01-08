@@ -28,7 +28,7 @@
         <jdk.version>1.8</jdk.version>        
         
         <euler-cache.version>0.0.6</euler-cache.version>
-        <euler-common.version>0.0.6</euler-common.version>
+        <euler-common.version>0.1.0-SNAPSHOT</euler-common.version>
         
         <commons-codec.version>1.10</commons-codec.version>
 

@@ -24,29 +24,25 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-form/web-form
+ * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.core.filter;
+package net.eulerframework.web.module.file.conf;
 
-import java.io.IOException;
+import net.eulerframework.web.config.WebConfig;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+/**
+ * @author cFrost
+ *
+ */
+public class FileConfig {
+    
+    public final static String FILE_DOWNLOAD_PATH = "/file";
+    public final static String IMAGE_DOWNLOAD_PATH = "/image";
+    public final static String VIDEO_DOWNLOAD_PATH = "/video";
+    public final static String FILE_UPLOAD_ACTION = "/uploadFile";
 
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import net.eulerframework.web.core.extend.WebLanguageRequestWrapper;
-
-public class WebLanguageFilter extends OncePerRequestFilter {
-
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-	    WebLanguageRequestWrapper localeRequest = new WebLanguageRequestWrapper(request, response);
-		filterChain.doFilter(localeRequest, response);
-	}
-
+    public static String getFileArchivedPath() {
+        return WebConfig.getRuntimePath() + "/archived/file";
+    }
 }
