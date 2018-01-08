@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import net.eulerframework.common.util.CommonUtils;
 import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.web.config.WebConfig;
 
@@ -99,22 +100,14 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
-    /**
-     * @param request
-     * @return
-     */
     private Locale getLocaleFromParam(HttpServletRequest request) {
         String localeParamValue = this.getRequest().getParameter(LOCALE_PARAM_NAME);
         if (StringUtils.hasText(localeParamValue)) {
-            return this.generateLocale(localeParamValue);
+            return CommonUtils.parseLocale(localeParamValue);
         }
         return null;
     }
 
-    /**
-     * @param request
-     * @return
-     */
     private Locale getLocaleFromSession(HttpServletRequest request) {
         HttpSession session = request.getSession();
         if(session != null) {
@@ -133,7 +126,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(LocaleCookies.LOCALE.getCookieName())) {
                     String localeStr = cookie.getValue();
-                    return this.generateLocale(localeStr);
+                    return CommonUtils.parseLocale(localeStr);
                 }
             }
         }
@@ -141,29 +134,8 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         return null;
     }
 
-    private Locale generateLocale(String localeStr) {
-        Locale locale;
-        if (localeStr.indexOf('-') < 0) {
-            locale = new Locale(localeStr);
-        } else {
-            String[] localeStrs = localeStr.split("-");
-            locale = new Locale(localeStrs[0], localeStrs[1]);
-        }
-        return locale;
-    }
-
     private void addLocaleIntoCookie(HttpServletRequest request, HttpServletResponse response) {
-        String language = this.locale.getLanguage();
-        String country = this.locale.getCountry();
-        String localeStr = null;
-        
-        if(StringUtils.hasText(language) && StringUtils.hasText(country)) {
-            localeStr = language.toLowerCase() + "-" + country.toLowerCase();
-        } else if(StringUtils.hasText(language)){
-            localeStr = language.toLowerCase();
-        } else if(StringUtils.hasText(country)) {
-            localeStr = country.toLowerCase();
-        }
+        String localeStr = CommonUtils.formatLocal(this.locale, '-');
         
         if(StringUtils.hasText(localeStr)) {
             Cookie cookie = new Cookie(LocaleCookies.LOCALE.getCookieName(), localeStr);
@@ -173,9 +145,6 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
-    /**
-     * @param request
-     */
     private void addLocaleIntoSession(HttpServletRequest request) {
         request.getSession().setAttribute(LOCALE_SESSION_ATTR_NAME, this.locale);
     }
