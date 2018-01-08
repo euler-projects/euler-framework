@@ -1,4 +1,4 @@
-package net.eulerframework.config;
+package net.eulerframework.config.controller;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,12 +24,12 @@ import net.eulerframework.web.core.annotation.AjaxWebController;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = {"**.web.**.controller.admin"},
+        basePackages = {"**.web.**.controller"},
         useDefaultFilters = false,
         includeFilters = @ComponentScan.Filter(AjaxWebController.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class AdminAjaxServletContextConfig extends WebMvcConfigurerAdapter {
+public class AjaxServletContextConfig extends WebMvcConfigurerAdapter {
     
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 

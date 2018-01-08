@@ -1,4 +1,4 @@
-package net.eulerframework.config;
+package net.eulerframework.config.controller;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ import net.eulerframework.web.core.annotation.WebController;
                         })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class WebServletContextConfig extends WebMvcConfigurerAdapter {
+public class JspServletContextConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     public ViewResolver viewResolver() {
