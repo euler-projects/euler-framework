@@ -138,6 +138,11 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         return this.useOr;
     }
     
+
+    public void setUseOr(boolean userOr) {
+        this.useOr = userOr;
+    }
+    
     private LinkedHashMap<String, OrderMode> extractOrderMode(HttpServletRequest request) {
         LinkedHashMap<String, OrderMode> result = new LinkedHashMap<>();
         
@@ -234,6 +239,10 @@ public class QueryRequest extends LogSupport implements BaseRequest {
 
     public Map<String, QueryMode> getModeMap() {
         return modeMap;
+    }
+
+    public Map<String, QueryMode> getFModeMap() {
+        return fmodeMap;
     }
 
 }
