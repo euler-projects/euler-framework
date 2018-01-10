@@ -56,13 +56,13 @@ public class AdminJspServletContextConfig
         return resolver;
     }
     
-//    @Resource
-//    private SpringValidatorAdapter validator;
-//    
-//    @Override
-//    public Validator getValidator() {
-//        return this.validator;
-//    }
+    @Resource
+    private SpringValidatorAdapter validator;
+    
+    @Override
+    public Validator getValidator() {
+        return this.validator;
+    }
 
     @Resource(name = "objectMapper")
     ObjectMapper objectMapper;
