@@ -8,7 +8,7 @@ import net.eulerframework.web.core.base.controller.JspSupportWebController;
 
 @JspController
 @RequestMapping("/")
-public class ErrorWebController extends JspSupportWebController {
+public class ErrorJspController extends JspSupportWebController {
     
     @RequestMapping("error-{errorCode}")
     public String error(@PathVariable("errorCode") String errorCode) {
