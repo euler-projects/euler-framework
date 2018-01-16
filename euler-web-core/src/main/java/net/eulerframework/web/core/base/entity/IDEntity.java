@@ -17,7 +17,6 @@ import javax.persistence.MappedSuperclass;
  * @see NonIDEntity
  * @see UUIDEntity
  */
-@SuppressWarnings("serial")
 @MappedSuperclass
 public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T> {    
 

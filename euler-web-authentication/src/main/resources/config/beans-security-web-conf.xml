@@ -21,115 +21,38 @@
     <beans:bean id="sessionRegistry"
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
 
-    <beans:beans profile="web-security-local,web-security-ldap">    
-        <beans:import resource="classpath:**/web-security-web-config.xml"/>
-    </beans:beans>
+    <beans:import resource="classpath:**/web-security-web-config.xml"/>
     
-    <beans:beans profile="web-security-local">
-        <authentication-manager>
-            <authentication-provider user-service-ref="userDetailsService">
-                <password-encoder ref="passwordEncoder" />
-            </authentication-provider>
-        </authentication-manager>
-    </beans:beans>
-
-    <beans:beans profile="web-security-ldap">
-        
-        <authentication-manager>
-            <authentication-provider ref="ldapAuthenticationProvider" />
-        </authentication-manager>
-
-        <beans:bean id="ldapAuthenticationProvider"
-            class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
-            <beans:constructor-arg index="0"
-                ref="ldapAuthenticator" />
-            <beans:constructor-arg index="1"
-                ref="ldapAuthoritiesPopulator" />
-        </beans:bean>
-
-        <beans:bean id="ldapAuthenticator"
-            class="org.springframework.security.ldap.authentication.BindAuthenticator">
-            <beans:constructor-arg ref="ldapContextSource" />
-            <beans:property name="userSearch" ref="ldapUserSearch" />
-        </beans:bean>
-
-        <beans:bean id="ldapUserSearch"
-            class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
-            <beans:constructor-arg index="0"
-                value="${ldap.searchBase}" />
-            <beans:constructor-arg index="1"
-                value="${ldap.searchFilter}" />
-            <beans:constructor-arg index="2"
-                ref="ldapContextSource" />
-        </beans:bean>
-
-        <beans:bean id="ldapContextSource"
-            class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
-            <beans:constructor-arg value="${ldap.url}" />
-            <beans:property name="userDn" value="${ldap.userDN}" />
-            <beans:property name="password" value="${ldap.password}" />
-        </beans:bean>
-
-        <beans:bean id="ldapAuthoritiesPopulator"
-            class="org.springframework.security.ldap.authentication.UserDetailsServiceLdapAuthoritiesPopulator">
-            <beans:constructor-arg ref="userDetailsService" />
-        </beans:bean>
-    </beans:beans>
-
-    <beans:beans profile="web-security-cas">
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider user-service-ref="userDetailsService">
+            <password-encoder ref="passwordEncoder" />
+        </authentication-provider>
+    </authentication-manager>
     
-        <beans:import resource="classpath:**/web-security-cas-config.xml"/>
-
-        <authentication-manager alias="authenticationManager">
-            <authentication-provider ref="casAuthenticationProvider" />
-        </authentication-manager>
-
-        <beans:bean id="serviceProperties"
-            class="org.springframework.security.cas.ServiceProperties">
-            <beans:property name="service"
-                value="${cas.localSystemUrl}${cas.localSystemLoginUrl}" />
-            <beans:property name="sendRenew" value="false" />
-        </beans:bean>
-
-        <beans:bean id="casEntryPoint"
-            class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
-            <beans:property name="loginUrl" value="${cas.loginUrl}" />
-            <beans:property name="serviceProperties" ref="serviceProperties" />
-        </beans:bean>
-
-        <beans:bean id="casAuthenticationProvider"
-            class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
-            <beans:property name="userDetailsService" ref="userDetailsService" />
-            <beans:property name="serviceProperties" ref="serviceProperties" />
-            <beans:property name="ticketValidator">
-                <beans:bean
-                    class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
-                    <beans:constructor-arg index="0"
-                        value="${cas.url}" />
-                </beans:bean>
-            </beans:property>
-            <beans:property name="key"
-                value="an_id_for_this_auth_provider_only" />
-        </beans:bean>
-
-        <beans:bean id="casFilter"
-            class="org.springframework.security.cas.web.CasAuthenticationFilter">
-            <beans:property name="authenticationManager" ref="authenticationManager" />
-            <beans:property name="filterProcessesUrl" value="${cas.localSystemLoginUrl}" />
-        </beans:bean>
-
-        <beans:bean id="singleLogoutFilter"
-            class="org.jasig.cas.client.session.SingleSignOutFilter" />
-
-        <beans:bean id="requestSingleLogoutFilter"
-            class="org.springframework.security.web.authentication.logout.LogoutFilter">
-            <beans:constructor-arg value="${cas.logoutUrl}" />
-            <beans:constructor-arg>
-                <beans:bean
-                    class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
-            </beans:constructor-arg>
-            <beans:property name="filterProcessesUrl" value="/logout" />
-        </beans:bean>
-    </beans:beans>
+    <beans:bean id="authenticationEntryPoint"  
+        class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">  
+        <beans:constructor-arg  value="${security.loginPage}" />  
+    </beans:bean> 
+    
+    <beans:bean id="formLoginFilter" class="net.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  
+        <beans:property name="authenticationManager" ref="authenticationManager"/>
+        <beans:property name="requiresAuthenticationRequestMatcher" ref="requiresAuthenticationRequestMatcher"/>  
+        <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>   
+        <beans:property name="authenticationFailureHandler" ref="authenticationFailureHandler"/> 
+        <beans:property name="enableCaptcha" value="${security.login.enableCaptcha}"/>
+    </beans:bean> 
+    
+    <beans:bean id="requiresAuthenticationRequestMatcher" class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <beans:constructor-arg  value="${security.login.processingUrl}" />
+        <beans:constructor-arg  value="POST" />
+    </beans:bean>
+    
+    <beans:bean id="authenticationSuccessHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler"> 
+        <beans:property name="defaultTargetUrl" value="${security.login.defaultTargetUrl}"/> 
+    </beans:bean>
+    
+    <beans:bean id="authenticationFailureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+        <beans:property name="defaultFailureUrl" value="${security.login.defaultFailureUrl}"/>     
+    </beans:bean>
 
 </beans:beans>

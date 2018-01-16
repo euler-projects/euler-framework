@@ -11,7 +11,7 @@
     </parent>
     
     <artifactId>euler-framework</artifactId>
-    <version>0.3.7</version>
+    <version>0.3.8</version>
     <packaging>pom</packaging>
     <name>Euler Framework Parent Pom</name>
     <url>https://eulerproject.io/euler-framework</url>
@@ -21,14 +21,14 @@
         <module>euler-web-core</module>
         <module>euler-web-authentication</module>
         <module>euler-web-basic</module>
-        <module>euler-web-authentication-impl</module>
+        <module>euler-web-authentication-impl-hibernate</module>
     </modules>
 
     <properties>
-        <jdk.version>1.7</jdk.version>        
+        <jdk.version>1.8</jdk.version>        
         
         <euler-cache.version>0.0.6</euler-cache.version>
-        <euler-common.version>0.0.4</euler-common.version>
+        <euler-common.version>0.1.0-SNAPSHOT</euler-common.version>
         
         <commons-codec.version>1.10</commons-codec.version>
 

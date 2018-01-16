@@ -16,7 +16,6 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  * @see NonIDModifyInfoEntity
  * @see IDModifyInfoEntity
  */
-@SuppressWarnings("serial")
 @MappedSuperclass
 public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T> {    
 

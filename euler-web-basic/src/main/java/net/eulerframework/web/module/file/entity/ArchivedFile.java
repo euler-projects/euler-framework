@@ -1,14 +1,15 @@
 package net.eulerframework.web.module.file.entity;
 
+import java.io.File;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "BASIC_UPLOADED_FILE")
 public class ArchivedFile extends UUIDEntity<ArchivedFile> {
@@ -29,6 +30,17 @@ public class ArchivedFile extends UUIDEntity<ArchivedFile> {
     private Date uploadedDate;
     @Column(name = "UPLOADED_USER_ID", nullable = false)
     private String uploadedUserId;
+    
+    @Transient
+    private File archivedFile;
+
+    public File getArchivedFile() {
+        return archivedFile;
+    }
+
+    public void setArchivedFile(File archivedFile) {
+        this.archivedFile = archivedFile;
+    }
 
     public String getOriginalFilename() {
         return originalFilename;

@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
-import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.service.UserService;
 
@@ -28,10 +28,10 @@ public class UserContext {
     }
 
     private final static DefaultObjectCache<String, User> USER_CACHE = ObjectCachePool
-            .generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
+            .generateDefaultObjectCache(SecurityConfig.getUserContextCacheLife());
 
     private final static DefaultObjectCache<Serializable, User> USER_CACHE_ID = ObjectCachePool
-            .generateDefaultObjectCache(WebConfig.getUserContextCacheLife());
+            .generateDefaultObjectCache(SecurityConfig.getUserContextCacheLife());
 
     public static List<User> getUserByNameOrCode(String nameOrCode) {
         return userService.loadUserByNameOrCodeFuzzy(nameOrCode);

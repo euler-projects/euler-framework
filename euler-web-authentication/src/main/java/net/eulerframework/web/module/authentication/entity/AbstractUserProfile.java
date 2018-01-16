@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import net.eulerframework.web.core.base.entity.BaseEntity;
 
-@SuppressWarnings("serial")
 @MappedSuperclass
 public abstract class AbstractUserProfile implements BaseEntity<AbstractUserProfile> {
     @Id

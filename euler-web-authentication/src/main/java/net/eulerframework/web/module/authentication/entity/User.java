@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(name = "SYS_USER")
@@ -55,6 +54,8 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
+    @Column(name = "VIEW_ID")
+    private String viewId;
     @Column(name = "EMAIL", unique = true)
     private String email;
     @Column(name = "MOBILE", unique = true)
@@ -97,6 +98,20 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
 
     public String getFullName() {
         return fullName;
+    }
+
+    /**
+     * @return the viewId
+     */
+    public String getViewId() {
+        return viewId;
+    }
+
+    /**
+     * @param viewId the viewId to set
+     */
+    public void setViewId(String viewId) {
+        this.viewId = viewId;
     }
 
     public void setFullName(String fullName) {

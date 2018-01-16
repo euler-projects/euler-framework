@@ -9,7 +9,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.spi.TypedValue;
 
-@SuppressWarnings("serial")
 public class LikeExpressionX implements Criterion {
     private final String propertyName;
     private final Object value;

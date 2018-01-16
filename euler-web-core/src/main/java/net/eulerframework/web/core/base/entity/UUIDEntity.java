@@ -18,7 +18,6 @@ import org.hibernate.annotations.GenericGenerator;
  * @see NonIDEntity
  * @see IDEntity
  */
-@SuppressWarnings("serial")
 @MappedSuperclass
 public abstract class UUIDEntity<T extends UUIDEntity<?>> implements BaseEntity<T> {    
 

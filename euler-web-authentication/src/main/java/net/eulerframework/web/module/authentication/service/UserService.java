@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.util.StringUtils;
-import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
 import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.Group;
@@ -251,7 +251,7 @@ public class UserService extends BaseService {
         if (username == null) {
             throw new UserInfoCheckWebException("_USERNAME_IS_NULL");
         }
-        if (!(username.matches(WebConfig.getUsernameFormat()))) {
+        if (!(username.matches(SecurityConfig.getUsernameFormat()))) {
             throw new UserInfoCheckWebException("_INCORRECT_USERNAME_FORMAT");
         }
         if (this.loadUserByUsername(username) != null) {
@@ -263,7 +263,7 @@ public class UserService extends BaseService {
         if (email == null) {
             throw new UserInfoCheckWebException("_EMAIL_IS_NULL");
         }
-        if (!(email.matches(WebConfig.getEmailFormat()))) {
+        if (!(email.matches(SecurityConfig.getEmailFormat()))) {
             throw new UserInfoCheckWebException("_INCORRECT_EMAIL_FORMAT");
         }
         if (this.loadUserByEmail(email) != null) {
@@ -285,11 +285,11 @@ public class UserService extends BaseService {
         if (password == null) {
             throw new UserInfoCheckWebException("_PASSWORD_IS_NULL");
         }
-        if (!password.matches(WebConfig.getPasswordFormat())) {
+        if (!password.matches(SecurityConfig.getPasswordFormat())) {
             throw new UserInfoCheckWebException("_INCORRECT_PASSWORD_FORMAT");
         }
-        if (!(password.length() >= WebConfig.getMinPasswordLength()
-                && password.length() <= WebConfig.getMaxPasswordLength())) {
+        if (!(password.length() >= SecurityConfig.getMinPasswordLength()
+                && password.length() <= SecurityConfig.getMaxPasswordLength())) {
             throw new UserInfoCheckWebException("_INCORRECT_PASSWORD_LENGTH");
         }
     }

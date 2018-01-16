@@ -404,6 +404,20 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             }            
         }
         
+
+        Map<String, String> fqueryMap = queryRequest.getFQueryMap();
+        
+        for (Map.Entry<String, String> entry : fqueryMap.entrySet()) {
+            String property = entry.getKey();
+            String value = entry.getValue();
+            
+            if(StringUtils.isNull(value))
+                continue;
+            
+            QueryMode fqueryMode = queryRequest.getFQueryMode(property);
+            detachedCriteria.add(this.generateRestriction(property, value, fqueryMode));
+        }    
+        
         LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
         
         for (Map.Entry<String, OrderMode> entry : sortMap.entrySet()) {

@@ -11,7 +11,6 @@ import org.hibernate.internal.util.StringHelper;
 import org.hibernate.type.CompositeType;
 import org.hibernate.type.Type;
 
-@SuppressWarnings("serial")
 public class InExpressionX implements Criterion {
     private final String propertyName;
     private final Object[] values;
