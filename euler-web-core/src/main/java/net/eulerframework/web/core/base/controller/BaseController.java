@@ -1,22 +1,42 @@
 package net.eulerframework.web.core.base.controller;
 
+import java.beans.PropertyEditorSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.common.util.MIMEUtils;
 import net.eulerframework.common.util.MIMEUtils.MIME;
-import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
+    
+    @InitBinder  
+    protected void initBinder(WebDataBinder binder) {  
+        binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {  
+            @Override  
+            public void setAsText(String value) {
+                if(StringUtils.hasText(value)) {
+                    setValue(new Date(Long.valueOf(value)));                    
+                } else {
+                    setValue(null);
+                }
+            }  
+        });  
+    
+    } 
     
     @Resource private ObjectMapper objectMapper;
     
@@ -44,11 +64,11 @@ public abstract class BaseController extends WebContextAccessable {
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
     
-//    protected void setNoCacheHeader() {
-//        HttpServletResponse response = this.getResponse();
-//        response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
-//        response.setHeader("Pragma", "no-cache");
-//        response.setDateHeader("Date", new Date().getTime());
-//        response.setIntHeader("Expires", 0);
-//    }
+    protected void setNoCacheHeader() {
+        HttpServletResponse response = this.getResponse();
+        response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Date", new Date().getTime());
+        response.setIntHeader("Expires", 0);
+    }
 }

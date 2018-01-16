@@ -24,7 +24,7 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-form/web-form
+ * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
 package net.eulerframework.web.core.base.controller;
@@ -36,20 +36,27 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.WebContextAccessable;
-import net.eulerframework.web.core.exception.PageNotFoundException;
-import net.eulerframework.web.core.exception.web.UndefinedWebException;
+import net.eulerframework.web.core.exception.web.BadCredentialsWebException;
+import net.eulerframework.web.core.exception.web.PageNotFoundException;
+import net.eulerframework.web.core.exception.web.SystemWebError;
+import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
 import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
     private final static String THEME_PARAM_NAME = "_theme";
     private final static String THEME_COOKIE_NAME = "EULER_THEME";
+    private final static String CONTROLLER_NAME_SUFFIX = "JspController";
     private final static int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
     
     private String webControllerName;
@@ -77,11 +84,11 @@ public abstract class JspSupportWebController extends AbstractWebController {
         
         String className = this.getClass().getSimpleName();
 
-        int indexOfWebController = className.lastIndexOf("JspController");
+        int indexOfWebController = className.lastIndexOf(CONTROLLER_NAME_SUFFIX);
 
         if (indexOfWebController <= 0)
             throw new RuntimeException(
-                    "If you want to use this.display(), JspController's class name must end with 'JspController'");
+                    "If you want to use this.display(), JspController's class name must end with '" + CONTROLLER_NAME_SUFFIX + "'");
 
         return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("JspController")));
     }
@@ -179,7 +186,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error() {
-        return this.error(new UndefinedWebException());
+        return this.error(new UndefinedWebRuntimeException());
     }
     
     /**
@@ -188,7 +195,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error(String message) {
-        return this.error(new UndefinedWebException(message));
+        return this.error(new UndefinedWebRuntimeException(message));
     }
     
     /**
@@ -196,14 +203,30 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 自定义错误信息可在jsp中用{@code ${__error}}获取
      * 自定义错误代码可在jsp中用{@code ${__code}}获取
      * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
-     * @param viewException 错误异常
+     * @param webRuntimeException 错误异常
      * @return 错误页面
      */
-    private String error(WebException viewException) {
-        Assert.notNull(viewException, "Error exception can not be null"); 
-        this.getRequest().setAttribute("__error_description", viewException.getLocalizedMessage());   
-        this.getRequest().setAttribute("__error", viewException.getError());
-        this.getRequest().setAttribute("__code", viewException.getCode()); 
+    private String error(WebRuntimeException webRuntimeException) {
+        Assert.notNull(webRuntimeException, "Error exception can not be null"); 
+        this.getRequest().setAttribute("__error_description", webRuntimeException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", webRuntimeException.getError());
+        this.getRequest().setAttribute("__code", webRuntimeException.getCode()); 
+        return this.display("/common/error");
+    }
+    
+    /**
+     * 显示错误页面
+     * 自定义错误信息可在jsp中用{@code ${__error}}获取
+     * 自定义错误代码可在jsp中用{@code ${__code}}获取
+     * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
+     * @param webException 错误异常
+     * @return 错误页面
+     */
+    private String error(WebException webException) {
+        Assert.notNull(webException, "Error exception can not be null"); 
+        this.getRequest().setAttribute("__error_description", webException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", webException.getError());
+        this.getRequest().setAttribute("__code", webException.getCode()); 
         return this.display("/common/error");
     }
 
@@ -236,7 +259,8 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     protected String success(String message, Target... target) {
         this.getRequest().setAttribute("__message", message);   
-        this.getRequest().setAttribute("__targets", target);  
+        this.getRequest().setAttribute("__targets", target);
+        //return this.redirect("/common/success");
         return this.display("/common/success");
     }
 
@@ -288,8 +312,18 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(PageNotFoundException.class)
     public String pageNotFoundException(PageNotFoundException e) {
-        this.logger.warn(e.getMessage());
         return this.notfound();
+    }
+
+    /**
+     * 用于在程序发生{@link WebRuntimeException}异常时统一返回错误信息
+     * 
+     * @return
+     */
+    @ExceptionHandler(WebRuntimeException.class)
+    public String webRuntimeException(WebRuntimeException e) {
+        this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
+        return this.error(e);
     }
 
     /**
@@ -299,10 +333,24 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(WebException.class)
     public String webException(WebException e) {
-        if (WebConfig.isDebugMode()) {
-            this.logger.error("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        }
+        this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
+    }
+    
+    @ExceptionHandler(BadCredentialsException.class)
+    public String badCredentialsException(BadCredentialsException e) {
+        return this.error(new BadCredentialsWebException());
+    }
+    
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public String missingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return this.error(new WebRuntimeException(e.getMessage(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
+    }
+    
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public String methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        return this.error(new WebRuntimeException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), 
+                SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
 
     /**

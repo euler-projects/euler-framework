@@ -106,7 +106,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new UserInfoCheckWebException("_INCORRECT_PASSWORD");
@@ -127,7 +127,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getUsername() != null && user.getUsername().equals(username)) {
             return;
@@ -147,7 +147,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getEmail() != null && user.getEmail().equals(email)) {
             return;
@@ -167,7 +167,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getMobile() != null && user.getMobile().equals(mobile)) {
             return;
@@ -186,7 +186,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getFullName() != null && user.getFullName().equals(fullname)) {
             return;
@@ -202,7 +202,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         user.setAvatar(avatarFileId);
 
@@ -214,7 +214,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         user.setEnabled(enabled);
 
@@ -236,7 +236,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         String password = newPassword.trim();
         this.validPassword(password);
@@ -314,7 +314,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getGroups() == null)
             user.setGroups(new HashSet<Group>());
@@ -343,7 +343,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getGroups() == null)
             return;
@@ -360,7 +360,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         if (user.getGroups() == null)
             return;
@@ -380,7 +380,7 @@ public class UserService extends BaseService {
         User user = this.userDao.load(userId);
 
         if (user == null)
-            throw new UserNotFoundException("User id is \"" + userId + "\" not found.");
+            throw new UserNotFoundException();
 
         user.setGroups(new HashSet<Group>());
         user.getGroups().addAll(groups);

@@ -88,7 +88,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             User user = this.userService.loadUserByEmail(email);
             
             if(user == null)
-                throw new UserNotFoundException("User email is '" + email + "' not found");
+                throw new UserNotFoundException();
             
             UserResetInfoVo vo = new UserResetInfoVo(user, 10 * 60);
             
@@ -112,7 +112,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
         try {            
             this.jwtEncryptor.decode(token);            
         } catch (InvalidJwtException e) {
-            throw new InvalidEmailResetTokenException(e.getMessage(), e);
+            throw new InvalidEmailResetTokenException();
         }
     }
 
@@ -123,7 +123,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
             
             this.userService.updateUserPasswordWithoutCheck(vo.getId(), password);
         } catch (InvalidJwtException e) {
-            throw new InvalidEmailResetTokenException(e.getMessage(), e);
+            throw new InvalidEmailResetTokenException();
         }
         
     }
