@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Set;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.core.base.service.impl.BaseHibernateSupportService;
 import net.eulerframework.web.module.file.dao.IAttachmentDao;
 import net.eulerframework.web.module.file.entity.AbstractAttachment;
 import net.eulerframework.web.module.file.entity.AbstractFileAttachment;
 import net.eulerframework.web.module.file.exception.AttachmentNotFoundException;
 
-public class AttachmentService extends BaseService {
+public class AttachmentService extends BaseHibernateSupportService {
 
     private Collection<IAttachmentDao<AbstractAttachment>> attachmentDaos;
 

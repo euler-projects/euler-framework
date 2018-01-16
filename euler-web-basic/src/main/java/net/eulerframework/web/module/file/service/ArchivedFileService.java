@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.DateUtils;
 import net.eulerframework.common.util.StringUtils;
+import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.file.conf.FileConfig;
@@ -45,7 +46,7 @@ public class ArchivedFileService extends BaseService {
         af.setOriginalFilename(originalFilename);
         af.setArchivedPathSuffix(archivedPathSuffix);
         af.setArchivedFilename(archivedFilename);
-        af.setExtension(WebFileTool.extractFileExtension(originalFilename));
+        af.setExtension(FileUtils.extractFileExtension(originalFilename));
         af.setFileByteSize(fileSize);
         af.setMd5(md5);
         af.setUploadedDate(new Date());

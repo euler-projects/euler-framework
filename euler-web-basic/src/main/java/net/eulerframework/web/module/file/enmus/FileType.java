@@ -27,22 +27,32 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.file.conf;
-
-import net.eulerframework.web.config.WebConfig;
+package net.eulerframework.web.module.file.enmus;
 
 /**
  * @author cFrost
  *
  */
-public class FileConfig {
+public enum FileType {
+    IMAGE_FILES("image", "jpeg,gif,jpg,png,bmp,pic");
     
-    public final static String FILE_DOWNLOAD_PATH = "/file";
-    public final static String IMAGE_DOWNLOAD_PATH = "/image";
-    public final static String VIDEO_DOWNLOAD_PATH = "/video";
-    public final static String FILE_UPLOAD_ACTION = "/uploadFile";
-
-    public static String getFileArchivedPath() {
-        return WebConfig.getRuntimePath() + "/archived/file";
+    FileType(String title, String extensions) {
+        this.title = title;
+        this.extensions = extensions;
+    }
+    
+    private String title;
+    private String extensions;
+    
+    public String getTitle() {
+        return this.title;
+    }
+    
+    public String getExtensions() {
+        return this.extensions;
+    }
+    
+    public String toJson() {
+        return "{\"title\":\"" + this.getTitle() + "\", \"extensions\":\"" + this.getExtensions() + "\"}";
     }
 }
