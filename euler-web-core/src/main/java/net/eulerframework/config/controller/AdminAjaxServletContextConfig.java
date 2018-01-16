@@ -19,14 +19,14 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.eulerframework.web.core.annotation.AjaxWebController;
+import net.eulerframework.web.core.annotation.AjaxController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = {"**.web.**.controller.admin"},
         useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(AjaxWebController.class)
+        includeFilters = @ComponentScan.Filter(AjaxController.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
 public class AdminAjaxServletContextConfig extends WebMvcConfigurerAdapter {

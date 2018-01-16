@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @ResponseBody
-public @interface AjaxWebController {
+public @interface AjaxController {
     String value() default "";    
 }
