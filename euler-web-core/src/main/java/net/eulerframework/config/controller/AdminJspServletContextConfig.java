@@ -28,14 +28,14 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = { "**.web.**.controller.admin" }, 
         useDefaultFilters = false, 
-        includeFilters = @ComponentScan.Filter(WebController.class),
+        includeFilters = @ComponentScan.Filter(JspController.class),
         excludeFilters = @ComponentScan.Filter(
                 type=FilterType.ASPECTJ, 
                 pattern={

@@ -77,13 +77,13 @@ public abstract class JspSupportWebController extends AbstractWebController {
         
         String className = this.getClass().getSimpleName();
 
-        int indexOfWebController = className.lastIndexOf("WebController");
+        int indexOfWebController = className.lastIndexOf("JspController");
 
         if (indexOfWebController <= 0)
             throw new RuntimeException(
-                    "If you want to use this.display(), WebController's class name must end with 'WebController'");
+                    "If you want to use this.display(), JspController's class name must end with 'JspController'");
 
-        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("WebController")));
+        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("JspController")));
     }
 
     /**

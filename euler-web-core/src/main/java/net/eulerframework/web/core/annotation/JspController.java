@@ -12,6 +12,6 @@ import org.springframework.stereotype.Controller;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Controller
-public @interface WebController {
+public @interface JspController {
     String value() default "";  
 }

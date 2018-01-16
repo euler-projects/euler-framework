@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
@@ -24,7 +24,7 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
  * @author cFrost
  *
  */
-@WebController
+@JspController
 @RequestMapping("/")
 public class UserWebController extends JspSupportWebController {
 
