@@ -10,6 +10,7 @@
     <artifactId>euler-web-core</artifactId>
     <name>Euler Web Core</name>
     <url>https://eulerproject.io/euler-framework</url>
+    <description>The Core Module of Euler Framework.</description>
 
     <dependencies>
         <dependency>
@@ -64,26 +65,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.mchange</groupId>
-            <artifactId>c3p0</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
         </dependency>
 
         <dependency>
@@ -114,6 +97,16 @@
         </dependency>
 
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.eulerframework</groupId>
             <artifactId>euler-cache</artifactId>
         </dependency>
@@ -125,6 +118,11 @@
         <dependency>
             <groupId>net.eulerframework</groupId>
             <artifactId>euler-common-util</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
     

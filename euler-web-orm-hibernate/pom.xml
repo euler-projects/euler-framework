@@ -6,34 +6,26 @@
         <artifactId>euler-framework</artifactId>
         <version>0.3.9-SNAPSHOT</version>
     </parent>
-    <artifactId>euler-web-basic</artifactId>
-    <name>Euler Web Basic</name>
+    <artifactId>euler-web-orm-hibernate</artifactId>
+    <name>Euler ORM Hibernate</name>
     <url>https://eulerproject.io/euler-framework</url>
+    <description>An ORM module use hibernate</description>
 
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
         </dependency>
+        
         <dependency>
-            <groupId>javax.servlet.jsp</groupId>
-            <artifactId>jsp-api</artifactId>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>euler-web-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>euler-web-orm-hibernate</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-           <groupId>net.coobird</groupId>
-           <artifactId>thumbnailator</artifactId>
-           <version>0.4.8</version>
         </dependency>
     </dependencies>
 </project>

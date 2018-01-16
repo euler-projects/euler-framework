@@ -59,5 +59,10 @@
             <artifactId>euler-web-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-web-orm-hibernate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -38,7 +38,7 @@ public class ServletUtils {
     public static String findRealURI(HttpServletRequest httpServletRequest) {        
         String requestURI = httpServletRequest.getRequestURI();
         String contextPath = httpServletRequest.getContextPath();        
-        return requestURI.replaceFirst(contextPath, "").trim();
+        return requestURI.replaceFirst(contextPath, "");
     }
     
     public static String getRealIP() {

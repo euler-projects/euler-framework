@@ -135,7 +135,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private void addLocaleIntoCookie(HttpServletRequest request, HttpServletResponse response) {
-        String localeStr = this.locale.toString();//暂时不引入新代码，兼容环球奖项目和新锐奖项目
+        String localeStr = CommonUtils.formatLocal(this.locale, '-');
         
         if(StringUtils.hasText(localeStr)) {
             Cookie cookie = new Cookie(LocaleCookies.LOCALE.getCookieName(), localeStr);
