@@ -57,17 +57,13 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
         return resolver;
     }
     
+    
     @Resource
     private SpringValidatorAdapter validator;
     
     @Override
     public Validator getValidator() {
         return this.validator;
-    }
-    
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseSuffixPatternMatch(false);
     }
 
     @Resource(name = "objectMapper")
@@ -84,11 +80,16 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
         converters.add(jsonConverter);
 
     }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
+    }
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         Map<String, MediaType> mediaTypes = new HashMap<>();
-        ;
+        
         mediaTypes.put("json", MediaType.APPLICATION_JSON_UTF8);
 
         configurer.favorPathExtension(false).favorParameter(false).ignoreAcceptHeader(false)

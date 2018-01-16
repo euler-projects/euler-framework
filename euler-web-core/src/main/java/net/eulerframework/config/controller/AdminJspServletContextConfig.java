@@ -63,11 +63,6 @@ public class AdminJspServletContextConfig
     public Validator getValidator() {
         return this.validator;
     }
-    
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseSuffixPatternMatch(false);
-    }
 
     @Resource(name = "objectMapper")
     ObjectMapper objectMapper;
@@ -82,6 +77,11 @@ public class AdminJspServletContextConfig
         jsonConverter.setObjectMapper(this.objectMapper);
         converters.add(jsonConverter);
 
+    }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
     }
 
     @Override

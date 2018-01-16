@@ -17,6 +17,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +63,11 @@ public class ApiServletContextConfig extends WebMvcConfigurerAdapter {
         converters.add(jsonConverter);
         
     }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
+    }
 
     @Override
     public void configureContentNegotiation(
@@ -71,7 +77,7 @@ public class ApiServletContextConfig extends WebMvcConfigurerAdapter {
         mediaTypes.put("json", MediaType.APPLICATION_JSON_UTF8);
         //mediaTypes.put("xml", MediaType.APPLICATION_XML);
         
-        configurer.favorPathExtension(true).favorParameter(true)
+        configurer.favorPathExtension(false).favorParameter(false)
                 .ignoreAcceptHeader(false)
                 .defaultContentType(MediaType.APPLICATION_JSON_UTF8)
                 .mediaTypes(mediaTypes);

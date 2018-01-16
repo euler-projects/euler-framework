@@ -17,7 +17,6 @@ import net.eulerframework.web.core.annotation.JspController;
                           @ComponentScan.Filter(JspController.class),
                           @ComponentScan.Filter(ApiEndpoint.class)}
 )
-
 public class RootContextConfig {
     
 }
