@@ -1,5 +1,7 @@
 package net.eulerframework.web.core.base.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.MappedSuperclass;
 
 /**
@@ -12,7 +14,7 @@ import javax.persistence.MappedSuperclass;
  * @see UUIDEntity
  */
 @MappedSuperclass
-public abstract class NonIDEntity<T extends NonIDEntity<?>> implements BaseEntity<T> {
+public abstract class NonIDEntity<T extends NonIDEntity<?, ?>, ID_TYPE extends Serializable> implements BaseEntity<T, ID_TYPE> {
 
     @Override
     public int hashCode() {

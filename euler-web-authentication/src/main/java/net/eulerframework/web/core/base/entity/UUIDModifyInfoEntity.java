@@ -17,7 +17,7 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
  * @see IDModifyInfoEntity
  */
 @MappedSuperclass
-public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T> {    
+public abstract class UUIDModifyInfoEntity<T extends UUIDModifyInfoEntity<?>> extends UUIDEntity<T> implements BaseModifyInfoEntity<T, String> {    
 
     @Column(name="CREATE_BY", nullable=false)
     private String createBy;

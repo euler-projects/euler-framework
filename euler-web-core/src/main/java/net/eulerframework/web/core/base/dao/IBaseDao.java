@@ -4,11 +4,15 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projection;
+
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
+import net.eulerframework.web.core.base.response.PageResponse;
 
-public interface IBaseDao<T extends BaseEntity<?>>{
+public interface IBaseDao<T extends BaseEntity<?, ?>>{
 
     T load(Serializable id);
 
@@ -40,9 +44,41 @@ public interface IBaseDao<T extends BaseEntity<?>>{
     
     long countAll();
     
-    EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest);
+
+    /**
+     * @param pageQueryRequest
+     * @param criterions
+     * @return
+     */
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions);
+
+    /**
+     * @param pageQueryRequest
+     * @param criterions
+     * @param orders
+     * @return
+     */
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders);
+
+    /**
+     * @param pageQueryRequest
+     * @param criterions
+     * @param orders
+     * @param projection
+     * @return
+     */
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders,
+            Projection projection);
     
-    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
+    /**
+     * 
+     * @param pageQueryRequest
+     * @param propertySetToSelectMode
+     * @return
+     * @deprecated
+     */
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
 
     void flushSession();
 

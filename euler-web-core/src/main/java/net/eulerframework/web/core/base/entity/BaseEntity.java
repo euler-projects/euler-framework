@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @see IDEntity
  * @see UUIDEntity
  */
-public interface BaseEntity<T extends BaseEntity<?>> extends Serializable, Comparable<T> {
+public interface BaseEntity<T extends BaseEntity<?, ?>, ID_TYPE extends Serializable> extends Serializable, Comparable<T> {
     
     /**
      * 获取主键<br>
@@ -21,7 +21,12 @@ public interface BaseEntity<T extends BaseEntity<?>> extends Serializable, Compa
      * 
      * @return
      */
-    public Serializable getId();
+    ID_TYPE getId();
     
-    public void setSerializableId(Serializable id);
+    void setId(ID_TYPE id);
+    
+    @SuppressWarnings("unchecked")
+    default void setSerializable(Serializable id) {
+        this.setId((ID_TYPE) id);
+    }
 }

@@ -26,6 +26,7 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
+import org.springframework.util.CollectionUtils;
 
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.base.log.LogSupport;
@@ -33,15 +34,16 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.DateUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.IBaseDao;
+import net.eulerframework.web.core.base.entity.BaseEmbeddable;
 import net.eulerframework.web.core.base.entity.BaseEntity;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest;
 import net.eulerframework.web.core.base.request.QueryRequest.OrderMode;
 import net.eulerframework.web.core.base.request.QueryRequest.QueryMode;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
+import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 
-public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implements IBaseDao<T> {
+public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport implements IBaseDao<T> {
 
     private SessionFactory sessionFactory;
 
@@ -161,19 +163,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     @Override
     public void deleteById(Serializable id) {
         try {
-            this.logger.info("!!!!delete by id");
             T entity = this.entityClass.newInstance();
-            entity.setSerializableId(id);            
+            entity.setSerializable(id);           
             this.delete(entity);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-//        StringBuffer hqlBuffer = new StringBuffer();
-//        hqlBuffer.append("delete ");
-//        hqlBuffer.append(this.entityClass.getSimpleName());
-//        hqlBuffer.append(" en where en.id = ?");
-//        final String hql = hqlBuffer.toString();
-//        this.update(hql, id);
     }
 
     @Override
@@ -224,17 +219,50 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     }
     
     @Override
-    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
-        DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
-        
-        int pageIndex = pageQueryRequest.getPageIndex();
-        int pageSize = pageQueryRequest.getPageSize();
-        
-        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
+        return this.pageQuery(pageQueryRequest, null, null, null);        
     }
     
     @Override
-    public EasyUIPageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
+    public PageResponse<T> pageQuery(
+            PageQueryRequest pageQueryRequest, 
+            List<Criterion> criterions) {
+        return this.pageQuery(pageQueryRequest, criterions, null, null);  
+    }
+    
+    @Override
+    public PageResponse<T> pageQuery(
+            PageQueryRequest pageQueryRequest, 
+            List<Criterion> criterions,
+            List<Order> orders) {
+        return this.pageQuery(pageQueryRequest, criterions, orders, null);  
+    }
+    
+    @Override
+    public PageResponse<T> pageQuery(
+            PageQueryRequest pageQueryRequest, 
+            List<Criterion> criterions,
+            List<Order> orders,
+            Projection projection) {
+        DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
+        
+        if(!CollectionUtils.isEmpty(criterions)) {
+            for(Criterion c : criterions) {
+                detachedCriteria.add(c);
+            }
+        }
+        
+        if(!CollectionUtils.isEmpty(orders)) {
+            for(Order d : orders) {
+                detachedCriteria.addOrder(d);
+            }
+        }
+        
+        return this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize(), projection);        
+    }
+    
+    @Override
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
         for(String c : propertySetToSelectMode) {
@@ -318,12 +346,12 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         return result;
     }
 
-    protected EasyUIPageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
+    protected PageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize) {
         return this.pageQuery(detachedCriteria, pageIndex, pageSize, null);
     }
     
     @SuppressWarnings("unchecked")
-    protected EasyUIPageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
+    protected PageResponse<T> pageQuery(DetachedCriteria detachedCriteria, int pageIndex, int pageSize, Projection projection) {
         
         detachedCriteria.setProjection(Projections.rowCount());
         long total = ((Long)detachedCriteria.getExecutableCriteria(this.getSessionFactory().getCurrentSession()).list().get(0)).longValue();
@@ -338,7 +366,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         criteria.setMaxResults(pageSize);
         List<T> result = criteria.list();
         evict(result);
-        return new EasyUIPageResponse<>(result, total, pageIndex, pageSize);
+        return new PageResponse<>(result, total, pageIndex, pageSize);
     }
 
     protected final void evict(Object entity) {
@@ -404,20 +432,6 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
             }            
         }
         
-
-        Map<String, String> fqueryMap = queryRequest.getFQueryMap();
-        
-        for (Map.Entry<String, String> entry : fqueryMap.entrySet()) {
-            String property = entry.getKey();
-            String value = entry.getValue();
-            
-            if(StringUtils.isNull(value))
-                continue;
-            
-            QueryMode fqueryMode = queryRequest.getFQueryMode(property);
-            detachedCriteria.add(this.generateRestriction(property, value, fqueryMode));
-        }    
-        
         LinkedHashMap<String, OrderMode> sortMap = queryRequest.getSortMap();
         
         for (Map.Entry<String, OrderMode> entry : sortMap.entrySet()) {
@@ -453,9 +467,21 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
     protected Criterion generateRestriction(String property, String value, QueryMode queryMode) {
         Field field;
         try {
-            field = this.entityClass.getDeclaredField(property);
+            String fieldName = property;            
+            if(property.indexOf('.') > 0) {
+                fieldName = property.substring(0, property.indexOf('.'));
+            }
+            field = this.entityClass.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
             throw new IllegalArgumentException("Property '" + property + "' not exist");
+        }
+        
+        if(BaseEmbeddable.class.isAssignableFrom(field.getType())){
+            try {
+                field = field.getType().getDeclaredField(property.substring(property.indexOf('.') + 1));
+            } catch (NoSuchFieldException e) {
+                throw new IllegalArgumentException("Property '" + property + "' not exist");
+            }
         }
         
         switch (queryMode) {
@@ -476,7 +502,7 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
         case LT:
             return Restrictions.lt(property, this.analyzeValue(value, field.getType()));
         case IN:
-            return RestrictionsX.in(property, this.analyzeInterval(value, field.getType()));
+            return Restrictions.in(property, this.analyzeInterval(value, field.getType()));
         case NOTIN:
             return Restrictions.not(RestrictionsX.in(property, this.analyzeInterval(value, field.getType())));
         case IS:
@@ -531,13 +557,10 @@ public abstract class BaseDao<T extends BaseEntity<?>> extends LogSupport implem
                 ret = new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
                 try {
-                    ret = DateUtils.parseDate(value, "yyyy-MM-dd HH:mm:ss");
+                    ret = DateUtils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                 } catch (ParseException e1) {
-                    try {
-                        ret = DateUtils.parseDate(value, "yyyy-MM-dd");
-                    } catch (ParseException e2) {
-                        throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or 'yyyy-MM-dd HH:mm:ss' or 'yyyy-MM-dd'");
-                    }
+                    throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"");
+
                 }
             }
             return ret;

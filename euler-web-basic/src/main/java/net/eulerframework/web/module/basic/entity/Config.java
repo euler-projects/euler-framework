@@ -1,16 +1,15 @@
 package net.eulerframework.web.module.basic.entity;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 
 @Entity
 @Table(name = "SYS_CONF")
-public class Config extends NonIDEntity<Config> {
+public class Config extends NonIDEntity<Config, String> {
 
     @Id
     @Column(name = "CONF_KEY")
@@ -58,15 +57,15 @@ public class Config extends NonIDEntity<Config> {
     public String getId() {
         return this.key;
     }
-    
-    @Override
-    public void setSerializableId(Serializable id) {
-        this.setKey((String) id);
-    }
 
     @Override
     public int compareTo(Config o) {
         return this.getId().compareTo(o.getId());
+    }
+
+    @Override
+    public void setId(String id) {
+        this.key = id;
     }
 
 }

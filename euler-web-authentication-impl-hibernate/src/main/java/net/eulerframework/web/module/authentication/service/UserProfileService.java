@@ -2,11 +2,11 @@ package net.eulerframework.web.module.authentication.service;
 
 import java.util.Collection;
 
-import net.eulerframework.web.core.base.service.impl.BaseService;
+import net.eulerframework.web.core.base.service.impl.BaseHibernateSupportService;
 import net.eulerframework.web.module.authentication.dao.IUserProfileDao;
 import net.eulerframework.web.module.authentication.entity.AbstractUserProfile;
 
-public class UserProfileService extends BaseService implements IUserProfileService {
+public class UserProfileService extends BaseHibernateSupportService implements IUserProfileService {
 
     private Collection<IUserProfileDao<AbstractUserProfile>> userProfileDaos;
     

@@ -14,7 +14,7 @@ import net.eulerframework.common.util.Assert;
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
+import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
@@ -388,8 +388,8 @@ public class UserService extends BaseService {
         this.userDao.update(user);
     }
 
-    public EasyUIPageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
-        EasyUIPageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
+    public PageResponse<User> findUserByPage(EasyUiQueryReqeuset queryRequest) {
+        PageResponse<User> ret = this.userDao.findUserByPage(queryRequest);
 
         for (User user : ret.getRows()) {
             Set<Group> groups = user.getGroups();

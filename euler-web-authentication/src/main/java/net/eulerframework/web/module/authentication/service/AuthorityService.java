@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
+import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.dao.AuthorityDao;
 import net.eulerframework.web.module.authentication.dao.GroupDao;
@@ -25,11 +25,11 @@ public class AuthorityService extends BaseService {
     @Resource
     private AuthorityDao authorityDao;
 
-    public EasyUIPageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
+    public PageResponse<Group> findGroupByPage(PageQueryRequest pageQueryRequest) {
         return this.groupDao.findGroupByPage(pageQueryRequest);
     }
 
-    public EasyUIPageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest) {
+    public PageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest) {
         return this.authorityDao.findAuthorityByPage(pageQueryRequest);
     }
 

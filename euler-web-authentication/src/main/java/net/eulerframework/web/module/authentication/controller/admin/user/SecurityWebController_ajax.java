@@ -15,8 +15,8 @@ import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
+import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
 import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
 import net.eulerframework.web.module.authentication.entity.Authority;
 import net.eulerframework.web.module.authentication.entity.Group;
@@ -40,7 +40,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     
     @RequestMapping(value ="findUserByPage_ajax")
     @ResponseBody
-    public EasyUIPageResponse<User> findUserByPage(){
+    public PageResponse<User> findUserByPage(){
         return this.userService.findUserByPage(new EasyUiQueryReqeuset(this.getRequest()));
     }
     
@@ -101,7 +101,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
     
     @RequestMapping(value ="findGroupByPage")
     @ResponseBody
-    public EasyUIPageResponse<Group> findGroupByPage() {
+    public PageResponse<Group> findGroupByPage() {
         return this.authorityService.findGroupByPage(new PageQueryRequest(this.getRequest(), "page", "rows"));
     }
     
@@ -136,7 +136,7 @@ public class SecurityWebController_ajax extends AjaxSupportWebController {
 
     @ResponseBody
     @RequestMapping(value ="/findAuthorityByPage")
-    public EasyUIPageResponse<Authority> findAuthorityByPage() {
+    public PageResponse<Authority> findAuthorityByPage() {
         return this.authorityService.findAuthorityByPage(new PageQueryRequest(this.getRequest(), "page", "rows"));
     }
 

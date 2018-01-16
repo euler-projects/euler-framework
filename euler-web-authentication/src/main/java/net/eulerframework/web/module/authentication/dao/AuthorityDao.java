@@ -12,14 +12,14 @@ import org.hibernate.criterion.Restrictions;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIPageResponse;
+import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.authentication.entity.Authority;
 
 public class AuthorityDao extends BaseDao<Authority> {
 
     
-    public EasyUIPageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest) {
+    public PageResponse<Authority> findAuthorityByPage(PageQueryRequest pageQueryRequest) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(this.entityClass);
         try {
             String queryValue = null;
@@ -41,7 +41,7 @@ public class AuthorityDao extends BaseDao<Authority> {
         
         detachedCriteria.addOrder(Order.asc("authority"));
         
-        EasyUIPageResponse<Authority> result = this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
+        PageResponse<Authority> result = this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
         
         return result;
     }

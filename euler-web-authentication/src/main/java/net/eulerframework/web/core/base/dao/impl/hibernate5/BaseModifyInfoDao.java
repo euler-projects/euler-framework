@@ -10,7 +10,7 @@ import net.eulerframework.web.core.base.entity.BaseModifyInfoEntity;
 import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.User;
 
-public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?>> extends BaseDao<T> implements IBaseModifyInfoDao<T> {
+public abstract class BaseModifyInfoDao<T extends BaseModifyInfoEntity<?, ?>> extends BaseDao<T> implements IBaseModifyInfoDao<T> {
 
     protected User getCurrentUser(){
         return UserContext.getCurrentUser();

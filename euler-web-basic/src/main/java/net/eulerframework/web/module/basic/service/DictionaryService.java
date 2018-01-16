@@ -14,7 +14,7 @@ public class DictionaryService extends BaseService {
     
     @Resource private ObjectMapper objectMapper;
 
-//    public EasyUIPageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
+//    public PageResponse<Dictionary> findCodeTableByPage(QueryRequest queryRequest, int pageIndex, int pageSize) {
 //        return this.dictionaryDao.findDictionaryByPage(queryRequest, pageIndex, pageSize);
 //    }
 //
