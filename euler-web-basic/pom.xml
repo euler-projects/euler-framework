@@ -9,6 +9,7 @@
     <artifactId>euler-web-basic</artifactId>
     <name>Euler Web Basic</name>
     <url>https://eulerproject.io/euler-framework</url>
+    <description>Include some basic moduel such as file upload and download.</description>
 
     <dependencies>
         <dependency>
@@ -30,10 +31,6 @@
             <artifactId>euler-web-orm-hibernate</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-           <groupId>net.coobird</groupId>
-           <artifactId>thumbnailator</artifactId>
-           <version>0.4.8</version>
-        </dependency>
+
     </dependencies>
 </project>
