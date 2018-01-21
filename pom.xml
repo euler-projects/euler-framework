@@ -23,6 +23,7 @@
         <module>euler-web-authentication</module>
         <module>euler-web-authentication-impl-hibernate</module>
         <module>euler-web-basic</module>
+        <module>euler-web-file</module>
     </modules>
 
     <properties>
