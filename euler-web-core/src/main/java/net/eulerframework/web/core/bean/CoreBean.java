@@ -6,7 +6,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.PathResource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.multipart.MultipartResolver;
@@ -72,7 +72,7 @@ public class CoreBean {
         propertyPlaceholderConfigurer.setOrder(1);
         propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
         propertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
-        FileSystemResource resource = new FileSystemResource(WebConfig.getConfigPath());
+        PathResource resource = new PathResource(WebConfig.getConfigPath());
         propertyPlaceholderConfigurer.setLocation(resource);
         return propertyPlaceholderConfigurer;
     }
