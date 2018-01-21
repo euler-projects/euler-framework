@@ -22,7 +22,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,8 +43,7 @@ import net.eulerframework.web.core.annotation.JspController;
                         })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class AdminJspServletContextConfig
-        extends WebMvcConfigurerAdapter {
+public class AdminJspServletContextConfig implements WebMvcConfigurer  {
     
     @Bean
     public ViewResolver viewResolver() {

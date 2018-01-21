@@ -17,9 +17,10 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.eulerframework.web.core.annotation.AjaxController;
 
 @Configuration
@@ -30,7 +31,7 @@ import net.eulerframework.web.core.annotation.AjaxController;
         includeFilters = @ComponentScan.Filter(AjaxController.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class AjaxServletContextConfig extends WebMvcConfigurerAdapter {
+public class AjaxServletContextConfig implements WebMvcConfigurer {
     
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 
