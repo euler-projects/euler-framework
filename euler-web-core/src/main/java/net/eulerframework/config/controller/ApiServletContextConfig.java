@@ -18,9 +18,10 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.eulerframework.web.core.annotation.ApiEndpoint;
 
 @Configuration
@@ -31,7 +32,7 @@ import net.eulerframework.web.core.annotation.ApiEndpoint;
         includeFilters = @ComponentScan.Filter(ApiEndpoint.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class ApiServletContextConfig extends WebMvcConfigurerAdapter {
+public class ApiServletContextConfig implements WebMvcConfigurer {
     
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 //    @Resource(name="jaxb2Marshaller") Marshaller marshaller;
