@@ -19,7 +19,7 @@ import net.eulerframework.web.module.authentication.service.RootService;
  */
 @JspController
 @RequestMapping("/passwd")
-public class PasswdWebController extends JspSupportWebController {
+public class PasswdJspController extends JspSupportWebController {
     
     @Resource
     private RootService rootService;

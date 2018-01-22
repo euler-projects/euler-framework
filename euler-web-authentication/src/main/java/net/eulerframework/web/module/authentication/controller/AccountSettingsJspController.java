@@ -18,10 +18,9 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
  */
 @JspController
 @RequestMapping("/settings/account")
-public class AccountSettingsWebController extends JspSupportWebController {
+public class AccountSettingsJspController extends JspSupportWebController {
     
-    public AccountSettingsWebController() {
-        super();
+    public AccountSettingsJspController() {
         this.setWebControllerName("settings/account");
     }
 

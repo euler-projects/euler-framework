@@ -11,7 +11,7 @@ import net.eulerframework.web.module.authentication.service.UserService;
 
 @JspController
 @RequestMapping("security")
-public class SecurityWebController extends JspSupportWebController {
+public class SecurityJspController extends JspSupportWebController {
     
 
 	@Resource
