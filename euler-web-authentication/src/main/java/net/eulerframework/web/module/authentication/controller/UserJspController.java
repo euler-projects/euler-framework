@@ -26,7 +26,7 @@ import net.eulerframework.web.module.authentication.service.IAuthenticationServi
  */
 @JspController
 @RequestMapping("/")
-public class UserWebController extends JspSupportWebController {
+public class UserJspController extends JspSupportWebController {
 
     @Resource
     private IAuthenticationService authenticationService;
