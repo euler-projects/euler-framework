@@ -1,6 +1,6 @@
 package net.eulerframework.web.module.authentication.exception;
 
-import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
 
-public class InvalidEmailResetTokenException extends WebException {
+public class InvalidEmailResetTokenException extends WebRuntimeException {
 }
