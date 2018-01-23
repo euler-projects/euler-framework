@@ -49,7 +49,6 @@ import net.eulerframework.web.core.exception.web.BadCredentialsWebException;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.SystemWebError;
 import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
-import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.WebRuntimeException;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
@@ -213,22 +212,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
         this.getRequest().setAttribute("__code", webRuntimeException.getCode()); 
         return this.display("/common/error");
     }
-    
-    /**
-     * 显示错误页面
-     * 自定义错误信息可在jsp中用{@code ${__error}}获取
-     * 自定义错误代码可在jsp中用{@code ${__code}}获取
-     * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
-     * @param webException 错误异常
-     * @return 错误页面
-     */
-    private String error(WebException webException) {
-        Assert.notNull(webException, "Error exception can not be null"); 
-        this.getRequest().setAttribute("__error_description", webException.getLocalizedMessage());   
-        this.getRequest().setAttribute("__error", webException.getError());
-        this.getRequest().setAttribute("__code", webException.getCode()); 
-        return this.display("/common/error");
-    }
 
     /**
      * 显示成功页面,不指定信息，含有一个指向首页的链接
@@ -322,17 +305,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(WebRuntimeException.class)
     public String webRuntimeException(WebRuntimeException e) {
-        this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
-        return this.error(e);
-    }
-
-    /**
-     * 用于在程序发生{@link WebException}异常时统一返回错误信息
-     * 
-     * @return
-     */
-    @ExceptionHandler(WebException.class)
-    public String webException(WebException e) {
         this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
     }
