@@ -41,8 +41,6 @@ import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
-import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
-import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.admin.UserManageService;
 
 @AjaxController
@@ -64,7 +62,7 @@ public class UserManageAjaxContorller extends AjaxSupportWebController {
             @RequestParam(required = true) String email,
             @RequestParam(required = true) String mobile,
             @RequestParam(required = false) String password,
-            @RequestParam(required = true) boolean enabled) throws UserInfoCheckWebException, UserNotFoundException {
+            @RequestParam(required = true) boolean enabled) {
         
         if(!StringUtils.hasText(userId)) {
             this.userManageService.addUser(username, email, mobile, password, enabled, true, true, true);
@@ -76,19 +74,19 @@ public class UserManageAjaxContorller extends AjaxSupportWebController {
     @RequestMapping(path="resetPassword", method = RequestMethod.POST)
     public void resetPassword(
             @RequestParam(required = true) String userId,
-            @RequestParam(required = true) String newPassword) throws UserNotFoundException, UserInfoCheckWebException {
+            @RequestParam(required = true) String newPassword) {
         this.userManageService.updatePassword(userId, newPassword);
     }
     
     @RequestMapping(path="activeUser", method = RequestMethod.POST)
     public void activeUser(
-            @RequestParam(required = true) String userId) throws UserNotFoundException {
+            @RequestParam(required = true) String userId) {
         this.userManageService.activeUser(userId);
     }
     
     @RequestMapping(path="blockUser", method = RequestMethod.POST)
     public void blockUser(
-            @RequestParam(required = true) String userId) throws UserNotFoundException {
+            @RequestParam(required = true) String userId) {
         this.userManageService.blockUser(userId);
     }
 }

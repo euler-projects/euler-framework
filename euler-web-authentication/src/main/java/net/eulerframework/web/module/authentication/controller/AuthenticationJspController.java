@@ -39,10 +39,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
-import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.Captcha;
-import net.eulerframework.web.module.authentication.util.Captcha.InvalidCaptchaException;
 
 /**
  * @author cFrost
@@ -76,7 +74,7 @@ public class AuthenticationJspController extends JspSupportWebController {
             @RequestParam String username, 
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile, 
-            @RequestParam String password) throws UserInfoCheckWebException, InvalidCaptchaException {
+            @RequestParam String password) {
         if(SecurityConfig.isSignUpEnabled()) {
             Captcha.validCaptcha(this.getRequest());
             this.userRegistService.signUp(username, email, mobile, password);

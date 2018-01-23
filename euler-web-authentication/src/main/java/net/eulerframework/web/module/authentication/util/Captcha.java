@@ -15,7 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.util.StringUtils;
 
-import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.core.exception.web.WebRuntimeException;
 
 /**
  * 验证码图片生成工具
@@ -155,7 +155,7 @@ public class Captcha {
      * @author cFrost
      *
      */
-    public static class InvalidCaptchaException extends WebException {
+    public static class InvalidCaptchaException extends WebRuntimeException {
         public InvalidCaptchaException() {
             super("_INVALID_CAPTCHA");
         }

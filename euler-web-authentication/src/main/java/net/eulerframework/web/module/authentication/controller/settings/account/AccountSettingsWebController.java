@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.context.UserContext;
-import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
-import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.PasswordService;
 
 /**
@@ -65,8 +63,7 @@ public class AccountSettingsWebController extends JspSupportWebController {
     @RequestMapping(value = "change-password", method = RequestMethod.POST)
     public String changePassword(
             @RequestParam(required = true) String oldPassword, 
-            @RequestParam(required = true) String newPassword) 
-                    throws UserNotFoundException, UserInfoCheckWebException {
+            @RequestParam(required = true) String newPassword) {
         String userId = UserContext.getCurrentUser().getUserId().toString();
         this.passwordService.updatePassword(userId, oldPassword, newPassword);
         return this.success();

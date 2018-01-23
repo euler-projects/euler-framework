@@ -39,10 +39,8 @@ import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
-import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.Captcha;
-import net.eulerframework.web.module.authentication.util.Captcha.InvalidCaptchaException;
 
 /**
  * @author cFrost
@@ -65,7 +63,7 @@ public class BasicUserProfileRegistJspController extends JspSupportWebController
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile, 
             @RequestParam String password,
-            BasicUserProfile basicUserProfile) throws UserInfoCheckWebException, InvalidCaptchaException {
+            BasicUserProfile basicUserProfile) {
         if(SecurityConfig.isSignUpEnabled()) {
             Captcha.validCaptcha(this.getRequest());
             this.userRegistService.signUp(username, email, mobile, password, basicUserProfile);

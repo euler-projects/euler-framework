@@ -110,7 +110,7 @@ public class ResetPasswordJspController extends JspSupportWebController {
             @RequestParam(required = true) ResetPasswordType type, 
             @RequestParam(required = false) String token, 
             @RequestParam(required = false) String pin, 
-            @RequestParam(required = true) String password) throws UserInfoCheckWebException {
+            @RequestParam(required = true) String password) {
 
         try {
             if (ResetPasswordType.EMAIL.equals(type)) {
