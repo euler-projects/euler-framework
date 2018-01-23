@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
-import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
+import net.eulerframework.web.core.exception.web.UndefinedWebException;
 import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.service.UserService;
@@ -36,7 +36,7 @@ public class ProfileSettingsController_ajax extends AjaxSupportWebController {
         try {
             this.userService.updateAvatar(UserContext.getCurrentUser().getId(), avatarFileId);
         } catch (UserNotFoundException e) {
-            throw new UndefinedWebRuntimeException(e.getMessage(), e);
+            throw new UndefinedWebException(e.getMessage(), e);
         }
         return EasyUIAjaxResponse.SUCCESS_RESPONSE;
     }

@@ -1,6 +1,6 @@
 package net.eulerframework.web.module.authentication.exception;
 
-import net.eulerframework.web.core.exception.web.WebRuntimeException;
+import net.eulerframework.web.core.exception.web.WebException;
 
-public class InvalidSmsResetPinException extends WebRuntimeException {
+public class InvalidSmsResetPinException extends WebException {
 }
