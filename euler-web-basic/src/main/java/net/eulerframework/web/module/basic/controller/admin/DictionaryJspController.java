@@ -10,7 +10,7 @@ import net.eulerframework.web.module.basic.service.DictionaryService;
 
 @JspController
 @RequestMapping("/dictionary")
-public class DictionaryWebController extends JspSupportWebController {
+public class DictionaryJspController extends JspSupportWebController {
     
     @Resource
     private DictionaryService dictionaryService;
