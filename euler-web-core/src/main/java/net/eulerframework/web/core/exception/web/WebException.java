@@ -3,57 +3,57 @@ package net.eulerframework.web.core.exception.web;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.i18n.Tag;
 
-public class WebRuntimeException extends RuntimeException {
+public class WebException extends RuntimeException {
     
     private String error;
     private int code;
 
-    public WebRuntimeException() {
+    public WebException() {
         super();
         this.generateErrorAndCode();
     }
     
-    public WebRuntimeException(String message) {
+    public WebException(String message) {
         super(message);
         this.generateErrorAndCode();
     }
 
-    public WebRuntimeException(Throwable cause) {
+    public WebException(Throwable cause) {
         super(cause);
         this.generateErrorAndCode();
     }
 
-    public WebRuntimeException(String message, Throwable cause) {
+    public WebException(String message, Throwable cause) {
         super(message, cause);
         this.generateErrorAndCode();
     }
 
-    protected WebRuntimeException(String message, Throwable cause, boolean enableSuppression,
+    protected WebException(String message, Throwable cause, boolean enableSuppression,
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.generateErrorAndCode();
     }
     
-    public WebRuntimeException(WebError webError) {
+    public WebException(WebError webError) {
         this.generateErrorAndCode(webError);
     }
 
-    public WebRuntimeException(String message, WebError webError) {
+    public WebException(String message, WebError webError) {
         super(message);
         this.generateErrorAndCode(webError);
     }
 
-    public WebRuntimeException(WebError webError, Throwable cause) {
+    public WebException(WebError webError, Throwable cause) {
         super(cause);
         this.generateErrorAndCode(webError);
     }
 
-    public WebRuntimeException(String message, WebError webError, Throwable cause) {
+    public WebException(String message, WebError webError, Throwable cause) {
         super(message, cause);
         this.generateErrorAndCode(webError);
     }
 
-    protected WebRuntimeException(String message, WebError webError, Throwable cause, boolean enableSuppression,
+    protected WebException(String message, WebError webError, Throwable cause, boolean enableSuppression,
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.generateErrorAndCode(webError);

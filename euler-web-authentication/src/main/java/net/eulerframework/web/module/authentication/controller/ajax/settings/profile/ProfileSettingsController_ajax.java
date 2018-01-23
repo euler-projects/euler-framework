@@ -26,7 +26,7 @@ public class ProfileSettingsController_ajax extends AjaxSupportWebController {
 //        try {
 //            this.userService.updateAvatar(UserContext.getCurrentUser().getId(), avatarFileId);
 //        } catch (UserNotFoundException e) {
-//            throw new UndefinedWebRuntimeException(e.getMessage(), e);
+//            throw new UndefinedWebException(e.getMessage(), e);
 //        }
 //        return EasyUIAjaxResponse.SUCCESS_RESPONSE;
 //    }

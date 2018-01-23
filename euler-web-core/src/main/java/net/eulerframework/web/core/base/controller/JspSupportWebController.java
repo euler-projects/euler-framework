@@ -48,8 +48,8 @@ import net.eulerframework.web.core.base.WebContextAccessable;
 import net.eulerframework.web.core.exception.web.BadCredentialsWebException;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.SystemWebError;
-import net.eulerframework.web.core.exception.web.UndefinedWebRuntimeException;
-import net.eulerframework.web.core.exception.web.WebRuntimeException;
+import net.eulerframework.web.core.exception.web.UndefinedWebException;
+import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
 public abstract class JspSupportWebController extends AbstractWebController {
@@ -185,7 +185,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error() {
-        return this.error(new UndefinedWebRuntimeException());
+        return this.error(new UndefinedWebException());
     }
     
     /**
@@ -194,7 +194,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * @return 错误页面
      */
     protected String error(String message) {
-        return this.error(new UndefinedWebRuntimeException(message));
+        return this.error(new UndefinedWebException(message));
     }
     
     /**
@@ -202,14 +202,14 @@ public abstract class JspSupportWebController extends AbstractWebController {
      * 自定义错误信息可在jsp中用{@code ${__error}}获取
      * 自定义错误代码可在jsp中用{@code ${__code}}获取
      * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
-     * @param webRuntimeException 错误异常
+     * @param webException 错误异常
      * @return 错误页面
      */
-    private String error(WebRuntimeException webRuntimeException) {
-        Assert.notNull(webRuntimeException, "Error exception can not be null"); 
-        this.getRequest().setAttribute("__error_description", webRuntimeException.getLocalizedMessage());   
-        this.getRequest().setAttribute("__error", webRuntimeException.getError());
-        this.getRequest().setAttribute("__code", webRuntimeException.getCode()); 
+    private String error(WebException webException) {
+        Assert.notNull(webException, "Error exception can not be null"); 
+        this.getRequest().setAttribute("__error_description", webException.getLocalizedMessage());   
+        this.getRequest().setAttribute("__error", webException.getError());
+        this.getRequest().setAttribute("__code", webException.getCode()); 
         return this.display("/common/error");
     }
 
@@ -299,12 +299,12 @@ public abstract class JspSupportWebController extends AbstractWebController {
     }
 
     /**
-     * 用于在程序发生{@link WebRuntimeException}异常时统一返回错误信息
+     * 用于在程序发生{@link WebException}异常时统一返回错误信息
      * 
      * @return
      */
-    @ExceptionHandler(WebRuntimeException.class)
-    public String webRuntimeException(WebRuntimeException e) {
+    @ExceptionHandler(WebException.class)
+    public String webException(WebException e) {
         this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
     }
@@ -316,12 +316,12 @@ public abstract class JspSupportWebController extends AbstractWebController {
     
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public String missingServletRequestParameterException(MissingServletRequestParameterException e) {
-        return this.error(new WebRuntimeException(e.getMessage(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
+        return this.error(new WebException(e.getMessage(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
     
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public String methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        return this.error(new WebRuntimeException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), 
+        return this.error(new WebException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), 
                 SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
 

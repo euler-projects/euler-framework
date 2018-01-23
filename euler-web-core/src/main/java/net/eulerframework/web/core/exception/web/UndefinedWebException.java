@@ -1,20 +1,20 @@
 package net.eulerframework.web.core.exception.web;
 
-public class UndefinedWebRuntimeException extends WebRuntimeException {
+public class UndefinedWebException extends WebException {
     
-    public UndefinedWebRuntimeException() {
+    public UndefinedWebException() {
         super(SystemWebError.UNDEFINED_ERROR);
     }
     
-    public UndefinedWebRuntimeException(Throwable e) {
+    public UndefinedWebException(Throwable e) {
         super(SystemWebError.UNDEFINED_ERROR, e);
     }
     
-    public UndefinedWebRuntimeException(String message) {
+    public UndefinedWebException(String message) {
         super(message, SystemWebError.UNDEFINED_ERROR);
     }
     
-    public UndefinedWebRuntimeException(String message, Throwable e) {
+    public UndefinedWebException(String message, Throwable e) {
         super(message, SystemWebError.UNDEFINED_ERROR, e);
     }
 }

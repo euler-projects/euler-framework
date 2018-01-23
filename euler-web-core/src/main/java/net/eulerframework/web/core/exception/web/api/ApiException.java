@@ -1,9 +1,9 @@
 package net.eulerframework.web.core.exception.web.api;
 
 import net.eulerframework.web.core.exception.web.WebError;
-import net.eulerframework.web.core.exception.web.WebRuntimeException;
+import net.eulerframework.web.core.exception.web.WebException;
 
-public abstract class ApiException extends WebRuntimeException {
+public abstract class ApiException extends WebException {
     
     private int httpStatus;    
 
