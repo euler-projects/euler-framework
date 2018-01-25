@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -94,5 +95,14 @@ public class JspServletContextConfig implements WebMvcConfigurer {
 
         configurer.favorPathExtension(false).favorParameter(false).ignoreAcceptHeader(false)
                 .defaultContentType(MediaType.APPLICATION_JSON_UTF8).mediaTypes(mediaTypes);
+    }
+    
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(WebConfig.getAssetsPath() + "/**").addResourceLocations(WebConfig.getAssetsPath() + "/");
+        registry.addResourceHandler(WebConfig.getStaticPagesRootPath() + "/**").addResourceLocations(WebConfig.getStaticPagesRootPath() + "/");
+        registry.addResourceHandler("/ueditor/upload/**").addResourceLocations("/ueditor/upload");
+        registry.addResourceHandler("/favicon.ico").addResourceLocations("/favicon.ico");
+        registry.addResourceHandler("/robot.txt").addResourceLocations("/robot.txt");
     }
 }
