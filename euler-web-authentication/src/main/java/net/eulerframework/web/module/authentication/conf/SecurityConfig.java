@@ -2,13 +2,12 @@ package net.eulerframework.web.module.authentication.conf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
+
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.property.PropertyReader;
 
-@Configuration
 public abstract class SecurityConfig {
     protected static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 

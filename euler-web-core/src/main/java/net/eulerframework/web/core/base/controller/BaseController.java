@@ -23,15 +23,24 @@ import net.eulerframework.web.core.base.WebContextAccessable;
 
 public abstract class BaseController extends WebContextAccessable {
     
-    @InitBinder  
+    /**
+     * 尝试以时间戳的方式格式化时间,如果失败则传递原始字符串
+     * @param binder
+     */
+    @InitBinder
     protected void initBinder(WebDataBinder binder) {  
         binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {  
             @Override  
             public void setAsText(String value) {
                 if(StringUtils.hasText(value)) {
-                    setValue(new Date(Long.valueOf(value)));                    
+                    try {
+                        long timestamp = Long.valueOf(value);
+                        setValue(new Date(timestamp)); 
+                    } catch (NumberFormatException e) {
+                        setValue(value);
+                    }      
                 } else {
-                    setValue(null);
+                    setValue(value);
                 }
             }  
         });  
