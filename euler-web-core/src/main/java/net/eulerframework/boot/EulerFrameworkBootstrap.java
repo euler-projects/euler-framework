@@ -36,6 +36,7 @@ import javax.servlet.ServletRegistration;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -58,19 +59,24 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         this.logger.info("Executing Euler-Framework bootstrap.");
+        
+        /*
+         * 判断是否存在AbstractSecurityWebApplicationInitializer的实现类, 若不存在则在此处注册ContextLoaderListener
+         */
+        try {
+            Class.forName("net.eulerframework.web.module.authentication.boot.SecurityBootstrap");
+        } catch (ClassNotFoundException e) {
+            AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+            try {
+                rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
+            } catch (ClassNotFoundException e2) {
+                rootContext.close();
+                throw new ServletException(e2);
+            }
 
-//        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-//        try {
-//            rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
-//        } catch (ClassNotFoundException e) {
-//            rootContext.close();
-//            throw new ServletException(e);
-//        }
-//
-//        this.setConfigurableEnvironment(rootContext);
-//
-//        container.addListener(new ContextLoaderListener(rootContext));
-//        container.addListener(new RequestContextListener());
+            container.addListener(new ContextLoaderListener(rootContext));
+        }
+
         container.addListener(new EulerFrameworkCoreListener());
         
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.E_TAG_FILTER, new ShallowEtagHeaderFilter());
