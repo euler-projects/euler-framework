@@ -285,6 +285,11 @@ public abstract class WebConfig {
                         result = result.substring("file://".length());
                     }
                 }
+                
+                //当配置的路径为*inx格式，但是当前环境是Windows时，默认放在C盘
+                if(isWindows() && result.startsWith("/")) {
+                    result = "C:" + result;
+                }
 
                 return CommonUtils.convertDirToUnixFormat(result, false);
             }
