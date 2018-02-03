@@ -101,7 +101,7 @@ public class JspServletContextConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(WebConfig.getAssetsPath() + "/**").addResourceLocations(WebConfig.getAssetsPath() + "/");
         registry.addResourceHandler(WebConfig.getStaticPagesRootPath() + "/**").addResourceLocations(WebConfig.getStaticPagesRootPath() + "/");
-        registry.addResourceHandler("/ueditor/upload/**").addResourceLocations("/ueditor/upload");
+        registry.addResourceHandler("/ueditor/upload/**").addResourceLocations("/ueditor/upload/");
         registry.addResourceHandler("/favicon.ico").addResourceLocations("/favicon.ico");
         registry.addResourceHandler("/robot.txt").addResourceLocations("/robot.txt");
     }
