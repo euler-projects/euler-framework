@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -28,7 +29,13 @@ import net.eulerframework.web.core.annotation.AjaxController;
 @ComponentScan(
         basePackages = {"**.web.**.controller"},
         useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(AjaxController.class)
+        includeFilters = @ComponentScan.Filter(AjaxController.class),
+        excludeFilters = @ComponentScan.Filter(
+                type=FilterType.ASPECTJ, 
+                pattern={
+                        "*..web..controller.admin..*",
+                        "*..web..controller.api..*"
+                        })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
 public class AjaxServletContextConfig implements WebMvcConfigurer {
