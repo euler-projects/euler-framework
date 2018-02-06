@@ -3,7 +3,9 @@ package net.eulerframework.web.core.base.dao;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.FetchMode;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
@@ -68,17 +70,18 @@ public interface IBaseDao<T extends BaseEntity<?, ?>>{
      * @param projection
      * @return
      */
-    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders,
-            Projection projection);
-    
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders, Projection projection);
+
     /**
-     * 
      * @param pageQueryRequest
-     * @param propertySetToSelectMode
+     * @param criterions
+     * @param orders
+     * @param projection
+     * @param fetchMode
      * @return
-     * @deprecated
      */
-    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode);
+    PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders,
+            Projection projection, Map<String, FetchMode> fetchMode);
 
     void flushSession();
 

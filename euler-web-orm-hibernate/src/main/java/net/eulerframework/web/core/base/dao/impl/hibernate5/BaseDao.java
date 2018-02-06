@@ -220,14 +220,14 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
     
     @Override
     public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest) {
-        return this.pageQuery(pageQueryRequest, null, null, null);        
+        return this.pageQuery(pageQueryRequest, null, null, null, null);        
     }
     
     @Override
     public PageResponse<T> pageQuery(
             PageQueryRequest pageQueryRequest, 
             List<Criterion> criterions) {
-        return this.pageQuery(pageQueryRequest, criterions, null, null);  
+        return this.pageQuery(pageQueryRequest, criterions, null, null, null);  
     }
     
     @Override
@@ -235,7 +235,7 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
             PageQueryRequest pageQueryRequest, 
             List<Criterion> criterions,
             List<Order> orders) {
-        return this.pageQuery(pageQueryRequest, criterions, orders, null);  
+        return this.pageQuery(pageQueryRequest, criterions, orders, null, null);  
     }
     
     @Override
@@ -244,6 +244,11 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
             List<Criterion> criterions,
             List<Order> orders,
             Projection projection) {
+        return this.pageQuery(pageQueryRequest, criterions, orders, projection, null);         
+    }
+    
+    @Override
+    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, List<Criterion> criterions, List<Order> orders, Projection projection, Map<String, FetchMode> fetchMode) {
         DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
         
         if(!CollectionUtils.isEmpty(criterions)) {
@@ -258,21 +263,15 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
             }
         }
         
-        return this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize(), projection);        
-    }
-    
-    @Override
-    public PageResponse<T> pageQuery(PageQueryRequest pageQueryRequest, String... propertySetToSelectMode) {
-        DetachedCriteria detachedCriteria = this.analyzeQueryRequest(pageQueryRequest);
-        
-        for(String c : propertySetToSelectMode) {
-            detachedCriteria.setFetchMode(c, FetchMode.SELECT);
+        if(!CollectionUtils.isEmpty(fetchMode)) {
+            for (Map.Entry<String, FetchMode> entry : fetchMode.entrySet()) {
+                String property = entry.getKey();
+                FetchMode propertyFetchMode = entry.getValue();
+                detachedCriteria.setFetchMode(property, propertyFetchMode);
+            }
         }
         
-        int pageIndex = pageQueryRequest.getPageIndex();
-        int pageSize = pageQueryRequest.getPageSize();
-        
-        return this.pageQuery(detachedCriteria, pageIndex, pageSize);   
+        return this.pageQuery(detachedCriteria, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize(), projection);  
     }
 
     @Override
