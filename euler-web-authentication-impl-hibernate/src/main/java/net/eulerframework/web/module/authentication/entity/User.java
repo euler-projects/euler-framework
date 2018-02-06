@@ -43,6 +43,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.util.CollectionUtils;
 
 import net.eulerframework.web.core.base.entity.UUIDEntity;
@@ -76,6 +78,7 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     private Set<Authority> authorities;
     
     @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
     @JoinTable(name = "SYS_USER_GROUP", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "GROUP_ID") })
     private Set<Group> groups;
 
