@@ -1,8 +1,8 @@
---------------------------------------
---用户管理与安全验证模块
---------------------------------------
+-- ------------------------------------
+-- 用户管理与安全验证模块
+-- ------------------------------------
 
---用户表
+-- 用户表
 CREATE TABLE SYS_USER
     (
         ID VARCHAR(36) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE SYS_USER
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---权限组表
+-- 权限组表
 CREATE TABLE SYS_GROUP
     (
         ID VARCHAR(36)  NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE SYS_GROUP
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---权限表
+-- 权限表
 CREATE TABLE SYS_AUTHORITY
     (
         AUTHORITY VARCHAR(255) NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE SYS_AUTHORITY
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---用户-权限组关系表
+-- 用户-权限组关系表
 CREATE TABLE SYS_USER_GROUP
     (
         USER_ID  VARCHAR(36) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE SYS_USER_GROUP
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---权限组-权限关系表
+-- 权限组-权限关系表
 CREATE TABLE SYS_GROUP_AUTHORITY
     (
         GROUP_ID  VARCHAR(36)  NOT NULL,
@@ -66,28 +66,28 @@ CREATE TABLE SYS_GROUP_AUTHORITY
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---插入根用户
+-- 插入根用户
 INSERT INTO SYS_USER (ID, USERNAME, EMAIL, MOBILE, PASSWORD, ACCOUNT_NON_EXPIRED, ACCOUNT_NON_LOCKED, CREDENTIALS_NON_EXPIRED, ENABLED, ROOT)
 VALUES ('00000000-0000-0000-0000-000000000000', 'root', null, null, 'NaN', true, true, true, true, true);
---插入默认管理员用户
+-- 插入默认管理员用户
 INSERT INTO SYS_USER (ID, USERNAME, EMAIL, MOBILE, PASSWORD, ACCOUNT_NON_EXPIRED, ACCOUNT_NON_LOCKED, CREDENTIALS_NON_EXPIRED, ENABLED, ROOT)
 VALUES (uuid(), 'admin', null, null, 'NaN', true, true, true, true, null);
---插入默认管理员权限组
+-- 插入默认管理员权限组
 INSERT INTO SYS_GROUP (ID, DESCRIPTION, NAME) VALUES ('00000000-0000-0000-0000-000000000000', '管理员', '管理员');
---插入默认管理员权限
+-- 插入默认管理员权限
 INSERT INTO SYS_AUTHORITY (AUTHORITY, DESCRIPTION, NAME) VALUES ('ADMIN', '管理员', '管理员');
---插入默认管理员与默认管理员权限组的关系映射
+-- 插入默认管理员与默认管理员权限组的关系映射
 INSERT INTO SYS_USER_GROUP (USER_ID, GROUP_ID) VALUES (
 (SELECT ID FROM SYS_USER WHERE USERNAME = 'admin'), '00000000-0000-0000-0000-000000000000');
---插入默认管理员权限组与默认管理员权限的关系映射
+-- 插入默认管理员权限组与默认管理员权限的关系映射
 INSERT INTO SYS_GROUP_AUTHORITY (GROUP_ID, AUTHORITY) VALUES ('00000000-0000-0000-0000-000000000000', 'ADMIN');
 
 
---------------------------------------
---基础配置、数据字典、文件上下载模块
---------------------------------------
+-- ------------------------------------
+-- 基础配置、数据字典、文件上下载模块
+-- ------------------------------------
 
---配置信息表
+-- 配置信息表
 CREATE TABLE SYS_CONF
     (
         CONF_KEY VARCHAR(255) NOT NULL COMMENT '配置信息键值',
@@ -98,7 +98,7 @@ CREATE TABLE SYS_CONF
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='配置信息表';
 
---上传文件信息表
+-- 上传文件信息表
 CREATE TABLE BASIC_UPLOADED_FILE
     (
         ID VARCHAR(36) NOT NULL COMMENT '上传文件ID',
