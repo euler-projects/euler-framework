@@ -34,7 +34,8 @@ package net.eulerframework.web.module.file.enmus;
  *
  */
 public enum FileType {
-    IMAGE_FILES("image", "jpeg,gif,jpg,png,bmp,pic");
+    IMAGE_FILES("image", "jpeg,gif,jpg,png,bmp,pic"),
+    ALL_FILES("all", ".*");
     
     FileType(String title, String extensions) {
         this.title = title;
