@@ -8,9 +8,9 @@ import java.util.Set;
 
 import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.AbstractApiEndpoint;
-import net.eulerframework.web.module.oldauthentication.entity.Authority;
-import net.eulerframework.web.module.oldauthentication.entity.User;
-import net.eulerframework.web.module.oldauthentication.util.UserContext;
+import net.eulerframework.web.module.authentication.entity.Authority;
+import net.eulerframework.web.module.authentication.entity.User;
+import net.eulerframework.web.module.authentication.util.UserContext;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

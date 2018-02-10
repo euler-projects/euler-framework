@@ -6,7 +6,7 @@
     <parent>
         <artifactId>euler-framework</artifactId>
         <groupId>net.eulerframework</groupId>
-        <version>0.4.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>euler-web-authentication-impl-hibernate</artifactId>
     <name>Euler Web Authentication Implement</name>
