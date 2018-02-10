@@ -15,8 +15,8 @@
                             proxy-target-class="true">
     </global-method-security>
     
-    <beans:bean id="eulerUrlAuthenticationFailureHandler" class="net.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler" />
-    <beans:bean id="accessDeniedHandler" class="net.eulerframework.web.module.authentication.extend.EulerAccessDeniedHandler" />
+    <beans:bean id="eulerUrlAuthenticationFailureHandler" class="net.eulerframework.web.module.oldauthentication.extend.EulerUrlAuthenticationFailureHandler" />
+    <beans:bean id="accessDeniedHandler" class="net.eulerframework.web.module.oldauthentication.extend.EulerAccessDeniedHandler" />
 
     <beans:bean id="sessionRegistry"
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
@@ -34,7 +34,7 @@
         <beans:constructor-arg  value="${security.loginPage}" />  
     </beans:bean> 
     
-    <beans:bean id="formLoginFilter" class="net.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  
+    <beans:bean id="formLoginFilter" class="net.eulerframework.web.module.oldauthentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="requiresAuthenticationRequestMatcher" ref="requiresAuthenticationRequestMatcher"/>  
         <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>   

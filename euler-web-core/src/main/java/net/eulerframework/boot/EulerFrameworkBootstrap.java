@@ -64,7 +64,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
          * 判断是否存在AbstractSecurityWebApplicationInitializer的实现类, 若不存在则在此处注册ContextLoaderListener
          */
         try {
-            Class.forName("net.eulerframework.web.module.authentication.boot.SecurityBootstrap");
+            Class.forName("net.eulerframework.web.module.oldauthentication.boot.SecurityBootstrap");
         } catch (ClassNotFoundException e) {
             AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
             try {

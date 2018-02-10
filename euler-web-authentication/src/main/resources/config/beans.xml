@@ -13,16 +13,6 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
     
-    <bean id="userDao" class="net.eulerframework.web.module.authentication.dao.UserDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="groupDao" class="net.eulerframework.web.module.authentication.dao.GroupDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="authorityDao" class="net.eulerframework.web.module.authentication.dao.AuthorityDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>  
-    
     <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
     
     <!-- Spring Security 白名单 -->
