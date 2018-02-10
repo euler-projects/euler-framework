@@ -61,6 +61,10 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     private String mobile;
     @Column(name = "PASSWORD", nullable = false)
     private String password;
+    @Column(name = "FULL_NAME")
+    private String fullName;
+    @Column(name = "AVATAR", length=36)
+    private String avatar;
     @Column(name = "ENABLED", nullable = false)
     private Boolean enabled;
     @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
@@ -212,4 +216,29 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     public void setGroups(Set<Group> groups) {
         this.groups = groups;
     }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Boolean getRoot() {
+        return root;
+    }
+
+    public void setRoot(Boolean root) {
+        this.root = root;
+    }
+    
 }
