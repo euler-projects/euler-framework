@@ -17,7 +17,7 @@ public class ConfigContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());        
-        ConfigService configService= (ConfigService)rwp.getBean("configService");        
+        ConfigService configService= rwp.getBean(ConfigService.class);        
         DBConfigContext.setConfigService(configService);
     }
 

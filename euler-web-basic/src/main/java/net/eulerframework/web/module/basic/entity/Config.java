@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 
 @Entity
@@ -57,15 +56,15 @@ public class Config extends NonIDEntity<Config, String> {
     public String getId() {
         return this.key;
     }
+    
+    @Override
+    public void setId(String id) {
+        this.setKey(id);
+    }
 
     @Override
     public int compareTo(Config o) {
         return this.getId().compareTo(o.getId());
-    }
-
-    @Override
-    public void setId(String id) {
-        this.key = id;
     }
 
 }

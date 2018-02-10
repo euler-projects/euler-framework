@@ -38,10 +38,10 @@ public class DictionaryCode extends NonIDEntity<DictionaryCode, String> {
     public String getId() {
         return code;
     }
-
+    
     @Override
     public void setId(String id) {
-        this.code = id;
+        this.setCode(id);
     }
     
     @Override

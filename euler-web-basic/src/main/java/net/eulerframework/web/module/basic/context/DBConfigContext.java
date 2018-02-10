@@ -16,6 +16,10 @@ public class DBConfigContext {
     public static void setConfigService(ConfigService configService) {
         DBConfigContext.configService = configService;
     }
+    
+    public static void clear() {
+        while(!CONF_CACHE.clear());
+    }
 
     public static String getConfig(String key) throws ConfigNotFoundException {
         String result;
