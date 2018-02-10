@@ -9,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.web.module.oldauthentication.conf.SecurityConfig;
@@ -19,7 +18,7 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 
 public class UserContext {
-    private static final String OAUTH_CLIENT_PREFIX = "__OAUTH_";
+    //private static final String OAUTH_CLIENT_PREFIX = "__OAUTH_";
     private static final String UNKNOWN_USER_PREFIX = "__UNKOWN_";
     private static UserService userService;
 
@@ -79,20 +78,20 @@ public class UserContext {
          * No user OAuth client request. Such as an api request with a token
          * which was granted using client_credentials mode
          */
-        if (OAuth2Authentication.class.isAssignableFrom(authentication.getClass())) {
-            OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
-            authentication = oauth2Authentication.getUserAuthentication();
-
-            if (authentication == null) {
-                String clientId = (String) oauth2Authentication.getPrincipal();
-                String username = OAUTH_CLIENT_PREFIX + clientId;
-
-                User user = new User();
-                user.setId(username);
-                user.setUsername(username);
-                return user;
-            }
-        }
+//        if (OAuth2Authentication.class.isAssignableFrom(authentication.getClass())) {
+//            OAuth2Authentication oauth2Authentication = (OAuth2Authentication) authentication;
+//            authentication = oauth2Authentication.getUserAuthentication();
+//
+//            if (authentication == null) {
+//                String clientId = (String) oauth2Authentication.getPrincipal();
+//                String username = OAUTH_CLIENT_PREFIX + clientId;
+//
+//                User user = new User();
+//                user.setId(username);
+//                user.setUsername(username);
+//                return user;
+//            }
+//        }
 
         Object principal = context.getAuthentication().getPrincipal();
 
