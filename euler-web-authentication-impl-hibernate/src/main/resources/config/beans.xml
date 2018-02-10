@@ -13,4 +13,11 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
+    <bean id="basicUserProfileDao" class="net.eulerframework.web.module.authentication.dao.BasicUserProfileDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+    <bean id="userDao" class="net.eulerframework.web.module.authentication.dao.UserDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
 </beans>
