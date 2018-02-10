@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +13,7 @@ import net.eulerframework.common.util.jwt.InvalidJwtException;
 import net.eulerframework.common.util.jwt.JwtEncryptor;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.oldauthentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.oldauthentication.context.UserContext;
 import net.eulerframework.web.module.oldauthentication.entity.AbstractUserProfile;
 import net.eulerframework.web.module.oldauthentication.entity.Group;
@@ -36,7 +37,7 @@ public class AuthenticationService extends BaseService implements IAuthenticatio
     private boolean enableAutoAuthorize = SecurityConfig.isEnableAutoAuthorizeAfterSignup();
     private String[] autoAuthorizeGroupId = SecurityConfig.getAutoAuthorizeGroupId();
     
-    @Resource private JwtEncryptor jwtEncryptor;
+    @Autowired(required = false) private JwtEncryptor jwtEncryptor;
 
     @Override
     public String signUp(User user) {

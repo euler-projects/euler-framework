@@ -21,7 +21,7 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.oldauthentication.entity.Group;
 
-@Repository
+@Repository("oldGroupDao")
 public class GroupDao extends BaseDao<Group> {
     
     @Resource public void setSessionFactory(SessionFactory sessionFactory) {

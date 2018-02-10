@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.request.easyuisupport.EasyUiQueryReqeuset;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.oldauthentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.oldauthentication.dao.GroupDao;
 import net.eulerframework.web.module.oldauthentication.dao.UserDao;
 import net.eulerframework.web.module.oldauthentication.entity.Group;
@@ -27,9 +28,9 @@ import net.eulerframework.web.module.oldauthentication.exception.UserNotFoundExc
 @Service
 public class UserService extends BaseService {
 
-    @Resource
+    @Autowired
     private UserDao userDao;
-    @Resource
+    @Autowired
     private GroupDao groupDao;
     @Resource
     private PasswordEncoder passwordEncoder;

@@ -10,6 +10,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
@@ -21,7 +24,8 @@ public class Group extends UUIDEntity<Group> {
     @Column(name="NAME", nullable = false, unique = true)
     private String name;
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "SYS_GROUP_AUTHORITY", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
+    @Fetch(FetchMode.SELECT)
+    @JoinTable(name = "SYS_GROUP_AUTHORITY", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY") })
     private Set<Authority> authorities;
     @Column(name="DESCRIPTION")
     private String description;

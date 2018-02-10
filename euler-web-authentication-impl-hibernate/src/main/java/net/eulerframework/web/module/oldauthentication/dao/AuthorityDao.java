@@ -20,7 +20,7 @@ import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.extend.hibernate5.RestrictionsX;
 import net.eulerframework.web.module.oldauthentication.entity.Authority;
 
-@Repository
+@Repository("oldAuthorityDao")
 public class AuthorityDao extends BaseDao<Authority> {
     
     @Resource public void setSessionFactory(SessionFactory sessionFactory) {

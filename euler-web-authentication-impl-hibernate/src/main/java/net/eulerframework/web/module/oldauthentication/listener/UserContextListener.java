@@ -17,7 +17,7 @@ public class UserContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         
         WebApplicationContext rwp = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());        
-        UserService userService= (UserService)rwp.getBean("userService");        
+        UserService userService= rwp.getBean(UserService.class);        
         UserContext.setUserService(userService);
     }
 

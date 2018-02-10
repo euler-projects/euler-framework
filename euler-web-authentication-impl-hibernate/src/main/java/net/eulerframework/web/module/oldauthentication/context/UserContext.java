@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
-import net.eulerframework.web.module.oldauthentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.oldauthentication.entity.User;
 import net.eulerframework.web.module.oldauthentication.service.UserService;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;

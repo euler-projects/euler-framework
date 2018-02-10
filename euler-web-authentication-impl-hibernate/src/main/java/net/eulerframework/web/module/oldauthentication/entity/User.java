@@ -76,7 +76,7 @@ public class User extends UUIDEntity<User> implements UserDetails, CredentialsCo
     private Boolean credentialsNonExpired;
     @Column(name = "ROOT")
     private Boolean root;
-    @Column(name = "SIGN_UP_TIME", nullable = false)
+    @Column(name = "REGIST_TIME", nullable = false)
     private Date signUpTime;
     
 //    @ManyToMany(fetch = FetchType.EAGER)

@@ -8,10 +8,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.web.module.oldauthentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.oldauthentication.entity.User;
 
-@Service("userDetailsService")
+//@Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Resource private UserService userSerivce;
