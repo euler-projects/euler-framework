@@ -20,6 +20,7 @@
     <modules>
         <module>euler-web-core</module>
         <module>euler-web-orm-hibernate</module>
+        <module>euler-web-orm-mybatis</module>
         <module>euler-web-authentication</module>
         <module>euler-web-authentication-impl-hibernate</module>
         <module>euler-web-basic</module>
