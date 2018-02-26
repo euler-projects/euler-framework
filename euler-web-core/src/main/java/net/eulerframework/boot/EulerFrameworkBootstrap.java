@@ -120,7 +120,12 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                     WebConfig.getApiRootPath() + "/*");
             
             FilterRegistration.Dynamic crosFilter = container.addFilter(EulerFilters.CROS_FILTER, new CrosFilter());
-            crosFilter.addMappingForServletNames(null, false, EulerServlets.API_SERVLET);
+            crosFilter.addMappingForServletNames(
+                    null, 
+                    false, 
+                    EulerServlets.API_SERVLET, 
+                    EulerServlets.WEB_AJAX_SERVLET, 
+                    EulerServlets.WEB_ADMIN_AJAX_SERVLET);
         }
     }
 
