@@ -42,7 +42,7 @@ import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebEx
  * @author cFrost
  *
  */
-@Transactional
+@Transactional("htransactionManager")
 public interface UserRegistService {
     
     EulerUserEntityService getEulerUserEntityService();

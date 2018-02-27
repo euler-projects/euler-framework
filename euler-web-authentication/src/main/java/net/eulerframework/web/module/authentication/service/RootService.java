@@ -51,7 +51,7 @@ import net.eulerframework.web.util.ServletUtils;
  *
  */
 @Service
-@Transactional
+@Transactional("htransactionManager")
 public class RootService{
     private final static String ADMIN_USERNAME = "admin";
     private final static String NAN_PASSWD = "NaN";

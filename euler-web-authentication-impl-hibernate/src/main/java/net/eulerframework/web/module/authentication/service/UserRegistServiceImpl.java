@@ -47,7 +47,7 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
  * @author cFrost
  *
  */
-@Transactional
+@Transactional("htransactionManager")
 @Service("userRegistService")
 public class UserRegistServiceImpl implements UserRegistService {
     @Resource private EulerUserEntityService eulerUserEntityService;

@@ -158,7 +158,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
     }
 
     @Override
-    @Transactional
+    @Transactional("htransactionManager")
     public void activeUser(String userId) throws UserNotFoundException {
         Assert.hasText(userId, "Param 'userId' can not be empty");
         
@@ -174,7 +174,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
     }
 
     @Override
-    @Transactional
+    @Transactional("htransactionManager")
     public void blockUser(String userId) throws UserNotFoundException {
         Assert.hasText(userId, "Param 'userId' can not be empty");
         
