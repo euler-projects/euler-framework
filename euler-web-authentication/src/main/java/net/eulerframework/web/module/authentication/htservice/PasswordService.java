@@ -27,7 +27,7 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.service;
+package net.eulerframework.web.module.authentication.htservice;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;

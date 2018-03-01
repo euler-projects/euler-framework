@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.AbstractApiEndpoint;
 import net.eulerframework.web.module.basic.entity.Dictionary;
-import net.eulerframework.web.module.basic.service.DictionaryService;
+import net.eulerframework.web.module.basic.htservice.DictionaryService;
 
 /**
  * @author cFrost

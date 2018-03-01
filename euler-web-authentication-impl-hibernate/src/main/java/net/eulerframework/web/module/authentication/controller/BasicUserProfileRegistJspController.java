@@ -39,7 +39,7 @@ import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
-import net.eulerframework.web.module.authentication.service.UserRegistService;
+import net.eulerframework.web.module.authentication.htservice.UserRegistService;
 import net.eulerframework.web.module.authentication.util.Captcha;
 
 /**

@@ -35,7 +35,7 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.service.EulerUserEntityService;
+import net.eulerframework.web.module.authentication.htservice.EulerUserEntityService;
 
 /**
  * @author cFrost

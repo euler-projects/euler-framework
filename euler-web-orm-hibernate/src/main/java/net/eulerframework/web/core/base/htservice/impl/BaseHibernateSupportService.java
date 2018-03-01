@@ -1,4 +1,4 @@
-package net.eulerframework.web.core.base.service.impl;
+package net.eulerframework.web.core.base.htservice.impl;
 
 import java.util.Collection;
 

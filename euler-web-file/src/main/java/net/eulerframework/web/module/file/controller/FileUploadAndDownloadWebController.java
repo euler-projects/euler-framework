@@ -24,7 +24,7 @@ import net.eulerframework.web.module.file.conf.FileConfig;
 import net.eulerframework.web.module.file.enmus.FileType;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
-import net.eulerframework.web.module.file.service.ArchivedFileService;
+import net.eulerframework.web.module.file.htservice.ArchivedFileService;
 
 @JspController
 @RequestMapping("/")

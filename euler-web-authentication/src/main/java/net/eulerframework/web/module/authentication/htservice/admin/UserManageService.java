@@ -27,7 +27,7 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.service.admin;
+package net.eulerframework.web.module.authentication.htservice.admin;
 
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;

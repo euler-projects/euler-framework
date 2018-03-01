@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.authentication.service;
+package net.eulerframework.web.module.authentication.htservice;
 
 import java.util.Date;
 

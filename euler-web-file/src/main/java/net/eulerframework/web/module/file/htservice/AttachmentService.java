@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.file.service;
+package net.eulerframework.web.module.file.htservice;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.web.core.base.service.impl.BaseHibernateSupportService;
+import net.eulerframework.web.core.base.htservice.impl.BaseHibernateSupportService;
 import net.eulerframework.web.module.file.dao.IAttachmentDao;
 import net.eulerframework.web.module.file.entity.AbstractAttachment;
 import net.eulerframework.web.module.file.entity.AbstractFileAttachment;

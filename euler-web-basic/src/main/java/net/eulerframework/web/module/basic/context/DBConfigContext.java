@@ -5,7 +5,7 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.module.basic.entity.Config;
 import net.eulerframework.web.module.basic.exception.ConfigNotFoundException;
-import net.eulerframework.web.module.basic.service.ConfigService;
+import net.eulerframework.web.module.basic.htservice.ConfigService;
 
 public class DBConfigContext {
     

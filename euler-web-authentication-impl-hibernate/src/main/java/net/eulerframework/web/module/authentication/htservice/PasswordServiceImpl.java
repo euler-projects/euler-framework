@@ -27,44 +27,56 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.service;
+package net.eulerframework.web.module.authentication.htservice;
 
 import javax.annotation.Resource;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.dao.BasicUserProfileDao;
-import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
-import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
+import net.eulerframework.web.module.authentication.exception.InvalidEmailResetTokenException;
+import net.eulerframework.web.module.authentication.exception.InvalidSmsResetPinException;
 
 /**
  * @author cFrost
  *
  */
-@Service
-public class BasicUserProfileService extends BaseService implements EulerUserProfileService {
+@Service("passwordService")
+public class PasswordServiceImpl implements PasswordService {
     
-    @Resource private BasicUserProfileDao basicUserProfileDao;
+    @Resource private PasswordEncoder passwordEncoder;
+    @Resource private EulerUserEntityService eulerUserEntityService;
 
     @Override
-    public boolean isMyProfile(EulerUserProfileEntity userProfile) {
-        Assert.notNull(userProfile, "userProfile can not be null");
-        return BasicUserProfile.class.equals(userProfile.getClass());
+    public PasswordEncoder getPasswordEncoder() {
+        return this.passwordEncoder;
     }
 
     @Override
-    public BasicUserProfile createUserProfile(EulerUserProfileEntity userProfile) {
-        BasicUserProfile basicUserProfile = (BasicUserProfile) userProfile;
-        this.basicUserProfileDao.save(basicUserProfile);
-        return basicUserProfile;
+    public EulerUserEntityService getEulerUserEntityService() {
+        return this.eulerUserEntityService;
     }
 
     @Override
-    public <T extends EulerUserProfileEntity> T loadUserProfile(String userId, Class<? extends T> profileClass) {
+    public void passwdResetSMSGen(String mobile) {
         // TODO Auto-generated method stub
-        return null;
+    }
+
+    @Override
+    public void passwdResetEmailGen(String email) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public String analyzeUserIdFromSmsResetPin(String pin) throws InvalidSmsResetPinException {
+        // TODO Auto-generated method stub
+        throw new InvalidSmsResetPinException();
+    }
+
+    @Override
+    public String analyzeUserIdFromEmailResetToken(String token) throws InvalidEmailResetTokenException {
+        // TODO Auto-generated method stub
+        throw new InvalidEmailResetTokenException();
     }
 
 }

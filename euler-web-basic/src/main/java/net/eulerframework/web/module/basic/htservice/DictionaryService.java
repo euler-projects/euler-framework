@@ -1,4 +1,4 @@
-package net.eulerframework.web.module.basic.service;
+package net.eulerframework.web.module.basic.htservice;
 
 import java.util.List;
 import java.util.Locale;

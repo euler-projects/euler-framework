@@ -44,9 +44,9 @@ import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
+import net.eulerframework.web.module.authentication.htservice.EulerUserDetailsService;
+import net.eulerframework.web.module.authentication.htservice.EulerUserEntityService;
 import net.eulerframework.web.module.authentication.principal.EulerUserDetails;
-import net.eulerframework.web.module.authentication.service.EulerUserDetailsService;
-import net.eulerframework.web.module.authentication.service.EulerUserEntityService;
 
 public class UserContext {
 
