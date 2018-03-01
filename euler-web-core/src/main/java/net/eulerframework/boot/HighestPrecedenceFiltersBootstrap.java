@@ -15,6 +15,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.constant.EulerFilters;
 import net.eulerframework.constant.EulerServlets;
+import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.filter.AdminPageRedirectFilter;
 import net.eulerframework.web.core.filter.RequestIdFilter;
 import net.eulerframework.web.core.filter.WebLanguageFilter;
 
@@ -47,5 +49,16 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
                 EulerServlets.WEB_AJAX_SERVLET, 
                 EulerServlets.WEB_ADMIN_AJAX_SERVLET);
         //webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
+        
+        FilterRegistration.Dynamic adminPageRedirectFilter = container.addFilter(EulerFilters.ADMIN_PAGE_REDIRECT_FILTER, new AdminPageRedirectFilter());
+        adminPageRedirectFilter.addMappingForUrlPatterns(null, false, WebConfig.getAdminRootPath());
+        
+//        FilterRegistration.Dynamic ajaxRedirectResponseFilter = container.addFilter(EulerFilters.AJAX_REDIRECT_RESPONSE_FILTER, new AjaxRedirectResponseFilter());
+//
+//        ajaxRedirectResponseFilter.addMappingForServletNames(
+//                null, 
+//                false, 
+//                EulerServlets.WEB_AJAX_SERVLET, 
+//                EulerServlets.WEB_ADMIN_AJAX_SERVLET);
     }
 }

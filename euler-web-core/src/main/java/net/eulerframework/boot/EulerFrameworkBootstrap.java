@@ -38,21 +38,18 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.constant.EulerSysAttributes;
-import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.constant.EulerFilters;
 import net.eulerframework.constant.EulerServlets;
+import net.eulerframework.constant.EulerSysAttributes;
+import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.filter.AdminPageRedirectFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
@@ -83,24 +80,18 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.E_TAG_FILTER, new ShallowEtagHeaderFilter());
         webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
-        FilterRegistration.Dynamic adminPageRedirectFilter = container.addFilter(EulerFilters.ADMIN_PAGE_REDIRECT_FILTER, new AdminPageRedirectFilter());
-        adminPageRedirectFilter.addMappingForUrlPatterns(null, false, WebConfig.getAdminRootPath());
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
-        FilterRegistration.Dynamic corsFilter = container.addFilter(EulerFilters.CORS_FILTER, new CorsFilter(source));
+
+        DelegatingFilterProxy corsFilterProxy = new DelegatingFilterProxy();
+        corsFilterProxy.setTargetBeanName("corsFilter");;
+        corsFilterProxy.setTargetFilterLifecycle(true);
+        FilterRegistration.Dynamic corsFilter = container.addFilter(EulerFilters.CORS_FILTER, corsFilterProxy);
         corsFilter.addMappingForServletNames(
                 null, 
                 false, 
                 EulerServlets.API_SERVLET, 
                 EulerServlets.WEB_AJAX_SERVLET, 
                 EulerServlets.WEB_ADMIN_AJAX_SERVLET);
-
+        
         this.initSpringMVCDispatcher(
                 container, 
                 EulerServlets.WEB_SERVLET, 

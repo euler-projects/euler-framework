@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2015-2016 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 cFrost.sun(孙宾, SUN BIN) 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,29 @@
  * 
  * For more information, please visit the following website
  * 
- * https://github.com/euler-form/web-form
- * http://eulerframework.net
- * http://cfrost.net
+ * https://eulerproject.io
+ * https://cfrost.net
  */
-package net.eulerframework.web.core.listener;
+package net.eulerframework.web.core.base.response;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
-import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.web.config.WebConfig;
+/**
+ * @author cFrost
+ *
+ */
+public class RedirectResponse extends CmdResponse {
 
-public class EulerFrameworkCoreListener extends LogSupport implements ServletContextListener {
-
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        this.logger.info("Init euler framework core listener");
-        
-        ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq());
+    public RedirectResponse(String location) {
+        super(Cmd.REDIRECT);
+        this.location = location;
     }
 
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
+    private String location;
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }
