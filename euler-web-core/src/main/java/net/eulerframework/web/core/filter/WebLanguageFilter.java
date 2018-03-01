@@ -31,19 +31,17 @@ package net.eulerframework.web.core.filter;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import net.eulerframework.constant.EulerSysAttributes;
 import net.eulerframework.web.core.extend.WebLanguageRequestWrapper;
 
-public class WebLanguageFilter implements Filter {
+public class WebLanguageFilter extends OncePerRequestFilter {
 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -51,25 +49,13 @@ public class WebLanguageFilter implements Filter {
 	    localeRequest.setAttribute(EulerSysAttributes.LOCALE.value(), localeRequest.getLocale());
 		filterChain.doFilter(localeRequest, response);
 	}
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-
-        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
-            throw new ServletException("WebLanguageFilterr just supports HTTP requests");
-        }
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
-        this.doFilterInternal(httpRequest, httpResponse, chain);
-    }
-
-    @Override
-    public void destroy() {
+	
+	/**
+	 * 返回false, 否则访问错误页面不会显示为对应语言
+	 */
+	@Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
     }
 
 }

@@ -58,6 +58,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     
+    private String staticRequestPrefix;
     private Locale locale;
 
     /**
@@ -71,24 +72,25 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
      */
     public WebLanguageRequestWrapper(HttpServletRequest request, HttpServletResponse response) {
         super(request);
+        
+        this.staticRequestPrefix = request.getContextPath() + WebConfig.getStaticPagesRootPath() + "/";
+        
         try {
-            this.locale = this.getLocaleFromParam(request);
+            this.locale = this.getLocaleFromPath(request);
             
             if(this.locale == null) {
-                this.locale = this.getLocaleFromCookie(request);
+                this.locale = this.getLocaleFromParam(request);
+                
+                if(this.locale == null) {
+                    this.locale = this.getLocaleFromCookie(request);
+                    
+                    if(this.locale == null) {
+                        this.locale = this.getLocaleFromSession(request);
+                    }
+                }
             }
             
-            if(this.locale == null) {
-                this.locale = this.getLocaleFromSession(request);
-            }
-            
-            if(this.locale == null) {
-                this.locale = WebConfig.getDefaultLanguage();
-            }
-            
-            Locale[] supportLocales = WebConfig.getSupportLanguages();
-            
-            if(!Arrays.asList(supportLocales).contains(this.locale)) {
+            if(this.locale == null || !Arrays.asList(WebConfig.getSupportLanguages()).contains(this.locale)) {
                 this.locale = WebConfig.getDefaultLanguage();
             }
             
@@ -99,12 +101,65 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
             this.locale = request.getLocale();
         }
     }
+    
+    private boolean isStaticPageRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(this.staticRequestPrefix);
+    }
+    
+    private Locale returnLocaleFromLocaleString(String localeStr) {
+        try {
+            Locale locale = CommonUtils.parseLocale(localeStr);
+
+            /*
+             * 判断请求路径是否为受支持的语言, 若不受支持则返回null, 
+             * 这样设计的目的是因为path, cookie, param的方式都是由访问者指定的, 
+             * 如果访问者指定了一个不支持的语言可以让后面的获取逻辑尝试获取访问者先前指定的语言,
+             * 如果有合适的语言, 网站可以保持访问者指定错误语言前的样子
+             */
+            if(!Arrays.asList(WebConfig.getSupportLanguages()).contains(locale)) {
+                return null;
+            }
+            
+            return locale;
+        } catch (Exception e) {
+            this.logger.info(e.getMessage());
+        }
+        
+        return null;
+    }
+
+    private Locale getLocaleFromPath(HttpServletRequest request) {
+        if(this.isStaticPageRequest(request)) {
+            String path = request.getRequestURI().substring(this.staticRequestPrefix.length());
+            System.out.println(path);
+            if(path.indexOf("/") > 0) {
+                String localeStr = path.substring(0, path.indexOf("/"));
+                return this.returnLocaleFromLocaleString(localeStr);
+            }
+        }
+        return null;
+    }
 
     private Locale getLocaleFromParam(HttpServletRequest request) {
         String localeParamValue = this.getRequest().getParameter(LOCALE_PARAM_NAME);
         if (StringUtils.hasText(localeParamValue)) {
-            return CommonUtils.parseLocale(localeParamValue);
+            return this.returnLocaleFromLocaleString(localeParamValue);
         }
+        return null;
+    }
+
+    private Locale getLocaleFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(LocaleCookies.LOCALE.getCookieName())) {
+                    String localeStr = cookie.getValue();
+                    return this.returnLocaleFromLocaleString(localeStr);
+                }
+            }
+        }
+
         return null;
     }
 
@@ -116,21 +171,6 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
                 this.locale = (Locale) locale;
             }            
         }        
-        return null;
-    }
-
-    private Locale getLocaleFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(LocaleCookies.LOCALE.getCookieName())) {
-                    String localeStr = cookie.getValue();
-                    return CommonUtils.parseLocale(localeStr);
-                }
-            }
-        }
-
         return null;
     }
 
