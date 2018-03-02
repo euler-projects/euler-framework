@@ -43,7 +43,7 @@ import net.eulerframework.web.module.authentication.exception.InvalidEmailResetT
 import net.eulerframework.web.module.authentication.exception.InvalidSmsResetPinException;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.htservice.PasswordService;
+import net.eulerframework.web.module.authentication.service.PasswordService;
 
 /**
  * @author cFrost

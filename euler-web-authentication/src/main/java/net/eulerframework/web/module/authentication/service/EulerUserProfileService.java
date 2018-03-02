@@ -27,44 +27,32 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.htservice;
+package net.eulerframework.web.module.authentication.service;
 
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
-import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.dao.BasicUserProfileDao;
-import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
 import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 
 /**
  * @author cFrost
  *
  */
-@Service
-public class BasicUserProfileService extends BaseService implements EulerUserProfileService {
+public interface EulerUserProfileService {
+
+    /**
+     * 判断一个用户档案实体类是否可由此实现类处理
+     * 
+     * @param userProfile 用户档案
+     * @return <code>true</code>表示时自己可以处理的用户档案
+     */
+    boolean isMyProfile(EulerUserProfileEntity userProfile);
+
+    /**
+     * 创建用户档案
+     * 
+     * @param userProfile 用户档案
+     * @return 新创建的用户档案实体，与传入参数是同一个实例
+     */
+    EulerUserProfileEntity createUserProfile(EulerUserProfileEntity userProfile);
     
-    @Resource private BasicUserProfileDao basicUserProfileDao;
-
-    @Override
-    public boolean isMyProfile(EulerUserProfileEntity userProfile) {
-        Assert.notNull(userProfile, "userProfile can not be null");
-        return BasicUserProfile.class.equals(userProfile.getClass());
-    }
-
-    @Override
-    public BasicUserProfile createUserProfile(EulerUserProfileEntity userProfile) {
-        BasicUserProfile basicUserProfile = (BasicUserProfile) userProfile;
-        this.basicUserProfileDao.save(basicUserProfile);
-        return basicUserProfile;
-    }
-
-    @Override
-    public <T extends EulerUserProfileEntity> T loadUserProfile(String userId, Class<? extends T> profileClass) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    <T extends EulerUserProfileEntity> T loadUserProfile(String userId, Class<? extends T> profileClass);
 
 }

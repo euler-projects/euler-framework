@@ -14,7 +14,7 @@ import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
-import net.eulerframework.web.module.authentication.htservice.UserRegistService;
+import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.Captcha;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
 

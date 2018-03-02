@@ -8,8 +8,8 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.module.authentication.context.UserContext;
-import net.eulerframework.web.module.authentication.htservice.EulerUserDetailsService;
-import net.eulerframework.web.module.authentication.htservice.EulerUserEntityService;
+import net.eulerframework.web.module.authentication.service.EulerUserDetailsService;
+import net.eulerframework.web.module.authentication.service.EulerUserEntityService;
 import net.eulerframework.web.module.authentication.util.SecurityTag;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
 

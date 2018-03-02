@@ -27,7 +27,7 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.htservice;
+package net.eulerframework.web.module.authentication.service;
 
 import java.io.IOException;
 
@@ -51,7 +51,7 @@ import net.eulerframework.web.util.ServletUtils;
  *
  */
 @Service
-@Transactional("htransactionManager")
+@Transactional
 public class RootService{
     private final static String ADMIN_USERNAME = "admin";
     private final static String NAN_PASSWD = "NaN";

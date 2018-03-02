@@ -27,7 +27,7 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.htservice.admin;
+package net.eulerframework.web.module.authentication.service.admin;
 
 import java.util.Date;
 
@@ -42,10 +42,10 @@ import org.springframework.util.StringUtils;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.core.base.service.impl.BaseService;
-import net.eulerframework.web.module.authentication.dao.UserDao;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
+import net.eulerframework.web.module.authentication.repository.UserRepository;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
@@ -56,14 +56,14 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
 public class UserManageServiceImpl extends BaseService implements UserManageService {
 
     @Resource
-    private UserDao userDao;
+    private UserRepository userRepository;
     @Resource
     private PasswordEncoder passwordEncoder;
 
     @Override
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
-        PageResponse<User> ret = this.userDao.pageQuery(pageQueryRequest);
-
+        PageResponse<User> ret = new PageResponse<>(null, 0, 0, 0);//this.userDao.pageQuery(pageQueryRequest);
+        //TODO:实现分页
         if (!ret.getRows().isEmpty()) {
             ret.getRows().forEach(user -> user.eraseCredentials());
         }
@@ -101,7 +101,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         user.setCredentialsNonExpired(credentialsNonExpired);
         user.setRegistTime(new Date());
         
-        this.userDao.save(user);
+        this.userRepository.save(user);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         Assert.hasText(userId, "Param 'userId' can not be empty");
         Assert.hasText(username, "Param 'username' can not be empty");
         
-        User user = this.userDao.load(userId);
+        User user = this.userRepository.findUserById(userId);
         
         if(user == null) {
             throw new UserNotFoundException();
@@ -137,7 +137,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         user.setAccountNonLocked(accountNonLocked);
         user.setCredentialsNonExpired(credentialsNonExpired);
         
-        this.userDao.update(user);
+        this.userRepository.save(user);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         Assert.hasText(userId, "Param 'userId' can not be empty");
         Assert.hasText(password, "Param 'password' can not be empty");
         
-        User user = this.userDao.load(userId);
+        User user = this.userRepository.findUserById(userId);
         
         if(user == null) {
             throw new UserNotFoundException();
@@ -154,15 +154,15 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         UserDataValidator.validPassword(password);
         user.setPassword(this.passwordEncoder.encode(password));
 
-        this.userDao.update(user);
+        this.userRepository.save(user);
     }
 
     @Override
-    @Transactional("htransactionManager")
+    @Transactional
     public void activeUser(String userId) throws UserNotFoundException {
         Assert.hasText(userId, "Param 'userId' can not be empty");
         
-        User user = this.userDao.load(userId);
+        User user = this.userRepository.findUserById(userId);
         
         if(user == null) {
             throw new UserNotFoundException();
@@ -170,15 +170,15 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
 
         user.setEnabled(true);
         
-        this.userDao.update(user);
+        this.userRepository.save(user);
     }
 
     @Override
-    @Transactional("htransactionManager")
+    @Transactional
     public void blockUser(String userId) throws UserNotFoundException {
         Assert.hasText(userId, "Param 'userId' can not be empty");
         
-        User user = this.userDao.load(userId);
+        User user = this.userRepository.findUserById(userId);
         
         if(user == null) {
             throw new UserNotFoundException();
@@ -186,7 +186,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
 
         user.setEnabled(false);
         
-        this.userDao.update(user);
+        this.userRepository.save(user);
     }
 
 }

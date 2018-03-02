@@ -27,7 +27,7 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.htservice;
+package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebEx
  * @author cFrost
  *
  */
-@Transactional("htransactionManager")
+@Transactional
 public interface UserRegistService {
     
     EulerUserEntityService getEulerUserEntityService();

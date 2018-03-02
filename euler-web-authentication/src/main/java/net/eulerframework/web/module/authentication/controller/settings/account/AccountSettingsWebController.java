@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 import net.eulerframework.web.module.authentication.context.UserContext;
-import net.eulerframework.web.module.authentication.htservice.PasswordService;
+import net.eulerframework.web.module.authentication.service.PasswordService;
 
 /**
  * @author cFrost

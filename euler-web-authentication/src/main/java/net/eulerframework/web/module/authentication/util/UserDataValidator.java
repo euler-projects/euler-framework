@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import net.eulerframework.web.module.authentication.htservice.EulerUserEntityService;
+import net.eulerframework.web.module.authentication.service.EulerUserEntityService;
 
 /**
  * @author cFrost

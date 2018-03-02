@@ -41,7 +41,7 @@ import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
-import net.eulerframework.web.module.authentication.htservice.admin.UserManageService;
+import net.eulerframework.web.module.authentication.service.admin.UserManageService;
 
 @AjaxController
 @RequestMapping("authentication/user")

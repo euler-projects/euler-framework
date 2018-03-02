@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
 import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
-import net.eulerframework.web.module.authentication.htservice.PasswordService;
+import net.eulerframework.web.module.authentication.service.PasswordService;
 
 /**
  * @author cFrost

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 cFrost.sun(孙宾, SUN BIN) 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,18 +24,24 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.dao;
+package net.eulerframework.web.module.authentication.repository;
 
-import net.eulerframework.web.core.base.dao.impl.hibernate5.BaseDao;
-import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import net.eulerframework.web.module.authentication.entity.User;
 
 /**
  * @author cFrost
  *
  */
-public class BasicUserProfileDao extends BaseDao<BasicUserProfile> {
+@Repository
+public interface UserRepository extends JpaRepository<User, String> {
 
+    public User findUserById(String userId);
+    public User findUserByUsernameIgnoreCase(String username);
+    public User findUserByEmailIgnoreCase(String email);
+    public User findUserByMobileIgnoreCase(String mobile);
 }

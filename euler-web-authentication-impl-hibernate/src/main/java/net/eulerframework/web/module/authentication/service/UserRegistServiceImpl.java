@@ -27,7 +27,7 @@
  * https://github.com/euler-projects/euler-framework
  * https://cfrost.net
  */
-package net.eulerframework.web.module.authentication.htservice;
+package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
  * @author cFrost
  *
  */
-@Transactional("htransactionManager")
+@Transactional
 @Service("userRegistService")
 public class UserRegistServiceImpl implements UserRegistService {
     @Resource private EulerUserEntityService eulerUserEntityService;
