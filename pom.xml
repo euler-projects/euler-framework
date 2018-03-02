@@ -19,10 +19,10 @@
 
     <modules>
         <module>euler-web-core</module>
-        <module>euler-web-orm-hibernate</module>
+        <module>euler-web-orm-jpa</module>
         <module>euler-web-orm-mybatis</module>
         <module>euler-web-authentication</module>
-        <module>euler-web-authentication-impl-hibernate</module>
+        <module>euler-web-authentication-impl-jpa</module>
         <module>euler-web-basic</module>
         <module>euler-web-file</module>
     </modules>

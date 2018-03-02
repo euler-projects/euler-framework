@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>euler-web-orm-hibernate</artifactId>
+            <artifactId>euler-web-orm-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
 

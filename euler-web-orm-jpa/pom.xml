@@ -6,10 +6,10 @@
         <artifactId>euler-framework</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>euler-web-orm-hibernate</artifactId>
-    <name>Euler ORM Hibernate</name>
+    <artifactId>euler-web-orm-jpa</artifactId>
+    <name>Euler ORM JPA</name>
     <url>https://eulerproject.io/euler-framework</url>
-    <description>An ORM module use hibernate</description>
+    <description>An ORM module use spring data JPA</description>
 
     <dependencies>
         <dependency>
