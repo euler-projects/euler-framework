@@ -30,7 +30,6 @@
 package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
-
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,7 @@ public class UserRegistServiceImpl implements UserRegistService {
     @Resource private EulerUserEntityService eulerUserEntityService;
     @Resource private PasswordEncoder passwordEncoder;
     @Autowired(required = false) private List<EulerUserProfileService> eulerUserProfileServices;
+    @Autowired(required = false) private List<EulerUserExtraDataProcessor> eulerUserExtraDataProcessors;
 
     @Override
     public EulerUserEntityService getEulerUserEntityService() {
@@ -62,6 +62,11 @@ public class UserRegistServiceImpl implements UserRegistService {
     @Override
     public List<EulerUserProfileService> getEulerUserProfileServices() {
         return this.eulerUserProfileServices;
+    }
+
+    @Override
+    public List<EulerUserExtraDataProcessor> getEulerUserExtraDataProcessors() {
+        return this.eulerUserExtraDataProcessors;
     }
 
     @Override

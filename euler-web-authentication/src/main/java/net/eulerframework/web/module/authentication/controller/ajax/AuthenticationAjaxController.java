@@ -3,6 +3,8 @@
  */
 package net.eulerframework.web.module.authentication.controller.ajax;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,7 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
 @AjaxController
 @RequestMapping("/")
 public class AuthenticationAjaxController extends AjaxSupportWebController {
-    
+
     @Resource
     private UserRegistService userRegistService;
 
@@ -61,10 +63,23 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
             @RequestParam String username, 
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile, 
-            @RequestParam String password) {
+            @RequestParam String password,
+            @RequestParam Map<String, String> extraData) {
         if(SecurityConfig.isSignUpEnabled()) {
             Captcha.validCaptcha(this.getRequest());
-            return this.userRegistService.signUp(username, email, mobile, password).getUserId();
+            
+            if(extraData != null) {
+                extraData.remove("username");
+                extraData.remove("email");
+                extraData.remove("mobile");
+                extraData.remove("password");
+            }
+            
+            if(extraData == null || extraData.isEmpty()) {
+                return this.userRegistService.signUp(username, email, mobile, password).getUserId();
+            } else {
+                return this.userRegistService.signUp(username, email, mobile, password, extraData).getUserId();
+            }
         } else {
             throw new PageNotFoundException();
         }

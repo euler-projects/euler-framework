@@ -30,6 +30,7 @@
 package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -47,6 +48,7 @@ public interface UserRegistService {
     
     EulerUserEntityService getEulerUserEntityService();
     List<EulerUserProfileService> getEulerUserProfileServices();
+    List<EulerUserExtraDataProcessor> getEulerUserExtraDataProcessors();
 
     /**
      * 注册新用户
@@ -58,7 +60,7 @@ public interface UserRegistService {
      */
     EulerUserEntity signUp(String username, String email, String mobile, String password) 
             throws UserInfoCheckWebException;
-
+    
     /**
      * 注册新用户
      * @param username 用户名
@@ -66,8 +68,9 @@ public interface UserRegistService {
      * @param mobile 注册手机号
      * @param password 密码
      * @param userProfile 用户档案
+     * @return 注册生成的用户实体
      */
-    default void signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
+    default EulerUserEntity signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
             throws UserInfoCheckWebException {
         Assert.notNull(getEulerUserProfileServices(), "At least one EulerUserProfileServices should be implemented");
         EulerUserEntity user = this.signUp(username, email, mobile, password);
@@ -77,6 +80,36 @@ public interface UserRegistService {
                 eulerUserProfileService.createUserProfile(userProfile);
             }
         }
+        return user;
+    }
+    
+    /**
+     * 注册新用户, 并尝试处理附加数据, 
+     * 当找到第一个可以处理附加数据的{@link EulerUserExtraDataProcessor}后, 就会使用此处理器处理完毕并返回结果,
+     * 如果当前应用上下文中没有{@link EulerUserExtraDataProcessor}的实现类或者所有实现类均无法处理传入的附加数据,
+     * 方法不会报错, 仍会完成基本的用户注册流程, 并返回结果.
+     * <br>
+     * <b>注意: </b>因为只有第一个符合条件的附加数据处理器处理器可以生效, 所以应尽量避免应用上下文中存在多个可以处理同一类附加数据的处理器.
+     * 
+     * @param username 用户名
+     * @param email 注册邮箱
+     * @param mobile 注册手机号
+     * @param password 密码
+     * @param extraData 附加数据
+     * @return 注册生成的用户实体
+     */
+    default EulerUserEntity signUp(String username, String email, String mobile, String password, Map<String, String> extraData) 
+            throws UserInfoCheckWebException {
+        Assert.notNull(getEulerUserExtraDataProcessors(), "At least one EulerUserExtraDataProcessor should be implemented");
+        EulerUserEntity user = this.signUp(username, email, mobile, password);
+        if(extraData != null && !extraData.isEmpty() && getEulerUserExtraDataProcessors() != null) {
+            for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : getEulerUserExtraDataProcessors()) {
+                if(eulerUserExtraDataProcessor.process(user.getUserId(), extraData)) {
+                    break;
+                }
+            }
+        }
+        return user;
     }
 
 }
