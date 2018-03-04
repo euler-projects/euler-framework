@@ -1,11 +1,14 @@
 package net.eulerframework.web.core.base.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import net.eulerframework.web.core.base.response.ErrorResponse;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
@@ -46,6 +49,22 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
     @ExceptionHandler(IllegalArgumentException.class)
     public Object illegalArgumentException(IllegalArgumentException e) {
         return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_ARGUMENT, e));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UnrecognizedPropertyException.class)
+    public Object unrecognizedPropertyException(UnrecognizedPropertyException e) {
+        return new ErrorResponse(new WebException("JSON parse error: Unrecognized field \"" + e.getPropertyName() + "\"", SystemWebError.ILLEGAL_PARAMETER, e));
+    }
+    
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public Object httpMessageNotReadableException(HttpMessageNotReadableException e) {
+        if(e.getCause().getClass().equals(UnrecognizedPropertyException.class)) {
+            return this.unrecognizedPropertyException((UnrecognizedPropertyException) e.getCause());
+        }
+        
+        return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
     }
 
     /**
