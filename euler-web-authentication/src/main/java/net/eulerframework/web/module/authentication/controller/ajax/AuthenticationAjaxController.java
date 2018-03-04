@@ -7,6 +7,9 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,15 +61,22 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
         Captcha.validCaptcha(captcha, this.getRequest());
     }
 
-    @RequestMapping(value = "signup", method = RequestMethod.POST)
+    @RequestMapping(
+            value = "signup", 
+            method = RequestMethod.POST, 
+            consumes = {
+                    MediaType.APPLICATION_FORM_URLENCODED_VALUE, 
+                    MediaType.MULTIPART_FORM_DATA_VALUE})
     public String litesignup(
             @RequestParam String username, 
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile, 
             @RequestParam String password,
-            @RequestParam Map<String, String> extraData) {
+            @RequestParam Map<String, Object> extraData) {
         if(SecurityConfig.isSignUpEnabled()) {
-            Captcha.validCaptcha(this.getRequest());
+            if(SecurityConfig.isSignUpEnableCaptcha()) {
+                Captcha.validCaptcha(this.getRequest());
+            }
             
             if(extraData != null) {
                 extraData.remove("username");
@@ -83,6 +93,29 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
         } else {
             throw new PageNotFoundException();
         }
+    }
+    
+    @RequestMapping(
+            value = "signup", 
+            method = RequestMethod.POST, 
+            consumes = {
+                    MediaType.APPLICATION_JSON_VALUE, 
+                    MediaType.APPLICATION_JSON_UTF8_VALUE})
+    public String signupJson( @RequestBody Map<String, Object> data) {
+        String username = (String) data.get("username");
+        Assert.hasText(username, "Required String parameter 'username' is not present");
+        String password = (String) data.get("password");
+        Assert.hasText(password, "Required String parameter 'password' is not present");
+        
+        String email = (String) data.get("email");
+        String mobile = (String) data.get("mobile");
+
+        data.remove("username");
+        data.remove("email");
+        data.remove("mobile");
+        data.remove("password");
+        
+        return this.litesignup(username, email, mobile, password, data);
     }
 
 }

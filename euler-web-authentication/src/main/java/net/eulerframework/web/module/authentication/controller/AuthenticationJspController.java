@@ -76,7 +76,10 @@ public class AuthenticationJspController extends JspSupportWebController {
             @RequestParam(required = false) String mobile, 
             @RequestParam String password) {
         if(SecurityConfig.isSignUpEnabled()) {
-            Captcha.validCaptcha(this.getRequest());
+            if(SecurityConfig.isSignUpEnableCaptcha()) {
+                Captcha.validCaptcha(this.getRequest());
+            }
+            
             this.userRegistService.signUp(username, email, mobile, password);
             return this.success();
         } else {

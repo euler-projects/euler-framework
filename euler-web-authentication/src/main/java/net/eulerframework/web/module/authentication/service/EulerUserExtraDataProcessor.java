@@ -42,5 +42,5 @@ public interface EulerUserExtraDataProcessor {
      * @param extraData 附加数据
      * @return 处理成功返回{@code true}, 失败返回{@code false}
      */
-    boolean process(String userId, Map<String, String> extraData);
+    boolean process(String userId, Map<String, Object> extraData);
 }

@@ -98,9 +98,8 @@ public interface UserRegistService {
      * @param extraData 附加数据
      * @return 注册生成的用户实体
      */
-    default EulerUserEntity signUp(String username, String email, String mobile, String password, Map<String, String> extraData) 
+    default EulerUserEntity signUp(String username, String email, String mobile, String password, Map<String, Object> extraData) 
             throws UserInfoCheckWebException {
-        Assert.notNull(getEulerUserExtraDataProcessors(), "At least one EulerUserExtraDataProcessor should be implemented");
         EulerUserEntity user = this.signUp(username, email, mobile, password);
         if(extraData != null && !extraData.isEmpty() && getEulerUserExtraDataProcessors() != null) {
             for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : getEulerUserExtraDataProcessors()) {

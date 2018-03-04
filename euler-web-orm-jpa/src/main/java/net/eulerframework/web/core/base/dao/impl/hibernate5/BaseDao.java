@@ -565,7 +565,9 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
             return ret;
         } else if(BigDecimal.class.equals(clazz)) {
             return new BigDecimal(value);
-        } 
+        } else if(clazz.isEnum()) {
+            return Enum.valueOf((Class<? extends Enum>) clazz, value);
+        }
         
         throw new IllegalArgumentException("Unsupport query property type: " + clazz);
     }
