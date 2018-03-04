@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
@@ -49,10 +50,14 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
 @Transactional
 @Service("userRegistService")
 public class UserRegistServiceImpl implements UserRegistService {
-    @Resource private EulerUserEntityService eulerUserEntityService;
-    @Resource private PasswordEncoder passwordEncoder;
-    @Autowired(required = false) private List<EulerUserProfileService> eulerUserProfileServices;
-    @Autowired(required = false) private List<EulerUserExtraDataProcessor> eulerUserExtraDataProcessors;
+    @Resource 
+    private EulerUserEntityService eulerUserEntityService;
+    @Resource 
+    private PasswordEncoder passwordEncoder;
+    @Autowired(required = false) 
+    private List<EulerUserProfileService<? extends EulerUserProfileEntity>> eulerUserProfileServices;
+    @Autowired(required = false) 
+    private List<EulerUserExtraDataProcessor> eulerUserExtraDataProcessors;
 
     @Override
     public EulerUserEntityService getEulerUserEntityService() {
@@ -60,7 +65,7 @@ public class UserRegistServiceImpl implements UserRegistService {
     }
 
     @Override
-    public List<EulerUserProfileService> getEulerUserProfileServices() {
+    public List<EulerUserProfileService<? extends EulerUserProfileEntity>> getEulerUserProfileServices() {
         return this.eulerUserProfileServices;
     }
 

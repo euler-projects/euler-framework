@@ -47,7 +47,7 @@ import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebEx
 public interface UserRegistService {
     
     EulerUserEntityService getEulerUserEntityService();
-    List<EulerUserProfileService> getEulerUserProfileServices();
+    List<EulerUserProfileService<? extends EulerUserProfileEntity>> getEulerUserProfileServices();
     List<EulerUserExtraDataProcessor> getEulerUserExtraDataProcessors();
 
     /**
@@ -75,7 +75,7 @@ public interface UserRegistService {
         Assert.notNull(getEulerUserProfileServices(), "At least one EulerUserProfileServices should be implemented");
         EulerUserEntity user = this.signUp(username, email, mobile, password);
         userProfile.setUserId(user.getUserId());
-        for(EulerUserProfileService eulerUserProfileService : getEulerUserProfileServices()) {
+        for(EulerUserProfileService<? extends EulerUserProfileEntity> eulerUserProfileService : getEulerUserProfileServices()) {
             if(eulerUserProfileService.isMyProfile(userProfile)) {
                 eulerUserProfileService.createUserProfile(userProfile);
             }

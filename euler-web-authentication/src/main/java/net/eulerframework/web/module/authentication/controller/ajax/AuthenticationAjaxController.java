@@ -101,7 +101,7 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
             consumes = {
                     MediaType.APPLICATION_JSON_VALUE, 
                     MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public String signupJson( @RequestBody Map<String, Object> data) {
+    public String signupJson(@RequestBody Map<String, Object> data) {
         String username = (String) data.get("username");
         Assert.hasText(username, "Required String parameter 'username' is not present");
         String password = (String) data.get("password");

@@ -92,7 +92,7 @@ public class UserContext {
         UserContext.userDetailsServicel = userDetailsServicel;
     }
     
-    public static void setUserDetailsServicel(EulerUserEntityService userEntityService) {
+    public static void setEulerUserEntityService(EulerUserEntityService userEntityService) {
         UserContext.userEntityService = userEntityService;
     }
     
@@ -103,7 +103,9 @@ public class UserContext {
     public static EulerUserEntity getCurrentUserEntity() {
         return USER_ENTITY_CACHE.get(getCurrentUser().getUserId().toString(), userId -> {
             try {
-                return userEntityService.loadUserByUserId(userId);
+                EulerUserEntity entity = userEntityService.loadUserByUserId(userId);
+                entity.eraseCredentials();
+                return entity;
             } catch (UserNotFoundException e) {
                 throw new RuntimeException(e);
             }

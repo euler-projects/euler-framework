@@ -21,6 +21,7 @@ public class UserContextListener extends LogSupport implements ServletContextLis
         EulerUserDetailsService userDetailsService= rwp.getBean("userDetailsService", EulerUserDetailsService.class);
         UserContext.setUserDetailsServicel(userDetailsService);
         EulerUserEntityService eulerUserEntityService= rwp.getBean(EulerUserEntityService.class);
+        UserContext.setEulerUserEntityService(eulerUserEntityService);
         UserDataValidator.setEulerUserEntityService(eulerUserEntityService);
         SecurityTag.setEulerUserEntityService(eulerUserEntityService);
     }

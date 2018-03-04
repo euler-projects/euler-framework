@@ -43,4 +43,9 @@ public interface EulerUserExtraDataProcessor {
      * @return 处理成功返回{@code true}, 失败返回{@code false}
      */
     boolean process(String userId, Map<String, Object> extraData);
+
+    /**
+     * @param userId
+     */
+    Map<String, Object> loadExtraData(String userId);
 }

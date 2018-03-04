@@ -32,8 +32,6 @@ package net.eulerframework.web.module.authentication.service;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.authentication.entity.BasicUserProfile;
 import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
@@ -44,15 +42,9 @@ import net.eulerframework.web.module.authentication.repository.BasicUserProfileR
  *
  */
 @Service
-public class BasicUserProfileService extends BaseService implements EulerUserProfileService {
+public class BasicUserProfileService extends BaseService implements EulerUserProfileService<BasicUserProfile> {
     
     @Resource private BasicUserProfileRepository basicUserProfileRepository;
-
-    @Override
-    public boolean isMyProfile(EulerUserProfileEntity userProfile) {
-        Assert.notNull(userProfile, "userProfile can not be null");
-        return BasicUserProfile.class.equals(userProfile.getClass());
-    }
 
     @Override
     public BasicUserProfile createUserProfile(EulerUserProfileEntity userProfile) {
@@ -62,7 +54,7 @@ public class BasicUserProfileService extends BaseService implements EulerUserPro
     }
 
     @Override
-    public <T extends EulerUserProfileEntity> T loadUserProfile(String userId, Class<? extends T> profileClass) {
+    public BasicUserProfile loadUserProfile(String userId) {
         // TODO Auto-generated method stub
         return null;
     }
