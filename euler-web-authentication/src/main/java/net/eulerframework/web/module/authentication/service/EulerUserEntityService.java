@@ -164,4 +164,6 @@ public interface EulerUserEntityService {
         user.setEnabled(true);
         this.updateUser(user);
     }
+    
+    void addGroup(String userId, String groupCode);
 }

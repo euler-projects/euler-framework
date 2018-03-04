@@ -21,6 +21,8 @@ public class Group extends UUIDEntity<Group> {
     
     public static final String SYSTEM_USERS_CROUP_NAME = "Users";
 
+    @Column(name="CODE", nullable = false, unique = true)
+    private String code;
     @Column(name="NAME", nullable = false, unique = true)
     private String name;
     @ManyToMany(fetch = FetchType.EAGER)
@@ -29,6 +31,16 @@ public class Group extends UUIDEntity<Group> {
     private Set<Authority> authorities;
     @Column(name="DESCRIPTION")
     private String description;
+    
+    public String getCode() {
+        return code;
+    }
+    public void setCode(String code) {
+        this.code = code;
+    }
+    public static String getSystemUsersCroupName() {
+        return SYSTEM_USERS_CROUP_NAME;
+    }
     public String getName() {
         return name;
     }
