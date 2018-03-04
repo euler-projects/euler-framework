@@ -38,9 +38,6 @@ public class Group extends UUIDEntity<Group> {
     public void setCode(String code) {
         this.code = code;
     }
-    public static String getSystemUsersCroupName() {
-        return SYSTEM_USERS_CROUP_NAME;
-    }
     public String getName() {
         return name;
     }
