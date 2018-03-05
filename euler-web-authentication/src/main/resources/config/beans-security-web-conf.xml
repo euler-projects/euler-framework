@@ -12,7 +12,6 @@
                             proxy-target-class="true">
     </global-method-security>
     
-    <beans:bean id="eulerUrlAuthenticationFailureHandler" class="net.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler" />
     <beans:bean id="accessDeniedHandler" class="net.eulerframework.web.module.authentication.extend.EulerAccessDeniedHandler" />
 
     <beans:bean id="sessionRegistry"
@@ -54,8 +53,12 @@
         <beans:property name="targetUrlParameter" value="redirectUrl"/> 
     </beans:bean>
     
-    <beans:bean id="authenticationFailureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+    <!-- <beans:bean id="authenticationFailureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
         <beans:property name="defaultFailureUrl" value="${security.login.defaultFailureUrl}"/>     
+    </beans:bean>   --> 
+    
+    <beans:bean id="authenticationFailureHandler" class="net.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler">
+        
     </beans:bean>
 
     <beans:beans profile="web-security-ldap">
