@@ -69,8 +69,9 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
      *            请求，不会对请求做任何修改
      * @param response
      *            响应，只会向响应中添加关于语言的Cookie
+     * @throws NeedRedirectException 
      */
-    public WebLanguageRequestWrapper(HttpServletRequest request, HttpServletResponse response) {
+    public WebLanguageRequestWrapper(HttpServletRequest request, HttpServletResponse response) throws NeedRedirectException {
         super(request);
         
         this.staticRequestPrefix = request.getContextPath() + WebConfig.getStaticPagesRootPath() + "/";
@@ -88,6 +89,19 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
                         this.locale = this.getLocaleFromSession(request);
                     }
                 }
+            } else { 
+                
+                /*
+                 * getLocaleFromPath不为空说明是前端页面访问, 这时检查是否指定了_locale参数,
+                 * 如果指定了_locale参数, 切指定的语言和path中的不一致, 以_locale参数的为准,
+                 * 此时将发生页面重定向
+                 */
+                Locale paramLocale = this.getLocaleFromParam(request);
+                if(paramLocale != null && !paramLocale.equals(this.locale)) {
+                    String redirectUri = "/h" + request.getRequestURI().substring((this.staticRequestPrefix + CommonUtils.formatLocal(this.locale, '-')).length());
+                    redirectUri = redirectUri + "?" + request.getQueryString(); //因为是从前端页面的请求参数中取出了语言, 所以queryString一定有值
+                    throw new NeedRedirectException(request.getContextPath() + redirectUri);
+                }
             }
             
             if(this.locale == null || !Arrays.asList(WebConfig.getSupportLanguages()).contains(this.locale)) {
@@ -96,14 +110,17 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
             
             this.addLocaleIntoCookie(request, response);
             this.addLocaleIntoSession(request);
-        } catch (Exception e) {
+        } catch (NeedRedirectException e) {
+            throw e;
+        }catch (Exception e) {
             this.logger.error(e.getMessage(), e);
             this.locale = request.getLocale();
         }
     }
     
     private boolean isStaticPageRequest(HttpServletRequest request) {
-        return request.getRequestURI().startsWith(this.staticRequestPrefix);
+        return "GET".equalsIgnoreCase(request.getMethod()) 
+                && request.getRequestURI().startsWith(this.staticRequestPrefix);
     }
     
     private Locale returnLocaleFromLocaleString(String localeStr) {
@@ -141,7 +158,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private Locale getLocaleFromParam(HttpServletRequest request) {
-        String localeParamValue = this.getRequest().getParameter(LOCALE_PARAM_NAME);
+        String localeParamValue = request.getParameter(LOCALE_PARAM_NAME);
         if (StringUtils.hasText(localeParamValue)) {
             return this.returnLocaleFromLocaleString(localeParamValue);
         }
@@ -168,7 +185,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         if(session != null) {
             Object locale = session.getAttribute(LOCALE_SESSION_ATTR_NAME);
             if (locale != null) {
-                this.locale = (Locale) locale;
+                return (Locale) locale;
             }            
         }        
         return null;
@@ -192,5 +209,17 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Locale getLocale() {
         return locale;
+    }
+    
+    public class NeedRedirectException extends Exception {
+        private String redirectUrl;
+        
+        private NeedRedirectException(String redirectUrl) {
+            this.redirectUrl = redirectUrl;
+        }
+        
+        public String getRedirectUrl() {
+            return this.redirectUrl;
+        }
     }
 }

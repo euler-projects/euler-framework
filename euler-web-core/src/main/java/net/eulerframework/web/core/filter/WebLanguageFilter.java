@@ -40,12 +40,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import net.eulerframework.constant.EulerSysAttributes;
 import net.eulerframework.web.core.extend.WebLanguageRequestWrapper;
+import net.eulerframework.web.core.extend.WebLanguageRequestWrapper.NeedRedirectException;
 
 public class WebLanguageFilter extends OncePerRequestFilter {
 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-	    WebLanguageRequestWrapper localeRequest = new WebLanguageRequestWrapper(request, response);
+	    WebLanguageRequestWrapper localeRequest;
+        try {
+            localeRequest = new WebLanguageRequestWrapper(request, response);
+        } catch (NeedRedirectException e) {
+            response.sendRedirect(e.getRedirectUrl());
+            return;
+        }
 	    localeRequest.setAttribute(EulerSysAttributes.LOCALE.value(), localeRequest.getLocale());
 		filterChain.doFilter(localeRequest, response);
 	}
