@@ -30,10 +30,7 @@ package net.eulerframework.web.module.authentication.extend;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,7 +56,8 @@ public class EulerLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticatio
     /**
      * @param loginFormUrl
      */
-    public EulerLoginUrlAuthenticationEntryPoint(String loginFormUrl, ObjectMapper objectMapper, CorsFilter corsFilter) {
+    public EulerLoginUrlAuthenticationEntryPoint(String loginFormUrl, ObjectMapper objectMapper,
+            CorsFilter corsFilter) {
         super(loginFormUrl);
         this.objectMapper = objectMapper;
         this.corsFilter = corsFilter;
@@ -68,36 +66,25 @@ public class EulerLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticatio
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        
-        if (request.getRequestURI().startsWith(request.getContextPath() + "/ajax") 
-                || request.getRequestURI().startsWith(
-                        request.getContextPath() + WebConfig.getAdminRootPath() + "/ajax"
-                        )
-                ){
-            
-            this.corsFilter.doFilter(request, response, new FilterChain() {
 
-                @Override
-                public void doFilter(ServletRequest request, ServletResponse response)
-                        throws IOException, ServletException {
-                    // TODO Auto-generated method stub
-                    
-                }
-                
+        if (this.isAjaxRequest(request)) {
+
+            this.corsFilter.doFilter(request, response, (q, p) -> {
+                HttpServletResponse httpServletRequest = (HttpServletResponse) p;
+                httpServletRequest.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                httpServletRequest.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                httpServletRequest.getOutputStream().print(this.objectMapper.writeValueAsString(
+                        new RedirectResponse(this.buildRedirectUrlToLoginPage(request, response, authException))));
             });
-            
-            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            
-            response.getOutputStream().print( 
-                    this.objectMapper.writeValueAsString(
-                            new RedirectResponse(
-                                    this.buildRedirectUrlToLoginPage(request, response, authException)
-                                    )
-                            )
-                    );
+
         } else {
             super.commence(request, response, authException);
         }
+    }
+
+    protected boolean isAjaxRequest(HttpServletRequest request) {
+        return (request.getRequestURI().startsWith(request.getContextPath() + "/ajax") || request.getRequestURI()
+                .startsWith(request.getContextPath() + WebConfig.getAdminRootPath() + "/ajax"));
     }
 }
