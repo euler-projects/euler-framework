@@ -11,6 +11,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.filter.DelegatingFilterProxy;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.constant.EulerFilters;
@@ -48,17 +49,19 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
                 EulerServlets.WEB_ADMIN_SERVLET, 
                 EulerServlets.WEB_AJAX_SERVLET, 
                 EulerServlets.WEB_ADMIN_AJAX_SERVLET);
-        //webLanguageFilter.addMappingForUrlPatterns(null, false, WebConfig.getStaticPagesRootPath() + "/*");
         
         FilterRegistration.Dynamic adminPageRedirectFilter = container.addFilter(EulerFilters.ADMIN_PAGE_REDIRECT_FILTER, new AdminPageRedirectFilter());
         adminPageRedirectFilter.addMappingForUrlPatterns(null, false, WebConfig.getAdminRootPath());
         
-//        FilterRegistration.Dynamic ajaxRedirectResponseFilter = container.addFilter(EulerFilters.AJAX_REDIRECT_RESPONSE_FILTER, new AjaxRedirectResponseFilter());
-//
-//        ajaxRedirectResponseFilter.addMappingForServletNames(
-//                null, 
-//                false, 
-//                EulerServlets.WEB_AJAX_SERVLET, 
-//                EulerServlets.WEB_ADMIN_AJAX_SERVLET);
+        DelegatingFilterProxy corsFilterProxy = new DelegatingFilterProxy();
+        corsFilterProxy.setTargetBeanName("corsFilter");;
+        corsFilterProxy.setTargetFilterLifecycle(true);
+        FilterRegistration.Dynamic corsFilter = container.addFilter(EulerFilters.CORS_FILTER, corsFilterProxy);
+        corsFilter.addMappingForUrlPatterns(
+                null, 
+                false, 
+                "/ajax/*", 
+                WebConfig.getAdminRootPath() + "/ajax/*",
+                WebConfig.getApiRootPath() + "/*");
     }
 }

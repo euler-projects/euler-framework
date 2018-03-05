@@ -38,7 +38,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -80,17 +79,6 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.E_TAG_FILTER, new ShallowEtagHeaderFilter());
         webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
-
-        DelegatingFilterProxy corsFilterProxy = new DelegatingFilterProxy();
-        corsFilterProxy.setTargetBeanName("corsFilter");;
-        corsFilterProxy.setTargetFilterLifecycle(true);
-        FilterRegistration.Dynamic corsFilter = container.addFilter(EulerFilters.CORS_FILTER, corsFilterProxy);
-        corsFilter.addMappingForServletNames(
-                null, 
-                false, 
-                EulerServlets.API_SERVLET, 
-                EulerServlets.WEB_AJAX_SERVLET, 
-                EulerServlets.WEB_ADMIN_AJAX_SERVLET);
         
         this.initSpringMVCDispatcher(
                 container, 

@@ -28,8 +28,7 @@
     <beans:bean id="authenticationEntryPoint"  
         class="net.eulerframework.web.module.authentication.extend.EulerLoginUrlAuthenticationEntryPoint">  
         <beans:constructor-arg value="${security.loginPage}" />  
-        <beans:constructor-arg ref="objectMapper" />  
-        <beans:constructor-arg ref="corsFilter" />
+        <beans:constructor-arg ref="objectMapper" />
     </beans:bean> 
     
     <beans:bean id="formLoginFilter" class="net.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  

@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.web.filter.CorsFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,16 +50,13 @@ import net.eulerframework.web.core.base.response.RedirectResponse;
 public class EulerLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
 
     private ObjectMapper objectMapper;
-    private CorsFilter corsFilter;
 
     /**
      * @param loginFormUrl
      */
-    public EulerLoginUrlAuthenticationEntryPoint(String loginFormUrl, ObjectMapper objectMapper,
-            CorsFilter corsFilter) {
+    public EulerLoginUrlAuthenticationEntryPoint(String loginFormUrl, ObjectMapper objectMapper) {
         super(loginFormUrl);
         this.objectMapper = objectMapper;
-        this.corsFilter = corsFilter;
     }
 
     @Override
@@ -68,15 +64,11 @@ public class EulerLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticatio
             AuthenticationException authException) throws IOException, ServletException {
 
         if (this.isAjaxRequest(request)) {
+            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-            this.corsFilter.doFilter(request, response, (q, p) -> {
-                HttpServletResponse httpServletRequest = (HttpServletResponse) p;
-                httpServletRequest.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-                httpServletRequest.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-                httpServletRequest.getOutputStream().print(this.objectMapper.writeValueAsString(
-                        new RedirectResponse(this.buildRedirectUrlToLoginPage(request, response, authException))));
-            });
+            response.getOutputStream().print(this.objectMapper.writeValueAsString(
+                    new RedirectResponse(this.buildRedirectUrlToLoginPage(request, response, authException))));
 
         } else {
             super.commence(request, response, authException);
