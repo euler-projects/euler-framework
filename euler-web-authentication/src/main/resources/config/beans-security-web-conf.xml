@@ -46,8 +46,12 @@
         <beans:constructor-arg  value="POST" />
     </beans:bean>
     
-    <beans:bean id="authenticationSuccessHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler"> 
+    <!-- <beans:bean id="authenticationSuccessHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler"> 
         <beans:property name="defaultTargetUrl" value="${security.login.defaultTargetUrl}"/> 
+    </beans:bean> -->
+    <beans:bean id="authenticationSuccessHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler"> 
+        <beans:property name="defaultTargetUrl" value="${security.login.defaultTargetUrl}"/> 
+        <beans:property name="targetUrlParameter" value="redirectUrl"/> 
     </beans:bean>
     
     <beans:bean id="authenticationFailureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">

@@ -49,7 +49,7 @@ public abstract class SecurityConfig {
         // private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         // private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
-        private static final boolean SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED = true;
+        private static final boolean SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED = false;
         private static final long SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE = 10_000L;
 
         private static final boolean SECURITY_SIGNUP_ENABLED = true;
