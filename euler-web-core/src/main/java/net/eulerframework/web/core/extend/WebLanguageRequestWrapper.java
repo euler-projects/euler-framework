@@ -148,7 +148,6 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
     private Locale getLocaleFromPath(HttpServletRequest request) {
         if(this.isStaticPageRequest(request)) {
             String path = request.getRequestURI().substring(this.staticRequestPrefix.length());
-            System.out.println(path);
             if(path.indexOf("/") > 0) {
                 String localeStr = path.substring(0, path.indexOf("/"));
                 return this.returnLocaleFromLocaleString(localeStr);
