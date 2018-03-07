@@ -2,11 +2,8 @@ package net.eulerframework.web.core.base.dao.impl.hibernate5;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 import net.eulerframework.common.util.JavaObjectUtils;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.Assert;
-import net.eulerframework.common.util.DateUtils;
 import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.base.dao.IBaseDao;
 import net.eulerframework.web.core.base.entity.BaseEmbeddable;
@@ -493,21 +489,21 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
         case EXACT:
             return RestrictionsX.like(property, value, MatchMode.EXACT);
         case GE:
-            return Restrictions.ge(property, this.analyzeValue(value, field.getType()));
+            return Restrictions.ge(property, JavaObjectUtils.analyzeStringValueToObject(value, field.getType()));
         case GT:
-            return Restrictions.gt(property, this.analyzeValue(value, field.getType()));
+            return Restrictions.gt(property, JavaObjectUtils.analyzeStringValueToObject(value, field.getType()));
         case LE:
-            return Restrictions.le(property, this.analyzeValue(value, field.getType()));
+            return Restrictions.le(property, JavaObjectUtils.analyzeStringValueToObject(value, field.getType()));
         case LT:
-            return Restrictions.lt(property, this.analyzeValue(value, field.getType()));
+            return Restrictions.lt(property, JavaObjectUtils.analyzeStringValueToObject(value, field.getType()));
         case IN:
             return Restrictions.in(property, this.analyzeInterval(value, field.getType()));
         case NOTIN:
             return Restrictions.not(RestrictionsX.in(property, this.analyzeInterval(value, field.getType())));
         case IS:
-            return Restrictions.eq(property, this.analyzeValue(value, field.getType()));
+            return Restrictions.eq(property, JavaObjectUtils.analyzeStringValueToObject(value, field.getType()));
         case NOT:
-            return Restrictions.ne(property, this.analyzeValue(value, field.getType()));
+            return Restrictions.ne(property, JavaObjectUtils.analyzeStringValueToObject(value, field.getType()));
         case BETWEEN:
             Object[] array1 = this.analyzeInterval(value, field.getType());
             return Restrictions.between(property, array1[0], array1[1]);
@@ -525,50 +521,8 @@ public abstract class BaseDao<T extends BaseEntity<?, ?>> extends LogSupport imp
         Object[] result = new Object[valueArray.length];
         
         for(int i = 0; i < valueArray.length; i++) {
-            result[i] = this.analyzeValue(valueArray[i], clazz);
+            result[i] = JavaObjectUtils.analyzeStringValueToObject(valueArray[i], clazz);
         }
         return result;
-    }
-
-    private Object analyzeValue(String value, Class<?> clazz) {
-        if(String.class.equals(clazz)) {
-            return value;
-        } else if(Integer.class.equals(clazz) || "int".equals(clazz.toString())) {
-            return Integer.parseInt(value);
-        } else if(Long.class.equals(clazz) || "long".equals(clazz.toString())) {
-            return Long.parseLong(value);
-        } else if(Short.class.equals(clazz) || "short".equals(clazz.toString())) {
-            return Short.parseShort(value);
-        } else if(Float.class.equals(clazz) || "float".equals(clazz.toString())) {
-            return Float.parseFloat(value);
-        } else if(Double.class.equals(clazz) || "double".equals(clazz.toString())) {
-            return Double.parseDouble(value);
-        } else if(Boolean.class.equals(clazz) || "boolean".equals(clazz.toString())) {
-            return Boolean.parseBoolean(value);
-        } else if(Character.class.equals(clazz) || "char".equals(clazz.toString())) {
-            if(value.length() > 0)
-                this.logger.warn("Query property type is Character, only use the first char of value");
-            
-            return value.toCharArray()[0];
-        } else if(Date.class.equals(clazz)) {
-            Date ret = null;
-            try {
-                ret = new Date(Long.parseLong(value));
-            } catch (NumberFormatException e) {
-                try {
-                    ret = DateUtils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                } catch (ParseException e1) {
-                    throw new IllegalArgumentException("Date property value '" + value + "' format doesn't match timesamp(3) or \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"");
-
-                }
-            }
-            return ret;
-        } else if(BigDecimal.class.equals(clazz)) {
-            return new BigDecimal(value);
-        } else if(clazz.isEnum()) {
-            return Enum.valueOf((Class<? extends Enum>) clazz, value);
-        }
-        
-        throw new IllegalArgumentException("Unsupport query property type: " + clazz);
     }
 }
