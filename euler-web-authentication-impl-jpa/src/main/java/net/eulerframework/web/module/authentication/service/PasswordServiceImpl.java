@@ -54,11 +54,18 @@ import net.eulerframework.web.util.ServletUtils;
  */
 @Service("passwordService")
 public class PasswordServiceImpl implements PasswordService {
-    
-    @Resource private PasswordEncoder passwordEncoder;
-    @Resource private EulerUserEntityService eulerUserEntityService;
-    @Resource private JwtEncryptor jwtEncryptor;
-    
+
+    @Resource
+    private PasswordEncoder passwordEncoder;
+    @Resource
+    private EulerUserEntityService eulerUserEntityService;
+    @Resource
+    private JwtEncryptor jwtEncryptor;
+    @Resource
+    private String resetPasswordEmailSubject;
+    @Resource
+    private String resetPasswordEmailContent;
+
     @Autowired(required = false)
     private ThreadSimpleMailSender threadSimpleMailSender;
 
@@ -86,18 +93,15 @@ public class PasswordServiceImpl implements PasswordService {
             CommonUtils.sleep(1);
             return;
         }
-        
+
         UserResetJwtClaims claims = new UserResetJwtClaims(user, 30 * 60);
         Jwt jwt = this.jwtEncryptor.encode(claims);
         String token = jwt.getEncoded();
-        String resetPasswordUrl = 
-                WebConfig.getWebUrl() 
-                + ServletUtils.getRequest().getContextPath() 
-                + "/reset-password?type=EMAIL&token="
-                + token;
-        String content = "<p>You can use the following link to reset your password in 10 minutes:</p><p><a href=\"" + resetPasswordUrl + "\">" + resetPasswordUrl + "</a></p>";
-        if(this.threadSimpleMailSender != null) {
-            this.threadSimpleMailSender.send("Reset Passwowrd", content, email);
+        String resetPasswordUrl = WebConfig.getWebUrl() + ServletUtils.getRequest().getContextPath()
+                + "/reset-password?type=EMAIL&token=" + token;
+        String content = this.resetPasswordEmailContent.replaceAll("\\$\\{resetPasswordUrl\\}", resetPasswordUrl);
+        if (this.threadSimpleMailSender != null) {
+            this.threadSimpleMailSender.send(this.resetPasswordEmailSubject, content, email);
         } else {
             System.out.println(content);
         }
