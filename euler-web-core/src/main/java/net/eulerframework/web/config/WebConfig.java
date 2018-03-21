@@ -1,5 +1,7 @@
 package net.eulerframework.web.config;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -56,13 +58,15 @@ public abstract class WebConfig {
         private static final String WEB_ASSETS_PATH = "web.asstesPath";
         private static final String WEB_DEFAULT_LANGUAGE = "web.defaultLanguage";
         private static final String WEB_SUPPORT_LANGUAGES = "web.supportLanguages";
-        private static final String WEB_PATH_LANGUAGE_CONTROL_ENABLED = "web.pathLanguageControlEnabled";
 
         private static final String WEB_MULITPART = "web.multipart";
         private static final String WEB_MULITPART_LOCATION = "web.multiPart.location";
         private static final String WEB_MULITPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
         private static final String WEB_MULITPART_MAX_REQUEST_SIZE = "web.multiPart.maxRequestSize";
         private static final String WEB_MULITPART_FILE_SIZE_THRESHOLD = "web.multiPart.fileSizeThreshold";
+        
+        // [mail]
+        private static final String MAIL_SMTP = "mail.smtp";
     }
 
     private static class WebConfigDefault {
@@ -95,17 +99,19 @@ public abstract class WebConfig {
         private static final String WEB_ASSETS_PATH = "/assets";
         private static final Locale WEB_DEFAULT_LANGUAGE = Locale.CHINA;
         private static final Locale[] WEB_SUPPORT_LANGUAGES = new Locale[] {Locale.CHINA, Locale.US};
-        private static final boolean WEB_PATH_LANGUAGE_CONTROL_ENABLED = false;
 
         private static final String WEB_MULITPART_LOCATION = null;
         private static final long WEB_MULITPART_MAX_FILE_SIZE = 51_200L;
         private static final long WEB_MULITPART_MAX_REQUEST_SIZE = 51_200L;
         private static final int WEB_MULITPART_FILE_SIZE_THRESHOLD = 1_024;
     }
-
-    public static boolean clearWebConfigCache() {
-        properties.refresh();
-        return CONFIG_CAHCE.clear();
+    
+    static {
+        try {
+            properties.getPropertySource().loadProperties("file:" + getConfigPath());
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static int getI18nRefreshFreq() {
@@ -588,15 +594,6 @@ public abstract class WebConfig {
     }
 
     /**
-     * 判断路径语言控制是否启用
-     * @return <code>true</code> 路径语言控制已启用 <code>false</code> 路径语言控制已禁用 
-     * @deprecated
-     */
-    public static boolean isPathLocaleControlEnabled() {
-        return (boolean) CONFIG_CAHCE.get(WebConfigKey.WEB_PATH_LANGUAGE_CONTROL_ENABLED, key -> properties.getBooleanValue(key, WebConfigDefault.WEB_PATH_LANGUAGE_CONTROL_ENABLED));
-    }
-
-    /**
      * 获取外部配置文件路径
      * @return
      */
@@ -606,6 +603,16 @@ public abstract class WebConfig {
     
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().indexOf("windows") > -1;
+    }
+    
+    public static String getSmtp() {
+        return (String) CONFIG_CAHCE.get(WebConfigKey.MAIL_SMTP, key -> {
+            try {
+                return properties.get(key);
+            } catch (PropertyNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 }
