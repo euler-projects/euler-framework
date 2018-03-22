@@ -1,7 +1,5 @@
 package net.eulerframework.web.config;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -107,11 +105,7 @@ public abstract class WebConfig {
     }
     
     static {
-        try {
-            properties.getPropertySource().loadProperties("file:" + getConfigPath());
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        properties.addConfigFile("file:" + getConfigPath());
     }
 
     public static int getI18nRefreshFreq() {
