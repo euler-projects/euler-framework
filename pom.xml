@@ -20,10 +20,10 @@
     <modules>
         <module>euler-web-core</module>
         <module>euler-web-orm-jpa</module>
-        <module>euler-web-orm-mybatis</module>
+        <!-- <module>euler-web-orm-mybatis</module> -->
         <module>euler-web-authentication</module>
         <module>euler-web-authentication-impl-jpa</module>
-        <module>euler-web-basic</module>
+        <!-- <module>euler-web-basic</module> -->
         <module>euler-web-file</module>
     </modules>
 
@@ -31,7 +31,7 @@
         <jdk.version>1.8</jdk.version>
 
         <euler-cache.version>0.0.6</euler-cache.version>
-        <euler-common.version>0.1.0-SNAPSHOT</euler-common.version>
+        <euler-common.version>1.0.0-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.10</commons-codec.version>
 
