@@ -1,10 +1,11 @@
-package net.eulerframework.web.module.file.htservice;
+package net.eulerframework.web.module.file.service;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +23,9 @@ import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.web.core.base.service.impl.BaseService;
 import net.eulerframework.web.module.file.conf.FileConfig;
-import net.eulerframework.web.module.file.dao.IArchivedFileDao;
 import net.eulerframework.web.module.file.entity.ArchivedFile;
 import net.eulerframework.web.module.file.exception.FileArchiveException;
+import net.eulerframework.web.module.file.repository.ArchivedFileRepository;
 import net.eulerframework.web.module.file.util.WebFileTool;
 import net.eulerframework.web.util.ServletUtils;
 
@@ -32,7 +33,7 @@ import net.eulerframework.web.util.ServletUtils;
 public class ArchivedFileService extends BaseService {
 
     @Resource
-    private IArchivedFileDao archivedFileDao;
+    private ArchivedFileRepository archivedFileRepository;
 
     private ArchivedFile saveFileInfo(String originalFilename, String archivedPathSuffix, File archivedFile)
             throws IOException {
@@ -56,7 +57,7 @@ public class ArchivedFileService extends BaseService {
         else
             af.setUploadedUserId("anonymousUser");
 
-        this.archivedFileDao.save(af);
+        this.archivedFileRepository.save(af);
 
         return af;
     }
@@ -114,18 +115,20 @@ public class ArchivedFileService extends BaseService {
     public ArchivedFile findArchivedFile(String archivedFileId) {
         Assert.isFalse(StringUtils.isNull(archivedFileId), "archivedFileId is null");
 
-        return this.archivedFileDao.load(archivedFileId);
+        return this.archivedFileRepository.findArchivedFileById(archivedFileId);
     }
 
     public void deleteArchivedFile(String... archivedFileId) {
         Assert.notNull(archivedFileId);
 
-        List<ArchivedFile> archivedFile = this.archivedFileDao.load(archivedFileId);
+        List<ArchivedFile> archivedFile = this.archivedFileRepository.findAllById(Arrays.asList(archivedFileId));
 
         if (archivedFile == null)
             return;
 
-        this.archivedFileDao.deleteByIds(archivedFileId);
+        for(String each : archivedFileId) {
+            this.archivedFileRepository.deleteById(each);
+        }
 
         for (ArchivedFile each : archivedFile) {
             File file = WebFileTool.getArchivedFile(each);
