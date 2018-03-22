@@ -33,12 +33,12 @@ import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import net.eulerframework.common.email.ThreadSimpleMailSender;
 import net.eulerframework.common.util.CommonUtils;
 import net.eulerframework.common.util.jwt.InvalidJwtException;
+import net.eulerframework.common.util.jwt.Jwt;
 import net.eulerframework.common.util.jwt.JwtEncryptor;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
