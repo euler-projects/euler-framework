@@ -18,6 +18,8 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     
     private final static String QUERY_PREFIX = "query.";
     private static final String MODE_PREFIX = "mode.";
+    private final static String FILTER_PREFIX = "filter.";
+    
     private static final String SORT_PARAM_NAME = "sort";
     private static final String ORDER_PARAM_NAME = "order";
     private static final String SPLIT = ",";
@@ -33,6 +35,8 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     
     private Map<String, String> queryMap = new HashMap<>();
     
+    private Map<String, String> filterMap = new HashMap<>();
+    
     /**
      * 默认解析query.开头的参数
      * @param request
@@ -42,6 +46,8 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         this.useOr = Boolean.parseBoolean(request.getParameter(OR_QUERY_NAME));
         
         this.queryMap = this.extractParams(request, QUERY_PREFIX);
+
+        this.filterMap = this.extractParams(request, FILTER_PREFIX);
         
         this.modeMap = this.extractParams(request, MODE_PREFIX, new ParamExtractor<QueryMode>() {
 
@@ -179,6 +185,10 @@ public class QueryRequest extends LogSupport implements BaseRequest {
 
     public Map<String, String> getQueryMap() {
         return this.queryMap;
+    }
+    
+    public String getFilterValue(String key){
+        return this.filterMap.get(key);
     }
 
     public LinkedHashMap<String, OrderMode> getSortMap() {
