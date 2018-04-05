@@ -1,6 +1,5 @@
 package net.eulerframework.web.module.basic.entity;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -23,7 +22,7 @@ import net.eulerframework.web.core.base.entity.NonIDEntity;
  */
 @Entity
 @Table(name = "SYS_DICT_CODE")
-public class DictionaryCode extends NonIDEntity<DictionaryCode> {
+public class DictionaryCode extends NonIDEntity<DictionaryCode, String> {
 
     @Id
     @Column(name = "CODE")
@@ -41,8 +40,8 @@ public class DictionaryCode extends NonIDEntity<DictionaryCode> {
     }
     
     @Override
-    public void setSerializableId(Serializable id) {
-        this.setCode((String) id);
+    public void setId(String id) {
+        this.setCode(id);
     }
     
     @Override

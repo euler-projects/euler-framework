@@ -5,7 +5,7 @@ import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.web.module.basic.entity.Config;
 import net.eulerframework.web.module.basic.exception.ConfigNotFoundException;
-import net.eulerframework.web.module.basic.service.ConfigService;
+import net.eulerframework.web.module.basic.htservice.ConfigService;
 
 public class DBConfigContext {
     
@@ -15,6 +15,10 @@ public class DBConfigContext {
 
     public static void setConfigService(ConfigService configService) {
         DBConfigContext.configService = configService;
+    }
+    
+    public static void clear() {
+        while(!CONF_CACHE.clear());
     }
 
     public static String getConfig(String key) throws ConfigNotFoundException {

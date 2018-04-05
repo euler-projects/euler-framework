@@ -1,5 +1,7 @@
 package net.eulerframework.web.module.basic.entity;
 
+import java.util.Locale;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -10,9 +12,9 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
 @Table(name = "SYS_DICT", uniqueConstraints = {
-        @UniqueConstraint(columnNames={"CODE", "DICT_KEY"}),
+        @UniqueConstraint(columnNames={"CODE", "DICT_KEY", "LOCALE"}),
         @UniqueConstraint(columnNames={"CODE", "DICT_VALUE"}),
-        @UniqueConstraint(columnNames={"CODE", "SHOW_ORDER"})})
+        @UniqueConstraint(columnNames={"CODE", "SHOW_ORDER", "LOCALE"})})
 public class Dictionary extends UUIDEntity<Dictionary> {
 
     @Column(name = "CODE", nullable = false)
@@ -21,9 +23,9 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     @Column(name = "DICT_KEY", nullable = false)
     private String key;
     @Column(name = "DICT_VALUE")
-    private String value;  
-    @Column(name = "DICT_VALUE_ENUS")
-    private String valueEnUs;   
+    private String value;
+    @Column(name = "LOCALE", nullable = false)
+    private Locale locale;
     @Column(name = "SHOW_ORDER", nullable = false)
     private Integer showOrder;
     public String getCode() {
@@ -44,17 +46,17 @@ public class Dictionary extends UUIDEntity<Dictionary> {
     public void setValue(String value) {
         this.value = value;
     }
-    public String getValueEnUs() {
-        return valueEnUs;
-    }
-    public void setValueEnUs(String valueEnUs) {
-        this.valueEnUs = valueEnUs;
-    }
     public Integer getShowOrder() {
         return showOrder;
     }
     public void setShowOrder(Integer showOrder) {
         this.showOrder = showOrder;
+    }
+    public Locale getLocale() {
+        return locale;
+    }
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
     
 }

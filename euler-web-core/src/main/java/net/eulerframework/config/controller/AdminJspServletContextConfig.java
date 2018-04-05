@@ -22,20 +22,20 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = { "**.web.**.controller.admin" }, 
         useDefaultFilters = false, 
-        includeFilters = @ComponentScan.Filter(WebController.class),
+        includeFilters = @ComponentScan.Filter(JspController.class),
         excludeFilters = @ComponentScan.Filter(
                 type=FilterType.ASPECTJ, 
                 pattern={
@@ -43,8 +43,7 @@ import net.eulerframework.web.core.annotation.WebController;
                         })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class AdminJspServletContextConfig
-        extends WebMvcConfigurerAdapter {
+public class AdminJspServletContextConfig implements WebMvcConfigurer  {
     
     @Bean
     public ViewResolver viewResolver() {
@@ -63,11 +62,6 @@ public class AdminJspServletContextConfig
     public Validator getValidator() {
         return this.validator;
     }
-    
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseSuffixPatternMatch(false);
-    }
 
     @Resource(name = "objectMapper")
     ObjectMapper objectMapper;
@@ -82,6 +76,11 @@ public class AdminJspServletContextConfig
         jsonConverter.setObjectMapper(this.objectMapper);
         converters.add(jsonConverter);
 
+    }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
     }
 
     @Override

@@ -18,8 +18,8 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     
     private final static String QUERY_PREFIX = "query.";
     private static final String MODE_PREFIX = "mode.";
-    private final static String F_QUERY_PREFIX = "fquery.";
-    private static final String F_MODE_PREFIX = "fmode.";
+    private final static String FILTER_PREFIX = "filter.";
+    
     private static final String SORT_PARAM_NAME = "sort";
     private static final String ORDER_PARAM_NAME = "order";
     private static final String SPLIT = ",";
@@ -30,12 +30,12 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     private boolean caseSensitive;
     private boolean useOr;
     
+    private Map<String, QueryMode> modeMap = new HashMap<>();
     private LinkedHashMap<String, OrderMode> sortMap = new LinkedHashMap<>();
     
     private Map<String, String> queryMap = new HashMap<>();
-    private Map<String, QueryMode> modeMap = new HashMap<>();
-    private Map<String, String> fqueryMap = new HashMap<>();
-    private Map<String, QueryMode> fmodeMap = new HashMap<>();
+    
+    private Map<String, String> filterMap = new HashMap<>();
     
     /**
      * 默认解析query.开头的参数
@@ -46,34 +46,10 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         this.useOr = Boolean.parseBoolean(request.getParameter(OR_QUERY_NAME));
         
         this.queryMap = this.extractParams(request, QUERY_PREFIX);
+
+        this.filterMap = this.extractParams(request, FILTER_PREFIX);
         
         this.modeMap = this.extractParams(request, MODE_PREFIX, new ParamExtractor<QueryMode>() {
-
-            @Override
-            public QueryMode extract(String value) {
-                switch(value) {
-                case "is" : return QueryMode.IS;
-                case "not" : return QueryMode.NOT;
-                case "lt" : return QueryMode.LT;
-                case "le" : return QueryMode.LE;
-                case "gt" : return QueryMode.GT;
-                case "ge" : return QueryMode.GE;
-                case "in" : return QueryMode.IN;
-                case "notin" : return QueryMode.NOTIN;
-                case "between" : return QueryMode.BETWEEN;
-                case "outside" : return QueryMode.OUTSIDE;
-                case "exact" : return QueryMode.EXACT;
-                case "anywhere" : return QueryMode.ANYWHERE;
-                case "start" : return QueryMode.START;
-                case "end" : return QueryMode.END;
-                default:throw new IllegalArgumentException("unkonwn query mode "+ value);               
-                }
-            }
-        });
-        
-        this.fqueryMap = this.extractParams(request, F_QUERY_PREFIX);
-        
-        this.fmodeMap = this.extractParams(request, F_MODE_PREFIX, new ParamExtractor<QueryMode>() {
 
             @Override
             public QueryMode extract(String value) {
@@ -100,19 +76,6 @@ public class QueryRequest extends LogSupport implements BaseRequest {
         this.sortMap = this.extractOrderMode(request);
     }
     
-    public String getFQueryValue(String key){
-        return this.fqueryMap.get(key);
-    }
-
-    public QueryMode getFQueryMode(String property) {
-        QueryMode ret = this.fmodeMap.get(property);
-        
-        if(ret == null)
-            return QueryMode.IS;
-        
-        return ret;
-    }
-    
     public String getQueryValue(String key){
         return this.queryMap.get(key);
     }
@@ -136,11 +99,6 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     
     public boolean useOr() {
         return this.useOr;
-    }
-    
-
-    public void setUseOr(boolean userOr) {
-        this.useOr = userOr;
     }
     
     private LinkedHashMap<String, OrderMode> extractOrderMode(HttpServletRequest request) {
@@ -228,9 +186,9 @@ public class QueryRequest extends LogSupport implements BaseRequest {
     public Map<String, String> getQueryMap() {
         return this.queryMap;
     }
-
-    public Map<String, String> getFQueryMap() {
-        return this.fqueryMap;
+    
+    public String getFilterValue(String key){
+        return this.filterMap.get(key);
     }
 
     public LinkedHashMap<String, OrderMode> getSortMap() {
@@ -239,10 +197,6 @@ public class QueryRequest extends LogSupport implements BaseRequest {
 
     public Map<String, QueryMode> getModeMap() {
         return modeMap;
-    }
-
-    public Map<String, QueryMode> getFModeMap() {
-        return fmodeMap;
     }
 
 }

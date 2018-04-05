@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>euler-framework</artifactId>
+        <groupId>net.eulerframework</groupId>
+        <version>1.0.0.M1</version>
+    </parent>
+    <artifactId>euler-web-authentication-impl-jpa</artifactId>
+    <name>Euler Web Authentication Implement</name>
+    <url>https://eulerproject.io/euler-framework</url>
+    <description>An Implement of Euler Web Authentication Use Spring Data JPA.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-web-authentication</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-web-orm-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.eulerframework</groupId>
+            <artifactId>euler-common-jwt</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -45,14 +45,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.constant.EulerSysAttributes;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
 
 /**
  * @author cFrost
  *
  */
-@WebController
+@JspController
 @RequestMapping("dynamic-assets")
 public class DynamicAssets extends JspSupportWebController {
     

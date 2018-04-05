@@ -1,48 +1,62 @@
 package net.eulerframework.web.core.exception.web;
 
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.i18n.Tag;
 
-public abstract class WebException extends RuntimeException {
+public class WebException extends RuntimeException {
     
     private String error;
     private int code;
 
-
-    public WebException(String message) {
-        super(message);
-        this.error = "undefined";
-        this.code = -1;
+    public WebException() {
+        super();
+        this.generateErrorAndCode();
     }
     
-    public WebException(String error, int code) {
-        super();
-        this.error = error;
-        this.code = code;
-    }
-
-    public WebException(String message, String error, int code) {
+    public WebException(String message) {
         super(message);
-        this.error = error;
-        this.code = code;
+        this.generateErrorAndCode();
     }
 
-    public WebException(String error, int code, Throwable cause) {
+    public WebException(Throwable cause) {
         super(cause);
-        this.error = error;
-        this.code = code;
+        this.generateErrorAndCode();
     }
 
-    public WebException(String message, String error, int code, Throwable cause) {
+    public WebException(String message, Throwable cause) {
         super(message, cause);
-        this.error = error;
-        this.code = code;
+        this.generateErrorAndCode();
     }
 
-    protected WebException(String message, String error, int code, Throwable cause, boolean enableSuppression,
+    protected WebException(String message, Throwable cause, boolean enableSuppression,
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.error = error;
-        this.code = code;
+        this.generateErrorAndCode();
+    }
+    
+    public WebException(WebError webError) {
+        this.generateErrorAndCode(webError);
+    }
+
+    public WebException(String message, WebError webError) {
+        super(message);
+        this.generateErrorAndCode(webError);
+    }
+
+    public WebException(WebError webError, Throwable cause) {
+        super(cause);
+        this.generateErrorAndCode(webError);
+    }
+
+    public WebException(String message, WebError webError, Throwable cause) {
+        super(message, cause);
+        this.generateErrorAndCode(webError);
+    }
+
+    protected WebException(String message, WebError webError, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+        this.generateErrorAndCode(webError);
     }
 
     @Override
@@ -58,57 +72,19 @@ public abstract class WebException extends RuntimeException {
         return this.error;
     }
     
-    /**
-     * 系统预定义WEB异常代码
-     * 
-     * <p>所有系统预定义的错误代码范围为{@code 700000 ~ 799999}</p>
-     * <pre>
-     * 703000 ~ 703999 权限异常
-     * 704000 ~ 704999 请求参数异常
-     * 707000 ~ 707999 请求资源异常
-     * -1 未定义异常
-     * </pre>
-     * 
-     * @author cFrost
-     *
-     */
-    public enum WebError {
-        
-        ACCESS_DENIED(703001, "access_denied"),
-
-        ILLEGAL_ARGUMENT(704001, "illegal_argument"),
-        ILLEGAL_PARAMETER(704002, "illegal_parameter"),
-        PARAMETER_NOT_MEET_REQUIREMENT(704003, "parameter_not_meet_requirement"),
-        
-        RESOURCE_NOT_FOUND(707001, "resource_not_found"),
-        RESOURCE_EXISTS(707002, "resource_exists"),
-        RESOURCE_STATUS_LOCKED(707003, "resource_status_locked"),
-        
-        UNDEFINED_ERROR(-1, "undefined_error");
-        
-        private final int value;
-
-        private final String reasonPhrase;
-
-
-        private WebError(int value, String reasonPhrase) {
-            this.value = value;
-            this.reasonPhrase = reasonPhrase;
+    private void generateErrorAndCode() {
+        this.error = this.getClass().getSimpleName();
+        if(this.error.endsWith("RuntimeException")) {
+            this.error = this.error.substring(0, this.error.length() - "RuntimeException".length());
+        } else if(this.error.endsWith("Exception")) {
+            this.error = this.error.substring(0, this.error.length() - "Exception".length());
         }
-
-        /**
-         * Return the integer value of this web error code.
-         */
-        public int value() {
-            return this.value;
-        }
-
-        /**
-         * Return the reason phrase of this web error code.
-         */
-        public String getReasonPhrase() {
-            return reasonPhrase;
-        }
+        this.error = StringUtils.camelCaseToUnderLineCase(this.error);
+        this.code = this.error.hashCode();
     }
-
+    
+    private void generateErrorAndCode(WebError webError) {
+        this.error = webError.getReasonPhrase();
+        this.code = webError.value();
+    }
 }

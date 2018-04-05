@@ -34,7 +34,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -43,55 +42,44 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.constant.EulerSysAttributes;
-import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.constant.EulerFilters;
 import net.eulerframework.constant.EulerServlets;
+import net.eulerframework.constant.EulerSysAttributes;
+import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.filter.AdminPageRedirectFilter;
-import net.eulerframework.web.core.filter.CrosFilter;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
 public class EulerFrameworkBootstrap extends LogSupport implements WebApplicationInitializer {
 
-//    private static final String WEB_SECURITY_LOCAL = "web-security-local";
-//    private static final String WEB_SECURITY_LDAP = "web-security-ldap";
-//    private static final String WEB_SECURITY_CAS = "web-security-cas";
-//
-//    private static final String REST_SECURITY_OAUTH = "rest-security-oauth";
-//    private static final String REST_SECURITY_BASIC = "rest-security-basic";
-//    private static final String REST_SECURITY_WEB = "rest-security-web";
-//    private static final String REST_SECURITY_NONE = "rest-security-none";
-//
-//    private static final String OAUTH_AUTHORIZATION_SERVER = "oauth-authorization-server";
-//    private static final String OAUTH_RESOURCE_SERVER = "oauth-resource-server";
-
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         this.logger.info("Executing Euler-Framework bootstrap.");
-
-        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+        
+        /*
+         * 判断是否存在AbstractSecurityWebApplicationInitializer的实现类, 若不存在则在此处注册ContextLoaderListener
+         */
         try {
-            rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
+            Class.forName("net.eulerframework.web.module.authentication.boot.SecurityBootstrap");
         } catch (ClassNotFoundException e) {
-            rootContext.close();
-            throw new ServletException(e);
+            AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+            try {
+                rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
+            } catch (ClassNotFoundException e2) {
+                rootContext.close();
+                throw new ServletException(e2);
+            }
+
+            container.addListener(new ContextLoaderListener(rootContext));
         }
 
-        this.setConfigurableEnvironment(rootContext);
-
-        container.addListener(new ContextLoaderListener(rootContext));
-        // container.addListener(new RequestContextListener());
         container.addListener(new EulerFrameworkCoreListener());
         
         FilterRegistration.Dynamic webLanguageFilter = container.addFilter(EulerFilters.E_TAG_FILTER, new ShallowEtagHeaderFilter());
         webLanguageFilter.addMappingForServletNames(null, false, EulerServlets.WEB_SERVLET, EulerServlets.WEB_ADMIN_SERVLET);
-        FilterRegistration.Dynamic adminPageRedirectFilter = container.addFilter(EulerFilters.ADMIN_PAGE_REDIRECT_FILTER, new AdminPageRedirectFilter());
-        adminPageRedirectFilter.addMappingForUrlPatterns(null, false, WebConfig.getAdminRootPath());
-
+        
         this.initSpringMVCDispatcher(
                 container, 
                 EulerServlets.WEB_SERVLET, 
@@ -126,56 +114,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                     1, 
                     WebConfig.getApiConfigClassName(),
                     WebConfig.getApiRootPath() + "/*");
-            
-            FilterRegistration.Dynamic crosFilter = container.addFilter(EulerFilters.CROS_FILTER, new CrosFilter());
-            crosFilter.addMappingForServletNames(null, false, EulerServlets.API_SERVLET, EulerServlets.WEB_AJAX_SERVLET);
         }
-    }
-
-    private void setConfigurableEnvironment(AbstractApplicationContext rootContext) {
-//        ConfigurableEnvironment configurableEnvironment = rootContext.getEnvironment();
-//
-//        switch (WebConfig.getWebAuthenticationType()) {
-//        case LOCAL:
-//            configurableEnvironment.addActiveProfile(WEB_SECURITY_LOCAL);
-//            break;
-//        case LDAP:
-//            configurableEnvironment.addActiveProfile(WEB_SECURITY_LDAP);
-//            break;
-//        case CAS:
-//            configurableEnvironment.addActiveProfile(WEB_SECURITY_CAS);
-//            break;
-//        }
-//
-//        switch (WebConfig.getApiAuthenticationType()) {
-//        case OAUTH:
-//            configurableEnvironment.addActiveProfile(REST_SECURITY_OAUTH);
-//            break;
-//        case BASIC:
-//            configurableEnvironment.addActiveProfile(REST_SECURITY_BASIC);
-//            break;
-//        case WEB:
-//            configurableEnvironment.addActiveProfile(REST_SECURITY_WEB);
-//            break;
-//        case NONE:
-//            configurableEnvironment.addActiveProfile(REST_SECURITY_NONE);
-//            break;
-//        }
-//
-//        switch (WebConfig.getOAuthSeverType()) {
-//        case AUTHORIZATION_SERVER:
-//            configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);
-//            break;
-//        case RESOURCE_SERVER:
-//            configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
-//            break;
-//        case BOTH:
-//            configurableEnvironment.addActiveProfile(OAUTH_AUTHORIZATION_SERVER);
-//            configurableEnvironment.addActiveProfile(OAUTH_RESOURCE_SERVER);
-//            break;
-//        case NEITHER:
-//            break;
-//        }
     }
 
     private void initSpringMVCDispatcher(

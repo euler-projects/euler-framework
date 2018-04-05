@@ -5,17 +5,14 @@
     xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:tx="http://www.springframework.org/schema/tx"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/context/spring-context-4.3.xsd
            http://www.springframework.org/schema/aop
-           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
            http://www.springframework.org/schema/tx 
-           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+           http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
-    <bean id="archivedFileDao" class="net.eulerframework.web.module.file.dao.impl.ArchivedFileDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
     <bean id="configDao" class="net.eulerframework.web.module.basic.dao.ConfigDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>

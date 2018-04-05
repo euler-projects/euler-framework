@@ -4,11 +4,12 @@
     <parent>
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>0.3.9</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>euler-web-basic</artifactId>
     <name>Euler Web Basic</name>
     <url>https://eulerproject.io/euler-framework</url>
+    <description>Include some basic moduel such as file upload and download.</description>
 
     <dependencies>
         <dependency>
@@ -26,9 +27,10 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-           <groupId>net.coobird</groupId>
-           <artifactId>thumbnailator</artifactId>
-           <version>0.4.8</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-web-orm-jpa</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 </project>

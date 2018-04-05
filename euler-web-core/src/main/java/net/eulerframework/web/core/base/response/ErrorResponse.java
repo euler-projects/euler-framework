@@ -1,9 +1,8 @@
 package net.eulerframework.web.core.base.response;
 
 import net.eulerframework.common.base.log.LogSupport;
-import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.exception.web.SystemWebError;
 import net.eulerframework.web.core.exception.web.WebException;
-import net.eulerframework.web.core.exception.web.WebException.WebError;
 
 public class ErrorResponse extends LogSupport implements BaseResponse {
 
@@ -12,13 +11,13 @@ public class ErrorResponse extends LogSupport implements BaseResponse {
     private String error_description;
     
     public ErrorResponse() {
-        this.error = WebError.UNDEFINED_ERROR.getReasonPhrase();
-        this.error_code = WebError.UNDEFINED_ERROR.value();        
+        this.error = SystemWebError.UNDEFINED_ERROR.getReasonPhrase();
+        this.error_code = SystemWebError.UNDEFINED_ERROR.value();        
     }
 
     public ErrorResponse(WebException webException) {
-        if (WebConfig.isDebugMode()) {
-            this.logger.error("WebException throwed," + " error: " + webException.getError() + " code: " + webException.getCode() + " message: " + webException.getMessage(),
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("WebException throwed," + " error: " + webException.getError() + " code: " + webException.getCode() + " message: " + webException.getMessage(),
                     webException);
         }
 

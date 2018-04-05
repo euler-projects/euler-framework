@@ -7,11 +7,11 @@
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-parent</artifactId>
         <version>3</version>
-        <relativePath/>
+        <relativePath />
     </parent>
-    
+
     <artifactId>euler-framework</artifactId>
-    <version>0.3.9</version>
+    <version>1.0.0.M1</version>
     <packaging>pom</packaging>
     <name>Euler Framework Parent Pom</name>
     <url>https://eulerproject.io/euler-framework</url>
@@ -19,17 +19,20 @@
 
     <modules>
         <module>euler-web-core</module>
+        <module>euler-web-orm-jpa</module>
+        <!-- <module>euler-web-orm-mybatis</module> -->
         <module>euler-web-authentication</module>
-        <module>euler-web-basic</module>
-        <module>euler-web-authentication-impl-hibernate</module>
+        <module>euler-web-authentication-impl-jpa</module>
+        <!-- <module>euler-web-basic</module> -->
+        <module>euler-web-file</module>
     </modules>
 
     <properties>
-        <jdk.version>1.8</jdk.version>        
-        
+        <jdk.version>1.8</jdk.version>
+
         <euler-cache.version>0.0.6</euler-cache.version>
-        <euler-common.version>0.0.7</euler-common.version>
-        
+        <euler-common.version>1.0.0.M1</euler-common.version>
+
         <commons-codec.version>1.10</commons-codec.version>
 
         <jsp.version>2.2</jsp.version>
@@ -38,11 +41,11 @@
         <inject.version>1</inject.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <jta.version>1.1</jta.version>
-        <jaxb-api.version>2.2.12</jaxb-api.version>
-        <java-mail.version>1.5.5</java-mail.version>
 
-        <springframework.version>4.2.5.RELEASE</springframework.version>
-        <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
+        <hibernate.validator.version>5.2.5.Final</hibernate.validator.version>
+
+        <springframework.version>5.0.4.RELEASE</springframework.version>
+        <springsecurity.version>4.2.3.RELEASE</springsecurity.version>
         <springsecurity.oauth.version>2.0.9.RELEASE</springsecurity.oauth.version>
         <springsecurity.oauth.jwt.version>1.0.4.RELEASE</springsecurity.oauth.jwt.version>
 
@@ -50,20 +53,18 @@
         <jasig.version>3.2.2</jasig.version>
         <quartz.version>2.2.3</quartz.version>
 
-        <hibernate.version>5.0.5.Final</hibernate.version>
-        <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
+        <mybatis.version>3.4.5</mybatis.version>
+        <mybatis-spring.version>1.3.1</mybatis-spring.version>
+        <hibernate.version>5.2.13.Final</hibernate.version>
         <c3p0.version>0.9.5.2</c3p0.version>
 
-        <!-- <jersey.version>2.22.2</jersey.version> -->
+        <jackson.version>2.9.3</jackson.version>
 
-        <jackson.version>2.7.3</jackson.version>
-
-        <slf4j-api.version>1.7.21</slf4j-api.version>
         <log4j.version>1.2.17</log4j.version>
         <jboss.logging.version>3.3.0.Final</jboss.logging.version>
         <commons-logging.version>1.2</commons-logging.version>
 
-        <junit.version>3.8.1</junit.version>
+        <junit.version>4.8.2</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -107,16 +108,6 @@
                 <groupId>javax.transaction</groupId>
                 <artifactId>jta</artifactId>
                 <version>${jta.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>${jaxb-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>javax.mail-api</artifactId>
-                <version>${java-mail.version}</version>
             </dependency>
 
             <!-- Spring -->
@@ -220,6 +211,18 @@
                 <version>${springsecurity.oauth.jwt.version}</version>
             </dependency>
 
+            <!-- MyBatis ... -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
+
             <!-- Hibernate ... -->
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -228,37 +231,22 @@
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
             </dependency>
+
+            <!-- Data Source -->
             <dependency>
                 <groupId>com.mchange</groupId>
                 <artifactId>c3p0</artifactId>
                 <version>${c3p0.version}</version>
             </dependency>
-
-            <!-- Jersey bean-validator与Hibernate5冲突 -->
-            <!-- <dependency>
-                <groupId>org.glassfish.jersey.containers</groupId>
-                <artifactId>jersey-container-servlet</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.ext</groupId>
-                <artifactId>jersey-spring3</artifactId>
-                <version>${jersey.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>bean-validator</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-json-jackson</artifactId>
-                <version>${jersey.version}</version>
-            </dependency> -->
 
             <!-- Jackson -->
             <dependency>
@@ -282,20 +270,23 @@
                 <version>${jackson.version}</version>
             </dependency>
 
-            <!-- Too many loggers ... -->
+            <!-- Loggers -->
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>${jboss.logging.version}</version>
             </dependency>
-            
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>net.eulerframework</groupId>
                 <artifactId>euler-cache</artifactId>
@@ -316,6 +307,13 @@
                 <groupId>net.eulerframework</groupId>
                 <artifactId>euler-common-jwt</artifactId>
                 <version>${euler-common.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

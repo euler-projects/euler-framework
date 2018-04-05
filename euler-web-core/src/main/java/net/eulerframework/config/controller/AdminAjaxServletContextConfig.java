@@ -16,20 +16,22 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.eulerframework.web.core.annotation.AjaxWebController;
+
+import net.eulerframework.web.core.annotation.AjaxController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = {"**.web.**.controller.admin"},
         useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(AjaxWebController.class)
+        includeFilters = @ComponentScan.Filter(AjaxController.class)
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class AdminAjaxServletContextConfig extends WebMvcConfigurerAdapter {
+public class AdminAjaxServletContextConfig implements WebMvcConfigurer {
     
     @Resource(name="objectMapper") ObjectMapper objectMapper;
 
@@ -49,6 +51,11 @@ public class AdminAjaxServletContextConfig extends WebMvcConfigurerAdapter {
         converters.add(jsonConverter);
         
     }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
+    }
 
     @Override
     public void configureContentNegotiation(
@@ -58,7 +65,7 @@ public class AdminAjaxServletContextConfig extends WebMvcConfigurerAdapter {
         mediaTypes.put("json", MediaType.APPLICATION_JSON_UTF8);
         //mediaTypes.put("xml", MediaType.APPLICATION_XML);
         
-        configurer.favorPathExtension(true).favorParameter(true)
+        configurer.favorPathExtension(false).favorParameter(false)
                 .ignoreAcceptHeader(false)
                 .defaultContentType(MediaType.APPLICATION_JSON_UTF8)
                 .mediaTypes(mediaTypes);

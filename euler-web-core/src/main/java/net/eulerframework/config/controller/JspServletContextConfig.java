@@ -22,20 +22,21 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.WebController;
+import net.eulerframework.web.core.annotation.JspController;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(
         basePackages = { "**.web.**.controller" }, 
         useDefaultFilters = false, 
-        includeFilters = @ComponentScan.Filter(WebController.class),
+        includeFilters = @ComponentScan.Filter(JspController.class),
         excludeFilters = @ComponentScan.Filter(
                 type=FilterType.ASPECTJ, 
                 pattern={
@@ -45,7 +46,7 @@ import net.eulerframework.web.core.annotation.WebController;
                         })
 )
 @ImportResource({"classpath*:config/controller-security.xml"})
-public class JspServletContextConfig extends WebMvcConfigurerAdapter {
+public class JspServletContextConfig implements WebMvcConfigurer {
 
     @Bean
     public ViewResolver viewResolver() {
@@ -57,17 +58,13 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
         return resolver;
     }
     
+    
     @Resource
     private SpringValidatorAdapter validator;
     
     @Override
     public Validator getValidator() {
         return this.validator;
-    }
-    
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseSuffixPatternMatch(false);
     }
 
     @Resource(name = "objectMapper")
@@ -84,14 +81,28 @@ public class JspServletContextConfig extends WebMvcConfigurerAdapter {
         converters.add(jsonConverter);
 
     }
+    
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseSuffixPatternMatch(false);
+    }
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         Map<String, MediaType> mediaTypes = new HashMap<>();
-        ;
+        
         mediaTypes.put("json", MediaType.APPLICATION_JSON_UTF8);
 
         configurer.favorPathExtension(false).favorParameter(false).ignoreAcceptHeader(false)
                 .defaultContentType(MediaType.APPLICATION_JSON_UTF8).mediaTypes(mediaTypes);
+    }
+    
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(WebConfig.getAssetsPath() + "/**").addResourceLocations(WebConfig.getAssetsPath() + "/");
+        registry.addResourceHandler(WebConfig.getStaticPagesRootPath() + "/**").addResourceLocations(WebConfig.getStaticPagesRootPath() + "/");
+        registry.addResourceHandler("/ueditor/upload/**").addResourceLocations("/ueditor/upload/");
+        registry.addResourceHandler("/favicon.ico").addResourceLocations("/favicon.ico");
+        registry.addResourceHandler("/robot.txt").addResourceLocations("/robot.txt");
     }
 }

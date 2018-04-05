@@ -3,18 +3,18 @@ package net.eulerframework.web.core.exception.web;
 public class UndefinedWebException extends WebException {
     
     public UndefinedWebException() {
-        super(WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value());
+        super(SystemWebError.UNDEFINED_ERROR);
     }
     
     public UndefinedWebException(Throwable e) {
-        super(WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value(), e);
+        super(SystemWebError.UNDEFINED_ERROR, e);
     }
     
     public UndefinedWebException(String message) {
-        super(message, WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value());
+        super(message, SystemWebError.UNDEFINED_ERROR);
     }
     
     public UndefinedWebException(String message, Throwable e) {
-        super(message, WebError.UNDEFINED_ERROR.getReasonPhrase(), WebError.UNDEFINED_ERROR.value(), e);
+        super(message, SystemWebError.UNDEFINED_ERROR, e);
     }
 }

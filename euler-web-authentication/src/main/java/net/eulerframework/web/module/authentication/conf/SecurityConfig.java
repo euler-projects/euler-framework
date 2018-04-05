@@ -2,13 +2,12 @@ package net.eulerframework.web.module.authentication.conf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
+
 import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.property.PropertyReader;
 
-@Configuration
 public abstract class SecurityConfig {
     protected static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
@@ -32,6 +31,7 @@ public abstract class SecurityConfig {
         private static final String SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE = "security.authentication.userDetails.cacheLife";
 
         private static final String SECURITY_SIGNUP_ENABLED = "security.signup.enabled";
+        private static final String SECURITY_SIGNUP_ENABLE_CAPTCHA = "security.signup.enableCaptcha";
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
         private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "security.signup.mobile.format";
@@ -49,13 +49,14 @@ public abstract class SecurityConfig {
         // private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         // private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
-        private static final boolean SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED = true;
+        private static final boolean SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED = false;
         private static final long SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE = 10_000L;
 
         private static final boolean SECURITY_SIGNUP_ENABLED = true;
+        private static final boolean SECURITY_SIGNUP_ENABLE_CAPTCHA = true;
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; // 至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; // 可含有-_.的email
-        private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "^[0-9\\+][0-9\\-]+$"; //以数字或+开头，后续可含有数组或-
+        private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "^[0-9\\+][0-9\\-]+[0-9]$"; //以数字或+开头，后续可含有数字或-，以数字结束
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; // ASCII可显示非空白字符
         private static final int SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = 6;
         private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
@@ -246,6 +247,12 @@ public abstract class SecurityConfig {
         return (boolean)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_ENABLED, 
                 key -> properties.getBooleanValue(key,
                                 WebConfigDefault.SECURITY_SIGNUP_ENABLED));
+    }
+
+    public static boolean isSignUpEnableCaptcha() {
+        return (boolean)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_ENABLE_CAPTCHA, 
+                key -> properties.getBooleanValue(key,
+                                WebConfigDefault.SECURITY_SIGNUP_ENABLE_CAPTCHA));
     }
 
     public static boolean isEnableAutoAuthorizeAfterSignup() {
