@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0.M2-SNAPSHOT</version>
     </parent>
     <artifactId>euler-web-orm-jpa</artifactId>
     <name>Euler ORM JPA</name>
