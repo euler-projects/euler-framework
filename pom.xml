@@ -7,7 +7,6 @@
         <groupId>net.eulerframework</groupId>
         <artifactId>euler-parent</artifactId>
         <version>3</version>
-        <relativePath />
     </parent>
 
     <artifactId>euler-framework</artifactId>
