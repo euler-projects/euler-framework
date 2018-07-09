@@ -19,8 +19,8 @@ import net.eulerframework.web.core.base.entity.UUIDEntity;
 @Table(name="sys_group")
 public class Group extends UUIDEntity<Group> {
 
-    @Column(name="code", nullable = false, unique = true)
-    private String code;
+//    @Column(name="code", nullable = false, unique = true)
+//    private String code;
     @Column(name="name", nullable = false, unique = true)
     private String name;
     @ManyToMany(fetch = FetchType.EAGER)
@@ -34,12 +34,12 @@ public class Group extends UUIDEntity<Group> {
     @Column(name="description")
     private String description;
     
-    public String getCode() {
-        return code;
-    }
-    public void setCode(String code) {
-        this.code = code;
-    }
+//    public String getCode() {
+//        return code;
+//    }
+//    public void setCode(String code) {
+//        this.code = code;
+//    }
     public String getName() {
         return name;
     }
