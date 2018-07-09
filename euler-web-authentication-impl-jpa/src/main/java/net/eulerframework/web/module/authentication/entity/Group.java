@@ -16,20 +16,22 @@ import org.hibernate.annotations.FetchMode;
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
-@Table(name="SYS_GROUP")
+@Table(name="sys_group")
 public class Group extends UUIDEntity<Group> {
-    
-    public static final String SYSTEM_USERS_CROUP_NAME = "Users";
 
-    @Column(name="CODE", nullable = false, unique = true)
+    @Column(name="code", nullable = false, unique = true)
     private String code;
-    @Column(name="NAME", nullable = false, unique = true)
+    @Column(name="name", nullable = false, unique = true)
     private String name;
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(FetchMode.SELECT)
-    @JoinTable(name = "SYS_GROUP_AUTHORITY", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "AUTHORITY") })
+    @JoinTable(name = "sys_group_authority", joinColumns = {
+            @JoinColumn(name = "group_id")
+    }, inverseJoinColumns = {
+            @JoinColumn(name = "authority")
+    })
     private Set<Authority> authorities;
-    @Column(name="DESCRIPTION")
+    @Column(name="description")
     private String description;
     
     public String getCode() {

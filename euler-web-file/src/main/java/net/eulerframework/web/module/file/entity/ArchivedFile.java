@@ -11,24 +11,24 @@ import javax.persistence.Transient;
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
-@Table(name = "BASIC_UPLOADED_FILE")
+@Table(name = "basic_uploaded_file")
 public class ArchivedFile extends UUIDEntity<ArchivedFile> {
 
-    @Column(name = "ORIGINAL_FILENAME", nullable = false)
+    @Column(name = "original_filename", nullable = false)
     private String originalFilename;
-    @Column(name = "ARCHIVED_PATH_SUFFIX")
+    @Column(name = "archived_path_suffix")
     private String archivedPathSuffix;
-    @Column(name = "ARCHIVED_FILENAME", nullable = false, unique = true)
+    @Column(name = "archived_filename", nullable = false, unique = true)
     private String archivedFilename;
-    @Column(name = "EXTENSION")
+    @Column(name = "extension")
     private String extension;
-    @Column(name = "MD5", nullable = false)
+    @Column(name = "md5", nullable = false)
     private String md5;
-    @Column(name = "FILE_BYTE_SIZE", nullable = false)
+    @Column(name = "file_byte_size", nullable = false)
     private Long fileByteSize;
-    @Column(name = "UPLOADED_DATE", nullable = false)
+    @Column(name = "uploaded_date", nullable = false)
     private Date uploadedDate;
-    @Column(name = "UPLOADED_USER_ID", nullable = false)
+    @Column(name = "uploaded_user_id", nullable = false)
     private String uploadedUserId;
     
     @Transient

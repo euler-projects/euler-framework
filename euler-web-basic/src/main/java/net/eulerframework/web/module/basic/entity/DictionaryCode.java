@@ -21,16 +21,16 @@ import net.eulerframework.web.core.base.entity.NonIDEntity;
  *
  */
 @Entity
-@Table(name = "SYS_DICT_CODE")
+@Table(name = "sys_dict_code")
 public class DictionaryCode extends NonIDEntity<DictionaryCode, String> {
 
     @Id
-    @Column(name = "CODE")
+    @Column(name = "code")
     private String code;
-    @Column(name = "NAME", nullable = false, unique = true)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
     @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name="CODE")
+    @JoinColumn(name="code")
     @OrderBy(value="showOrder ASC")
     private List<Dictionary> dictionarys;
     

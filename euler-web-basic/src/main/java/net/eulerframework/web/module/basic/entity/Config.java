@@ -7,17 +7,17 @@ import javax.persistence.Table;
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 
 @Entity
-@Table(name = "SYS_CONF")
+@Table(name = "sys_conf")
 public class Config extends NonIDEntity<Config, String> {
 
     @Id
-    @Column(name = "CONF_KEY")
+    @Column(name = "conf_key")
     private String key;
-    @Column(name = "CONF_VALUE")
+    @Column(name = "conf_value")
     private String value;
-    @Column(name = "CONF_DESCRIPTION")
+    @Column(name = "conf_description")
     private String description;
-    @Column(name = "ENABLED", nullable = false)
+    @Column(name = "enabled", nullable = false)
     private Boolean enabled;
 
     public String getKey() {

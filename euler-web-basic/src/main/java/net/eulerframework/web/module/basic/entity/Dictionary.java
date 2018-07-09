@@ -11,22 +11,22 @@ import javax.validation.constraints.NotNull;
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
-@Table(name = "SYS_DICT", uniqueConstraints = {
-        @UniqueConstraint(columnNames={"CODE", "DICT_KEY", "LOCALE"}),
-        @UniqueConstraint(columnNames={"CODE", "DICT_VALUE"}),
-        @UniqueConstraint(columnNames={"CODE", "SHOW_ORDER", "LOCALE"})})
+@Table(name = "sys_dict", uniqueConstraints = {
+        @UniqueConstraint(columnNames={"code", "dict_key", "locale"}),
+        @UniqueConstraint(columnNames={"code", "dict_value"}),
+        @UniqueConstraint(columnNames={"code", "show_order", "locale"})})
 public class Dictionary extends UUIDEntity<Dictionary> {
 
-    @Column(name = "CODE", nullable = false)
+    @Column(name = "code", nullable = false)
     private String code;
     @NotNull
-    @Column(name = "DICT_KEY", nullable = false)
+    @Column(name = "dict_key", nullable = false)
     private String key;
-    @Column(name = "DICT_VALUE")
+    @Column(name = "dict_value")
     private String value;
-    @Column(name = "LOCALE", nullable = false)
+    @Column(name = "locale", nullable = false)
     private Locale locale;
-    @Column(name = "SHOW_ORDER", nullable = false)
+    @Column(name = "show_order", nullable = false)
     private Integer showOrder;
     public String getCode() {
         return code;

@@ -50,28 +50,28 @@ import org.springframework.util.CollectionUtils;
 import net.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
-@Table(name = "SYS_USER")
+@Table(name = "sys_user")
 public class User extends UUIDEntity<User> implements EulerUserEntity {
 
-    @Column(name = "USERNAME", nullable = false, unique = true)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
-    @Column(name = "EMAIL", unique = true)
+    @Column(name = "email", unique = true)
     private String email;
-    @Column(name = "MOBILE", unique = true)
+    @Column(name = "mobile", unique = true)
     private String mobile;
-    @Column(name = "PASSWORD", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "ENABLED", nullable = false)
+    @Column(name = "enabled", nullable = false)
     private Boolean enabled;
-    @Column(name = "ACCOUNT_NON_EXPIRED", nullable = false)
+    @Column(name = "account_non_expired", nullable = false)
     private Boolean accountNonExpired;
-    @Column(name = "ACCOUNT_NON_LOCKED", nullable = false)
+    @Column(name = "account_non_locked", nullable = false)
     private Boolean accountNonLocked;
-    @Column(name = "CREDENTIALS_NON_EXPIRED", nullable = false)
+    @Column(name = "credentials_non_expired", nullable = false)
     private Boolean credentialsNonExpired;
-    @Column(name = "ROOT")
+    @Column(name = "root")
     private Boolean root;
-    @Column(name = "REGIST_TIME")
+    @Column(name = "regist_time")
     private Date registTime;
     
     @Transient
@@ -79,7 +79,11 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(FetchMode.SELECT)
-    @JoinTable(name = "SYS_USER_GROUP", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "GROUP_ID") })
+    @JoinTable(name = "sys_user_group", joinColumns = {
+            @JoinColumn(name = "user_id")
+    }, inverseJoinColumns = {
+            @JoinColumn(name = "group_id")
+    })
     private Set<Group> groups;
 
     @Override

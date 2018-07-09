@@ -10,18 +10,18 @@ import javax.validation.constraints.Pattern;
 import net.eulerframework.web.core.base.entity.NonIDEntity;
 
 @Entity
-@Table(name = "SYS_AUTHORITY")
+@Table(name = "sys_authority")
 public class Authority extends NonIDEntity<Authority, String> implements EulerAuthorityEntity {
 
     @Id
     @NotNull
     @Pattern(regexp = "[A-Z][A-Z_]*", message = "{validation.authority.authority}")
-    @Column(name = "AUTHORITY")
+    @Column(name = "authority")
     private String authority;
     @NotNull
-    @Column(name = "NAME", nullable = false, unique = true)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
-    @Column(name = "DESCRIPTION")
+    @Column(name = "description")
     private String description;
 
     public String getName() {

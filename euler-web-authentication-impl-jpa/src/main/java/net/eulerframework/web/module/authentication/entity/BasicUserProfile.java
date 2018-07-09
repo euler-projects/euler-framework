@@ -48,75 +48,75 @@ import net.eulerframework.web.module.authentication.enums.NameOrder;
  *
  */
 @Entity
-@Table(name = "SYS_BASIC_USER_PROFILE")
+@Table(name = "sys_basic_user_profile")
 public class BasicUserProfile extends NonIDEntity<BasicUserProfile, String> implements EulerUserProfileEntity {
     
     /**
      * 用户ID
      */
     @Id
-    @Column(name = "USER_ID", length = 36)
+    @Column(name = "user_id", length = 36)
     private String userId;
     /**
      * 名字
      */
-    @Column(name = "GIVEN_NAME", length = 255, nullable = true)
+    @Column(name = "given_name", length = 255, nullable = true)
     private String givenName;
     /**
      * 姓氏
      */
-    @Column(name = "FAMILY_NAME", length = 255, nullable = true)
+    @Column(name = "fmaily_name", length = 255, nullable = true)
     private String familyName;
     /**
      * 性别
      */
-    @Column(name = "GENDER", length = 6, nullable = true)
+    @Column(name = "gender", length = 6, nullable = true)
     @Enumerated(EnumType.STRING)
     private Gender gender;
     /**
      * 国籍
      */
-    @Column(name = "NATIONALITY", length = 255, nullable = true)
+    @Column(name = "nationality", length = 255, nullable = true)
     private String nationality;
     /**
      * 州/省
      */
-    @Column(name = "PROVINCE", length = 255, nullable = true)
+    @Column(name = "province", length = 255, nullable = true)
     private String province;
     /**
      * 民族
      */
-    @Column(name = "ETHNICITY", length = 255, nullable = true)
+    @Column(name = "ethnicity", length = 255, nullable = true)
     private String ethnicity;
     /**
      * 国家/地区
      */
-    @Column(name = "COUNTRY_OR_REGION", length = 255, nullable = true)
+    @Column(name = "country_or_region", length = 255, nullable = true)
     private String countryOrRegion;
     /**
      * 城市
      */
-    @Column(name = "CITY", length = 255, nullable = true)
+    @Column(name = "city", length = 255, nullable = true)
     private String city;
     /**
      * 地址
      */
-    @Column(name = "ADDRESS", length = 2000, nullable = true)
+    @Column(name = "address", length = 2000, nullable = true)
     private String address;
     /**
      * 出生日期
      */
-    @Column(name = "DATE_OF_BIRTH", nullable = true)
+    @Column(name = "date_of_birth", nullable = true)
     private Date dateOfBirth;
     /**
      * 偏好语言
      */
-    @Column(name = "PREFERRED_LANG", length = 20, nullable = true)
+    @Column(name = "preferred_language", length = 20, nullable = true)
     private Locale preferredLanguage;
     /**
      * 姓名显示顺序
      */
-    @Column(name = "NAME_ORDER", length = 17, nullable = true)
+    @Column(name = "name_order", length = 17, nullable = true)
     @Enumerated(EnumType.STRING)
     private NameOrder nameOrder;
 
