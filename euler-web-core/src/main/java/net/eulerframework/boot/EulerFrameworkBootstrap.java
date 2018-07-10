@@ -53,17 +53,19 @@ import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)
 public class EulerFrameworkBootstrap extends LogSupport implements WebApplicationInitializer {
+    
+    /*
+     * Spring Security的启动类将此参数放入ServletContext，以标识Spring Security已启用，此处跳过ContextLoaderListener的初始化，
+     * 更好的办法：判断是否存在AbstractSecurityWebApplicationInitializer的实现类
+     */
+    public final static String EULER_SPRING_SECURITY_ENABLED = "__EULER_SPRING_SECURITY_ENABLED";
 
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         this.logger.info("Executing Euler-Framework bootstrap.");
         
-        /*
-         * 判断是否存在AbstractSecurityWebApplicationInitializer的实现类, 若不存在则在此处注册ContextLoaderListener
-         */
-        try {
-            Class.forName("net.eulerframework.web.module.authentication.boot.SecurityBootstrap");
-        } catch (ClassNotFoundException e) {
+        if(container.getAttribute(EULER_SPRING_SECURITY_ENABLED) == null
+                || !container.getAttribute(EULER_SPRING_SECURITY_ENABLED).equals(true)) {
             AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
             try {
                 rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
@@ -73,7 +75,26 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
             }
 
             container.addListener(new ContextLoaderListener(rootContext));
+        } else {
+            this.logger.info("Spring security was enabled, skip ContextLoaderListener init.");
         }
+        
+        /*
+         * 判断是否存在AbstractSecurityWebApplicationInitializer的实现类, 若不存在则在此处注册ContextLoaderListener
+         */
+//        try {
+//            Class.forName("net.eulerframework.web.module.authentication.boot.SecurityBootstrap");
+//        } catch (ClassNotFoundException e) {
+//            AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+//            try {
+//                rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
+//            } catch (ClassNotFoundException e2) {
+//                rootContext.close();
+//                throw new ServletException(e2);
+//            }
+//
+//            container.addListener(new ContextLoaderListener(rootContext));
+//        }
 
         container.addListener(new EulerFrameworkCoreListener());
         
