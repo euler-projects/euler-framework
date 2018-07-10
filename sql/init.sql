@@ -35,11 +35,11 @@ CREATE TABLE sys_user
 CREATE TABLE sys_group
 (
   id          VARCHAR(36)  NOT NULL,
-  -- code        VARCHAR(100) NOT NULL,
+  code        VARCHAR(10) NOT NULL,
   name        VARCHAR(100) NOT NULL,
   description VARCHAR(255) NULL,
   PRIMARY KEY (id),
-  -- CONSTRAINT uk_sys_group_code UNIQUE (code),
+  CONSTRAINT uk_sys_group_code UNIQUE (code),
   CONSTRAINT uk_sys_group_name UNIQUE (name)
 )
   ENGINE = InnoDB
@@ -113,7 +113,7 @@ VALUES ('00000000-0000-0000-0000-000000000000', 'root', NULL, NULL, 'NaN', TRUE,
 INSERT INTO sys_user (id, username, email, mobile, password, account_non_expired, account_non_locked, credentials_non_expired, enabled, root, regist_time)
 VALUES (uuid(), 'admin', NULL, NULL, 'NaN', TRUE, TRUE, TRUE, TRUE, NULL, now());
 -- 插入默认管理员权限组
-INSERT INTO sys_group (id, description, name) VALUES ('00000000-0000-0000-0000-000000000000', 'Default system management group', 'Administrators');
+INSERT INTO sys_group (id, code, description, name) VALUES ('00000000-0000-0000-0000-000000000000', 'g_admin', 'Default system management group', 'Administrators');
 -- 插入默认管理员权限
 INSERT INTO sys_authority (authority, description, name) VALUES ('ADMIN', 'Default system management permissions', 'Admin');
 -- 插入默认管理员与默认管理员权限组的关系映射

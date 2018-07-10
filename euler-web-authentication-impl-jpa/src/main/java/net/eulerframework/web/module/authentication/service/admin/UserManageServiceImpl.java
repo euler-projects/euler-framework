@@ -30,6 +30,7 @@
 package net.eulerframework.web.module.authentication.service.admin;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -62,7 +63,8 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
 
     @Override
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
-        PageResponse<User> ret = new PageResponse<>(null, 0, 0, 0);//this.userDao.pageQuery(pageQueryRequest);
+        List<User> all = this.userRepository.findAll();
+        PageResponse<User> ret = new PageResponse<>(all, all.size(), pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());//this.userDao.pageQuery(pageQueryRequest);
         //TODO:实现分页
         if (!ret.getRows().isEmpty()) {
             ret.getRows().forEach(user -> user.eraseCredentials());
