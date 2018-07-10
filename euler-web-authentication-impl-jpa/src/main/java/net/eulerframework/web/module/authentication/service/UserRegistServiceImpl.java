@@ -36,12 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
 import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 import net.eulerframework.web.module.authentication.entity.User;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
-import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
  * @author cFrost
@@ -49,7 +46,7 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
  */
 @Transactional
 @Service("userRegistService")
-public class UserRegistServiceImpl implements UserRegistService {
+public class UserRegistServiceImpl extends UserRegistService {
     @Resource 
     private EulerUserEntityService eulerUserEntityService;
     @Resource 
@@ -75,24 +72,12 @@ public class UserRegistServiceImpl implements UserRegistService {
     }
 
     @Override
-    public User signUp(String username, String email, String mobile, String password)
+    protected User doSignup(String username, String email, String mobile, String password)
             throws UserInfoCheckWebException {
         User user = new User();
-        
-        UserDataValidator.validUsername(username);
-        user.setUsername(username.trim());
-        
-        if(StringUtils.hasText(email)) {
-            UserDataValidator.validEmail(email);
-            user.setEmail(email.trim());
-        }
-        
-        if(StringUtils.hasText(mobile)) {
-            UserDataValidator.validMobile(mobile);
-            user.setMobile(mobile.trim());
-        }
-        
-        UserDataValidator.validPassword(password);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setMobile(mobile);
         user.setPassword(this.passwordEncoder.encode(password.trim()));
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);

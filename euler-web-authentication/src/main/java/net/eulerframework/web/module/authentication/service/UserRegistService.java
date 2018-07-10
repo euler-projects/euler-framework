@@ -31,35 +31,87 @@ package net.eulerframework.web.module.authentication.service;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Random;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 import net.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
+import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
  * @author cFrost
  *
  */
 @Transactional
-public interface UserRegistService {
+public abstract class UserRegistService {
+    private final static String[] INTERESTING_NAMES = {"folgandros", "arild", "getaria", "norcia", "lavenham", "bolgheri"};
     
-    EulerUserEntityService getEulerUserEntityService();
-    List<EulerUserProfileService<? extends EulerUserProfileEntity>> getEulerUserProfileServices();
-    List<EulerUserExtraDataProcessor> getEulerUserExtraDataProcessors();
+    public abstract EulerUserEntityService getEulerUserEntityService();
+    public abstract List<EulerUserProfileService<? extends EulerUserProfileEntity>> getEulerUserProfileServices();
+    public abstract List<EulerUserExtraDataProcessor> getEulerUserExtraDataProcessors();
 
+    protected abstract EulerUserEntity doSignup(String username, String email, String mobile, String password) throws UserInfoCheckWebException;
+    
     /**
-     * 注册新用户
+     * 注册新用户，用户名、邮箱、手机号必须有一个有值，当用户名为空时，会随机一个格式为“随机名字_手机号或邮箱”的用户名
      * @param username 用户名
      * @param email 注册邮箱
      * @param mobile 注册手机号
      * @param password 密码
      * @return 注册生成的用户实体
      */
-    EulerUserEntity signUp(String username, String email, String mobile, String password) 
-            throws UserInfoCheckWebException;
+    public EulerUserEntity signUp(String username, String email, String mobile, String password) 
+            throws UserInfoCheckWebException {
+        
+        if(StringUtils.isEmpty(username) && (StringUtils.hasText(email) || StringUtils.hasText(mobile))) {
+            username = this.randomUsername(email, mobile);
+        }
+
+        UserDataValidator.validUsername(username);
+        username = username.trim();
+        
+        if(StringUtils.hasText(email)) {
+            UserDataValidator.validEmail(email);
+            email = email.trim();
+        } else {
+            email = null;
+        }
+        
+        if(StringUtils.hasText(mobile)) {
+            UserDataValidator.validMobile(mobile);
+            mobile = mobile.trim();
+        } else {
+            mobile = null;
+        }
+        
+        UserDataValidator.validPassword(password);
+        password = password.trim();
+        
+        return this.doSignup(username, email, mobile, password);
+    }
+    
+    private String randomUsername(String email, String mobile) {
+        Random random = new Random();
+        String perfix = INTERESTING_NAMES[random.nextInt(INTERESTING_NAMES.length)];
+        String suffix;
+        
+        if(StringUtils.hasText(mobile) && mobile.startsWith("+")) {
+            if(mobile.startsWith("+")) {
+                suffix = mobile.substring(1);
+            } else {
+                suffix = mobile;
+            }
+        } else {
+            suffix = email;
+        }
+        
+        suffix = suffix.replaceAll("[^A-Za-z0-9_\\-\\.]", "_");
+        
+        return perfix + "_" + suffix;
+    }
     
     /**
      * 注册新用户
@@ -70,7 +122,7 @@ public interface UserRegistService {
      * @param userProfile 用户档案
      * @return 注册生成的用户实体
      */
-    default EulerUserEntity signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
+    public EulerUserEntity signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
             throws UserInfoCheckWebException {
         Assert.notNull(getEulerUserProfileServices(), "At least one EulerUserProfileServices should be implemented");
         EulerUserEntity user = this.signUp(username, email, mobile, password);
@@ -98,7 +150,7 @@ public interface UserRegistService {
      * @param extraData 附加数据
      * @return 注册生成的用户实体
      */
-    default EulerUserEntity signUp(String username, String email, String mobile, String password, Map<String, Object> extraData) 
+    public EulerUserEntity signUp(String username, String email, String mobile, String password, Map<String, Object> extraData) 
             throws UserInfoCheckWebException {
         EulerUserEntity user = this.signUp(username, email, mobile, password);
         if(extraData != null && !extraData.isEmpty() && getEulerUserExtraDataProcessors() != null) {

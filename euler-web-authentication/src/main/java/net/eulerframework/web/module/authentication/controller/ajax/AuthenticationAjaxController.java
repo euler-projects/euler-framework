@@ -68,7 +68,7 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
                     MediaType.APPLICATION_FORM_URLENCODED_VALUE, 
                     MediaType.MULTIPART_FORM_DATA_VALUE})
     public String litesignup(
-            @RequestParam String username, 
+            @RequestParam(required = false) String username, 
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile, 
             @RequestParam String password,
@@ -103,7 +103,7 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
                     MediaType.APPLICATION_JSON_UTF8_VALUE})
     public String signupJson(@RequestBody Map<String, Object> data) {
         String username = (String) data.get("username");
-        Assert.hasText(username, "Required String parameter 'username' is not present");
+        //Assert.hasText(username, "Required String parameter 'username' is not present");
         String password = (String) data.get("password");
         Assert.hasText(password, "Required String parameter 'password' is not present");
         
@@ -117,5 +117,4 @@ public class AuthenticationAjaxController extends AjaxSupportWebController {
         
         return this.litesignup(username, email, mobile, password, data);
     }
-
 }
