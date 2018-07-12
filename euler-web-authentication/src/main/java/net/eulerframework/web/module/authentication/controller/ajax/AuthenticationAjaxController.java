@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.common.util.CommonUtils;
 import net.eulerframework.web.core.annotation.AjaxController;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
@@ -28,6 +29,7 @@ import net.eulerframework.web.module.authentication.util.UserDataValidator;
  * @author cFrost
  *
  */
+@ApiEndpoint
 @AjaxController
 @RequestMapping("/")
 public class AuthenticationAjaxController extends ApiSupportWebController {
