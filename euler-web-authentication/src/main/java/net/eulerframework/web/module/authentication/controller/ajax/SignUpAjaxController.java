@@ -3,10 +3,13 @@
  */
 package net.eulerframework.web.module.authentication.controller.ajax;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,47 +23,71 @@ import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.exception.RobotRequestException;
+import net.eulerframework.web.module.authentication.service.RobotCheckService;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
-import net.eulerframework.web.module.authentication.util.Captcha;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
 /**
  * 用于验证用户信息是否符合要求
+ * 
  * @author cFrost
  *
  */
 @ApiEndpoint
 @AjaxController
 @RequestMapping("/")
-public class AuthenticationAjaxController extends ApiSupportWebController {
+public class SignUpAjaxController extends ApiSupportWebController {
 
     @Resource
     private UserRegistService userRegistService;
+    @Autowired(required = false)
+    private List<RobotCheckService> robotCheckServices;
 
     @RequestMapping(path="validUsername", method = RequestMethod.GET)
     public void validUsername(@RequestParam String username) {
-        UserDataValidator.validUsername(username);
+        if(SecurityConfig.isSignUpEnabled()) {
+            UserDataValidator.validUsername(username);
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 
     @RequestMapping(path="validEmail", method = RequestMethod.GET)
     public void validEmail(@RequestParam String email) {
-        UserDataValidator.validEmail(email);
+        if(SecurityConfig.isSignUpEnabled()) {
+            UserDataValidator.validEmail(email);
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 
     @RequestMapping(path="validMobile", method = RequestMethod.GET)
     public void validMobile(@RequestParam String mobile) {
-        UserDataValidator.validMobile(mobile);
+        if(SecurityConfig.isSignUpEnabled()) {
+            UserDataValidator.validMobile(mobile);
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 
     @RequestMapping(path="validPassword", method = RequestMethod.GET)
     public void validPassword(@RequestParam String password) {
-        UserDataValidator.validPassword(password);
+        if(SecurityConfig.isSignUpEnabled()) {
+            UserDataValidator.validPassword(password);
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 
-    @RequestMapping(path="validCaptcha", method = RequestMethod.GET)
-    public void validCaptcha(@RequestParam String captcha) {
-        CommonUtils.sleep(1);
-        Captcha.validCaptcha(captcha, this.getRequest());
+    @RequestMapping(path= {"robotCheck", "validCaptcha"}, method = RequestMethod.GET)
+    public void robotCheck() {
+        if(SecurityConfig.isSignUpEnabled()) {
+            this.isRobotRequest(this.getRequest());
+            //Captcha.validCaptcha(captcha, this.getRequest());
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 
     @RequestMapping(
@@ -76,9 +103,7 @@ public class AuthenticationAjaxController extends ApiSupportWebController {
             @RequestParam String password,
             @RequestParam Map<String, Object> extraData) {
         if(SecurityConfig.isSignUpEnabled()) {
-            if(SecurityConfig.isSignUpEnableCaptcha()) {
-                Captcha.validCaptcha(this.getRequest());
-            }
+            this.isRobotRequest(this.getRequest());
             
             if(extraData != null) {
                 extraData.remove("username");
@@ -118,5 +143,24 @@ public class AuthenticationAjaxController extends ApiSupportWebController {
         data.remove("password");
         
         return this.litesignup(username, email, mobile, password, data);
+    }
+    
+    /**
+     * 检测是否是机器人请求
+     * 
+     * 可存在多个机器人检测实现类，检测策略为只要有一个判定不是机器人即检测通过，如果没有实现类则关闭机器人检测功能
+     * @param request 请求对象
+     */
+    private void isRobotRequest(HttpServletRequest request) {
+        if(this.robotCheckServices != null) {
+            for(RobotCheckService robotCheckService : this.robotCheckServices) {
+                if(!robotCheckService.isRobot(request)) {
+                    return;
+                }
+            }
+
+            CommonUtils.sleep(1); //延迟一秒，降低注册接口请求频率
+            throw new RobotRequestException();
+        }
     }
 }
