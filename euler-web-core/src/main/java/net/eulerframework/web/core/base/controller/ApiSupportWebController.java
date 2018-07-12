@@ -11,12 +11,24 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import net.eulerframework.web.core.base.response.ErrorResponse;
-import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.core.exception.web.SystemWebError;
 import net.eulerframework.web.core.exception.web.WebException;
 
 @ResponseBody
-public abstract class AjaxSupportWebController extends AbstractWebController {
+public abstract class ApiSupportWebController extends AbstractWebController {
+
+//  /**
+//   * 用于在程序发生{@link BindException}异常时统一返回错误信息
+//   * 
+//   * @return
+//   */
+//  @ResponseBody
+//  @ResponseStatus(HttpStatus.BAD_REQUEST)
+//  @ExceptionHandler(BindException.class)
+//  public Object bindException(BindException e) {
+//      this.logger.error(e.getMessage(), e);
+//      return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
+//  }
 
     /**
      * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息
@@ -65,15 +77,6 @@ public abstract class AjaxSupportWebController extends AbstractWebController {
         }
         
         return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
-    }
-
-    /**
-     * 用于在程序发生{@link PageNotFoundException}异常时统一返回错误信息
-     * 
-     */
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(PageNotFoundException.class)
-    public void pageNotFoundException(PageNotFoundException e) {
     }
 
     /**

@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import net.eulerframework.web.core.annotation.AjaxController;
-import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
+import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.core.base.request.PageQueryRequest;
 import net.eulerframework.web.core.base.response.PageResponse;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
@@ -45,7 +45,7 @@ import net.eulerframework.web.module.authentication.service.admin.UserManageServ
 
 @AjaxController
 @RequestMapping("authentication/user")
-public class UserManageAjaxContorller extends AjaxSupportWebController {
+public class UserManageAjaxContorller extends ApiSupportWebController {
     
     @Resource private UserManageService userManageService;
 

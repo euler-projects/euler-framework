@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.eulerframework.web.core.annotation.AjaxController;
-import net.eulerframework.web.core.base.controller.AjaxSupportWebController;
+import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import net.eulerframework.web.module.authentication.service.EulerUserExtraDataProcessor;
@@ -26,7 +26,7 @@ import net.eulerframework.web.module.authentication.service.EulerUserExtraDataSe
  */
 @AjaxController
 @RequestMapping("settings")
-public class ProfileSettingsAjaxController extends AjaxSupportWebController {
+public class ProfileSettingsAjaxController extends ApiSupportWebController {
 
     @Autowired
     private EulerUserExtraDataService eulerUserExtraDataService;
