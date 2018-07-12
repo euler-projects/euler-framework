@@ -44,47 +44,46 @@ public class SignUpAjaxController extends ApiSupportWebController {
     @Autowired(required = false)
     private List<RobotCheckService> robotCheckServices;
 
-    @RequestMapping(path="validUsername", method = RequestMethod.GET)
+    @RequestMapping(path = "validUsername", method = RequestMethod.GET)
     public void validUsername(@RequestParam String username) {
-        if(SecurityConfig.isSignUpEnabled()) {
+        if (SecurityConfig.isSignUpEnabled()) {
             UserDataValidator.validUsername(username);
         } else {
             throw new PageNotFoundException();
         }
     }
 
-    @RequestMapping(path="validEmail", method = RequestMethod.GET)
+    @RequestMapping(path = "validEmail", method = RequestMethod.GET)
     public void validEmail(@RequestParam String email) {
-        if(SecurityConfig.isSignUpEnabled()) {
+        if (SecurityConfig.isSignUpEnabled()) {
             UserDataValidator.validEmail(email);
         } else {
             throw new PageNotFoundException();
         }
     }
 
-    @RequestMapping(path="validMobile", method = RequestMethod.GET)
+    @RequestMapping(path = "validMobile", method = RequestMethod.GET)
     public void validMobile(@RequestParam String mobile) {
-        if(SecurityConfig.isSignUpEnabled()) {
+        if (SecurityConfig.isSignUpEnabled()) {
             UserDataValidator.validMobile(mobile);
         } else {
             throw new PageNotFoundException();
         }
     }
 
-    @RequestMapping(path="validPassword", method = RequestMethod.GET)
+    @RequestMapping(path = "validPassword", method = RequestMethod.GET)
     public void validPassword(@RequestParam String password) {
-        if(SecurityConfig.isSignUpEnabled()) {
+        if (SecurityConfig.isSignUpEnabled()) {
             UserDataValidator.validPassword(password);
         } else {
             throw new PageNotFoundException();
         }
     }
 
-    @RequestMapping(path= {"robotCheck", "validCaptcha"}, method = RequestMethod.GET)
+    @RequestMapping(path = "robotCheck", method = RequestMethod.GET)
     public void robotCheck() {
-        if(SecurityConfig.isSignUpEnabled()) {
+        if (SecurityConfig.isSignUpEnabled()) {
             this.isRobotRequest(this.getRequest());
-            //Captcha.validCaptcha(captcha, this.getRequest());
         } else {
             throw new PageNotFoundException();
         }
@@ -95,24 +94,24 @@ public class SignUpAjaxController extends ApiSupportWebController {
             method = RequestMethod.POST, 
             consumes = {
                     MediaType.APPLICATION_FORM_URLENCODED_VALUE, 
-                    MediaType.MULTIPART_FORM_DATA_VALUE})
+                    MediaType.MULTIPART_FORM_DATA_VALUE })
     public String litesignup(
-            @RequestParam(required = false) String username, 
+            @RequestParam(required = false) String username,
             @RequestParam(required = false) String email, 
-            @RequestParam(required = false) String mobile, 
-            @RequestParam String password,
+            @RequestParam(required = false) String mobile,
+            @RequestParam String password, 
             @RequestParam Map<String, Object> extraData) {
-        if(SecurityConfig.isSignUpEnabled()) {
+        if (SecurityConfig.isSignUpEnabled()) {
             this.isRobotRequest(this.getRequest());
-            
-            if(extraData != null) {
+
+            if (extraData != null) {
                 extraData.remove("username");
                 extraData.remove("email");
                 extraData.remove("mobile");
                 extraData.remove("password");
             }
-            
-            if(extraData == null || extraData.isEmpty()) {
+
+            if (extraData == null || extraData.isEmpty()) {
                 return this.userRegistService.signUp(username, email, mobile, password).getUserId();
             } else {
                 return this.userRegistService.signUp(username, email, mobile, password, extraData).getUserId();
@@ -121,19 +120,18 @@ public class SignUpAjaxController extends ApiSupportWebController {
             throw new PageNotFoundException();
         }
     }
-    
+
     @RequestMapping(
             value = "signup", 
             method = RequestMethod.POST, 
-            consumes = {
-                    MediaType.APPLICATION_JSON_VALUE, 
-                    MediaType.APPLICATION_JSON_UTF8_VALUE})
+            consumes = { 
+                    MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_UTF8_VALUE })
     public String signupJson(@RequestBody Map<String, Object> data) {
-        String username = (String) data.get("username");
-        //Assert.hasText(username, "Required String parameter 'username' is not present");
         String password = (String) data.get("password");
         Assert.hasText(password, "Required String parameter 'password' is not present");
-        
+
+        String username = (String) data.get("username");
         String email = (String) data.get("email");
         String mobile = (String) data.get("mobile");
 
@@ -141,25 +139,27 @@ public class SignUpAjaxController extends ApiSupportWebController {
         data.remove("email");
         data.remove("mobile");
         data.remove("password");
-        
+
         return this.litesignup(username, email, mobile, password, data);
     }
-    
+
     /**
      * 检测是否是机器人请求
      * 
      * 可存在多个机器人检测实现类，检测策略为只要有一个判定不是机器人即检测通过，如果没有实现类则关闭机器人检测功能
-     * @param request 请求对象
+     * 
+     * @param request
+     *            请求对象
      */
     private void isRobotRequest(HttpServletRequest request) {
-        if(this.robotCheckServices != null) {
-            for(RobotCheckService robotCheckService : this.robotCheckServices) {
-                if(!robotCheckService.isRobot(request)) {
+        if (this.robotCheckServices != null) {
+            for (RobotCheckService robotCheckService : this.robotCheckServices) {
+                if (!robotCheckService.isRobot(request)) {
                     return;
                 }
             }
 
-            CommonUtils.sleep(1); //延迟一秒，降低注册接口请求频率
+            CommonUtils.sleep(1); // 延迟一秒，降低注册接口请求频率
             throw new RobotRequestException();
         }
     }
