@@ -211,6 +211,18 @@
                 <artifactId>spring-security-jwt</artifactId>
                 <version>${springsecurity.oauth.jwt.version}</version>
             </dependency>
+            
+            <!-- Reids -->
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-redis</artifactId>
+                <version>2.0.8.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>2.9.0</version>
+            </dependency>
 
             <!-- MyBatis ... -->
             <dependency>
