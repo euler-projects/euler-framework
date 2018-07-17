@@ -152,6 +152,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
      *            请求对象
      */
     private void isRobotRequest(HttpServletRequest request) {
+        CommonUtils.sleep(1); // 延迟一秒，降低注册接口请求频率
         if (this.robotCheckServices != null) {
             for (RobotCheckService robotCheckService : this.robotCheckServices) {
                 if (!robotCheckService.isRobot(request)) {
@@ -159,7 +160,6 @@ public class SignUpAjaxController extends ApiSupportWebController {
                 }
             }
 
-            CommonUtils.sleep(1); // 延迟一秒，降低注册接口请求频率
             throw new RobotRequestException();
         }
     }
