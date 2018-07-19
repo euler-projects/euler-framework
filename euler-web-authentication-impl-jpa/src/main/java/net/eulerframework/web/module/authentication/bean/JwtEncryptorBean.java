@@ -10,6 +10,7 @@ import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.common.util.io.file.FileReadException;
 import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import net.eulerframework.common.util.jwt.JwtEncryptor;
+import net.eulerframework.web.module.authentication.conf.SecurityConfigExternal;
 
 @Configuration
 public class JwtEncryptorBean extends LogSupport {
@@ -23,7 +24,7 @@ public class JwtEncryptorBean extends LogSupport {
     }
 
     public String privKey() {
-        String path = this.getClass().getResource("/").getPath() + "rsa/resetPasswdPrivKey.pem";
+        String path = SecurityConfigExternal.getResetPasswordPrivKeyFile();
         String key;
         try {
             key = new String(SimpleFileIOUtils.readFileByByte(new File(path)));
@@ -35,7 +36,7 @@ public class JwtEncryptorBean extends LogSupport {
     }
 
     public String pubKey() {
-        String path = this.getClass().getResource("/").getPath() + "rsa/resetPasswdPubKey.pem";
+        String path = SecurityConfigExternal.getResetPasswordPubKeyFile();
         String key;
         try {
             key = new String(SimpleFileIOUtils.readFileByByte(new File(path)));

@@ -65,6 +65,13 @@ public abstract class WebConfig {
         
         // [mail]
         private static final String MAIL_SMTP = "mail.smtp";
+        
+        // [Redis]
+        private static final String REDIS_TYPE = "redis.type";
+        private static final String REDIS_HOST = "redis.host";
+        private static final String REDIS_PORT = "redis.port";
+        private static final String REDIS_PASSWORD = "redis.password";
+        private static final String REDIS_SENTINELS = "redis.sentinels";
     }
 
     private static class WebConfigDefault {
@@ -102,6 +109,12 @@ public abstract class WebConfig {
         private static final long WEB_MULITPART_MAX_FILE_SIZE = 51_200L;
         private static final long WEB_MULITPART_MAX_REQUEST_SIZE = 51_200L;
         private static final int WEB_MULITPART_FILE_SIZE_THRESHOLD = 1_024;
+        
+        // [Redis]
+        private static final RedisType REDIS_TYPE = RedisType.STANDALONE;
+        private static final String REDIS_HOST = "localhost";
+        private static final int REDIS_PORT = 6379;
+        private static final String REDIS_PASSWORD = null;
     }
     
     static {
@@ -609,4 +622,40 @@ public abstract class WebConfig {
         });
     }
 
+    public static RedisType getRedisType() {
+        return (RedisType) CONFIG_CAHCE.get(WebConfigKey.REDIS_TYPE, 
+                key -> properties.getEnumValue(key, WebConfigDefault.REDIS_TYPE, true));
+    }
+    
+    public static String getRedisHost() {
+        return (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_HOST, 
+                key -> properties.get(key, WebConfigDefault.REDIS_HOST));
+    }
+
+    public static String getRedisPassword() {
+        return (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_PASSWORD, 
+                key -> properties.get(key, WebConfigDefault.REDIS_PASSWORD));
+    }
+
+    public static int getRedisPort() {
+        return (int) CONFIG_CAHCE.get(WebConfigKey.REDIS_PORT, 
+                key -> properties.getIntValue(key, WebConfigDefault.REDIS_PORT));
+    }
+
+    /**
+     * @return
+     */
+    public static String[] getRedisSentinels() {
+        String str = (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_SENTINELS, key -> {
+                    try {
+                        return properties.get(key);
+                    } catch (PropertyNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        
+        Assert.hasText(str, () -> WebConfigKey.REDIS_SENTINELS + "can not be empty");
+        
+        return str.split(",");
+    }
 }
