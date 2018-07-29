@@ -24,7 +24,6 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://cfrost.net
  */
 package net.eulerframework.web.core.extend;
 

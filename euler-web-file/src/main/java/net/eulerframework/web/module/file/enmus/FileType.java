@@ -25,7 +25,6 @@
  * 
  * https://eulerproject.io
  * https://github.com/euler-projects/euler-framework
- * https://cfrost.net
  */
 package net.eulerframework.web.module.file.enmus;
 

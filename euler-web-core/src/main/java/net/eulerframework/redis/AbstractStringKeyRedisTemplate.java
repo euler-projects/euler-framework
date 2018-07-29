@@ -24,7 +24,6 @@
  * For more information, please visit the following websites
  * 
  * https://eulerproject.io/euler-framework
- * https://cfrost.net
  */
 package net.eulerframework.redis;
 
