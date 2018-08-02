@@ -13,22 +13,5 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
-    <bean id="clientDao" class="net.eulerframework.web.module.oauth2.dao.impl.ClientDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="resourceDao" class="net.eulerframework.web.module.oauth2.dao.impl.ResourceDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    <bean id="scopeDao" class="net.eulerframework.web.module.oauth2.dao.impl.ScopeDao">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
-    
-    <bean id="clientService" name="clientDetailsService" class="net.eulerframework.web.module.oauth2.service.impl.ClientService">
-        <property name="clientDao" ref="clientDao"/>
-        <property name="resourceDao" ref="resourceDao"/>
-        <property name="scopeDao" ref="scopeDao"/>
-        <property name="passwordEncoder" ref="passwordEncoder"/>
-        <property name="cacheEnabled" value="${clientDetailsServiceCache.enabled}"/>
-        <property name="cacheSeconds" value="${clientDetailsServiceCache.cacheSeconds}"/>
-    </bean>
+    <import resource="beans-oauth-authorization-server.xml"/>
 </beans>

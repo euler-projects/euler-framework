@@ -24,7 +24,7 @@
         <module>euler-web-authentication-impl-jpa</module>
         <!-- <module>euler-web-basic</module> -->
         <module>euler-web-file</module>
-        <module>euler-web-oauth2-authorization-server</module>
+        <module>euler-web-oauth2-server</module>
         <module>euler-web-orm-hibernate</module>
     </modules>
 
@@ -47,8 +47,7 @@
 
         <springframework.version>5.0.7.RELEASE</springframework.version>
         <springsecurity.version>5.0.6.RELEASE</springsecurity.version>
-        <springsecurity.oauth.version>2.0.9.RELEASE</springsecurity.oauth.version>
-        <springsecurity.oauth.jwt.version>1.0.4.RELEASE</springsecurity.oauth.jwt.version>
+        <springsecurity.oauth.version>2.3.3.RELEASE</springsecurity.oauth.version>
 
         <AspectJ.version>1.8.9</AspectJ.version>
         <jasig.version>3.2.2</jasig.version>
@@ -205,11 +204,6 @@
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
                 <version>${springsecurity.oauth.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-jwt</artifactId>
-                <version>${springsecurity.oauth.jwt.version}</version>
             </dependency>
             
             <!-- Reids -->
