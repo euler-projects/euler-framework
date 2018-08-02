@@ -21,17 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * 
- * For more information, please visit the following website
+ * For more information, please visit the following websites
  * 
  * https://eulerproject.io
  */
-package net.eulerframework.web.module.authentication.service;
+package net.eulerframework.web.module.authentication.exception;
 
-import javax.servlet.http.HttpServletRequest;
+/**
+ * @author cFrost
+ *
+ */
+public class NotSupportRobotCheckRequestException extends Exception {
 
-import net.eulerframework.web.module.authentication.exception.NotSupportRobotCheckRequestException;
-
-public interface RobotCheckService {
-
-    boolean isRobot(HttpServletRequest request) throws NotSupportRobotCheckRequestException;
 }

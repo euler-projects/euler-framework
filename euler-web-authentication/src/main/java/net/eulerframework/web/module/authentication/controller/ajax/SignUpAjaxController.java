@@ -17,13 +17,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import net.eulerframework.common.util.CommonUtils;
 import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
+import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.exception.NotSupportRobotCheckRequestException;
 import net.eulerframework.web.module.authentication.exception.RobotRequestException;
+import net.eulerframework.web.module.authentication.service.MobileCodeRobotCheckService;
 import net.eulerframework.web.module.authentication.service.RobotCheckService;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
@@ -43,6 +45,8 @@ public class SignUpAjaxController extends ApiSupportWebController {
     private UserRegistService userRegistService;
     @Autowired(required = false)
     private List<RobotCheckService> robotCheckServices;
+    @Autowired(required = false)
+    private MobileCodeRobotCheckService mobileCodeRobotCheckService;
 
     @RequestMapping(path = "validUsername", method = RequestMethod.GET)
     public void validUsername(@RequestParam String username) {
@@ -87,6 +91,14 @@ public class SignUpAjaxController extends ApiSupportWebController {
         } else {
             throw new PageNotFoundException();
         }
+    }
+    
+    @RequestMapping(value = "sendSmsCode") 
+    public void sendSmsCode() {
+        if(this.mobileCodeRobotCheckService == null) {
+            throw new WebException("sms code was disabled");
+        }
+        this.mobileCodeRobotCheckService.sendSmsCode(this.getRequest());
     }
 
     @RequestMapping(
@@ -152,11 +164,14 @@ public class SignUpAjaxController extends ApiSupportWebController {
      *            请求对象
      */
     private void isRobotRequest(HttpServletRequest request) {
-        CommonUtils.sleep(1); // 延迟一秒，降低注册接口请求频率
         if (this.robotCheckServices != null) {
             for (RobotCheckService robotCheckService : this.robotCheckServices) {
-                if (!robotCheckService.isRobot(request)) {
-                    return;
+                try {
+                    if (!robotCheckService.isRobot(request)) {
+                        return;
+                    }
+                } catch (NotSupportRobotCheckRequestException e) {
+                    // DO_NOTHING
                 }
             }
 

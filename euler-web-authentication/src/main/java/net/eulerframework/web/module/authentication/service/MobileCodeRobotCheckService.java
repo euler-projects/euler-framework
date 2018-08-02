@@ -39,6 +39,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import net.eulerframework.web.module.authentication.exception.NotSupportRobotCheckRequestException;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
 
@@ -111,11 +112,15 @@ public class MobileCodeRobotCheckService implements RobotCheckService {
     }
 
     @Override
-    public boolean isRobot(HttpServletRequest request) {
+    public boolean isRobot(HttpServletRequest request) throws NotSupportRobotCheckRequestException{
         String mobile = request.getParameter("mobile");
         String smsCode = request.getParameter("smsCode");
-        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
-        Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
+//        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
+//        Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
+        
+        if(StringUtils.isEmpty(mobile) || StringUtils.isEmpty(smsCode)) {
+            throw new NotSupportRobotCheckRequestException();
+        }
 
         String redisKey = generateRedisKey(mobile);
         String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
