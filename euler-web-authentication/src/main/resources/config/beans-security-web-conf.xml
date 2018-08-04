@@ -19,7 +19,7 @@
 
     <beans:import resource="classpath:**/web-security-web-config.xml"/>
 
-    <authentication-manager alias="authenticationManager">
+    <authentication-manager id="authenticationManager">
         <authentication-provider user-service-ref="userDetailsService">
             <password-encoder ref="passwordEncoder" />
         </authentication-provider>

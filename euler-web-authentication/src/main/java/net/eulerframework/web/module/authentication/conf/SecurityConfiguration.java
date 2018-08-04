@@ -9,8 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @EnableWebSecurity
 @ImportResource({
     "classpath:config/beans-security-exclude-conf.xml", // Spring Security 白名单
-    "classpath:config/beans-security-web-conf.xml", // Spring Security WEB 验证方式配置
-    "classpath:config/beans-security-api-conf.xml" // Spring Security API 验证方式配置
+    "classpath:config/beans-security-web-conf.xml" // Spring Security WEB 验证方式配置
+    //"classpath:config/beans-security-api-conf.xml" // Spring Security API 验证方式配置
 })
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     

@@ -16,8 +16,7 @@ import net.eulerframework.web.core.annotation.JspController;
 @Configuration
 @ImportResource({"classpath*:config/beans.xml"})
 @ComponentScan(
-        basePackages = {"net.eulerframework.web",
-                        "com.eulerframework.web"},
+        basePackages = {"net.eulerframework.**.web"},
         excludeFilters = {@ComponentScan.Filter(Controller.class),
                           @ComponentScan.Filter(JspController.class),
                           @ComponentScan.Filter(ApiEndpoint.class)}

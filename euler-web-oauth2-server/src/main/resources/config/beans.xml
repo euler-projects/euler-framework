@@ -4,5 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
 
-    <import resource="beans-oauth-authorization-server.xml"/>
+
+    <import resource="beans-oauth2-server.xml"/>
 </beans>

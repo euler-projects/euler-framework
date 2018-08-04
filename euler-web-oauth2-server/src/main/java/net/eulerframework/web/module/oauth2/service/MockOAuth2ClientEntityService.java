@@ -33,7 +33,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import net.eulerframework.web.module.oauth2.entity.EulerOAuth2ClientEntity;
 import net.eulerframework.web.module.oauth2.enums.GrantType;
@@ -46,6 +50,10 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
     
     private DefaultOAuth2ClientEntity defaultOAuth2ClientEntity = new DefaultOAuth2ClientEntity();
 
+    public MockOAuth2ClientEntityService(PasswordEncoder passwordEncoder) {
+        defaultOAuth2ClientEntity.setClientSecret(passwordEncoder.encode("default"));
+    }
+    
     @Override
     public EulerOAuth2ClientEntity loadClientById(String clientId) {
         if(defaultOAuth2ClientEntity.getClientId().equals(clientId)) {
@@ -57,6 +65,7 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
     
     public class DefaultOAuth2ClientEntity implements EulerOAuth2ClientEntity{
         
+        private String clientScrect;
         private Set<String> resourceIds = new HashSet<>(Arrays.asList("default"));
         private Set<GrantType> grantTypes = new HashSet<>(Arrays.asList(
 //                GrantType.AUTHORIZATION_CODE,
@@ -65,6 +74,7 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
                 GrantType.PASSWORD,
                 GrantType.REFRESH_TOKEN
                 ));
+        private Set<String> scopes = new HashSet<>(Arrays.asList("default"));
         
         @Override
         public void eraseCredentials() {
@@ -88,8 +98,14 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
 
         @Override
         public String getClientSecret() {
-            return null;
+            return this.clientScrect;
         }
+        
+
+        public void setClientSecret(String clientScrect) {
+            this.clientScrect = clientScrect;
+        }
+
 
         @Override
         public Boolean getIsScoped() {
@@ -98,7 +114,7 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
 
         @Override
         public Set<String> getScope() {
-            return null;
+            return scopes;
         }
 
         @Override

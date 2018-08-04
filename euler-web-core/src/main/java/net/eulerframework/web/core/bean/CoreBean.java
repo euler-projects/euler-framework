@@ -122,7 +122,7 @@ public class CoreBean {
     }
     
     @Bean
-    public RedisStandaloneConfiguration getRedisStandaloneConfiguration() {
+    public RedisStandaloneConfiguration redisStandaloneConfiguration() {
         if(!RedisType.STANDALONE.equals(WebConfig.getRedisType())) {
             return null;
         }
@@ -136,7 +136,7 @@ public class CoreBean {
     }
     
     @Bean
-    public RedisSentinelConfiguration getRedisSentinelConfiguration() {
+    public RedisSentinelConfiguration redisSentinelConfiguration() {
         if(!RedisType.SENTINEL.equals(WebConfig.getRedisType())) {
             return null;
         }
@@ -161,7 +161,7 @@ public class CoreBean {
     }
 
     @Bean
-    public JedisConnectionFactory getJedisConnectionFactory(
+    public JedisConnectionFactory jedisConnectionFactory(
             @Nullable RedisStandaloneConfiguration redisStandaloneConfiguration, 
             @Nullable RedisSentinelConfiguration redisSentinelConfiguration,
             @Nullable JedisPoolConfig jedisPoolConfig) {
@@ -175,12 +175,12 @@ public class CoreBean {
     }
     
     @Bean
-    public StringRedisSerializer getStringRedisSerializer() {
+    public StringRedisSerializer stringRedisSerializer() {
         return new StringRedisSerializer();
     }
     
     @Bean
-    public StringRedisTemplate getStringRedisTemplate(
+    public StringRedisTemplate stringRedisTemplate(
             JedisConnectionFactory jedisConnectionFactory,
             StringRedisSerializer stringRedisSerializer) {
         StringRedisTemplate stringRedisTemplate= new StringRedisTemplate();
