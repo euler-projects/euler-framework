@@ -37,8 +37,7 @@ public class EulerOAuth2ClientDetails implements ClientDetails {
         this.secretRequired = eulerOauth2ClientEntity.getSecretRequired();
         this.scoped = eulerOauth2ClientEntity.getIsScoped();
         this.additionalInformation = eulerOauth2ClientEntity.getAdditionalInformation();
-        this.authoritie = eulerOauth2ClientEntity.getAuthorities() == null ? new HashSet<>()
-                : eulerOauth2ClientEntity.getAuthorities();
+        this.authoritie = Optional.ofNullable(eulerOauth2ClientEntity.getAuthorities()).orElse(new HashSet<>());
         this.registeredRedirectUri = eulerOauth2ClientEntity.getRegisteredRedirectUri();
         this.resourceIds = eulerOauth2ClientEntity.getResourceIds();
         this.neverNeedApprove = eulerOauth2ClientEntity.getNeverNeedApprove();
@@ -48,7 +47,7 @@ public class EulerOAuth2ClientDetails implements ClientDetails {
                 Optional.ofNullable(eulerOauth2ClientEntity.getAuthorizedGrantTypes())
                     .orElse(new HashSet<>())
                         .stream()
-                        .map(authorizedGrantType -> authorizedGrantType.toString())
+                        .map(authorizedGrantType -> authorizedGrantType.getValue())
                         .collect(Collectors.toSet());
     }
 

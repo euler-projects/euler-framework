@@ -24,7 +24,6 @@
  * For more information, please visit the following website
  * 
  * https://eulerproject.io
- * https://github.com/euler-projects/euler-framework
  */
 package net.eulerframework.web.module.authentication.controller.admin;
 

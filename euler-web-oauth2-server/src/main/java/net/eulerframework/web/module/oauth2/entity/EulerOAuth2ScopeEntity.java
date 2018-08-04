@@ -25,12 +25,8 @@
  * 
  * https://eulerproject.io
  */
-package net.eulerframework.web.module.authentication.enums;
+package net.eulerframework.web.module.oauth2.entity;
 
-/**
- * @author cFrost
- *
- */
-public enum Gender {
-    MALE,FEMALE,OTHER;
+public interface EulerOAuth2ScopeEntity {
+    
 }

@@ -34,6 +34,8 @@ import java.util.Set;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 
+import net.eulerframework.web.module.oauth2.enums.GrantType;
+
 /**
  * @author cFrost
  *
