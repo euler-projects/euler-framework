@@ -35,12 +35,13 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 
 import net.eulerframework.web.module.oauth2.enums.GrantType;
+import net.eulerframework.web.module.oauth2.provider.EulerOAuth2ClientDetails;
 
 /**
  * @author cFrost
  *
  */
-public interface EulerOauth2ClientEntity extends CredentialsContainer {
+public interface EulerOAuth2ClientEntity extends CredentialsContainer {
     /**
      * The client id.
      * 
@@ -143,4 +144,16 @@ public interface EulerOauth2ClientEntity extends CredentialsContainer {
      * @return 不需要用户批准的scope
      */
     Set<String> getAutoApproveScope();
+
+    /**
+     * @return
+     */
+    Boolean getEnabled();
+
+    /**
+     * 
+     */
+    default EulerOAuth2ClientDetails toEulerOAuth2ClientDetails() {
+        return new EulerOAuth2ClientDetails(this);
+    }
 }

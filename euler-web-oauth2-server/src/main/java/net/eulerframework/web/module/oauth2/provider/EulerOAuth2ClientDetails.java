@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.ClientDetails;
 
-import net.eulerframework.web.module.oauth2.entity.EulerOauth2ClientEntity;
+import net.eulerframework.web.module.oauth2.entity.EulerOAuth2ClientEntity;
 
 public class EulerOAuth2ClientDetails implements ClientDetails {
 
@@ -28,27 +28,29 @@ public class EulerOAuth2ClientDetails implements ClientDetails {
     private boolean neverNeedApprove;
     private Set<String> autoApproveScope;
     private Set<String> authorizedGrantTypes;
+    private boolean enabled;
 
-    public EulerOAuth2ClientDetails(EulerOauth2ClientEntity eulerOauth2ClientEntity) {
-        this.clientId = eulerOauth2ClientEntity.getClientId();
-        this.clientSecret = eulerOauth2ClientEntity.getClientSecret();
-        this.accessTokenValiditySeconds = eulerOauth2ClientEntity.getAccessTokenValiditySeconds();
-        this.refreshTokenValiditySeconds = eulerOauth2ClientEntity.getRefreshTokenValiditySeconds();
-        this.secretRequired = eulerOauth2ClientEntity.getSecretRequired();
-        this.scoped = eulerOauth2ClientEntity.getIsScoped();
-        this.additionalInformation = eulerOauth2ClientEntity.getAdditionalInformation();
-        this.authoritie = Optional.ofNullable(eulerOauth2ClientEntity.getAuthorities()).orElse(new HashSet<>());
-        this.registeredRedirectUri = eulerOauth2ClientEntity.getRegisteredRedirectUri();
-        this.resourceIds = eulerOauth2ClientEntity.getResourceIds();
-        this.neverNeedApprove = eulerOauth2ClientEntity.getNeverNeedApprove();
-        this.scope = eulerOauth2ClientEntity.getScope();
-        this.autoApproveScope = eulerOauth2ClientEntity.getAutoApproveScope();
+    public EulerOAuth2ClientDetails(EulerOAuth2ClientEntity eulerOAuth2ClientEntity) {
+        this.clientId = eulerOAuth2ClientEntity.getClientId();
+        this.clientSecret = eulerOAuth2ClientEntity.getClientSecret();
+        this.accessTokenValiditySeconds = eulerOAuth2ClientEntity.getAccessTokenValiditySeconds();
+        this.refreshTokenValiditySeconds = eulerOAuth2ClientEntity.getRefreshTokenValiditySeconds();
+        this.secretRequired = eulerOAuth2ClientEntity.getSecretRequired();
+        this.scoped = eulerOAuth2ClientEntity.getIsScoped();
+        this.additionalInformation = eulerOAuth2ClientEntity.getAdditionalInformation();
+        this.authoritie = Optional.ofNullable(eulerOAuth2ClientEntity.getAuthorities()).orElse(new HashSet<>());
+        this.registeredRedirectUri = eulerOAuth2ClientEntity.getRegisteredRedirectUri();
+        this.resourceIds = eulerOAuth2ClientEntity.getResourceIds();
+        this.neverNeedApprove = eulerOAuth2ClientEntity.getNeverNeedApprove();
+        this.scope = eulerOAuth2ClientEntity.getScope();
+        this.autoApproveScope = eulerOAuth2ClientEntity.getAutoApproveScope();
         this.authorizedGrantTypes = 
-                Optional.ofNullable(eulerOauth2ClientEntity.getAuthorizedGrantTypes())
+                Optional.ofNullable(eulerOAuth2ClientEntity.getAuthorizedGrantTypes())
                     .orElse(new HashSet<>())
                         .stream()
                         .map(authorizedGrantType -> authorizedGrantType.getValue())
                         .collect(Collectors.toSet());
+        this.enabled = eulerOAuth2ClientEntity.getEnabled();
     }
 
     @Override
@@ -114,6 +116,13 @@ public class EulerOAuth2ClientDetails implements ClientDetails {
     @Override
     public boolean isScoped() {
         return scoped;
+    }
+
+    /**
+     * @return
+     */
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
 }
