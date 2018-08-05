@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2015-2016 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,6 @@
  * 
  * For more information, please visit the following website
  * 
- * https://github.com/euler-form/web-form
- * http://eulerframework.net
  * http://cfrost.net
  */
 package net.eulerframework.web.core.listener;

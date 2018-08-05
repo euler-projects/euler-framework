@@ -31,7 +31,7 @@
     <properties>
         <jdk.version>1.8</jdk.version>
 
-        <euler-cache.version>0.0.6</euler-cache.version>
+        <euler-cache.version>1.0.0.M2-SNAPSHOT</euler-cache.version>
         <euler-common.version>1.0.0.M2-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.10</commons-codec.version>
@@ -59,10 +59,6 @@
         <c3p0.version>0.9.5.2</c3p0.version>
 
         <jackson.version>2.9.3</jackson.version>
-
-        <log4j.version>1.2.17</log4j.version>
-        <jboss.logging.version>3.3.0.Final</jboss.logging.version>
-        <commons-logging.version>1.2</commons-logging.version>
 
         <junit.version>4.8.2</junit.version>
     </properties>
@@ -275,23 +271,6 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-
-            <!-- Loggers -->
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.logging</groupId>
-                <artifactId>jboss-logging</artifactId>
-                <version>${jboss.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
             </dependency>
 
             <dependency>
