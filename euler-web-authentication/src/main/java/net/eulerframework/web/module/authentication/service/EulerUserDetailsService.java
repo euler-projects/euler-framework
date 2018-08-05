@@ -85,23 +85,31 @@ public class EulerUserDetailsService implements UserDetailsService {
         try {
             try {
                 return this.eulerUserEntityService.loadUserByUsername(username).toEulerUserDetails();
-            } catch (UserNotFoundException e1) {
+            } catch (UserNotFoundException usernameNotFoundException) {
                 if (this.enableEmailSignin) {
                     try {
                         return this.eulerUserEntityService.loadUserByEmail(username).toEulerUserDetails();
-                    } catch (UserNotFoundException e2) {
+                    } catch (UserNotFoundException emailNotFoundException) {
                         if (this.enableMobileSignin) {
                             try {
                                 return this.eulerUserEntityService.loadUserByMobile(username).toEulerUserDetails();
-                            } catch (UserNotFoundException e3) {
-                                throw e3;
+                            } catch (UserNotFoundException mobileNotFoundException) {
+                                throw mobileNotFoundException;
                             }
                         } else {
-                            throw e2;
+                            throw emailNotFoundException;
                         }
                     }
                 } else {
-                    throw e1;
+                    if (this.enableMobileSignin) {
+                        try {
+                            return this.eulerUserEntityService.loadUserByMobile(username).toEulerUserDetails();
+                        } catch (UserNotFoundException mobileNotFoundException) {
+                            throw mobileNotFoundException;
+                        }
+                    } else {
+                        throw usernameNotFoundException;
+                    }
                 }
             }
         } catch (UserNotFoundException e) {
