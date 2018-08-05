@@ -63,7 +63,7 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
     public class DefaultOAuth2ClientEntity implements EulerOAuth2ClientEntity{
         
         private String clientScrect;
-        private Set<String> resourceIds = new HashSet<>(Arrays.asList("default"));
+        private Set<String> resourceIds = new HashSet<>(Arrays.asList("DEFAULT"));
         private Set<GrantType> grantTypes = new HashSet<>(Arrays.asList(
 //                GrantType.AUTHORIZATION_CODE,
 //                GrantType.CLIENT_CREDENTIALS,
@@ -71,7 +71,7 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
                 GrantType.PASSWORD,
                 GrantType.REFRESH_TOKEN
                 ));
-        private Set<String> scopes = new HashSet<>(Arrays.asList("default"));
+        private Set<String> scopes = new HashSet<>(Arrays.asList("DEFAULT"));
         
         @Override
         public void eraseCredentials() {

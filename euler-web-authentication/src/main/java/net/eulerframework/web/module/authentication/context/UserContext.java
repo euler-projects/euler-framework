@@ -138,19 +138,29 @@ public class UserContext {
             USER_CACHE.put(user.getUsername(), user);
             return user;
         }
+        
+        // String principal
+        if(principal instanceof String) {
+            String username = (String)principal;
+            return loadEulerUserDetails(username);
+        }
 
         // Other UserDetails principal
         if (UserDetails.class.isAssignableFrom(principal.getClass())) {
             UserDetails userDetails = (UserDetails) principal;
             String username = userDetails.getUsername();
-            return USER_CACHE.get(username, key -> {
-                EulerUserDetails eulerUserDetails = userDetailsServicel.loadUserByUsername(key);
-                eulerUserDetails.eraseCredentials();
-                return eulerUserDetails;
-            });
+            return loadEulerUserDetails(username);
         }
 
         throw new PrincipalException("Unsupported principal type.");
+    }
+    
+    private static EulerUserDetails loadEulerUserDetails(String username) {
+        return USER_CACHE.get(username, key -> {
+            EulerUserDetails eulerUserDetails = userDetailsServicel.loadUserByUsername(key);
+            eulerUserDetails.eraseCredentials();
+            return eulerUserDetails;
+        });
     }
     
 //    private static boolean isOAuth2Authentication(Authentication authentication) {
