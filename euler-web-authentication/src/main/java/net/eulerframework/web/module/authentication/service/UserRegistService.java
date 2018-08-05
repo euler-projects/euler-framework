@@ -30,6 +30,8 @@ package net.eulerframework.web.module.authentication.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -51,6 +53,8 @@ public abstract class UserRegistService {
     public abstract List<EulerUserProfileService<? extends EulerUserProfileEntity>> getEulerUserProfileServices();
     public abstract List<EulerUserExtraDataProcessor> getEulerUserExtraDataProcessors();
 
+    private Random random = new Random();
+    
     protected abstract EulerUserEntity doSignup(String username, String email, String mobile, String password) throws UserInfoCheckWebException;
     
     /**
@@ -65,7 +69,7 @@ public abstract class UserRegistService {
             throws UserInfoCheckWebException {
         
         if(StringUtils.isEmpty(username) && (StringUtils.hasText(email) || StringUtils.hasText(mobile))) {
-            username = this.randomUsername(email, mobile);
+            username = this.randomUsername();
         }
 
         UserDataValidator.validUsername(username);
@@ -91,22 +95,9 @@ public abstract class UserRegistService {
         return this.doSignup(username, email, mobile, password);
     }
     
-    private String randomUsername(String email, String mobile) {
-        Random random = new Random();
+    private String randomUsername() {
         String perfix = INTERESTING_NAMES[random.nextInt(INTERESTING_NAMES.length)];
-        String suffix;
-        
-        if(StringUtils.hasText(mobile) && mobile.startsWith("+")) {
-            if(mobile.startsWith("+")) {
-                suffix = mobile.substring(1);
-            } else {
-                suffix = mobile;
-            }
-        } else {
-            suffix = email;
-        }
-        
-        suffix = suffix.replaceAll("[^A-Za-z0-9_\\-\\.]", "_");
+        String suffix = UUID.randomUUID().toString().substring(0, 8) + UUID.randomUUID().toString().substring(14, 18);
         
         return perfix + "_" + suffix;
     }
