@@ -5,5 +5,5 @@
                            http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
 
 
-    <import resource="beans-oauth2-server.xml"/>
+    <import resource="beans-security-oauth2-server-conf.xml"/>
 </beans>

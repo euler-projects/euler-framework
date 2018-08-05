@@ -7,7 +7,6 @@
                                  http://www.springframework.org/schema/security
                                  http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
-
     <global-method-security pre-post-annotations="enabled" order="0"
                             proxy-target-class="true">
     </global-method-security>
@@ -16,8 +15,6 @@
 
     <beans:bean id="sessionRegistry"
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
-
-    <beans:import resource="classpath:**/web-security-web-config.xml"/>
 
     <authentication-manager id="authenticationManager">
         <authentication-provider user-service-ref="userDetailsService">
@@ -59,6 +56,35 @@
     <beans:bean id="authenticationFailureHandler" class="net.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler">
         
     </beans:bean>
+
+    <beans:import resource="classpath:**/web-security-web-config.xml"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <beans:beans profile="web-security-ldap">
         

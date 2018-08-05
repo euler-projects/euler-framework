@@ -30,7 +30,6 @@ package net.eulerframework.web.module.oauth2.conf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.property.PropertyReader;
