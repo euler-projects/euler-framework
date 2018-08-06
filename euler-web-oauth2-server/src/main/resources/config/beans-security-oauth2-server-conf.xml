@@ -73,5 +73,17 @@
         <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler" />
         <csrf disabled="true" />
     </http>
+    
+    <oauth2:resource-server id="insideOAuthResourceServerFilter" token-services-ref="oauth2AuthorizationServerTokenServices" />
+    
+    <http pattern="/oauth/user_info" use-expressions="true" create-session="stateless"
+          entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+
+        <intercept-url pattern="/oauth/user_info" method="OPTIONS" access="permitAll" />
+        <intercept-url pattern="/oauth/user_info" access="isFullyAuthenticated()" />
+        
+        <custom-filter ref="insideOAuthResourceServerFilter" before="PRE_AUTH_FILTER"/>
+        <csrf disabled="true"/>
+    </http>
 
 </beans:beans>

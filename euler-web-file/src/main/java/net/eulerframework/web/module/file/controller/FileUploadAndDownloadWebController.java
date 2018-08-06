@@ -18,7 +18,6 @@ import net.eulerframework.common.util.io.file.FileUtils;
 import net.eulerframework.web.config.WebConfig;
 import net.eulerframework.web.core.annotation.JspController;
 import net.eulerframework.web.core.base.controller.JspSupportWebController;
-import net.eulerframework.web.core.base.response.easyuisupport.EasyUIAjaxResponse;
 import net.eulerframework.web.core.exception.web.PageNotFoundException;
 import net.eulerframework.web.module.file.conf.FileConfig;
 import net.eulerframework.web.module.file.enmus.FileType;
@@ -96,8 +95,8 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
     
     @ResponseBody
     @RequestMapping(path = FileConfig.FILE_UPLOAD_ACTION, method = RequestMethod.POST)
-    public EasyUIAjaxResponse<ArchivedFile> uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
-        return new EasyUIAjaxResponse<>(this.archivedFileService.saveMultipartFile(multipartFile));        
+    public ArchivedFile uploadArchivedFile(@RequestParam(value="file") MultipartFile multipartFile) throws FileArchiveException {
+        return this.archivedFileService.saveMultipartFile(multipartFile);        
     }
 
 }
