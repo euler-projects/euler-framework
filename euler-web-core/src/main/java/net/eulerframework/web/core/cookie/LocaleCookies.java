@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,41 @@
  * 
  * https://eulerproject.io
  */
-package net.eulerframework.constant;
+package net.eulerframework.web.core.cookie;
 
 /**
  * @author cFrost
  *
  */
-public abstract class EulerFilters {
-    public final static String CORS_FILTER = "corsFilter";
-    public final static String WEB_LANGUAGE_FILTER = "webLanguageFilter";
-    public final static String E_TAG_FILTER = "eTagFilter";
-    public final static String ADMIN_PAGE_REDIRECT_FILTER = "adminPageRedirectFilter";
-    public final static String AJAX_REDIRECT_RESPONSE_FILTER = "ajaxRedirectResponseFilter";
+public enum LocaleCookies implements EulerCookies {
+    LOCALE("EULER_LOCALE", 10 * 365 * 24 * 60 * 60, "/");
+    
+    LocaleCookies(String name, int age, String path) {
+        this.age = age;
+        this.name = name;
+        this.path = path;
+    }
+    
+    private String name;
+    private int age;
+    private String path;
+
+    @Override
+    public String getCookieName() {
+        // TODO Auto-generated method stub
+        return name;
+    }
+
+    @Override
+    public int getCookieAge() {
+        // TODO Auto-generated method stub
+        return age;
+    }
+
+    @Override
+    public String getCookiePath() {
+        // TODO Auto-generated method stub
+        return path;
+    }
+
 }

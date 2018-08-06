@@ -26,6 +26,7 @@
         <module>euler-web-file</module>
         <module>euler-web-oauth2-server</module>
         <module>euler-web-orm-hibernate</module>
+        <module>euler-web-support</module>
     </modules>
 
     <properties>

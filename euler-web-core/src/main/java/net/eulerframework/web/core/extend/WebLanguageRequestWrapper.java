@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import net.eulerframework.common.util.CommonUtils;
-import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.cookie.LocaleCookies;
 
 /**
  * 支持手动切换语言的RequestWrapper

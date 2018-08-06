@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,19 +25,14 @@
  * 
  * https://eulerproject.io
  */
-package net.eulerframework.web.core.exception;
+package net.eulerframework.web.core.cookie;
 
 /**
  * @author cFrost
  *
  */
-public class EulerFrameworkInitException extends RuntimeException {
-
-    public EulerFrameworkInitException(String message) {
-        super(message);
-    }
-    
-    public EulerFrameworkInitException(String message, Throwable e) {
-        super(message, e);
-    }
+public interface EulerCookies {
+    public String getCookieName();
+    public int getCookieAge();
+    public String getCookiePath();
 }

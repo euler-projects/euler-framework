@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,10 @@ package net.eulerframework.constant;
  * @author cFrost
  *
  */
-public interface EulerCookies {
-    public String getCookieName();
-    public int getCookieAge();
-    public String getCookiePath();
+public abstract class EulerFilters {
+    public final static String CORS_FILTER = "corsFilter";
+    public final static String WEB_LANGUAGE_FILTER = "webLanguageFilter";
+    public final static String E_TAG_FILTER = "eTagFilter";
+    public final static String ADMIN_PAGE_REDIRECT_FILTER = "adminPageRedirectFilter";
+    public final static String AJAX_REDIRECT_RESPONSE_FILTER = "ajaxRedirectResponseFilter";
 }

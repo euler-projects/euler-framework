@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,35 +31,10 @@ package net.eulerframework.constant;
  * @author cFrost
  *
  */
-public enum LocaleCookies implements EulerCookies {
-    LOCALE("EULER_LOCALE", 10 * 365 * 24 * 60 * 60, "/");
-    
-    LocaleCookies(String name, int age, String path) {
-        this.age = age;
-        this.name = name;
-        this.path = path;
-    }
-    
-    private String name;
-    private int age;
-    private String path;
-
-    @Override
-    public String getCookieName() {
-        // TODO Auto-generated method stub
-        return name;
-    }
-
-    @Override
-    public int getCookieAge() {
-        // TODO Auto-generated method stub
-        return age;
-    }
-
-    @Override
-    public String getCookiePath() {
-        // TODO Auto-generated method stub
-        return path;
-    }
-
+public abstract class EulerServlets {
+    public final static String WEB_SERVLET = "springWebDispatcherServlet";
+    public final static String WEB_ADMIN_SERVLET = "springAdminWebDispatcherServlet";
+    public final static String WEB_AJAX_SERVLET = "springWebAjaxDispatcherServlet";
+    public final static String WEB_ADMIN_AJAX_SERVLET = "springAdminWebAjaxDispatcherServlet";
+    public final static String API_SERVLET = "springApiDispatcherServlet";
 }

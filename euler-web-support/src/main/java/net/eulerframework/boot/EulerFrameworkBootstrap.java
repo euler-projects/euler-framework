@@ -44,10 +44,10 @@ import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.constant.EulerFilters;
 import net.eulerframework.constant.EulerServlets;
 import net.eulerframework.constant.EulerSysAttributes;
-import net.eulerframework.constant.LocaleCookies;
 import net.eulerframework.web.config.MultiPartConfig;
 import net.eulerframework.web.config.SystemProperties;
 import net.eulerframework.web.config.WebConfig;
+import net.eulerframework.web.core.cookie.LocaleCookies;
 import net.eulerframework.web.core.listener.EulerFrameworkCoreListener;
 
 @Order(0)

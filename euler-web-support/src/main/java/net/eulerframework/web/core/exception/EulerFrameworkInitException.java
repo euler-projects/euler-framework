@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2013-2017 cFrost.sun(孙宾, SUN BIN) 
+ * Copyright (c) 2013-2018 Euler Project 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,19 @@
  * 
  * https://eulerproject.io
  */
-package net.eulerframework.constant;
+package net.eulerframework.web.core.exception;
 
 /**
  * @author cFrost
  *
  */
-public abstract class EulerServlets {
-    public final static String WEB_SERVLET = "springWebDispatcherServlet";
-    public final static String WEB_ADMIN_SERVLET = "springAdminWebDispatcherServlet";
-    public final static String WEB_AJAX_SERVLET = "springWebAjaxDispatcherServlet";
-    public final static String WEB_ADMIN_AJAX_SERVLET = "springAdminWebAjaxDispatcherServlet";
-    public final static String API_SERVLET = "springApiDispatcherServlet";
+public class EulerFrameworkInitException extends RuntimeException {
+
+    public EulerFrameworkInitException(String message) {
+        super(message);
+    }
+    
+    public EulerFrameworkInitException(String message, Throwable e) {
+        super(message, e);
+    }
 }
