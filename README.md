@@ -29,7 +29,8 @@ Visit [eulerproject.io][] for more info.
 
 ## License
 
-The Euler Framework is released under the [MIT License][].
+The Euler Framework is released under version 2.0 of the [Apache License][].
 
 [MIT License]: https://opensource.org/licenses/MIT
+[Apache License]: http://www.apache.org/licenses/LICENSE-2.0
 [eulerproject.io]: https://eulerproject.io
