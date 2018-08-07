@@ -14,37 +14,18 @@ Visit [eulerproject.io][] for more info.
 
 * Add RESTful API support
 * Rebuild authentication module
+* Spring Data JPA support
+* Redis support
+* OAuth2.0 support
+* Refactoring euler-web-core to support Spring Boot
 
 ## Planned
 
-* A generic form submitter
-* Redis cache module
+* MyBatis support
 
 ## Release History
 
-### 0.3.0
-
-* Change project name to euler-framework
-* Streamline modules
-* Improve user authentication module
-* Improve JSP support
-* Improve AJAX support
-* A uniform exception handling system
-* File upload & download support
-* Properties file config support
-* DB config support
-
-### 0.2.0
-
-* CMS module
-* BLOG module
-
-### 0.1.0
-
-* Basic module
-* Local authentication
-* LDAP authentication
-* CAS authentication
+* [1.0.0.M1](https://github.com/euler-projects/euler-framework/releases/tag/1.0.0.M1)
 
 ## License
 
