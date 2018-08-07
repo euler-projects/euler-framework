@@ -20,6 +20,7 @@
         <authentication-provider user-service-ref="userDetailsService">
             <password-encoder ref="passwordEncoder" />
         </authentication-provider>
+        <authentication-provider ref="customAuthenticationProvider" />
     </authentication-manager>
     
     <beans:bean id="authenticationEntryPoint"  

@@ -37,8 +37,8 @@ import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.exception.NotSupportRobotCheckRequestException;
 import net.eulerframework.web.module.authentication.exception.RobotRequestException;
-import net.eulerframework.web.module.authentication.service.MobileCodeRobotCheckService;
 import net.eulerframework.web.module.authentication.service.RobotCheckService;
+import net.eulerframework.web.module.authentication.service.SmsCodeValidator;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
@@ -58,7 +58,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
     @Autowired(required = false)
     private List<RobotCheckService> robotCheckServices;
     @Autowired(required = false)
-    private MobileCodeRobotCheckService mobileCodeRobotCheckService;
+    private SmsCodeValidator smsCodeValidator;
 
     @RequestMapping(path = "validUsername", method = RequestMethod.GET)
     public void validUsername(@RequestParam String username) {
@@ -106,11 +106,19 @@ public class SignUpAjaxController extends ApiSupportWebController {
     }
     
     @RequestMapping(value = "sendSmsCode") 
-    public void sendSmsCode() {
-        if(this.mobileCodeRobotCheckService == null) {
+    public void sendSmsCode(@RequestParam String mobile) {
+        if(this.smsCodeValidator == null) {
             throw new WebException("sms code was disabled");
         }
-        this.mobileCodeRobotCheckService.sendSmsCode(this.getRequest());
+        this.smsCodeValidator.sendSmsCode(mobile);
+    }
+    
+    @RequestMapping(path = "validSmsCode", method = RequestMethod.GET)
+    public void validSmsCode(@RequestParam String mobile, @RequestParam String smsCode) {
+        if(this.smsCodeValidator == null) {
+            throw new WebException("sms code was disabled");
+        }
+        this.smsCodeValidator.check(mobile, smsCode);
     }
 
     @RequestMapping(
@@ -123,10 +131,15 @@ public class SignUpAjaxController extends ApiSupportWebController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile,
+            @RequestParam(required = false) String smsCode,
             @RequestParam String password, 
             @RequestParam Map<String, Object> extraData) {
         if (SecurityConfig.isSignUpEnabled()) {
             this.isRobotRequest(this.getRequest());
+            
+            if(this.smsCodeValidator != null) {
+                this.smsCodeValidator.check(mobile, smsCode);
+            }
 
             if (extraData != null) {
                 extraData.remove("username");
@@ -158,13 +171,15 @@ public class SignUpAjaxController extends ApiSupportWebController {
         String username = (String) data.get("username");
         String email = (String) data.get("email");
         String mobile = (String) data.get("mobile");
+        String smsCode = (String) data.get("smsCode");
 
         data.remove("username");
         data.remove("email");
         data.remove("mobile");
+        data.remove("smsCode");
         data.remove("password");
 
-        return this.litesignup(username, email, mobile, password, data);
+        return this.litesignup(username, email, mobile, smsCode, password, data);
     }
 
     /**

@@ -29,6 +29,10 @@ import net.eulerframework.web.module.authentication.util.Captcha;
 
 public class CaptchaUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     
+    public static final String EULER_SECURITY_FORM_SMS_CODE_KEY = "smsCode";
+
+    private String smsCodeParameter = EULER_SECURITY_FORM_SMS_CODE_KEY;
+    
     private boolean enableCaptcha = true;
     
     public void setEnableCaptcha(boolean enableCaptcha) {
@@ -53,6 +57,17 @@ public class CaptchaUsernamePasswordAuthenticationFilter extends UsernamePasswor
         } else {
             throw new InternalAuthenticationServiceException("captcha_error");
         }
+    }
+
+    @Override
+    protected String obtainPassword(HttpServletRequest request) {
+        String password = super.obtainPassword(request);
+        
+        if(password == null) {
+            password = request.getParameter(smsCodeParameter);
+        }
+        
+        return password;
     }
 
 }

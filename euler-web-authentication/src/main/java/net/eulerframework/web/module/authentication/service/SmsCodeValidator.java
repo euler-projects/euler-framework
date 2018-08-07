@@ -21,13 +21,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import net.eulerframework.web.module.authentication.exception.NotSupportRobotCheckRequestException;
+import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
 
@@ -35,8 +33,8 @@ import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSen
  * @author cFrost
  *
  */
-public class MobileCodeRobotCheckService implements RobotCheckService {
-    private final static String REDIS_KEY_PERFIX = "EULER_SMS_CODE:";
+public class SmsCodeValidator {
+    private final static String REDIS_KEY_PERFIX = "euler_sms_code:";
     private final static Random RANDOM = new Random();
     private final static DecimalFormat DF = new DecimalFormat("0000");
     private SmsSenderFactory smsSenderFactory;
@@ -77,8 +75,7 @@ public class MobileCodeRobotCheckService implements RobotCheckService {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
-    public void sendSmsCode(HttpServletRequest request) {
-        String mobile = request.getParameter("mobile");
+    public void sendSmsCode(String mobile) {
         Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
         String redisKey = generateRedisKey(mobile);
         String smsCode = this.generateSmsCode();
@@ -99,24 +96,22 @@ public class MobileCodeRobotCheckService implements RobotCheckService {
         return DF.format(RANDOM.nextInt(9999));
     }
 
-    @Override
-    public boolean isRobot(HttpServletRequest request) throws NotSupportRobotCheckRequestException{
-        String mobile = request.getParameter("mobile");
-        String smsCode = request.getParameter("smsCode");
-//        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
-//        Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
-        
-        if(StringUtils.isEmpty(mobile) || StringUtils.isEmpty(smsCode)) {
-            throw new NotSupportRobotCheckRequestException();
-        }
+    public void check(String mobile, String smsCode) throws InvalidSmsCodeException {
+        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
+        Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
 
         String redisKey = generateRedisKey(mobile);
         String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
 
         if (StringUtils.hasText(realSmsCode) && realSmsCode.equalsIgnoreCase(smsCode)) {
-            return false;
+            return;
         }
-        return true;
+        
+        throw new InvalidSmsCodeException();
+    }
+    
+    public class InvalidSmsCodeException extends WebException {
+        
     }
 
 }
