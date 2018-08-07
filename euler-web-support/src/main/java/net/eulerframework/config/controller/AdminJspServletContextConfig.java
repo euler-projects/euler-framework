@@ -1,39 +1,4 @@
-package net.eulerframework.config.controller;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
-import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import net.eulerframework.web.config.WebConfig;
-import net.eulerframework.web.core.annotation.JspController;
-
-@Configuration
-@EnableWebMvc
-@ComponentScan(
-        basePackages = { "**.web.**.controller.admin" }, 
+packages = { "**.web.**.controller.admin" }, 
         useDefaultFilters = false, 
         includeFilters = @ComponentScan.Filter(JspController.class),
         excludeFilters = @ComponentScan.Filter(

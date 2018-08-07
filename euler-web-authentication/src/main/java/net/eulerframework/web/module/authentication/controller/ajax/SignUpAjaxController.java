@@ -1,6 +1,3 @@
-/**
- * 
- */
 package net.eulerframework.web.module.authentication.controller.ajax;
 
 import java.util.List;

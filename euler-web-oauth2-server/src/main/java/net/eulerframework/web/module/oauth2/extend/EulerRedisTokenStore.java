@@ -1,7 +1,3 @@
-/*
- * Copyright 2018 SF Airlines Co., Ltd. All rights reserved.
- * 本文件仅限于顺丰航空有限公司内部传阅，禁止外泄以及用于其他的商业目的。
- */
 package net.eulerframework.web.module.oauth2.extend;
 import java.util.ArrayList;
 import java.util.Collection;

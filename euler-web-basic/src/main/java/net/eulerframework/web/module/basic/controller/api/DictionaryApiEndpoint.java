@@ -1,6 +1,3 @@
-/**
- * 
- */
 package net.eulerframework.web.module.basic.controller.api;
 
 import java.util.List;
