@@ -21,10 +21,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
@@ -33,13 +36,17 @@ import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSen
  * @author cFrost
  *
  */
-public class SmsCodeValidator {
+@Component
+public class SmsCodeValidator extends LogSupport {
     private final static String REDIS_KEY_PERFIX = "euler_sms_code:";
     private final static Random RANDOM = new Random();
     private final static DecimalFormat DF = new DecimalFormat("0000");
-    private SmsSenderFactory smsSenderFactory;
-    private StringRedisTemplate stringRedisTemplate;
     private ExecutorService threadPool = Executors.newFixedThreadPool(4);
+    
+    @Autowired(required = false)
+    private SmsSenderFactory smsSenderFactory = new ConsoleSmsSenderFactory();
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     public class SmsSendThread implements Runnable {
         private String mobile;
@@ -57,22 +64,6 @@ public class SmsCodeValidator {
             this.smsSender.sendSms(mobile, msg);
         }
 
-    }
-
-    public SmsSenderFactory getSmsSenderFactory() {
-        return smsSenderFactory;
-    }
-
-    public void setSmsSenderFactory(SmsSenderFactory smsSenderFactory) {
-        this.smsSenderFactory = smsSenderFactory;
-    }
-
-    public StringRedisTemplate getStringRedisTemplate() {
-        return stringRedisTemplate;
-    }
-
-    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     public void sendSmsCode(String mobile) {
@@ -97,6 +88,11 @@ public class SmsCodeValidator {
     }
 
     public void check(String mobile, String smsCode) throws InvalidSmsCodeException {
+        if(this.smsSenderFactory instanceof ConsoleSmsSenderFactory) {
+            this.logger.info("Sms sender is disabled");
+            return;
+        }
+        
         Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
         Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
 
@@ -108,6 +104,25 @@ public class SmsCodeValidator {
         }
         
         throw new InvalidSmsCodeException();
+    }
+    
+    public class ConsoleSmsSenderFactory implements SmsSenderFactory {
+        private SmsSender sender = new ConsoleSmsSender();
+
+        @Override
+        public SmsSender newSmsSender() {
+            return sender;
+        }
+        
+    }
+    
+    public class ConsoleSmsSender implements SmsSender {
+
+        @Override
+        public void sendSms(String mobile, String msg) {
+            System.out.println("Sms sender is disabled, mobile: " + mobile + " msg: " + msg);
+        }
+        
     }
     
     public class InvalidSmsCodeException extends WebException {

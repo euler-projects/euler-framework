@@ -57,7 +57,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
     private UserRegistService userRegistService;
     @Autowired(required = false)
     private List<RobotCheckService> robotCheckServices;
-    @Autowired(required = false)
+    @Autowired
     private SmsCodeValidator smsCodeValidator;
 
     @RequestMapping(path = "validUsername", method = RequestMethod.GET)
@@ -105,11 +105,8 @@ public class SignUpAjaxController extends ApiSupportWebController {
         }
     }
     
-    @RequestMapping(value = "sendSmsCode") 
+    @RequestMapping(value = "sendSmsCode", method = RequestMethod.POST) 
     public void sendSmsCode(@RequestParam String mobile) {
-        if(this.smsCodeValidator == null) {
-            throw new WebException("sms code was disabled");
-        }
         this.smsCodeValidator.sendSmsCode(mobile);
     }
     
@@ -137,9 +134,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
         if (SecurityConfig.isSignUpEnabled()) {
             this.isRobotRequest(this.getRequest());
             
-            if(this.smsCodeValidator != null) {
-                this.smsCodeValidator.check(mobile, smsCode);
-            }
+            this.smsCodeValidator.check(mobile, smsCode);
 
             if (extraData != null) {
                 extraData.remove("username");
