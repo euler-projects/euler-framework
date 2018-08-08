@@ -47,10 +47,12 @@ public class PasswordServiceImpl implements PasswordService {
     private EulerUserEntityService eulerUserEntityService;
     @Resource
     private JwtEncryptor jwtEncryptor;
-    @Resource
-    private String resetPasswordEmailSubject;
-    @Resource
-    private String resetPasswordEmailContent;
+    @Autowired(required = false)
+    private String resetPasswordEmailSubject = "[Euler Projects] Please reset your password";
+    @Autowired(required = false)
+    private String resetPasswordEmailContent = 
+        "<p>You can use the following link to reset your password in 10 minutes:</p>" +
+        "<p><a href=\"${resetPasswordUrl}\">${resetPasswordUrl}</a></p>";
 
     @Autowired(required = false)
     private ThreadSimpleMailSender threadSimpleMailSender;
