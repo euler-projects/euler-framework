@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import net.eulerframework.common.util.StringUtils;
 import net.eulerframework.web.core.annotation.AjaxController;
 import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.ApiSupportWebController;
@@ -129,12 +130,20 @@ public class SignUpAjaxController extends ApiSupportWebController {
             @RequestParam(required = false) String email, 
             @RequestParam(required = false) String mobile,
             @RequestParam(required = false) String smsCode,
-            @RequestParam String password, 
+            @RequestParam(required = false) String password, 
             @RequestParam Map<String, Object> extraData) {
         if (SecurityConfig.isSignUpEnabled()) {
             this.isRobotRequest(this.getRequest());
             
-            this.smsCodeValidator.check(mobile, smsCode);
+            if(this.smsCodeValidator.isEnabled()) {
+                this.smsCodeValidator.check(mobile, smsCode);
+                if(StringUtils.isEmpty(password)) {
+                    this.logger.info("Sms Code is enabled, use random password when parameter 'password' is not presen");
+                    password = StringUtils.randomString(16);
+                }
+            }
+                
+            Assert.hasText(password, "Required String parameter 'password' is not present");
 
             if (extraData != null) {
                 extraData.remove("username");
@@ -160,13 +169,11 @@ public class SignUpAjaxController extends ApiSupportWebController {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_JSON_UTF8_VALUE })
     public String signupJson(@RequestBody Map<String, Object> data) {
-        String password = (String) data.get("password");
-        Assert.hasText(password, "Required String parameter 'password' is not present");
-
         String username = (String) data.get("username");
         String email = (String) data.get("email");
         String mobile = (String) data.get("mobile");
         String smsCode = (String) data.get("smsCode");
+        String password = (String) data.get("password");
 
         data.remove("username");
         data.remove("email");

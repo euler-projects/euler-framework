@@ -88,7 +88,7 @@ public class SmsCodeValidator extends LogSupport {
     }
 
     public void check(String mobile, String smsCode) throws InvalidSmsCodeException {
-        if(this.smsSenderFactory instanceof ConsoleSmsSenderFactory) {
+        if(!this.isEnabled()) {
             this.logger.info("Sms sender is disabled");
             return;
         }
@@ -104,6 +104,10 @@ public class SmsCodeValidator extends LogSupport {
         }
         
         throw new InvalidSmsCodeException();
+    }
+    
+    public boolean isEnabled() {
+        return !(this.smsSenderFactory instanceof ConsoleSmsSenderFactory);
     }
     
     public class ConsoleSmsSenderFactory implements SmsSenderFactory {
