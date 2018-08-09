@@ -138,6 +138,12 @@ public class SignUpAjaxController extends ApiSupportWebController {
             if(this.smsCodeValidator.isEnabled()) {
                 this.smsCodeValidator.check(mobile, smsCode);
                 if(StringUtils.isEmpty(password)) {
+                    /*
+                     * TODO: 短信验证码注册采用随机密码的方式不完美, 
+                     * 因为这样一来使用验证码注册的用户想设置密码只能通过重置密码功能进行, 
+                     * 体验不完美, 应该采用可以识别出密码没有被设置的方案,
+                     * 但这样子又要考虑如何识别空密码的问题, 需要好好设计, 避免产生漏洞
+                     */
                     this.logger.info("Sms Code is enabled, use random password when parameter 'password' is not presen");
                     password = StringUtils.randomString(16);
                 }
