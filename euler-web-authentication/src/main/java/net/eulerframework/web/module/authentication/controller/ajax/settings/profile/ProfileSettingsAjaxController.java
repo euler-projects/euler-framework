@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.eulerframework.web.core.annotation.AjaxController;
+import net.eulerframework.web.core.annotation.ApiEndpoint;
 import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.module.authentication.context.UserContext;
 import net.eulerframework.web.module.authentication.entity.EulerUserEntity;
@@ -37,6 +38,7 @@ import net.eulerframework.web.module.authentication.service.EulerUserExtraDataSe
  *
  */
 @AjaxController
+@ApiEndpoint
 @RequestMapping("settings")
 public class ProfileSettingsAjaxController extends ApiSupportWebController {
 
