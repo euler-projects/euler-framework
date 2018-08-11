@@ -71,13 +71,18 @@ public class SmsCodeValidator extends LogSupport {
         Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
         String redisKey = generateRedisKey(mobile);
         String smsCode = this.generateSmsCode();
+        int expireMinutes = SecurityConfig.getSignUpSmsCodeExpireMinutes();
 
+        String msg = SecurityConfig.getSignUpSmsCodeTemplate()
+                .replaceAll("\\$\\{sms_code\\}", smsCode)
+                .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
+        
         SmsSender smsSender = this.smsSenderFactory.newSmsSender();
-        SmsSendThread thread = new SmsSendThread(smsSender, mobile, smsCode);
+        SmsSendThread thread = new SmsSendThread(smsSender, mobile, msg);
         this.threadPool.submit(thread);
 
         this.stringRedisTemplate.opsForValue().set(redisKey, smsCode);
-        this.stringRedisTemplate.expire(redisKey, SecurityConfig.getSignUpSmsCodeExpireMinutes(), TimeUnit.MINUTES);
+        this.stringRedisTemplate.expire(redisKey, expireMinutes, TimeUnit.MINUTES);
     }
 
     private String generateRedisKey(String mobile) {
