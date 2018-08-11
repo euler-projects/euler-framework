@@ -54,8 +54,14 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "security.signup.password.format";
         private static final String SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = "security.signup.password.minLength";
         private static final String SECURITY_SIGNUP_AUTO_SIGNIN = "security.signup.autoSignin";
-        private static final String SECURITY_SIGNUP_SMSCODE_TEMPLATE = "security.signup.smscode.template";
-        private static final String SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES = "security.signup.smscode.expire.minutes";
+        
+        private static final String SECURITY_SMSCODE_TEMPLATE_SIGNUP = "security.smscode.template.signup";
+        private static final String SECURITY_SMSCODE_TEMPLATE_SIGNIN = "security.smscode.template.signin";
+        private static final String SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD = "security.smscode.template.resetPassword";
+        
+        private static final String SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNUP = "security.smscode.expire.minutes.signup";
+        private static final String SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNIN = "security.smscode.expire.minutes.signin";
+        private static final String SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD = "security.smscode.expire.minutes.resetPassword";
     }
 
     private static class WebConfigDefault {
@@ -78,8 +84,14 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; // ASCII可显示非空白字符
         private static final int SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = 6;
         private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
-        private static final String SECURITY_SIGNUP_SMSCODE_TEMPLATE = "[Euler Project] Your Sign Up SMS code is ${sms_code}, while exipre in ${expire_minutes} minutes.";
-        private static final int SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES = 10;
+        
+        private static final String SECURITY_SMSCODE_TEMPLATE_SIGNUP = "[Euler Project] Your Sign Up SMS code is ${sms_code}, will exipre in ${expire_minutes} minutes.";
+        private static final String SECURITY_SMSCODE_TEMPLATE_SIGNIN = "[Euler Project] Your Sign In SMS code is ${sms_code}, will exipre in ${expire_minutes} minutes.";
+        private static final String SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD = "[Euler Project] Your reset password SMS code is ${sms_code}, will exipre in ${expire_minutes} minutes.";
+
+        private static final int SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNUP = 10;
+        private static final int SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNIN = 10;
+        private static final int SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD = 10;
 
     }
     
@@ -279,16 +291,40 @@ public abstract class SecurityConfig {
                                 WebConfigDefault.SECURITY_SIGNUP_ENABLE_CAPTCHA));
     }
     
-    public static String getSignUpSmsCodeTemplate() {
-        return (String)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_SMSCODE_TEMPLATE,
+    public static String getSmsCodeTemplateSignUp() {
+        return (String)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SMSCODE_TEMPLATE_SIGNUP,
                 configKey -> properties.get(configKey,
-                        WebConfigDefault.SECURITY_SIGNUP_SMSCODE_TEMPLATE));
+                        WebConfigDefault.SECURITY_SMSCODE_TEMPLATE_SIGNUP));
     }
     
-    public static int getSignUpSmsCodeExpireMinutes() {
-        return (int)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES,
+    public static String getSmsCodeTemplateSignIn() {
+        return (String)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SMSCODE_TEMPLATE_SIGNIN,
+                configKey -> properties.get(configKey,
+                        WebConfigDefault.SECURITY_SMSCODE_TEMPLATE_SIGNIN));
+    }
+    
+    public static String getSmsCodeTemplateResetPassword() {
+        return (String)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD,
+                configKey -> properties.get(configKey,
+                        WebConfigDefault.SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD));
+    }
+    
+    public static int getSmsCodeExpireMinutesSignUp() {
+        return (int)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNUP,
                 configKey -> properties.getIntValue(configKey,
-                        WebConfigDefault.SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES));
+                        WebConfigDefault.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNUP));
+    }
+    
+    public static int getSmsCodeExpireMinutesSignIn() {
+        return (int)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNIN,
+                configKey -> properties.getIntValue(configKey,
+                        WebConfigDefault.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNIN));
+    }
+    
+    public static int getSmsCodeExpireMinutesResetPassword() {
+        return (int)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD,
+                configKey -> properties.getIntValue(configKey,
+                        WebConfigDefault.SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD));
     }
 
     public static boolean isEnableAutoAuthorizeAfterSignup() {

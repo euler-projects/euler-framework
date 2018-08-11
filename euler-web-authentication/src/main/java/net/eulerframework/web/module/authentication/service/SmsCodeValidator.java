@@ -67,15 +67,37 @@ public class SmsCodeValidator extends LogSupport {
 
     }
 
-    public void sendSmsCode(String mobile) {
+    public void sendSmsCode(String mobile, BizCode bizCode) {
         Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
-        String redisKey = generateRedisKey(mobile);
-        String smsCode = this.generateSmsCode();
-        int expireMinutes = SecurityConfig.getSignUpSmsCodeExpireMinutes();
+        Assert.notNull(bizCode, "Required String parameter 'bizCode' is not present");
 
-        String msg = SecurityConfig.getSignUpSmsCodeTemplate()
-                .replaceAll("\\$\\{sms_code\\}", smsCode)
-                .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
+        String smsCode = this.generateSmsCode();
+        String redisKey = this.generateRedisKey(mobile, bizCode);
+        
+        String msg;
+        int expireMinutes;
+        
+        switch(bizCode) {
+        case RESET_PASSWORD:
+            expireMinutes = SecurityConfig.getSmsCodeExpireMinutesResetPassword();
+            msg = SecurityConfig.getSmsCodeTemplateResetPassword()
+                    .replaceAll("\\$\\{sms_code\\}", smsCode)
+                    .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
+            break;
+        case SIGN_IN:
+            expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignIn();
+            msg = SecurityConfig.getSmsCodeTemplateSignIn()
+                    .replaceAll("\\$\\{sms_code\\}", smsCode)
+                    .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
+            break;
+        case SIGN_UP:
+            expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignUp();
+            msg = SecurityConfig.getSmsCodeTemplateSignUp()
+                    .replaceAll("\\$\\{sms_code\\}", smsCode)
+                    .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
+            break;
+        default: return;
+        }
         
         SmsSender smsSender = this.smsSenderFactory.newSmsSender();
         SmsSendThread thread = new SmsSendThread(smsSender, mobile, msg);
@@ -85,15 +107,15 @@ public class SmsCodeValidator extends LogSupport {
         this.stringRedisTemplate.expire(redisKey, expireMinutes, TimeUnit.MINUTES);
     }
 
-    private String generateRedisKey(String mobile) {
-        return REDIS_KEY_PERFIX + mobile;
+    private String generateRedisKey(String mobile, BizCode bizCode) {
+        return REDIS_KEY_PERFIX + bizCode.name().toLowerCase() + ":" + mobile;
     }
 
     private String generateSmsCode() {
         return DF.format(RANDOM.nextInt(9999));
     }
 
-    public void check(String mobile, String smsCode) throws InvalidSmsCodeException {
+    public void check(String mobile, String smsCode, BizCode bizCode) throws InvalidSmsCodeException {
         if(!this.isEnabled()) {
             this.logger.info("Sms sender is disabled");
             return;
@@ -101,8 +123,9 @@ public class SmsCodeValidator extends LogSupport {
         
         Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
         Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
+        Assert.hasText(smsCode, "Required String parameter 'bizCode' is not present");
 
-        String redisKey = generateRedisKey(mobile);
+        String redisKey = this.generateRedisKey(mobile, bizCode);
         String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
 
         if (StringUtils.hasText(realSmsCode) && realSmsCode.equalsIgnoreCase(smsCode)) {
@@ -134,6 +157,10 @@ public class SmsCodeValidator extends LogSupport {
             System.out.println("Sms sender is disabled, mobile: " + mobile + " msg: " + msg);
         }
         
+    }
+    
+    public enum BizCode {
+        SIGN_UP, SIGN_IN, RESET_PASSWORD;
     }
     
     public class InvalidSmsCodeException extends WebException {

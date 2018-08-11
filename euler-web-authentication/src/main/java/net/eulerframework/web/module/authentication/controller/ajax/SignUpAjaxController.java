@@ -40,6 +40,7 @@ import net.eulerframework.web.module.authentication.exception.NotSupportRobotChe
 import net.eulerframework.web.module.authentication.exception.RobotRequestException;
 import net.eulerframework.web.module.authentication.service.RobotCheckService;
 import net.eulerframework.web.module.authentication.service.SmsCodeValidator;
+import net.eulerframework.web.module.authentication.service.SmsCodeValidator.BizCode;
 import net.eulerframework.web.module.authentication.service.UserRegistService;
 import net.eulerframework.web.module.authentication.util.UserDataValidator;
 
@@ -107,16 +108,16 @@ public class SignUpAjaxController extends ApiSupportWebController {
     }
     
     @RequestMapping(value = "sendSmsCode", method = RequestMethod.POST) 
-    public void sendSmsCode(@RequestParam String mobile) {
-        this.smsCodeValidator.sendSmsCode(mobile);
+    public void sendSmsCode(@RequestParam String mobile, @RequestParam BizCode bizCode) {
+        this.smsCodeValidator.sendSmsCode(mobile, bizCode);
     }
     
     @RequestMapping(path = "validSmsCode", method = RequestMethod.GET)
-    public void validSmsCode(@RequestParam String mobile, @RequestParam String smsCode) {
+    public void validSmsCode(@RequestParam String mobile, @RequestParam String smsCode, @RequestParam BizCode bizCode) {
         if(this.smsCodeValidator == null) {
             throw new WebException("sms code was disabled");
         }
-        this.smsCodeValidator.check(mobile, smsCode);
+        this.smsCodeValidator.check(mobile, smsCode, bizCode);
     }
 
     @RequestMapping(
@@ -136,7 +137,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
             this.isRobotRequest(this.getRequest());
             
             if(this.smsCodeValidator.isEnabled()) {
-                this.smsCodeValidator.check(mobile, smsCode);
+                this.smsCodeValidator.check(mobile, smsCode, BizCode.SIGN_UP);
                 if(StringUtils.isEmpty(password)) {
                     /*
                      * TODO: 短信验证码注册采用随机密码的方式不完美, 

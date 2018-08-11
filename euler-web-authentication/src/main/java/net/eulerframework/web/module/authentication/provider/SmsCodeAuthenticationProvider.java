@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import net.eulerframework.web.module.authentication.service.SmsCodeValidator;
+import net.eulerframework.web.module.authentication.service.SmsCodeValidator.BizCode;
 import net.eulerframework.web.module.authentication.service.SmsCodeValidator.InvalidSmsCodeException;
 
 /**
@@ -61,7 +62,7 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
         String presentedPassword = authentication.getCredentials().toString();
         
         try {
-            this.smsCodeValidator.check(mobile, presentedPassword);
+            this.smsCodeValidator.check(mobile, presentedPassword, BizCode.SIGN_IN);
         } catch (InvalidSmsCodeException e) {
             logger.debug("Authentication failed: sms code does not match stored value");
 
@@ -99,7 +100,7 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
     private void mitigateAgainstTimingAttack(String mobile, UsernamePasswordAuthenticationToken authentication) {
         if (authentication.getCredentials() != null) {
             String presentedSmsCode = authentication.getCredentials().toString();
-            this.smsCodeValidator.check(mobile, presentedSmsCode);
+            this.smsCodeValidator.check(mobile, presentedSmsCode, BizCode.SIGN_IN);
         }
     }
 
