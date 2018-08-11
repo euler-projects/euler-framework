@@ -131,7 +131,9 @@ public class SmsCodeValidator extends LogSupport {
     }
     
     public class InvalidSmsCodeException extends WebException {
-        
+        public InvalidSmsCodeException() {
+            super("_INVALID_SMS_CODE");
+        }
     }
 
 }
