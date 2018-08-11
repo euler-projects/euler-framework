@@ -22,6 +22,7 @@ import net.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import net.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import net.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import net.eulerframework.common.util.property.PropertyReader;
+import net.eulerframework.web.config.WebConfig;
 
 public abstract class SecurityConfig {
     protected static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
@@ -80,6 +81,10 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_SMSCODE_TEMPLATE = "[Euler Project] Your Sign Up SMS code is ${sms_code}, while exipre in ${expire_minutes} minutes.";
         private static final int SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES = 10;
 
+    }
+    
+    static {
+        properties.addConfigFile("file:" + WebConfig.getConfigPath());
     }
 
     public static boolean clearSecurityConfigCache() {
