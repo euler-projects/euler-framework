@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.core.exception.web.WebException;
+import net.eulerframework.web.module.authentication.conf.SecurityConfig;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
 
@@ -76,7 +77,7 @@ public class SmsCodeValidator extends LogSupport {
         this.threadPool.submit(thread);
 
         this.stringRedisTemplate.opsForValue().set(redisKey, smsCode);
-        this.stringRedisTemplate.expire(redisKey, 10, TimeUnit.MINUTES);
+        this.stringRedisTemplate.expire(redisKey, SecurityConfig.getSignUpSmsCodeExpireMinutes(), TimeUnit.MINUTES);
     }
 
     private String generateRedisKey(String mobile) {

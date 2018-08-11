@@ -53,6 +53,7 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "security.signup.password.format";
         private static final String SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = "security.signup.password.minLength";
         private static final String SECURITY_SIGNUP_AUTO_SIGNIN = "security.signup.autoSignin";
+        private static final String SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES = "security.signup.smscode.expire.minutes";
     }
 
     private static class WebConfigDefault {
@@ -75,6 +76,7 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; // ASCII可显示非空白字符
         private static final int SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = 6;
         private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
+        private static final int SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES = 10;
 
     }
 
@@ -268,6 +270,12 @@ public abstract class SecurityConfig {
         return (boolean)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_ENABLE_CAPTCHA, 
                 key -> properties.getBooleanValue(key,
                                 WebConfigDefault.SECURITY_SIGNUP_ENABLE_CAPTCHA));
+    }
+    
+    public static int getSignUpSmsCodeExpireMinutes() {
+        return (int)CONFIG_CAHCE.get(WebConfigKey.SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES,
+                configKey -> properties.getIntValue(configKey,
+                        WebConfigDefault.SECURITY_SIGNUP_SMSCODE_EXPIRE_MINUTES));
     }
 
     public static boolean isEnableAutoAuthorizeAfterSignup() {
