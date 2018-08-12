@@ -39,7 +39,7 @@ import net.eulerframework.web.module.authentication.service.EulerUserExtraDataSe
  */
 @AjaxController
 @ApiEndpoint
-@RequestMapping("settings")
+@RequestMapping("settings/profile")
 public class ProfileSettingsAjaxController extends ApiSupportWebController {
 
     @Autowired
@@ -47,7 +47,7 @@ public class ProfileSettingsAjaxController extends ApiSupportWebController {
     @Autowired(required = false) 
     private List<EulerUserExtraDataProcessor> eulerUserExtraDataProcessors;
     
-    @GetMapping("profile")
+    @GetMapping
     public Map<String, Object> findUserProfile() {
         EulerUserEntity userEntity = UserContext.getCurrentUserEntity();
         
@@ -71,7 +71,7 @@ public class ProfileSettingsAjaxController extends ApiSupportWebController {
         return userData;
     }
     
-    @PostMapping("profile")
+    @PostMapping
     public void updataUserProfile(@RequestBody Map<String, Object> data) {
         String userId = UserContext.getCurrentUser().getUserId().toString();
 //        String username = (String) data.get("username");

@@ -33,18 +33,29 @@ public class SpringCloudOAuth2UserContext {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> rawPrincipal = (Map<String, Object>) ((OAuth2Authentication) authentication).getUserAuthentication().getPrincipal();
-            EulerOAuth2UserDetails oauth2User = new EulerOAuth2UserDetails();
-            oauth2User.setUserId((String) rawPrincipal.get("userId"));
-            oauth2User.setUsername((String) rawPrincipal.get("username"));
-            oauth2User.setAccountNonExpired((boolean) rawPrincipal.get("accountNonExpired"));
-            oauth2User.setAccountNonLocked((boolean) rawPrincipal.get("accountNonLocked"));
-            oauth2User.setCredentialsNonExpired((boolean) rawPrincipal.get("credentialsNonExpired"));
-            oauth2User.setEnabled((boolean) rawPrincipal.get("enabled"));
-            return oauth2User;
+            return extracttPrincipal(((OAuth2Authentication) authentication).getUserAuthentication().getPrincipal());
         } catch (Exception e) {
             throw new RuntimeException("Some exception was thrown, Only Euler Web OAuth2 Authentication is supported. Exception: " + e.getMessage(), e);
         }
+    }
+    
+    public static EulerOAuth2UserDetails extracttPrincipal(Object principal) {
+
+        Map<String, Object> rawPrincipal;
+
+        if(OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
+            rawPrincipal = (Map<String, Object>) ((OAuth2Authentication)principal).getPrincipal();
+        } else {
+            rawPrincipal = (Map<String, Object>) principal;
+        }
+
+        EulerOAuth2UserDetails oauth2User = new EulerOAuth2UserDetails();
+        oauth2User.setUserId((String) rawPrincipal.get("userId"));
+        oauth2User.setUsername((String) rawPrincipal.get("username"));
+        oauth2User.setAccountNonExpired((boolean) rawPrincipal.get("accountNonExpired"));
+        oauth2User.setAccountNonLocked((boolean) rawPrincipal.get("accountNonLocked"));
+        oauth2User.setCredentialsNonExpired((boolean) rawPrincipal.get("credentialsNonExpired"));
+        oauth2User.setEnabled((boolean) rawPrincipal.get("enabled"));
+        return oauth2User;
     }
 }

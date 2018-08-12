@@ -44,10 +44,10 @@ public abstract class AbstractStringKeyRedisTemplate<T> extends RedisTemplate<St
     
     protected Jackson2JsonRedisSerializer<T> jackson2JsonRedisSerializer;
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public AbstractStringKeyRedisTemplate() {
         this.jackson2JsonRedisSerializer = 
-                new Jackson2JsonRedisSerializer<T>((Class<T>) JavaObjectUtils.findSuperClassGenricType(this.getClass(), 0));
+                new Jackson2JsonRedisSerializer(JavaObjectUtils.findSuperClassGenricType(this.getClass(), 0));
     }
     
     @Override
