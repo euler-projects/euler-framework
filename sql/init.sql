@@ -124,6 +124,9 @@ INSERT INTO sys_user_group (user_id, group_id) VALUES (
 -- 插入默认管理员权限组与默认管理员权限的关系映射
 INSERT INTO sys_group_authority (group_id, authority) VALUES ('00000000-0000-0000-0000-000000000000', 'ADMIN');
 
+GRANT ALL PRIVILEGES ON db_name.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
 -- ------------------------------------
 -- 基础配置、数据字典、文件上下载模块
 -- ------------------------------------
