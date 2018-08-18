@@ -31,8 +31,8 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
 
     private static final String PROPERTIES_SUFFIX = ".properties";
     private static final String CLASS_PATH_PREFIX = "WEB-INF/classes/";
-    private static final String CLASS_LIB_PATH_PREFIX = "WEB-INF/lib/";
     private static final String JAR_PATH_PREFIX = "jar:";
+    private static final String FILE_PATH_PREFIX = "file:";
     
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -75,6 +75,11 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
                             if(!basenamesList.contains(relativePath)) {
                                 basenamesList.add(relativePath);
                             }
+                        } else if(this.isFilePathFile(realFileName)) {
+                            String relativePath = this.generateFilePathBasename(realFileName);
+                            if(!basenamesList.contains(relativePath)) {
+                                basenamesList.add(relativePath);
+                            }
                         }
                     }
                 } else {
@@ -86,13 +91,20 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
         }
     }
 
-    private String generateJarPathBasename(String realFileName) {        
-        String prefixPath = realFileName.substring(0, realFileName.lastIndexOf(CLASS_LIB_PATH_PREFIX));
-        String relativePath = realFileName.substring(realFileName.lastIndexOf(CLASS_LIB_PATH_PREFIX));
+    private String generateFilePathBasename(String realFileName) {
+        String relativePath = realFileName;
         if(relativePath.indexOf('_') >= 0) {
             relativePath = relativePath.substring(0, relativePath.indexOf('_'));
         }
-        return prefixPath + relativePath;
+        return relativePath;
+    }
+
+    private String generateJarPathBasename(String realFileName) {
+        String relativePath = realFileName;
+        if(relativePath.indexOf('_') >= 0) {
+            relativePath = relativePath.substring(0, relativePath.indexOf('_'));
+        }
+        return relativePath;
     }
 
     private boolean isJarPathFile(String realFileName) {
@@ -112,5 +124,9 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
 
     private boolean isClassPathFile(String realFileName) {
         return realFileName.lastIndexOf(CLASS_PATH_PREFIX) >= 0;
+    }
+
+    private boolean isFilePathFile(String realFileName) {
+        return realFileName.startsWith(FILE_PATH_PREFIX);
     }
 }
