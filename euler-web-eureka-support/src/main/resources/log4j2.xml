@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="off" monitorInterval="1800">
+
+    <!-- <properties>
+        <property name="logPath">D:/logs</property>
+        <property name="logFileName">euler-logs</property>
+    </properties> -->
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-5p %d - %msg @ %l%n" />
+        </Console>
+
+        <!-- <RollingRandomAccessFile name="errorLog"
+            fileName="${logPath}/${logFileName}.log"
+            filePattern="${logPath}/${logFileName}.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%-5p %d - %msg @ %l%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy
+                    size="100 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20" />
+        </RollingRandomAccessFile> -->
+
+    </Appenders>
+    
+    <loggers>
+        <root level="info">
+            <!-- <appender-ref ref="errorLog"/> -->
+            <appender-ref ref="console" />
+        </root>
+        <logger name="net.eulerframework" level="info" />
+    </loggers>
+</configuration>
