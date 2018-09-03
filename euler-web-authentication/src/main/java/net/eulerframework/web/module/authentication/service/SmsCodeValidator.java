@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -30,6 +31,7 @@ import org.springframework.util.StringUtils;
 import net.eulerframework.common.base.log.LogSupport;
 import net.eulerframework.web.core.exception.web.WebException;
 import net.eulerframework.web.module.authentication.conf.SecurityConfig;
+import net.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory;
 import net.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
 
@@ -48,6 +50,8 @@ public class SmsCodeValidator extends LogSupport {
     private SmsSenderFactory smsSenderFactory = new ConsoleSmsSenderFactory();
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private EulerUserEntityService eulerUserEntityService;
 
     public class SmsSendThread implements Runnable {
         private String mobile;
@@ -79,23 +83,38 @@ public class SmsCodeValidator extends LogSupport {
         
         switch(bizCode) {
         case RESET_PASSWORD:
+            try {
+                this.eulerUserEntityService.loadUserByMobile(mobile);
+            } catch (UserNotFoundException userNotFoundException) {
+                throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
+            }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesResetPassword();
             msg = SecurityConfig.getSmsCodeTemplateResetPassword()
                     .replaceAll("\\$\\{sms_code\\}", smsCode)
                     .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
             break;
         case SIGN_IN:
+            try {
+                this.eulerUserEntityService.loadUserByMobile(mobile);
+            } catch (UserNotFoundException userNotFoundException) {
+                throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
+            }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignIn();
             msg = SecurityConfig.getSmsCodeTemplateSignIn()
                     .replaceAll("\\$\\{sms_code\\}", smsCode)
                     .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
             break;
         case SIGN_UP:
-            expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignUp();
-            msg = SecurityConfig.getSmsCodeTemplateSignUp()
-                    .replaceAll("\\$\\{sms_code\\}", smsCode)
-                    .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
-            break;
+            try {
+                this.eulerUserEntityService.loadUserByMobile(mobile);
+            } catch (UserNotFoundException userNotFoundException) {
+                expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignUp();
+                msg = SecurityConfig.getSmsCodeTemplateSignUp()
+                        .replaceAll("\\$\\{sms_code\\}", smsCode)
+                        .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
+                break;
+            }
+            throw new SmsCodeNotSentException("_MOBILE_ALREADY_BE_USED");
         default: return;
         }
         
@@ -166,6 +185,12 @@ public class SmsCodeValidator extends LogSupport {
     public class InvalidSmsCodeException extends WebException {
         public InvalidSmsCodeException() {
             super("_INVALID_SMS_CODE");
+        }
+    }
+    
+    public class SmsCodeNotSentException extends WebException {
+        public SmsCodeNotSentException(String message) {
+            super(message);
         }
     }
 
