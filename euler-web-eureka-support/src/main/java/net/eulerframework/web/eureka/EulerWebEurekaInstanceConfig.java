@@ -16,15 +16,11 @@
 package net.eulerframework.web.eureka;
 
 import com.netflix.appinfo.PropertiesInstanceConfig;
-import com.netflix.discovery.internal.util.Archaius1Utils;
 
 /**
  * @author cFrost
  *
  */
 public class EulerWebEurekaInstanceConfig extends PropertiesInstanceConfig {
-    
-    public EulerWebEurekaInstanceConfig() {
-    }
 
 }
