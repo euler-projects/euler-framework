@@ -1,6 +1,6 @@
 CREATE DATABASE db_name
     DEFAULT CHARACTER SET utf8mb4
-    DEFAULT COLLATE utf8mb4_unicode_ci;
+    DEFAULT COLLATE utf8mb4_bin;
 
 USE db_name;
 
@@ -29,7 +29,7 @@ CREATE TABLE sys_user
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  DEFAULT COLLATE utf8mb4_bin;
 
 -- 权限组表
 CREATE TABLE sys_group
@@ -44,7 +44,7 @@ CREATE TABLE sys_group
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  DEFAULT COLLATE utf8mb4_bin;
 
 -- 权限表
 CREATE TABLE sys_authority
@@ -57,7 +57,7 @@ CREATE TABLE sys_authority
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  DEFAULT COLLATE utf8mb4_bin;
 
 -- 用户-权限组关系表
 CREATE TABLE sys_user_group
@@ -70,7 +70,7 @@ CREATE TABLE sys_user_group
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  DEFAULT COLLATE utf8mb4_bin;
 
 -- 权限组-权限关系表
 CREATE TABLE sys_group_authority
@@ -83,7 +83,7 @@ CREATE TABLE sys_group_authority
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  DEFAULT COLLATE utf8mb4_bin;
   
 CREATE TABLE sys_basic_user_profile
 (
@@ -104,7 +104,7 @@ CREATE TABLE sys_basic_user_profile
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  DEFAULT COLLATE utf8mb4_bin;
 
 -- 插入根用户
 INSERT INTO sys_user (id, username, email, mobile, password, account_non_expired, account_non_locked, credentials_non_expired, enabled, root, regist_time)
@@ -124,7 +124,7 @@ INSERT INTO sys_user_group (user_id, group_id) VALUES (
 -- 插入默认管理员权限组与默认管理员权限的关系映射
 INSERT INTO sys_group_authority (group_id, authority) VALUES ('00000000-0000-0000-0000-000000000000', 'ADMIN');
 
-GRANT ALL PRIVILEGES ON db_name.* TO 'root'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON db_name.* TO 'user'@'host' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 -- ------------------------------------
@@ -144,7 +144,7 @@ CREATE TABLE sys_conf
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci
+  DEFAULT COLLATE utf8mb4_bin
   COMMENT ='配置信息表';
 
 -- 上传文件信息表
@@ -171,5 +171,5 @@ CREATE TABLE basic_uploaded_file
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci
+  DEFAULT COLLATE utf8mb4_bin
   COMMENT ='上传文件记录表';
