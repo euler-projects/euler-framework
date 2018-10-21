@@ -38,7 +38,7 @@ public class UserManageAjaxContorller extends ApiSupportWebController {
 
     @RequestMapping(path="findUserByPage")
     public PageResponse<? extends EulerUserEntity> findUserByPage() {
-        return this.userManageService.findUserByPage(new PageQueryRequest(this.getRequest(), PageQueryRequest.EASYUI_PAGE_INDEX_NAME, PageQueryRequest.EASYUI_PAGE_SIZE_NAME));
+        return this.userManageService.findUserByPage(new PageQueryRequest(this.getRequest()));
     }
     
     @RequestMapping(path="saveOrUpdateUser", method = RequestMethod.POST)

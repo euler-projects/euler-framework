@@ -16,6 +16,7 @@
 package net.eulerframework.web.module.authentication.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import net.eulerframework.web.module.authentication.entity.User;
@@ -25,7 +26,7 @@ import net.eulerframework.web.module.authentication.entity.User;
  *
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
 
     public User findUserById(String userId);
     public User findUserByUsernameIgnoreCase(String username);

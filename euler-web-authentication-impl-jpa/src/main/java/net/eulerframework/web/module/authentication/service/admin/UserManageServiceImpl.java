@@ -16,10 +16,12 @@
 package net.eulerframework.web.module.authentication.service.admin;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +51,13 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
 
     @Override
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
-        List<User> all = this.userRepository.findAll();
-        PageResponse<User> ret = new PageResponse<>(all, all.size(), pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());//this.userDao.pageQuery(pageQueryRequest);
-        //TODO:实现分页
+        Pageable pageable = PageRequest.of(pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
+        Page<User> page = this.userRepository.findAll(pageable);
+        PageResponse<User> ret = new PageResponse<>(
+                page.getContent(), 
+                page.getTotalElements(), 
+                page.getNumber(), 
+                page.getSize());
         if (!ret.getRows().isEmpty()) {
             ret.getRows().forEach(user -> user.eraseCredentials());
         }
