@@ -134,7 +134,7 @@ FLUSH PRIVILEGES;
 -- 配置信息表
 CREATE TABLE sys_conf
 (
-  conf_key         VARCHAR(255) NOT NULL
+  conf_key         VARCHAR(100) NOT NULL
   COMMENT '配置信息键值',
   conf_description VARCHAR(255) COMMENT '配置信息说明',
   enabled          BIT          NOT NULL
@@ -152,7 +152,7 @@ CREATE TABLE basic_uploaded_file
 (
   id                   VARCHAR(36)  NOT NULL
   COMMENT '上传文件ID',
-  archived_filename    VARCHAR(255) NOT NULL
+  archived_filename    VARCHAR(100) NOT NULL
   COMMENT '上传后文件名',
   archived_path_suffix VARCHAR(255) COMMENT '上传保存路径前缀',
   extension            VARCHAR(255) COMMENT '文件扩展名',
@@ -160,14 +160,14 @@ CREATE TABLE basic_uploaded_file
   COMMENT '文件大小',
   md5                  VARCHAR(255) NOT NULL
   COMMENT '文件MD5',
-  original_filename    VARCHAR(255) NOT NULL
+  original_filename    VARCHAR(2000) NOT NULL
   COMMENT '原始文件名',
   uploaded_date        DATETIME     NOT NULL
   COMMENT '上传时刻',
   uploaded_user_id     VARCHAR(255) NOT NULL
   COMMENT '上传用户ID',
   PRIMARY KEY (id),
-  CONSTRAINT UK_BASIC_UPLOADED_FILE_1 UNIQUE (archived_filename)
+  CONSTRAINT UK_BASIC_UPLOADED_FILE_AF UNIQUE (archived_filename)
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
