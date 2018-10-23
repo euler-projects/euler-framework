@@ -15,13 +15,19 @@
  */
 package net.eulerframework.web.module.authentication.service.admin;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
-
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +58,38 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
     @Override
     public PageResponse<User> findUserByPage(PageQueryRequest pageQueryRequest) {
         Pageable pageable = PageRequest.of(pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
-        Page<User> page = this.userRepository.findAll(pageable);
+        
+        Specification<User> spec = new Specification<User>() {
+
+            @Override
+            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                // TODO Auto-generated method stub
+                String username = pageQueryRequest.getQueryValue("username");
+                List<Predicate> p = new ArrayList<>();
+                if(StringUtils.hasText(username))  {
+                    Predicate a = criteriaBuilder.like(criteriaBuilder.upper(root.get("username")), "%" + username.toUpperCase() + "%");
+                    p.add(a);
+                }
+                String email = pageQueryRequest.getQueryValue("email");
+                if(StringUtils.hasText(email))  {
+                    Predicate a = criteriaBuilder.like(criteriaBuilder.upper(root.get("email")), "%" + email.toUpperCase() + "%");
+                    p.add(a);
+                }
+                String mobile = pageQueryRequest.getQueryValue("mobile");
+                if(StringUtils.hasText(mobile))  {
+                    Predicate a = criteriaBuilder.like(criteriaBuilder.upper(root.get("mobile")), "%" + mobile.toUpperCase() + "%");
+                    p.add(a);
+                }
+                if(p.isEmpty()) {
+                    return null;
+                }
+                return criteriaBuilder.or(p.toArray(new Predicate[] {}));
+            }
+            
+        };
+        
+        Page<User> page = this.userRepository.findAll(spec , pageable);
+        //Page<User> page = this.userRepository.findAll(pageable);
         PageResponse<User> ret = new PageResponse<>(
                 page.getContent(), 
                 page.getTotalElements(), 
