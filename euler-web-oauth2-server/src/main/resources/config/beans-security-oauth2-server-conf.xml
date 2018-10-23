@@ -76,6 +76,16 @@
     
     <oauth2:resource-server id="insideOAuthResourceServerFilter" token-services-ref="oauth2AuthorizationServerTokenServices" />
     
+    <http pattern="/oauth/api/**" use-expressions="true" create-session="stateless"
+          entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+
+        <intercept-url pattern="/oauth/api/**" method="OPTIONS" access="permitAll" />
+        <intercept-url pattern="/oauth/api/**" access="isFullyAuthenticated()" />
+        
+        <custom-filter ref="insideOAuthResourceServerFilter" before="PRE_AUTH_FILTER"/>
+        <csrf disabled="true"/>
+    </http>
+    
     <http pattern="/oauth/user_info" use-expressions="true" create-session="stateless"
           entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
 
