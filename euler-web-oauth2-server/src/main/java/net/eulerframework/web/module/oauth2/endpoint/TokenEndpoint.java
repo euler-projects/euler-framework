@@ -36,13 +36,13 @@ public class TokenEndpoint {
     @Resource 
     private TokenStore tokenStore;
     
-    @GetMapping(value = "oauth/tokens/{username}")
+    @GetMapping(value = "oauth/api/token/{username}")
     @ResponseBody
     public Collection<OAuth2AccessToken> userInfo(@PathVariable String username) {
         return this.tokenStore.findTokensByClientIdAndUserName("default", username);
     }
     
-    @DeleteMapping(value = "oauth/token/{access_token}")
+    @DeleteMapping(value = "oauth/api/token/{access_token}")
     @ResponseBody
     public void delToken(@PathVariable("access_token") String accessToken) {
         OAuth2AccessToken oauth2AccessToken = this.tokenStore.readAccessToken(accessToken);
