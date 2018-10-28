@@ -33,9 +33,10 @@ import net.eulerframework.common.util.io.file.SimpleFileIOUtils;
  * @author cFrost
  *
  */
-public abstract class JspDeployListener extends LogSupport implements ServletContextListener {
+public abstract class AbstractJspDeployer extends LogSupport implements ServletContextListener {
 
-    private final static String PAGE_PATH = "META-INF/jsp";
+    private final static String PACKAGE_PAGE_PATH = "META-INF/jsp";
+    private final static String RUNTIME_PAGE_PATH = "WEB-INF/jsp";
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -61,16 +62,16 @@ public abstract class JspDeployListener extends LogSupport implements ServletCon
             while(jes.hasMoreElements()) {
                 JarEntry je = jes.nextElement();
                 
-                if(!je.getName().startsWith(PAGE_PATH) || je.isDirectory()) {
+                if(!je.getName().startsWith(PACKAGE_PAGE_PATH) || je.isDirectory()) {
                     continue;
                 }
                 
                 try(InputStream inputStream = jspJar.getInputStream(je)) {
                     String pagePath = je.getName();
-                    this.logger.info("Load page file: {}/{}", jarFilePath, pagePath);
+                    this.logger.info("Find package page file: {}/{}", jarFilePath, pagePath);
                     
                     String webRootRealPath = sce.getServletContext().getRealPath("/");
-                    String destPath = webRootRealPath + "WEB-INF/jsp" + pagePath.substring(PAGE_PATH.length());
+                    String destPath = webRootRealPath + RUNTIME_PAGE_PATH + pagePath.substring(PACKAGE_PAGE_PATH.length());
                     if (!new File(destPath).exists()) {
                         byte[] result = new byte[inputStream.available()];
 
@@ -79,10 +80,11 @@ public abstract class JspDeployListener extends LogSupport implements ServletCon
                         while ((tempInt = inputStream.read()) != -1) {
                             result[count++] = (byte) tempInt;
                         }
-
-                        System.out.println(new String(result));
+                        
+                        SimpleFileIOUtils.writeFile(destPath, result, false);
+                        this.logger.info("Page file deployed: {}/{} -> {}", jarFilePath, pagePath, destPath);
                     } else {
-                        this.logger.info("Load page file: {}", pagePath.substring(PAGE_PATH.length()));
+                        this.logger.info("Page file existed, deploy ignored: {}/{}", jarFilePath, pagePath);
                     }
                 } 
             }
