@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.eulerframework</groupId>
+        <groupId>org.eulerframework</groupId>
         <artifactId>euler-parent</artifactId>
-        <version>4-SNAPSHOT</version>
+        <version>4</version>
     </parent>
 
     <artifactId>euler-framework</artifactId>
