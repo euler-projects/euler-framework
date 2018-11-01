@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import net.eulerframework.web.core.annotation.ApiEndpoint;
-import net.eulerframework.web.core.base.controller.AbstractApiEndpoint;
+import net.eulerframework.web.core.base.controller.ApiSupportWebController;
 import net.eulerframework.web.module.basic.entity.Dictionary;
 import net.eulerframework.web.module.basic.htservice.DictionaryService;
 
@@ -35,7 +35,7 @@ import net.eulerframework.web.module.basic.htservice.DictionaryService;
  */
 @ApiEndpoint
 @RequestMapping("/dict")
-public class DictionaryApiEndpoint extends AbstractApiEndpoint {
+public class DictionaryApiEndpoint extends ApiSupportWebController {
     
     @Resource DictionaryService dictionaryService;
     
