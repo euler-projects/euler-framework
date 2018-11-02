@@ -10,11 +10,11 @@
                                  http://www.springframework.org/schema/security/oauth2
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
 
-    <beans:bean id="oauth2AuthorizationServerTokenStore" class="net.eulerframework.web.module.oauth2.extend.EulerRedisTokenStore">
+    <beans:bean id="oauth2AuthorizationServerTokenStore" class="org.eulerframework.web.module.oauth2.extend.EulerRedisTokenStore">
         <beans:constructor-arg ref="jedisConnectionFactory" />
     </beans:bean>
 
-    <beans:bean id="oauth2AuthorizationServerTokenServices" class="net.eulerframework.web.module.oauth2.extend.EulerTokenServices">
+    <beans:bean id="oauth2AuthorizationServerTokenServices" class="org.eulerframework.web.module.oauth2.extend.EulerTokenServices">
         <beans:property name="tokenStore" ref="oauth2AuthorizationServerTokenStore" />
         <beans:property name="clientDetailsService" ref="clientDetailsService" />
         <beans:property name="supportRefreshToken" value="true" />

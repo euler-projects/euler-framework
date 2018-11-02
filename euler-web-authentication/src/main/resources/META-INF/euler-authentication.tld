@@ -12,7 +12,7 @@
     <function>
         <description>Reverses the characters in the given String</description>
         <name>userIdtoUserame</name>
-        <function-class>net.eulerframework.web.module.authentication.util.SecurityTag</function-class>
+        <function-class>org.eulerframework.web.module.authentication.util.SecurityTag</function-class>
         <function-signature>java.lang.String userIdtoUserame( java.lang.String )</function-signature>
     </function>
 
