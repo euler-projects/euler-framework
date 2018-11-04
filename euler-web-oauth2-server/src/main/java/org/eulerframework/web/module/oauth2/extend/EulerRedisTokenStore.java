@@ -175,10 +175,22 @@ public class EulerRedisTokenStore implements TokenStore {
 
 		RedisConnection conn = getConnection();
 		try {
+            byte[] existingAccessToken = conn.get(accessKey);
 			conn.openPipeline();
 			conn.set(accessKey, serializedAccessToken);
 			conn.set(authKey, serializedAuth);
 			conn.set(authToAccessKey, serializedAccessToken);
+
+            /*
+             * Token Service有时会把已有的Token重新存储，这时候需要把原来的值从列表中删除
+             */
+			if(existingAccessToken != null && existingAccessToken.length > 0) {
+	            if (!authentication.isClientOnly()) {
+	                conn.lRem(approvalKey, 1, existingAccessToken);
+	            }
+	            conn.lRem(clientId, 1, existingAccessToken);
+			}
+			
 			if (!authentication.isClientOnly()) {
 				conn.rPush(approvalKey, serializedAccessToken);
 			}

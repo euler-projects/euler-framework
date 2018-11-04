@@ -18,6 +18,7 @@ package org.eulerframework.web.module.oauth2.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +145,9 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
 
         @Override
         public Map<String, Object> getAdditionalInformation() {
-            return null;
+            Map<String, Object> ret = new HashMap<>();
+            ret.put("multiLogin", true);
+            return ret;
         }
 
         @Override
