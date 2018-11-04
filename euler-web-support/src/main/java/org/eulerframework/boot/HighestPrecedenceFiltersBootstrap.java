@@ -76,6 +76,7 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
                 null, 
                 false, 
                 "/ajax/*", 
+                "/oauth/*", 
                 WebConfig.getAdminRootPath() + "/ajax/*",
                 WebConfig.getApiRootPath() + "/*");
     }

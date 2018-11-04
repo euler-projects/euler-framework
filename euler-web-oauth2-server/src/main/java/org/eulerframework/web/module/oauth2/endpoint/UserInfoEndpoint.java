@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpoint;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -34,9 +35,11 @@ import org.eulerframework.web.module.oauth2.vo.UserInfo;
  *
  */
 @FrameworkEndpoint
+@RequestMapping("oauth/user_info")
+@ResponseBody
 public class UserInfoEndpoint {
-    @RequestMapping(value = "oauth/user_info")
-    @ResponseBody
+    
+    @GetMapping
     public UserInfo userInfo() {
         EulerUserDetails userDetails = UserContext.getCurrentUser();
         OAuth2User user = new OAuth2User();
