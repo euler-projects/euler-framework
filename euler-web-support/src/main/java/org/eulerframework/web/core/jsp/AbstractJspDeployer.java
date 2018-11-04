@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.core.listener;
+package org.eulerframework.web.core.jsp;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +40,10 @@ public abstract class AbstractJspDeployer extends LogSupport implements ServletC
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        this.deployJsps(sce);
+    }
+    
+    protected void deployJsps(ServletContextEvent sce) {
         this.logger.info("Jar deployer was found: {}", this.getClass().getName());
         
         /**
