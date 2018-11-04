@@ -15,15 +15,18 @@
  */
 package org.eulerframework.web.module.oauth2.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
+import org.eulerframework.web.core.base.request.PageQueryRequest;
+import org.eulerframework.web.core.base.response.PageResponse;
 import org.eulerframework.web.module.oauth2.entity.EulerOAuth2ClientEntity;
 import org.eulerframework.web.module.oauth2.enums.GrantType;
 
@@ -40,12 +43,24 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
     }
     
     @Override
-    public EulerOAuth2ClientEntity loadClientById(String clientId) {
+    public DefaultOAuth2ClientEntity loadClientById(String clientId) {
         if(defaultOAuth2ClientEntity.getClientId().equals(clientId)) {
             return defaultOAuth2ClientEntity;
         }
         
         return null;
+    }
+    
+    @Override
+    public PageResponse<DefaultOAuth2ClientEntity> findClientsByPage(PageQueryRequest pageQueryRequest) {
+        if(pageQueryRequest.getPageIndex() == 0 && pageQueryRequest.getPageSize() > 0) {
+            List<DefaultOAuth2ClientEntity> ret = new ArrayList<>();
+            DefaultOAuth2ClientEntity data = new DefaultOAuth2ClientEntity();
+            data.eraseCredentials();
+            ret.add(data);
+            return new PageResponse<>(ret, 1, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
+        }
+        return new PageResponse<>(new ArrayList<>(), 1, pageQueryRequest.getPageIndex(), pageQueryRequest.getPageSize());
     }
     
     public class DefaultOAuth2ClientEntity implements EulerOAuth2ClientEntity{
@@ -63,7 +78,7 @@ public class MockOAuth2ClientEntityService implements EulerOAuth2ClientEntitySer
         
         @Override
         public void eraseCredentials() {
-            
+            this.clientScrect = null;
         }
 
         @Override

@@ -15,6 +15,8 @@
  */
 package org.eulerframework.web.module.oauth2.service;
 
+import org.eulerframework.web.core.base.request.PageQueryRequest;
+import org.eulerframework.web.core.base.response.PageResponse;
 import org.eulerframework.web.module.oauth2.entity.EulerOAuth2ClientEntity;
 
 /**
@@ -24,5 +26,7 @@ import org.eulerframework.web.module.oauth2.entity.EulerOAuth2ClientEntity;
 public interface EulerOAuth2ClientEntityService {
 
     EulerOAuth2ClientEntity loadClientById(String clientId);
+    
+    PageResponse<? extends EulerOAuth2ClientEntity> findClientsByPage(PageQueryRequest pageQueryRequest);
     
 }
