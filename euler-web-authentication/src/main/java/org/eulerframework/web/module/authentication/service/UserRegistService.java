@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import org.eulerframework.common.util.StringUtils;
+import org.eulerframework.web.module.authentication.conf.SecurityConfig;
 import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import org.eulerframework.web.module.authentication.entity.EulerUserProfileEntity;
 import org.eulerframework.web.module.authentication.exception.UserInfoCheckWebException;
@@ -84,10 +85,14 @@ public abstract class UserRegistService {
     }
     
     private String randomUsername() {
-        String perfix = INTERESTING_NAMES[random.nextInt(INTERESTING_NAMES.length)];
-        String suffix = UUID.randomUUID().toString().substring(0, 8) + UUID.randomUUID().toString().substring(14, 18);
+        String username = UUID.randomUUID().toString().substring(0, 8) + UUID.randomUUID().toString().substring(14, 18);
         
-        return perfix + "_" + suffix;
+        if(SecurityConfig.isEnableInterestingRandomUsernamePrefix()) {
+            String perfix = INTERESTING_NAMES[random.nextInt(INTERESTING_NAMES.length)];
+            return perfix + "_" + username;
+        }
+        
+        return username;
     }
     
     /**

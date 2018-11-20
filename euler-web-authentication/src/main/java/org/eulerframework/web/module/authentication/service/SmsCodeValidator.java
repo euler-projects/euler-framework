@@ -187,8 +187,9 @@ public class SmsCodeValidator extends LogSupport {
     }
     
     public boolean isEnabled() {
+        return true;
         //TODO: 判定启用的逻辑不完备, 如果开发者的实现类也是不想启用短信验证码功能的类怎么处理?
-        return !(this.smsSenderFactory instanceof ConsoleSmsSenderFactory);
+        //return !(this.smsSenderFactory instanceof ConsoleSmsSenderFactory);
     }
     
     public class ConsoleSmsSenderFactory implements SmsSenderFactory {

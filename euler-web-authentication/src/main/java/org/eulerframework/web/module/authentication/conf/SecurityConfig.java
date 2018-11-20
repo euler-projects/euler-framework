@@ -55,6 +55,7 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = "security.signup.password.minLength";
         private static final String SECURITY_SIGNUP_AUTO_SIGNIN = "security.signup.autoSignin";
         private static final String SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP = "security.signup.enableMobileAutoSignup";
+        private static final String SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX = "security.signup.enableInterestingUsernamePrefix";
         
         private static final String SECURITY_SMSCODE_TEMPLATE_SIGNUP = "security.smscode.template.signup";
         private static final String SECURITY_SMSCODE_TEMPLATE_SIGNIN = "security.smscode.template.signin";
@@ -80,6 +81,7 @@ public abstract class SecurityConfig {
         private static final boolean SECURITY_SIGNUP_ENABLED = true;
         private static final boolean SECURITY_SIGNUP_ENABLE_CAPTCHA = true;
         private static final boolean SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP = false;
+        private static final boolean SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX = true;
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; // 至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; // 可含有-_.的email
         private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "^[0-9\\+][0-9\\-]+[0-9]$"; //以数字或+开头，后续可含有数字或-，以数字结束
@@ -346,6 +348,15 @@ public abstract class SecurityConfig {
         return (boolean)CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP, 
                 key -> properties.getBooleanValue(key,
                                 ConfigDefault.SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP));
+    }
+
+    /**
+     * @return
+     */
+    public static boolean isEnableInterestingRandomUsernamePrefix() {
+        return (boolean)CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX, 
+                key -> properties.getBooleanValue(key,
+                                ConfigDefault.SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX));
     }
 
 }
