@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.module.authentication.conf.SecurityConfig;
+import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import org.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import org.eulerframework.web.module.authentication.util.SmsSenderFactory;
 import org.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
@@ -83,7 +84,10 @@ public class SmsCodeValidator extends LogSupport {
         switch(bizCode) {
         case RESET_PASSWORD:
             try {
-                this.eulerUserEntityService.loadUserByMobile(mobile);
+                EulerUserEntity userEntity = this.eulerUserEntityService.loadUserByMobile(mobile);
+                if(!userEntity.isEnabled()) {
+                    throw new SmsCodeNotSentException("_USER_IS_BLOCKED");
+                }
             } catch (UserNotFoundException userNotFoundException) {
                 throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
             }
@@ -94,9 +98,16 @@ public class SmsCodeValidator extends LogSupport {
             break;
         case SIGN_IN:
             try {
-                this.eulerUserEntityService.loadUserByMobile(mobile);
+                EulerUserEntity userEntity = this.eulerUserEntityService.loadUserByMobile(mobile);
+                if(!userEntity.isEnabled()) {
+                    throw new SmsCodeNotSentException("_USER_IS_BLOCKED");
+                }
             } catch (UserNotFoundException userNotFoundException) {
-                throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
+                if(SecurityConfig.isEnableMobileAutoSignup()) {
+                    this.logger.info("Mobile {} not exists but mobile auto sign up enabled, send the code for one key sign up.", mobile);
+                } else {
+                    throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
+                }
             }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignIn();
             msg = SecurityConfig.getSmsCodeTemplateSignIn()
@@ -141,13 +152,35 @@ public class SmsCodeValidator extends LogSupport {
         
         Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
         Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
-        Assert.hasText(smsCode, "Required String parameter 'bizCode' is not present");
+        Assert.notNull(bizCode, "Required String parameter 'bizCode' is not present");
 
         String redisKey = this.generateRedisKey(mobile, bizCode);
         String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
 
         if (StringUtils.hasText(realSmsCode) && realSmsCode.equalsIgnoreCase(smsCode)) {
             return;
+        }
+        
+        throw new InvalidSmsCodeException();
+    }
+    
+    public void check(String mobile, String smsCode, BizCode... bizCodes) throws InvalidSmsCodeException {
+        if(!this.isEnabled()) {
+            this.logger.info("Sms sender is disabled");
+            return;
+        }
+        
+        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
+        Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
+        Assert.notEmpty(bizCodes, "Required String parameter 'bizCodes' is not present");
+
+        for(BizCode bizCode : bizCodes) {
+            String redisKey = this.generateRedisKey(mobile, bizCode);
+            String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
+
+            if (StringUtils.hasText(realSmsCode) && realSmsCode.equalsIgnoreCase(smsCode)) {
+                return;
+            }
         }
         
         throw new InvalidSmsCodeException();

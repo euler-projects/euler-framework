@@ -23,10 +23,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
+import org.eulerframework.common.util.StringUtils;
+import org.eulerframework.web.module.authentication.conf.SecurityConfig;
+import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
+import org.eulerframework.web.module.authentication.principal.EulerUserDetails;
 import org.eulerframework.web.module.authentication.service.SmsCodeValidator;
 import org.eulerframework.web.module.authentication.service.SmsCodeValidator.BizCode;
 import org.eulerframework.web.module.authentication.service.SmsCodeValidator.InvalidSmsCodeException;
+import org.eulerframework.web.module.authentication.service.UserRegistService;
 
 /**
  * @author cFrost
@@ -37,6 +41,8 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
     private SmsCodeValidator smsCodeValidator;
 
     private UserDetailsService userDetailsService;
+    
+    private UserRegistService userRegistService;
 
     public void setSmsCodeValidator(SmsCodeValidator smsCodeValidator) {
         this.smsCodeValidator = smsCodeValidator;
@@ -85,9 +91,28 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
             return loadedUser;
         }
         catch (UsernameNotFoundException ex) {
-            String mobile = authentication.getPrincipal().toString();
-            mitigateAgainstTimingAttack(mobile, authentication);
-            throw ex;
+            
+            if(SecurityConfig.isEnableMobileAutoSignup()) {
+                String mobile = authentication.getPrincipal().toString();
+                String presentedPassword = authentication.getCredentials().toString();
+                
+                try {
+                    this.smsCodeValidator.check(mobile, presentedPassword, BizCode.SIGN_IN);
+                    /*
+                     * TODO: 此处代码与SignUpAjaxController重复, 需改进
+                     */
+                    String password = StringUtils.randomString(16);
+                    EulerUserEntity eulerUserEntity = this.userRegistService.signUp(null, null, mobile, password);
+                    return new EulerUserDetails(eulerUserEntity);
+                } catch (InvalidSmsCodeException e) {
+                    throw ex;
+                }
+                
+            } else {
+                mitigateAgainstTimingAttack(authentication);
+                throw ex;
+            }
+            
         }
         catch (InternalAuthenticationServiceException ex) {
             throw ex;
@@ -97,7 +122,8 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
         }
     }
 
-    private void mitigateAgainstTimingAttack(String mobile, UsernamePasswordAuthenticationToken authentication) {
+    private void mitigateAgainstTimingAttack(UsernamePasswordAuthenticationToken authentication) {
+        String mobile = authentication.getPrincipal().toString();
         if (authentication.getCredentials() != null) {
             String presentedSmsCode = authentication.getCredentials().toString();
             this.smsCodeValidator.check(mobile, presentedSmsCode, BizCode.SIGN_IN);
@@ -110,6 +136,14 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
 
     protected UserDetailsService getUserDetailsService() {
         return userDetailsService;
+    }
+
+    public UserRegistService getUserRegistService() {
+        return userRegistService;
+    }
+
+    public void setUserRegistService(UserRegistService userRegistService) {
+        this.userRegistService = userRegistService;
     }
 
 }
