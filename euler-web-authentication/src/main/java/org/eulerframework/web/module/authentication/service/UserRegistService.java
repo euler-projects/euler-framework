@@ -90,9 +90,10 @@ public abstract class UserRegistService {
         if(SecurityConfig.isEnableInterestingRandomUsernamePrefix()) {
             String perfix = INTERESTING_NAMES[random.nextInt(INTERESTING_NAMES.length)];
             return perfix + "_" + username;
+        } else {
+            //前面加一个随机字母避免无法通过用户名格式校验
+            return (char)(random.nextInt(26)+97) + username;
         }
-        
-        return username;
     }
     
     /**
