@@ -15,9 +15,11 @@
  */
 package org.eulerframework.web.module.authentication.controller.ajax.settings.profile;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +60,7 @@ public class ProfileSettingsAjaxController extends ApiSupportWebController {
         userData.put("email", userEntity.getEmail());
         userData.put("mobile", userEntity.getMobile());
         
-        for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : this.eulerUserExtraDataProcessors) {
+        for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : Optional.ofNullable(this.eulerUserExtraDataProcessors).orElse(Collections.emptyList())) {
             Map<String, Object> extraData = eulerUserExtraDataProcessor.loadExtraData(userEntity.getUserId());
             
             if(extraData != null) {
