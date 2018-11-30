@@ -32,8 +32,7 @@ import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.module.authentication.conf.SecurityConfig;
 import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import org.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import org.eulerframework.web.module.authentication.util.SmsSenderFactory;
-import org.eulerframework.web.module.authentication.util.SmsSenderFactory.SmsSender;
+import org.eulerframework.web.module.authentication.service.SmsCodeValidator.SmsCaptchaSenderFactory.SmsCaptchaSender;
 
 /**
  * @author cFrost
@@ -47,26 +46,30 @@ public class SmsCodeValidator extends LogSupport {
     private ExecutorService threadPool = Executors.newFixedThreadPool(4);
     
     @Autowired(required = false)
-    private SmsSenderFactory smsSenderFactory = new ConsoleSmsSenderFactory();
+    private SmsCaptchaSenderFactory smsSenderFactory = new ConsoleSmsSenderFactory();
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private EulerUserEntityService eulerUserEntityService;
 
     public class SmsSendThread implements Runnable {
+        private BizCode bizCode;
         private String mobile;
-        private String msg;
-        private SmsSender smsSender;
+        private String captcha;
+        private int expireMinutes;
+        private SmsCaptchaSender smsCaptchaSender;
 
-        public SmsSendThread(SmsSender smsSender, String mobile, String msg) {
+        public SmsSendThread(SmsCaptchaSender smsCaptchaSender, BizCode bizCode, String mobile, String captcha, int expireMinutes) {
+            this.smsCaptchaSender = smsCaptchaSender;
+            this.bizCode = bizCode;
             this.mobile = mobile;
-            this.msg = msg;
-            this.smsSender = smsSender;
+            this.captcha = captcha;
+            this.expireMinutes = expireMinutes;
         }
 
         @Override
         public void run() {
-            this.smsSender.sendSms(mobile, msg);
+            this.smsCaptchaSender.sendSms(bizCode, mobile, captcha, expireMinutes);
         }
 
     }
@@ -78,7 +81,7 @@ public class SmsCodeValidator extends LogSupport {
         String smsCode = this.generateSmsCode();
         String redisKey = this.generateRedisKey(mobile, bizCode);
         
-        String msg;
+        SmsCaptchaSender smsCaptchaSender = this.smsSenderFactory.newSmsCaptchaSender();
         int expireMinutes;
         
         switch(bizCode) {
@@ -92,9 +95,6 @@ public class SmsCodeValidator extends LogSupport {
                 throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
             }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesResetPassword();
-            msg = SecurityConfig.getSmsCodeTemplateResetPassword()
-                    .replaceAll("\\$\\{sms_code\\}", smsCode)
-                    .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
             break;
         case SIGN_IN:
             try {
@@ -110,26 +110,19 @@ public class SmsCodeValidator extends LogSupport {
                 }
             }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignIn();
-            msg = SecurityConfig.getSmsCodeTemplateSignIn()
-                    .replaceAll("\\$\\{sms_code\\}", smsCode)
-                    .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
             break;
         case SIGN_UP:
             try {
                 this.eulerUserEntityService.loadUserByMobile(mobile);
             } catch (UserNotFoundException userNotFoundException) {
                 expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignUp();
-                msg = SecurityConfig.getSmsCodeTemplateSignUp()
-                        .replaceAll("\\$\\{sms_code\\}", smsCode)
-                        .replaceAll("\\$\\{expire_minutes\\}", String.valueOf(expireMinutes));
                 break;
             }
             throw new SmsCodeNotSentException("_MOBILE_ALREADY_BE_USED");
         default: return;
         }
         
-        SmsSender smsSender = this.smsSenderFactory.newSmsSender();
-        SmsSendThread thread = new SmsSendThread(smsSender, mobile, msg);
+        SmsSendThread thread = new SmsSendThread(smsCaptchaSender, bizCode, mobile, smsCode, expireMinutes);
         this.threadPool.submit(thread);
 
         this.stringRedisTemplate.opsForValue().set(redisKey, smsCode);
@@ -192,21 +185,38 @@ public class SmsCodeValidator extends LogSupport {
         //return !(this.smsSenderFactory instanceof ConsoleSmsSenderFactory);
     }
     
-    public class ConsoleSmsSenderFactory implements SmsSenderFactory {
-        private SmsSender sender = new ConsoleSmsSender();
-
-        @Override
-        public SmsSender newSmsSender() {
-            return sender;
-        }
+    /**
+     * 用于在发送短信前生成新的短信发送实现类实例，工厂实现类可自行决定是否采用单例模式。
+     * 
+     * @author cFrost
+     *
+     */
+    public interface SmsCaptchaSenderFactory{
         
+        abstract public SmsCaptchaSender newSmsCaptchaSender();
+        
+        public interface SmsCaptchaSender {
+            public void sendSms(BizCode bizCode, String mobile, String captcha, int expireMinutes);
+        }
     }
     
-    public class ConsoleSmsSender implements SmsSender {
+    public class ConsoleSmsSenderFactory implements SmsCaptchaSenderFactory {
+        private SmsCaptchaSender sender = new ConsoleSmsCaptchaSender();
 
         @Override
-        public void sendSms(String mobile, String msg) {
-            System.out.println("Sms sender is disabled, mobile: " + mobile + " msg: " + msg);
+        public SmsCaptchaSender newSmsCaptchaSender() {
+            return sender;
+        }
+    }
+    
+    public class ConsoleSmsCaptchaSender implements SmsCaptchaSender {
+
+        @Override
+        public void sendSms(BizCode bizCode, String mobile, String captcha, int expireMinutes) {
+            System.out.println(
+                    String.format(
+                            "Sms sender is disabled, bizCode: %s mobile: %s captcha: %s expireMinutes: %d", 
+                            bizCode, mobile, captcha, expireMinutes));
         }
         
     }
