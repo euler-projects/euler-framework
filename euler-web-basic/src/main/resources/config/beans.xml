@@ -13,13 +13,13 @@
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
-    <bean id="configDao" class="net.eulerframework.web.module.basic.dao.ConfigDao">
+    <bean id="configDao" class="org.eulerframework.web.module.basic.dao.ConfigDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="dictionaryDao" class="net.eulerframework.web.module.basic.dao.DictionaryDao">
+    <bean id="dictionaryDao" class="org.eulerframework.web.module.basic.dao.DictionaryDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    <bean id="dictionaryCodeDao" class="net.eulerframework.web.module.basic.dao.DictionaryCodeDao">
+    <bean id="dictionaryCodeDao" class="org.eulerframework.web.module.basic.dao.DictionaryCodeDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 </beans>

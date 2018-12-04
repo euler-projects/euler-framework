@@ -2,9 +2,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>net.eulerframework</groupId>
+        <groupId>org.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>1.0.0.M1</version>
+        <version>1.0.0.M2</version>
     </parent>
     <artifactId>euler-web-orm-jpa</artifactId>
     <name>Euler ORM JPA</name>
@@ -16,10 +16,6 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
             <version>2.0.4.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

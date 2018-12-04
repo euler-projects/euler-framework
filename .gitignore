@@ -11,3 +11,4 @@ pom.xml.versionsBackup
 #IDEA
 .idea/
 *.iml
+.DS_Store

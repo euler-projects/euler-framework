@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                 http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+                                 http://www.springframework.org/schema/security
+                                 http://www.springframework.org/schema/security/spring-security-4.2.xsd
+                                 http://www.springframework.org/schema/security/oauth2
+                                 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+
+    <beans:bean id="oauth2AuthorizationServerTokenStore" class="org.eulerframework.web.module.oauth2.extend.EulerRedisTokenStore">
+        <beans:constructor-arg ref="jedisConnectionFactory" />
+    </beans:bean>
+
+    <beans:bean id="oauth2AuthorizationServerTokenServices" class="org.eulerframework.web.module.oauth2.extend.EulerTokenServices">
+        <beans:property name="tokenStore" ref="oauth2AuthorizationServerTokenStore" />
+        <beans:property name="clientDetailsService" ref="clientDetailsService" />
+        <beans:property name="supportRefreshToken" value="true" />
+        <beans:property name="reuseRefreshToken" value="false" />
+    </beans:bean>
+
+    <beans:bean id="oauth2AuthorizationServerClientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+        <beans:constructor-arg ref="clientDetailsService" />
+        <beans:property name="passwordEncoder" ref="passwordEncoder" />
+    </beans:bean>
+
+    <beans:bean id="oauth2AuthorizationServerAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint" />
+
+    <authentication-manager id="oauth2AuthorizationServerAuthenticationManager">
+        <authentication-provider user-service-ref="oauth2AuthorizationServerClientDetailsUserService">
+            <password-encoder ref="passwordEncoder" />
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="oauth2AuthorizationServerUserApprovalHandler" class="org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler">
+        <beans:property name="tokenStore" ref="oauth2AuthorizationServerTokenStore" />
+        <beans:property name="clientDetailsService" ref="clientDetailsService" />
+        <beans:property name="requestFactory">
+            <beans:bean class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
+                <beans:constructor-arg ref="clientDetailsService" />
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
+
+    <beans:bean id="oauth2AuthorizationServerAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+
+    <oauth2:authorization-server token-services-ref="oauth2AuthorizationServerTokenServices"
+        client-details-service-ref="clientDetailsService" user-approval-handler-ref="oauth2AuthorizationServerUserApprovalHandler"
+        user-approval-page="authentication/authorize" error-page="authentication/error" check-token-enabled="true">
+        <oauth2:authorization-code />
+        <oauth2:implicit />
+        <oauth2:refresh-token />
+        <oauth2:client-credentials />
+        <oauth2:password />
+    </oauth2:authorization-server>
+
+    <http pattern="/oauth/token" use-expressions="true" create-session="stateless"
+        authentication-manager-ref="oauth2AuthorizationServerAuthenticationManager" entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+        <intercept-url pattern="/oauth/token" access="isFullyAuthenticated()" />
+        <http-basic />
+        <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler" />
+        <csrf disabled="true" />
+    </http>
+
+    <http pattern="/oauth/check_token" use-expressions="true" create-session="stateless"
+        authentication-manager-ref="oauth2AuthorizationServerAuthenticationManager" entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+
+        <intercept-url pattern="/oauth/check_token" method="OPTIONS" access="permitAll" />
+        <intercept-url pattern="/oauth/check_token" access="isFullyAuthenticated()" />
+        <http-basic />
+        <access-denied-handler ref="oauth2AuthorizationServerAccessDeniedHandler" />
+        <csrf disabled="true" />
+    </http>
+    
+    <oauth2:resource-server id="insideOAuthResourceServerFilter" token-services-ref="oauth2AuthorizationServerTokenServices" />
+    
+    <http pattern="/oauth/**" use-expressions="true" create-session="stateless"
+          entry-point-ref="oauth2AuthorizationServerAuthenticationEntryPoint">
+
+        <intercept-url pattern="/oauth/**" method="OPTIONS" access="permitAll" />
+        
+        <intercept-url pattern="/oauth/user_info" access="isFullyAuthenticated()" />
+        <intercept-url pattern="/oauth/**" access="hasAnyAuthority('ADMIN', 'ROOT')" />
+        
+        <custom-filter ref="insideOAuthResourceServerFilter" before="PRE_AUTH_FILTER"/>
+        <csrf disabled="true"/>
+    </http>
+
+</beans:beans>

@@ -4,14 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.eulerframework</groupId>
+        <groupId>org.eulerframework</groupId>
         <artifactId>euler-parent</artifactId>
-        <version>3</version>
-        <relativePath />
+        <version>4</version>
     </parent>
 
     <artifactId>euler-framework</artifactId>
-    <version>1.0.0.M1</version>
+    <version>1.0.0.M2</version>
     <packaging>pom</packaging>
     <name>Euler Framework Parent Pom</name>
     <url>https://eulerproject.io/euler-framework</url>
@@ -25,13 +24,18 @@
         <module>euler-web-authentication-impl-jpa</module>
         <!-- <module>euler-web-basic</module> -->
         <module>euler-web-file</module>
+        <module>euler-web-oauth2-server</module>
+        <module>euler-web-orm-hibernate</module>
+        <module>euler-web-support</module>
+        <module>euler-web-oauth2-util</module>
+        <module>euler-web-eureka-support</module>
     </modules>
 
     <properties>
-        <jdk.version>1.8</jdk.version>
+        <java.version>1.8</java.version>
 
-        <euler-cache.version>0.0.6</euler-cache.version>
-        <euler-common.version>1.0.0.M1</euler-common.version>
+        <euler-cache.version>1.0.0.M2</euler-cache.version>
+        <euler-common.version>1.0.0.M2</euler-common.version>
 
         <commons-codec.version>1.10</commons-codec.version>
 
@@ -44,10 +48,9 @@
 
         <hibernate.validator.version>5.2.5.Final</hibernate.validator.version>
 
-        <springframework.version>5.0.4.RELEASE</springframework.version>
-        <springsecurity.version>4.2.3.RELEASE</springsecurity.version>
-        <springsecurity.oauth.version>2.0.9.RELEASE</springsecurity.oauth.version>
-        <springsecurity.oauth.jwt.version>1.0.4.RELEASE</springsecurity.oauth.jwt.version>
+        <springframework.version>5.0.7.RELEASE</springframework.version>
+        <springsecurity.version>5.0.6.RELEASE</springsecurity.version>
+        <springsecurity.oauth.version>2.3.3.RELEASE</springsecurity.oauth.version>
 
         <AspectJ.version>1.8.9</AspectJ.version>
         <jasig.version>3.2.2</jasig.version>
@@ -58,11 +61,7 @@
         <hibernate.version>5.2.13.Final</hibernate.version>
         <c3p0.version>0.9.5.2</c3p0.version>
 
-        <jackson.version>2.9.3</jackson.version>
-
-        <log4j.version>1.2.17</log4j.version>
-        <jboss.logging.version>3.3.0.Final</jboss.logging.version>
-        <commons-logging.version>1.2</commons-logging.version>
+        <jackson.version>2.9.7</jackson.version>
 
         <junit.version>4.8.2</junit.version>
     </properties>
@@ -205,10 +204,17 @@
                 <artifactId>spring-security-oauth2</artifactId>
                 <version>${springsecurity.oauth.version}</version>
             </dependency>
+            
+            <!-- Reids -->
             <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-jwt</artifactId>
-                <version>${springsecurity.oauth.jwt.version}</version>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-redis</artifactId>
+                <version>2.0.8.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>2.9.0</version>
             </dependency>
 
             <!-- MyBatis ... -->
@@ -270,41 +276,24 @@
                 <version>${jackson.version}</version>
             </dependency>
 
-            <!-- Loggers -->
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.logging</groupId>
-                <artifactId>jboss-logging</artifactId>
-                <version>${jboss.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.eulerframework</groupId>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-cache</artifactId>
                 <version>${euler-cache.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.eulerframework</groupId>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-logging</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.eulerframework</groupId>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-util</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.eulerframework</groupId>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-jwt</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
@@ -317,20 +306,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <scm>
         <connection>scm:git:https://github.com/euler-projects/euler-framework.git</connection>

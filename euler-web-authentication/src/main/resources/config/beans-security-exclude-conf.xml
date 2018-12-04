@@ -17,8 +17,5 @@
     <http security="none" pattern="/robot.txt" />
     <!-- 其他要排除安全控制的目录 -->    
     <beans:import resource="classpath:**/web-security-exclude-config.xml"/>
-    
-    <!-- API暂无权限控制 --> 
-    <http security="none" pattern="${web.api.rootPath}/**" />
 
 </beans:beans>

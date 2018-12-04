@@ -1,8 +1,8 @@
 [![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk8/badge/icon)](https://ci.eulerproject.io/job/euler-framework-latest-jdk8/)
 [![GitHub issues](https://img.shields.io/github/issues/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/issues)
 [![GitHub release](https://img.shields.io/github/release/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/releases)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.eulerframework/euler-framework/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.eulerframework/euler-framework)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/euler-projects/euler-framework/master/LICENSE)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eulerframework/euler-framework/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eulerframework/euler-framework)
+[![GitHub license](https://img.shields.io/github/license/euler-projects/euler-framework.svg)](https://raw.githubusercontent.com/euler-projects/euler-framework/master/LICENSE)
 
 ## About
 
@@ -14,41 +14,23 @@ Visit [eulerproject.io][] for more info.
 
 * Add RESTful API support
 * Rebuild authentication module
+* Spring Data JPA support
+* Redis support
+* OAuth2.0 support
+* Refactoring euler-web-core to support Spring Boot
 
 ## Planned
 
-* A generic form submitter
-* Redis cache module
+* MyBatis support
 
 ## Release History
 
-### 0.3.0
-
-* Change project name to euler-framework
-* Streamline modules
-* Improve user authentication module
-* Improve JSP support
-* Improve AJAX support
-* A uniform exception handling system
-* File upload & download support
-* Properties file config support
-* DB config support
-
-### 0.2.0
-
-* CMS module
-* BLOG module
-
-### 0.1.0
-
-* Basic module
-* Local authentication
-* LDAP authentication
-* CAS authentication
+* [1.0.0.M1](https://github.com/euler-projects/euler-framework/releases/tag/1.0.0.M1)
 
 ## License
 
-The Euler Framework is released under the [MIT License][].
+The Euler Framework is released under version 2.0 of the [Apache License][].
 
 [MIT License]: https://opensource.org/licenses/MIT
+[Apache License]: http://www.apache.org/licenses/LICENSE-2.0
 [eulerproject.io]: https://eulerproject.io

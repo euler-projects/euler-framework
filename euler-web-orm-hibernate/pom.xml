@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.eulerframework</groupId>
+        <artifactId>euler-framework</artifactId>
+        <version>1.0.0.M2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>euler-web-orm-hibernate</artifactId>
+
+    <name>Euler ORM Hibernate</name>
+    <url>https://eulerproject.io/euler-framework</url>
+    <description>An ORM module use Hibernate</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-web-orm-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

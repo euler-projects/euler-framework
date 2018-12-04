@@ -7,31 +7,29 @@
                                  http://www.springframework.org/schema/security
                                  http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
-
     <global-method-security pre-post-annotations="enabled" order="0"
                             proxy-target-class="true">
     </global-method-security>
     
-    <beans:bean id="accessDeniedHandler" class="net.eulerframework.web.module.authentication.extend.EulerAccessDeniedHandler" />
+    <beans:bean id="accessDeniedHandler" class="org.eulerframework.web.module.authentication.extend.EulerAccessDeniedHandler" />
 
     <beans:bean id="sessionRegistry"
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
 
-    <beans:import resource="classpath:**/web-security-web-config.xml"/>
-
-    <authentication-manager alias="authenticationManager">
+    <authentication-manager id="authenticationManager">
         <authentication-provider user-service-ref="userDetailsService">
             <password-encoder ref="passwordEncoder" />
         </authentication-provider>
+        <authentication-provider ref="customAuthenticationProvider" />
     </authentication-manager>
     
     <beans:bean id="authenticationEntryPoint"  
-        class="net.eulerframework.web.module.authentication.extend.EulerLoginUrlAuthenticationEntryPoint">  
+        class="org.eulerframework.web.module.authentication.extend.EulerLoginUrlAuthenticationEntryPoint">  
         <beans:constructor-arg value="${security.loginPage}" />  
         <beans:constructor-arg ref="objectMapper" />
     </beans:bean> 
     
-    <beans:bean id="formLoginFilter" class="net.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  
+    <beans:bean id="formLoginFilter" class="org.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter">  
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="requiresAuthenticationRequestMatcher" ref="requiresAuthenticationRequestMatcher"/>  
         <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>   
@@ -56,9 +54,38 @@
         <beans:property name="defaultFailureUrl" value="${security.login.defaultFailureUrl}"/>     
     </beans:bean>   --> 
     
-    <beans:bean id="authenticationFailureHandler" class="net.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler">
+    <beans:bean id="authenticationFailureHandler" class="org.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler">
         
     </beans:bean>
+
+    <beans:import resource="classpath:**/web-security-web-config.xml"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <beans:beans profile="web-security-ldap">
         

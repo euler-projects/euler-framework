@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns="http://www.springframework.org/schema/security"
              xmlns:beans="http://www.springframework.org/schema/beans"
-             xmlns:aop="http://www.springframework.org/schema/aop"
              xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans
                                  http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
                                  http://www.springframework.org/schema/security
                                  http://www.springframework.org/schema/security/spring-security-4.2.xsd
-                                 http://www.springframework.org/schema/aop
-                                 http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
                                  http://www.springframework.org/schema/security/oauth2
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
                                  
@@ -33,7 +30,7 @@
         <beans:constructor-arg index="0" ref="accessTokenRequestProxy" />
     </beans:bean>
     <beans:bean id="customerSupportRestTemplate"
-                class="net.eulerframework.web.rs.client.WebServiceResponseRestTemplate">
+                class="org.eulerframework.web.rs.client.WebServiceResponseRestTemplate">
         <beans:property name="objectMapper" ref="rsClientObjectMapper" />
         <beans:constructor-arg index="0" ref="oAuth2ClientBean" />
         <beans:constructor-arg index="1">
