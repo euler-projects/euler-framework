@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>euler-framework</artifactId>
-    <version>1.0.0.M2-SNAPSHOT</version>
+    <version>1.0.0.M2</version>
     <packaging>pom</packaging>
     <name>Euler Framework Parent Pom</name>
     <url>https://eulerproject.io/euler-framework</url>
@@ -34,8 +34,8 @@
     <properties>
         <java.version>1.8</java.version>
 
-        <euler-cache.version>1.0.0.M2-SNAPSHOT</euler-cache.version>
-        <euler-common.version>1.0.0.M2-SNAPSHOT</euler-common.version>
+        <euler-cache.version>1.0.0.M2</euler-cache.version>
+        <euler-common.version>1.0.0.M2</euler-common.version>
 
         <commons-codec.version>1.10</commons-codec.version>
 
