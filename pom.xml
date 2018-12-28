@@ -17,6 +17,7 @@
     <description>Parent POM for Euler Framework projects.</description>
 
     <modules>
+        <module>euler-web-dependencies</module>
         <module>euler-web-core</module>
         <module>euler-web-orm-jpa</module>
         <!-- <module>euler-web-orm-mybatis</module> -->
