@@ -2,25 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.eulerframework</groupId>
-        <artifactId>euler-parent</artifactId>
-        <version>4</version>
+        <artifactId>euler-framework</artifactId>
+        <version>1.0.0.M3-SNAPSHOT</version>
     </parent>
-    <artifactId>euler-web-dependencies</artifactId>
+    <artifactId>euler-framework-dependencies</artifactId>
     <packaging>pom</packaging>
-
-    <properties>
-        <eulerframework.version>1.0.0.M3-SNAPSHOT</eulerframework.version>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.eulerframework</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>euler-web-core</artifactId>
-                <version>${eulerframework.version}</version>
+                <version>${project.version}</version>
                 <exclusions>
                     <!-- Exclude redis-related dependencies, otherwise actuator will perform health checks on redis links. -->
                     <exclusion>
@@ -34,14 +29,14 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.eulerframework</groupId>
+                <groupId>${project.groupId}k</groupId>
                 <artifactId>euler-web-orm-jpa</artifactId>
-                <version>${eulerframework.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eulerframework</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>euler-web-oauth2-util</artifactId>
-                <version>${eulerframework.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
