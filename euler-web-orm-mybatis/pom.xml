@@ -5,6 +5,7 @@
         <groupId>org.eulerframework</groupId>
         <artifactId>euler-web-parent</artifactId>
         <version>1.0.0.M3-SNAPSHOT</version>
+        <relativePath>../euler-web-parent</relativePath>
     </parent>
     <artifactId>euler-web-orm-mybatis</artifactId>
     <name>Euler ORM myBatis</name>
