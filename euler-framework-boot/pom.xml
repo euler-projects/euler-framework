@@ -16,5 +16,6 @@
     <modules>
         <module>euler-web-starter</module>
         <module>euler-web-autoconfigure</module>
+        <module>euler-web-dependencies</module>
     </modules>
 </project>
