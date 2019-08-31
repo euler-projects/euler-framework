@@ -20,14 +20,11 @@
     </properties>
 
     <modules>
-        <module>euler-framework-dependencies</module>
         <module>euler-web-parent</module>
         <module>euler-web-core</module>
         <module>euler-web-orm-jpa</module>
-        <!-- <module>euler-web-orm-mybatis</module> -->
         <module>euler-web-authentication</module>
         <module>euler-web-authentication-impl-jpa</module>
-        <!-- <module>euler-web-basic</module> -->
         <module>euler-web-file</module>
         <module>euler-web-oauth2-server</module>
         <module>euler-web-orm-hibernate</module>
