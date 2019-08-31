@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.eulerframework</groupId>
         <artifactId>euler-web-parent</artifactId>
-        <version>1.0.0.M3-SNAPSHOT</version>
+        <version>${revision}</version>
         <relativePath>../euler-web-parent</relativePath>
     </parent>
     <artifactId>euler-web-core</artifactId>

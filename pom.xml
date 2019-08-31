@@ -10,10 +10,14 @@
     </parent>
 
     <artifactId>euler-framework</artifactId>
-    <version>1.0.0.M3-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <url>https://eulerproject.io/euler-framework</url>
     <description>Parent POM for Euler Framework projects.</description>
+
+    <properties>
+        <revision>1.0.0.M3-SNAPSHOT</revision>
+    </properties>
 
     <modules>
         <module>euler-framework-dependencies</module>
@@ -30,6 +34,7 @@
         <module>euler-web-support</module>
         <module>euler-web-oauth2-util</module>
         <module>euler-web-eureka-support</module>
+        <module>euler-framework-boot</module>
     </modules>
 
     <scm>

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.eulerframework</groupId>
         <artifactId>euler-framework</artifactId>
-        <version>1.0.0.M3-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
     <artifactId>euler-framework-dependencies</artifactId>
     <packaging>pom</packaging>
