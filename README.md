@@ -25,6 +25,8 @@ Visit [eulerproject.io][] for more info.
 
 ## Release History
 
+* [1.0.0.M3](https://github.com/euler-projects/euler-framework/releases/tag/1.0.0.M3)
+* [1.0.0.M2](https://github.com/euler-projects/euler-framework/releases/tag/1.0.0.M2)
 * [1.0.0.M1](https://github.com/euler-projects/euler-framework/releases/tag/1.0.0.M1)
 
 ## License
