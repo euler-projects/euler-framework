@@ -3,8 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eulerframework</groupId>
-        <artifactId>euler-framework</artifactId>
-        <version>1.0.0.M2</version>
+        <artifactId>euler-web-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../euler-web-parent</relativePath>
     </parent>
     <artifactId>euler-web-authentication</artifactId>
     <name>Euler Web Authentication</name>
