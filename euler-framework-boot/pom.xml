@@ -52,11 +52,6 @@
                         <configuration>
                             <updatePomFile>true</updatePomFile>
                             <flattenMode>oss</flattenMode>
-                            <pomElements>
-                                <parent>expand</parent>
-                                <distributionManagement>remove</distributionManagement>
-                                <repositories>remove</repositories>
-                            </pomElements>
                         </configuration>
                     </execution>
                     <execution>
