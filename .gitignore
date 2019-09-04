@@ -2,6 +2,7 @@ target
 
 pom.xml.releaseBackup
 pom.xml.versionsBackup
+.flattened-pom.xml
 
 #Eclipse
 .project
