@@ -13,6 +13,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>euler-web-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-web-core</artifactId>
                 <version>${project.version}</version>

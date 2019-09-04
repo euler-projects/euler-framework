@@ -15,6 +15,7 @@
  */
 package org.eulerframework.web.module.authentication.conf;
 
+import org.eulerframework.common.util.property.FilePropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +24,28 @@ import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.util.property.PropertyReader;
 import org.eulerframework.web.config.WebConfig;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 public abstract class SecurityConfigExternal {
     protected static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
     private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
 
-    private static final PropertyReader properties = new PropertyReader("/config.properties");
+    private static PropertyReader propertyReader;
+
+    static {
+        try {
+            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setPropertyReader(PropertyReader propertyReader) {
+        SecurityConfigExternal.propertyReader = propertyReader;
+    }
 
     private static class WebConfigKey {
         private static final String SECURITY_RESET_PASSWD_PRIV_KEY = "security.resetPassword.privKeyFile";
@@ -41,19 +57,14 @@ public abstract class SecurityConfigExternal {
         private static final String SECURITY_RESET_PASSWD_PUB_KEY = "rsa/resetPasswdPubKey.pem";
     }
 
-    public static boolean clearSecurityConfigCache() {
-        properties.refresh();
-        return CONFIG_CAHCE.clear();
-    }
-    
     public static String getResetPasswordPrivKeyFile() {
-        return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PRIV_KEY, 
-                key -> properties.get(key, WebConfigDefault.SECURITY_RESET_PASSWD_PRIV_KEY));
+        return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PRIV_KEY,
+                key -> propertyReader.get(key, WebConfigDefault.SECURITY_RESET_PASSWD_PRIV_KEY));
     }
-    
+
     public static String getResetPasswordPubKeyFile() {
-        return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PUB_KEY, 
-                key -> properties.get(key, WebConfigDefault.SECURITY_RESET_PASSWD_PUB_KEY));
+        return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PUB_KEY,
+                key -> propertyReader.get(key, WebConfigDefault.SECURITY_RESET_PASSWD_PUB_KEY));
     }
 
 }

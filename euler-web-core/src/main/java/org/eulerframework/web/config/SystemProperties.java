@@ -15,18 +15,30 @@
  */
 package org.eulerframework.web.config;
 
+import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyNotFoundException;
 import org.eulerframework.common.util.property.PropertyReader;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 /**
  * 用户获取系统参数
- * @author cFrost
  *
+ * @author cFrost
  */
 public final class SystemProperties {
 
-    private final static PropertyReader properties = new PropertyReader("/system.properties");
-    
+    private final static PropertyReader properties;
+
+    static {
+        try {
+            properties = new PropertyReader(new FilePropertySource("/system.properties"));
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static String frameworkVersion() {
         try {
             return properties.get("version");

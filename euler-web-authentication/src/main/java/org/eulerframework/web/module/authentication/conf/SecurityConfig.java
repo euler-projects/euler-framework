@@ -15,6 +15,7 @@
  */
 package org.eulerframework.web.module.authentication.conf;
 
+import org.eulerframework.common.util.property.FilePropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,9 @@ import org.eulerframework.cache.inMemoryCache.AbstractObjectCache.DataGetter;
 import org.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.util.property.PropertyReader;
-import org.eulerframework.web.config.WebConfig;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 public abstract class SecurityConfig {
     protected static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
@@ -30,7 +33,19 @@ public abstract class SecurityConfig {
     private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
 
-    private static final PropertyReader properties = new PropertyReader("/config.properties");
+    private static PropertyReader propertyReader;
+
+    static {
+        try {
+            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setPropertyReader(PropertyReader propertyReader) {
+        SecurityConfig.propertyReader = propertyReader;
+    }
 
     private static class ConfigKey {
         // [security]
@@ -98,19 +113,10 @@ public abstract class SecurityConfig {
         private static final int SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD = 10;
 
     }
-    
-    static {
-        properties.addConfigFile("file:" + WebConfig.getConfigPath());
-    }
-
-    public static boolean clearSecurityConfigCache() {
-        properties.refresh();
-        return CONFIG_CAHCE.clear();
-    }
 
     public static WebAuthenticationType getWebAuthenticationType() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE, key -> {
-            return properties.getEnumValue(key,
+            return propertyReader.getEnumValue(key,
                         ConfigDefault.SECURITY_WEB_AUTHENTICATION_TYPE, true);
         });
 
@@ -119,7 +125,7 @@ public abstract class SecurityConfig {
 
     public static ApiAuthenticationType getApiAuthenticationType() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_API_AUTHENTICATION_TYPE, key -> {
-            return properties.getEnumValue(ConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
+            return propertyReader.getEnumValue(ConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
                                 ConfigDefault.SECURITY_API_AUTHENTICATION_TYPE, true);
         });
         return (ApiAuthenticationType) cachedConfig;
@@ -127,7 +133,7 @@ public abstract class SecurityConfig {
 
     public static OAuthServerType getOAuthSeverType() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_OAUTH_SERVER_TYPE, key -> {
-            return properties.getEnumValue(key,
+            return propertyReader.getEnumValue(key,
                                 ConfigDefault.SECURITY_OAUTH_SERVER_TYPE, true);
         });
         return (OAuthServerType) cachedConfig;
@@ -141,7 +147,7 @@ public abstract class SecurityConfig {
                     @Override
                     public Object getData(String key) {
 
-                        int result = properties.getIntValue(ConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH,
+                        int result = propertyReader.getIntValue(ConfigKey.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH,
                                 ConfigDefault.SECURITY_SIGNUP_PASSWORD_MIN_LENGTH);
 
                         if (result > getMaxPasswordLength()) {
@@ -169,7 +175,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.get(ConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT,
+                        return propertyReader.get(ConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT,
                                 ConfigDefault.SECURITY_SIGNUP_USERNAME_FORMAT);
                     }
 
@@ -184,7 +190,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.get(ConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT,
+                        return propertyReader.get(ConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT,
                                 ConfigDefault.SECURITY_SIGNUP_EMAIL_FORMAT);
                     }
 
@@ -195,7 +201,7 @@ public abstract class SecurityConfig {
 
     public static String getMobileFormat() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_MOBILE_FORMAT,
-                configKey -> properties.get(configKey,
+                configKey -> propertyReader.get(configKey,
                         ConfigDefault.SECURITY_SIGNUP_MOBILE_FORMAT));
 
         return (String) cachedConfig;
@@ -207,7 +213,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.get(ConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT,
+                        return propertyReader.get(ConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT,
                                 ConfigDefault.SECURITY_SIGNUP_PASSWORD_FORMAT);
                     }
 
@@ -223,7 +229,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.getBooleanValue(ConfigKey.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
+                        return propertyReader.getBooleanValue(ConfigKey.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN,
                                 ConfigDefault.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
                     }
 
@@ -234,7 +240,7 @@ public abstract class SecurityConfig {
 
     public static boolean isEnableMobileSignin() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
-                key -> properties.getBooleanValue(ConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
+                key -> propertyReader.getBooleanValue(ConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
                         ConfigDefault.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN)
         );
 
@@ -243,7 +249,7 @@ public abstract class SecurityConfig {
 
     public static boolean isEnableUserDetailsCache() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED, configKey -> 
-        properties.getBooleanValue(configKey,
+        propertyReader.getBooleanValue(configKey,
                 ConfigDefault.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_ENABLED)
     );
 
@@ -252,7 +258,7 @@ public abstract class SecurityConfig {
 
     public static long getUserDetailsCacheLife() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE, configKey -> 
-            properties.getLongValue(configKey,
+            propertyReader.getLongValue(configKey,
                     ConfigDefault.SECURITY_AUTHENTICATION_USER_DETAILS_CAHCE_LIFE)
         );
 
@@ -261,7 +267,7 @@ public abstract class SecurityConfig {
 
     public static long getUserContextCacheLife() {
         Object cachedConfig = CONFIG_CAHCE.get(ConfigKey.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE, configKey -> 
-            properties.getLongValue(configKey,
+            propertyReader.getLongValue(configKey,
                     ConfigDefault.SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE)
         );
 
@@ -274,7 +280,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.getBooleanValue(ConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN,
+                        return propertyReader.getBooleanValue(ConfigKey.SECURITY_SIGNUP_AUTO_SIGNIN,
                                 ConfigDefault.SECURITY_SIGNUP_AUTO_SIGNIN);
                     }
 
@@ -285,49 +291,49 @@ public abstract class SecurityConfig {
     
     public static boolean isSignUpEnabled() {
         return (boolean)CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_ENABLED, 
-                key -> properties.getBooleanValue(key,
+                key -> propertyReader.getBooleanValue(key,
                                 ConfigDefault.SECURITY_SIGNUP_ENABLED));
     }
 
     public static boolean isSignUpEnableCaptcha() {
         return (boolean)CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_ENABLE_CAPTCHA, 
-                key -> properties.getBooleanValue(key,
+                key -> propertyReader.getBooleanValue(key,
                                 ConfigDefault.SECURITY_SIGNUP_ENABLE_CAPTCHA));
     }
     
     public static String getSmsCodeTemplateSignUp() {
         return (String)CONFIG_CAHCE.get(ConfigKey.SECURITY_SMSCODE_TEMPLATE_SIGNUP,
-                configKey -> properties.get(configKey,
+                configKey -> propertyReader.get(configKey,
                         ConfigDefault.SECURITY_SMSCODE_TEMPLATE_SIGNUP));
     }
     
     public static String getSmsCodeTemplateSignIn() {
         return (String)CONFIG_CAHCE.get(ConfigKey.SECURITY_SMSCODE_TEMPLATE_SIGNIN,
-                configKey -> properties.get(configKey,
+                configKey -> propertyReader.get(configKey,
                         ConfigDefault.SECURITY_SMSCODE_TEMPLATE_SIGNIN));
     }
     
     public static String getSmsCodeTemplateResetPassword() {
         return (String)CONFIG_CAHCE.get(ConfigKey.SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD,
-                configKey -> properties.get(configKey,
+                configKey -> propertyReader.get(configKey,
                         ConfigDefault.SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD));
     }
     
     public static int getSmsCodeExpireMinutesSignUp() {
         return (int)CONFIG_CAHCE.get(ConfigKey.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNUP,
-                configKey -> properties.getIntValue(configKey,
+                configKey -> propertyReader.getIntValue(configKey,
                         ConfigDefault.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNUP));
     }
     
     public static int getSmsCodeExpireMinutesSignIn() {
         return (int)CONFIG_CAHCE.get(ConfigKey.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNIN,
-                configKey -> properties.getIntValue(configKey,
+                configKey -> propertyReader.getIntValue(configKey,
                         ConfigDefault.SECURITY_SMSCODE_EXPIRE_MINUTES_SIGNIN));
     }
     
     public static int getSmsCodeExpireMinutesResetPassword() {
         return (int)CONFIG_CAHCE.get(ConfigKey.SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD,
-                configKey -> properties.getIntValue(configKey,
+                configKey -> propertyReader.getIntValue(configKey,
                         ConfigDefault.SECURITY_SMSCODE_EXPIRE_MINUTES_RESET_PASSWORD));
     }
 
@@ -346,7 +352,7 @@ public abstract class SecurityConfig {
      */
     public static boolean isEnableMobileAutoSignup() {
         return (boolean)CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP, 
-                key -> properties.getBooleanValue(key,
+                key -> propertyReader.getBooleanValue(key,
                                 ConfigDefault.SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP));
     }
 
@@ -355,7 +361,7 @@ public abstract class SecurityConfig {
      */
     public static boolean isEnableInterestingRandomUsernamePrefix() {
         return (boolean)CONFIG_CAHCE.get(ConfigKey.SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX, 
-                key -> properties.getBooleanValue(key,
+                key -> propertyReader.getBooleanValue(key,
                                 ConfigDefault.SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX));
     }
 

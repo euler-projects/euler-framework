@@ -15,8 +15,11 @@
  */
 package org.eulerframework.web.config;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
+import org.eulerframework.common.util.property.FilePropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -34,7 +37,19 @@ public abstract class WebConfig {
     private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
 
-    private static final PropertyReader properties = new PropertyReader("/config.properties");
+    private static PropertyReader propertyReader;
+
+    static {
+        try {
+            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setPropertyReader(PropertyReader propertyReader) {
+        WebConfig.propertyReader = propertyReader;
+    }
 
     private static class WebConfigKey {
         // [project]
@@ -77,10 +92,10 @@ public abstract class WebConfig {
         private static final String WEB_MULITPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
         private static final String WEB_MULITPART_MAX_REQUEST_SIZE = "web.multiPart.maxRequestSize";
         private static final String WEB_MULITPART_FILE_SIZE_THRESHOLD = "web.multiPart.fileSizeThreshold";
-        
+
         // [mail]
         private static final String MAIL_SMTP = "mail.smtp";
-        
+
         // [Redis]
         private static final String REDIS_TYPE = "redis.type";
         private static final String REDIS_HOST = "redis.host";
@@ -113,32 +128,28 @@ public abstract class WebConfig {
         private static final String WEB_ADMIN_ROOT_PATH = "/admin";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "/assets/system/admin-dashboard-brand.png";
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "Manage Dashboard";
-        
+
         private static final boolean WEB_API_ENABLED = true;
         private static final String WEB_API_ROOT_PATH = "/api";
         private static final String WEB_ASSETS_PATH = "/assets";
         private static final Locale WEB_DEFAULT_LANGUAGE = Locale.CHINA;
-        private static final Locale[] WEB_SUPPORT_LANGUAGES = new Locale[] {Locale.CHINA, Locale.US};
+        private static final Locale[] WEB_SUPPORT_LANGUAGES = new Locale[]{Locale.CHINA, Locale.US};
 
         private static final String WEB_MULITPART_LOCATION = null;
         private static final long WEB_MULITPART_MAX_FILE_SIZE = 51_200L;
         private static final long WEB_MULITPART_MAX_REQUEST_SIZE = 51_200L;
         private static final int WEB_MULITPART_FILE_SIZE_THRESHOLD = 1_024;
-        
+
         // [Redis]
         private static final RedisType REDIS_TYPE = RedisType.STANDALONE;
         private static final String REDIS_HOST = "localhost";
         private static final int REDIS_PORT = 6379;
         private static final String REDIS_PASSWORD = null;
     }
-    
-    static {
-        properties.addConfigFile("file:" + getConfigPath());
-    }
 
     public static int getI18nRefreshFreq() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ, key -> {
-            return properties.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
+            return propertyReader.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
                     WebConfigDefault.CORE_CACHE_I18N_REFRESH_FREQ);
         });
 
@@ -147,6 +158,7 @@ public abstract class WebConfig {
 
     /**
      * 获取网站域名
+     *
      * @return 末尾不带/的网站域名
      * <p> 如<br>
      * http://localhost:8080<br>
@@ -156,14 +168,14 @@ public abstract class WebConfig {
      */
     public static String getWebUrl() {
         try {
-            String result = properties.get(WebConfigKey.WEB_URL);
+            String result = propertyReader.get(WebConfigKey.WEB_URL);
             if (!StringUtils.hasText(result))
                 throw new RuntimeException(WebConfigKey.WEB_URL + "can not be empty");
 
             while (result.endsWith("/")) {
                 result = result.substring(0, result.length() - 1);
             }
-            
+
             return result;
         } catch (PropertyNotFoundException e) {
             throw new RuntimeException(e);
@@ -172,15 +184,15 @@ public abstract class WebConfig {
 
     public static boolean isApiEnabled() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ENABLED, key -> {
-            return properties.getBooleanValue(key, WebConfigDefault.WEB_API_ENABLED);
+            return propertyReader.getBooleanValue(key, WebConfigDefault.WEB_API_ENABLED);
         });
-        
+
         return (boolean) cachedConfig;
     }
-    
+
     public static String getApiRootPath() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_API_ROOT_PATH, key -> {
-            String result = properties.get(key, WebConfigDefault.WEB_API_ROOT_PATH);
+            String result = propertyReader.get(key, WebConfigDefault.WEB_API_ROOT_PATH);
 
             if (!StringUtils.hasText(result))
                 throw new RuntimeException(key + "can not be empty");
@@ -206,7 +218,7 @@ public abstract class WebConfig {
             @Override
             public Object getData(String key) {
 
-                String result = properties.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
+                String result = propertyReader.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
                 if (!StringUtils.hasText(result))
                     throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + " can not be empty");
@@ -226,14 +238,14 @@ public abstract class WebConfig {
 
         return (String) cachedConfig;
     }
-    
+
     public static String getStaticPagesRootPath() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_STATIC_PAGES_PATH, new DataGetter<String, Object>() {
 
             @Override
             public Object getData(String key) {
 
-                String result = properties.get(key, WebConfigDefault.WEB_STATIC_PAGES_PATH);
+                String result = propertyReader.get(key, WebConfigDefault.WEB_STATIC_PAGES_PATH);
 
                 if (!StringUtils.hasText(result))
                     throw new RuntimeException(key + " can not be empty");
@@ -261,7 +273,7 @@ public abstract class WebConfig {
             public Object getData(String key) {
 
                 return CommonUtils.convertDirToUnixFormat(
-                        properties.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH), true);
+                        propertyReader.get(WebConfigKey.WEB_JSP_PATH, WebConfigDefault.WEB_JSP_PATH), true);
             }
 
         });
@@ -276,7 +288,7 @@ public abstract class WebConfig {
             public Object getData(String key) {
 
                 return CommonUtils.convertDirToUnixFormat(
-                        properties.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH), true);
+                        propertyReader.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH), true);
             }
 
         });
@@ -292,7 +304,7 @@ public abstract class WebConfig {
 
                 String result;
                 try {
-                    result = properties.get(WebConfigKey.CORE_RUNTIME_PATH);
+                    result = propertyReader.get(WebConfigKey.CORE_RUNTIME_PATH);
                 } catch (PropertyNotFoundException e) {
                     if (isWindows()) {
                         LOGGER.info("OS is windows");
@@ -313,9 +325,9 @@ public abstract class WebConfig {
                         result = result.substring("file://".length());
                     }
                 }
-                
+
                 //当配置的路径为*inx格式，但是当前环境是Windows时，默认放在C盘
-                if(isWindows() && result.startsWith("/")) {
+                if (isWindows() && result.startsWith("/")) {
                     result = "C:" + result;
                 }
 
@@ -333,7 +345,7 @@ public abstract class WebConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.getLongValue(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ,
+                        return propertyReader.getLongValue(WebConfigKey.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ,
                                 WebConfigDefault.CORE_CAHCE_RAMCACHE_POOL_CLEAN_FREQ);
                     }
 
@@ -347,13 +359,13 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                String location = properties.get(WebConfigKey.WEB_MULITPART_LOCATION,
+                String location = propertyReader.get(WebConfigKey.WEB_MULITPART_LOCATION,
                         WebConfigDefault.WEB_MULITPART_LOCATION);
-                long maxFileSize = properties.getLongValue(WebConfigKey.WEB_MULITPART_MAX_FILE_SIZE,
+                long maxFileSize = propertyReader.getLongValue(WebConfigKey.WEB_MULITPART_MAX_FILE_SIZE,
                         WebConfigDefault.WEB_MULITPART_MAX_FILE_SIZE);
-                long maxRequestSize = properties.getLongValue(WebConfigKey.WEB_MULITPART_MAX_REQUEST_SIZE,
+                long maxRequestSize = propertyReader.getLongValue(WebConfigKey.WEB_MULITPART_MAX_REQUEST_SIZE,
                         WebConfigDefault.WEB_MULITPART_MAX_REQUEST_SIZE);
-                int fileSizeThreshold = properties.getIntValue(WebConfigKey.WEB_MULITPART_FILE_SIZE_THRESHOLD,
+                int fileSizeThreshold = propertyReader.getIntValue(WebConfigKey.WEB_MULITPART_FILE_SIZE_THRESHOLD,
                         WebConfigDefault.WEB_MULITPART_FILE_SIZE_THRESHOLD);
 
                 MultiPartConfig result = new MultiPartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
@@ -371,7 +383,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.getEnumValue(WebConfigKey.PROJECT_MODE, WebConfigDefault.PROJECT_MODE, true);
+                return propertyReader.getEnumValue(WebConfigKey.PROJECT_MODE, WebConfigDefault.PROJECT_MODE, true);
             }
 
         });
@@ -385,7 +397,7 @@ public abstract class WebConfig {
             @Override
             public Object getData(String key) {
                 try {
-                    return properties.get(WebConfigKey.PROJECT_VERSION);
+                    return propertyReader.get(WebConfigKey.PROJECT_VERSION);
                 } catch (PropertyNotFoundException e) {
                     throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_VERSION);
                 }
@@ -402,7 +414,7 @@ public abstract class WebConfig {
             @Override
             public Object getData(String key) {
                 try {
-                    return properties.get(WebConfigKey.PROJECT_BUILDTIME);
+                    return propertyReader.get(WebConfigKey.PROJECT_BUILDTIME);
                 } catch (PropertyNotFoundException e) {
                     throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_BUILDTIME);
                 }
@@ -418,7 +430,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, WebConfigDefault.PROJECT_COPYRIGHT_HOLDER);
+                return propertyReader.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, WebConfigDefault.PROJECT_COPYRIGHT_HOLDER);
             }
 
         });
@@ -431,7 +443,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.WEB_SITENAME, WebConfigDefault.WEB_SITENAME);
+                return propertyReader.get(WebConfigKey.WEB_SITENAME, WebConfigDefault.WEB_SITENAME);
             }
 
         });
@@ -444,7 +456,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.WEB_ASSETS_PATH, WebConfigDefault.WEB_ASSETS_PATH);
+                return propertyReader.get(WebConfigKey.WEB_ASSETS_PATH, WebConfigDefault.WEB_ASSETS_PATH);
             }
 
         });
@@ -456,7 +468,7 @@ public abstract class WebConfig {
      * 检查当前配置是不是调试模式<br>
      * <b>注意:</b>
      * 根据配置不同,调试模式可能包含多个{@link ProjectMode},并不是{@link ProjectMode#DEVELOP}
-     * 
+     *
      * @return
      */
     public static boolean isDebugMode() {
@@ -469,7 +481,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.WEB_DEFAULT_THEME, WebConfigDefault.WEB_DEFAULT_THEME);
+                return propertyReader.get(WebConfigKey.WEB_DEFAULT_THEME, WebConfigDefault.WEB_DEFAULT_THEME);
             }
 
         });
@@ -483,7 +495,7 @@ public abstract class WebConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON,
+                        return propertyReader.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON,
                                 WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_ICON);
                     }
 
@@ -498,7 +510,7 @@ public abstract class WebConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT,
+                        return propertyReader.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT,
                                 WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_TEXT);
                     }
 
@@ -509,7 +521,7 @@ public abstract class WebConfig {
 
     public static String getRootContextConfigClassName() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_ROOT_CONTEXT_CONFIG_CLASS, key -> {
-            return properties.get(key, WebConfigDefault.CORE_ROOT_CONTEXT_CONFIG_CLASS);
+            return propertyReader.get(key, WebConfigDefault.CORE_ROOT_CONTEXT_CONFIG_CLASS);
         });
 
         return (String) cachedConfig;
@@ -520,7 +532,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.CORE_WEB_CONFIG_CLASS, WebConfigDefault.CORE_WEB_CONFIG_CLASS);
+                return propertyReader.get(WebConfigKey.CORE_WEB_CONFIG_CLASS, WebConfigDefault.CORE_WEB_CONFIG_CLASS);
             }
 
         });
@@ -533,7 +545,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.CORE_AJAX_CONFIG_CLASS, WebConfigDefault.CORE_AJAX_CONFIG_CLASS);
+                return propertyReader.get(WebConfigKey.CORE_AJAX_CONFIG_CLASS, WebConfigDefault.CORE_AJAX_CONFIG_CLASS);
             }
 
         });
@@ -547,7 +559,7 @@ public abstract class WebConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return properties.get(WebConfigKey.CORE_ADMIN_WEB_CONFIG_CLASS,
+                        return propertyReader.get(WebConfigKey.CORE_ADMIN_WEB_CONFIG_CLASS,
                                 WebConfigDefault.CORE_ADMIN_WEB_CONFIG_CLASS);
                     }
 
@@ -561,7 +573,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.CORE_ADMIN_AJAX_CONFIG_CLASS, WebConfigDefault.CORE_ADMIN_AJAX_CONFIG_CLASS);
+                return propertyReader.get(WebConfigKey.CORE_ADMIN_AJAX_CONFIG_CLASS, WebConfigDefault.CORE_ADMIN_AJAX_CONFIG_CLASS);
             }
 
         });
@@ -574,7 +586,7 @@ public abstract class WebConfig {
 
             @Override
             public Object getData(String key) {
-                return properties.get(WebConfigKey.CORE_API_CONFIG_CLASS, WebConfigDefault.CORE_API_CONFIG_CLASS);
+                return propertyReader.get(WebConfigKey.CORE_API_CONFIG_CLASS, WebConfigDefault.CORE_API_CONFIG_CLASS);
             }
 
         });
@@ -584,12 +596,13 @@ public abstract class WebConfig {
 
     /**
      * 获得站点默认语言
+     *
      * @return 站点默认语言
      */
     public static Locale getDefaultLanguage() {
         return (Locale) CONFIG_CAHCE.get(WebConfigKey.WEB_DEFAULT_LANGUAGE, key -> {
             try {
-                String defaultLanguagesStr = properties.get(key);
+                String defaultLanguagesStr = propertyReader.get(key);
                 Assert.hasText(defaultLanguagesStr, WebConfigKey.WEB_DEFAULT_LANGUAGE + " can not be empty");
                 return CommonUtils.parseLocale(defaultLanguagesStr);
             } catch (PropertyNotFoundException e) {
@@ -601,12 +614,13 @@ public abstract class WebConfig {
     public static Locale[] getSupportLanguages() {
         return (Locale[]) CONFIG_CAHCE.get(WebConfigKey.WEB_SUPPORT_LANGUAGES, key -> {
             try {
-                String supportLanguagesStr = properties.get(key);
+                String supportLanguagesStr = propertyReader.get(key);
                 String[] supportLanguagesStrArray = supportLanguagesStr.split(",");
                 Locale[] ret = new Locale[supportLanguagesStrArray.length];
-                
-                for(int i = 0; i < supportLanguagesStrArray.length; i++) {
-                    ret[i] = CommonUtils.parseLocale(supportLanguagesStrArray[i]);;
+
+                for (int i = 0; i < supportLanguagesStrArray.length; i++) {
+                    ret[i] = CommonUtils.parseLocale(supportLanguagesStrArray[i]);
+                    ;
                 }
                 return ret;
             } catch (PropertyNotFoundException e) {
@@ -617,20 +631,21 @@ public abstract class WebConfig {
 
     /**
      * 获取外部配置文件路径
+     *
      * @return
      */
     public static String getConfigPath() {
         return getRuntimePath() + "/conf/config.properties";
     }
-    
+
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().indexOf("windows") > -1;
     }
-    
+
     public static String getSmtp() {
         return (String) CONFIG_CAHCE.get(WebConfigKey.MAIL_SMTP, key -> {
             try {
-                return properties.get(key);
+                return propertyReader.get(key);
             } catch (PropertyNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -638,23 +653,23 @@ public abstract class WebConfig {
     }
 
     public static RedisType getRedisType() {
-        return (RedisType) CONFIG_CAHCE.get(WebConfigKey.REDIS_TYPE, 
-                key -> properties.getEnumValue(key, WebConfigDefault.REDIS_TYPE, true));
+        return (RedisType) CONFIG_CAHCE.get(WebConfigKey.REDIS_TYPE,
+                key -> propertyReader.getEnumValue(key, WebConfigDefault.REDIS_TYPE, true));
     }
-    
+
     public static String getRedisHost() {
-        return (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_HOST, 
-                key -> properties.get(key, WebConfigDefault.REDIS_HOST));
+        return (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_HOST,
+                key -> propertyReader.get(key, WebConfigDefault.REDIS_HOST));
     }
 
     public static String getRedisPassword() {
-        return (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_PASSWORD, 
-                key -> properties.get(key, WebConfigDefault.REDIS_PASSWORD));
+        return (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_PASSWORD,
+                key -> propertyReader.get(key, WebConfigDefault.REDIS_PASSWORD));
     }
 
     public static int getRedisPort() {
-        return (int) CONFIG_CAHCE.get(WebConfigKey.REDIS_PORT, 
-                key -> properties.getIntValue(key, WebConfigDefault.REDIS_PORT));
+        return (int) CONFIG_CAHCE.get(WebConfigKey.REDIS_PORT,
+                key -> propertyReader.getIntValue(key, WebConfigDefault.REDIS_PORT));
     }
 
     /**
@@ -662,15 +677,15 @@ public abstract class WebConfig {
      */
     public static String[] getRedisSentinels() {
         String str = (String) CONFIG_CAHCE.get(WebConfigKey.REDIS_SENTINELS, key -> {
-                    try {
-                        return properties.get(key);
-                    } catch (PropertyNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-        
+            try {
+                return propertyReader.get(key);
+            } catch (PropertyNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         Assert.hasText(str, () -> WebConfigKey.REDIS_SENTINELS + "can not be empty");
-        
+
         return str.split(",");
     }
 }

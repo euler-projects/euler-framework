@@ -15,6 +15,7 @@
  */
 package org.eulerframework.web.module.oauth2.conf;
 
+import org.eulerframework.common.util.property.FilePropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,13 +23,28 @@ import org.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.util.property.PropertyReader;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 public abstract class OAuth2ServerConfig {
     protected static final Logger LOGGER = LoggerFactory.getLogger(OAuth2ServerConfig.class);
 
     private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
 
-    private static final PropertyReader properties = new PropertyReader("/config.properties");
+    private static PropertyReader propertyReader;
+
+    static {
+        try {
+            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setPropertyReader(PropertyReader propertyReader) {
+        OAuth2ServerConfig.propertyReader = propertyReader;
+    }
 
     private static class OAuth2ServerConfigKey {
         public static final String SECURITY_OAUTH2_CLIENT_DETAILS_CAHCE_LIFE = "security.auth2.clientDetails.cacheLife";
@@ -40,17 +56,12 @@ public abstract class OAuth2ServerConfig {
         public static final boolean SECURITY_OAUTH2_CLIENT_DETAILS_CAHCE_ENABLED = false;
     }
 
-    public static boolean clearOAuth2ServerConfigCache() {
-        properties.refresh();
-        return CONFIG_CAHCE.clear();
-    }
-
     /**
      * @return
      */
     public static long getClientDetailsCacheLife() {
         return (long) CONFIG_CAHCE.get(OAuth2ServerConfigKey.SECURITY_OAUTH2_CLIENT_DETAILS_CAHCE_LIFE,
-                configKey -> properties.getLongValue(configKey,
+                configKey -> propertyReader.getLongValue(configKey,
                         OAuth2ServerConfigDefault.SECURITY_OAUTH2_CLIENT_DETAILS_CAHCE_LIFE));
     }
 
@@ -59,7 +70,7 @@ public abstract class OAuth2ServerConfig {
      */
     public static boolean isEnableClientDetailsCache() {
         return (boolean) CONFIG_CAHCE.get(OAuth2ServerConfigKey.SECURITY_OAUTH2_CLIENT_DETAILS_CAHCE_ENABLED,
-                configKey -> properties.getBooleanValue(configKey,
+                configKey -> propertyReader.getBooleanValue(configKey,
                         OAuth2ServerConfigDefault.SECURITY_OAUTH2_CLIENT_DETAILS_CAHCE_ENABLED));
     }
 

@@ -16,7 +16,7 @@
     <description>Parent POM for Euler Framework projects.</description>
 
     <properties>
-        <revision>1.0.0.M3</revision>
+        <revision>1.0.0.M4-SNAPSHOT</revision>
     </properties>
 
     <modules>
