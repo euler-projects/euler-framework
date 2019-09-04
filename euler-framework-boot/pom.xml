@@ -10,59 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.eulerframework.boot</groupId>
-    <artifactId>euler-framework-boot-parent</artifactId>
+    <artifactId>euler-framework-boot</artifactId>
     <packaging>pom</packaging>
 
     <modules>
+        <module>euler-web-dependencies</module>
+        <module>euler-framework-boot-parent</module>
         <module>euler-web-starter</module>
         <module>euler-web-autoconfigure</module>
-        <module>euler-web-dependencies</module>
     </modules>
-
-    <properties>
-        <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <inherited>true</inherited>
-                <executions>
-                    <execution>
-                        <!-- Tidy up all POMs before they are published -->
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                        <configuration>
-                            <updatePomFile>true</updatePomFile>
-                            <flattenMode>oss</flattenMode>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>flatten-clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

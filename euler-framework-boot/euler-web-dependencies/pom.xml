@@ -3,18 +3,28 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>euler-framework-boot-parent</artifactId>
+        <artifactId>euler-framework-boot</artifactId>
         <groupId>org.eulerframework.boot</groupId>
         <version>${revision}</version>
+        <relativePath>../</relativePath>
     </parent>
     <artifactId>euler-web-dependencies</artifactId>
     <packaging>pom</packaging>
+
+    <properties>
+        <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>euler-web-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>euler-web-autoconfigure</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -48,6 +58,15 @@
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -55,7 +74,7 @@
                 <inherited>false</inherited>
                 <executions>
                     <execution>
-                        <!-- Tidy up all POMs before they are published -->
+                        <!-- Flatten and simplify our own POM for install/deploy -->
                         <id>flatten</id>
                         <phase>process-resources</phase>
                         <goals>
