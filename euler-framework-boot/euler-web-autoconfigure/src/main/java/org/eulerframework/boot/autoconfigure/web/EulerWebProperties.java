@@ -21,7 +21,7 @@ import java.time.Duration;
 
 @ConfigurationProperties(prefix = "euler.web")
 public class EulerWebProperties {
-    private I18n i18n;
+    private I18n i18n = new I18n();
 
     public I18n getI18n() {
         return i18n;
