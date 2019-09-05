@@ -17,10 +17,11 @@
 
     <properties>
         <revision>1.0.0.M4-SNAPSHOT</revision>
+        <main.basedir>${basedir}</main.basedir>
     </properties>
 
     <modules>
-        <module>euler-web-parent</module>
+        <module>euler-web-dependencies</module>
         <module>euler-web-core</module>
         <module>euler-web-orm-jpa</module>
         <module>euler-web-authentication</module>
@@ -31,7 +32,7 @@
         <module>euler-web-support</module>
         <module>euler-web-oauth2-util</module>
         <module>euler-web-eureka-support</module>
-        <module>euler-framework-boot</module>
+        <module>euler-boot</module>
     </modules>
 
     <scm>

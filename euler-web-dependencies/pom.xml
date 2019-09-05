@@ -6,10 +6,11 @@
         <artifactId>euler-framework</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>euler-web-parent</artifactId>
+    <artifactId>euler-web-dependencies</artifactId>
     <packaging>pom</packaging>
 
     <properties>
+        <main.basedir>${basedir}/..</main.basedir>
         <java.version>1.8</java.version>
 
         <euler-cache.version>1.0.0.M3-SNAPSHOT</euler-cache.version>
@@ -43,7 +44,9 @@
 
         <junit.version>4.8.2</junit.version>
 
+        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
+        <xml-maven-plugin.version>1.0.2</xml-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -256,6 +259,13 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-cache</artifactId>
@@ -295,17 +305,47 @@
                     <artifactId>flatten-maven-plugin</artifactId>
                     <version>${flatten-maven-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xml-maven-plugin</artifactId>
+                    <version>${xml-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <inherited>true</inherited>
+                <inherited>false</inherited>
                 <executions>
                     <execution>
-                        <!-- Tidy up all POMs before they are published -->
+                        <!-- Create an effective POM (with versions expanded) for the CLI and
+                            documentation -->
+                        <id>flatten-effective-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <configuration>
+                            <updatePomFile>false</updatePomFile>
+                            <outputDirectory>${project.build.directory}/effective-pom</outputDirectory>
+                            <flattenedPomFilename>euler-web-dependencies.xml</flattenedPomFilename>
+                            <flattenMode>oss</flattenMode>
+                            <pomElements>
+                                <dependencyManagement>expand</dependencyManagement>
+                                <pluginManagement>expand</pluginManagement>
+                                <properties>remove</properties>
+                                <repositories>remove</repositories>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Flatten and simplify our own POM for install/deploy -->
                         <id>flatten</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -313,7 +353,96 @@
                         </goals>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                            <flattenMode>bom</flattenMode>
+                            <pomElements>
+                                <pluginManagement>keep</pluginManagement>
+                                <properties>keep</properties>
+                                <repositories>remove</repositories>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <!-- Cleanup the effective POM -->
+                        <id>post-process-effective-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <transformationSets>
+                                <transformationSet>
+                                    <dir>${project.build.directory}/effective-pom</dir>
+                                    <outputDir>${project.build.directory}/effective-pom</outputDir>
+                                    <stylesheet>src/main/xslt/post-process-flattened-pom.xsl</stylesheet>
+                                    <outputProperties>
+                                        <outputProperty>
+                                            <name>indent</name>
+                                            <value>yes</value>
+                                        </outputProperty>
+                                    </outputProperties>
+                                </transformationSet>
+                            </transformationSets>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Cleanup the flattened project POM -->
+                        <id>post-process-flattened-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <transformationSets>
+                                <transformationSet>
+                                    <dir>${project.basedir}</dir>
+                                    <outputDir>${project.basedir}</outputDir>
+                                    <includes>.flattened-pom.xml</includes>
+                                    <stylesheet>src/main/xslt/post-process-flattened-pom.xsl</stylesheet>
+                                    <outputProperties>
+                                        <outputProperty>
+                                            <name>indent</name>
+                                            <value>yes</value>
+                                        </outputProperty>
+                                    </outputProperties>
+                                </transformationSet>
+                            </transformationSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <!-- Attach effective POM -->
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/effective-pom/euler-web-dependencies.xml</file>
+                                    <type>effective-pom</type>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>

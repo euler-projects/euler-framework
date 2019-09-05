@@ -3,10 +3,10 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>euler-framework-boot-parent</artifactId>
+        <artifactId>euler-boot-parent</artifactId>
         <groupId>org.eulerframework.boot</groupId>
         <version>${revision}</version>
-        <relativePath>../euler-framework-boot-parent</relativePath>
+        <relativePath>../euler-boot-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,8 +15,8 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>euler-web-autoconfigure</artifactId>
-            <version>${project.version}</version>
+            <artifactId>euler-boot-autoconfigure</artifactId>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 </project>
