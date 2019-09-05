@@ -22,6 +22,7 @@
 
     <modules>
         <module>euler-web-dependencies</module>
+        <module>euler-web-parent</module>
         <module>euler-web-core</module>
         <module>euler-web-orm-jpa</module>
         <module>euler-web-authentication</module>

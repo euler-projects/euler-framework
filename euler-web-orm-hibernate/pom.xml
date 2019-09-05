@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.eulerframework</groupId>
-        <artifactId>euler-web-dependencies</artifactId>
+        <artifactId>euler-web-parent</artifactId>
         <version>${revision}</version>
-        <relativePath>../euler-web-dependencies</relativePath>
+        <relativePath>../euler-web-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
