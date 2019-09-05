@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.eulerframework</groupId>
         <artifactId>euler-parent</artifactId>
-        <version>4</version>
+        <version>5-SNAPSHOT</version>
     </parent>
 
     <artifactId>euler-framework</artifactId>
@@ -32,7 +32,6 @@
         <module>euler-web-support</module>
         <module>euler-web-oauth2-util</module>
         <module>euler-web-eureka-support</module>
-        <module>euler-boot</module>
     </modules>
 
     <scm>
