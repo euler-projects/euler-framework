@@ -82,12 +82,7 @@
                         </goals>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>bom</flattenMode>
-                            <pomElements>
-                                <pluginManagement>keep</pluginManagement>
-                                <properties>keep</properties>
-                                <repositories>remove</repositories>
-                            </pomElements>
+                            <flattenMode>resolveCiFriendliesOnly</flattenMode>
                         </configuration>
                     </execution>
                     <execution>

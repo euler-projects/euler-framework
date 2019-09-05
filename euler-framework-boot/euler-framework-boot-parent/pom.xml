@@ -45,12 +45,7 @@
                         </goals>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>oss</flattenMode>
-                            <pomElements>
-                                <parent>expand</parent>
-                                <distributionManagement>remove</distributionManagement>
-                                <repositories>remove</repositories>
-                            </pomElements>
+                            <flattenMode>resolveCiFriendliesOnly</flattenMode>
                         </configuration>
                     </execution>
                 </executions>
