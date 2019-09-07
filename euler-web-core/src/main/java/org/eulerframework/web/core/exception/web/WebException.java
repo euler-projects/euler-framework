@@ -94,7 +94,7 @@ public class WebException extends RuntimeException {
         } else if(this.error.endsWith("Exception")) {
             this.error = this.error.substring(0, this.error.length() - "Exception".length());
         }
-        this.error = StringUtils.camelCaseToUnderLineCase(this.error);
+        this.error = StringUtils.camelStyleToUnderLineLowerCase(this.error);
         this.code = this.error.hashCode();
     }
     
