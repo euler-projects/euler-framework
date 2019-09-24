@@ -1,3 +1,4 @@
+[![Build Status](https://www.travis-ci.org/euler-projects/euler-framework.svg?branch=develop)](https://www.travis-ci.org/euler-projects/euler-framework)
 [![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk8/badge/icon)](https://ci.eulerproject.io/job/euler-framework-latest-jdk8/)
 [![GitHub issues](https://img.shields.io/github/issues/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/issues)
 [![GitHub release](https://img.shields.io/github/release/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/releases)
