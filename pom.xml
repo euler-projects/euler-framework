@@ -40,4 +40,18 @@
         <developerConnection>scm:git:git@github.com:euler-projects/euler-framework.git</developerConnection>
         <url>https://github.com/euler-projects/euler-framework</url>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>euler-snapshot</id>
+            <name>euler-snapshot</name>
+            <url>https://repo.eulerproject.io/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
