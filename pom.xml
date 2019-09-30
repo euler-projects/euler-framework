@@ -30,9 +30,9 @@
         <module>euler-web-file</module>
         <module>euler-web-oauth2-server</module>
         <module>euler-web-orm-hibernate</module>
-        <module>euler-web-support</module>
         <module>euler-web-oauth2-util</module>
         <module>euler-web-eureka-support</module>
+        <module>euler-web-supports</module>
     </modules>
 
     <scm>

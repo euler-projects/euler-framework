@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.module.authentication.controller.settings.account;
+package org.eulerframework.web.module.authentication.controller.account;
 
 import javax.annotation.Resource;
 import org.springframework.web.bind.annotation.RequestMapping;

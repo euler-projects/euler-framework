@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystemException;
 import java.util.Locale;
 
 public abstract class WebConfig {
@@ -51,7 +52,7 @@ public abstract class WebConfig {
         WebConfig.propertyReader = propertyReader;
     }
 
-    private static class WebConfigKey {
+    public static class WebConfigKey {
         // [project]
         private static final String PROJECT_VERSION = "project.verison";
         private static final String PROJECT_MODE = "project.mode";
@@ -59,7 +60,10 @@ public abstract class WebConfig {
         private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
 
         // [core]
-        private static final String CORE_RUNTIME_PATH = "core.runtimePath";
+        public static final String SPRING_APPLICATION_NAME = "spring.application.name";
+        public static final String CORE_RUNTIME_PATH = "core.runtimePath";
+        public static final String CORE_TMP_PATH = "core.tmpPath";
+
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "core.rootContextConfigClass";
         private static final String CORE_WEB_CONFIG_CLASS = "core.webConfigClass";
         private static final String CORE_AJAX_CONFIG_CLASS = "core.webAjaxConfigClass";
@@ -104,12 +108,14 @@ public abstract class WebConfig {
         private static final String REDIS_SENTINELS = "redis.sentinels";
     }
 
-    private static class WebConfigDefault {
+    public static class WebConfigDefault {
         private static final String PROJECT_COPYRIGHT_HOLDER = "Copyright Holder";
         private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
 
-        private static final String CORE_RUNTIME_PATH_UNIX = "file:///var/lib/euler-framework/";
-        private static final String CORE_RUNTIME_PATH_WIN = "file://C:\\euler-framework\\";
+        public static final String DEFAULT_APPLICATION_NAME = "euler-framework";
+        public static final String DEFAULT_RUNTIME_PATH_PREFIX = "/var/run";
+        public static final String DEFAULT_TEMP_PATH_PREFIX = "/var/tmp";
+
         private static final String CORE_ROOT_CONTEXT_CONFIG_CLASS = "org.eulerframework.config.root.RootContextConfig";
         private static final String CORE_WEB_CONFIG_CLASS = "org.eulerframework.config.controller.JspServletContextConfig";
         private static final String CORE_AJAX_CONFIG_CLASS = "org.eulerframework.config.controller.AjaxServletContextConfig";
@@ -145,6 +151,39 @@ public abstract class WebConfig {
         private static final String REDIS_HOST = "localhost";
         private static final int REDIS_PORT = 6379;
         private static final String REDIS_PASSWORD = null;
+    }
+
+    public static String getSpringApplicationName() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.SPRING_APPLICATION_NAME, key -> propertyReader.get(WebConfigKey.SPRING_APPLICATION_NAME,
+                WebConfigDefault.DEFAULT_APPLICATION_NAME));
+
+        return (String) cachedConfig;
+    }
+
+    public static String getRuntimePath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
+            String result = propertyReader.get(key, null);
+            try {
+                return ConfigUtils.handleApplicationPath(result, () -> WebConfigDefault.DEFAULT_RUNTIME_PATH_PREFIX + "/" + getSpringApplicationName(), key);
+            } catch (FileSystemException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        });
+
+        return (String) cachedConfig;
+    }
+
+    public static String getTmpPath() {
+        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_TMP_PATH, key -> {
+            String result = propertyReader.get(key, null);
+            try {
+                return ConfigUtils.handleApplicationPath(result, () -> WebConfigDefault.DEFAULT_TEMP_PATH_PREFIX + "/" + getSpringApplicationName(), key);
+            } catch (FileSystemException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        });
+
+        return (String) cachedConfig;
     }
 
     public static int getI18nRefreshFreq() {
@@ -263,45 +302,7 @@ public abstract class WebConfig {
 
     public static String getAdminJspPath() {
         Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.WEB_ADMIN_JSP_PATH, key -> CommonUtils.convertDirToUnixFormat(
-                propertyReader.get(WebConfigKey.WEB_ADMIN_JSP_PATH, WebConfigDefault.WEB_ADMIN_JSP_PATH), true));
-
-        return (String) cachedConfig;
-    }
-
-    public static String getRuntimePath() {
-        Object cachedConfig = CONFIG_CAHCE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
-
-            String result;
-            try {
-                result = propertyReader.get(WebConfigKey.CORE_RUNTIME_PATH);
-            } catch (PropertyNotFoundException e) {
-                if (SystemUtils.isWindows()) {
-                    LOGGER.info("OS is windows");
-                    result = WebConfigDefault.CORE_RUNTIME_PATH_WIN;
-                } else {
-                    LOGGER.info("OS isn't windows");
-                    result = WebConfigDefault.CORE_RUNTIME_PATH_UNIX;
-                }
-                LOGGER.warn("Couldn't load " + WebConfigKey.CORE_RUNTIME_PATH + " , use " + result + " for default.");
-            }
-
-            result = CommonUtils.convertDirToUnixFormat(result, true);
-            if (!result.startsWith("/") && !result.startsWith("file://")) {
-                throw new RuntimeException(WebConfigKey.CORE_RUNTIME_PATH + " must bengin with file:// or /");
-                //result = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath(result);
-            } else {
-                if (result.startsWith("file://")) {
-                    result = result.substring("file://".length());
-                }
-            }
-
-            //当配置的路径为*inx格式，但是当前环境是Windows时，默认放在C盘
-            if (SystemUtils.isWindows() && result.startsWith("/")) {
-                result = "C:" + result;
-            }
-
-            return CommonUtils.convertDirToUnixFormat(result, false);
-        });
+                propertyReader.get(key, WebConfigDefault.WEB_ADMIN_JSP_PATH), true));
 
         return (String) cachedConfig;
     }

@@ -46,16 +46,16 @@ public abstract class ApiSupportWebController extends AbstractWebController {
 //      return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
 //  }
 
-    /**
-     * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息
-     * 
-     * @return 包含错误信息的Ajax响应体
-     */
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(AccessDeniedException.class)
-    public Object accessDeniedException(AccessDeniedException e) {
-        return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ACCESS_DENIED, e));
-    }
+//    /**
+//     * 用于在程序发生{@link AccessDeniedException}异常时统一返回错误信息
+//     *
+//     * @return 包含错误信息的Ajax响应体
+//     */
+//    @ResponseStatus(HttpStatus.FORBIDDEN)
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public Object accessDeniedException(AccessDeniedException e) {
+//        return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ACCESS_DENIED, e));
+//    }
     
     /**
      * 用于在程序发生{@link MissingServletRequestPartException}异常时统一返回错误信息
