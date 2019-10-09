@@ -57,6 +57,16 @@
                 <artifactId>euler-web-support</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-support-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-support-oauth2-server</artifactId>
+                <version>${revision}</version>
+            </dependency>
         
             <!-- Basic Jars -->
             <dependency>
