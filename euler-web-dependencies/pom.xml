@@ -11,7 +11,7 @@
 
     <properties>
         <euler-cache.version>1.0.0.M3-SNAPSHOT</euler-cache.version>
-        <euler-common.version>1.0.0.M3-SNAPSHOT</euler-common.version>
+        <euler-common.version>1.0.0.M7-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.10</commons-codec.version>
 
