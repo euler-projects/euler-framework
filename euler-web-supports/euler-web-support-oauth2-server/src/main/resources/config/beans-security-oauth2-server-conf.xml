@@ -11,7 +11,7 @@
                                  http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
 
     <beans:bean id="oauth2AuthorizationServerTokenStore" class="org.eulerframework.web.module.oauth2.extend.EulerRedisTokenStore">
-        <beans:constructor-arg ref="jedisConnectionFactory" />
+        <beans:constructor-arg ref="redisConnectionFactory" />
     </beans:bean>
 
     <beans:bean id="oauth2AuthorizationServerTokenServices" class="org.eulerframework.web.module.oauth2.extend.EulerTokenServices">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,59 +15,20 @@
  */
 package org.eulerframework.web.core.base.controller;
 
-import java.beans.PropertyEditorSupport;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Date;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.eulerframework.common.util.MIMEUtils;
 import org.eulerframework.common.util.MIMEUtils.MIME;
 import org.eulerframework.common.util.io.file.FileUtils;
 import org.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import org.eulerframework.web.core.base.WebContextAccessable;
+import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Date;
 
 public abstract class AbstractWebController extends WebContextAccessable {
-    
-    /**
-     * 尝试以时间戳的方式格式化时间,如果失败则传递原始字符串
-     * @param binder
-     */
-    @InitBinder
-    protected void initBinder(WebDataBinder binder) {  
-        binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {  
-            @Override  
-            public void setAsText(String value) {
-                if(StringUtils.hasText(value)) {
-                    try {
-                        long timestamp = Long.valueOf(value);
-                        setValue(new Date(timestamp)); 
-                    } catch (NumberFormatException e) {
-                        setValue(value);
-                    }      
-                } else {
-                    setValue(value);
-                }
-            }  
-        });  
-    
-    } 
-    
-    @Resource private ObjectMapper objectMapper;
-    
-    protected ObjectMapper getObjectMapper() {
-        return this.objectMapper;
-    }
-    
     protected void writeString(String string) throws IOException{
         this.getResponse().getOutputStream().write(string.getBytes("UTF-8"));
     }

@@ -22,6 +22,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -56,6 +57,17 @@ public abstract class ApiSupportWebController extends AbstractWebController {
 //    public Object accessDeniedException(AccessDeniedException e) {
 //        return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ACCESS_DENIED, e));
 //    }
+
+    /**
+     * 用于在程序发生{@link MethodArgumentTypeMismatchException}异常时统一返回错误信息
+     *
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public Object methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
+    }
     
     /**
      * 用于在程序发生{@link MissingServletRequestPartException}异常时统一返回错误信息
@@ -119,7 +131,7 @@ public abstract class ApiSupportWebController extends AbstractWebController {
 
     /**
      * 用于在程序发生{@link Exception}异常时统一返回错误信息
-     * 
+     *
      * @return 包含错误信息的Ajax响应体
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -15,24 +15,33 @@
  */
 package org.eulerframework.web.core.bean;
 
+import java.beans.PropertyEditorSupport;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.PathResource;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -51,9 +60,36 @@ import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
 public class CoreBean {
-    
+
+    @ControllerAdvice
+    public static class GlobalParameterBinder {
+        /**
+         * 尝试以时间戳的方式格式化时间,如果失败则传递原始字符串
+         *
+         * @param binder
+         */
+        @InitBinder
+        public void initBinder(WebDataBinder binder) {
+            binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {
+                @Override
+                public void setAsText(String value) {
+                    if (StringUtils.hasText(value)) {
+                        try {
+                            long timestamp = Long.parseLong(value);
+                            setValue(new Date(timestamp));
+                        } catch (NumberFormatException e) {
+                            setValue(value);
+                        }
+                    } else {
+                        setValue(value);
+                    }
+                }
+            });
+        }
+    }
+
     @Bean
-    public CorsFilter corsFilter() {  
+    public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
@@ -105,7 +141,7 @@ public class CoreBean {
         mapper.setSerializationInclusion(Include.NON_NULL);
         return mapper;
     }
-    
+
     @Bean(name = "secretPropertyConfigurer")
     public PropertyPlaceholderConfigurer secretPropertyConfigurer() {
         PropertyPlaceholderConfigurer propertyPlaceholderConfigurer = new PropertyPlaceholderConfigurer();
@@ -113,7 +149,7 @@ public class CoreBean {
         propertyPlaceholderConfigurer.setOrder(1);
         propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
         propertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
-        PathResource resource = new PathResource(WebConfig.getConfigPath());
+        FileSystemResource resource = new FileSystemResource(WebConfig.getConfigPath());
         propertyPlaceholderConfigurer.setLocation(resource);
         return propertyPlaceholderConfigurer;
     }
@@ -127,21 +163,11 @@ public class CoreBean {
     // }
 
     @Bean
-    public JedisPoolConfig getJedisPoolConfig() {
-        //TODO: 改为可外部配置
-        JedisPoolConfig JedisPoolConfig = new JedisPoolConfig();
-        JedisPoolConfig.setMaxIdle(1000);
-        JedisPoolConfig.setMaxTotal(100);
-        JedisPoolConfig.setMinIdle(100);
-        return JedisPoolConfig;
-    }
-    
-    @Bean
     public RedisStandaloneConfiguration redisStandaloneConfiguration() {
-        if(!RedisType.STANDALONE.equals(WebConfig.getRedisType())) {
+        if (!RedisType.STANDALONE.equals(WebConfig.getRedisType())) {
             return null;
         }
-        
+
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setDatabase(0);
         redisStandaloneConfiguration.setHostName(WebConfig.getRedisHost());
@@ -149,21 +175,21 @@ public class CoreBean {
         redisStandaloneConfiguration.setPort(WebConfig.getRedisPort());
         return redisStandaloneConfiguration;
     }
-    
+
     @Bean
     public RedisSentinelConfiguration redisSentinelConfiguration() {
-        if(!RedisType.SENTINEL.equals(WebConfig.getRedisType())) {
+        if (!RedisType.SENTINEL.equals(WebConfig.getRedisType())) {
             return null;
         }
-        
+
         //TODO: 完成哨兵Bean
-        
+
         RedisSentinelConfiguration redisSentinelConfiguration = new RedisSentinelConfiguration();
         redisSentinelConfiguration.setDatabase(0);
-        
+
         String[] sentinelsStr = WebConfig.getRedisSentinels();
-        
-        for(String sentinelStr : sentinelsStr) {
+
+        for (String sentinelStr : sentinelsStr) {
             String[] sentinelStrArray = sentinelStr.split(":");
             Assert.isTrue(sentinelStrArray.length == 2, "sentinel format must be host:port");
             String host = sentinelStrArray[0];
@@ -171,35 +197,64 @@ public class CoreBean {
             RedisNode sentinel = new RedisNode(host, port);
             redisSentinelConfiguration.addSentinel(sentinel);
         }
-        
+
         return redisSentinelConfiguration;
     }
 
     @Bean
-    public JedisConnectionFactory jedisConnectionFactory(
-            @Nullable RedisStandaloneConfiguration redisStandaloneConfiguration, 
-            @Nullable RedisSentinelConfiguration redisSentinelConfiguration,
-            @Nullable JedisPoolConfig jedisPoolConfig) {
-        if(redisStandaloneConfiguration != null) {
-            return new JedisConnectionFactory(redisStandaloneConfiguration);
-        } else if(redisSentinelConfiguration != null) {
-            return new JedisConnectionFactory(redisSentinelConfiguration, jedisPoolConfig);
+    public RedisConnectionFactory redisConnectionFactory(
+            @Nullable RedisStandaloneConfiguration redisStandaloneConfiguration,
+            @Nullable RedisSentinelConfiguration redisSentinelConfiguration) {
+        if (redisStandaloneConfiguration != null) {
+            if (this.isLettuce()) {
+                return new LettuceConnectionFactory(redisStandaloneConfiguration);
+            } else if (this.isJedis()) {
+                return new JedisConnectionFactory(redisStandaloneConfiguration);
+            } else {
+                throw new RuntimeException("Jedis client not exits.");
+            }
+        } else if (redisSentinelConfiguration != null) {
+            if (this.isLettuce()) {
+                return new LettuceConnectionFactory(redisSentinelConfiguration);
+            } else if (this.isJedis()) {
+                return new JedisConnectionFactory(redisSentinelConfiguration);
+            } else {
+                throw new RuntimeException("Jedis client not exits.");
+            }
         } else {
             throw new RuntimeException("redis type error");
         }
     }
-    
+
+    private boolean isLettuce() {
+        try {
+            Class.forName("io.lettuce.core.RedisClient");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isJedis() {
+        try {
+            Class.forName("redis.clients.jedis.Jedis");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     @Bean
     public StringRedisSerializer stringRedisSerializer() {
         return new StringRedisSerializer();
     }
-    
+
     @Bean
     public StringRedisTemplate stringRedisTemplate(
-            JedisConnectionFactory jedisConnectionFactory,
+            RedisConnectionFactory redisConnectionFactory,
             StringRedisSerializer stringRedisSerializer) {
-        StringRedisTemplate stringRedisTemplate= new StringRedisTemplate();
-        stringRedisTemplate.setConnectionFactory(jedisConnectionFactory);
+        StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
+        stringRedisTemplate.setConnectionFactory(redisConnectionFactory);
         return stringRedisTemplate;
     }
 }
