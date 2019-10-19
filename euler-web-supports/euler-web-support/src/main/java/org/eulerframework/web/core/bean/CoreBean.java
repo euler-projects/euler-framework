@@ -19,6 +19,8 @@ import java.beans.PropertyEditorSupport;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -60,6 +62,7 @@ import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
 public class CoreBean {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @ControllerAdvice
     public static class GlobalParameterBinder {
@@ -207,19 +210,23 @@ public class CoreBean {
             @Nullable RedisSentinelConfiguration redisSentinelConfiguration) {
         if (redisStandaloneConfiguration != null) {
             if (this.isLettuce()) {
+                this.logger.info("Lettuce Standalone");
                 return new LettuceConnectionFactory(redisStandaloneConfiguration);
             } else if (this.isJedis()) {
+                this.logger.info("Jedis Standalone");
                 return new JedisConnectionFactory(redisStandaloneConfiguration);
             } else {
-                throw new RuntimeException("Jedis client not exits.");
+                throw new RuntimeException("Jedis or Lettuce not exits.");
             }
         } else if (redisSentinelConfiguration != null) {
             if (this.isLettuce()) {
+                this.logger.info("Lettuce Sentinel");
                 return new LettuceConnectionFactory(redisSentinelConfiguration);
             } else if (this.isJedis()) {
+                this.logger.info("Jedis Sentinel");
                 return new JedisConnectionFactory(redisSentinelConfiguration);
             } else {
-                throw new RuntimeException("Jedis client not exits.");
+                throw new RuntimeException("Jedis or Lettuce not exits.");
             }
         } else {
             throw new RuntimeException("redis type error");
