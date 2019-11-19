@@ -17,6 +17,7 @@ package org.eulerframework.web.module.authentication.boot;
 
 import javax.servlet.ServletContext;
 
+import org.eulerframework.config.EulerWebSupportConfig;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
@@ -28,7 +29,7 @@ import org.eulerframework.web.module.authentication.conf.SecurityConfiguration;
 public class SecurityBootstrap extends AbstractSecurityWebApplicationInitializer {
 
     public SecurityBootstrap() throws ClassNotFoundException {
-        super(Class.forName(WebConfig.getRootContextConfigClassName()), SecurityConfiguration.class);
+        super(Class.forName(EulerWebSupportConfig.getRootContextConfigClassName()), SecurityConfiguration.class);
     }
 
     @Override

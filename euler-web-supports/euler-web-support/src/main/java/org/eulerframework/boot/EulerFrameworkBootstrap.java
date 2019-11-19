@@ -21,6 +21,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.eulerframework.config.EulerWebSupportConfig;
+import org.eulerframework.web.config.MultiPartConfig;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -32,7 +34,6 @@ import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.constant.EulerFilters;
 import org.eulerframework.constant.EulerServlets;
 import org.eulerframework.constant.EulerSysAttributes;
-import org.eulerframework.web.config.MultiPartConfig;
 import org.eulerframework.web.config.SystemProperties;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.cookie.LocaleCookies;
@@ -55,7 +56,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                 || !container.getAttribute(EULER_SPRING_SECURITY_ENABLED).equals(true)) {
             AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
             try {
-                rootContext.register(Class.forName(WebConfig.getRootContextConfigClassName()));
+                rootContext.register(Class.forName(EulerWebSupportConfig.getRootContextConfigClassName()));
             } catch (ClassNotFoundException e2) {
                 rootContext.close();
                 throw new ServletException(e2);
@@ -91,27 +92,27 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         this.initSpringMVCDispatcher(
                 container, 
                 EulerServlets.WEB_SERVLET, 
-                1, 
-                WebConfig.getWebConfigClassName(),
+                1,
+                EulerWebSupportConfig.getWebConfigClassName(),
                 "/");
         
         this.initSpringMVCDispatcher(container, 
                 EulerServlets.WEB_ADMIN_SERVLET, 
                 1,
-                WebConfig.getAdminWebConfigClassName(), 
+                EulerWebSupportConfig.getAdminWebConfigClassName(),
                 WebConfig.getAdminRootPath() + "/*");
         
         this.initSpringMVCDispatcher(
                 container, 
                 EulerServlets.WEB_AJAX_SERVLET, 
-                1, 
-                WebConfig.getAjaxConfigClassName(),
+                1,
+                EulerWebSupportConfig.getAjaxConfigClassName(),
                 "/ajax/*");
         
         this.initSpringMVCDispatcher(container, 
                 EulerServlets.WEB_ADMIN_AJAX_SERVLET, 
                 1,
-                WebConfig.getAdminAjaxConfigClassName(), 
+                EulerWebSupportConfig.getAdminAjaxConfigClassName(),
                 WebConfig.getAdminRootPath() + "/ajax/*");
 
         this.initBaseData(container);
@@ -119,8 +120,8 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         if(WebConfig.isApiEnabled()) {
             this.initSpringMVCDispatcher(container, 
                     EulerServlets.API_SERVLET, 
-                    1, 
-                    WebConfig.getApiConfigClassName(),
+                    1,
+                    EulerWebSupportConfig.getApiConfigClassName(),
                     WebConfig.getApiRootPath() + "/*");
         }
     }
@@ -167,7 +168,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         container.setAttribute(EulerSysAttributes.PROJECT_MODE.value(), WebConfig.getProjectMode());
         container.setAttribute(EulerSysAttributes.PROJECT_BUILDTIME.value(), WebConfig.getProjectBuildtime());
 
-        container.setAttribute(EulerSysAttributes.SITENAME.value(), WebConfig.getSitename());
+        container.setAttribute(EulerSysAttributes.SITENAME.value(), WebConfig.getSiteName());
         container.setAttribute(EulerSysAttributes.COPYRIGHT_HOLDER.value(), WebConfig.getCopyrightHolder());
 
         container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_ICON.value(), contextPath + WebConfig.getAdminDashboardBrandIcon());
