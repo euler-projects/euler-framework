@@ -49,30 +49,89 @@ public abstract class WebConfig {
 
     public static class WebConfigKey {
         // [core]
+        /**
+         * 应用名称
+         */
         public static final String CORE_APPLICATION_NAME = "core.application.name";
+        /**
+         * 应用运行时目录
+         */
         public static final String CORE_RUNTIME_PATH = "core.runtimePath";
+        /**
+         * 应用临时目录
+         */
         public static final String CORE_TEMP_PATH = "core.tempPath";
 
         // [core.cache]
+        /**
+         * 国际化资源文件刷新周期, 秒
+         */
         private static final String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
+        /**
+         * 内存缓存池清理周期, 毫秒
+         */
         private static final String CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
 
         // [web]
+        /**
+         * 后台管理页面图标文件存放位置
+         * TODO: 支持存放在外部目录
+         */
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
+        /**
+         * 后台管理页面标题文本
+         */
         private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
+        /**
+         * 后台管理JSP页面文件存放目录
+         */
         private static final String WEB_ADMIN_JSP_PATH = "web.admin.jspPath";
+        /**
+         * 后台管理页面URL根路径
+         */
         private static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
+        /**
+         * 开启RESTful API支持
+         */
         private static final String WEB_API_ENABLED = "web.api.enabled";
+        /**
+         * RESTful API URL根路径
+         */
         private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
+        /**
+         * 站点默认语言
+         */
         private static final String WEB_LANGUAGE_DEFAULT = "web.language.default";
+        /**
+         * 站点支持语言列表
+         */
         private static final String WEB_LANGUAGE_SUPPORT_LANGUAGES = "web.language.supportLanguages";
+        /**
+         * 静态资源文件URL根路径
+         */
         private static final String WEB_SITE_ASSETS_PATH = "web.site.assetsPath";
+        /**
+         * 站点默认主题
+         */
         private static final String WEB_SITE_DEFAULT_THEME = "web.site.defaultTheme";
+        /**
+         * 站点JSP文件存放目录
+         */
         private static final String WEB_SITE_JSP_PATH = "web.site.jspPath";
+        /**
+         * 站点名称
+         */
         private static final String WEB_SITE_NAME = "web.site.name";
+        /**
+         * 静态页面URL根路径
+         */
         private static final String WEB_SITE_STATIC_PAGES_PATH = "web.site.staticPagesPath";
+        /**
+         * 站点URL
+         */
         private static final String WEB_SITE_URL = "web.site.url";
         //private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
+        
         private static final String WEB_MULTIPART = "web.multipart";
         private static final String WEB_MULTIPART_LOCATION = "web.multiPart.location";
         private static final String WEB_MULTIPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
