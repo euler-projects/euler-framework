@@ -19,6 +19,7 @@ import java.beans.PropertyEditorSupport;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import org.eulerframework.config.EulerWebSupportConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -106,7 +107,7 @@ public class CoreBean {
     @Bean
     public MessageSource messageSource() {
         ClassPathReloadableResourceBundleMessageSource messageSource = new ClassPathReloadableResourceBundleMessageSource();
-        messageSource.setCacheSeconds(WebConfig.getI18nRefreshFreq());
+        //messageSource.setCacheSeconds(default as -1);
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setBasename("classpath*:language/**/*");
@@ -152,7 +153,7 @@ public class CoreBean {
         propertyPlaceholderConfigurer.setOrder(1);
         propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
         propertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
-        FileSystemResource resource = new FileSystemResource(WebConfig.getConfigPath());
+        FileSystemResource resource = new FileSystemResource(EulerWebSupportConfig.getConfigPath());
         propertyPlaceholderConfigurer.setLocation(resource);
         return propertyPlaceholderConfigurer;
     }
@@ -167,21 +168,21 @@ public class CoreBean {
 
     @Bean
     public RedisStandaloneConfiguration redisStandaloneConfiguration() {
-        if (!RedisType.STANDALONE.equals(WebConfig.getRedisType())) {
+        if (!RedisType.STANDALONE.equals(EulerWebSupportConfig.getRedisType())) {
             return null;
         }
 
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setDatabase(0);
-        redisStandaloneConfiguration.setHostName(WebConfig.getRedisHost());
-        redisStandaloneConfiguration.setPassword(RedisPassword.of(WebConfig.getRedisPassword()));
-        redisStandaloneConfiguration.setPort(WebConfig.getRedisPort());
+        redisStandaloneConfiguration.setHostName(EulerWebSupportConfig.getRedisHost());
+        redisStandaloneConfiguration.setPassword(RedisPassword.of(EulerWebSupportConfig.getRedisPassword()));
+        redisStandaloneConfiguration.setPort(EulerWebSupportConfig.getRedisPort());
         return redisStandaloneConfiguration;
     }
 
     @Bean
     public RedisSentinelConfiguration redisSentinelConfiguration() {
-        if (!RedisType.SENTINEL.equals(WebConfig.getRedisType())) {
+        if (!RedisType.SENTINEL.equals(EulerWebSupportConfig.getRedisType())) {
             return null;
         }
 
@@ -190,7 +191,7 @@ public class CoreBean {
         RedisSentinelConfiguration redisSentinelConfiguration = new RedisSentinelConfiguration();
         redisSentinelConfiguration.setDatabase(0);
 
-        String[] sentinelsStr = WebConfig.getRedisSentinels();
+        String[] sentinelsStr = EulerWebSupportConfig.getRedisSentinels();
 
         for (String sentinelStr : sentinelsStr) {
             String[] sentinelStrArray = sentinelStr.split(":");

@@ -250,7 +250,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
      */
     protected String crashPage(Throwable e) {
         this.logger.error(e.getMessage(), e);
-        if (WebConfig.isDebugMode()) {
+        if (WebConfig.showStackTraceInCrashPage()) {
             this.getRequest().setAttribute("__crashInfo", e.getMessage());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

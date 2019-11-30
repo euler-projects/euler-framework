@@ -163,14 +163,12 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         container.setAttribute(EulerSysAttributes.AJAX_PATH.value(), contextPath + "/ajax");
         container.setAttribute(EulerSysAttributes.ADMIN_AJAX_PATH.value(), contextPath + WebConfig.getAdminRootPath() + "/ajax");
 
-        container.setAttribute(EulerSysAttributes.DEBUG_MODE.value(), WebConfig.isDebugMode());
-        container.setAttribute(EulerSysAttributes.PROJECT_VERSION.value(), WebConfig.getProjectVersion());
-        container.setAttribute(EulerSysAttributes.PROJECT_MODE.value(), WebConfig.getProjectMode());
-        container.setAttribute(EulerSysAttributes.PROJECT_BUILDTIME.value(), WebConfig.getProjectBuildtime());
+        container.setAttribute(EulerSysAttributes.PROJECT_VERSION.value(), EulerWebSupportConfig.getProjectVersion());
+        container.setAttribute(EulerSysAttributes.PROJECT_MODE.value(), EulerWebSupportConfig.getProjectMode());
+        container.setAttribute(EulerSysAttributes.PROJECT_BUILD_TIME.value(), EulerWebSupportConfig.getProjectBuildTime());
 
-        container.setAttribute(EulerSysAttributes.SITENAME.value(), WebConfig.getSiteName());
-        container.setAttribute(EulerSysAttributes.COPYRIGHT_HOLDER.value(), WebConfig.getCopyrightHolder());
-
+        container.setAttribute(EulerSysAttributes.SITE_NAME.value(), WebConfig.getSiteName());
+        container.setAttribute(EulerSysAttributes.COPYRIGHT_HOLDER.value(), EulerWebSupportConfig.getCopyrightHolder());
         container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_ICON.value(), contextPath + WebConfig.getAdminDashboardBrandIcon());
         container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_TEXT.value(), WebConfig.getAdminDashboardBrandText());
 

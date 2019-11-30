@@ -15,20 +15,18 @@
  */
 package org.eulerframework.web.module.authentication.conf;
 
-import org.eulerframework.common.util.property.FilePropertySource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eulerframework.cache.inMemoryCache.DefaultObjectCache;
 import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
+import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
 import org.eulerframework.web.config.WebConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 public abstract class SecurityConfigExternal {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
     private static final DefaultObjectCache<String, Object> CONFIG_CAHCE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);

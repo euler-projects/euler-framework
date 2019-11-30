@@ -18,6 +18,7 @@ package org.eulerframework.web.module.oauth2.boot;
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
+import org.eulerframework.config.EulerWebSupportConfig;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.module.authentication.conf.SecurityConfig;
 import org.eulerframework.web.module.oauth2.conf.OAuth2ServerConfig;
@@ -36,7 +37,7 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
     public void onStartup(ServletContext container) throws ServletException {
         try {
             FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
-            eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getConfigPath());
+            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
             PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
             OAuth2ServerConfig.setPropertyReader(eulerFrameworkPropertyReader);
         } catch (IOException | URISyntaxException e) {

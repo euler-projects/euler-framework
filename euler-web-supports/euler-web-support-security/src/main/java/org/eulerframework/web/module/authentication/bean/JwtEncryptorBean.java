@@ -15,17 +15,16 @@
  */
 package org.eulerframework.web.module.authentication.bean;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.common.util.io.file.FileReadException;
 import org.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import org.eulerframework.common.util.jwt.JwtEncryptor;
 import org.eulerframework.web.module.authentication.conf.SecurityConfigExternal;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 
 @Configuration
 public class JwtEncryptorBean extends LogSupport {

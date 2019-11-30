@@ -64,10 +64,6 @@ public abstract class WebConfig {
 
         // [core.cache]
         /**
-         * 国际化资源文件刷新周期, 秒
-         */
-        private static final String CORE_CACHE_I18N_REFRESH_FREQ = "core.cache.i18n.refreshFreq";
-        /**
          * 内存缓存池清理周期, 毫秒
          */
         private static final String CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
@@ -130,26 +126,32 @@ public abstract class WebConfig {
          * 站点URL
          */
         private static final String WEB_SITE_URL = "web.site.url";
+        /**
+         * 崩溃页面显示详细异常栈
+         */
+        public static final String WEB_JSP_SHOW_STACK_TRACE = "web.jsp.showStackTrace";
         //private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
-        
+
+        /**
+         * Multipart request 配置数据缓存对象的KEY，并不用于配置文件
+         */
         private static final String WEB_MULTIPART = "web.multipart";
+        /**
+         * the directory location where files will be stored
+         */
         private static final String WEB_MULTIPART_LOCATION = "web.multiPart.location";
+        /**
+         * the maximum size allowed for uploaded files
+         */
         private static final String WEB_MULTIPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
+        /**
+         * the maximum size allowed for multipart/form-data requests
+         */
         private static final String WEB_MULTIPART_MAX_REQUEST_SIZE = "web.multiPart.maxRequestSize";
+        /**
+         * the size threshold after which files will be written to disk
+         */
         private static final String WEB_MULTIPART_FILE_SIZE_THRESHOLD = "web.multiPart.fileSizeThreshold";
-
-        // [project]
-        private static final String PROJECT_VERSION = "project.version";
-        private static final String PROJECT_MODE = "project.mode";
-        private static final String PROJECT_BUILDTIME = "project.buildtime";
-        private static final String PROJECT_COPYRIGHT_HOLDER = "project.copyrightHolder";
-
-        // [Redis]
-        private static final String REDIS_TYPE = "redis.type";
-        private static final String REDIS_HOST = "redis.host";
-        private static final String REDIS_PORT = "redis.port";
-        private static final String REDIS_PASSWORD = "redis.password";
-        private static final String REDIS_SENTINELS = "redis.sentinels";
     }
 
     public static class WebConfigDefault {
@@ -157,7 +159,6 @@ public abstract class WebConfig {
         private static final String CORE_RUNTIME_PATH_PREFIX = "/var/run";
         private static final String CORE_TEMP_PATH_PREFIX = "/var/tmp";
 
-        private static final int CORE_CACHE_I18N_REFRESH_FREQ = 86_400;
         private static final long CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = 60_000L;
 
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "/assets/system/admin-dashboard-brand.png";
@@ -173,20 +174,12 @@ public abstract class WebConfig {
         private static final String WEB_SITE_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_SITE_NAME = "DEMO";
         private static final String WEB_SITE_STATIC_PAGES_PATH = "/pages";
+        public static final boolean WEB_JSP_SHOW_STACK_TRACE = false;
         //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
         private static final String WEB_MULTIPART_LOCATION = null;
         private static final long WEB_MULTIPART_MAX_FILE_SIZE = 51_200L;
         private static final long WEB_MULTIPART_MAX_REQUEST_SIZE = 51_200L;
         private static final int WEB_MULTIPART_FILE_SIZE_THRESHOLD = 1_024;
-
-        private static final String PROJECT_COPYRIGHT_HOLDER = "Copyright Holder";
-        private static final ProjectMode PROJECT_MODE = ProjectMode.DEBUG;
-
-        // [Redis]
-        private static final RedisType REDIS_TYPE = RedisType.STANDALONE;
-        private static final String REDIS_HOST = "localhost";
-        private static final int REDIS_PORT = 6379;
-        private static final String REDIS_PASSWORD = null;
     }
 
     public static String getApplicationName() {
@@ -405,13 +398,6 @@ public abstract class WebConfig {
         return (String) cachedConfig;
     }
 
-    public static int getI18nRefreshFreq() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ, key -> propertyReader.getIntValue(WebConfigKey.CORE_CACHE_I18N_REFRESH_FREQ,
-                WebConfigDefault.CORE_CACHE_I18N_REFRESH_FREQ));
-
-        return (int) cachedConfig;
-    }
-
 
     public static long getRamCacheCleanFreq() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ,
@@ -421,98 +407,12 @@ public abstract class WebConfig {
         return (long) cachedConfig;
     }
 
-    public static ProjectMode getProjectMode() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.PROJECT_MODE, key -> propertyReader.getEnumValue(WebConfigKey.PROJECT_MODE, WebConfigDefault.PROJECT_MODE, true));
+    public static boolean showStackTraceInCrashPage() {
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_JSP_SHOW_STACK_TRACE,
+                key -> propertyReader.getBooleanValue(WebConfigKey.WEB_JSP_SHOW_STACK_TRACE,
+                        WebConfigDefault.WEB_JSP_SHOW_STACK_TRACE));
 
-        return (ProjectMode) cachedConfig;
-    }
-
-    public static String getProjectVersion() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.PROJECT_VERSION, key -> {
-            try {
-                return propertyReader.get(WebConfigKey.PROJECT_VERSION);
-            } catch (PropertyNotFoundException e) {
-                throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_VERSION);
-            }
-        });
-
-        return (String) cachedConfig;
-    }
-
-    public static String getProjectBuildtime() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.PROJECT_BUILDTIME, key -> {
-            try {
-                return propertyReader.get(WebConfigKey.PROJECT_BUILDTIME);
-            } catch (PropertyNotFoundException e) {
-                throw new RuntimeException("Couldn't load " + WebConfigKey.PROJECT_BUILDTIME);
-            }
-        });
-
-        return (String) cachedConfig;
-    }
-
-    public static String getCopyrightHolder() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, key -> propertyReader.get(WebConfigKey.PROJECT_COPYRIGHT_HOLDER, WebConfigDefault.PROJECT_COPYRIGHT_HOLDER));
-
-        return (String) cachedConfig;
-    }
-
-    /**
-     * 检查当前配置是不是调试模式<br>
-     * <b>注意:</b>
-     * 根据配置不同,调试模式可能包含多个{@link ProjectMode},并不是{@link ProjectMode#DEVELOP}
-     *
-     * @return 调试模式
-     */
-    public static boolean isDebugMode() {
-        // TODO: make log details mode configable
-        return getProjectMode().equals(ProjectMode.DEVELOP) || getProjectMode().equals(ProjectMode.DEBUG);
-    }
-
-    /**
-     * 获取外部配置文件路径
-     *
-     * @return 外部配置文件路径
-     */
-    public static String getConfigPath() {
-        return getRuntimePath() + "/conf/config.properties";
-    }
-
-    public static RedisType getRedisType() {
-        return (RedisType) CONFIG_CACHE.get(WebConfigKey.REDIS_TYPE,
-                key -> propertyReader.getEnumValue(key, WebConfigDefault.REDIS_TYPE, true));
-    }
-
-    public static String getRedisHost() {
-        return (String) CONFIG_CACHE.get(WebConfigKey.REDIS_HOST,
-                key -> propertyReader.get(key, WebConfigDefault.REDIS_HOST));
-    }
-
-    public static String getRedisPassword() {
-        return (String) CONFIG_CACHE.get(WebConfigKey.REDIS_PASSWORD,
-                key -> propertyReader.get(key, WebConfigDefault.REDIS_PASSWORD));
-    }
-
-    public static int getRedisPort() {
-        return (int) CONFIG_CACHE.get(WebConfigKey.REDIS_PORT,
-                key -> propertyReader.getIntValue(key, WebConfigDefault.REDIS_PORT));
-    }
-
-    /**
-     * @return 获取redis配置
-     */
-    public static String[] getRedisSentinels() {
-        String str = (String) CONFIG_CACHE.get(WebConfigKey.REDIS_SENTINELS, key -> {
-            try {
-                return propertyReader.get(key);
-            } catch (PropertyNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        Assert.hasText(str, () -> WebConfigKey.REDIS_SENTINELS + "can not be empty");
-
-        return str.split(",");
+        return (boolean) cachedConfig;
     }
 
     public static MultiPartConfig getMultiPartConfig() {

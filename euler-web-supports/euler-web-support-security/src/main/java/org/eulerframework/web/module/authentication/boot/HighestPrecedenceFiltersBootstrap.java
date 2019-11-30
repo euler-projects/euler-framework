@@ -18,8 +18,10 @@ package org.eulerframework.web.module.authentication.boot;
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
+import org.eulerframework.config.EulerWebSupportConfig;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.module.authentication.conf.SecurityConfig;
+import org.eulerframework.web.module.authentication.conf.SecurityConfigExternal;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
@@ -35,11 +37,20 @@ public class HighestPrecedenceFiltersBootstrap extends LogSupport implements Web
     public void onStartup(ServletContext container) throws ServletException {
         try {
             FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
-            eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getConfigPath());
+            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
             PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
             SecurityConfig.setPropertyReader(eulerFrameworkPropertyReader);
         } catch (IOException | URISyntaxException e) {
             throw new ServletException("SecurityConfig init error", e);
+        }
+
+        try {
+            FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
+            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
+            PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
+            SecurityConfigExternal.setPropertyReader(eulerFrameworkPropertyReader);
+        } catch (IOException | URISyntaxException e) {
+            throw new ServletException("SecurityConfigExternal init error", e);
         }
     }
 }
