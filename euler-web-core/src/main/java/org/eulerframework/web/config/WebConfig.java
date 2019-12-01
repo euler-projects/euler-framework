@@ -155,7 +155,7 @@ public abstract class WebConfig {
     }
 
     public static class WebConfigDefault {
-        private static final String CORE_APPLICATION_NAME = "euler-framework";
+        private static final String CORE_APPLICATION_NAME = null;
         private static final String CORE_RUNTIME_PATH_PREFIX = "/var/run";
         private static final String CORE_TEMP_PATH_PREFIX = "/var/tmp";
 
@@ -192,7 +192,7 @@ public abstract class WebConfig {
 
     public static String getRuntimePath() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
-            String result = propertyReader.get(key, null);
+            String result = propertyReader.get(key, WebConfigDefault.CORE_APPLICATION_NAME);
             try {
                 return ConfigUtils.handleApplicationPath(
                         result,
