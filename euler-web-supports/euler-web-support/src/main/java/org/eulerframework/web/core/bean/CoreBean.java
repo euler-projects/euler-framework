@@ -15,11 +15,11 @@
  */
 package org.eulerframework.web.core.bean;
 
-import java.beans.PropertyEditorSupport;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eulerframework.config.EulerWebSupportConfig;
+import org.eulerframework.web.config.RedisType;
+import org.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -27,7 +27,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.PathResource;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisPassword;
@@ -53,13 +52,9 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.eulerframework.web.config.RedisType;
-import org.eulerframework.web.config.WebConfig;
-import org.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
-import redis.clients.jedis.JedisPoolConfig;
+import java.beans.PropertyEditorSupport;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @Configuration
 public class CoreBean {
