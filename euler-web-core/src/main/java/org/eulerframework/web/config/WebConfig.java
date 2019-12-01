@@ -66,66 +66,66 @@ public abstract class WebConfig {
         /**
          * 内存缓存池清理周期, 毫秒
          */
-        private static final String CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
+        public static final String CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = "core.cache.ramCachePool.cleanFreq";
 
         // [web]
         /**
          * 后台管理页面图标文件存放位置
          * TODO: 支持存放在外部目录
          */
-        private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
+        public static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "web.admin.dashboardBrandIcon";
         /**
          * 后台管理页面标题文本
          */
-        private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
+        public static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "web.admin.dashboardBrandText";
         /**
          * 后台管理JSP页面文件存放目录
          */
-        private static final String WEB_ADMIN_JSP_PATH = "web.admin.jspPath";
+        public static final String WEB_ADMIN_JSP_PATH = "web.admin.jspPath";
         /**
          * 后台管理页面URL根路径
          */
-        private static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
+        public static final String WEB_ADMIN_ROOT_PATH = "web.admin.rootPath";
         /**
          * 开启RESTful API支持
          */
-        private static final String WEB_API_ENABLED = "web.api.enabled";
+        public static final String WEB_API_ENABLED = "web.api.enabled";
         /**
          * RESTful API URL根路径
          */
-        private static final String WEB_API_ROOT_PATH = "web.api.rootPath";
+        public static final String WEB_API_ROOT_PATH = "web.api.rootPath";
         /**
          * 站点默认语言
          */
-        private static final String WEB_LANGUAGE_DEFAULT = "web.language.default";
+        public static final String WEB_LANGUAGE_DEFAULT = "web.language.default";
         /**
          * 站点支持语言列表
          */
-        private static final String WEB_LANGUAGE_SUPPORT_LANGUAGES = "web.language.supportLanguages";
+        public static final String WEB_LANGUAGE_SUPPORT_LANGUAGES = "web.language.supportLanguages";
         /**
          * 静态资源文件URL根路径
          */
-        private static final String WEB_SITE_ASSETS_PATH = "web.site.assetsPath";
+        public static final String WEB_SITE_ASSETS_PATH = "web.site.assetsPath";
         /**
          * 站点默认主题
          */
-        private static final String WEB_SITE_DEFAULT_THEME = "web.site.defaultTheme";
+        public static final String WEB_SITE_DEFAULT_THEME = "web.site.defaultTheme";
         /**
          * 站点JSP文件存放目录
          */
-        private static final String WEB_SITE_JSP_PATH = "web.site.jspPath";
+        public static final String WEB_SITE_JSP_PATH = "web.site.jspPath";
         /**
          * 站点名称
          */
-        private static final String WEB_SITE_NAME = "web.site.name";
+        public static final String WEB_SITE_NAME = "web.site.name";
         /**
          * 静态页面URL根路径
          */
-        private static final String WEB_SITE_STATIC_PAGES_PATH = "web.site.staticPagesPath";
+        public static final String WEB_SITE_STATIC_PAGES_PATH = "web.site.staticPagesPath";
         /**
          * 站点URL
          */
-        private static final String WEB_SITE_URL = "web.site.url";
+        public static final String WEB_SITE_URL = "web.site.url";
         /**
          * 崩溃页面显示详细异常栈
          */
@@ -135,23 +135,23 @@ public abstract class WebConfig {
         /**
          * Multipart request 配置数据缓存对象的KEY，并不用于配置文件
          */
-        private static final String WEB_MULTIPART = "web.multipart";
+        public static final String WEB_MULTIPART = "web.multipart";
         /**
          * the directory location where files will be stored
          */
-        private static final String WEB_MULTIPART_LOCATION = "web.multiPart.location";
+        public static final String WEB_MULTIPART_LOCATION = "web.multiPart.location";
         /**
          * the maximum size allowed for uploaded files
          */
-        private static final String WEB_MULTIPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
+        public static final String WEB_MULTIPART_MAX_FILE_SIZE = "web.multiPart.maxFileSize";
         /**
          * the maximum size allowed for multipart/form-data requests
          */
-        private static final String WEB_MULTIPART_MAX_REQUEST_SIZE = "web.multiPart.maxRequestSize";
+        public static final String WEB_MULTIPART_MAX_REQUEST_SIZE = "web.multiPart.maxRequestSize";
         /**
          * the size threshold after which files will be written to disk
          */
-        private static final String WEB_MULTIPART_FILE_SIZE_THRESHOLD = "web.multiPart.fileSizeThreshold";
+        public static final String WEB_MULTIPART_FILE_SIZE_THRESHOLD = "web.multiPart.fileSizeThreshold";
     }
 
     public static class WebConfigDefault {
@@ -183,17 +183,24 @@ public abstract class WebConfig {
     }
 
     public static String getApplicationName() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> propertyReader.get(WebConfigKey.CORE_APPLICATION_NAME,
-                WebConfigDefault.CORE_APPLICATION_NAME));
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> propertyReader.get(WebConfigKey.CORE_APPLICATION_NAME, null));
 
-        return (String) cachedConfig;
+        return cachedConfig == null ? null : (String) cachedConfig;
     }
+
+    private static final String DEFAULT_APPLICATION_NAME = "euler-framework";
 
     public static String getRuntimePath() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
             String result = propertyReader.get(key, null);
             try {
-                return ConfigUtils.handleApplicationPath(result, () -> WebConfigDefault.CORE_RUNTIME_PATH_PREFIX + "/" + getApplicationName(), key);
+                return ConfigUtils.handleApplicationPath(
+                        result,
+                        () -> {
+                            String applicationName = getApplicationName();
+                            return WebConfigDefault.CORE_RUNTIME_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : DEFAULT_APPLICATION_NAME);
+                        },
+                        key);
             } catch (FileSystemException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
@@ -206,7 +213,13 @@ public abstract class WebConfig {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_TEMP_PATH, key -> {
             String result = propertyReader.get(key, null);
             try {
-                return ConfigUtils.handleApplicationPath(result, () -> WebConfigDefault.CORE_TEMP_PATH_PREFIX + "/" + getApplicationName(), key);
+                return ConfigUtils.handleApplicationPath(
+                        result,
+                        () -> {
+                            String applicationName = getApplicationName();
+                            return WebConfigDefault.CORE_TEMP_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : DEFAULT_APPLICATION_NAME);
+                        },
+                        key);
             } catch (FileSystemException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
