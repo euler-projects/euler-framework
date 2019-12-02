@@ -27,7 +27,7 @@ public class EulerFrameworkCoreListener extends LogSupport implements ServletCon
     public void contextInitialized(ServletContextEvent sce) {
         this.logger.info("Init euler framework core listener");
         
-        ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq());
+        ObjectCachePool.initEulerCachePoolCleaner(60_000, WebConfig.getRamCacheCleanFreq().toMillis());
     }
 
     @Override

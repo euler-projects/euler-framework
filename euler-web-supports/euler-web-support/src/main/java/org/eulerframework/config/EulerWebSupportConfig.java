@@ -99,39 +99,39 @@ public abstract class EulerWebSupportConfig {
     }
 
     public static String getRootContextConfigClassName() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_ROOT_CONTEXT_CONFIG_CLASS, key -> propertyReader.get(key, EulerWebSupportConfigDefault.CORE_ROOT_CONTEXT_CONFIG_CLASS));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_ROOT_CONTEXT_CONFIG_CLASS, key -> propertyReader.getString(key, EulerWebSupportConfigDefault.CORE_ROOT_CONTEXT_CONFIG_CLASS));
 
         return (String) cachedConfig;
     }
 
     public static String getWebConfigClassName() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_WEB_CONFIG_CLASS, key -> propertyReader.get(EulerWebSupportConfigKeys.CORE_WEB_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_WEB_CONFIG_CLASS));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_WEB_CONFIG_CLASS, key -> propertyReader.getString(EulerWebSupportConfigKeys.CORE_WEB_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_WEB_CONFIG_CLASS));
 
         return (String) cachedConfig;
     }
 
     public static String getAjaxConfigClassName() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_AJAX_CONFIG_CLASS, key -> propertyReader.get(EulerWebSupportConfigKeys.CORE_AJAX_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_AJAX_CONFIG_CLASS));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_AJAX_CONFIG_CLASS, key -> propertyReader.getString(EulerWebSupportConfigKeys.CORE_AJAX_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_AJAX_CONFIG_CLASS));
 
         return (String) cachedConfig;
     }
 
     public static String getAdminWebConfigClassName() {
         Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_ADMIN_WEB_CONFIG_CLASS,
-                key -> propertyReader.get(EulerWebSupportConfigKeys.CORE_ADMIN_WEB_CONFIG_CLASS,
+                key -> propertyReader.getString(EulerWebSupportConfigKeys.CORE_ADMIN_WEB_CONFIG_CLASS,
                         EulerWebSupportConfigDefault.CORE_ADMIN_WEB_CONFIG_CLASS));
 
         return (String) cachedConfig;
     }
 
     public static String getAdminAjaxConfigClassName() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_ADMIN_AJAX_CONFIG_CLASS, key -> propertyReader.get(EulerWebSupportConfigKeys.CORE_ADMIN_AJAX_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_ADMIN_AJAX_CONFIG_CLASS));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_ADMIN_AJAX_CONFIG_CLASS, key -> propertyReader.getString(EulerWebSupportConfigKeys.CORE_ADMIN_AJAX_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_ADMIN_AJAX_CONFIG_CLASS));
 
         return (String) cachedConfig;
     }
 
     public static String getApiConfigClassName() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_API_CONFIG_CLASS, key -> propertyReader.get(EulerWebSupportConfigKeys.CORE_API_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_API_CONFIG_CLASS));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.CORE_API_CONFIG_CLASS, key -> propertyReader.getString(EulerWebSupportConfigKeys.CORE_API_CONFIG_CLASS, EulerWebSupportConfigDefault.CORE_API_CONFIG_CLASS));
 
         return (String) cachedConfig;
     }
@@ -145,7 +145,7 @@ public abstract class EulerWebSupportConfig {
     public static String getProjectVersion() {
         Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.PROJECT_VERSION, key -> {
             try {
-                return propertyReader.get(EulerWebSupportConfigKeys.PROJECT_VERSION);
+                return propertyReader.getString(EulerWebSupportConfigKeys.PROJECT_VERSION);
             } catch (PropertyNotFoundException e) {
                 throw new RuntimeException("Couldn't load " + EulerWebSupportConfigKeys.PROJECT_VERSION);
             }
@@ -157,7 +157,7 @@ public abstract class EulerWebSupportConfig {
     public static String getProjectBuildTime() {
         Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.PROJECT_BUILD_TIME, key -> {
             try {
-                return propertyReader.get(EulerWebSupportConfigKeys.PROJECT_BUILD_TIME);
+                return propertyReader.getString(EulerWebSupportConfigKeys.PROJECT_BUILD_TIME);
             } catch (PropertyNotFoundException e) {
                 throw new RuntimeException("Couldn't load " + EulerWebSupportConfigKeys.PROJECT_BUILD_TIME);
             }
@@ -167,7 +167,7 @@ public abstract class EulerWebSupportConfig {
     }
 
     public static String getCopyrightHolder() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.PROJECT_COPYRIGHT_HOLDER, key -> propertyReader.get(EulerWebSupportConfigKeys.PROJECT_COPYRIGHT_HOLDER, EulerWebSupportConfigDefault.PROJECT_COPYRIGHT_HOLDER));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.PROJECT_COPYRIGHT_HOLDER, key -> propertyReader.getString(EulerWebSupportConfigKeys.PROJECT_COPYRIGHT_HOLDER, EulerWebSupportConfigDefault.PROJECT_COPYRIGHT_HOLDER));
 
         return (String) cachedConfig;
     }
@@ -179,12 +179,12 @@ public abstract class EulerWebSupportConfig {
 
     public static String getRedisHost() {
         return (String) CONFIG_CAHCE.get(EulerWebSupportConfigKeys.REDIS_HOST,
-                key -> propertyReader.get(key, EulerWebSupportConfigDefault.REDIS_HOST));
+                key -> propertyReader.getString(key, EulerWebSupportConfigDefault.REDIS_HOST));
     }
 
     public static String getRedisPassword() {
         return (String) CONFIG_CAHCE.get(EulerWebSupportConfigKeys.REDIS_PASSWORD,
-                key -> propertyReader.get(key, EulerWebSupportConfigDefault.REDIS_PASSWORD));
+                key -> propertyReader.getString(key, EulerWebSupportConfigDefault.REDIS_PASSWORD));
     }
 
     public static int getRedisPort() {
@@ -198,7 +198,7 @@ public abstract class EulerWebSupportConfig {
     public static String[] getRedisSentinels() {
         String str = (String) CONFIG_CAHCE.get(EulerWebSupportConfigKeys.REDIS_SENTINELS, key -> {
             try {
-                return propertyReader.get(key);
+                return propertyReader.getString(key);
             } catch (PropertyNotFoundException e) {
                 throw new RuntimeException(e);
             }

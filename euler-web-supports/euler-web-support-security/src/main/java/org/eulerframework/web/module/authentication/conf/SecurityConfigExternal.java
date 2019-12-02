@@ -20,8 +20,6 @@ import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
 import org.eulerframework.web.config.WebConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -57,12 +55,12 @@ public abstract class SecurityConfigExternal {
 
     public static String getResetPasswordPrivKeyFile() {
         return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PRIV_KEY,
-                key -> propertyReader.get(key, WebConfigDefault.SECURITY_RESET_PASSWD_PRIV_KEY));
+                key -> propertyReader.getString(key, WebConfigDefault.SECURITY_RESET_PASSWD_PRIV_KEY));
     }
 
     public static String getResetPasswordPubKeyFile() {
         return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PUB_KEY,
-                key -> propertyReader.get(key, WebConfigDefault.SECURITY_RESET_PASSWD_PUB_KEY));
+                key -> propertyReader.getString(key, WebConfigDefault.SECURITY_RESET_PASSWD_PUB_KEY));
     }
 
 }

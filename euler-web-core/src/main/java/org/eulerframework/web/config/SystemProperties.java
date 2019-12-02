@@ -41,7 +41,7 @@ public final class SystemProperties {
 
     public static String frameworkVersion() {
         try {
-            return properties.get("version");
+            return properties.getString("version");
         } catch (PropertyNotFoundException e) {
             throw new RuntimeException(e);
         }

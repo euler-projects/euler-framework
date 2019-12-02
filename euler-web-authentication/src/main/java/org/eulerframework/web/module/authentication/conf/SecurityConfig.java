@@ -124,19 +124,19 @@ public abstract class SecurityConfig {
 
     public static String getLoginPage() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_LOGIN_PAGE, key ->
-                propertyReader.get(SecurityConfigKey.SECURITY_LOGIN_PAGE, SecurityConfigDefault.SECURITY_LOGIN_PAGE));
+                propertyReader.getString(SecurityConfigKey.SECURITY_LOGIN_PAGE, SecurityConfigDefault.SECURITY_LOGIN_PAGE));
         return (String) cachedConfig;
     }
 
     public static String getLoginProcessingUrl() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_LOGIN_PROCESSING_URL, key ->
-                propertyReader.get(SecurityConfigKey.SECURITY_LOGIN_PROCESSING_URL, SecurityConfigDefault.SECURITY_LOGIN_PROCESSING_URL));
+                propertyReader.getString(SecurityConfigKey.SECURITY_LOGIN_PROCESSING_URL, SecurityConfigDefault.SECURITY_LOGIN_PROCESSING_URL));
         return (String) cachedConfig;
     }
 
     public static String getLoginDefaultTargetUrl() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_LOGIN_DEFAULT_TARGET_URL, key ->
-                propertyReader.get(SecurityConfigKey.SECURITY_LOGIN_DEFAULT_TARGET_URL, SecurityConfigDefault.SECURITY_LOGIN_DEFAULT_TARGET_URL));
+                propertyReader.getString(SecurityConfigKey.SECURITY_LOGIN_DEFAULT_TARGET_URL, SecurityConfigDefault.SECURITY_LOGIN_DEFAULT_TARGET_URL));
         return (String) cachedConfig;
     }
 
@@ -201,7 +201,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return propertyReader.get(SecurityConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT,
+                        return propertyReader.getString(SecurityConfigKey.SECURITY_SIGNUP_USERNAME_FORMAT,
                                 SecurityConfigDefault.SECURITY_SIGNUP_USERNAME_FORMAT);
                     }
 
@@ -216,7 +216,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return propertyReader.get(SecurityConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT,
+                        return propertyReader.getString(SecurityConfigKey.SECURITY_SIGNUP_EMAIL_FORMAT,
                                 SecurityConfigDefault.SECURITY_SIGNUP_EMAIL_FORMAT);
                     }
 
@@ -227,7 +227,7 @@ public abstract class SecurityConfig {
 
     public static String getMobileFormat() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SIGNUP_MOBILE_FORMAT,
-                configKey -> propertyReader.get(configKey,
+                configKey -> propertyReader.getString(configKey,
                         SecurityConfigDefault.SECURITY_SIGNUP_MOBILE_FORMAT));
 
         return (String) cachedConfig;
@@ -239,7 +239,7 @@ public abstract class SecurityConfig {
 
                     @Override
                     public Object getData(String key) {
-                        return propertyReader.get(SecurityConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT,
+                        return propertyReader.getString(SecurityConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT,
                                 SecurityConfigDefault.SECURITY_SIGNUP_PASSWORD_FORMAT);
                     }
 
@@ -329,19 +329,19 @@ public abstract class SecurityConfig {
     
     public static String getSmsCodeTemplateSignUp() {
         return (String)CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SMSCODE_TEMPLATE_SIGNUP,
-                configKey -> propertyReader.get(configKey,
+                configKey -> propertyReader.getString(configKey,
                         SecurityConfigDefault.SECURITY_SMSCODE_TEMPLATE_SIGNUP));
     }
     
     public static String getSmsCodeTemplateSignIn() {
         return (String)CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SMSCODE_TEMPLATE_SIGNIN,
-                configKey -> propertyReader.get(configKey,
+                configKey -> propertyReader.getString(configKey,
                         SecurityConfigDefault.SECURITY_SMSCODE_TEMPLATE_SIGNIN));
     }
     
     public static String getSmsCodeTemplateResetPassword() {
         return (String)CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD,
-                configKey -> propertyReader.get(configKey,
+                configKey -> propertyReader.getString(configKey,
                         SecurityConfigDefault.SECURITY_SMSCODE_TEMPLATE_RESET_PASSWORD));
     }
     
