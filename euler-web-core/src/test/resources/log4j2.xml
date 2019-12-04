@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="debug" monitorInterval="1800">
+<configuration status="warn" monitorInterval="1800">
 
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
@@ -9,7 +9,7 @@
     </Appenders>
     
     <loggers>
-        <root level="info">
+        <root level="debug">
             <appender-ref ref="console" />
         </root>
     </loggers>
