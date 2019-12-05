@@ -142,8 +142,8 @@ public abstract class SecurityConfig {
 
     public static WebAuthenticationType getWebAuthenticationType() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_WEB_AUTHENTICATION_TYPE, key -> {
-            return propertyReader.getEnumValue(key,
-                        SecurityConfigDefault.SECURITY_WEB_AUTHENTICATION_TYPE, true);
+            return propertyReader.get(key,
+                        SecurityConfigDefault.SECURITY_WEB_AUTHENTICATION_TYPE);
         });
 
         return (WebAuthenticationType) cachedConfig;
@@ -151,16 +151,16 @@ public abstract class SecurityConfig {
 
     public static ApiAuthenticationType getApiAuthenticationType() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_API_AUTHENTICATION_TYPE, key -> {
-            return propertyReader.getEnumValue(SecurityConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
-                                SecurityConfigDefault.SECURITY_API_AUTHENTICATION_TYPE, true);
+            return propertyReader.get(SecurityConfigKey.SECURITY_API_AUTHENTICATION_TYPE,
+                                SecurityConfigDefault.SECURITY_API_AUTHENTICATION_TYPE);
         });
         return (ApiAuthenticationType) cachedConfig;
     }
 
     public static OAuthServerType getOAuthSeverType() {
         Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_OAUTH_SERVER_TYPE, key -> {
-            return propertyReader.getEnumValue(key,
-                                SecurityConfigDefault.SECURITY_OAUTH_SERVER_TYPE, true);
+            return propertyReader.get(key,
+                                SecurityConfigDefault.SECURITY_OAUTH_SERVER_TYPE);
         });
         return (OAuthServerType) cachedConfig;
     }

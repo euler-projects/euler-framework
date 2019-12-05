@@ -183,7 +183,13 @@ public abstract class WebConfig {
     }
 
     public static String getApplicationName() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> propertyReader.getString(WebConfigKey.CORE_APPLICATION_NAME, null));
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> {
+            try {
+                return propertyReader.getString(WebConfigKey.CORE_APPLICATION_NAME);
+            } catch (PropertyNotFoundException e) {
+                return null;
+            }
+        });
 
         return cachedConfig == null ? null : (String) cachedConfig;
     }
@@ -234,12 +240,12 @@ public abstract class WebConfig {
      * @return 站点默认语言
      */
     public static Locale getDefaultLanguage() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_LANGUAGE_DEFAULT, key -> propertyReader.getLocaleValue(WebConfigKey.WEB_LANGUAGE_DEFAULT, WebConfigDefault.WEB_LANGUAGE_DEFAULT));
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_LANGUAGE_DEFAULT, key -> propertyReader.get(WebConfigKey.WEB_LANGUAGE_DEFAULT, WebConfigDefault.WEB_LANGUAGE_DEFAULT));
         return (Locale) cachedConfig;
     }
 
     public static Locale[] getSupportLanguages() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, key -> propertyReader.getLocaleArrayValue(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, WebConfigDefault.WEB_LANGUAGE_SUPPORT_LANGUAGES));
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, key -> propertyReader.get(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, WebConfigDefault.WEB_LANGUAGE_SUPPORT_LANGUAGES));
         return (Locale[]) cachedConfig;
     }
 
@@ -394,7 +400,7 @@ public abstract class WebConfig {
 
     public static Duration getRamCacheCleanFreq() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ,
-                key -> propertyReader.getDurationValue(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ,
+                key -> propertyReader.get(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ,
                         WebConfigDefault.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ));
 
         return (Duration) cachedConfig;

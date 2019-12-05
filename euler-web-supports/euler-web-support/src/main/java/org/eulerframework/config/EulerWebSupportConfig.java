@@ -137,7 +137,7 @@ public abstract class EulerWebSupportConfig {
     }
 
     public static ProjectMode getProjectMode() {
-        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.PROJECT_MODE, key -> propertyReader.getEnumValue(EulerWebSupportConfigKeys.PROJECT_MODE, EulerWebSupportConfigDefault.PROJECT_MODE, true));
+        Object cachedConfig = CONFIG_CAHCE.get(EulerWebSupportConfigKeys.PROJECT_MODE, key -> propertyReader.get(EulerWebSupportConfigKeys.PROJECT_MODE, EulerWebSupportConfigDefault.PROJECT_MODE));
 
         return (ProjectMode) cachedConfig;
     }
@@ -174,7 +174,7 @@ public abstract class EulerWebSupportConfig {
 
     public static RedisType getRedisType() {
         return (RedisType) CONFIG_CAHCE.get(EulerWebSupportConfigKeys.REDIS_TYPE,
-                key -> propertyReader.getEnumValue(key, EulerWebSupportConfigDefault.REDIS_TYPE, true));
+                key -> propertyReader.get(key, EulerWebSupportConfigDefault.REDIS_TYPE));
     }
 
     public static String getRedisHost() {

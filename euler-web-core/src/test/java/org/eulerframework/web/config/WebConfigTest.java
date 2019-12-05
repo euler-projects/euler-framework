@@ -14,5 +14,6 @@ public class WebConfigTest {
         Assert.assertEquals(Locale.UK, WebConfig.getDefaultLanguage());
         Assert.assertArrayEquals(new Locale[] {Locale.CHINA, Locale.US, Locale.UK}, WebConfig.getSupportLanguages());
         Assert.assertEquals(Duration.ofSeconds(1), WebConfig.getRamCacheCleanFreq());
+        Assert.assertEquals("default", WebConfig.getDefaultTheme());
     }
 }
