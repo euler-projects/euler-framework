@@ -183,14 +183,7 @@ public abstract class WebConfig {
     }
 
     public static String getApplicationName() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> {
-            try {
-                return propertyReader.getString(WebConfigKey.CORE_APPLICATION_NAME);
-            } catch (PropertyNotFoundException e) {
-                return null;
-            }
-        });
-
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> propertyReader.get(key, String.class, WebConfigDefault.CORE_APPLICATION_NAME));
         return cachedConfig == null ? null : (String) cachedConfig;
     }
 
@@ -198,7 +191,7 @@ public abstract class WebConfig {
 
     public static String getRuntimePath() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
-            String result = propertyReader.getString(key, WebConfigDefault.CORE_APPLICATION_NAME);
+            String result = propertyReader.get(key, String.class, null);
             try {
                 return ConfigUtils.handleApplicationPath(
                         result,
@@ -206,7 +199,8 @@ public abstract class WebConfig {
                             String applicationName = getApplicationName();
                             return WebConfigDefault.CORE_RUNTIME_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : DEFAULT_APPLICATION_NAME);
                         },
-                        key);
+                        key,
+                        true);
             } catch (FileSystemException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
@@ -217,7 +211,7 @@ public abstract class WebConfig {
 
     public static String getTempPath() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_TEMP_PATH, key -> {
-            String result = propertyReader.getString(key, null);
+            String result = propertyReader.get(key, String.class, null);
             try {
                 return ConfigUtils.handleApplicationPath(
                         result,
@@ -225,7 +219,8 @@ public abstract class WebConfig {
                             String applicationName = getApplicationName();
                             return WebConfigDefault.CORE_TEMP_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : DEFAULT_APPLICATION_NAME);
                         },
-                        key);
+                        key,
+                        true);
             } catch (FileSystemException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }

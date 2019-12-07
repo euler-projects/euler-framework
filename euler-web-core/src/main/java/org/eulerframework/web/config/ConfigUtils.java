@@ -21,10 +21,11 @@ public class ConfigUtils {
      * @param path                 要处理的目录路径
      * @param defaultIfPathIsEmpty 当path为空时使用的默认目录路径
      * @param propertyName         配置项名称
+     * @param mkDirsIfNotExits     目录不存在时自动创建目录
      * @return 处理后的可用目录路径
      * @throws FileSystemException 当尝试创建目录失败时会抛出此异常
      */
-    public static String handleApplicationPath(String path, Supplier<String> defaultIfPathIsEmpty, String propertyName) throws FileSystemException {
+    public static String handleApplicationPath(String path, Supplier<String> defaultIfPathIsEmpty, String propertyName, boolean mkDirsIfNotExits) throws FileSystemException {
         if (StringUtils.isEmpty(path)) {
             path = defaultIfPathIsEmpty.get();
             LOGGER.info("'{}' is not configured, use {} as the default.", propertyName, path);
@@ -39,19 +40,30 @@ public class ConfigUtils {
             path = path.substring("file://".length());
         }
 
-        if (!path.startsWith("/")) {
-            String classPath = ClassLoader.getSystemResource("").getPath();
-            path = CommonUtils.convertDirToUnixFormat(classPath, false) + "/" + path;
-        } else if (SystemUtils.isWindows() && path.startsWith("/")) {
+        if (SystemUtils.isWindows() && path.startsWith("/")) {
             //当配置的路径为*inx格式的绝对路径，且当前环境是Windows时，默认放在C盘
             LOGGER.warn("Application is running under Windows. '{}' does not specify a partition, use C: for default", propertyName);
             path = "C:" + path;
         }
 
+        if(path.startsWith("/")) {
+            //Unix 绝对逻辑
+            if(SystemUtils.isWindows()) {
+                //当配置的路径为*inx格式的绝对路径，且当前环境是Windows时，默认放在C盘
+                LOGGER.warn("Application is running under Windows. '{}' does not specify a partition, use C: for default", propertyName);
+                path = "C:" + path;
+            }
+        } else if (SystemUtils.isWindows() && path.matches("^\\w+:/.*$")) {
+            //Windows 绝对路径，不做任何处理
+        } else {
+            String classPath = ClassLoader.getSystemResource("").getPath();
+            path = CommonUtils.convertDirToUnixFormat(classPath, false) + "/" + path;
+        }
+
         LOGGER.info("'{}' is '{}'.", propertyName, path);
 
         File pathFile = new File(path);
-        if (!pathFile.exists()) {
+        if (mkDirsIfNotExits && !pathFile.exists()) {
             LOGGER.info("Path '{}' not exits, create it.", path);
             if (!pathFile.mkdirs()) {
                 throw new FileSystemException(path, null, "Path create failed, pleas check the permissions of this path");
