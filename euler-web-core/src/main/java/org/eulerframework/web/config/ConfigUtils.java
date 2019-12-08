@@ -33,28 +33,19 @@ public class ConfigUtils {
 
         path = CommonUtils.convertDirToUnixFormat(path, false);
 
-//        Assert.isTrue(path.startsWith("/") || path.startsWith("file://"),
-//                () -> String.format("'%s' must begin with 'file://' or '/'", propertyName));
-
         if (path.startsWith("file://")) {
             path = path.substring("file://".length());
         }
 
-        if (SystemUtils.isWindows() && path.startsWith("/")) {
-            //当配置的路径为*inx格式的绝对路径，且当前环境是Windows时，默认放在C盘
-            LOGGER.warn("Application is running under Windows. '{}' does not specify a partition, use C: for default", propertyName);
-            path = "C:" + path;
-        }
-
-        if(path.startsWith("/")) {
-            //Unix 绝对逻辑
-            if(SystemUtils.isWindows()) {
-                //当配置的路径为*inx格式的绝对路径，且当前环境是Windows时，默认放在C盘
+        if (path.startsWith("/")) {
+            // *nix 绝对路径，除Windows外不做任何处理
+            if (SystemUtils.isWindows()) {
+                // 当配置的路径为*inx格式的绝对路径，且当前环境是Windows时，默认放在C盘
                 LOGGER.warn("Application is running under Windows. '{}' does not specify a partition, use C: for default", propertyName);
                 path = "C:" + path;
             }
         } else if (SystemUtils.isWindows() && path.matches("^\\w+:/.*$")) {
-            //Windows 绝对路径，不做任何处理
+            // Windows 绝对路径，不做任何处理
         } else {
             String classPath = ClassLoader.getSystemResource("").getPath();
             path = CommonUtils.convertDirToUnixFormat(classPath, false) + "/" + path;
