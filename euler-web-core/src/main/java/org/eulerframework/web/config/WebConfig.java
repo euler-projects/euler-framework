@@ -287,7 +287,7 @@ public abstract class WebConfig {
      * https://eulerproject.io
      */
     public static String getWebUrl() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, key -> {
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_URL, key -> {
             String result = propertyReader.getString(WebConfigKey.WEB_SITE_URL, WebConfigDefault.WEB_SITE_URL);
             if (!StringUtils.hasText(result))
                 throw new RuntimeException(WebConfigKey.WEB_SITE_URL + "can not be empty");
