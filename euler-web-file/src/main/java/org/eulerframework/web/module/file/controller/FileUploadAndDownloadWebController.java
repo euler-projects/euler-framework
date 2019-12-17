@@ -56,7 +56,7 @@ public class FileUploadAndDownloadWebController extends JspSupportWebController 
         this.getRequest().setAttribute("fileType", fileType.toJson());
         this.getRequest().setAttribute("extensions", fileType.getExtensions());
         this.getRequest().setAttribute("app", app);
-        this.getRequest().setAttribute("maxFileSize", WebConfig.getMultiPartConfig().getMaxFileSize() / 1024 / 1014);
+        this.getRequest().setAttribute("maxFileSize", WebConfig.getMultipartConfig().getMaxFileSize().toMegabytes());
         return this.display("/common/plupload");
     }
     

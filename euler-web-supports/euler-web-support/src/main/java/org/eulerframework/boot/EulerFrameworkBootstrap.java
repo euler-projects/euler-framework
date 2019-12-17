@@ -22,7 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.eulerframework.config.EulerWebSupportConfig;
-import org.eulerframework.web.config.MultiPartConfig;
+import org.eulerframework.web.config.MultipartConfig;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -145,11 +145,11 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
                 springDispatcherServlet);
         springDispatcherServletDynamic.setLoadOnStartup(loadOnStartup);
 
-        MultiPartConfig multiPartConfig = WebConfig.getMultiPartConfig();
+        MultipartConfig multiPartConfig = WebConfig.getMultipartConfig();
 
         springDispatcherServletDynamic.setMultipartConfig(
-                new MultipartConfigElement(multiPartConfig.getLocation(), multiPartConfig.getMaxFileSize(),
-                        multiPartConfig.getMaxRequestSize(), multiPartConfig.getFileSizeThreshold()));
+                new MultipartConfigElement(multiPartConfig.getLocation(), multiPartConfig.getMaxFileSize().toBytes(),
+                        multiPartConfig.getMaxRequestSize().toBytes(), (int) multiPartConfig.getFileSizeThreshold().toBytes()));
         springDispatcherServletDynamic.addMapping(urlPatterns);
     }
 

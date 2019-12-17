@@ -22,6 +22,11 @@ import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyNotFoundException;
 import org.eulerframework.common.util.property.PropertyReader;
+import org.eulerframework.common.util.type.TypeConverter;
+import org.eulerframework.common.util.type.TypeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.unit.DataSize;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,16 +35,38 @@ import java.time.Duration;
 import java.util.Locale;
 
 public abstract class WebConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebConfig.class);
+
     private static final DefaultObjectCache<String, Object> CONFIG_CACHE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
 
     private static PropertyReader propertyReader;
 
     static {
+        if(!TypeUtils.containsTypeConverter(DataSize.class)) {
+            TypeUtils.addTypeConverter(DataSize.class, new TypeConverter<DataSize>() {
+                @Override
+                public DataSize convert(Object value) {
+                    return DataSize.parse(String.valueOf(value));
+                }
+
+                @Override
+                public String asString(DataSize value) {
+                    return value.toString();
+                }
+            });
+        }
+
+        // Euler Boot 模式不加载默认配置文件
         try {
-            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
+            Class.forName("org.eulerframework.boot.autoconfigure.support.web.core.EulerBootPropertySource");
+            LOGGER.info("EulerBootPropertySource was found, The Euler Boot auto configurator will initialize propertyReader");
+        } catch (ClassNotFoundException classNotFoundException) {
+            try {
+                propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -177,9 +204,9 @@ public abstract class WebConfig {
         public static final boolean WEB_JSP_SHOW_STACK_TRACE = false;
         //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
         private static final String WEB_MULTIPART_LOCATION = null;
-        private static final long WEB_MULTIPART_MAX_FILE_SIZE = 51_200L;
-        private static final long WEB_MULTIPART_MAX_REQUEST_SIZE = 51_200L;
-        private static final int WEB_MULTIPART_FILE_SIZE_THRESHOLD = 1_024;
+        private static final DataSize WEB_MULTIPART_MAX_FILE_SIZE = DataSize.ofMegabytes(10);
+        private static final DataSize WEB_MULTIPART_MAX_REQUEST_SIZE = DataSize.ofMegabytes(50);
+        private static final DataSize WEB_MULTIPART_FILE_SIZE_THRESHOLD = DataSize.ofKilobytes(1);
     }
 
     public static String getApplicationName() {
@@ -409,20 +436,23 @@ public abstract class WebConfig {
         return (boolean) cachedConfig;
     }
 
-    public static MultiPartConfig getMultiPartConfig() {
+    public static MultipartConfig getMultipartConfig() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_MULTIPART, key -> {
             String location = propertyReader.getString(WebConfigKey.WEB_MULTIPART_LOCATION,
                     WebConfigDefault.WEB_MULTIPART_LOCATION);
-            long maxFileSize = propertyReader.getLongValue(WebConfigKey.WEB_MULTIPART_MAX_FILE_SIZE,
+            DataSize maxFileSize = propertyReader.get(WebConfigKey.WEB_MULTIPART_MAX_FILE_SIZE,
+                    DataSize.class,
                     WebConfigDefault.WEB_MULTIPART_MAX_FILE_SIZE);
-            long maxRequestSize = propertyReader.getLongValue(WebConfigKey.WEB_MULTIPART_MAX_REQUEST_SIZE,
+            DataSize maxRequestSize = propertyReader.get(WebConfigKey.WEB_MULTIPART_MAX_REQUEST_SIZE,
+                    DataSize.class,
                     WebConfigDefault.WEB_MULTIPART_MAX_REQUEST_SIZE);
-            int fileSizeThreshold = propertyReader.getIntValue(WebConfigKey.WEB_MULTIPART_FILE_SIZE_THRESHOLD,
+            DataSize fileSizeThreshold = propertyReader.get(WebConfigKey.WEB_MULTIPART_FILE_SIZE_THRESHOLD,
+                    DataSize.class,
                     WebConfigDefault.WEB_MULTIPART_FILE_SIZE_THRESHOLD);
 
-            return new MultiPartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
+            return new MultipartConfig(location, maxFileSize, maxRequestSize, fileSizeThreshold);
         });
 
-        return (MultiPartConfig) cachedConfig;
+        return (MultipartConfig) cachedConfig;
     }
 }

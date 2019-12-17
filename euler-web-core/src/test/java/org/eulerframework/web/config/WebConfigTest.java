@@ -15,5 +15,7 @@ public class WebConfigTest {
         Assert.assertArrayEquals(new Locale[] {Locale.CHINA, Locale.US, Locale.UK}, WebConfig.getSupportLanguages());
         Assert.assertEquals(Duration.ofSeconds(1), WebConfig.getRamCacheCleanFreq());
         Assert.assertEquals("default", WebConfig.getDefaultTheme());
+
+        Assert.assertEquals(1024 * 1024 * 50L, WebConfig.getMultipartConfig().getMaxFileSize().toBytes());
     }
 }

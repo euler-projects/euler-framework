@@ -15,13 +15,15 @@
  */
 package org.eulerframework.web.config;
 
-public class MultiPartConfig {
+import org.springframework.util.unit.DataSize;
+
+public class MultipartConfig {
     private final String location;
-    private final long maxFileSize;
-    private final long maxRequestSize;
-    private final int fileSizeThreshold;
+    private final DataSize maxFileSize;
+    private final DataSize maxRequestSize;
+    private final DataSize fileSizeThreshold;
     
-    protected MultiPartConfig(String location, long maxFileSize, long maxRequestSize, int fileSizeThreshold) {
+    protected MultipartConfig(String location, DataSize maxFileSize, DataSize maxRequestSize, DataSize fileSizeThreshold) {
         this.location = location;
         this.maxFileSize = maxFileSize;
         this.maxRequestSize = maxRequestSize;
@@ -30,13 +32,13 @@ public class MultiPartConfig {
     public String getLocation() {
         return location;
     }
-    public long getMaxFileSize() {
+    public DataSize getMaxFileSize() {
         return maxFileSize;
     }
-    public long getMaxRequestSize() {
+    public DataSize getMaxRequestSize() {
         return maxRequestSize;
     }
-    public int getFileSizeThreshold() {
+    public DataSize getFileSizeThreshold() {
         return fileSizeThreshold;
     }
     
