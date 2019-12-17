@@ -43,7 +43,7 @@ public abstract class WebConfig {
     private static PropertyReader propertyReader;
 
     static {
-        if(!TypeUtils.containsTypeConverter(DataSize.class)) {
+        if (!TypeUtils.containsTypeConverter(DataSize.class)) {
             TypeUtils.addTypeConverter(DataSize.class, new TypeConverter<DataSize>() {
                 @Override
                 public DataSize convert(Object value) {
@@ -182,14 +182,14 @@ public abstract class WebConfig {
     }
 
     public static class WebConfigDefault {
-        private static final String CORE_APPLICATION_NAME = null;
+        private static final String CORE_APPLICATION_NAME = "euler-framework";
         private static final String CORE_RUNTIME_PATH_PREFIX = "/var/run";
         private static final String CORE_TEMP_PATH_PREFIX = "/var/tmp";
 
         private static final Duration CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = Duration.ofMinutes(1);
 
         private static final String WEB_ADMIN_DASHBOARD_BRAND_ICON = "/assets/system/admin-dashboard-brand.png";
-        private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "Manage Dashboard";
+        private static final String WEB_ADMIN_DASHBOARD_BRAND_TEXT = "Euler Framework Dashboard";
         private static final String WEB_ADMIN_JSP_PATH = "/WEB-INF/jsp/admin/themes";
         private static final String WEB_ADMIN_ROOT_PATH = "/admin";
         private static final boolean WEB_API_ENABLED = true;
@@ -199,7 +199,8 @@ public abstract class WebConfig {
         private static final String WEB_SITE_ASSETS_PATH = "/assets";
         private static final String WEB_SITE_DEFAULT_THEME = "default";
         private static final String WEB_SITE_JSP_PATH = "/WEB-INF/jsp/themes";
-        private static final String WEB_SITE_NAME = "DEMO";
+        private static final String WEB_SITE_URL = "http://localhost:8080";
+        private static final String WEB_SITE_NAME = "Euler Framework Demo";
         private static final String WEB_SITE_STATIC_PAGES_PATH = "/pages";
         public static final boolean WEB_JSP_SHOW_STACK_TRACE = false;
         //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
@@ -214,8 +215,6 @@ public abstract class WebConfig {
         return cachedConfig == null ? null : (String) cachedConfig;
     }
 
-    private static final String DEFAULT_APPLICATION_NAME = "euler-framework";
-
     public static String getRuntimePath() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
             String result = propertyReader.get(key, String.class, null);
@@ -224,7 +223,7 @@ public abstract class WebConfig {
                         result,
                         () -> {
                             String applicationName = getApplicationName();
-                            return WebConfigDefault.CORE_RUNTIME_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : DEFAULT_APPLICATION_NAME);
+                            return WebConfigDefault.CORE_RUNTIME_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : WebConfigDefault.CORE_APPLICATION_NAME);
                         },
                         key,
                         true);
@@ -244,7 +243,7 @@ public abstract class WebConfig {
                         result,
                         () -> {
                             String applicationName = getApplicationName();
-                            return WebConfigDefault.CORE_TEMP_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : DEFAULT_APPLICATION_NAME);
+                            return WebConfigDefault.CORE_TEMP_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : WebConfigDefault.CORE_APPLICATION_NAME);
                         },
                         key,
                         true);
@@ -288,8 +287,8 @@ public abstract class WebConfig {
      * https://eulerproject.io
      */
     public static String getWebUrl() {
-        try {
-            String result = propertyReader.getString(WebConfigKey.WEB_SITE_URL);
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, key -> {
+            String result = propertyReader.getString(WebConfigKey.WEB_SITE_URL, WebConfigDefault.WEB_SITE_URL);
             if (!StringUtils.hasText(result))
                 throw new RuntimeException(WebConfigKey.WEB_SITE_URL + "can not be empty");
 
@@ -298,9 +297,9 @@ public abstract class WebConfig {
             }
 
             return result;
-        } catch (PropertyNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        });
+
+        return (String) cachedConfig;
     }
 
     public static String getAdminRootPath() {
