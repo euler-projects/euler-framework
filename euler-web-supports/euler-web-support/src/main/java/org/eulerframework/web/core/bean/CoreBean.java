@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eulerframework.config.EulerWebSupportConfig;
 import org.eulerframework.web.config.RedisType;
+import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +149,7 @@ public class CoreBean {
         propertyPlaceholderConfigurer.setOrder(1);
         propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
         propertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
-        FileSystemResource resource = new FileSystemResource(EulerWebSupportConfig.getConfigPath());
+        FileSystemResource resource = new FileSystemResource(WebConfig.getAdditionalConfigPath());
         propertyPlaceholderConfigurer.setLocation(resource);
         return propertyPlaceholderConfigurer;
     }

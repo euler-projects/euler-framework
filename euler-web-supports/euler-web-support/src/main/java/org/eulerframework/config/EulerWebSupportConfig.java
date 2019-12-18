@@ -36,7 +36,7 @@ public abstract class EulerWebSupportConfig {
 
     static {
         try {
-            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+            propertyReader = new PropertyReader(new FilePropertySource(WebConfig.DEFAULT_CONFIG_FILE));
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -44,6 +44,10 @@ public abstract class EulerWebSupportConfig {
 
     public static void setPropertyReader(PropertyReader propertyReader) {
         EulerWebSupportConfig.propertyReader = propertyReader;
+    }
+
+    public static PropertyReader getPropertyReader() {
+        return propertyReader;
     }
 
     private static class EulerWebSupportConfigKeys {
@@ -87,15 +91,6 @@ public abstract class EulerWebSupportConfig {
         private static final String REDIS_HOST = "localhost";
         private static final int REDIS_PORT = 6379;
         private static final String REDIS_PASSWORD = null;
-    }
-
-    /**
-     * 获取外部配置文件路径
-     *
-     * @return 外部配置文件路径
-     */
-    public static String getConfigPath() {
-        return WebConfig.getRuntimePath() + "/conf/config.properties";
     }
 
     public static String getRootContextConfigClassName() {

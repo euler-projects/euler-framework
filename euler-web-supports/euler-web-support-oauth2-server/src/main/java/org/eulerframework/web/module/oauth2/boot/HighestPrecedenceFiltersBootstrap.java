@@ -18,9 +18,8 @@ package org.eulerframework.web.module.oauth2.boot;
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
-import org.eulerframework.config.EulerWebSupportConfig;
+import org.eulerframework.common.util.property.PropertySource;
 import org.eulerframework.web.config.WebConfig;
-import org.eulerframework.web.module.authentication.conf.SecurityConfig;
 import org.eulerframework.web.module.oauth2.conf.OAuth2ServerConfig;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -31,15 +30,16 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class HighestPrecedenceFiltersBootstrap extends LogSupport implements WebApplicationInitializer {
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         try {
-            FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
-            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
-            PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
-            OAuth2ServerConfig.setPropertyReader(eulerFrameworkPropertyReader);
+            PropertySource propertySource = OAuth2ServerConfig.getPropertyReader().getPropertySource();
+            if (FilePropertySource.class.isAssignableFrom(propertySource.getClass())) {
+                FilePropertySource eulerFrameworkFilePropertySource = (FilePropertySource) propertySource;
+                eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getAdditionalConfigPath() + WebConfig.DEFAULT_CONFIG_FILE);
+            }
         } catch (IOException | URISyntaxException e) {
             throw new ServletException("OAuth2ServerConfig init error", e);
         }

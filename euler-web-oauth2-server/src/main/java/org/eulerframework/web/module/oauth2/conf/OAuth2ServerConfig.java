@@ -16,6 +16,7 @@
 package org.eulerframework.web.module.oauth2.conf;
 
 import org.eulerframework.common.util.property.FilePropertySource;
+import org.eulerframework.web.config.WebConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public abstract class OAuth2ServerConfig {
 
     static {
         try {
-            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+            propertyReader = new PropertyReader(new FilePropertySource(WebConfig.DEFAULT_CONFIG_FILE));
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -44,6 +45,10 @@ public abstract class OAuth2ServerConfig {
 
     public static void setPropertyReader(PropertyReader propertyReader) {
         OAuth2ServerConfig.propertyReader = propertyReader;
+    }
+
+    public static PropertyReader getPropertyReader() {
+        return propertyReader;
     }
 
     private static class OAuth2ServerConfigKey {

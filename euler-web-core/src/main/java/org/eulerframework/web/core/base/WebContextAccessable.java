@@ -29,13 +29,12 @@ import org.eulerframework.common.base.log.LogSupport;
 
 public abstract class WebContextAccessable extends LogSupport {
     
-    protected ServletContext getServletContext(){
-        WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
-        return webApplicationContext.getServletContext();
-    }
-    
     private ServletRequestAttributes getServletRequestAttributes() {
         return (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+    }
+
+    protected ServletContext getServletContext(){
+        return this.getRequest().getServletContext();
     }
     
     protected HttpServletRequest getRequest() {

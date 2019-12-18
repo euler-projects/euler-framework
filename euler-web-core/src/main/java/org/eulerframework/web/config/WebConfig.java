@@ -20,7 +20,6 @@ import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.util.CommonUtils;
 import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.common.util.property.FilePropertySource;
-import org.eulerframework.common.util.property.PropertyNotFoundException;
 import org.eulerframework.common.util.property.PropertyReader;
 import org.eulerframework.common.util.type.TypeConverter;
 import org.eulerframework.common.util.type.TypeUtils;
@@ -36,6 +35,8 @@ import java.util.Locale;
 
 public abstract class WebConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConfig.class);
+
+    public static final String DEFAULT_CONFIG_FILE = "/config.properties";
 
     private static final DefaultObjectCache<String, Object> CONFIG_CACHE = ObjectCachePool
             .generateDefaultObjectCache(Long.MAX_VALUE);
@@ -63,7 +64,7 @@ public abstract class WebConfig {
             LOGGER.info("EulerBootPropertySource was found, The Euler Boot auto configurator will initialize propertyReader");
         } catch (ClassNotFoundException classNotFoundException) {
             try {
-                propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+                propertyReader = new PropertyReader(new FilePropertySource(DEFAULT_CONFIG_FILE));
             } catch (IOException | URISyntaxException e) {
                 throw new RuntimeException(e);
             }
@@ -72,6 +73,10 @@ public abstract class WebConfig {
 
     public static void setPropertyReader(PropertyReader propertyReader) {
         WebConfig.propertyReader = propertyReader;
+    }
+
+    public static PropertyReader getPropertyReader() {
+        return propertyReader;
     }
 
     public static class WebConfigKey {
@@ -88,6 +93,10 @@ public abstract class WebConfig {
          * 应用临时目录
          */
         public static final String CORE_TEMP_PATH = "core.tempPath";
+        /**
+         * 外部配置文件路径
+         */
+        public static final String CORE_ADDITIONAL_CONF_PATH = "core.additionalConfigPath";
 
         // [core.cache]
         /**
@@ -185,6 +194,7 @@ public abstract class WebConfig {
         private static final String CORE_APPLICATION_NAME = "euler-framework";
         private static final String CORE_RUNTIME_PATH_PREFIX = "/var/run";
         private static final String CORE_TEMP_PATH_PREFIX = "/var/tmp";
+        private static final String CORE_ADDITIONAL_CONF_PATH_PREFIX = "/usr/local";
 
         private static final Duration CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ = Duration.ofMinutes(1);
 
@@ -253,6 +263,30 @@ public abstract class WebConfig {
         });
 
         return (String) cachedConfig;
+    }
+
+    /**
+     * 获取外部配置文件路径
+     *
+     * @return 外部配置文件路径
+     */
+    public static String getAdditionalConfigPath() {
+        return (String) CONFIG_CACHE.get(WebConfigKey.CORE_ADDITIONAL_CONF_PATH, key -> {
+            String result = propertyReader.get(key, String.class, null);
+
+            try {
+                return ConfigUtils.handleApplicationPath(
+                        result,
+                        () -> {
+                            String applicationName = getApplicationName();
+                            return WebConfigDefault.CORE_ADDITIONAL_CONF_PATH_PREFIX + "/" + (StringUtils.hasText(applicationName) ? applicationName : WebConfigDefault.CORE_APPLICATION_NAME) + "/conf";
+                        },
+                        key,
+                        true);
+            } catch (FileSystemException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        });
     }
 
     /**

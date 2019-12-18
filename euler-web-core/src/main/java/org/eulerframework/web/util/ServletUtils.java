@@ -27,8 +27,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class ServletUtils {
     
     public static ServletContext getServletContext(){
-        WebApplicationContext webApplicationContext = ContextLoader.getCurrentWebApplicationContext();  
-        return webApplicationContext.getServletContext();
+        return ServletContextHolder.getServletContext();
     }
     
     public static ServletRequestAttributes getServletRequestAttributes() {

@@ -33,7 +33,7 @@ public abstract class SecurityConfigExternal {
 
     static {
         try {
-            propertyReader = new PropertyReader(new FilePropertySource("/config.properties"));
+            propertyReader = new PropertyReader(new FilePropertySource(WebConfig.DEFAULT_CONFIG_FILE));
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -41,6 +41,10 @@ public abstract class SecurityConfigExternal {
 
     public static void setPropertyReader(PropertyReader propertyReader) {
         SecurityConfigExternal.propertyReader = propertyReader;
+    }
+
+    public static PropertyReader getPropertyReader() {
+        return propertyReader;
     }
 
     private static class WebConfigKey {

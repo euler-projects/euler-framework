@@ -18,7 +18,7 @@ package org.eulerframework.web.module.authentication.boot;
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
-import org.eulerframework.config.EulerWebSupportConfig;
+import org.eulerframework.common.util.property.PropertySource;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.module.authentication.conf.SecurityConfig;
 import org.eulerframework.web.module.authentication.conf.SecurityConfigExternal;
@@ -31,24 +31,26 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class HighestPrecedenceFiltersBootstrap extends LogSupport implements WebApplicationInitializer {
     @Override
     public void onStartup(ServletContext container) throws ServletException {
         try {
-            FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
-            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
-            PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
-            SecurityConfig.setPropertyReader(eulerFrameworkPropertyReader);
+            PropertySource propertySource = SecurityConfig.getPropertyReader().getPropertySource();
+            if(FilePropertySource.class.isAssignableFrom(propertySource.getClass())) {
+                FilePropertySource eulerFrameworkFilePropertySource = (FilePropertySource) propertySource;
+                eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getAdditionalConfigPath() + WebConfig.DEFAULT_CONFIG_FILE);
+            }
         } catch (IOException | URISyntaxException e) {
             throw new ServletException("SecurityConfig init error", e);
         }
 
         try {
-            FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
-            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
-            PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
-            SecurityConfigExternal.setPropertyReader(eulerFrameworkPropertyReader);
+            PropertySource propertySource = SecurityConfigExternal.getPropertyReader().getPropertySource();
+            if(FilePropertySource.class.isAssignableFrom(propertySource.getClass())) {
+                FilePropertySource eulerFrameworkFilePropertySource = (FilePropertySource) propertySource;
+                eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getAdditionalConfigPath() + WebConfig.DEFAULT_CONFIG_FILE);
+            }
         } catch (IOException | URISyntaxException e) {
             throw new ServletException("SecurityConfigExternal init error", e);
         }

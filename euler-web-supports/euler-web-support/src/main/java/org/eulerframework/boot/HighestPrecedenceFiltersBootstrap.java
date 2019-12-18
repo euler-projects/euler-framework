@@ -26,7 +26,9 @@ import javax.servlet.ServletException;
 
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;
+import org.eulerframework.common.util.property.PropertySource;
 import org.eulerframework.config.EulerWebSupportConfig;
+import org.eulerframework.web.util.ServletContextHolder;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
@@ -45,13 +47,26 @@ import org.eulerframework.web.core.filter.WebLanguageFilter;
 public class HighestPrecedenceFiltersBootstrap extends LogSupport implements WebApplicationInitializer {
     @Override
     public void onStartup(ServletContext container) throws ServletException {
+        ServletContextHolder.holdServletContext(container);
+
         try {
-            FilePropertySource eulerFrameworkFilePropertySource = new FilePropertySource("/config.properties");
-            eulerFrameworkFilePropertySource.addPropertyFile("file:" + EulerWebSupportConfig.getConfigPath());
-            PropertyReader eulerFrameworkPropertyReader = new PropertyReader(eulerFrameworkFilePropertySource);
-            WebConfig.setPropertyReader(eulerFrameworkPropertyReader);
+            PropertySource propertySource = WebConfig.getPropertyReader().getPropertySource();
+            if(FilePropertySource.class.isAssignableFrom(propertySource.getClass())) {
+                FilePropertySource eulerFrameworkFilePropertySource = (FilePropertySource) propertySource;
+                eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getAdditionalConfigPath() + WebConfig.DEFAULT_CONFIG_FILE);
+            }
         } catch (IOException | URISyntaxException e) {
             throw new ServletException("WebConfig init error", e);
+        }
+
+        try {
+            PropertySource propertySource = EulerWebSupportConfig.getPropertyReader().getPropertySource();
+            if(FilePropertySource.class.isAssignableFrom(propertySource.getClass())) {
+                FilePropertySource eulerFrameworkFilePropertySource = (FilePropertySource) propertySource;
+                eulerFrameworkFilePropertySource.addPropertyFile("file:" + WebConfig.getAdditionalConfigPath() + WebConfig.DEFAULT_CONFIG_FILE);
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new ServletException("EulerWebSupportConfig init error", e);
         }
 
         FilterRegistration.Dynamic characterEncodingFilter = container.addFilter("characterEncodingFilter", new CharacterEncodingFilter("UTF-8"));
