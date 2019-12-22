@@ -46,7 +46,7 @@ public class SmsCodeValidator extends LogSupport {
     private ExecutorService threadPool = Executors.newFixedThreadPool(4);
     
     @Autowired(required = false)
-    private SmsCaptchaSenderFactory smsSenderFactory = new ConsoleSmsSenderFactory();
+    private SmsCaptchaSenderFactory smsCaptchaSenderFactory = new ConsoleSmsSenderFactory();
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
@@ -81,7 +81,7 @@ public class SmsCodeValidator extends LogSupport {
         String smsCode = this.generateSmsCode();
         String redisKey = this.generateRedisKey(mobile, bizCode);
         
-        SmsCaptchaSender smsCaptchaSender = this.smsSenderFactory.newSmsCaptchaSender();
+        SmsCaptchaSender smsCaptchaSender = this.smsCaptchaSenderFactory.newSmsCaptchaSender();
         int expireMinutes;
         
         switch(bizCode) {
