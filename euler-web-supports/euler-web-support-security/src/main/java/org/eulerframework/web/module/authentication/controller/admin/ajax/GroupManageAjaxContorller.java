@@ -25,6 +25,7 @@ import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import org.eulerframework.web.module.authentication.service.admin.GroupManageService;
 import org.eulerframework.web.module.authentication.service.admin.UserManageService;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,5 +47,10 @@ public class GroupManageAjaxContorller extends ApiSupportWebController {
     @RequestMapping(path="findUserGroupByPage")
     public PageResponse<? extends EulerGroupEntity> findUserGroupByPage() {
         return this.groupManageService.findUserGroupByPage(new PageQueryRequest(this.getRequest()));
+    }
+
+    @PostMapping(path="updateUserGroup")
+    public void updateUserGroup(String userId, String[] groupCodes) {
+        this.groupManageService.updateUserGroup(userId, groupCodes);
     }
 }

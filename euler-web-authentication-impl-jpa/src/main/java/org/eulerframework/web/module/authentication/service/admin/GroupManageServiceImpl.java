@@ -1,5 +1,6 @@
 package org.eulerframework.web.module.authentication.service.admin;
 
+import org.eulerframework.common.util.ArrayUtils;
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.web.core.base.request.PageQueryRequest;
 import org.eulerframework.web.core.base.response.PageResponse;
@@ -19,7 +20,9 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -92,5 +95,24 @@ public class GroupManageServiceImpl implements GroupManageService {
                 page.getSize());
 
         return ret;
+    }
+
+    @Override
+    public void updateUserGroup(String userId, String[] groupCodes) {
+        List<Group> groups = null;
+        if(groupCodes != null && groupCodes.length > 0) {
+            groups = this.groupRepository.findAllByCodeIn(Arrays.asList(groupCodes));
+        }
+
+        User user = this.userRepository.findUserById(userId);
+
+        Assert.notNull(user, "User not exist");
+
+        if(groups == null) {
+            groups = new ArrayList<>();
+        }
+
+        user.setGroups(new HashSet<>(groups));
+        this.userRepository.save(user);
     }
 }

@@ -30,4 +30,6 @@ public interface GroupManageService extends IBaseService {
     PageResponse<? extends EulerGroupEntity> findGroupByPage(PageQueryRequest pageQueryRequest);
 
     PageResponse<? extends EulerGroupEntity> findUserGroupByPage(PageQueryRequest pageQueryRequest);
+
+    void updateUserGroup(String userId, String[] groupCodes);
 }
