@@ -38,4 +38,9 @@ public class UserManageJspController extends JspSupportWebController {
         return this.display("userManage");
     }
 
+    @RequestMapping(path = "userAuthorityManage", method = RequestMethod.GET)
+    public String userAuthorityManage() {
+        return this.display("userAuthorityManage");
+    }
+
 }

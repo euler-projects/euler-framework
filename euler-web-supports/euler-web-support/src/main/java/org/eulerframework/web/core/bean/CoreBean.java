@@ -149,7 +149,7 @@ public class CoreBean {
         propertyPlaceholderConfigurer.setOrder(1);
         propertyPlaceholderConfigurer.setIgnoreResourceNotFound(true);
         propertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
-        FileSystemResource resource = new FileSystemResource(WebConfig.getAdditionalConfigPath());
+        FileSystemResource resource = new FileSystemResource(WebConfig.getAdditionalConfigPath() + WebConfig.DEFAULT_CONFIG_FILE);
         propertyPlaceholderConfigurer.setLocation(resource);
         return propertyPlaceholderConfigurer;
     }

@@ -58,12 +58,12 @@ public abstract class SecurityConfigExternal {
     }
 
     public static String getResetPasswordPrivKeyFile() {
-        return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PRIV_KEY,
+        return WebConfig.getAdditionalConfigPath() + "/" + CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PRIV_KEY,
                 key -> propertyReader.getString(key, WebConfigDefault.SECURITY_RESET_PASSWD_PRIV_KEY));
     }
 
     public static String getResetPasswordPubKeyFile() {
-        return WebConfig.getRuntimePath() + "/" + (String) CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PUB_KEY,
+        return WebConfig.getAdditionalConfigPath() + "/" + CONFIG_CAHCE.get(WebConfigKey.SECURITY_RESET_PASSWD_PUB_KEY,
                 key -> propertyReader.getString(key, WebConfigDefault.SECURITY_RESET_PASSWD_PUB_KEY));
     }
 

@@ -35,7 +35,7 @@ CREATE TABLE sys_user
 CREATE TABLE sys_group
 (
   id          VARCHAR(36)  NOT NULL,
-  code        VARCHAR(10) NOT NULL,
+  code        VARCHAR(20) NOT NULL,
   name        VARCHAR(100) NOT NULL,
   description VARCHAR(255) NULL,
   PRIMARY KEY (id),

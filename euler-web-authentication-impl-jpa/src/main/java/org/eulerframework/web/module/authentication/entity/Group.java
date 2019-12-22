@@ -32,7 +32,7 @@ import org.eulerframework.web.core.base.entity.UUIDEntity;
 
 @Entity
 @Table(name="sys_group")
-public class Group extends UUIDEntity<Group> {
+public class Group extends UUIDEntity<Group> implements EulerGroupEntity {
 
     @Column(name="code", nullable = false, unique = true)
     private String code;
