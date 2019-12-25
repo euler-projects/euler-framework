@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.module.oauth2.endpoint;
-
-import java.util.Collection;
-
-import javax.annotation.Resource;
+package org.eulerframework.web.module.oauth2.controller.admin.ajax;
 
 import org.eulerframework.common.base.log.LogSupport;
+import org.eulerframework.web.core.annotation.AjaxController;
+import org.eulerframework.web.module.oauth2.endpoint.TokensEndpoint;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpoint;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -29,41 +27,35 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
+import java.util.Collection;
+
 /**
  * @author cFrost
  *
  */
-@FrameworkEndpoint
+@AjaxController
 @RequestMapping("oauth/tokens")
-@ResponseBody
-public class TokensEndpoint extends LogSupport {
+public class TokenManageAjaxController extends LogSupport {
     
     @Resource 
-    private TokenStore tokenStore;
+    private TokensEndpoint tokensEndpoint;
     
     @GetMapping(value = "client/{clientId}")
     public Collection<OAuth2AccessToken> findTokensByClientId(
             @PathVariable("clientId") String clientId) {
-        return this.tokenStore.findTokensByClientId(clientId);
+        return this.tokensEndpoint.findTokensByClientId(clientId);
     }
     
     @GetMapping(value = "client/{clientId}/user/{username}")
     public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(
             @PathVariable("clientId") String clientId, 
             @PathVariable("username") String username) {
-        return this.tokenStore.findTokensByClientIdAndUserName(clientId, username);
+        return this.tokensEndpoint.findTokensByClientIdAndUserName(clientId, username);
     }
     
     @DeleteMapping(value = "{accessTokens}")
     public void removeAccessTokens(@PathVariable("accessTokens") String[] accessTokens) {
-        for(String accessToken : accessTokens) {
-            OAuth2AccessToken oauth2AccessToken = this.tokenStore.readAccessToken(accessToken);
-            if(oauth2AccessToken != null) {
-                this.tokenStore.removeAccessToken(oauth2AccessToken);
-                this.logger.info("OAuth token was removed: {}", accessToken);
-            } else {
-                this.logger.info("OAuth token was not found: {}", accessToken);
-            }
-        }
+        this.tokensEndpoint.removeAccessTokens(accessTokens);
     }
 }

@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @AjaxController
 @RequestMapping("oauth2/client")
-public class OAuth2ClientManageAjaxContorller extends ApiSupportWebController {
+public class OAuth2ClientManageAjaxController extends ApiSupportWebController {
     
     @Resource
     private EulerOAuth2ClientEntityService eulerOAuth2ClientEntityService;
