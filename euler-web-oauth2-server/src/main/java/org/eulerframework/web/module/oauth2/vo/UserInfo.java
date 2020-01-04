@@ -26,7 +26,6 @@ import java.util.Collection;
 public class UserInfo {
     private OAuth2User user;
     private Collection<String> authority;
-    private OAuth2AccessToken token;
 
     public OAuth2User getUser() {
         return user;
@@ -42,13 +41,5 @@ public class UserInfo {
 
     public void setAuthority(Collection<String> authority) {
         this.authority = authority;
-    }
-
-    public OAuth2AccessToken getToken() {
-        return token;
-    }
-
-    public void setToken(OAuth2AccessToken token) {
-        this.token = token;
     }
 }
