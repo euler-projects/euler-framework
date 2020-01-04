@@ -64,7 +64,7 @@ public class ProfileSettingsAjaxController extends ApiSupportWebController {
             Map<String, Object> extraData = eulerUserExtraDataProcessor.loadExtraData(userEntity.getUserId());
             
             if(extraData != null) {
-                userData.putAll(eulerUserExtraDataProcessor.loadExtraData(userEntity.getUserId()));
+                userData.putAll(extraData);
                 break;
             }
             
