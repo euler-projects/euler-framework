@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpoint;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,7 +79,14 @@ public class UserInfoEndpoint {
                 if(authentication != null && OAuth2Authentication.class.isAssignableFrom(authentication.getClass())) {
                     OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) authentication;
 
-                    userInfo.setToken(oAuth2Authentication);
+
+                    Object details = oAuth2Authentication.getDetails();
+
+                    if(OAuth2AuthenticationDetails.class.isAssignableFrom(details.getClass())) {
+                        OAuth2AuthenticationDetails oAuth2AuthenticationDetails = (OAuth2AuthenticationDetails) details;
+                        String token = oAuth2AuthenticationDetails.getTokenValue();
+                        userInfo.setToken(this.tokenStore.readAccessToken(token));
+                    }
                 }
             }
         }
