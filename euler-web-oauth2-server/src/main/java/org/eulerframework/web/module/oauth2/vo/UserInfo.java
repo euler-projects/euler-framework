@@ -15,6 +15,8 @@
  */
 package org.eulerframework.web.module.oauth2.vo;
 
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+
 import java.util.Collection;
 
 /**
@@ -24,6 +26,7 @@ import java.util.Collection;
 public class UserInfo {
     private OAuth2User user;
     private Collection<String> authority;
+    private Object token;
 
     public OAuth2User getUser() {
         return user;
@@ -41,4 +44,11 @@ public class UserInfo {
         this.authority = authority;
     }
 
+    public Object getToken() {
+        return token;
+    }
+
+    public void setToken(Object token) {
+        this.token = token;
+    }
 }
