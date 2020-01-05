@@ -14,9 +14,23 @@
         <beans:constructor-arg ref="redisConnectionFactory" />
     </beans:bean>
 
+    <!-- 用于在续期Token时重新生成用户权限, 否则Token的用户权限不会更新 -->
+    <beans:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <beans:property name="preAuthenticatedUserDetailsService">
+            <beans:bean class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+                <beans:property name="userDetailsService" ref="userDetailsService"/>
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
+
+    <authentication-manager id="preAuthenticatedAuthenticationManager">
+        <authentication-provider ref="preAuthenticatedAuthenticationProvider" />
+    </authentication-manager>
+
     <beans:bean id="oauth2AuthorizationServerTokenServices" class="org.eulerframework.web.module.oauth2.extend.EulerTokenServices">
         <beans:property name="tokenStore" ref="oauth2AuthorizationServerTokenStore" />
         <beans:property name="clientDetailsService" ref="clientDetailsService" />
+        <beans:property name="authenticationManager" ref="preAuthenticatedAuthenticationManager" />
         <beans:property name="supportRefreshToken" value="true" />
         <beans:property name="reuseRefreshToken" value="false" />
     </beans:bean>
