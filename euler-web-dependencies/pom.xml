@@ -73,6 +73,11 @@
 
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-orm-jpa</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-web-orm-hibernate</artifactId>
                 <version>${revision}</version>
             </dependency>
