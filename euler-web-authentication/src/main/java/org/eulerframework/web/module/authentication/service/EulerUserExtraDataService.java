@@ -45,30 +45,30 @@ public class EulerUserExtraDataService {
             String newMobile,
             Map<String, Object> extraData) 
             throws UserInfoCheckWebException {
-        EulerUserEntity user = this.eulerUserEntityService.loadUserByUserId(userId);
+//        EulerUserEntity user = this.eulerUserEntityService.loadUserByUserId(userId);
         
 //        UserDataValidator.validUsername(newUsername);
 //        user.setUsername(newUsername.trim());
         
-        if(StringUtils.hasText(newEmail)) {
-            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
-                UserDataValidator.validEmail(newEmail);
-                user.setEmail(newEmail.trim());
-            }
-        } else {
-            user.setEmail(null);
-        }
-        
-        if(StringUtils.hasText(newMobile)) { 
-            if(!newMobile.equalsIgnoreCase(user.getMobile())) {
-                UserDataValidator.validMobile(newMobile);
-                user.setMobile(newMobile.trim());
-            }
-        } else {
-            user.setMobile(null);
-        }
-        
-        this.eulerUserEntityService.updateUser(user);
+//        if(StringUtils.hasText(newEmail)) {
+//            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
+//                UserDataValidator.validEmail(newEmail);
+//                user.setEmail(newEmail.trim());
+//            }
+//        } else {
+//            user.setEmail(null);
+//        }
+//
+//        if(StringUtils.hasText(newMobile)) {
+//            if(!newMobile.equalsIgnoreCase(user.getMobile())) {
+//                UserDataValidator.validMobile(newMobile);
+//                user.setMobile(newMobile.trim());
+//            }
+//        } else {
+//            user.setMobile(null);
+//        }
+//
+//        this.eulerUserEntityService.updateUser(user);
         
         if(extraData != null && !extraData.isEmpty() && this.eulerUserExtraDataProcessors != null) {
             for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : this.eulerUserExtraDataProcessors) {
