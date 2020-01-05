@@ -73,6 +73,16 @@
 
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-authentication</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-web-orm-jpa</artifactId>
                 <version>${revision}</version>
             </dependency>
