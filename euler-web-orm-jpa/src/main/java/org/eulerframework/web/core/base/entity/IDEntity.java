@@ -34,7 +34,7 @@ import javax.persistence.MappedSuperclass;
 public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T, Long> {    
 
     @Id
-    @Column(name="ID")
+    @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
