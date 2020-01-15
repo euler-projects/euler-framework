@@ -28,9 +28,8 @@ import java.util.Map;
 
 /**
  * 适用于通过euler-web-oauth2-server构建的验证服务器的/oauth/user_info获取用户信息的Spring Cloud项目
- * 
- * @author cFrost
  *
+ * @author cFrost
  */
 public class SpringCloudOAuth2UserContext {
 
@@ -40,25 +39,27 @@ public class SpringCloudOAuth2UserContext {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         try {
-            return extracttPrincipal(((OAuth2Authentication) authentication).getUserAuthentication().getPrincipal());
+            Authentication userAuthentication = ((OAuth2Authentication) authentication).getUserAuthentication();
+
+            EulerOAuth2UserDetails oauth2User = extractPrincipal(userAuthentication.getPrincipal());
+            oauth2User.setAuthorities(userAuthentication.getAuthorities());
+
+            return oauth2User;
         } catch (Exception e) {
             throw new RuntimeException("Some exception was thrown, Only Euler Web OAuth2 Authentication is supported. Exception: " + e.getMessage(), e);
         }
     }
-    
-    public static EulerOAuth2UserDetails extracttPrincipal(Object principal) {
 
-        Map<String, Object> rawPrincipal;
-        Collection<? extends GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        if(OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
-            OAuth2Authentication oAuth2Authentication = (OAuth2Authentication)principal;
-            rawPrincipal = (Map<String, Object>) oAuth2Authentication.getPrincipal();
-            grantedAuthorities = oAuth2Authentication.getUserAuthentication().getAuthorities();
-            //grantedAuthorities = oAuth2Authentication.getAuthorities();
-        } else {
-            rawPrincipal = (Map<String, Object>) principal;
-            LOGGER.warn("Unknown Principal, no authorities was added to EulerOAuth2UserDetails, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
-        }
+    private static EulerOAuth2UserDetails extractPrincipal(Object principal) {
+        LOGGER.info("Principal type: {}", principal.getClass().getName());
+
+        Map<String, Object> rawPrincipal = (Map<String, Object>) principal;
+//        if (OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
+//            OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) principal;
+//            rawPrincipal = (Map<String, Object>) oAuth2Authentication.getPrincipal();
+//        } else {
+//            rawPrincipal = (Map<String, Object>) principal;
+//        }
 
         EulerOAuth2UserDetails oauth2User = new EulerOAuth2UserDetails();
         oauth2User.setUserId((String) rawPrincipal.get("userId"));
@@ -67,7 +68,6 @@ public class SpringCloudOAuth2UserContext {
         oauth2User.setAccountNonLocked((boolean) rawPrincipal.get("accountNonLocked"));
         oauth2User.setCredentialsNonExpired((boolean) rawPrincipal.get("credentialsNonExpired"));
         oauth2User.setEnabled((boolean) rawPrincipal.get("enabled"));
-        oauth2User.setAuthorities(grantedAuthorities);
         return oauth2User;
     }
 }
