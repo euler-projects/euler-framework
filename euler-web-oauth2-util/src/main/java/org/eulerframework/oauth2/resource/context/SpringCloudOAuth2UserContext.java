@@ -18,9 +18,12 @@ package org.eulerframework.oauth2.resource.context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -46,15 +49,14 @@ public class SpringCloudOAuth2UserContext {
     public static EulerOAuth2UserDetails extracttPrincipal(Object principal) {
 
         Map<String, Object> rawPrincipal;
-
+        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         if(OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
-            rawPrincipal = (Map<String, Object>) ((OAuth2Authentication)principal).getPrincipal();
-
-            LOGGER.info("Principal, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
+            OAuth2Authentication oAuth2Authentication = (OAuth2Authentication)principal;
+            rawPrincipal = (Map<String, Object>) oAuth2Authentication.getPrincipal();
+            grantedAuthorities = oAuth2Authentication.getAuthorities();
         } else {
             rawPrincipal = (Map<String, Object>) principal;
-
-            LOGGER.info("Principal, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
+            LOGGER.warn("Unknown Principal, no authorities was added to EulerOAuth2UserDetails, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
         }
 
         EulerOAuth2UserDetails oauth2User = new EulerOAuth2UserDetails();
@@ -64,6 +66,7 @@ public class SpringCloudOAuth2UserContext {
         oauth2User.setAccountNonLocked((boolean) rawPrincipal.get("accountNonLocked"));
         oauth2User.setCredentialsNonExpired((boolean) rawPrincipal.get("credentialsNonExpired"));
         oauth2User.setEnabled((boolean) rawPrincipal.get("enabled"));
+        oauth2User.setAuthorities(grantedAuthorities);
         return oauth2User;
     }
 }

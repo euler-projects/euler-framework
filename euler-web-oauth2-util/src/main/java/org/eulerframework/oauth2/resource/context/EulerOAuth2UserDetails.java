@@ -15,6 +15,10 @@
  */
 package org.eulerframework.oauth2.resource.context;
 
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
+
 /**
  * euler-web-oauth2-server生成的用户信息对象
  * 
@@ -28,6 +32,7 @@ public class EulerOAuth2UserDetails {
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
     private boolean enabled;
+    private Collection<GrantedAuthority> authorities;
 
     public String getUserId() {
         return userId;
@@ -77,4 +82,11 @@ public class EulerOAuth2UserDetails {
         this.enabled = enabled;
     }
 
+    public Collection<GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Collection<GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
 }
