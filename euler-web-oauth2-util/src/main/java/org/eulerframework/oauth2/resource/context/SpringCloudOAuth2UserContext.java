@@ -15,6 +15,8 @@
  */
 package org.eulerframework.oauth2.resource.context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -28,6 +30,8 @@ import java.util.Map;
  *
  */
 public class SpringCloudOAuth2UserContext {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(SpringCloudOAuth2UserContext.class);
 
     public static EulerOAuth2UserDetails getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -45,8 +49,12 @@ public class SpringCloudOAuth2UserContext {
 
         if(OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
             rawPrincipal = (Map<String, Object>) ((OAuth2Authentication)principal).getPrincipal();
+
+            LOGGER.info("Principal, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
         } else {
             rawPrincipal = (Map<String, Object>) principal;
+
+            LOGGER.info("Principal, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
         }
 
         EulerOAuth2UserDetails oauth2User = new EulerOAuth2UserDetails();
