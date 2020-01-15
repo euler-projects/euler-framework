@@ -15,6 +15,7 @@
  */
 package org.eulerframework.oauth2.resource.context;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -39,6 +40,8 @@ public class SpringCloudOAuth2UserContext {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         try {
+            System.out.println("!!!!!!!" + new ObjectMapper().writeValueAsString(authentication));
+
             Authentication userAuthentication = ((OAuth2Authentication) authentication).getUserAuthentication();
 
             EulerOAuth2UserDetails oauth2User = extractPrincipal(userAuthentication.getPrincipal());
