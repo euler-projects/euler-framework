@@ -49,11 +49,12 @@ public class SpringCloudOAuth2UserContext {
     public static EulerOAuth2UserDetails extracttPrincipal(Object principal) {
 
         Map<String, Object> rawPrincipal;
-        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        Collection<? extends GrantedAuthority> grantedAuthorities = new ArrayList<>();
         if(OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
             OAuth2Authentication oAuth2Authentication = (OAuth2Authentication)principal;
             rawPrincipal = (Map<String, Object>) oAuth2Authentication.getPrincipal();
-            grantedAuthorities = oAuth2Authentication.getAuthorities();
+            grantedAuthorities = oAuth2Authentication.getUserAuthentication().getAuthorities();
+            //grantedAuthorities = oAuth2Authentication.getAuthorities();
         } else {
             rawPrincipal = (Map<String, Object>) principal;
             LOGGER.warn("Unknown Principal, no authorities was added to EulerOAuth2UserDetails, type: {}, text: {}", rawPrincipal.getClass().getName(), rawPrincipal);
