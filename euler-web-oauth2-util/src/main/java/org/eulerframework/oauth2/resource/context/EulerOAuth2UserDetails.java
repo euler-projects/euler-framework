@@ -32,7 +32,7 @@ public class EulerOAuth2UserDetails {
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
     private boolean enabled;
-    private Collection<? extends GrantedAuthority> authorities;
+    private Collection<String> authorities;
 
     public String getUserId() {
         return userId;
@@ -82,11 +82,11 @@ public class EulerOAuth2UserDetails {
         this.enabled = enabled;
     }
 
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<String> getAuthorities() {
         return authorities;
     }
 
-    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+    public void setAuthorities(Collection<String> authorities) {
         this.authorities = authorities;
     }
 }

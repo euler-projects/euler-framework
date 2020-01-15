@@ -22,9 +22,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -34,18 +36,26 @@ import java.util.Map;
  */
 public class SpringCloudOAuth2UserContext {
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     private final static Logger LOGGER = LoggerFactory.getLogger(SpringCloudOAuth2UserContext.class);
 
     public static EulerOAuth2UserDetails getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         try {
-            System.out.println("!!!!!!!" + new ObjectMapper().writeValueAsString(authentication));
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("Authentication: {}", objectMapper.writeValueAsString(authentication));
+            }
 
             Authentication userAuthentication = ((OAuth2Authentication) authentication).getUserAuthentication();
 
             EulerOAuth2UserDetails oauth2User = extractPrincipal(userAuthentication.getPrincipal());
-            oauth2User.setAuthorities(userAuthentication.getAuthorities());
+
+            LinkedHashMap<String, Object> details = (LinkedHashMap<String, Object>) userAuthentication.getDetails();
+
+            ArrayList<String> authority = (ArrayList<String>)details.get("authority");
+            oauth2User.setAuthorities(authority);
 
             return oauth2User;
         } catch (Exception e) {
@@ -54,7 +64,9 @@ public class SpringCloudOAuth2UserContext {
     }
 
     private static EulerOAuth2UserDetails extractPrincipal(Object principal) {
-        LOGGER.info("Principal type: {}", principal.getClass().getName());
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Principal type: {}", principal.getClass().getName());
+        }
 
         Map<String, Object> rawPrincipal = (Map<String, Object>) principal;
 //        if (OAuth2Authentication.class.isAssignableFrom(principal.getClass())) {
