@@ -27,7 +27,7 @@
         <hibernate.validator.version>5.2.5.Final</hibernate.validator.version>
 
         <springframework.version>5.0.7.RELEASE</springframework.version>
-        <springsecurity.version>5.0.6.RELEASE</springsecurity.version>
+        <springsecurity.version>5.3.3.RELEASE</springsecurity.version>
         <springsecurity.oauth.version>2.3.4.RELEASE</springsecurity.oauth.version>
 
         <AspectJ.version>1.8.9</AspectJ.version>
