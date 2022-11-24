@@ -36,7 +36,7 @@
 
         <mybatis.version>3.4.5</mybatis.version>
         <mybatis-spring.version>1.3.1</mybatis-spring.version>
-        <hibernate.version>5.2.13.Final</hibernate.version>
+        <hibernate.version>5.3.20.Final</hibernate.version>
         <c3p0.version>0.9.5.2</c3p0.version>
 
         <jackson.version>2.9.7</jackson.version>
