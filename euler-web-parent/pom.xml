@@ -364,6 +364,8 @@
                             <updatePomFile>true</updatePomFile>
                             <flattenMode>oss</flattenMode>
                             <pomElements>
+                                <properties>keep</properties>
+                                <dependencyManagement>keep</dependencyManagement>
                                 <parent>expand</parent>
                                 <distributionManagement>remove</distributionManagement>
                                 <repositories>remove</repositories>
