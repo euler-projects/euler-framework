@@ -55,7 +55,6 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
      *            请求，不会对请求做任何修改
      * @param response
      *            响应，只会向响应中添加关于语言的Cookie
-     * @throws NeedRedirectException 
      */
     public WebLanguageRequestWrapper(HttpServletRequest request, HttpServletResponse response) throws NeedRedirectException {
         super(request);
@@ -196,7 +195,7 @@ public class WebLanguageRequestWrapper extends HttpServletRequestWrapper {
         return locale;
     }
     
-    public class NeedRedirectException extends Exception {
+    public static class NeedRedirectException extends Exception {
         private String redirectUrl;
         
         private NeedRedirectException(String redirectUrl) {
