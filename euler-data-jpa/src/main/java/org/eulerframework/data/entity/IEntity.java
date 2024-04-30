@@ -28,7 +28,7 @@ import java.io.Serializable;
  * @see IDEntity
  * @see UUIDEntity
  */
-public interface BaseEntity<T extends BaseEntity<?, ?>, ID_TYPE extends Serializable> extends Serializable, Comparable<T> {
+public interface IEntity<T extends IEntity<?, ?>, ID_TYPE extends Serializable> extends Serializable, Comparable<T> {
     
     /**
      * 获取主键<br>

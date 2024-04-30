@@ -25,13 +25,13 @@ import jakarta.persistence.MappedSuperclass;
  * <strong>自增主键</strong>实体<br>
  * 适用与带有主键自增功能的数据库
  * 
- * @param <T> 实现类类名&nbsp;例如:<br><code>public class Example extends IDEntity&lt;Example&gt;<code>
+ * @param <E> 实现类类名&nbsp;例如:<br><code>public class Example extends IDEntity&lt;Example&gt;<code>
  * @author cFrost
  * @see NonIDEntity
  * @see UUIDEntity
  */
 @MappedSuperclass
-public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T, Long> {    
+public abstract class IDEntity<E extends IDEntity<?>> extends AuditingEntity<E, Long> {
 
     @Id
     @Column(name="id")
@@ -49,7 +49,7 @@ public abstract class IDEntity<T extends IDEntity<?>> implements BaseEntity<T, L
     }
 
     @Override 
-    public int compareTo(T obj) {
+    public int compareTo(E obj) {
         if (this == obj)
             return 0;
         
