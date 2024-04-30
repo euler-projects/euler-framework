@@ -17,18 +17,15 @@ package org.eulerframework.web.module.authentication.entity;
 
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
-import org.eulerframework.web.core.base.entity.UUIDEntity;
+import org.eulerframework.data.entity.UUIDEntity;
 
 @Entity
 @Table(name="sys_group")
@@ -39,7 +36,7 @@ public class Group extends UUIDEntity<Group> implements EulerGroupEntity {
     @Column(name="name", nullable = false, unique = true)
     private String name;
     @ManyToMany(fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SELECT)
+    //@Fetch(FetchMode.SELECT)
     @JoinTable(name = "sys_group_authority", joinColumns = {
             @JoinColumn(name = "group_id")
     }, inverseJoinColumns = {

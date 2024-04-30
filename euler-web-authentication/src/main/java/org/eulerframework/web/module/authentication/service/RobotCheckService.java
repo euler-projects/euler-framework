@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.module.authentication.service;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eulerframework.web.module.authentication.exception.NotSupportRobotCheckRequestException;
 

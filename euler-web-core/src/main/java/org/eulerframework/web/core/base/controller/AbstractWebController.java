@@ -22,7 +22,7 @@ import org.eulerframework.common.util.io.file.SimpleFileIOUtils;
 import org.eulerframework.web.core.base.WebContextAccessable;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

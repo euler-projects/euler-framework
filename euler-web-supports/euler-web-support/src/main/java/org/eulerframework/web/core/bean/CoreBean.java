@@ -17,6 +17,7 @@ package org.eulerframework.web.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Validator;
 import org.eulerframework.config.EulerWebSupportConfig;
 import org.eulerframework.web.config.RedisType;
 import org.eulerframework.web.config.WebConfig;
@@ -111,7 +112,7 @@ public class CoreBean {
     }
 
     @Bean
-    public LocalValidatorFactoryBean localValidatorFactoryBean() throws ClassNotFoundException {
+    public Validator localValidatorFactoryBean() throws ClassNotFoundException {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.setProviderClass(Class.forName("org.hibernate.validator.HibernateValidator"));
         validator.setValidationMessageSource(this.messageSource());

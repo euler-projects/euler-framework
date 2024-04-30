@@ -18,7 +18,7 @@ package org.eulerframework.web.module.authentication.service;
 import java.util.Date;
 import java.util.HashSet;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;

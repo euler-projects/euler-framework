@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.module.oauth2.service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;

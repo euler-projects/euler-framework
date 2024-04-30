@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.module.authentication.boot;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.eulerframework.config.EulerWebSupportConfig;
 import org.springframework.core.annotation.Order;

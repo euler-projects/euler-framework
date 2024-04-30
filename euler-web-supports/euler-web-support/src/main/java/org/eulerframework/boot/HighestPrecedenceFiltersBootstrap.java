@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyReader;

@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.module.authentication.service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 import org.eulerframework.web.core.base.service.impl.BaseService;

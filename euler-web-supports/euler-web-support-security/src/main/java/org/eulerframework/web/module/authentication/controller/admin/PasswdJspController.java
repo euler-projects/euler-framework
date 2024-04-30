@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.module.authentication.controller.admin;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.RequestMapping;

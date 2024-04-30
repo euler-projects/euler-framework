@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.core.i18n;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.servlet.support.RequestContext;
 

@@ -15,7 +15,7 @@
  */
 package org.eulerframework.web.module.oauth2.controller.admin.ajax;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.eulerframework.web.core.annotation.AjaxController;
 import org.eulerframework.web.core.base.controller.ApiSupportWebController;

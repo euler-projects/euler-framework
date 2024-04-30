@@ -15,8 +15,8 @@
  */
 package org.eulerframework.web.core.listener;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.web.config.WebConfig;

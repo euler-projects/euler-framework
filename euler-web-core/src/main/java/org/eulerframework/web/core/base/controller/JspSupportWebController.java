@@ -18,8 +18,8 @@ package org.eulerframework.web.core.base.controller;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;

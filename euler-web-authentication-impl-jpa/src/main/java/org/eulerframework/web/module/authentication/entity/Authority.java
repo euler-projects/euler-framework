@@ -15,14 +15,14 @@
  */
 package org.eulerframework.web.module.authentication.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-import org.eulerframework.web.core.base.entity.NonIDEntity;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import org.eulerframework.data.entity.NonIDEntity;
 
 @Entity
 @Table(name = "sys_authority")

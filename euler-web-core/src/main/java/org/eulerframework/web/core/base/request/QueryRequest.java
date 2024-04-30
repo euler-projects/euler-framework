@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.common.util.StringUtils;

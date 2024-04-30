@@ -20,20 +20,18 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.util.CollectionUtils;
 
-import org.eulerframework.web.core.base.entity.UUIDEntity;
+import org.eulerframework.data.entity.UUIDEntity;
 
 @Entity
 @Table(name = "sys_user")
@@ -64,7 +62,7 @@ public class User extends UUIDEntity<User> implements EulerUserEntity {
     private Set<Authority> authorities;
     
     @ManyToMany(fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SELECT)
+    //@Fetch(FetchMode.SELECT)
     @JoinTable(name = "sys_user_group", joinColumns = {
             @JoinColumn(name = "user_id")
     }, inverseJoinColumns = {

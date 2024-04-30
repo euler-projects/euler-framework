@@ -20,7 +20,7 @@ public class EurekaRegistry {
         
         DefaultEurekaClientConfig clientConfig = new DefaultEurekaClientConfig();
 
-        EurekaClient eurekaClient = new DiscoveryClient(applicationInfoManager, clientConfig);
+        EurekaClient eurekaClient = new DiscoveryClient(applicationInfoManager, clientConfig, /*TODO*/null);
         String instanceId = instanceInfo.getInstanceId();
         
         System.out.println(instanceId);

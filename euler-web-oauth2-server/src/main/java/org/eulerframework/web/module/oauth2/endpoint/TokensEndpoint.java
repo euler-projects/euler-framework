@@ -17,7 +17,7 @@ package org.eulerframework.web.module.oauth2.endpoint;
 
 import java.util.Collection;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.eulerframework.common.base.log.LogSupport;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;

@@ -17,7 +17,7 @@ package org.eulerframework.web.util;
 
 import org.springframework.util.Assert;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 public class ServletContextHolder {
     private static ServletContext servletContext;

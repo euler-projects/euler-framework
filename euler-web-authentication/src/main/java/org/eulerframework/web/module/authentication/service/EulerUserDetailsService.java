@@ -15,8 +15,8 @@
  */
 package org.eulerframework.web.module.authentication.service;
 
-import javax.annotation.Resource;
 
+import jakarta.annotation.Resource;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
