@@ -24,6 +24,7 @@
         <euler-common.version>1.0.0.M7-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.10</commons-codec.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
 
         <jakarta-servlet-api.version>6.0.0</jakarta-servlet-api.version>
         <jakarta-jsp-api.version>3.1.1</jakarta-jsp-api.version>
@@ -42,7 +43,7 @@
         <spring-security-oauth.version>2.5.2.RELEASE</spring-security-oauth.version>
         <spring-data.version>3.2.5</spring-data.version>
 
-        <AspectJ.version>1.8.9</AspectJ.version>
+        <aspectJ.version>1.8.9</aspectJ.version>
         <jasig.version>3.2.2</jasig.version>
         <quartz.version>2.2.3</quartz.version>
 
@@ -59,10 +60,6 @@
         <jackson.version>2.9.9</jackson.version>
 
         <junit.version>4.8.2</junit.version>
-
-        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
-        <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
-        <xml-maven-plugin.version>1.0.2</xml-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -73,6 +70,12 @@
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
 
             <!-- J2EE -->
             <dependency>
@@ -141,7 +144,7 @@
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
-                <version>${AspectJ.version}</version>
+                <version>${aspectJ.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
@@ -351,30 +354,6 @@
                 <inherited>true</inherited>
                 <executions>
                     <execution>
-                        <!-- Create an effective POM (with versions expanded) for the CLI and
-                            documentation -->
-                        <id>flatten-effective-pom</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                        <configuration>
-                            <updatePomFile>false</updatePomFile>
-                            <outputDirectory>${project.build.directory}/effective-pom</outputDirectory>
-                            <flattenedPomFilename>${project.artifactId}.xml</flattenedPomFilename>
-                            <flattenMode>oss</flattenMode>
-                            <pomElements>
-                                <parent>resolve</parent>
-                                <properties>resolve</properties>
-                                <dependencyManagement>keep</dependencyManagement>
-                                <pluginManagement>keep</pluginManagement>
-                                <distributionManagement>remove</distributionManagement>
-                                <repositories>remove</repositories>
-                            </pomElements>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- Flatten and simplify our own POM for install/deploy -->
                         <!-- Tidy up all POMs before they are published -->
                         <id>flatten</id>
                         <phase>process-resources</phase>
@@ -383,21 +362,12 @@
                         </goals>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>bom</flattenMode>
+                            <flattenMode>oss</flattenMode>
                             <pomElements>
-                                <pluginManagement>keep</pluginManagement>
-                                <properties>keep</properties>
+                                <parent>expand</parent>
+                                <distributionManagement>remove</distributionManagement>
                                 <repositories>remove</repositories>
                             </pomElements>
-<!--                            <flattenMode>oss</flattenMode>-->
-<!--                            <pomElements>-->
-<!--                                <parent>resolve</parent>-->
-<!--                                <properties>resolve</properties>-->
-<!--                                <dependencyManagement>keep</dependencyManagement>-->
-<!--                                <pluginManagement>keep</pluginManagement>-->
-<!--                                <distributionManagement>remove</distributionManagement>-->
-<!--                                <repositories>remove</repositories>-->
-<!--                            </pomElements>-->
                         </configuration>
                     </execution>
                     <execution>
@@ -414,29 +384,6 @@
                 <artifactId>xml-maven-plugin</artifactId>
                 <inherited>false</inherited>
                 <executions>
-                    <execution>
-                        <!-- Cleanup the effective POM -->
-                        <id>post-process-effective-pom</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>transform</goal>
-                        </goals>
-                        <configuration>
-                            <transformationSets>
-                                <transformationSet>
-                                    <dir>${project.build.directory}/effective-pom</dir>
-                                    <outputDir>${project.build.directory}/effective-pom</outputDir>
-                                    <stylesheet>src/main/xslt/post-process-flattened-pom.xsl</stylesheet>
-                                    <outputProperties>
-                                        <outputProperty>
-                                            <name>indent</name>
-                                            <value>yes</value>
-                                        </outputProperty>
-                                    </outputProperties>
-                                </transformationSet>
-                            </transformationSets>
-                        </configuration>
-                    </execution>
                     <execution>
                         <!-- Cleanup the flattened project POM -->
                         <id>post-process-flattened-pom</id>

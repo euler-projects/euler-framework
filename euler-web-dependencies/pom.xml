@@ -10,9 +10,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
         <xml-maven-plugin.version>1.0.2</xml-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -102,7 +102,7 @@
                             <flattenMode>oss</flattenMode>
                             <pomElements>
                                 <dependencyManagement>expand</dependencyManagement>
-                                <pluginManagement>expand</pluginManagement>
+                                <!--<pluginManagement>expand</pluginManagement>-->
                                 <properties>remove</properties>
                                 <repositories>remove</repositories>
                             </pomElements>
@@ -188,29 +188,29 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--            <plugin>-->
-            <!--                <groupId>org.codehaus.mojo</groupId>-->
-            <!--                <artifactId>build-helper-maven-plugin</artifactId>-->
-            <!--                <inherited>false</inherited>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        &lt;!&ndash; Attach effective POM &ndash;&gt;-->
-            <!--                        <id>attach-artifacts</id>-->
-            <!--                        <phase>package</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>attach-artifact</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <artifacts>-->
-            <!--                                <artifact>-->
-            <!--                                    <file>${project.build.directory}/effective-pom/euler-web-dependencies.xml</file>-->
-            <!--                                    <type>effective-pom</type>-->
-            <!--                                </artifact>-->
-            <!--                            </artifacts>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <!-- Attach effective POM -->
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/effective-pom/${project.artifactId}.xml</file>
+                                    <type>effective-pom</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
