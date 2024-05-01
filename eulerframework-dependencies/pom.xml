@@ -9,6 +9,12 @@
     <artifactId>eulerframework-dependencies</artifactId>
     <packaging>pom</packaging>
 
+    <scm>
+        <connection>scm:git:https://github.com/euler-projects/euler-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:euler-projects/euler-framework.git</developerConnection>
+        <url>https://github.com/euler-projects/euler-framework</url>
+    </scm>
+
     <properties>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
         <xml-maven-plugin.version>1.0.2</xml-maven-plugin.version>
