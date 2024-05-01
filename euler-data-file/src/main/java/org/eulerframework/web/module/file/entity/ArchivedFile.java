@@ -23,11 +23,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
-import org.eulerframework.data.entity.UUIDEntity;
+import org.eulerframework.data.entity.AuditingUUIDEntity;
 
 @Entity
 @Table(name = "basic_uploaded_file")
-public class ArchivedFile extends UUIDEntity<ArchivedFile> {
+public class ArchivedFile extends AuditingUUIDEntity {
 
     @Column(name = "original_filename", nullable = false)
     private String originalFilename;

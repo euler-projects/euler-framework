@@ -25,11 +25,11 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
-import org.eulerframework.data.entity.UUIDEntity;
+import org.eulerframework.data.entity.AuditingUUIDEntity;
 
 @Entity
 @Table(name="sys_group")
-public class Group extends UUIDEntity<Group> implements EulerGroupEntity {
+public class Group extends AuditingUUIDEntity implements EulerGroupEntity {
 
     @Column(name="code", nullable = false, unique = true)
     private String code;

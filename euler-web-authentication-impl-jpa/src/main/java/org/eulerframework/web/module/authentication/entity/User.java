@@ -31,11 +31,11 @@ import jakarta.persistence.Transient;
 
 import org.springframework.util.CollectionUtils;
 
-import org.eulerframework.data.entity.UUIDEntity;
+import org.eulerframework.data.entity.AuditingUUIDEntity;
 
 @Entity
 @Table(name = "sys_user")
-public class User extends UUIDEntity<User> implements EulerUserEntity {
+public class User extends AuditingUUIDEntity implements EulerUserEntity {
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;

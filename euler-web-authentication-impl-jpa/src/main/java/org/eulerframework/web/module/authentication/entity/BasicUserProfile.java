@@ -17,6 +17,7 @@ package org.eulerframework.web.module.authentication.entity;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +26,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import org.eulerframework.data.entity.NonIDEntity;
+import org.eulerframework.data.entity.AuditingEntity;
 import org.eulerframework.web.module.authentication.enums.Gender;
 import org.eulerframework.web.module.authentication.enums.NameOrder;
 
@@ -35,8 +36,7 @@ import org.eulerframework.web.module.authentication.enums.NameOrder;
  */
 @Entity
 @Table(name = "sys_basic_user_profile")
-public class BasicUserProfile extends NonIDEntity<BasicUserProfile, String> implements EulerUserProfileEntity {
-    
+public class BasicUserProfile extends AuditingEntity implements EulerUserProfileEntity {
     /**
      * 用户ID
      */
@@ -213,18 +213,20 @@ public class BasicUserProfile extends NonIDEntity<BasicUserProfile, String> impl
     }
 
     @Override
-    public String getId() {
-        return this.userId;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        BasicUserProfile that = (BasicUserProfile) o;
+        return Objects.equals(userId, that.userId);
     }
 
     @Override
-    public void setId(String id) {
-        this.userId = id;
+    public int hashCode() {
+        return Objects.hashCode(userId);
     }
-
-    @Override
-    public int compareTo(BasicUserProfile o) {
-        return this.getId().compareTo(o.getId());
-    }
-
 }

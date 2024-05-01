@@ -22,11 +22,13 @@ import jakarta.persistence.Table;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import org.eulerframework.data.entity.NonIDEntity;
+import org.eulerframework.data.entity.AuditingEntity;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "sys_authority")
-public class Authority extends NonIDEntity<Authority, String> implements EulerAuthorityEntity {
+public class Authority extends AuditingEntity implements EulerAuthorityEntity {
 
     @Id
     @NotNull
@@ -65,43 +67,20 @@ public class Authority extends NonIDEntity<Authority, String> implements EulerAu
     }
 
     @Override
-    public String getId() {
-        return this.authority;
-    }
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-    @Override
-    public void setId(String id) {
-        this.authority = id;
-    }
-
-    @Override
-    public int compareTo(Authority o) {
-        return this.getId().compareTo(o.getId());
+        Authority that = (Authority) o;
+        return Objects.equals(authority, that.authority);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((authority == null) ? 0 : authority.hashCode());
-        return result;
+        return Objects.hashCode(authority);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Authority other = (Authority) obj;
-        if (authority == null) {
-            if (other.authority != null)
-                return false;
-        } else if (!authority.equals(other.authority))
-            return false;
-        return true;
-    }
-
 }
