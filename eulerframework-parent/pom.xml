@@ -53,17 +53,14 @@
         <jasig.version>3.2.2</jasig.version>
         <quartz.version>2.2.3</quartz.version>
 
-        <lettuce.version>5.1.8.RELEASE</lettuce.version>
-        <jedis.version>2.9.3</jedis.version>
-        <mybatis.version>3.4.5</mybatis.version>
-        <mybatis-spring.version>1.3.1</mybatis-spring.version>
+        <lettuce.version>6.3.2.RELEASE</lettuce.version>
+        <jedis.version>5.1.2</jedis.version>
         <hibernate.version>6.5.0.Final</hibernate.version>
-        <c3p0.version>0.9.5.4</c3p0.version>
 
-        <slf4j.version>1.7.28</slf4j.version>
-        <log4j2.version>2.11.2</log4j2.version>
+        <slf4j.version>2.0.13</slf4j.version>
+        <log4j2.version>2.23.1</log4j2.version>
 
-        <jackson.version>2.9.9</jackson.version>
+        <jackson.version>2.17.0</jackson.version>
 
         <junit.version>4.8.2</junit.version>
     </properties>
@@ -246,18 +243,6 @@
                 <version>${spring-data.version}</version>
             </dependency>
 
-            <!-- MyBatis ... -->
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatis-spring.version}</version>
-            </dependency>
-
             <!-- Hibernate ... -->
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -269,13 +254,6 @@
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate-validator.version}</version>
-            </dependency>
-
-            <!-- Data Source -->
-            <dependency>
-                <groupId>com.mchange</groupId>
-                <artifactId>c3p0</artifactId>
-                <version>${c3p0.version}</version>
             </dependency>
 
             <dependency>

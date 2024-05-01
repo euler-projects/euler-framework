@@ -30,7 +30,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.web.config.WebConfig;
-import org.eulerframework.web.core.base.WebContextAccessable;
+import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.exception.web.BadCredentialsWebException;
 import org.eulerframework.web.core.exception.web.PageNotFoundException;
 import org.eulerframework.web.core.exception.web.SystemWebError;
@@ -322,7 +322,7 @@ public abstract class JspSupportWebController extends AbstractWebController {
         return this.crashPage(e);
     }
     
-    public static class Target extends WebContextAccessable {
+    public static class Target extends WebContextAccessible {
         private String href;
         private String name;
         

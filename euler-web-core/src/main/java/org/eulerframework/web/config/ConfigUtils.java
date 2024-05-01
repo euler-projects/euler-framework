@@ -47,8 +47,7 @@ public class ConfigUtils {
         } else if (SystemUtils.isWindows() && path.matches("^\\w+:/.*$")) {
             // Windows 绝对路径，不做任何处理
         } else {
-            String classPath = ClassLoader.getSystemResource("").getPath();
-            path = CommonUtils.convertDirToUnixFormat(classPath, false) + "/" + path;
+            // 相对路径，不做任何处理
         }
 
         LOGGER.info("'{}' is '{}'.", propertyName, path);
@@ -59,6 +58,7 @@ public class ConfigUtils {
             if (!pathFile.mkdirs()) {
                 throw new FileSystemException(path, null, "Path create failed, pleas check the permissions of this path");
             }
+            LOGGER.info("Path '{}' created.", pathFile.getAbsolutePath());
         }
 
         return path;

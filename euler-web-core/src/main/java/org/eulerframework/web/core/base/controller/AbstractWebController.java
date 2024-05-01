@@ -19,18 +19,19 @@ import org.eulerframework.common.util.MIMEUtils;
 import org.eulerframework.common.util.MIMEUtils.MIME;
 import org.eulerframework.common.util.io.file.FileUtils;
 import org.eulerframework.common.util.io.file.SimpleFileIOUtils;
-import org.eulerframework.web.core.base.WebContextAccessable;
+import org.eulerframework.web.core.base.WebContextAccessible;
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-public abstract class AbstractWebController extends WebContextAccessable {
+public abstract class AbstractWebController extends WebContextAccessible {
     protected void writeString(String string) throws IOException{
-        this.getResponse().getOutputStream().write(string.getBytes("UTF-8"));
+        this.getResponse().getOutputStream().write(string.getBytes(StandardCharsets.UTF_8));
     }
     
     protected void writeFile(String fileName, File file) throws FileNotFoundException, IOException {
@@ -44,7 +45,7 @@ public abstract class AbstractWebController extends WebContextAccessable {
         }
         this.getResponse().setHeader("Content-Type", mime.getContentType());
         response.setHeader("Content-Disposition", mime.getContentDisposition() + 
-                ";fileName=\"" + new String(fileName.getBytes("utf-8"), "ISO8859-1") + "\"");
+                ";fileName=\"" + new String(fileName.getBytes(StandardCharsets.UTF_8), "ISO8859-1") + "\"");
         response.setHeader("Content-Length", String.valueOf(file.length()));
         SimpleFileIOUtils.readFileToOutputStream(file, response.getOutputStream(), 2048);
     }
