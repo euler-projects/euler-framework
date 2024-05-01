@@ -6,7 +6,7 @@
         <artifactId>euler-framework</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>euler-web-dependencies</artifactId>
+    <artifactId>eulerframework-dependencies</artifactId>
     <packaging>pom</packaging>
 
     <properties>
