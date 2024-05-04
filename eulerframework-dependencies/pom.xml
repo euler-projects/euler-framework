@@ -35,6 +35,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-web-oauth2-authorization-server</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-web-support-security</artifactId>
                 <version>${revision}</version>
             </dependency>

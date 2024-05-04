@@ -47,7 +47,8 @@
 
         <spring-framework.version>6.1.6</spring-framework.version>
         <spring-security.version>6.2.4</spring-security.version>
-        <spring-security-oauth.version>2.5.2.RELEASE</spring-security-oauth.version>
+        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
+        <spring-security-oauth2-authorization-server.version>1.2.4</spring-security-oauth2-authorization-server.version>
         <spring-data.version>3.2.5</spring-data.version>
         <querydsl.version>5.1.0</querydsl.version>
 
@@ -225,7 +226,13 @@
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>${spring-security-oauth.version}</version>
+                <version>${spring-security-oauth2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-oauth2-authorization-server</artifactId>
+                <version>${spring-security-oauth2-authorization-server.version}</version>
+                <scope>compile</scope>
             </dependency>
 
             <!-- Reids -->
