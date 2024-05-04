@@ -177,11 +177,11 @@ public abstract class SecurityConfig {
         return propertyReader.getString(SecurityConfigKey.SECURITY_SIGNUP_PASSWORD_FORMAT, SecurityConfigDefault.SECURITY_SIGNUP_PASSWORD_FORMAT);
     }
 
-    public static boolean isEnableEmailSignIn() {
+    public static boolean isEnableEmailSignin() {
         return propertyReader.getBooleanValue(SecurityConfigKey.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN, SecurityConfigDefault.SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN);
     }
 
-    public static boolean isEnableMobileSignIn() {
+    public static boolean isEnableMobileSignin() {
         return propertyReader.getBooleanValue(SecurityConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN, SecurityConfigDefault.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN);
     }
 

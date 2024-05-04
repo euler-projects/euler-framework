@@ -1,11 +1,12 @@
-package org.eulerframework.security.spring.util;
+package org.eulerframework.security.core;
 
-import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.spring.principal.EulerUserDetails;
 import org.springframework.util.Assert;
 
-public abstract class EulerSecurityModelUtils {
-    public static EulerUserDetails toEulerUserDetails(EulerUser eulerUser) {
+public abstract class AbstractEulerUserService implements EulerUserService {
+
+    @Override
+    public EulerUserDetails toEulerUserDetails(EulerUser eulerUser) {
         if(eulerUser == null) {
             return null;
         }
@@ -18,7 +19,7 @@ public abstract class EulerSecurityModelUtils {
 
         eulerUserDetails.setUserId(eulerUser.getUserId());
         eulerUserDetails.setUsername(eulerUser.getUsername());
-        eulerUserDetails.setPassword(eulerUser.getPassword());
+         eulerUserDetails.setPassword(eulerUser.getPassword());
         eulerUserDetails.setAccountNonLocked(eulerUser.isAccountNonLocked());
         eulerUserDetails.setAccountNonExpired(eulerUser.isAccountNonExpired());
         eulerUserDetails.setCredentialsNonExpired(eulerUser.isCredentialsNonExpired());
