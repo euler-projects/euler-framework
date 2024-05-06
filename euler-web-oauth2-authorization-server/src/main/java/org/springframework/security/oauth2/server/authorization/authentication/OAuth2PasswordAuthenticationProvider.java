@@ -19,16 +19,15 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import java.security.Principal;
 import java.util.HashMap;
 
-import static org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthenticationProviderUtils.getAuthenticatedClientElseThrowInvalidClient;
-
 public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
     private final Logger logger = LoggerFactory.getLogger(OAuth2PasswordAuthenticationProvider.class);
 
-    private AuthenticationManager userDetailsAuthenticationManager;
+    private final AuthenticationManager userDetailsAuthenticationManager;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
-    public OAuth2PasswordAuthenticationProvider(OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+    public OAuth2PasswordAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+        this.userDetailsAuthenticationManager = authenticationManager;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
     }
@@ -121,9 +120,5 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     @Override
     public boolean supports(Class<?> authentication) {
         return OAuth2PasswordAuthenticationToken.class.isAssignableFrom(authentication);
-    }
-
-    public void setUserDetailsAuthenticationManager(AuthenticationManager userDetailsAuthenticationManager) {
-        this.userDetailsAuthenticationManager = userDetailsAuthenticationManager;
     }
 }
