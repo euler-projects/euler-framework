@@ -15,13 +15,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration(proxyBeanMethods = false)
-public class EulerAuthorizationServerConfig {
-    private static final Log logger = LogFactory.getLog(EulerAuthorizationServerConfig.class);
+public class EulerAuthorizationServerConfiguration {
+    private static final Log logger = LogFactory.getLog(EulerAuthorizationServerConfiguration.class);
 
     private final AuthenticationConfiguration authenticationConfiguration;
+
+    /**
+     * Only for build authorizationServerSecurityFilterChain
+     */
     private final HttpSecurity http;
 
-    public EulerAuthorizationServerConfig(AuthenticationConfiguration authenticationConfiguration, HttpSecurity http) {
+    public EulerAuthorizationServerConfiguration(AuthenticationConfiguration authenticationConfiguration, HttpSecurity http) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.http = http;
     }
@@ -31,18 +35,19 @@ public class EulerAuthorizationServerConfig {
     public SecurityFilterChain authorizationServerSecurityFilterChain() throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
-
         http
                 .securityMatcher(endpointsMatcher)
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
                 .with(authorizationServerConfigurer, this::configAuthorizationServer);
+
         return http.build();
     }
 
     private void configAuthorizationServer(OAuth2AuthorizationServerConfigurer configurer) {
         configurer
-                .tokenEndpoint(this::configTokenEndpoint);
+                .tokenEndpoint(this::configTokenEndpoint)
+                .tokenIntrospectionEndpoint(this::configTokenIntrospectionEndpoint);
     }
 
 
@@ -50,6 +55,9 @@ public class EulerAuthorizationServerConfig {
         configurer
                 .authenticationProvider(this.getOAuth2PasswordAuthenticationProvider())
                 .accessTokenRequestConverter(this.getOAuth2PasswordAuthenticationConverter());
+    }
+
+    private void configTokenIntrospectionEndpoint(OAuth2TokenIntrospectionEndpointConfigurer configurer) {
     }
 
     private OAuth2PasswordAuthenticationProvider getOAuth2PasswordAuthenticationProvider() {
