@@ -50,33 +50,24 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
         }
 
-        OAuth2Authorization authorization = OAuth2Authorization.withRegisteredClient(registeredClient)
+        OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
-                .attribute(Principal.class.getName(), userPrincipal)
-                .build();
-
-        this.authorizationService.save(authorization);
+                .attribute(Principal.class.getName(), userPrincipal);
 
         DefaultOAuth2TokenContext.Builder tokenContextBuilder = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorization(authorization)
-                .authorizedScopes(authorization.getAuthorizedScopes())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .authorizationGrant(passwordAuthenticationToken);
-
-        OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.from(authorization);
 
         // ----- Access token -----
         OAuth2TokenContext tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
         OAuth2Token generatedAccessToken = this.tokenGenerator.generate(tokenContext);
-//        if (generatedAccessToken == null) {
-//            OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
-//                    "The token generator failed to generate the access token.", ERROR_URI);
-//            throw new OAuth2AuthenticationException(error);
-//        }
+        if (generatedAccessToken == null) {
+            throw new OAuth2AuthenticationException("The token generator failed to generate the access token.");
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace("Generated access token");
@@ -98,11 +89,9 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.REFRESH_TOKEN).build();
             OAuth2Token generatedRefreshToken = this.tokenGenerator.generate(tokenContext);
             if (generatedRefreshToken != null) {
-//                if (!(generatedRefreshToken instanceof OAuth2RefreshToken)) {
-//                    OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
-//                            "The token generator failed to generate a valid refresh token.", ERROR_URI);
-//                    throw new OAuth2AuthenticationException(error);
-//                }
+                if (!(generatedRefreshToken instanceof OAuth2RefreshToken)) {
+                    throw new OAuth2AuthenticationException("The token generator failed to generate a valid refresh token.");
+                }
 
                 if (this.logger.isTraceEnabled()) {
                     this.logger.trace("Generated refresh token");
@@ -112,6 +101,9 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 authorizationBuilder.refreshToken(refreshToken);
             }
         }
+
+        OAuth2Authorization authorization = authorizationBuilder.build();
+        this.authorizationService.save(authorization);
 
         return new OAuth2AccessTokenAuthenticationToken(
                 registeredClient, clientPrincipal, accessToken, refreshToken, new HashMap<>());
