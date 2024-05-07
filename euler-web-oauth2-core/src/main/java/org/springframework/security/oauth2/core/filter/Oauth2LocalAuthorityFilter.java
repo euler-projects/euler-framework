@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.oauth2.resource.filter;
+package org.springframework.security.oauth2.core.filter;
 
 import java.io.IOException;
 

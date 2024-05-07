@@ -1,7 +1,10 @@
 package org.eulerframework.security.core;
 
 import org.eulerframework.security.spring.principal.EulerUserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.Assert;
+
+import java.util.Collections;
 
 public abstract class AbstractEulerUserService implements EulerUserService {
 
@@ -24,6 +27,7 @@ public abstract class AbstractEulerUserService implements EulerUserService {
         eulerUserDetails.setAccountNonExpired(eulerUser.isAccountNonExpired());
         eulerUserDetails.setCredentialsNonExpired(eulerUser.isCredentialsNonExpired());
         eulerUserDetails.setEnabled(eulerUser.isEnabled());
+        eulerUserDetails.setAuthorities(Collections.singletonList(new SimpleGrantedAuthority("TEST")));
 
         return eulerUserDetails;
     }

@@ -29,7 +29,7 @@
         <module>euler-web-authentication-impl-jpa</module>
         <module>euler-web-oauth2-authorization-server</module>
         <module>euler-web-oauth2-server</module>
-        <module>euler-web-oauth2-util</module>
+        <module>euler-web-oauth2-core</module>
         <module>euler-web-eureka-support</module>
         <module>euler-web-security</module>
         <module>euler-web-supports</module>

@@ -6,7 +6,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.*;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
@@ -17,10 +22,15 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 
 import java.security.Principal;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
+    private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
+
     private final Logger logger = LoggerFactory.getLogger(OAuth2PasswordAuthenticationProvider.class);
+    private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
+            new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
     private final AuthenticationManager userDetailsAuthenticationManager;
     private final OAuth2AuthorizationService authorizationService;
@@ -44,6 +54,8 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
+        this.validateScope(passwordAuthenticationToken, registeredClient);
+
         Authentication userPrincipal = passwordAuthenticationToken.getUserPrincipal();
         userPrincipal = this.userDetailsAuthenticationManager.authenticate(userPrincipal);
         if (!userPrincipal.isAuthenticated()) {
@@ -55,18 +67,36 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .attribute(Principal.class.getName(), userPrincipal);
 
+        Set<String> userAuthorityScopes = Optional.ofNullable(userPrincipal.getAuthorities())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(authority -> ScopePrefixes.RESOURCE_OWNER_AUTHORITY + authority)
+                .collect(Collectors.toSet());
+
+
+        Set<String> requestScopes = passwordAuthenticationToken.getScopes();
+        Set<String> mergedScopes = new HashSet<>(requestScopes.size() + userAuthorityScopes.size());
+        mergedScopes.addAll(requestScopes);
+        mergedScopes.addAll(userAuthorityScopes);
+
+        Set<String> authorizedScopes = Collections.unmodifiableSet(mergedScopes);
+
         DefaultOAuth2TokenContext.Builder tokenContextBuilder = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizedScopes(authorizedScopes)
                 .authorizationGrant(passwordAuthenticationToken);
 
         // ----- Access token -----
         OAuth2TokenContext tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
         OAuth2Token generatedAccessToken = this.tokenGenerator.generate(tokenContext);
         if (generatedAccessToken == null) {
-            throw new OAuth2AuthenticationException("The token generator failed to generate the access token.");
+            OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                    "The token generator failed to generate the access token.", ERROR_URI);
+            throw new OAuth2AuthenticationException(error);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -90,7 +120,9 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             OAuth2Token generatedRefreshToken = this.tokenGenerator.generate(tokenContext);
             if (generatedRefreshToken != null) {
                 if (!(generatedRefreshToken instanceof OAuth2RefreshToken)) {
-                    throw new OAuth2AuthenticationException("The token generator failed to generate a valid refresh token.");
+                    OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                            "The token generator failed to generate a valid refresh token.", ERROR_URI);
+                    throw new OAuth2AuthenticationException(error);
                 }
 
                 if (this.logger.isTraceEnabled()) {
@@ -102,15 +134,61 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             }
         }
 
+        // ----- ID token -----
+        OidcIdToken idToken;
+        if (tokenContext.getAuthorizedScopes().contains(OidcScopes.OPENID)) {
+            // @formatter:off
+            tokenContext = tokenContextBuilder
+                    .tokenType(ID_TOKEN_TOKEN_TYPE)
+                    .authorization(authorizationBuilder.build())	// ID token customizer may need access to the access token and/or refresh token
+                    .build();
+            // @formatter:on
+            OAuth2Token generatedIdToken = this.tokenGenerator.generate(tokenContext);
+            if (!(generatedIdToken instanceof Jwt)) {
+                OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                        "The token generator failed to generate the ID token.", ERROR_URI);
+                throw new OAuth2AuthenticationException(error);
+            }
+
+            if (this.logger.isTraceEnabled()) {
+                this.logger.trace("Generated id token");
+            }
+
+            idToken = new OidcIdToken(generatedIdToken.getTokenValue(), generatedIdToken.getIssuedAt(),
+                    generatedIdToken.getExpiresAt(), ((Jwt) generatedIdToken).getClaims());
+            authorizationBuilder.token(idToken, (metadata) ->
+                    metadata.put(OAuth2Authorization.Token.CLAIMS_METADATA_NAME, idToken.getClaims()));
+        } else {
+            idToken = null;
+        }
+
         OAuth2Authorization authorization = authorizationBuilder.build();
         this.authorizationService.save(authorization);
 
+        Map<String, Object> additionalParameters = Collections.emptyMap();
+        if (idToken != null) {
+            additionalParameters = new HashMap<>();
+            additionalParameters.put(OidcParameterNames.ID_TOKEN, idToken.getTokenValue());
+        }
+
         return new OAuth2AccessTokenAuthenticationToken(
-                registeredClient, clientPrincipal, accessToken, refreshToken, new HashMap<>());
+                registeredClient, clientPrincipal, accessToken, refreshToken, additionalParameters);
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
         return OAuth2PasswordAuthenticationToken.class.isAssignableFrom(authentication);
+    }
+
+    private void validateScope(OAuth2PasswordAuthenticationToken passwordAuthenticationToken, RegisteredClient registeredClient) {
+
+        Set<String> requestedScopes = passwordAuthenticationToken.getScopes();
+        Set<String> allowedScopes = registeredClient.getScopes();
+        if (!requestedScopes.isEmpty() && !allowedScopes.containsAll(requestedScopes)) {
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Invalid request: requested scope is not allowed for registered client '{}'", registeredClient.getId());
+            }
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));
+        }
     }
 }

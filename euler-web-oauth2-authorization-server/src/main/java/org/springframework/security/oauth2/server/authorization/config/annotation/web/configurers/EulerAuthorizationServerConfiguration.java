@@ -7,12 +7,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationConverter;
+import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration(proxyBeanMethods = false)
 public class EulerAuthorizationServerConfiguration {
@@ -39,7 +42,8 @@ public class EulerAuthorizationServerConfiguration {
                 .securityMatcher(endpointsMatcher)
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-                .with(authorizationServerConfigurer, this::configAuthorizationServer);
+                .with(authorizationServerConfigurer, this::configAuthorizationServer)
+                .oauth2ResourceServer((resourceServer) -> resourceServer.opaqueToken(withDefaults()));;
 
         return http.build();
     }
@@ -47,7 +51,8 @@ public class EulerAuthorizationServerConfiguration {
     private void configAuthorizationServer(OAuth2AuthorizationServerConfigurer configurer) {
         configurer
                 .tokenEndpoint(this::configTokenEndpoint)
-                .tokenIntrospectionEndpoint(this::configTokenIntrospectionEndpoint);
+                .tokenIntrospectionEndpoint(this::configTokenIntrospectionEndpoint)
+                .oidc(Customizer.withDefaults());
     }
 
 

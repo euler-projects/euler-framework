@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.oauth2.resource.context;
+package org.springframework.security.oauth2.core.context;
 
 import org.springframework.security.core.GrantedAuthority;
 
