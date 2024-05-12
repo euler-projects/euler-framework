@@ -62,25 +62,26 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
         }
 
+        Set<String> requestScopes = passwordAuthenticationToken.getScopes();
+
+//        Set<String> userAuthorityScopes = Optional.ofNullable(userPrincipal.getAuthorities())
+//                .orElse(Collections.emptyList())
+//                .stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .map(authority -> ScopePrefixes.RESOURCE_OWNER_AUTHORITY + authority)
+//                .collect(Collectors.toSet());
+
+//        Set<String> mergedScopes = new HashSet<>(requestScopes.size() + userAuthorityScopes.size());
+//        mergedScopes.addAll(requestScopes);
+//        mergedScopes.addAll(userAuthorityScopes);
+
+        Set<String> authorizedScopes = Collections.unmodifiableSet(requestScopes);
+
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
-
-        Set<String> userAuthorityScopes = Optional.ofNullable(userPrincipal.getAuthorities())
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(authority -> ScopePrefixes.RESOURCE_OWNER_AUTHORITY + authority)
-                .collect(Collectors.toSet());
-
-
-        Set<String> requestScopes = passwordAuthenticationToken.getScopes();
-        Set<String> mergedScopes = new HashSet<>(requestScopes.size() + userAuthorityScopes.size());
-        mergedScopes.addAll(requestScopes);
-        mergedScopes.addAll(userAuthorityScopes);
-
-        Set<String> authorizedScopes = Collections.unmodifiableSet(mergedScopes);
 
         DefaultOAuth2TokenContext.Builder tokenContextBuilder = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)

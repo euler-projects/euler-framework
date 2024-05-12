@@ -1,74 +1,28 @@
 package org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2PrincipalSupportTokenIntrospectionAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
-@Configuration(proxyBeanMethods = false)
 public class EulerAuthorizationServerConfiguration {
-    private static final Log logger = LogFactory.getLog(EulerAuthorizationServerConfiguration.class);
-
-    private final AuthenticationConfiguration authenticationConfiguration;
-
-    /**
-     * Only for build authorizationServerSecurityFilterChain
-     */
-    private final HttpSecurity http;
-
-    public EulerAuthorizationServerConfiguration(AuthenticationConfiguration authenticationConfiguration, HttpSecurity http) {
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.http = http;
+    public static void configPasswordAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).tokenEndpoint(configurer -> configurer
+                .authenticationProvider(getOAuth2PasswordAuthenticationProvider(http, authenticationConfiguration))
+                .accessTokenRequestConverter(getOAuth2PasswordAuthenticationConverter()));
     }
 
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain authorizationServerSecurityFilterChain() throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
-        RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
-        http
-                .securityMatcher(endpointsMatcher)
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-                .with(authorizationServerConfigurer, this::configAuthorizationServer)
-                .oauth2ResourceServer((resourceServer) -> resourceServer.opaqueToken(withDefaults()));;
-
-        return http.build();
+    public static void configPrincipalSupportTokenIntrospectionAuthentication(HttpSecurity http) {
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).tokenIntrospectionEndpoint(configurer -> configurer
+                .authenticationProvider(getOAuth2PasswordAuthenticationProvider(http)));
     }
 
-    private void configAuthorizationServer(OAuth2AuthorizationServerConfigurer configurer) {
-        configurer
-                .tokenEndpoint(this::configTokenEndpoint)
-                .tokenIntrospectionEndpoint(this::configTokenIntrospectionEndpoint)
-                .oidc(Customizer.withDefaults());
-    }
-
-
-    private void configTokenEndpoint(OAuth2TokenEndpointConfigurer configurer) {
-        configurer
-                .authenticationProvider(this.getOAuth2PasswordAuthenticationProvider())
-                .accessTokenRequestConverter(this.getOAuth2PasswordAuthenticationConverter());
-    }
-
-    private void configTokenIntrospectionEndpoint(OAuth2TokenIntrospectionEndpointConfigurer configurer) {
-    }
-
-    private OAuth2PasswordAuthenticationProvider getOAuth2PasswordAuthenticationProvider() {
+    private static OAuth2PasswordAuthenticationProvider getOAuth2PasswordAuthenticationProvider(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
         try {
             return new OAuth2PasswordAuthenticationProvider(
-                    this.authenticationConfiguration.getAuthenticationManager(),
+                    authenticationConfiguration.getAuthenticationManager(),
                     OAuth2ConfigurerUtils.getAuthorizationService(http),
                     OAuth2ConfigurerUtils.getTokenGenerator(http)
             );
@@ -77,8 +31,13 @@ public class EulerAuthorizationServerConfiguration {
         }
     }
 
+    private static OAuth2PrincipalSupportTokenIntrospectionAuthenticationProvider getOAuth2PasswordAuthenticationProvider(HttpSecurity http) {
+        return new OAuth2PrincipalSupportTokenIntrospectionAuthenticationProvider(
+                OAuth2ConfigurerUtils.getRegisteredClientRepository(http),
+                OAuth2ConfigurerUtils.getAuthorizationService(http));
+    }
 
-    private OAuth2PasswordAuthenticationConverter getOAuth2PasswordAuthenticationConverter() {
+    private static OAuth2PasswordAuthenticationConverter getOAuth2PasswordAuthenticationConverter() {
         return new OAuth2PasswordAuthenticationConverter();
     }
 }
