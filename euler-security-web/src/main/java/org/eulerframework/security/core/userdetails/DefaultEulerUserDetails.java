@@ -1,14 +1,14 @@
-package org.eulerframework.security.spring.principal;
+package org.eulerframework.security.core.userdetails;
 
-import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-public class EulerUserDetails implements UserDetails, CredentialsContainer {
+public class DefaultEulerUserDetails implements EulerUserDetails {
     private String userId;
     private String username;
+    private String email;
+    private String phone;
     private String password;
     private Collection<SimpleGrantedAuthority> authorities;
     private boolean accountNonExpired;
@@ -31,6 +31,24 @@ public class EulerUserDetails implements UserDetails, CredentialsContainer {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override

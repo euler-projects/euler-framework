@@ -1,7 +1,8 @@
 package org.eulerframework.security.core;
 
-public interface EulerAuthority {
-    String getAuthority();
+import org.springframework.security.core.GrantedAuthority;
+
+public interface EulerAuthority extends GrantedAuthority {
     String getName();
     String getDescription();
 }
