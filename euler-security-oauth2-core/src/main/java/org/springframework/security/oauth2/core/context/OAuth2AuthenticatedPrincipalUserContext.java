@@ -1,6 +1,6 @@
 package org.springframework.security.oauth2.core.context;
 
-import org.eulerframework.security.core.PrincipalUserContext;
+import org.eulerframework.security.core.context.PrincipalUserContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;

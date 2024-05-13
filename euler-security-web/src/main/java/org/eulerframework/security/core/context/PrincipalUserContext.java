@@ -1,4 +1,4 @@
-package org.eulerframework.security.core;
+package org.eulerframework.security.core.context;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

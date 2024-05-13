@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class EulerUserDetailsService implements UserDetailsService {
+public class EulerUserDetailsService implements UserDetailsService {
     private final Logger logger = LoggerFactory.getLogger(EulerUserDetailsService.class);
 
     private final List<EulerUserDetailsProvider> eulerUserDetailsProviders = new ArrayList<>();
@@ -22,7 +22,7 @@ public final class EulerUserDetailsService implements UserDetailsService {
     }
 
     public EulerUserDetailsService(List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
-        Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsPreulerUserDetailsProvidersovider must not be empty");
+        Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }
 
