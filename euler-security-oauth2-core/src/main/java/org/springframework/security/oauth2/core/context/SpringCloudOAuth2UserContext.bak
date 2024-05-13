@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 适用于通过euler-web-oauth2-server构建的验证服务器的/oauth/user_info获取用户信息的Spring Cloud项目
+ * 适用于通过euler-security-oauth2-server构建的验证服务器的/oauth/user_info获取用户信息的Spring Cloud项目
  *
  * @author cFrost
  */

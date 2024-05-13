@@ -7,7 +7,7 @@
         <version>${revision}</version>
         <relativePath>../eulerframework-parent</relativePath>
     </parent>
-    <artifactId>euler-web-oauth2-core</artifactId>
+    <artifactId>euler-security-oauth2-core</artifactId>
 
     <dependencies>
         <dependency>
@@ -35,7 +35,7 @@
 
         <dependency>
             <groupId>org.eulerframework</groupId>
-            <artifactId>euler-web-security</artifactId>
+            <artifactId>euler-security-web</artifactId>
         </dependency>
     </dependencies>
 </project>

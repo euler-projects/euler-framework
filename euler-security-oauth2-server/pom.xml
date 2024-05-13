@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>euler-web-oauth2-server</artifactId>
+    <artifactId>euler-security-oauth2-server</artifactId>
 
     <name>Euler OAuth2.0 Authorization Server</name>
     <url>https://eulerproject.io/euler-framework</url>

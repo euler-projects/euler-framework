@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>euler-web-oauth2-server</artifactId>
+            <artifactId>euler-security-oauth2-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

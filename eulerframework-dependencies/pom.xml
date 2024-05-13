@@ -30,22 +30,22 @@
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-security</artifactId>
+                <artifactId>euler-security-web</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-oauth2-core</artifactId>
+                <artifactId>euler-security-oauth2-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-oauth2-authorization-server</artifactId>
+                <artifactId>euler-security-oauth2-authorization-server</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-oauth2-resource-server</artifactId>
+                <artifactId>euler-security-oauth2-resource-server</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

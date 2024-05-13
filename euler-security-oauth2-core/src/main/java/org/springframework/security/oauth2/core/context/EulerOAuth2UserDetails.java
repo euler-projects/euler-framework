@@ -20,7 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 
 /**
- * euler-web-oauth2-server生成的用户信息对象
+ * euler-security-oauth2-server生成的用户信息对象
  * 
  * @author cFrost
  *
