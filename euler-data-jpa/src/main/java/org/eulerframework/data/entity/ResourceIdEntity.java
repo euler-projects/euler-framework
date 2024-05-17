@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.core.base.response;
+package org.eulerframework.data.entity;
 
-import java.io.Serializable;
+import jakarta.persistence.*;
 
-public interface BaseResponse extends Serializable {
+@MappedSuperclass
+public abstract class ResourceIdEntity extends ResourceEntity {
 
+    @Id
+    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
