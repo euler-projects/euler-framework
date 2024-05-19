@@ -22,4 +22,9 @@ public class BearerTokenAuthenticationUserContext implements UserContext {
         String sub = authenticatedPrincipal.getAttribute(OAuth2TokenIntrospectionClaimNames.SUB);
         return StringUtils.hasText(sub) ? sub : authenticatedPrincipal.getName();
     }
+
+    @Override
+    public String getTenantId() {
+        return "1";
+    }
 }

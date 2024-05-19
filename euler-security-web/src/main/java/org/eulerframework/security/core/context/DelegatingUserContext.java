@@ -21,4 +21,15 @@ public class DelegatingUserContext implements UserContext {
         }
         return username;
     }
+
+    @Override
+    public String getTenantId() {
+        String tenantId = null;
+        for (UserContext userContext : this.userContexts) {
+            if ((tenantId = userContext.getTenantId()) != null) {
+                return tenantId;
+            }
+        }
+        return tenantId;
+    }
 }

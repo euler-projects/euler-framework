@@ -19,10 +19,10 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Optional;
 
 public class ServletUtils {
     
@@ -35,11 +35,11 @@ public class ServletUtils {
     }
     
     public static HttpServletRequest getRequest() {
-        return getServletRequestAttributes().getRequest();
+        return Optional.ofNullable(getServletRequestAttributes()).map(ServletRequestAttributes::getRequest).orElse(null);
     }
     
     public static HttpServletResponse getResponse() {
-        return getServletRequestAttributes().getResponse();
+        return Optional.ofNullable(getServletRequestAttributes()).map(ServletRequestAttributes::getResponse).orElse(null);
     }
     
     public static String getWebDomain(){

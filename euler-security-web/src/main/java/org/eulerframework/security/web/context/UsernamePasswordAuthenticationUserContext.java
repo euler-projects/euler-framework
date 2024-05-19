@@ -16,4 +16,9 @@ public class UsernamePasswordAuthenticationUserContext implements UserContext {
 
         return null;
     }
+
+    @Override
+    public String getTenantId() {
+        return "1";
+    }
 }

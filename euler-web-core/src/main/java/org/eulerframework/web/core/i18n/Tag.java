@@ -27,7 +27,11 @@ public class Tag {
         if(msgKey == null)
             return null;
         
-        HttpServletRequest request = ServletUtils.getRequest();  
+        HttpServletRequest request = ServletUtils.getRequest();
+
+        if(request == null) {
+            return msgKey;
+        }
 
         RequestContext requestContext = new RequestContext(request);
         String message = requestContext.getMessage(msgKey);
