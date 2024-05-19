@@ -6,7 +6,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -23,7 +22,6 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
@@ -55,27 +53,13 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         }
 
         this.validateScope(passwordAuthenticationToken, registeredClient);
+        Set<String> authorizedScopes = Collections.unmodifiableSet(passwordAuthenticationToken.getScopes());
 
         Authentication userPrincipal = passwordAuthenticationToken.getUserPrincipal();
         userPrincipal = this.userDetailsAuthenticationManager.authenticate(userPrincipal);
         if (!userPrincipal.isAuthenticated()) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
         }
-
-        Set<String> requestScopes = passwordAuthenticationToken.getScopes();
-
-//        Set<String> userAuthorityScopes = Optional.ofNullable(userPrincipal.getAuthorities())
-//                .orElse(Collections.emptyList())
-//                .stream()
-//                .map(GrantedAuthority::getAuthority)
-//                .map(authority -> ScopePrefixes.RESOURCE_OWNER_AUTHORITY + authority)
-//                .collect(Collectors.toSet());
-
-//        Set<String> mergedScopes = new HashSet<>(requestScopes.size() + userAuthorityScopes.size());
-//        mergedScopes.addAll(requestScopes);
-//        mergedScopes.addAll(userAuthorityScopes);
-
-        Set<String> authorizedScopes = Collections.unmodifiableSet(requestScopes);
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
