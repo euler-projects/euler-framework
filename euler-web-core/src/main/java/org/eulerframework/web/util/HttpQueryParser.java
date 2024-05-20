@@ -33,26 +33,31 @@ public class HttpQueryParser {
         return this.queryMap.get(parameter);
     }
 
-    public Long getLongParameterValue(String parameter) {
+    public String getParameterValue(String parameter) {
         String[] values = this.getParameterValues(parameter);
         if (values == null || values.length == 0) {
             return null;
         }
+        return values[0];
+    }
 
-        return Long.parseLong(values[0]);
+    public Long getLongParameterValue(String parameter) {
+        String value = this.getParameterValue(parameter);
+        return value == null ? null : Long.parseLong(value);
     }
 
     public Integer getIntegerParameterValue(String parameter) {
-        String[] values = this.getParameterValues(parameter);
-        if (values == null || values.length == 0) {
-            return null;
-        }
-
-        return Integer.parseInt(values[0]);
+        String value = this.getParameterValue(parameter);
+        return value == null ? null : Integer.parseInt(value);
     }
 
     public Date getDateParameterValue(String parameter) {
         Long longParameterValue = this.getLongParameterValue(parameter);
         return longParameterValue == null ? null : new Date(longParameterValue);
+    }
+
+    public <T extends Enum<T>> T getEnumParameterValue(String parameter, Class<T> enumType) {
+        String value = this.getParameterValue(parameter);
+        return value == null ? null : Enum.valueOf(enumType, value);
     }
 }
