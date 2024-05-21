@@ -1,13 +1,17 @@
 package org.springframework.security.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.oauth2.server.authorization.jackson2.EulerOAuth2ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.jackson2.EulerOAuth2AuthorizationServerJackson2Module;
+
+import java.util.List;
+import java.util.function.Function;
 
 public class EulerJdbcOAuth2AuthorizationService extends JdbcOAuth2AuthorizationService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -66,11 +70,13 @@ public class EulerJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorization
     private void mixIn() {
         RowMapper<OAuth2Authorization> authorizationRowMapper = this.getAuthorizationRowMapper();
         if (authorizationRowMapper instanceof OAuth2AuthorizationRowMapper) {
-            ((OAuth2AuthorizationRowMapper) authorizationRowMapper).getObjectMapper().registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
+            ((OAuth2AuthorizationRowMapper) authorizationRowMapper).setObjectMapper(EulerOAuth2ObjectMapper.getInstance());
+                    //.getObjectMapper().registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
         }
-//        Function<OAuth2Authorization, List<SqlParameterValue>> authorizationParametersMapper = this.getAuthorizationParametersMapper();
-//        if (authorizationParametersMapper instanceof OAuth2AuthorizationParametersMapper) {
-//            ((OAuth2AuthorizationParametersMapper) authorizationParametersMapper).getObjectMapper().registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
-//        }
+        Function<OAuth2Authorization, List<SqlParameterValue>> authorizationParametersMapper = this.getAuthorizationParametersMapper();
+        if (authorizationParametersMapper instanceof OAuth2AuthorizationParametersMapper) {
+            ((OAuth2AuthorizationParametersMapper) authorizationParametersMapper).setObjectMapper(EulerOAuth2ObjectMapper.getInstance());
+                    //.getObjectMapper().registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
+        }
     }
 }

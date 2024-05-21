@@ -1,41 +1,27 @@
 package org.eulerframework.security.oauth2.server.authorization;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.jackson2.EulerOAuth2AuthorizationServerJackson2Module;
-import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
-import java.util.List;
 
 public class EulerRedisOAuth2AuthorizationConsentService implements OAuth2AuthorizationConsentService {
     private final static String KEY_AUTHORITIES = "consent:authorities";
 
     private String keyPrefix = "oauth2:auth:";
     private final StringRedisTemplate stringRedisTemplate;
-    private final ObjectMapper objectMapper;
     private final RegisteredClientRepository registeredClientRepository;
     private final Duration expireTime;
 
     public EulerRedisOAuth2AuthorizationConsentService(StringRedisTemplate stringRedisTemplate, RegisteredClientRepository registeredClientRepository, Duration expireTime) {
         this.stringRedisTemplate = stringRedisTemplate;
-        ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
-        List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModules(securityModules);
-        this.objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-        this.objectMapper.registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
         this.registeredClientRepository = registeredClientRepository;
         this.expireTime = expireTime;
     }

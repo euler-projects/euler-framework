@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.server.authorization.jackson2;
+package org.eulerframework.security.oauth2.server.authorization.jackson2;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
