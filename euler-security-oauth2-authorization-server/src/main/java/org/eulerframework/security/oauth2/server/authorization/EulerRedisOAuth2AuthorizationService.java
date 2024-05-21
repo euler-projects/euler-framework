@@ -78,7 +78,7 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
 
     private String keyPrefix = "oauth2:auth:";
     private final StringRedisTemplate stringRedisTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final RegisteredClientRepository registeredClientRepository;
     private final Duration expireTime;
 
@@ -86,6 +86,7 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
         this.stringRedisTemplate = stringRedisTemplate;
         ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
         List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+        this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModules(securityModules);
         this.objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
         this.objectMapper.registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
@@ -94,26 +95,34 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
     }
 
     public void setKeyPrefix(String keyPrefix) {
+        Assert.hasText(keyPrefix, "keyPrefix must not be empty");
+        if (!keyPrefix.endsWith(":")) {
+            keyPrefix += ":";
+        }
         this.keyPrefix = keyPrefix;
     }
 
     @Override
     public void save(OAuth2Authorization authorization) {
         Assert.notNull(authorization, "authorization cannot be null");
-        Assert.notNull(authorization.getId(), "authorization id cannot be null");
+        OAuth2Authorization existsAuthorization = this.findById(authorization.getId());
+        if(existsAuthorization != null) {
+            this.deleteAuthorization(existsAuthorization);
+        }
         this.saveAuthorization(authorization);
     }
 
     @Override
     public void remove(OAuth2Authorization authorization) {
         Assert.notNull(authorization, "authorization cannot be null");
-        Assert.notNull(authorization.getId(), "authorization id cannot be null");
-        List<String> keys = this.getKeys(authorization);
-        this.stringRedisTemplate.delete(keys);
+        OAuth2Authorization existsAuthorization = this.findById(authorization.getId());
+        // 这里优先使用已保存的Authorization数据确保可以完全删除Token索引数据
+        this.deleteAuthorization(existsAuthorization == null ? authorization : existsAuthorization);
     }
 
     @Override
     public OAuth2Authorization findById(String id) {
+        Assert.hasText(id, "id must not be empty");
         return this.getAuthorization(id);
     }
 
@@ -155,11 +164,15 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
         return null;
     }
 
+    private void deleteAuthorization(OAuth2Authorization authorization) {
+        List<String> keys = this.getKeys(authorization);
+        this.stringRedisTemplate.delete(keys);
+    }
+
     private String hash(String token) {
         if (token == null) {
             return null;
         }
-
         if (token.length() <= 64 && !org.apache.commons.lang3.StringUtils.containsWhitespace(token)) {
             return token;
         }
@@ -245,6 +258,9 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
 
     public OAuth2Authorization getAuthorization(String id) {
         String registeredClientId = this.getAuthorizationStringProperty(KEY_REGISTERED_CLIENT_ID, id);
+        if(registeredClientId == null) {
+            return null;
+        }
         RegisteredClient registeredClient = this.registeredClientRepository.findById(registeredClientId);
         if (registeredClient == null) {
             throw new DataRetrievalFailureException(
