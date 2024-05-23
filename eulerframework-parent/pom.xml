@@ -31,6 +31,7 @@
 
         <commons-codec.version>1.10</commons-codec.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-io.version>2.16.1</commons-io.version>
         <guava.version>33.1.0-jre</guava.version>
 
         <jakarta-servlet-api.version>6.0.0</jakarta-servlet-api.version>
@@ -83,6 +84,12 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
