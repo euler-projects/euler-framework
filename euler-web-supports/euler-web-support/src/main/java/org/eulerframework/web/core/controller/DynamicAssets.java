@@ -23,6 +23,7 @@ import java.util.Set;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
+import org.eulerframework.web.util.ServletUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -81,6 +82,6 @@ public class DynamicAssets extends JspSupportWebController {
             }
         }
         
-        this.writeString("var systemAttributes = " + om.writeValueAsString(m));
+        ServletUtils.writeString(this.getResponse(),"var systemAttributes = " + om.writeValueAsString(m));
     }
 }

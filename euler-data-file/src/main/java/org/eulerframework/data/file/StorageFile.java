@@ -1,6 +1,10 @@
-package org.eulerframework.web.module.file;
+package org.eulerframework.data.file;
 
 import org.eulerframework.core.model.AbstractResourceModel;
+import org.springframework.util.CollectionUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class StorageFile extends AbstractResourceModel {
     private String fileId;
@@ -8,7 +12,7 @@ public class StorageFile extends AbstractResourceModel {
     private String extension;
     private String storageType;
     private String storageIndex;
-    private Long fileSize;
+    private final Map<String, Object> attributes = new HashMap<>();
 
     public String getFileId() {
         return fileId;
@@ -50,11 +54,22 @@ public class StorageFile extends AbstractResourceModel {
         this.storageIndex = storageIndex;
     }
 
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
-    public Long getFileSize() {
-        return fileSize;
+    public void setAttributes(Map<String, Object> attributes) {
+        if (CollectionUtils.isEmpty(attributes)) {
+            return;
+        }
+        this.attributes.putAll(attributes);
+    }
+
+    public Object getAttribute(String key) {
+        return this.attributes.get(key);
+    }
+
+    public void addAttribute(String key, Object value) {
+        this.attributes.put(key, value);
     }
 }
