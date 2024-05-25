@@ -4,17 +4,55 @@ import org.apache.commons.io.FilenameUtils;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public abstract class AbstractFileStorage implements FileStorage {
 
+    private static final String INSERT_FILE_INDEX_DATA = "insert into t_file_storage_index (" +
+            "id, " +
+            "filename,  " +
+            "extension,  " +
+            "storage_type,  " +
+            "storage_index,  " +
+            "tenant_id,  " +
+            "created_by,  " +
+            "created_date,  " +
+            "modified_by,  " +
+            "modified_date) " +
+            "VALUES " +
+            "(?, ?, ?, ?, ?, '1', '1', now(), '1', now())";
+    private static final String SELECT_FILE_INDEX_DATA = "select " +
+            "id, " +
+            "filename,  " +
+            "extension,  " +
+            "storage_type,  " +
+            "storage_index,  " +
+            "tenant_id,  " +
+            "created_by,  " +
+            "created_date,  " +
+            "modified_by,  " +
+            "modified_date " +
+            "from t_file_storage_index " +
+            "where id = ?";
+
     private final JdbcOperations jdbcOperations;
 
+    private final FileIndexDataSaver fileIndexDataSaver;
+    private final BiFunction<JdbcOperations, String, FileIndex> fileIndexDataLoader;
+
     public AbstractFileStorage(JdbcOperations jdbcOperations) {
+        this(jdbcOperations, defaultFileIndexDataSaver(), defaultFileIndexDataLoader());
+    }
+
+    public AbstractFileStorage(JdbcOperations jdbcOperations, FileIndexDataSaver fileIndexDataSaver, BiFunction<JdbcOperations, String, FileIndex> fileIndexDataLoader) {
         this.jdbcOperations = jdbcOperations;
+        this.fileIndexDataSaver = fileIndexDataSaver;
+        this.fileIndexDataLoader = fileIndexDataLoader;
     }
 
     protected JdbcOperations getJdbcOperations() {
@@ -25,7 +63,7 @@ public abstract class AbstractFileStorage implements FileStorage {
 
     protected abstract String saveFileData(InputStream in, String filename) throws IOException;
 
-    protected abstract void getAttributes(StorageFile storageFile);
+    protected abstract void getAttributes(FileIndex storageFile);
 
     protected abstract void writeFileData(String fileIndex, File dest) throws IOException;
 
@@ -33,80 +71,106 @@ public abstract class AbstractFileStorage implements FileStorage {
 
     @Override
     @Transactional
-    public StorageFile save(File file, String filename) throws IOException {
+    public FileIndex save(File file, String filename) throws IOException {
         String fileId = UUID.randomUUID().toString();
-        this.insertFileStorageIndex(fileId, filename, this.saveFileData(file, filename));
-        return this.getStorageFile(fileId);
+        this.fileIndexDataSaver.save(
+                this.jdbcOperations,
+                fileId,
+                filename,
+                FilenameUtils.getExtension(filename),
+                this.getType(),
+                this.saveFileData(file, filename));
+        return this.getStorageIndex(fileId);
     }
 
     @Override
     @Transactional
-    public StorageFile save(InputStream in, String filename) throws IOException {
+    public FileIndex save(InputStream in, String filename) throws IOException {
         String fileId = UUID.randomUUID().toString();
-        this.insertFileStorageIndex(fileId, filename, this.saveFileData(in, filename));
-        return this.getStorageFile(fileId);
+        this.fileIndexDataSaver.save(
+                this.jdbcOperations,
+                fileId,
+                filename,
+                FilenameUtils.getExtension(filename),
+                this.getType(),
+                this.saveFileData(in, filename));
+        return this.getStorageIndex(fileId);
     }
 
     @Override
-    public StorageFile getStorageFile(String fileId) {
-        StorageFile storageFile = this.selectFileStorageIndex(fileId);
+    public FileIndex getStorageIndex(String fileId) {
+        String baseName = FilenameUtils.getBaseName(fileId);
+        String exceptedExtension = FilenameUtils.getExtension(fileId);
+
+        FileIndex storageFile = this.fileIndexDataLoader.apply(this.jdbcOperations, baseName);
+
+        if (storageFile == null) {
+            return null;
+        }
+
+        if (StringUtils.hasText(exceptedExtension) && !exceptedExtension.equalsIgnoreCase(storageFile.getExtension())) {
+            return null;
+        }
+
         this.getAttributes(storageFile);
         return storageFile;
     }
 
     @Override
-    public void get(String fileId, File dest, Consumer<StorageFile> storageFileConsumer) throws IOException {
-        StorageFile storageFile = this.getStorageFile(fileId);
+    public void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException {
+        FileIndex storageFile = this.getStorageIndex(fileId);
         if (storageFile == null) {
-            throw new ResourceNotFoundException("Storage file not found: " + fileId);
+            throw new ResourceNotFoundException("Storage file '" + fileId + "' not exists");
         }
         storageFileConsumer.accept(storageFile);
         this.writeFileData(storageFile.getStorageIndex(), dest);
     }
 
     @Override
-    public void get(String fileId, OutputStream out, Consumer<StorageFile> storageFileConsumer) throws IOException {
-        StorageFile storageFile = this.getStorageFile(fileId);
-        if (storageFile == null) {
-            throw new ResourceNotFoundException("Storage file not found: " + fileId);
+    public void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException {
+        FileIndex fileIndex = this.getStorageIndex(fileId);
+        if (fileIndex == null) {
+            throw new ResourceNotFoundException("Storage file '" + fileId + "' not exists");
         }
-        storageFileConsumer.accept(storageFile);
-        this.writeFileData(storageFile.getStorageIndex(), out);
+        storageFileConsumer.accept(fileIndex);
+        this.writeFileData(fileIndex.getStorageIndex(), out);
     }
 
-    private static final String INSERT = "insert into t_file_storage_index (id, filename,  extension,  storage_type,  storage_index,  tenant_id,  created_by,  created_date,  modified_by,  modified_date) VALUES (?, ?, ?, ?, ?, '1', '1', now(), '1', now())";
-    private static final String SELECT = "select id, filename,  extension,  storage_type,  storage_index,  tenant_id,  created_by,  created_date,  modified_by,  modified_date from t_file_storage_index where id = ?";
-
-    private void insertFileStorageIndex(String fileId, String filename, String fileIndex) {
-        this.jdbcOperations.update(INSERT, ps -> {
-            int index = 0;
-            ps.setString(++index, fileId);
-            ps.setString(++index, filename);
-            ps.setString(++index, FilenameUtils.getExtension(filename));
-            ps.setString(++index, this.getType());
-            ps.setString(++index, fileIndex);
-        });
+    private static FileIndexDataSaver defaultFileIndexDataSaver() {
+        return (jdbcOperations, fileId, filename, extension, storageType, storageIndex) ->
+                jdbcOperations.update(INSERT_FILE_INDEX_DATA, ps -> {
+                    int index = 0;
+                    ps.setString(++index, fileId);
+                    ps.setString(++index, filename);
+                    ps.setString(++index, extension);
+                    ps.setString(++index, storageType);
+                    ps.setString(++index, storageIndex);
+                });
     }
 
-    protected StorageFile selectFileStorageIndex(String fileId) {
-        return this.jdbcOperations.query(SELECT,
+    private static BiFunction<JdbcOperations, String, FileIndex> defaultFileIndexDataLoader() {
+        return (jdbcOperations, fileId) -> jdbcOperations.query(SELECT_FILE_INDEX_DATA,
                 ps -> ps.setString(1, fileId),
                 rs -> {
                     if (!rs.next()) {
                         return null;
                     }
-                    StorageFile storageFile = new StorageFile();
-                    storageFile.setFileId(rs.getString("id"));
-                    storageFile.setFilename(rs.getString("filename"));
-                    storageFile.setExtension(rs.getString("extension"));
-                    storageFile.setStorageType(rs.getString("storage_type"));
-                    storageFile.setStorageIndex(rs.getString("storage_index"));
-                    storageFile.setTenantId(rs.getString("tenant_id"));
-                    storageFile.setCreatedBy(rs.getString("created_by"));
-                    storageFile.setCreatedDate(rs.getDate("created_date"));
-                    storageFile.setLastModifiedBy(rs.getString("modified_by"));
-                    storageFile.setLastModifiedDate(rs.getDate("modified_date"));
-                    return storageFile;
+                    FileIndex fileIndex = new FileIndex();
+                    fileIndex.setFileId(rs.getString("id"));
+                    fileIndex.setFilename(rs.getString("filename"));
+                    fileIndex.setExtension(rs.getString("extension"));
+                    fileIndex.setStorageType(rs.getString("storage_type"));
+                    fileIndex.setStorageIndex(rs.getString("storage_index"));
+                    fileIndex.setTenantId(rs.getString("tenant_id"));
+                    fileIndex.setCreatedBy(rs.getString("created_by"));
+                    fileIndex.setCreatedDate(rs.getDate("created_date"));
+                    fileIndex.setLastModifiedBy(rs.getString("modified_by"));
+                    fileIndex.setLastModifiedDate(rs.getDate("modified_date"));
+                    return fileIndex;
                 });
+    }
+
+    public interface FileIndexDataSaver {
+        void save(JdbcOperations jdbcOperations, String fileId, String filename, String extension, String storageType, String storageIndex);
     }
 }

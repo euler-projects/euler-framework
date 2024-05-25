@@ -6,7 +6,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StorageFile extends AbstractResourceModel {
+public class FileIndex extends AbstractResourceModel {
     private String fileId;
     private String filename;
     private String extension;
