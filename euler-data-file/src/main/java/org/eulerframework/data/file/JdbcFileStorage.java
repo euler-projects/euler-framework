@@ -17,9 +17,11 @@ package org.eulerframework.data.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.unit.DataSize;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -34,6 +36,7 @@ public class JdbcFileStorage extends AbstractFileStorage {
     private static final String SELECT_SIZE = "select size from t_file_storage_jdbc where id = ?";
     private static final String SELECT_DATA = "select data from t_file_storage_jdbc where id = ?";
 
+    private DataSize maxFileSize = DataSize.ofKilobytes(512);
     private final BiFunction<JdbcOperations, byte[], Long> fileDataSaver;
     private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
     private final BiFunction<JdbcOperations, String, byte[]> fileDataLoader;
@@ -58,6 +61,10 @@ public class JdbcFileStorage extends AbstractFileStorage {
         this.fileDataLoader = fileDataLoader;
     }
 
+    public void setMaxFileSize(DataSize maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
+
     @Override
     public boolean support(String type) {
         return TYPE.equals(type);
@@ -77,7 +84,7 @@ public class JdbcFileStorage extends AbstractFileStorage {
 
     @Override
     protected String saveFileData(InputStream in, String filename) throws IOException {
-        byte[] data = IOUtils.toByteArray(in);
+        byte[] data = this.toByteArray(in);
         long id = this.fileDataSaver.apply(this.getJdbcOperations(), data);
         return String.valueOf(id);
     }
@@ -142,5 +149,16 @@ public class JdbcFileStorage extends AbstractFileStorage {
                     }
                     return rs.getBytes("data");
                 });
+    }
+
+    private byte[] toByteArray(InputStream in) throws IOException {
+        long maxBytes = this.maxFileSize.toBytes();
+        try (UnsynchronizedByteArrayOutputStream out = UnsynchronizedByteArrayOutputStream.builder().get()) {
+            long totalRead = IOUtils.copyLarge(in, out, 0, maxBytes + 1, IOUtils.byteArray(IOUtils.DEFAULT_BUFFER_SIZE));
+            if (totalRead > maxBytes) {
+                throw new FileStorageException("File is too large to be saved in jdbc storage, maximum is " + maxBytes + " Bytes.");
+            }
+            return out.toByteArray();
+        }
     }
 }
