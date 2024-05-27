@@ -78,7 +78,7 @@ public abstract class AbstractFileStorage implements FileStorage {
 
     protected abstract String saveFileData(InputStream in, String filename) throws IOException;
 
-    protected abstract void getAttributes(FileIndex storageFile);
+    protected abstract void applyAttributes(FileIndex storageFile);
 
     protected abstract void writeFileData(String fileIndex, File dest) throws IOException;
 
@@ -127,7 +127,7 @@ public abstract class AbstractFileStorage implements FileStorage {
             return null;
         }
 
-        this.getAttributes(storageFile);
+        this.applyAttributes(storageFile);
         return storageFile;
     }
 

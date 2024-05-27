@@ -21,6 +21,7 @@ create table t_file_storage_index
 create table t_file_storage_jdbc
 (
     id   bigint unsigned not null auto_increment comment '上传文件id',
+    size int             not null comment '文件大小',
     data longblob        not null comment '文件数据',
     primary key (id)
 )

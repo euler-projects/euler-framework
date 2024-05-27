@@ -90,7 +90,7 @@ public class JdbcFileStorage extends AbstractFileStorage {
     }
 
     @Override
-    protected void getAttributes(FileIndex storageFile) {
+    protected void applyAttributes(FileIndex storageFile) {
         Integer fileSize = this.fileSizeLoader.apply(this.getJdbcOperations(), storageFile.getStorageIndex());
         storageFile.addAttribute(ATTR_FILE_SIZE, fileSize);
     }
