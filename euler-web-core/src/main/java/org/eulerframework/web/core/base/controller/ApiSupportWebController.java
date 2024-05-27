@@ -15,6 +15,7 @@
  */
 package org.eulerframework.web.core.base.controller;
 
+import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -115,6 +116,18 @@ public abstract class ApiSupportWebController extends AbstractWebController {
         }
         
         return new ErrorResponse(new WebException(e.getMessage(), SystemWebError.ILLEGAL_PARAMETER, e));
+    }
+
+
+    /**
+     * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息
+     *
+     * @return 包含错误信息的Ajax响应体
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public Object webException(ResourceNotFoundException e) {
+        return new ErrorResponse(e);
     }
 
     /**

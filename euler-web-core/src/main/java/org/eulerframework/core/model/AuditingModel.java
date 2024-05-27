@@ -15,15 +15,12 @@
  */
 package org.eulerframework.core.model;
 
-public class AbstractResourceModel extends AbstractAuditingModel implements ResourceModel {
-    private String tenantId;
+import java.io.Serializable;
+import java.util.Date;
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
+public interface AuditingModel extends Serializable {
+    String getCreatedBy();
+    String getLastModifiedBy();
+    Date getCreatedDate();
+    Date getLastModifiedDate();
 }

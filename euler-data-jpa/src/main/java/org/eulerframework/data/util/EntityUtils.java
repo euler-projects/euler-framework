@@ -16,12 +16,13 @@
 package org.eulerframework.data.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.core.model.AbstractAuditingModel;
 import org.eulerframework.core.model.AbstractResourceModel;
 import org.eulerframework.data.entity.AuditingEntity;
 import org.eulerframework.data.entity.ResourceEntity;
 
 public class EntityUtils {
-    public static void updateModelAuditingFields(AuditingEntity entity, AbstractResourceModel model) {
+    public static void updateModelAuditingFields(AuditingEntity entity, AbstractAuditingModel model) {
         model.setCreatedBy(entity.getCreatedBy());
         model.setLastModifiedBy(entity.getModifiedBy());
         model.setCreatedDate(entity.getCreatedDate());
