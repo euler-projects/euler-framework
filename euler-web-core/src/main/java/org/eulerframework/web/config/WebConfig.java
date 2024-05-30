@@ -153,7 +153,9 @@ public abstract class WebConfig {
         /**
          * 站点名称
          */
-        public static final String WEB_SITE_NAME = "web.site.name";
+        public static final String WEB_SITE_NAME = "euler.web.site.name";
+        public static final String COPYRIGHT_HOLDER_NAME = "euler.copyright.holder.name";
+        public static final String COPYRIGHT_HOLDER_WEBSITE = "euler.copyright.holder.website";
         /**
          * 静态页面URL根路径
          */
@@ -211,6 +213,8 @@ public abstract class WebConfig {
         private static final String WEB_SITE_JSP_PATH = "/WEB-INF/jsp/themes";
         private static final String WEB_SITE_URL = "http://localhost:8080";
         private static final String WEB_SITE_NAME = "Euler Framework Demo";
+        private static final String COPYRIGHT_HOLDER_NAME = "Euler Project";
+        private static final String COPYRIGHT_HOLDER_WEBSITE = "https://www.eulerproject.io";
         private static final String WEB_SITE_STATIC_PAGES_PATH = "/pages";
         public static final boolean WEB_JSP_SHOW_STACK_TRACE = false;
         //private static final boolean WEB_JSP_AUTO_DEPLOY_ENABLED = true;
@@ -420,6 +424,19 @@ public abstract class WebConfig {
 
     public static String getSiteName() {
         Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_NAME, key -> propertyReader.getString(WebConfigKey.WEB_SITE_NAME, WebConfigDefault.WEB_SITE_NAME));
+
+        return (String) cachedConfig;
+    }
+
+
+    public static String getCopyrightHolderName() {
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.COPYRIGHT_HOLDER_NAME, key -> propertyReader.getString(WebConfigKey.COPYRIGHT_HOLDER_NAME, WebConfigDefault.COPYRIGHT_HOLDER_NAME));
+
+        return (String) cachedConfig;
+    }
+
+    public static String getCopyrightHolderWebsite() {
+        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.COPYRIGHT_HOLDER_WEBSITE, key -> propertyReader.getString(WebConfigKey.COPYRIGHT_HOLDER_WEBSITE, WebConfigDefault.COPYRIGHT_HOLDER_WEBSITE));
 
         return (String) cachedConfig;
     }
