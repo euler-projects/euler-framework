@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.eulerframework.net/assets/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.eulerframework.net/assets/css/themes/default/demo/single-form.css" rel="stylesheet">
+
+    <title th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</title>
+
+</head>
+
+<body>
+<div class="wrapper">
+    <div class="wrapper-inner">
+        <div class="title-wrapper">
+            <span class="" th:text="#{_SIGN_OUT_CONFIRM}">Are you sure you want to sign out?</span>
+        </div>
+        <div class="form-wrapper">
+            <form th:action="${servletContext.getAttribute('__CONTEXT_PATH')} + ${logoutProcessingUrl}"
+                  class="full-line-form"
+                  method="post">
+                <div class="form-group" style="text-align: center">
+                    <button type="submit" class="btn btn-danger" th:text="#{_SIGN_OUT}">Sign Out</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer
+            class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
+        <span><a href="/static" th:href="${servletContext.getAttribute('__CONTEXT_PATH')} + '/'"
+                 th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</a></span>
+        <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+                href="https://www.eulerproject.io"
+                th:href="${servletContext.getAttribute('__COPYRIGHT_HOLDER_WEBSITE')}"
+                th:text="${servletContext.getAttribute('__COPYRIGHT_HOLDER')}">Euler Project</a></span>
+    </footer>
+</div>
+
+<script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
+<script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>
