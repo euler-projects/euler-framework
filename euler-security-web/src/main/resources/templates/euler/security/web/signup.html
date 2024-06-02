@@ -202,7 +202,7 @@
         eulerForm.setLoadStatus(input);
 
         $.ajax({
-            url: __CONTEXT_PATH + '/ajax/validCaptcha',
+            url: __CONTEXT_PATH + '/validCaptcha',
             type: 'GET',
             async: true,
             data: {captcha: $(input).val()},
