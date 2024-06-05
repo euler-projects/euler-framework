@@ -1,9 +1,9 @@
 package org.eulerframework.security.core.captcha.provider;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eulerframework.common.util.Assert;
-import org.eulerframework.security.core.captcha.Captcha;
 import org.eulerframework.security.core.captcha.StringCaptcha;
-import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
+import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
 import org.eulerframework.security.exception.InvalidCaptchaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,62 +11,92 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Random;
 
-public class StringCaptchaProvider implements CaptchaProvider {
+public class StringCaptchaProvider implements CaptchaProvider<StringCaptcha> {
     private final Logger logger = LoggerFactory.getLogger(StringCaptchaProvider.class);
     private static final char[] DEFAULT_AVAILABLE_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+    private static final char[] NUMBERS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+    private static final int DEFAULT_LENGTH = 6;
 
     private final Random random = new Random();
-    private final CaptchaStorage captchaStorage;
+    private final StringCaptchaStorage captchaStorage;
 
-    private char[] availableChars = DEFAULT_AVAILABLE_CHARS;
-    private int captchaLength = 6;
+    private char[] defaultAvailableChars = DEFAULT_AVAILABLE_CHARS;
+    private int defaultLength = DEFAULT_LENGTH;
 
-    public StringCaptchaProvider(CaptchaStorage captchaStorage) {
+    public StringCaptchaProvider(StringCaptchaStorage captchaStorage) {
         this.captchaStorage = captchaStorage;
     }
 
-    @Override
-    public StringCaptcha generateCaptcha(Object key) {
-        Assert.notNull(key, "key is null");
-
+    public StringCaptcha generateCaptcha(char[] availableChars, int length, String... scope) {
         StringBuilder captchaBuilder = new StringBuilder();
-        for (int i = 0; i < captchaLength; i++) {
-            captchaBuilder.append(this.availableChars[random.nextInt(this.availableChars.length)]);
+        for (int i = 0; i < length; i++) {
+            captchaBuilder.append(availableChars[random.nextInt(availableChars.length)]);
         }
-        StringCaptcha captcha = new StringCaptcha(captchaBuilder.toString());
+        StringCaptcha captcha = new StringCaptcha(captchaBuilder.toString(), scope);
 
-        this.captchaStorage.saveCaptcha(key, captcha);
+        this.captchaStorage.saveCaptcha(captcha);
         return captcha;
     }
 
     @Override
-    public void validateCaptcha(@Nonnull Object key, @Nonnull Captcha provideCaptcha) {
-        Assert.notNull(key, "key is null");
-        Assert.notNull(provideCaptcha, "provideCaptcha is null");
+    public StringCaptcha generateCaptcha(String... scope) {
+        return this.generateCaptcha(this.defaultAvailableChars, this.defaultLength, scope);
+    }
 
-        Captcha savedCaptcha = this.captchaStorage.getCaptcha(key);
+    @Override
+    public void validateCaptcha(@Nonnull StringCaptcha provideCaptcha) {
+        Assert.notNull(provideCaptcha, "provideCaptcha is null");
+        Assert.hasText(provideCaptcha.getCaptcha(), "provideCaptcha is empty");
+
+        StringCaptcha savedCaptcha = this.captchaStorage.loadByCaptcha(provideCaptcha.getCaptcha());
 
         if (savedCaptcha == null) {
             throw new InvalidCaptchaException();
         }
 
-        if (savedCaptcha.getClass() != StringCaptcha.class || provideCaptcha.getClass() != StringCaptcha.class) {
-            // Only support StringCaptcha
-            this.logger.warn("Unsupported captcha type, saved type: '{}', provide type: '{}'",
-                    savedCaptcha.getClass(), provideCaptcha.getClass());
+//        if (savedCaptcha.getClass() != StringCaptcha.class || provideCaptcha.getClass() != StringCaptcha.class) {
+//            // Only support StringCaptcha
+//            this.logger.warn("Unsupported captcha type, saved type: '{}', provide type: '{}'",
+//                    savedCaptcha.getClass(), provideCaptcha.getClass());
+//            throw new InvalidCaptchaException();
+//        }
+
+        if (!savedCaptcha.getCaptcha().equalsIgnoreCase(provideCaptcha.getCaptcha())) {
             throw new InvalidCaptchaException();
         }
 
-        if (!savedCaptcha.equals(provideCaptcha)) {
+        String[] savedScopes = savedCaptcha.getScopes();
+        String[] provideScopes = provideCaptcha.getScopes();
+
+        if (provideScopes.length > savedScopes.length) {
             throw new InvalidCaptchaException();
+        }
+
+        if (savedScopes.length > 0 && provideScopes.length == 0) {
+            throw new InvalidCaptchaException();
+        }
+
+        for (String provideScope : provideScopes) {
+            if (!ArrayUtils.contains(savedScopes, provideScope)) {
+                throw new InvalidCaptchaException();
+            }
         }
     }
 
-    public void setCaptchaLength(int captchaLength) {
-        this.captchaLength = captchaLength;
+    public char[] getDefaultAvailableChars() {
+        return defaultAvailableChars;
     }
 
-    public void setAvailableChars(char[] availableChars) {
-        this.availableChars = availableChars;
+    public void setDefaultAvailableChars(char[] defaultAvailableChars) {
+        this.defaultAvailableChars = defaultAvailableChars;
+    }
+
+    public int getDefaultLength() {
+        return defaultLength;
+    }
+
+    public void setDefaultLength(int defaultLength) {
+        this.defaultLength = defaultLength;
     }
 }

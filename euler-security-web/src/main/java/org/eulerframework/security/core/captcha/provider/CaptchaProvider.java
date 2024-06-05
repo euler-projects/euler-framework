@@ -4,8 +4,8 @@ import org.eulerframework.security.core.captcha.Captcha;
 
 import javax.annotation.Nonnull;
 
-public interface CaptchaProvider {
-    Captcha generateCaptcha(Object key);
+public interface CaptchaProvider<C extends Captcha<?>> {
+    C generateCaptcha(String... scope);
 
-    void validateCaptcha(@Nonnull Object key, @Nonnull Captcha provideCaptcha);
+    void validateCaptcha(@Nonnull C provideCaptcha);
 }

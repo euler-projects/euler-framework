@@ -4,7 +4,8 @@ import org.eulerframework.security.core.captcha.Captcha;
 
 import javax.annotation.Nonnull;
 
-public interface CaptchaStorage {
-    void saveCaptcha(@Nonnull Object key, @Nonnull Captcha captcha);
-    Captcha getCaptcha(@Nonnull Object key);
+public interface CaptchaStorage<C extends Captcha<T>, T> {
+    void saveCaptcha(@Nonnull C captcha);
+
+    C loadByCaptcha(@Nonnull T captcha);
 }

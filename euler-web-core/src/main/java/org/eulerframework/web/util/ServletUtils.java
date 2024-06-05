@@ -19,6 +19,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -46,7 +47,16 @@ public class ServletUtils {
     }
 
     public static HttpServletRequest getRequest() {
-        return Optional.ofNullable(getServletRequestAttributes()).map(ServletRequestAttributes::getRequest).orElse(null);
+        return Optional.ofNullable(getServletRequestAttributes())
+                .map(ServletRequestAttributes::getRequest)
+                .orElse(null);
+    }
+
+    public static HttpSession getSession() {
+        return Optional.ofNullable(getServletRequestAttributes())
+                .map(ServletRequestAttributes::getRequest)
+                .map(HttpServletRequest::getSession)
+                .orElse(null);
     }
 
     public static HttpServletResponse getResponse() {

@@ -84,7 +84,7 @@
                         image</label><input
                         class="form-control" type="text" id="captcha" name="captcha"/><span class="captcha"><a
                         href="javascript:void(0)"><img id="captcha-img"
-                                                       th:src="${servletContext.getAttribute('__CONTEXT_PATH')} + '/captcha/simple'"
+                                                       th:src="${servletContext.getAttribute('__CONTEXT_PATH')} + '/captcha/img?scope=signup'"
                                                        alt="Captcha"></a></span>
                 </div>
                 <div class="form-group">
@@ -202,10 +202,13 @@
         eulerForm.setLoadStatus(input);
 
         $.ajax({
-            url: __CONTEXT_PATH + '/validCaptcha',
+            url: __CONTEXT_PATH + 'captcha/validCaptcha',
             type: 'GET',
             async: true,
-            data: {captcha: $(input).val()},
+            data: {
+                captcha: $(input).val(),
+                scope: 'signup'
+            },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 let response = JSON.parse(XMLHttpRequest.responseText);
                 eulerForm.setErrorStatus(input, response.error_description);
@@ -217,7 +220,7 @@
     });
 
     $("#captcha-img").on('click', function () {
-        $(this).attr('src', __CONTEXT_PATH + "/captcha/simple?_r=" + new Date().getTime());
+        $(this).attr('src', __CONTEXT_PATH + "/captcha/img?scope=signup&_r=" + new Date().getTime());
     });
 
     function signup() {
