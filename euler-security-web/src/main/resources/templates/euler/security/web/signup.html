@@ -107,15 +107,15 @@
 </div>
 
 <div style="display: none">
-    <span id="attr_context-path" th:text="${servletContext.getAttribute('__CONTEXT_PATH')}"></span>
-    <span id="attr_confirm-password-not-match" th:text="#{_CONFIRM_PASSWORD_NOT_MATCH}"></span>
+    <span id="attr_context-path" th:text="${servletContext.getAttribute('__CONTEXT_PATH')}">/</span>
+    <span id="attr_confirm-password-not-match" th:text="#{_CONFIRM_PASSWORD_NOT_MATCH}">The passwords you entered do not match.</span>
 </div>
 <script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
 <script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
 
 <script>
-    const __CONTEXT_PATH = $('#attr_context-path').text();
-    const __CONFIRM_PASSWORD_NOT_MATCH = $('#attr_confirm-password-not-match').text();
+    const __CONTEXT_PATH = document.getElementById('attr_context-path').innerText;
+    const __CONFIRM_PASSWORD_NOT_MATCH = document.getElementById('attr_confirm-password-not-match').innerText;
 
     const eulerForm = {};
     eulerForm.setLoadStatus = function (element) {

@@ -17,6 +17,7 @@ package org.eulerframework.security.oauth2.server.authorization.jackson2;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eulerframework.security.jackson2.EulerSecurityJackson2Module;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 
@@ -38,7 +39,7 @@ public abstract class EulerOAuth2ObjectMapper {
             List<Module> securityModules = SecurityJackson2Modules.getModules(EulerOAuth2ObjectMapper.class.getClassLoader());
             objectMapper.registerModules(securityModules);
             objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-            objectMapper.registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
+            objectMapper.registerModule(new EulerSecurityJackson2Module());
             return objectMapper;
         }
     }
