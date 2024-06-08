@@ -18,7 +18,7 @@ package org.eulerframework.data.entity;
 import jakarta.persistence.*;
 
 @MappedSuperclass
-public abstract class ResourceIdEntity extends PrincipalAuditingEntity {
+public abstract class ResourceIdEntity extends ResourceEntity {
 
     @Id
     @Column(name="id")
