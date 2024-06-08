@@ -15,6 +15,6 @@
  */
 package org.eulerframework.core.model;
 
-public interface ResourceModel extends AuditingModel {
+public interface ResourceModel extends PrincipalAuditingModel {
     String getTenantId();
 }

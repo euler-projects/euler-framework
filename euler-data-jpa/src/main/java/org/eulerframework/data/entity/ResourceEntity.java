@@ -19,7 +19,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class ResourceEntity extends AuditingEntity {
+public abstract class ResourceEntity extends PrincipalAuditingEntity {
 
     @Column(name = "tenant_id")
     private String tenantId;

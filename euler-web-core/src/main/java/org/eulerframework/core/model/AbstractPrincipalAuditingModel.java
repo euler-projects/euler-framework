@@ -13,17 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.userdetails;
+package org.eulerframework.core.model;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsPasswordService;
-import org.springframework.security.provisioning.UserDetailsManager;
-
-public abstract class AbstractEulerUserDetailsManager implements UserDetailsManager, UserDetailsPasswordService {
-    public abstract boolean support(UserDetails userDetails);
+public class AbstractPrincipalAuditingModel extends AbstractAuditingModel implements PrincipalAuditingModel {
+    private String createdBy;
+    private String lastModifiedBy;
 
     @Override
-    public final void changePassword(String oldPassword, String newPassword) {
-        throw new UnsupportedOperationException("Please use UerDetailsPasswordService.updatePassword instead");
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @Override
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
     }
 }

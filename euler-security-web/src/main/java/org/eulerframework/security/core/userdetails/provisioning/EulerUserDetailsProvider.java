@@ -13,29 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.core.model;
+package org.eulerframework.security.core.userdetails.provisioning;
 
-import java.util.Date;
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 
-public class AbstractAuditingModel implements AuditingModel {
-    private Date createdDate;
-    private Date lastModifiedDate;
-
-    @Override
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    @Override
-    public Date getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(Date lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
+public interface EulerUserDetailsProvider {
+    EulerUserDetails provide(String principal);
 }

@@ -15,7 +15,7 @@
  */
 package org.eulerframework.core.model;
 
-public class AbstractResourceModel extends AbstractAuditingModel implements ResourceModel {
+public class AbstractResourceModel extends AbstractPrincipalAuditingModel implements ResourceModel {
     private String tenantId;
 
     @Override

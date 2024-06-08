@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.userdetails;
+package org.eulerframework.core.model;
 
-public interface EulerUserDetailsProvider {
-    EulerUserDetails provide(String principal);
+public interface PrincipalAuditingModel extends AuditingModel {
+    String getCreatedBy();
+    String getLastModifiedBy();
 }

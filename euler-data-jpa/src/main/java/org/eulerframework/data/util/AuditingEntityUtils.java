@@ -17,21 +17,21 @@ package org.eulerframework.data.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.core.model.AbstractAuditingModel;
-import org.eulerframework.core.model.AbstractResourceModel;
+import org.eulerframework.core.model.AbstractPrincipalAuditingModel;
 import org.eulerframework.data.entity.AuditingEntity;
+import org.eulerframework.data.entity.PrincipalAuditingEntity;
 import org.eulerframework.data.entity.ResourceEntity;
 
-public class EntityUtils {
-    public static void updateModelAuditingFields(AuditingEntity entity, AbstractAuditingModel model) {
-        model.setCreatedBy(entity.getCreatedBy());
-        model.setLastModifiedBy(entity.getModifiedBy());
-        model.setCreatedDate(entity.getCreatedDate());
-        model.setLastModifiedDate(entity.getModifiedDate());
+public class AuditingEntityUtils {
+    public static void updateAuditingEntity(AbstractAuditingModel model, AuditingEntity entity) {
+        entity.setCreatedDate(model.getCreatedDate());
+        entity.setModifiedDate(model.getLastModifiedDate());
     }
 
-    public static void updateModelResourceFields(ResourceEntity entity, AbstractResourceModel model) {
-        updateModelAuditingFields(entity, model);
-        model.setTenantId(entity.getTenantId());
+    public static void updatePrincipalAuditingEntity(AbstractPrincipalAuditingModel model, PrincipalAuditingEntity entity) {
+        updateAuditingEntity(model, entity);
+        entity.setCreatedBy(model.getCreatedBy());
+        entity.setModifiedBy(model.getLastModifiedBy());
     }
 
     public static <E extends ResourceEntity> E newResourceEntity(String tenantId, Class<E> clazz) {

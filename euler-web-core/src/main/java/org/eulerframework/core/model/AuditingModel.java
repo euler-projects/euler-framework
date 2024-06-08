@@ -19,8 +19,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 public interface AuditingModel extends Serializable {
-    String getCreatedBy();
-    String getLastModifiedBy();
     Date getCreatedDate();
     Date getLastModifiedDate();
 }
