@@ -15,17 +15,17 @@
  */
 package org.eulerframework.security.web.endpoint;
 
-import org.eulerframework.security.conf.SecurityConfig;
+import org.eulerframework.security.core.userdetails.DefaultEulerUserDetails;
 import org.eulerframework.security.core.userdetails.provisioning.EulerUserDetailsManager;
 import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
-import org.eulerframework.web.util.ServletUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.ArrayList;
 
 @Controller
 public class DefaultEulerSecurityController extends ThymeleafSupportWebController implements EulerSecurityController {
@@ -41,7 +41,7 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
     @GetMapping("${" + EulerSecurityEndpoints.SIGNUP_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PAGE + "}")
     public String signupPage() throws NoResourceFoundException {
         if (!this.signupEnabled) {
-            throw new NoResourceFoundException(HttpMethod.GET, ServletUtils.findRealURI(this.getRequest()));
+            return this.notfound();
         }
         return this.display("/euler/security/web/signup");
     }
@@ -65,21 +65,17 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
     }
 
     @PostMapping("${" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL + "}")
-    public String litesignup(
-            @RequestParam String username,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String mobile,
-            @RequestParam String password) {
-        if (SecurityConfig.isSignUpEnabled()) {
-            if (SecurityConfig.isSignUpEnableCaptcha()) {
-                //Captcha.validCaptcha(this.getRequest());
-            }
-
-            //this.eulerUserService.signUp(username, email, mobile, password);
-            return this.success();
-        } else {
+    public String signup(@RequestParam String username, @RequestParam String password) {
+        if (!this.signupEnabled) {
             return this.notfound();
         }
+//        if (SecurityConfig.isSignUpEnableCaptcha()) {
+//            Captcha.validCaptcha(this.getRequest());
+//        }
+
+        DefaultEulerUserDetails userDetails = new DefaultEulerUserDetails(null, username, this.passwordEncoder.encode(password), new ArrayList<>());
+        this.eulerUserDetailsManager.createUser(userDetails);
+        return this.success(null, new Target("login", "_SIGN_IN"));
     }
 
     @Override

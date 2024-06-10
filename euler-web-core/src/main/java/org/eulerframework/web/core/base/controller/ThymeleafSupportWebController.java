@@ -73,7 +73,7 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
             throw new RuntimeException(
                     "If you want to use this.display(), JspController's class name must end with '" + CONTROLLER_NAME_SUFFIX + "'");
 
-        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("JspController")));
+        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf(CONTROLLER_NAME_SUFFIX)));
     }
 
     /**
