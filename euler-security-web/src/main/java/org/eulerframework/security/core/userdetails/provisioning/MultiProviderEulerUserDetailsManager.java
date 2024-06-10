@@ -19,7 +19,6 @@ import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -30,19 +29,16 @@ public class MultiProviderEulerUserDetailsManager extends AbstractEulerUserDetai
     private final Logger logger = LoggerFactory.getLogger(MultiProviderEulerUserDetailsManager.class);
 
     private final List<EulerUserDetailsProvider> eulerUserDetailsProviders = new ArrayList<>();
-    private final EulerUserService eulerUserService;
 
     public MultiProviderEulerUserDetailsManager(EulerUserService eulerUserService, EulerUserDetailsProvider... eulerUserDetailsProvider) {
-        Assert.notNull(eulerUserService, "eulerUserService must not be null");
+        super(eulerUserService);
         Assert.notEmpty(eulerUserDetailsProvider, "eulerUserDetailsProvider must not be empty");
-        this.eulerUserService = eulerUserService;
         this.eulerUserDetailsProviders.addAll(Arrays.asList(eulerUserDetailsProvider));
     }
 
     public MultiProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
-        Assert.notNull(eulerUserService, "eulerUserService must not be null");
+        super(eulerUserService);
         Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
-        this.eulerUserService = eulerUserService;
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }
 
@@ -55,35 +51,6 @@ public class MultiProviderEulerUserDetailsManager extends AbstractEulerUserDetai
             }
         }
         return userDetails;
-    }
-
-    @Override
-    public UserDetails updatePassword(UserDetails user, String newPassword) {
-        Assert.isAssignable(EulerUserDetails.class, user.getClass(), () -> "Only EulerUserDetails is supported, actually: " + user.getClass().getName());
-        EulerUserDetails userDetails = (EulerUserDetails) user;
-        return this.eulerUserService.updatePassword(userDetails.getUserId(), newPassword);
-    }
-
-    @Override
-    public void createUser(UserDetails user) {
-        Assert.isAssignable(EulerUserDetails.class, user.getClass(), () -> "Only EulerUserDetails is supported, actually: " + user.getClass().getName());
-        EulerUserDetails userDetails = (EulerUserDetails) user;
-        this.eulerUserService.createUser(userDetails);
-    }
-
-    @Override
-    public void updateUser(UserDetails user) {
-        Assert.isAssignable(EulerUserDetails.class, user.getClass(), () -> "Only EulerUserDetails is supported, actually: " + user.getClass().getName());
-        EulerUserDetails userDetails = (EulerUserDetails) user;
-        this.eulerUserService.updateUser(userDetails);
-    }
-
-    @Override
-    public void deleteUser(String username) {
-        EulerUserDetails userDetails = this.provideUserDetails(username);
-        if(userDetails != null) {
-            this.eulerUserService.deleteUser(userDetails.getUserId());
-        }
     }
 
     @Override

@@ -8,4 +8,6 @@ public interface EulerSecurityController {
     String loginPage();
 
     String logoutPage();
+
+    void changePassword(String oldRawPassword, String newRawPassword);
 }

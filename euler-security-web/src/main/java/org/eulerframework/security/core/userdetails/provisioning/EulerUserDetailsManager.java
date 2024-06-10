@@ -15,11 +15,13 @@
  */
 package org.eulerframework.security.core.userdetails.provisioning;
 
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.util.CollectionUtils;
 
 public interface EulerUserDetailsManager extends UserDetailsManager, UserDetailsPasswordService {
     /**
@@ -33,5 +35,16 @@ public interface EulerUserDetailsManager extends UserDetailsManager, UserDetails
      * @return a fully populated user record event the user has no GrantedAuthority,
      * or <code>null</code> if the user could not be found
      */
-    UserDetails provideUserDetails(String username);
+    EulerUserDetails provideUserDetails(String username);
+
+    @Override
+    default UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserDetails userDetails = this.provideUserDetails(username);
+
+        if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
+            throw new UsernameNotFoundException("User '" + username + "' not found.");
+        } else {
+            return userDetails;
+        }
+    }
 }

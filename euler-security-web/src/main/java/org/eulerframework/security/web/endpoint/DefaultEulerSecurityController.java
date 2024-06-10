@@ -1,15 +1,15 @@
 package org.eulerframework.security.web.endpoint;
 
 import org.eulerframework.security.conf.SecurityConfig;
+import org.eulerframework.security.core.userdetails.provisioning.EulerUserDetailsManager;
 import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
 import org.eulerframework.web.util.ServletUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Controller
@@ -18,7 +18,8 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
     private String signupProcessingUrl;
     private String loginProcessingUrl;
     private String logoutProcessingUrl;
-    //private EulerUserService eulerUserService;
+    private EulerUserDetailsManager eulerUserDetailsManager;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     @GetMapping("${" + EulerSecurityEndpoints.SIGNUP_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PAGE + "}")
@@ -39,6 +40,19 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
     @GetMapping("${" + EulerSecurityEndpoints.LOGOUT_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.LOGOUT_PAGE + "}")
     public String logoutPage() {
         return "euler/security/web/logout";
+    }
+
+    //@Override
+    @GetMapping("${" + EulerSecurityEndpoints.CHANGE_PASSWORD_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.CHANGE_PASSWORD_PAGE + "}")
+    public String changePasswordPage() {
+        return "euler/security/web/change-password";
+    }
+
+    @Override
+    @PostMapping("change-password")
+    @ResponseBody
+    public void changePassword(String oldRawPassword, String newRawPassword) {
+        this.eulerUserDetailsManager.changePassword(oldRawPassword, this.passwordEncoder.encode(newRawPassword));
     }
 
     @PostMapping("${" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL + "}")
@@ -94,8 +108,13 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
         this.logoutProcessingUrl = logoutProcessingUrl;
     }
 
-    //    @Autowired
-//    public void setEulerUserService(EulerUserService eulerUserService) {
-//        this.eulerUserService = eulerUserService;
-//    }
+    @Autowired
+    public void setEulerUserDetailsManager(EulerUserDetailsManager eulerUserDetailsManager) {
+        this.eulerUserDetailsManager = eulerUserDetailsManager;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 }

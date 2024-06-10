@@ -1,11 +1,17 @@
 package org.eulerframework.security.core.userdetails.provisioning;
 
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.exception.UserDetailsNotFountException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
 import java.util.LinkedHashMap;
 
-public class DelegatingEulerUserDetailsManager extends AbstractEulerUserDetailsManager {
+public class DelegatingEulerUserDetailsManager implements EulerUserDetailsManager {
     /**
      * An ordered {@link EulerUserDetailsManager} map which key is each manager's support {@link UserDetails} type.
      * The map's order will affect
@@ -13,6 +19,8 @@ public class DelegatingEulerUserDetailsManager extends AbstractEulerUserDetailsM
      * and the checking order of method {@link DelegatingEulerUserDetailsManager#userExists(String)}.
      */
     private final LinkedHashMap<Class<? extends UserDetails>, EulerUserDetailsManager> eulerUserDetailsManagers = new LinkedHashMap<>();
+    private SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder
+            .getContextHolderStrategy();
 
     public DelegatingEulerUserDetailsManager(LinkedHashMap<Class<? extends UserDetails>, EulerUserDetailsManager> eulerUserDetailsManagers) {
         Assert.notEmpty(eulerUserDetailsManagers, "eulerUserDetailsManagers must not be empty");
@@ -20,8 +28,8 @@ public class DelegatingEulerUserDetailsManager extends AbstractEulerUserDetailsM
     }
 
     @Override
-    public UserDetails provideUserDetails(String username) {
-        UserDetails userDetails = null;
+    public EulerUserDetails provideUserDetails(String username) {
+        EulerUserDetails userDetails = null;
         for (EulerUserDetailsManager manager : eulerUserDetailsManagers.values()) {
             if ((userDetails = manager.provideUserDetails(username)) != null) {
                 break;
@@ -55,6 +63,24 @@ public class DelegatingEulerUserDetailsManager extends AbstractEulerUserDetailsM
     }
 
     @Override
+    public void changePassword(String oldPassword, String newPassword) {
+        Authentication currentUser = this.securityContextHolderStrategy.getContext().getAuthentication();
+        if (currentUser == null) {
+            // This would indicate bad coding somewhere
+            throw new AccessDeniedException(
+                    "Can't change password as no Authentication object found in context " + "for current user.");
+        }
+        String username = currentUser.getName();
+
+        EulerUserDetails userDetails = this.provideUserDetails(username);
+        if (userDetails == null) {
+            throw new UserDetailsNotFountException("User '" + username + "' not found");
+        }
+
+        this.getEulerUserDetailsManager(userDetails.getClass()).changePassword(oldPassword, newPassword);
+    }
+
+    @Override
     public boolean userExists(String username) {
         for (EulerUserDetailsManager manager : eulerUserDetailsManagers.values()) {
             if (manager.userExists(username)) {
@@ -79,5 +105,9 @@ public class DelegatingEulerUserDetailsManager extends AbstractEulerUserDetailsM
             throw new IllegalArgumentException("EulerUserDetailsManager for user details type is '" + clazz + "' not found");
         }
         return manager;
+    }
+
+    public void setSecurityContextHolderStrategy(SecurityContextHolderStrategy securityContextHolderStrategy) {
+        this.securityContextHolderStrategy = securityContextHolderStrategy;
     }
 }
