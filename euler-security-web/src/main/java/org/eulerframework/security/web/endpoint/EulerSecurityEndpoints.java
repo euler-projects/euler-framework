@@ -24,6 +24,7 @@ public abstract class EulerSecurityEndpoints {
     public static final String SIGNUP_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.signup-processing-url";
     public static final String LOGIN_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.login-processing-url";
     public static final String LOGOUT_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.logout-processing-url";
+    public static final String CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.change-password-processing-url";
 
     public static final boolean SIGNUP_ENABLED = true;
     public static final String SIGNUP_PAGE = "/signup";
@@ -33,4 +34,5 @@ public abstract class EulerSecurityEndpoints {
     public static final String SIGNUP_PROCESSING_URL = "/signup";
     public static final String LOGIN_PROCESSING_URL = "/login";
     public static final String LOGOUT_PROCESSING_URL = "/logout";
+    public static final String CHANGE_PASSWORD_PROCESSING_URL = "/change-password";
 }

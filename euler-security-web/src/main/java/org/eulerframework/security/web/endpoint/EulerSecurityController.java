@@ -24,5 +24,5 @@ public interface EulerSecurityController {
 
     String logoutPage();
 
-    void changePassword(String oldRawPassword, String newRawPassword);
+    String changePassword(String oldRawPassword, String newRawPassword);
 }

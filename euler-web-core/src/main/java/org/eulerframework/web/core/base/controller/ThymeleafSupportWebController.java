@@ -39,7 +39,7 @@ import java.util.*;
 public abstract class ThymeleafSupportWebController extends AbstractWebController {
     private final static String THEME_PARAM_NAME = "_theme";
     private final static String THEME_COOKIE_NAME = "EULER_THEME";
-    private final static String CONTROLLER_NAME_SUFFIX = "JspController";
+    private final static String CONTROLLER_NAME_SUFFIX = "PageController";
     private final static int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
 
     private String webControllerName;
@@ -74,20 +74,6 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
                     "If you want to use this.display(), JspController's class name must end with '" + CONTROLLER_NAME_SUFFIX + "'");
 
         return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("JspController")));
-    }
-
-    @ModelAttribute("euler")
-    public Map<String, Object> servletContext() {
-        ServletContext servletContext = getServletContext();
-        Set<String> eulerSysAttributeNames = EulerSysAttributes.getEulerSysAttributeNames();
-        Map<String, Object> context = new HashMap<>();
-        for (String eulerSysAttributeName : eulerSysAttributeNames) {
-            Object value = servletContext.getAttribute(eulerSysAttributeName);
-            if (value != null) {
-                context.put(eulerSysAttributeName, value);
-            }
-        }
-        return Map.of("ctx", context);
     }
 
     /**
@@ -132,6 +118,17 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
      */
     protected String display(String view) {
         Assert.notNull(view, "view path is empty");
+
+        ServletContext servletContext = getServletContext();
+        Set<String> eulerSysAttributeNames = EulerSysAttributes.getEulerSysAttributeNames();
+        Map<String, Object> context = new HashMap<>();
+        for (String eulerSysAttributeName : eulerSysAttributeNames) {
+            Object value = servletContext.getAttribute(eulerSysAttributeName);
+            if (value != null) {
+                context.put(eulerSysAttributeName, value);
+            }
+        }
+        this.getRequest().setAttribute("euler", Map.of("ctx", context));
 
         if (!view.startsWith("/"))
             return "theme/" + this.theme() + "/" + this.getWebControllerName() + "/" + view;
