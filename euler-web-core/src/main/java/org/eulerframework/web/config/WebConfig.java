@@ -153,9 +153,9 @@ public abstract class WebConfig {
         /**
          * 站点名称
          */
-        public static final String WEB_SITE_NAME = "euler.web.site.name";
-        public static final String COPYRIGHT_HOLDER_NAME = "euler.copyright.holder.name";
-        public static final String COPYRIGHT_HOLDER_WEBSITE = "euler.copyright.holder.website";
+        public static final String WEB_SITE_NAME = "web.site.name";
+        public static final String COPYRIGHT_HOLDER_NAME = "copyright.holder.name";
+        public static final String COPYRIGHT_HOLDER_WEBSITE = "copyright.holder.website";
         /**
          * 静态页面URL根路径
          */
@@ -167,7 +167,7 @@ public abstract class WebConfig {
         /**
          * 崩溃页面显示详细异常栈
          */
-        public static final String WEB_JSP_SHOW_STACK_TRACE = "web.jsp.showStackTrace";
+        public static final String WEB_JSP_SHOW_STACK_TRACE = "web.page.showStackTrace";
         //private static final String WEB_JSP_AUTO_DEPLOY_ENABLED = "web.jspAutoDeployEnabled";
 
         /**

@@ -123,9 +123,9 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
         Assert.notNull(view, "view path is empty");
 
         if (!view.startsWith("/"))
-            return this.theme() + "/" + this.getWebControllerName() + "/" + view;
+            return "theme/" + this.theme() + "/" + this.getWebControllerName() + "/" + view;
         else
-            return this.theme() + view;
+            return "theme/" + this.theme() + view;
     }
 
     /**
