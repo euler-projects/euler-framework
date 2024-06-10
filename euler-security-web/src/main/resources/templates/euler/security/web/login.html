@@ -9,7 +9,7 @@
     <link href="https://cdn.eulerframework.net/assets/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.eulerframework.net/assets/css/themes/default/demo/single-form.css" rel="stylesheet">
 
-    <title th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</title>
+    <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 
 </head>
 
@@ -17,10 +17,10 @@
 <div class="wrapper">
     <div class="wrapper-inner">
         <div class="title-wrapper">
-            <span class="" th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</span>
+            <span class="" th:text="${euler.ctx.__SITE_NAME}">Euler Framework</span>
         </div>
         <div class="form-wrapper">
-            <form th:action="${servletContext.getAttribute('__CONTEXT_PATH')} + ${loginProcessingUrl}"
+            <form th:action="${euler.ctx.__CONTEXT_PATH} + ${loginProcessingUrl}"
                   class="full-line-form"
                   method="post">
                 <div class="form-group">
@@ -44,12 +44,12 @@
     </div>
     <footer
             class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
-        <span><a href="/static" th:href="${servletContext.getAttribute('__CONTEXT_PATH')} + '/'"
-                 th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</a></span>
+        <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+                 th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
         <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
                 href="https://www.eulerproject.io"
-                th:href="${servletContext.getAttribute('__COPYRIGHT_HOLDER_WEBSITE')}"
-                th:text="${servletContext.getAttribute('__COPYRIGHT_HOLDER')}">Euler Project</a></span>
+                th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
+                th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
     </footer>
 </div>
 

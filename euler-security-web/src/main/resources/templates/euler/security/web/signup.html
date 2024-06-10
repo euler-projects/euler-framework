@@ -55,7 +55,7 @@
         }
     </style>
 
-    <title th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</title>
+    <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
 <body>
 <div class="wrapper">
@@ -64,7 +64,7 @@
             <span class="" th:text="#{_CREATE_YOUR_ACCOUNT}">Create your account</span>
         </div>
         <div class="form-wrapper">
-            <form th:action="${servletContext.getAttribute('__CONTEXT_PATH')} + ${signupProcessingUrl}" id="main-form"
+            <form th:action="${euler.ctx.__CONTEXT_PATH} + ${signupProcessingUrl}" id="main-form"
                   class="full-line-form" method="post">
                 <div class="form-group has-feedback">
                     <label class="control-label" for="username" th:text="#{_USERNAME}">Username</label><input
@@ -84,7 +84,7 @@
                         image</label><input
                         class="form-control" type="text" id="captcha" name="captcha"/><span class="captcha"><a
                         href="javascript:void(0)"><img id="captcha-img"
-                                                       th:src="${servletContext.getAttribute('__CONTEXT_PATH')} + '/captcha/img?scope=signup'"
+                                                       th:src="${euler.ctx.__CONTEXT_PATH} + '/captcha/img?scope=signup'"
                                                        alt="Captcha"></a></span>
                 </div>
                 <div class="form-group">
@@ -96,18 +96,18 @@
     </div>
     <footer
             class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
-        <span><a href="/static" th:href="${servletContext.getAttribute('__CONTEXT_PATH')} + '/'"
-                 th:text="${servletContext.getAttribute('__SITE_NAME')}">Euler Framework</a></span>
+        <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+                 th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
         <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
                 href="https://www.eulerproject.io"
-                th:href="${servletContext.getAttribute('__COPYRIGHT_HOLDER_WEBSITE')}"
-                th:text="${servletContext.getAttribute('__COPYRIGHT_HOLDER')}">Euler Project</a></span>
+                th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
+                th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
     </footer>
     </footer>
 </div>
 
 <div style="display: none">
-    <span id="attr_context-path" th:text="${servletContext.getAttribute('__CONTEXT_PATH')}">/</span>
+    <span id="attr_context-path" th:text="${euler.ctx.__CONTEXT_PATH}">/</span>
     <span id="attr_confirm-password-not-match" th:text="#{_CONFIRM_PASSWORD_NOT_MATCH}">The passwords you entered do not match.</span>
 </div>
 <script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>

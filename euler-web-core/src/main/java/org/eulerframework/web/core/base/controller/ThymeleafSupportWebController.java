@@ -20,6 +20,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.common.util.StringUtils;
+import org.eulerframework.constant.EulerSysAttributes;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.exception.web.*;
@@ -33,6 +34,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.*;
 
 public abstract class ThymeleafSupportWebController extends AbstractWebController {
     private final static String THEME_PARAM_NAME = "_theme";
@@ -74,9 +76,18 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
         return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf("JspController")));
     }
 
-    @ModelAttribute("servletContext")
-    public ServletContext servletContext() {
-        return this.getServletContext();
+    @ModelAttribute("euler")
+    public Map<String, Object> servletContext() {
+        ServletContext servletContext = getServletContext();
+        Set<String> eulerSysAttributeNames = EulerSysAttributes.getEulerSysAttributeNames();
+        Map<String, Object> context = new HashMap<>();
+        for (String eulerSysAttributeName : eulerSysAttributeNames) {
+            Object value = servletContext.getAttribute(eulerSysAttributeName);
+            if (value != null) {
+                context.put(eulerSysAttributeName, value);
+            }
+        }
+        return Map.of("ctx", context);
     }
 
     /**

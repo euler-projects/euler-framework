@@ -133,11 +133,11 @@ public abstract class WebConfig {
         /**
          * 站点默认语言
          */
-        public static final String WEB_LANGUAGE_DEFAULT = "web.language.default";
+        public static final String WEB_LANGUAGE_DEFAULT = "web.i18n.defaultLanguage";
         /**
          * 站点支持语言列表
          */
-        public static final String WEB_LANGUAGE_SUPPORT_LANGUAGES = "web.language.supportLanguages";
+        public static final String WEB_LANGUAGE_SUPPORT_LANGUAGES = "web.i18n.supportLanguages";
         /**
          * 静态资源文件URL根路径
          */
