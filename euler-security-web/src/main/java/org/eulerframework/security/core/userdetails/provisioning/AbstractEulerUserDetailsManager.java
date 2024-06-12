@@ -111,6 +111,14 @@ public abstract class AbstractEulerUserDetailsManager implements EulerUserDetail
         }
     }
 
+    @Override
+    public void disableUser(String username) {
+        EulerUserDetails userDetails = this.loadUserByPrincipal(username);
+        if (userDetails != null) {
+            this.eulerUserService.disableUser(userDetails.getUserId());
+        }
+    }
+
     protected EulerUserDetails castUserDetails(UserDetails userDetails) {
         Assert.notNull(userDetails, "userDetails must not be null");
         Assert.isInstanceOf(EulerUserDetails.class, userDetails,

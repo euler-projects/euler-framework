@@ -77,6 +77,7 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
                 .passwordEncoder(this.passwordEncoder::encode)
                 .username(username)
                 .password(password)
+                .authorities("user")
                 .build();
         this.eulerUserDetailsManager.createUser(userDetails);
         return this.success(null, new Target("login", "_SIGN_IN"));

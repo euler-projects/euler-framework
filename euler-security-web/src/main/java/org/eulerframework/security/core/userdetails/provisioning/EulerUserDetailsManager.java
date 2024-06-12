@@ -49,4 +49,6 @@ public interface EulerUserDetailsManager extends UserDetailsManager, UserDetails
 
     @Override
     EulerUserDetails updatePassword(UserDetails user, String newPassword);
+
+    void disableUser(String username);
 }
