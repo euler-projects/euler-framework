@@ -26,20 +26,19 @@ import org.springframework.util.CollectionUtils;
 public interface EulerUserDetailsManager extends UserDetailsManager, UserDetailsPasswordService {
     /**
      * Like {@link UserDetailsService#loadUserByUsername(String)},
-     * but will return <code>null</code> instead of throw {@link UsernameNotFoundException}
-     * if username not found.
+     * but will return <code>null</code> instead of throw {@link UsernameNotFoundException} if principal not found.
      * <p>
      * More attention, if the user exist but has no GrantedAuthority, this method will still return the user record,
      *
-     * @param username the username identifying the user whose data is required.
+     * @param principal the principal identifying the user whose data is required, like username or email.
      * @return a fully populated user record event the user has no GrantedAuthority,
      * or <code>null</code> if the user could not be found
      */
-    EulerUserDetails provideUserDetails(String username);
+    EulerUserDetails loadUserByPrincipal(String principal);
 
     @Override
-    default UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails userDetails = this.provideUserDetails(username);
+    default EulerUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        EulerUserDetails userDetails = this.loadUserByPrincipal(username);
 
         if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
             throw new UsernameNotFoundException("User '" + username + "' not found.");
@@ -47,4 +46,7 @@ public interface EulerUserDetailsManager extends UserDetailsManager, UserDetails
             return userDetails;
         }
     }
+
+    @Override
+    EulerUserDetails updatePassword(UserDetails user, String newPassword);
 }

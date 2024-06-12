@@ -15,9 +15,9 @@
  */
 package org.eulerframework.security.core.userdetails.provisioning;
 
+import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.exception.UserDetailsNotFountException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -34,14 +34,19 @@ public abstract class AbstractEulerUserDetailsManager implements EulerUserDetail
     private final Logger logger = LoggerFactory.getLogger(AbstractEulerUserDetailsManager.class);
 
     private final EulerUserService eulerUserService;
+    private final SecurityContextHolderStrategy securityContextHolderStrategy;
 
     private AuthenticationManager authenticationManager;
-    private SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder
-            .getContextHolderStrategy();
 
     protected AbstractEulerUserDetailsManager(EulerUserService eulerUserService) {
+        this(eulerUserService, SecurityContextHolder.getContextHolderStrategy());
+    }
+
+    protected AbstractEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy) {
         Assert.notNull(eulerUserService, "eulerUserService must not be null");
+        Assert.notNull(securityContextHolderStrategy, "securityContextHolderStrategy must not be null");
         this.eulerUserService = eulerUserService;
+        this.securityContextHolderStrategy = securityContextHolderStrategy;
     }
 
     @Override
@@ -54,9 +59,9 @@ public abstract class AbstractEulerUserDetailsManager implements EulerUserDetail
         }
         String username = currentUser.getName();
 
-        EulerUserDetails userDetails = this.provideUserDetails(username);
-        if(userDetails == null) {
-            throw new UserDetailsNotFountException("User '" + username + "' not found");
+        EulerUserDetails userDetails = this.loadUserByPrincipal(username);
+        if (userDetails == null) {
+            throw new UserDetailsNotFountException(username);
         }
 
         this.logger.debug("Changing password for user '{}'", username);
@@ -79,32 +84,38 @@ public abstract class AbstractEulerUserDetailsManager implements EulerUserDetail
     }
 
     @Override
-    public UserDetails updatePassword(UserDetails user, String newPassword) {
-        Assert.isAssignable(EulerUserDetails.class, user.getClass(), () -> "Only EulerUserDetails is supported, actually: " + user.getClass().getName());
-        EulerUserDetails userDetails = (EulerUserDetails) user;
-        return this.eulerUserService.updatePassword(userDetails.getUserId(), newPassword);
+    public EulerUserDetails updatePassword(UserDetails userDetails, String newPassword) {
+        EulerUserDetails eulerUserDetails = this.castUserDetails(userDetails);
+        this.eulerUserService.updatePassword(eulerUserDetails.getUserId(), newPassword);
+        EulerUser eulerUser = this.eulerUserService.loadUserById(eulerUserDetails.getUserId());
+        return eulerUser == null ? null : this.eulerUserService.toUserDetails(eulerUser);
     }
 
     @Override
-    public void createUser(UserDetails user) {
-        Assert.isAssignable(EulerUserDetails.class, user.getClass(), () -> "Only EulerUserDetails is supported, actually: " + user.getClass().getName());
-        EulerUserDetails userDetails = (EulerUserDetails) user;
-        this.eulerUserService.createUser(userDetails);
+    public void createUser(UserDetails userDetails) {
+        EulerUserDetails eulerUserDetails = this.castUserDetails(userDetails);
+        this.eulerUserService.createUser(this.eulerUserService.parseUserDetails(eulerUserDetails));
     }
 
     @Override
-    public void updateUser(UserDetails user) {
-        Assert.isAssignable(EulerUserDetails.class, user.getClass(), () -> "Only EulerUserDetails is supported, actually: " + user.getClass().getName());
-        EulerUserDetails userDetails = (EulerUserDetails) user;
-        this.eulerUserService.updateUser(userDetails);
+    public void updateUser(UserDetails userDetails) {
+        EulerUserDetails eulerUserDetails = this.castUserDetails(userDetails);
+        this.eulerUserService.updateUser(this.eulerUserService.parseUserDetails(eulerUserDetails));
     }
 
     @Override
     public void deleteUser(String username) {
-        EulerUserDetails userDetails = this.provideUserDetails(username);
+        EulerUserDetails userDetails = this.loadUserByPrincipal(username);
         if (userDetails != null) {
             this.eulerUserService.deleteUser(userDetails.getUserId());
         }
+    }
+
+    protected EulerUserDetails castUserDetails(UserDetails userDetails) {
+        Assert.notNull(userDetails, "userDetails must not be null");
+        Assert.isInstanceOf(EulerUserDetails.class, userDetails,
+                () -> "Only EulerUserDetails is supported, actually: " + userDetails.getClass().getName());
+        return (EulerUserDetails) userDetails;
     }
 
     protected EulerUserService getEulerUserService() {
@@ -121,9 +132,5 @@ public abstract class AbstractEulerUserDetailsManager implements EulerUserDetail
 
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
-    }
-
-    public void setSecurityContextHolderStrategy(SecurityContextHolderStrategy securityContextHolderStrategy) {
-        this.securityContextHolderStrategy = securityContextHolderStrategy;
     }
 }

@@ -18,7 +18,7 @@ package org.eulerframework.security.jackson2;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.eulerframework.security.core.DefaultEulerAuthority;
-import org.eulerframework.security.core.userdetails.DefaultEulerUserDetails;
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 
 public class EulerSecurityJackson2Module extends SimpleModule {
@@ -30,7 +30,7 @@ public class EulerSecurityJackson2Module extends SimpleModule {
 	@Override
 	public void setupModule(SetupContext context) {
 		SecurityJackson2Modules.enableDefaultTyping(context.getOwner());
-		context.setMixInAnnotations(DefaultEulerUserDetails.class, EulerUserDetailsMixin.class);
+		context.setMixInAnnotations(EulerUserDetails.class, EulerUserDetailsMixin.class);
 		context.setMixInAnnotations(DefaultEulerAuthority.class, EulerAuthorityMixin.class);
 	}
 

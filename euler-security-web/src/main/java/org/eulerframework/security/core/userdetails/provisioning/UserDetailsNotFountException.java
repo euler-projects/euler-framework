@@ -13,24 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core;
+package org.eulerframework.security.core.userdetails.provisioning;
 
-import org.eulerframework.security.core.userdetails.EulerUserDetails;
-
-public interface EulerUserService {
-    EulerUser loadUserById(String userId);
-
-    EulerUser loadUserByUsername(String username);
-
-    void createUser(EulerUser eulerUser);
-
-    void updateUser(EulerUser eulerUser);
-
-    void deleteUser(String userId);
-
-    void updatePassword(String userId, String newPassword);
-
-    EulerUserDetails toUserDetails(EulerUser user);
-
-    EulerUser parseUserDetails(EulerUserDetails userDetails);
+public class UserDetailsNotFountException extends RuntimeException {
+    UserDetailsNotFountException(String principal) {
+        super("User details match principal '" + principal + "' not found");
+    }
 }

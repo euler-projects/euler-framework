@@ -19,34 +19,43 @@ import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MultiProviderEulerUserDetailsManager extends AbstractEulerUserDetailsManager {
-    private final Logger logger = LoggerFactory.getLogger(MultiProviderEulerUserDetailsManager.class);
+public class ProviderEulerUserDetailsManager extends AbstractEulerUserDetailsManager {
+    private final Logger logger = LoggerFactory.getLogger(ProviderEulerUserDetailsManager.class);
 
     private final List<EulerUserDetailsProvider> eulerUserDetailsProviders = new ArrayList<>();
 
-    public MultiProviderEulerUserDetailsManager(EulerUserService eulerUserService, EulerUserDetailsProvider... eulerUserDetailsProvider) {
-        super(eulerUserService);
-        Assert.notEmpty(eulerUserDetailsProvider, "eulerUserDetailsProvider must not be empty");
-        this.eulerUserDetailsProviders.addAll(Arrays.asList(eulerUserDetailsProvider));
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, EulerUserDetailsProvider... eulerUserDetailsProvider) {
+        this(eulerUserService, Arrays.asList(eulerUserDetailsProvider));
     }
 
-    public MultiProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy, EulerUserDetailsProvider... eulerUserDetailsProvider) {
+        this(eulerUserService, securityContextHolderStrategy, Arrays.asList(eulerUserDetailsProvider));
+    }
+
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
         super(eulerUserService);
         Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }
 
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy, List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
+        super(eulerUserService, securityContextHolderStrategy);
+        Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
+        this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
+    }
+
     @Override
-    public EulerUserDetails provideUserDetails(String username) {
+    public EulerUserDetails loadUserByPrincipal(String principal) {
         EulerUserDetails userDetails = null;
         for (EulerUserDetailsProvider provider : this.eulerUserDetailsProviders) {
-            if ((userDetails = provider.provide(username)) != null) {
+            if ((userDetails = provider.provide(principal)) != null) {
                 break;
             }
         }
@@ -55,6 +64,6 @@ public class MultiProviderEulerUserDetailsManager extends AbstractEulerUserDetai
 
     @Override
     public boolean userExists(String username) {
-        return this.provideUserDetails(username) != null;
+        return this.loadUserByPrincipal(username) != null;
     }
 }

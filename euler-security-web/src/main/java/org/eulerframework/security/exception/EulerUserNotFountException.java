@@ -15,8 +15,8 @@
  */
 package org.eulerframework.security.exception;
 
-public class AuthorityNotFountException extends RuntimeException{
-    public AuthorityNotFountException(String message) {
+public class EulerUserNotFountException extends RuntimeException{
+    public EulerUserNotFountException(String message) {
         super(message);
     }
 }

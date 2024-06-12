@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import org.eulerframework.security.core.EulerAuthority;
-import org.eulerframework.security.core.userdetails.DefaultEulerUserDetails;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -64,8 +63,7 @@ class DefaultEulerUserDetailsDeserializer extends JsonDeserializer<EulerUserDeta
 		boolean accountNonExpired = readJsonNode(jsonNode, "accountNonExpired").asBoolean();
 		boolean credentialsNonExpired = readJsonNode(jsonNode, "credentialsNonExpired").asBoolean();
 		boolean accountNonLocked = readJsonNode(jsonNode, "accountNonLocked").asBoolean();
-		EulerUserDetails result = new DefaultEulerUserDetails(userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked,
-				authorities);
+		EulerUserDetails result = new EulerUserDetails(userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 		if (passwordNode.asText(null) == null) {
 			result.eraseCredentials();
 		}

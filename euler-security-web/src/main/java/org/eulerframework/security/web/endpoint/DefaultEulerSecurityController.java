@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.web.endpoint;
 
-import org.eulerframework.security.core.userdetails.DefaultEulerUserDetails;
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.provisioning.EulerUserDetailsManager;
 import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +73,11 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
 //            Captcha.validCaptcha(this.getRequest());
 //        }
 
-        DefaultEulerUserDetails userDetails = new DefaultEulerUserDetails(null, username, this.passwordEncoder.encode(password), new ArrayList<>());
+        EulerUserDetails userDetails = EulerUserDetails.builder()
+                .passwordEncoder(this.passwordEncoder::encode)
+                .username(username)
+                .password(password)
+                .build();
         this.eulerUserDetailsManager.createUser(userDetails);
         return this.success(null, new Target("login", "_SIGN_IN"));
     }
