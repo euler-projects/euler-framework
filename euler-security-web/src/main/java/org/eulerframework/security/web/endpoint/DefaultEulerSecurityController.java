@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.web.endpoint;
 
+import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.provisioning.EulerUserDetailsManager;
 import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
@@ -24,8 +25,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import java.util.ArrayList;
 
 @Controller
 public class DefaultEulerSecurityController extends ThymeleafSupportWebController implements EulerSecurityController {
@@ -77,7 +76,7 @@ public class DefaultEulerSecurityController extends ThymeleafSupportWebControlle
                 .passwordEncoder(this.passwordEncoder::encode)
                 .username(username)
                 .password(password)
-                .authorities("user")
+                .authorities(EulerAuthority.USER)
                 .build();
         this.eulerUserDetailsManager.createUser(userDetails);
         return this.success(null, new Target("login", "_SIGN_IN"));

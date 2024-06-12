@@ -18,6 +18,9 @@ package org.eulerframework.security.core;
 import org.springframework.security.core.GrantedAuthority;
 
 public interface EulerAuthority extends GrantedAuthority {
+    String ROOT = "root";
+    String USER = "user";
+
     String getName();
     String getDescription();
 }
