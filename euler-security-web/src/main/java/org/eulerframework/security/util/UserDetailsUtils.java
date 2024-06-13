@@ -1,24 +1,46 @@
 package org.eulerframework.security.util;
 
+import org.eulerframework.security.core.EulerAuthority;
+import org.eulerframework.security.core.userdetails.EulerGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class UserDetailsUtils {
-    public static <A extends GrantedAuthority> SortedSet<A> sortAuthorities(Collection<A> authorities) {
+    public static Collection<GrantedAuthority> toGrantedAuthorities(Collection<? extends EulerAuthority> eulerAuthorities) {
+        if (CollectionUtils.isEmpty(eulerAuthorities)) {
+            return Collections.emptyList();
+        }
+
+        return eulerAuthorities.stream()
+                .map(ea -> new EulerGrantedAuthority(ea.getAuthority(), ea.getName(), ea.getDescription()))
+                .collect(Collectors.toList());
+    }
+
+    public static <A extends GrantedAuthority> SortedSet<A> sortGrantedAuthorities(Collection<A> authorities) {
         Assert.notNull(authorities, "Cannot pass a null GrantedAuthority collection");
         // Ensure array iteration order is predictable (as per
         // UserDetails.getAuthorities() contract and SEC-717)
         SortedSet<A> sortedAuthorities = new TreeSet<>(UserDetailsUtils::compareGrantedAuthority);
+        Set<String> authorityCodes = new HashSet<>();
         for (A grantedAuthority : authorities) {
             Assert.notNull(grantedAuthority, "GrantedAuthority list cannot contain any null elements");
+            if (authorityCodes.contains(grantedAuthority.getAuthority())) {
+                throw new IllegalArgumentException(
+                        "Can not sort authorities, there are more than one authority which code is: "
+                                + grantedAuthority.getAuthority());
+            }
+            authorityCodes.add(grantedAuthority.getAuthority());
+
             sortedAuthorities.add(grantedAuthority);
         }
         return sortedAuthorities;
     }
 
-    public static int compareGrantedAuthority(GrantedAuthority g1, GrantedAuthority g2) {
+    private static int compareGrantedAuthority(GrantedAuthority g1, GrantedAuthority g2) {
         // Neither should ever be null as each entry is checked before adding it to
         // the set. If the authority is null, it is a custom authority and should
         // precede others.

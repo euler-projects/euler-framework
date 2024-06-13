@@ -22,19 +22,19 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
-import org.eulerframework.security.core.userdetails.GrantedEulerAuthority;
+import org.eulerframework.security.core.userdetails.EulerGrantedAuthority;
 
 import java.io.IOException;
 
-class GrantedEulerAuthorityDeserializer extends JsonDeserializer<GrantedEulerAuthority> {
+class EulerGrantedAuthorityDeserializer extends JsonDeserializer<EulerGrantedAuthority> {
     @Override
-    public GrantedEulerAuthority deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public EulerGrantedAuthority deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         ObjectMapper mapper = (ObjectMapper) jp.getCodec();
         JsonNode jsonNode = mapper.readTree(jp);
         String authority = readJsonNode(jsonNode, "authority").asText();
         String name = readJsonNode(jsonNode, "name").asText();
         String description = readJsonNode(jsonNode, "description").asText();
-        return new GrantedEulerAuthority(authority, name, description);
+        return new EulerGrantedAuthority(authority, name, description);
     }
 
     private JsonNode readJsonNode(JsonNode jsonNode, String field) {

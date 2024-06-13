@@ -15,7 +15,6 @@
  */
 package org.eulerframework.security.core.userdetails;
 
-import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.util.UserDetailsUtils;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +22,6 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -83,7 +81,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         this.accountNonExpired = accountNonExpired;
         this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
-        this.authorities = Collections.unmodifiableSet(UserDetailsUtils.sortAuthorities(convertAuthorities(authorities)));
+        this.authorities = Collections.unmodifiableSet(UserDetailsUtils.sortGrantedAuthorities(authorities));
     }
 
     public String getUserId() {
@@ -391,37 +389,5 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
             return new EulerUserDetails(this.userId, this.username, encodedPassword, !this.disabled, !this.accountExpired,
                     !this.credentialsExpired, !this.accountLocked, this.authorities);
         }
-    }
-
-    private static Collection<? extends GrantedAuthority> convertAuthorities(Collection<? extends GrantedAuthority> grantedAuthorities) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        if (CollectionUtils.isEmpty(grantedAuthorities)) {
-            return authorities;
-        }
-
-        Set<String> authorityCodes = new HashSet<>();
-
-        for (GrantedAuthority grantedAuthority : grantedAuthorities) {
-            if (authorityCodes.contains(grantedAuthority.getAuthority())) {
-                throw new IllegalArgumentException(
-                        "Can not convert granted authorities, there are more than one authority which code is: "
-                                + grantedAuthority.getAuthority());
-            }
-            authorityCodes.add(grantedAuthority.getAuthority());
-
-            GrantedAuthority authority;
-            if (grantedAuthority instanceof GrantedEulerAuthority) {
-                authority = grantedAuthority;
-            } else if (EulerAuthority.class.isAssignableFrom(grantedAuthority.getClass())) {
-                EulerAuthority eulerAuthority = (EulerAuthority) grantedAuthority;
-                authority = new GrantedEulerAuthority(eulerAuthority.getAuthority(), eulerAuthority.getName(), eulerAuthority.getDescription());
-            } else {
-                authority = new GrantedEulerAuthority(grantedAuthority.getAuthority(), null, null);
-            }
-            authorities.add(authority);
-        }
-
-        return authorities;
     }
 }

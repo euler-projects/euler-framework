@@ -15,14 +15,14 @@
  */
 package org.eulerframework.security.core.userdetails;
 
-import org.eulerframework.security.core.EulerAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
-public class GrantedEulerAuthority implements EulerAuthority {
+public final class EulerGrantedAuthority implements GrantedAuthority {
     private final String authority;
     private final String name;
     private final String description;
 
-    public GrantedEulerAuthority(String authority, String name, String description) {
+    public EulerGrantedAuthority(String authority, String name, String description) {
         this.authority = authority;
         this.name = name;
         this.description = description;
@@ -33,12 +33,10 @@ public class GrantedEulerAuthority implements EulerAuthority {
         return authority;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public String getDescription() {
         return description;
     }
