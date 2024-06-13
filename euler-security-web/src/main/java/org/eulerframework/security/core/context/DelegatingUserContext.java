@@ -15,6 +15,8 @@
  */
 package org.eulerframework.security.core.context;
 
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,24 +29,24 @@ public class DelegatingUserContext implements UserContext {
     }
 
     @Override
-    public String getUsername() {
-        String username = null;
+    public EulerUserDetails getUserDetails() {
+        EulerUserDetails userDetails = null;
         for (UserContext userContext : this.userContexts) {
-            if ((username = userContext.getUsername()) != null) {
-                return username;
+            if ((userDetails = userContext.getUserDetails()) != null) {
+                break;
             }
         }
-        return username;
+        return userDetails;
     }
 
     @Override
-    public String getTenantId() {
-        String tenantId = null;
+    public String getUserId() {
+        String userId = null;
         for (UserContext userContext : this.userContexts) {
-            if ((tenantId = userContext.getTenantId()) != null) {
-                return tenantId;
+            if ((userId = userContext.getUserId()) != null) {
+                break;
             }
         }
-        return tenantId;
+        return userId;
     }
 }

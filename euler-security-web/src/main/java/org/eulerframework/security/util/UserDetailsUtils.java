@@ -3,9 +3,7 @@ package org.eulerframework.security.util;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public abstract class UserDetailsUtils {
     public static <A extends GrantedAuthority> SortedSet<A> sortAuthorities(Collection<A> authorities) {

@@ -15,7 +15,12 @@
  */
 package org.eulerframework.security.core.context;
 
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
+
 public interface UserContext {
-    String getUsername();
-    String getTenantId();
+    EulerUserDetails getUserDetails();
+    String getUserId();
+    default String getTenantId() {
+        return "1";
+    }
 }

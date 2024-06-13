@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core;
+package org.eulerframework.security.core.userdetails;
 
-public class DefaultEulerAuthority implements EulerAuthority {
+import org.eulerframework.security.core.EulerAuthority;
+
+public class GrantedEulerAuthority implements EulerAuthority {
     private final String authority;
     private final String name;
     private final String description;
 
-    public DefaultEulerAuthority(String authority, String name, String description) {
+    public GrantedEulerAuthority(String authority, String name, String description) {
         this.authority = authority;
         this.name = name;
         this.description = description;

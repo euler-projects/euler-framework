@@ -16,6 +16,7 @@
 package org.eulerframework.security.core.userdetails.provisioning;
 
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.util.CollectionUtils;
 
-public interface EulerUserDetailsManager extends UserDetailsManager, UserDetailsPasswordService {
+public interface EulerUserDetailsManager extends EulerUserDetailsService, UserDetailsManager, UserDetailsPasswordService {
     /**
      * Like {@link UserDetailsService#loadUserByUsername(String)},
      * but will return <code>null</code> instead of throw {@link UsernameNotFoundException} if principal not found.

@@ -39,13 +39,13 @@ public class ProviderEulerUserDetailsManager extends AbstractEulerUserDetailsMan
         this(eulerUserService, securityContextHolderStrategy, Arrays.asList(eulerUserDetailsProvider));
     }
 
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
         super(eulerUserService);
         Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }
 
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy, List<EulerUserDetailsProvider> eulerUserDetailsProviders) {
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
         super(eulerUserService, securityContextHolderStrategy);
         Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);

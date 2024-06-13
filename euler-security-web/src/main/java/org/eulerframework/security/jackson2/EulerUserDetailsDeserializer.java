@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.Set;
 
 
-class DefaultEulerUserDetailsDeserializer extends JsonDeserializer<EulerUserDetails> {
+class EulerUserDetailsDeserializer extends JsonDeserializer<EulerUserDetails> {
 
 	private static final TypeReference<Set<EulerAuthority>> SIMPLE_GRANTED_AUTHORITY_SET = new TypeReference<>() {
     };

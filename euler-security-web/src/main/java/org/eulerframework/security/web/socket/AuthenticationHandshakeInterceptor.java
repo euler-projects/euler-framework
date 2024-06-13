@@ -37,7 +37,7 @@ public class AuthenticationHandshakeInterceptor implements HandshakeInterceptor 
     @Override
     public boolean beforeHandshake(@Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response, @Nonnull WebSocketHandler wsHandler, @Nonnull Map<String, Object> attributes) throws Exception {
         attributes.put(ATTR_TENANT_ID, this.userContext.getTenantId());
-        attributes.put(ATTR_USERNAME, this.userContext.getUsername());
+        attributes.put(ATTR_USERNAME, this.userContext.getUserId());
         return true;
     }
 

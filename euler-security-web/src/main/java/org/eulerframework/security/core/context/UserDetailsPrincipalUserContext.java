@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.context;
+package org.eulerframework.security.core.context;
 
-import org.eulerframework.security.core.context.UserContext;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class UsernamePasswordAuthenticationUserContext implements UserContext {
+public class UserDetailsPrincipalUserContext implements UserContext {
     @Override
-    public String getUsername() {
+    public EulerUserDetails getUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof UsernamePasswordAuthenticationToken) {
-            return ((UserDetails) authentication.getPrincipal()).getUsername();
+
+        if (authentication == null) {
+            return null;
         }
 
-        return null;
+        return authentication.getPrincipal() instanceof EulerUserDetails userDetails ? userDetails : null;
     }
 
     @Override
-    public String getTenantId() {
-        return "1";
+    public String getUserId() {
+        EulerUserDetails userDetails = getUserDetails();
+        return userDetails == null ? null : userDetails.getUserId();
     }
 }

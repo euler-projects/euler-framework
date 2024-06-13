@@ -21,10 +21,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-@JsonDeserialize(using = DefaultEulerAuthorityDeserializer.class)
+@JsonDeserialize(using = GrantedEulerAuthorityDeserializer.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class EulerAuthorityMixin {
+public abstract class GrantedEulerAuthorityMixin {
 
 }
