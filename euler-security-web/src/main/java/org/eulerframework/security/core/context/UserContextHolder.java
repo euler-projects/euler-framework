@@ -14,7 +14,7 @@ public class UserContextHolder {
 
         synchronized (UserContextHolder.class) {
             if (userContext != null) {
-                throw new IllegalStateException("UserContextHolder already initialized");
+                return userContext;
             }
 
             return new DeferredUserContext(UserContextHolder::getUserContextBean);
