@@ -16,9 +16,7 @@
 package org.eulerframework.security.core.userdetails;
 
 import org.eulerframework.security.core.EulerUserService;
-import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.provider.EulerUserDetailsProvider;
-import org.eulerframework.security.provisioning.DefaultEulerUserDetailsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;

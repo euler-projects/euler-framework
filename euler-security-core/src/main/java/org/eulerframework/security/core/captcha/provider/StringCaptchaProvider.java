@@ -17,8 +17,8 @@ package org.eulerframework.security.core.captcha.provider;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.eulerframework.common.util.Assert;
-import org.eulerframework.security.core.captcha.StringCaptcha;
 import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
+import org.eulerframework.security.core.captcha.StringCaptcha;
 import org.eulerframework.security.exception.InvalidCaptchaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

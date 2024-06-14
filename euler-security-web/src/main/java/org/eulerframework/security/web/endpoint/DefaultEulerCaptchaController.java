@@ -18,7 +18,7 @@ package org.eulerframework.security.web.endpoint;
 import org.eulerframework.security.core.captcha.StringCaptcha;
 import org.eulerframework.security.core.captcha.provider.StringCaptchaProvider;
 import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
-import org.eulerframework.security.core.captcha.storage.SessionStringCaptchaStorage;
+import org.eulerframework.security.web.captcha.storage.SessionStringCaptchaStorage;
 import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
 import org.eulerframework.security.core.captcha.util.ImageStringCaptchaDrawer;
 import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;

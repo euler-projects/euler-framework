@@ -18,7 +18,6 @@ package org.eulerframework.security.core.context;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public class UserDetailsPrincipalUserContext implements UserContext {
     @Override

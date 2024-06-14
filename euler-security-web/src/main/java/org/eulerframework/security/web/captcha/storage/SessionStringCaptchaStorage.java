@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.captcha.storage;
+package org.eulerframework.security.web.captcha.storage;
 
 import jakarta.servlet.http.HttpSession;
 import org.eulerframework.security.core.captcha.StringCaptcha;
+import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
 import org.eulerframework.web.util.ServletUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
