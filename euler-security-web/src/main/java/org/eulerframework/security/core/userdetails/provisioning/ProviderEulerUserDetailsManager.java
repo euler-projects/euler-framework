@@ -16,17 +16,17 @@
 package org.eulerframework.security.core.userdetails.provisioning;
 
 import org.eulerframework.security.core.EulerUserService;
+import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ProviderEulerUserDetailsManager extends AbstractEulerUserDetailsManager {
+public class ProviderEulerUserDetailsManager extends DefaultEulerUserDetailsManager {
     private final Logger logger = LoggerFactory.getLogger(ProviderEulerUserDetailsManager.class);
 
     private final List<EulerUserDetailsProvider> eulerUserDetailsProviders = new ArrayList<>();
@@ -35,8 +35,8 @@ public class ProviderEulerUserDetailsManager extends AbstractEulerUserDetailsMan
         this(eulerUserService, Arrays.asList(eulerUserDetailsProvider));
     }
 
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy, EulerUserDetailsProvider... eulerUserDetailsProvider) {
-        this(eulerUserService, securityContextHolderStrategy, Arrays.asList(eulerUserDetailsProvider));
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, UserContext userContext, EulerUserDetailsProvider... eulerUserDetailsProvider) {
+        this(eulerUserService, userContext, Arrays.asList(eulerUserDetailsProvider));
     }
 
     public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
@@ -45,8 +45,8 @@ public class ProviderEulerUserDetailsManager extends AbstractEulerUserDetailsMan
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }
 
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, SecurityContextHolderStrategy securityContextHolderStrategy, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
-        super(eulerUserService, securityContextHolderStrategy);
+    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, UserContext userContext, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
+        super(eulerUserService, userContext);
         Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }
@@ -60,10 +60,5 @@ public class ProviderEulerUserDetailsManager extends AbstractEulerUserDetailsMan
             }
         }
         return userDetails;
-    }
-
-    @Override
-    public boolean userExists(String username) {
-        return this.loadUserByPrincipal(username) != null;
     }
 }

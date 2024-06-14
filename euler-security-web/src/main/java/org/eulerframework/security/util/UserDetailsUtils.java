@@ -32,7 +32,7 @@ public abstract class UserDetailsUtils {
                 .build();
     }
 
-    public static GrantedAuthority toGrantedAuthority(EulerAuthority eulerAuthority) {
+    public static EulerGrantedAuthority toGrantedAuthority(EulerAuthority eulerAuthority) {
         return eulerAuthority == null ? null : new EulerGrantedAuthority(
                 eulerAuthority.getAuthority(),
                 eulerAuthority.getName(),

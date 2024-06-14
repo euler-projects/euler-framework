@@ -107,7 +107,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
     }
 
     @Override
-    public Set<GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         return authorities;
     }
 

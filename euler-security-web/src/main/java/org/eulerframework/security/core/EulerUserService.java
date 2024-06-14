@@ -22,7 +22,7 @@ public interface EulerUserService {
 
     EulerUser loadUserByUsername(String username);
 
-    void createUser(EulerUser eulerUser);
+    EulerUser createUser(EulerUserDetails userDetails);
 
     void updateUser(EulerUser eulerUser);
 
@@ -31,6 +31,4 @@ public interface EulerUserService {
     void deleteUser(String userId);
 
     void updatePassword(String userId, String newPassword);
-
-    EulerUser parseUserDetails(EulerUserDetails userDetails);
 }

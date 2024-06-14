@@ -1,5 +1,6 @@
 package org.eulerframework.security.core;
 
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.CredentialsContainer;
 
 import java.util.Collection;
@@ -68,4 +69,6 @@ public interface EulerUser extends CredentialsContainer {
     default boolean isEnabled() {
         return true;
     }
+
+    void reloadUserDetails(EulerUserDetails userDetails);
 }
