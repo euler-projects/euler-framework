@@ -18,6 +18,7 @@ package org.eulerframework.security.core.userdetails.provisioning;
 import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.util.UserDetailsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -88,7 +89,7 @@ public abstract class AbstractEulerUserDetailsManager implements EulerUserDetail
         EulerUserDetails eulerUserDetails = this.castUserDetails(userDetails);
         this.eulerUserService.updatePassword(eulerUserDetails.getUserId(), newPassword);
         EulerUser eulerUser = this.eulerUserService.loadUserById(eulerUserDetails.getUserId());
-        return eulerUser == null ? null : this.eulerUserService.toUserDetails(eulerUser);
+        return UserDetailsUtils.toEulerUserDetails(eulerUser);
     }
 
     @Override

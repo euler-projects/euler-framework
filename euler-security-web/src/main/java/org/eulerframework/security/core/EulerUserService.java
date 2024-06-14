@@ -32,7 +32,5 @@ public interface EulerUserService {
 
     void updatePassword(String userId, String newPassword);
 
-    EulerUserDetails toUserDetails(EulerUser user);
-
     EulerUser parseUserDetails(EulerUserDetails userDetails);
 }

@@ -1,23 +1,43 @@
 package org.eulerframework.security.util;
 
 import org.eulerframework.security.core.EulerAuthority;
+import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.userdetails.EulerGrantedAuthority;
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class UserDetailsUtils {
-    public static Collection<GrantedAuthority> toGrantedAuthorities(Collection<? extends EulerAuthority> eulerAuthorities) {
-        if (CollectionUtils.isEmpty(eulerAuthorities)) {
-            return Collections.emptyList();
+    public static EulerUserDetails toEulerUserDetails(EulerUser eulerUser) {
+        if (eulerUser == null) {
+            return null;
         }
 
-        return eulerAuthorities.stream()
-                .map(ea -> new EulerGrantedAuthority(ea.getAuthority(), ea.getName(), ea.getDescription()))
-                .collect(Collectors.toList());
+        return EulerUserDetails.builder()
+                .userId(eulerUser.getUserId())
+                .password(eulerUser.getPassword())
+                .username(eulerUser.getUsername())
+                .accountExpired(!eulerUser.isAccountNonExpired())
+                .accountLocked(!eulerUser.isAccountNonLocked())
+                .credentialsExpired(!eulerUser.isCredentialsNonExpired())
+                .disabled(!eulerUser.isEnabled())
+                .authorities(Optional.ofNullable(eulerUser.getAuthorities())
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(UserDetailsUtils::toGrantedAuthority)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    public static GrantedAuthority toGrantedAuthority(EulerAuthority eulerAuthority) {
+        return eulerAuthority == null ? null : new EulerGrantedAuthority(
+                eulerAuthority.getAuthority(),
+                eulerAuthority.getName(),
+                eulerAuthority.getDescription()
+        );
     }
 
     public static <A extends GrantedAuthority> SortedSet<A> sortGrantedAuthorities(Collection<A> authorities) {
