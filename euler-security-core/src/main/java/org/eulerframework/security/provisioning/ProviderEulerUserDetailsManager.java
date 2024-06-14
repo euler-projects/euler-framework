@@ -52,6 +52,6 @@ public class ProviderEulerUserDetailsManager extends DefaultEulerUserDetailsMana
 
     @Override
     public EulerUserDetails loadUserByPrincipal(String principal) {
-        return this.providerEulerUserDetailsService.loadUserByUsername(principal);
+        return this.providerEulerUserDetailsService.loadUserByPrincipal(principal);
     }
 }
