@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.userdetails.provisioning;
+package org.eulerframework.security.core.userdetails;
 
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.context.UserContext;
-import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.core.userdetails.provider.EulerUserDetailsProvider;
+import org.eulerframework.security.provisioning.DefaultEulerUserDetailsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -26,27 +27,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ProviderEulerUserDetailsManager extends DefaultEulerUserDetailsManager {
-    private final Logger logger = LoggerFactory.getLogger(ProviderEulerUserDetailsManager.class);
+public class ProviderEulerUserDetailsService extends DefaultEulerUserDetailsService {
+    private final Logger logger = LoggerFactory.getLogger(ProviderEulerUserDetailsService.class);
 
     private final List<EulerUserDetailsProvider> eulerUserDetailsProviders = new ArrayList<>();
 
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, EulerUserDetailsProvider... eulerUserDetailsProvider) {
+    public ProviderEulerUserDetailsService(EulerUserService eulerUserService, EulerUserDetailsProvider... eulerUserDetailsProvider) {
         this(eulerUserService, Arrays.asList(eulerUserDetailsProvider));
     }
 
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, UserContext userContext, EulerUserDetailsProvider... eulerUserDetailsProvider) {
-        this(eulerUserService, userContext, Arrays.asList(eulerUserDetailsProvider));
-    }
-
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
+    public ProviderEulerUserDetailsService(EulerUserService eulerUserService, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
         super(eulerUserService);
-        Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
-        this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
-    }
-
-    public ProviderEulerUserDetailsManager(EulerUserService eulerUserService, UserContext userContext, List<? extends EulerUserDetailsProvider> eulerUserDetailsProviders) {
-        super(eulerUserService, userContext);
         Assert.notEmpty(eulerUserDetailsProviders, "eulerUserDetailsProviders must not be empty");
         this.eulerUserDetailsProviders.addAll(eulerUserDetailsProviders);
     }

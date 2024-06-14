@@ -17,7 +17,7 @@ package org.eulerframework.security.jackson2;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.eulerframework.security.core.userdetails.EulerGrantedAuthority;
+import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 

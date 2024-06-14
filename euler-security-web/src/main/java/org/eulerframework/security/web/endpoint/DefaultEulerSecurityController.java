@@ -17,7 +17,7 @@ package org.eulerframework.security.web.endpoint;
 
 import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.core.userdetails.provisioning.EulerUserDetailsManager;
+import org.eulerframework.security.provisioning.EulerUserDetailsManager;
 import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

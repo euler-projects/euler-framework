@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
-import org.eulerframework.security.core.userdetails.EulerGrantedAuthority;
+import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;

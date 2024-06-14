@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.userdetails.provisioning;
+package org.eulerframework.security.core.userdetails.provider;
 
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 

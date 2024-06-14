@@ -2,7 +2,7 @@ package org.eulerframework.security.util;
 
 import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.EulerUser;
-import org.eulerframework.security.core.userdetails.EulerGrantedAuthority;
+import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;

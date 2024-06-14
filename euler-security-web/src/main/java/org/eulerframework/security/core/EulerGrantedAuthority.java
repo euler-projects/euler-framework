@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.userdetails;
+package org.eulerframework.security.core;
 
 import org.springframework.security.core.GrantedAuthority;
 
