@@ -10,21 +10,11 @@
         <relativePath>../eulerframework-parent</relativePath>
     </parent>
 
-    <artifactId>euler-security-web</artifactId>
+    <artifactId>euler-security-core</artifactId>
     <dependencies>
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -43,14 +33,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eulerframework</groupId>
-            <artifactId>euler-security-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eulerframework</groupId>
-            <artifactId>euler-web-core</artifactId>
         </dependency>
     </dependencies>
 

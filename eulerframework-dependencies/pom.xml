@@ -30,6 +30,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-security-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-security-web</artifactId>
                 <version>${revision}</version>
             </dependency>
