@@ -21,13 +21,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.constant.EulerSysAttributes;
-import org.eulerframework.util.SystemUtils;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.exception.web.*;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -304,11 +302,6 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
     public String webException(WebException e) {
         this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public String badCredentialsException(BadCredentialsException e) {
-        return this.error(new BadCredentialsWebException());
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)

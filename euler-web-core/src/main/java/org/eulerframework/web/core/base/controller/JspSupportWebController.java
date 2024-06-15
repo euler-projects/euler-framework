@@ -22,7 +22,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -31,7 +30,6 @@ import org.eulerframework.common.util.Assert;
 import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
-import org.eulerframework.web.core.exception.web.BadCredentialsWebException;
 import org.eulerframework.web.core.exception.web.PageNotFoundException;
 import org.eulerframework.web.core.exception.web.SystemWebError;
 import org.eulerframework.web.core.exception.web.UndefinedWebException;
@@ -293,11 +291,6 @@ public abstract class JspSupportWebController extends AbstractWebController {
     public String webException(WebException e) {
         this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
-    }
-    
-    @ExceptionHandler(BadCredentialsException.class)
-    public String badCredentialsException(BadCredentialsException e) {
-        return this.error(new BadCredentialsWebException());
     }
     
     @ExceptionHandler(MissingServletRequestParameterException.class)
