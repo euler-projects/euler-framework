@@ -25,6 +25,11 @@
         <dependencies>
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-web-support</artifactId>
                 <version>${revision}</version>
             </dependency>

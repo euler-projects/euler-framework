@@ -15,7 +15,7 @@
  */
 package org.eulerframework.data.file;
 
-import org.eulerframework.core.model.AbstractResourceModel;
+import org.eulerframework.model.AbstractResourceModel;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;

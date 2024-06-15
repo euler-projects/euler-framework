@@ -17,7 +17,7 @@ package org.eulerframework.web.config;
 
 import junit.framework.Assert;
 import org.eulerframework.common.util.CommonUtils;
-import org.eulerframework.web.util.SystemUtils;
+import org.eulerframework.util.SystemUtils;
 import org.junit.Test;
 
 import java.nio.file.FileSystemException;

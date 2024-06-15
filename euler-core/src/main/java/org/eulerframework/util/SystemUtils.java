@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.config;
+package org.eulerframework.util;
 
 import org.eulerframework.common.util.property.FilePropertySource;
 import org.eulerframework.common.util.property.PropertyNotFoundException;
@@ -22,28 +22,39 @@ import org.eulerframework.common.util.property.PropertyReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-/**
- * 用户获取系统参数
- *
- * @author cFrost
- */
-public final class SystemProperties {
+public class SystemUtils {
 
-    private final static PropertyReader properties;
-
-    static {
-        try {
-            properties = new PropertyReader(new FilePropertySource("/system.properties"));
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
     public static String frameworkVersion() {
-        try {
-            return properties.getString("version");
-        } catch (PropertyNotFoundException e) {
-            throw new RuntimeException(e);
+        return SystemProperties.frameworkVersion();
+    }
+
+    /**
+     * 用户获取系统参数
+     *
+     * @author cFrost
+     */
+    private static final class SystemProperties {
+
+        private final static PropertyReader properties;
+
+        static {
+            try {
+                properties = new PropertyReader(new FilePropertySource("/system.properties"));
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static String frameworkVersion() {
+            try {
+                return properties.getString("version");
+            } catch (PropertyNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

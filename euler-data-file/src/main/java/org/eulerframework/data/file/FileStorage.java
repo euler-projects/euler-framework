@@ -16,7 +16,7 @@
 package org.eulerframework.data.file;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.eulerframework.core.function.Handler;
+import org.eulerframework.util.function.Handler;
 import org.eulerframework.data.file.servlet.JdbcStorageFileDownloader;
 
 import java.io.File;

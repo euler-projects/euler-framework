@@ -13,17 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.core.model;
+package org.eulerframework.model;
 
-public class AbstractResourceModel extends AbstractPrincipalAuditingModel implements ResourceModel {
-    private String tenantId;
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
+public interface PrincipalAuditingModel extends AuditingModel {
+    String getCreatedBy();
+    String getLastModifiedBy();
 }

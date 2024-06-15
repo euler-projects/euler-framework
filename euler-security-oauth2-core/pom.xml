@@ -34,8 +34,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.eulerframework</groupId>
-            <artifactId>euler-security-web</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-security-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

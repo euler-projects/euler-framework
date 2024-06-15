@@ -44,13 +44,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
         <dependency>
-            <groupId>org.eulerframework</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>euler-security-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eulerframework</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>euler-web-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

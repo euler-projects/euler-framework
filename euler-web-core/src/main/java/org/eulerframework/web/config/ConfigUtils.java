@@ -17,7 +17,7 @@ package org.eulerframework.web.config;
 
 import org.eulerframework.common.util.CommonUtils;
 import org.eulerframework.common.util.StringUtils;
-import org.eulerframework.web.util.SystemUtils;
+import org.eulerframework.util.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

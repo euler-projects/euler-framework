@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.constant.EulerSysAttributes;
+import org.eulerframework.util.SystemUtils;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.exception.web.*;
@@ -29,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.io.PrintWriter;
@@ -37,10 +37,13 @@ import java.io.StringWriter;
 import java.util.*;
 
 public abstract class ThymeleafSupportWebController extends AbstractWebController {
-    private final static String THEME_PARAM_NAME = "_theme";
-    private final static String THEME_COOKIE_NAME = "EULER_THEME";
-    private final static String CONTROLLER_NAME_SUFFIX = "PageController";
-    private final static int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
+    private static final String THEME_PARAM_NAME = "_theme";
+    private static final String THEME_COOKIE_NAME = "EULER_THEME";
+    private static final String CONTROLLER_NAME_SUFFIX = "PageController";
+    private static final int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
+
+    private static volatile Map<String, Object> TEMPLATE_ATTRIBUTES = null;
+    private static final Object TEMPLATE_ATTRIBUTES_LOCK = new Object();
 
     private String webControllerName;
 
@@ -119,16 +122,15 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
     protected String display(String view) {
         Assert.notNull(view, "view path is empty");
 
-        ServletContext servletContext = getServletContext();
-        Set<String> eulerSysAttributeNames = EulerSysAttributes.getEulerSysAttributeNames();
-        Map<String, Object> context = new HashMap<>();
-        for (String eulerSysAttributeName : eulerSysAttributeNames) {
-            Object value = servletContext.getAttribute(eulerSysAttributeName);
-            if (value != null) {
-                context.put(eulerSysAttributeName, value);
+        if (TEMPLATE_ATTRIBUTES == null) {
+            synchronized (TEMPLATE_ATTRIBUTES_LOCK) {
+                if (TEMPLATE_ATTRIBUTES == null) {
+                    TEMPLATE_ATTRIBUTES = Map.of("ctx", getEulerAttributesContext());
+                }
             }
         }
-        this.getRequest().setAttribute("euler", Map.of("ctx", context));
+
+        this.getRequest().setAttribute("euler", TEMPLATE_ATTRIBUTES);
 
         if (!view.startsWith("/"))
             return "theme/" + this.theme() + "/" + this.getWebControllerName() + "/" + view;
@@ -331,6 +333,19 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
         return this.crashPage(e);
     }
 
+    private Map<String, Object> getEulerAttributesContext() {
+        ServletContext servletContext = getServletContext();
+        Set<String> eulerSysAttributeNames = EulerSysAttributes.getEulerSysAttributeNames();
+        Map<String, Object> context = new HashMap<>();
+        for (String eulerSysAttributeName : eulerSysAttributeNames) {
+            Object value = servletContext.getAttribute(eulerSysAttributeName);
+            if (value != null) {
+                context.put(eulerSysAttributeName, value);
+            }
+        }
+        return context;
+    }
+
     public static class Target extends WebContextAccessible {
         private String href;
         private String name;
@@ -366,6 +381,6 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
             this.name = name == null ? href : name;
         }
 
-        public final static Target HOME_TARGET = new Target("/", "_GO_HOME");
+        public static final Target HOME_TARGET = new Target("/", "_GO_HOME");
     }
 }

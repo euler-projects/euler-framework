@@ -24,6 +24,7 @@
     <modules>
         <module>eulerframework-dependencies</module>
         <module>eulerframework-parent</module>
+        <module>euler-core</module>
         <module>euler-web-core</module>
         <module>euler-web-authentication</module>
         <module>euler-web-authentication-impl-jpa</module>

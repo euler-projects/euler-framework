@@ -16,10 +16,11 @@
 package org.eulerframework.web.core.exception.web;
 
 import org.eulerframework.common.util.StringUtils;
+import org.eulerframework.exception.EulerRuntimeException;
 import org.eulerframework.web.core.i18n.Tag;
 
-public class WebException extends RuntimeException {
-    
+public class WebException extends EulerRuntimeException {
+
     private String error;
     private int code;
 
@@ -27,7 +28,7 @@ public class WebException extends RuntimeException {
         super();
         this.generateErrorAndCode();
     }
-    
+
     public WebException(String message) {
         super(message);
         this.generateErrorAndCode();
@@ -44,11 +45,11 @@ public class WebException extends RuntimeException {
     }
 
     protected WebException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
+                           boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.generateErrorAndCode();
     }
-    
+
     public WebException(WebError webError) {
         this.generateErrorAndCode(webError);
     }
@@ -69,7 +70,7 @@ public class WebException extends RuntimeException {
     }
 
     protected WebException(String message, WebError webError, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
+                           boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.generateErrorAndCode(webError);
     }
@@ -82,22 +83,22 @@ public class WebException extends RuntimeException {
     public int getCode() {
         return this.code;
     }
-    
+
     public String getError() {
         return this.error;
     }
-    
+
     private void generateErrorAndCode() {
         this.error = this.getClass().getSimpleName();
-        if(this.error.endsWith("RuntimeException")) {
+        if (this.error.endsWith("RuntimeException")) {
             this.error = this.error.substring(0, this.error.length() - "RuntimeException".length());
-        } else if(this.error.endsWith("Exception")) {
+        } else if (this.error.endsWith("Exception")) {
             this.error = this.error.substring(0, this.error.length() - "Exception".length());
         }
         this.error = StringUtils.camelStyleToUnderLineLowerCase(this.error);
         this.code = this.error.hashCode();
     }
-    
+
     private void generateErrorAndCode(WebError webError) {
         this.error = webError.getReasonPhrase();
         this.code = webError.value();

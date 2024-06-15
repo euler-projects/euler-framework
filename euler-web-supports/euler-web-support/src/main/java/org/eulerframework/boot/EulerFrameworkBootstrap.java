@@ -22,6 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRegistration;
 
 import org.eulerframework.config.EulerWebSupportConfig;
+import org.eulerframework.util.SystemUtils;
 import org.eulerframework.web.config.MultipartConfig;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
@@ -34,7 +35,6 @@ import org.eulerframework.common.base.log.LogSupport;
 import org.eulerframework.constant.EulerFilters;
 import org.eulerframework.constant.EulerServlets;
 import org.eulerframework.constant.EulerSysAttributes;
-import org.eulerframework.web.config.SystemProperties;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.cookie.LocaleCookies;
 import org.eulerframework.web.core.listener.EulerFrameworkCoreListener;
@@ -172,7 +172,7 @@ public class EulerFrameworkBootstrap extends LogSupport implements WebApplicatio
         container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_ICON.value(), contextPath + WebConfig.getAdminDashboardBrandIcon());
         container.setAttribute(EulerSysAttributes.ADMIN_DASHBOARD_BRAND_TEXT.value(), WebConfig.getAdminDashboardBrandText());
 
-        container.setAttribute(EulerSysAttributes.FRAMEWORK_VERSION.value(), SystemProperties.frameworkVersion());
+        container.setAttribute(EulerSysAttributes.FRAMEWORK_VERSION.value(), SystemUtils.frameworkVersion());
 
         container.setAttribute(EulerSysAttributes.LOCALE_COOKIE_NAME.value(), LocaleCookies.LOCALE.getCookieName());
     }

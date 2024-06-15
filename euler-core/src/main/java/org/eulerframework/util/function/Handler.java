@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.core.model;
+package org.eulerframework.util.function;
 
-public interface PrincipalAuditingModel extends AuditingModel {
-    String getCreatedBy();
-    String getLastModifiedBy();
+public interface Handler<T> {
+    boolean support(T type);
 }

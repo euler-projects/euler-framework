@@ -51,8 +51,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.eulerframework</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>euler-security-oauth2-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

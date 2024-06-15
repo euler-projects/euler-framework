@@ -13,12 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.core.model;
+package org.eulerframework.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public interface AuditingModel extends Serializable {
-    Date getCreatedDate();
-    Date getLastModifiedDate();
+public class AbstractAuditingModel implements AuditingModel {
+    private Date createdDate;
+    private Date lastModifiedDate;
+
+    @Override
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    @Override
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
 }

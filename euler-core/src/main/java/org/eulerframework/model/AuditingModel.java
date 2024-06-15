@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.util;
+package org.eulerframework.model;
 
-public class SystemUtils {
+import java.io.Serializable;
+import java.util.Date;
 
-    public static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
-    }
+public interface AuditingModel extends Serializable {
+    Date getCreatedDate();
+    Date getLastModifiedDate();
 }

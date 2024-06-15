@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.core.function;
+package org.eulerframework.model;
 
-public interface Handler<T> {
-    boolean support(T type);
+public interface ResourceModel extends PrincipalAuditingModel {
+    String getTenantId();
 }

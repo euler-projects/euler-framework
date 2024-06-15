@@ -16,8 +16,8 @@
 package org.eulerframework.data.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.core.model.AbstractAuditingModel;
-import org.eulerframework.core.model.AbstractPrincipalAuditingModel;
+import org.eulerframework.model.AbstractAuditingModel;
+import org.eulerframework.model.AbstractPrincipalAuditingModel;
 import org.eulerframework.data.entity.AuditingEntity;
 import org.eulerframework.data.entity.PrincipalAuditingEntity;
 import org.eulerframework.data.entity.ResourceEntity;

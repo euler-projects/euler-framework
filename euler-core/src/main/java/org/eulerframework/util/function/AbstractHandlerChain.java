@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.core.model;
+package org.eulerframework.util.function;
 
-public class AbstractPrincipalAuditingModel extends AbstractAuditingModel implements PrincipalAuditingModel {
-    private String createdBy;
-    private String lastModifiedBy;
+import java.util.List;
 
-    @Override
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+public abstract class AbstractHandlerChain<H extends Handler<T>, T> implements Handler<T> {
+    protected abstract List<H> getHandlers();
 
     @Override
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
+    public boolean support(T type) {
+        return true;
     }
 
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
+    protected RuntimeException throwHandlerNotFountException(T type) {
+        return new RuntimeException("Handler not found for type: " + type);
+    }
+
+    protected H getHandler(T type) {
+        for (H handler : getHandlers()) {
+            if (handler.support(type))
+                return handler;
+        }
+
+        throw this.throwHandlerNotFountException(type);
     }
 }
