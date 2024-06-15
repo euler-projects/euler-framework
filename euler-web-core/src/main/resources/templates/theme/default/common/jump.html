@@ -17,13 +17,13 @@
 
 <script type="text/javascript">
     (function(){
-        var wait = document.getElementById('wait'),href = document.getElementById('target').href;
-        var interval = setInterval(function(){
-            var time = --wait.innerHTML;
+        let wait = document.getElementById('wait'),href = document.getElementById('target').href;
+        let interval = setInterval(function(){
+            let time = --wait.innerHTML;
             if(time <= 0) {
                 location.href = href;
                 clearInterval(interval);
-            };
+            }
         }, 1000);
     })();
 </script>

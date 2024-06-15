@@ -36,6 +36,7 @@ import org.eulerframework.web.core.exception.web.UndefinedWebException;
 import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 
+@Deprecated
 public abstract class JspSupportWebController extends AbstractWebController {
     private final static String THEME_PARAM_NAME = "_theme";
     private final static String THEME_COOKIE_NAME = "EULER_THEME";

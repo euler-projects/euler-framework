@@ -21,7 +21,7 @@ import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
 import org.eulerframework.security.web.captcha.storage.SessionStringCaptchaStorage;
 import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
 import org.eulerframework.security.core.captcha.util.ImageStringCaptchaDrawer;
-import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
+import org.eulerframework.web.core.base.controller.ThymeleafPageController;
 import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.util.ServletUtils;
@@ -34,7 +34,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("captcha")
-public class DefaultEulerCaptchaController extends ThymeleafSupportWebController {
+public class DefaultEulerCaptchaController extends ThymeleafPageController {
     private final StringCaptchaProvider stringCaptchaProvider;
     private final ImageStringCaptchaDrawer imageStringCaptchaDrawer;
 

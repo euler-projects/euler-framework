@@ -19,28 +19,25 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.eulerframework.web.util.ServletUtils;
 
-import org.eulerframework.common.base.log.LogSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
-public abstract class WebContextAccessible extends LogSupport {
-    
-    private ServletRequestAttributes getServletRequestAttributes() {
-        return (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+public abstract class WebContextAccessible {
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    protected ServletContext getServletContext() {
+        return ServletUtils.getServletContext();
     }
 
-    protected ServletContext getServletContext(){
-        return this.getRequest().getServletContext();
-    }
-    
     protected HttpServletRequest getRequest() {
-        return this.getServletRequestAttributes().getRequest();
+        return ServletUtils.getRequest();
     }
-    
+
     protected HttpServletResponse getResponse() {
-        return this.getServletRequestAttributes().getResponse();
+        return ServletUtils.getResponse();
     }
 
 }

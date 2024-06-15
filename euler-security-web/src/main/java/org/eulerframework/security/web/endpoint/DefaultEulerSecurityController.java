@@ -18,7 +18,7 @@ package org.eulerframework.security.web.endpoint;
 import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.provisioning.EulerUserDetailsManager;
-import org.eulerframework.web.core.base.controller.ThymeleafSupportWebController;
+import org.eulerframework.web.core.base.controller.ThymeleafPageController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Controller
-public class DefaultEulerSecurityController extends ThymeleafSupportWebController implements EulerSecurityController {
+public class DefaultEulerSecurityController extends ThymeleafPageController implements EulerSecurityController {
     private boolean signupEnabled;
     private String signupProcessingUrl;
     private String loginProcessingUrl;

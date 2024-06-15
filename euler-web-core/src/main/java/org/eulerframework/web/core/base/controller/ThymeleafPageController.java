@@ -35,7 +35,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
-public abstract class ThymeleafSupportWebController extends AbstractWebController {
+public abstract class ThymeleafPageController extends AbstractWebController {
     private static final String THEME_PARAM_NAME = "_theme";
     private static final String THEME_COOKIE_NAME = "EULER_THEME";
     private static final String CONTROLLER_NAME_SUFFIX = "PageController";
