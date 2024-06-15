@@ -1,7 +1,7 @@
 package org.eulerframework.security.core.context;
 
 import org.eulerframework.common.util.Assert;
-import org.eulerframework.core.context.ApplicationContextHolder;
+import org.eulerframework.context.ApplicationContextHolder;
 import org.springframework.context.ApplicationContext;
 
 public class UserContextHolder {

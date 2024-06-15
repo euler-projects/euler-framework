@@ -21,7 +21,7 @@ import jakarta.validation.Validator;
 import org.eulerframework.config.EulerWebSupportConfig;
 import org.eulerframework.web.config.RedisType;
 import org.eulerframework.web.config.WebConfig;
-import org.eulerframework.web.core.i18n.ClassPathReloadableResourceBundleMessageSource;
+import org.eulerframework.context.support.ClassPathReloadableResourceBundleMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;

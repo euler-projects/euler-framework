@@ -21,20 +21,19 @@ import org.eulerframework.web.core.exception.web.WebException;
 
 public class ErrorResponse extends LogSupport implements BaseResponse {
 
-    private String error;
-    private Integer error_code;
-    private String error_description;
-    
+    private final String error;
+    private final Integer error_code;
+    private final String error_description;
+
     public ErrorResponse() {
         this.error = SystemWebError.UNDEFINED_ERROR.getReasonPhrase();
-        this.error_code = SystemWebError.UNDEFINED_ERROR.value();        
+        this.error_code = SystemWebError.UNDEFINED_ERROR.value();
+        this.error_description = null;
     }
 
     public ErrorResponse(WebException webException) {
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug("WebException throwed," + " error: " + webException.getError() + " code: " + webException.getCode() + " message: " + webException.getMessage(),
-                    webException);
-        }
+        this.logger.debug("WebException thrown, error: {} code: {} message: {}",
+                webException.getError(), webException.getCode(), webException.getMessage(), webException);
 
         this.error = webException.getError();
         this.error_code = webException.getCode();
@@ -55,35 +54,35 @@ public class ErrorResponse extends LogSupport implements BaseResponse {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
         boolean first = true;
-        buffer.append('{');
-        if(this.error != null) {
-            buffer.append("\"error\":");
-            buffer.append('\"');
-            buffer.append(error);
-            buffer.append('\"');
+        builder.append('{');
+        if (this.error != null) {
+            builder.append("\"error\":");
+            builder.append('\"');
+            builder.append(error);
+            builder.append('\"');
             first = false;
         }
-        if(this.error_code != null) {
-            if(!first) {
-                buffer.append(',');
-            }            
-            buffer.append("\"error_code\":");
-            buffer.append(error_code);
+        if (this.error_code != null) {
+            if (!first) {
+                builder.append(',');
+            }
+            builder.append("\"error_code\":");
+            builder.append(error_code);
             first = false;
         }
-        if(this.error_description != null) {
-            if(!first) {
-                buffer.append(',');
-            }            
-            buffer.append("\"error_description\":");
-            buffer.append('\"');
-            buffer.append(error_description);
-            buffer.append('\"');
+        if (this.error_description != null) {
+            if (!first) {
+                builder.append(',');
+            }
+            builder.append("\"error_description\":");
+            builder.append('\"');
+            builder.append(error_description);
+            builder.append('\"');
         }
-        buffer.append('}');
-        
-        return buffer.toString();
+        builder.append('}');
+
+        return builder.toString();
     }
 }

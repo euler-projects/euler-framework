@@ -1,4 +1,4 @@
-package org.eulerframework.core.context;
+package org.eulerframework.context;
 
 import org.springframework.context.ApplicationContext;
 

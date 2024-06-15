@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.core.i18n;
+package org.eulerframework.context.support;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 public class ClassPathReloadableResourceBundleMessageSource extends ReloadableResourceBundleMessageSource
@@ -33,20 +35,19 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
     private static final String CLASS_PATH_PREFIX = "WEB-INF/classes/";
     private static final String JAR_PATH_PREFIX = "jar:";
     private static final String FILE_PATH_PREFIX = "file:";
-    
-    private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+
+    private final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     @Override
-    public void setBasename(String basename) {
+    public void setBasename(@NonNull String basename) {
         this.setBasenames(basename);
     }
 
     @Override
-    public void setBasenames(String... basenames) {
-        if (basenames != null) {
+    public void setBasenames(@NonNull String... basenames) {
+        if (!ArrayUtils.isEmpty(basenames)) {
             List<String> basenamesList = new ArrayList<>();
-            for (int i = 0; i < basenames.length; i++) {
-                String basename = basenames[i];
+            for (String basename : basenames) {
                 Assert.hasText(basename, "Basename must not be empty");
 
                 if (basename.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
@@ -64,20 +65,20 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
                             throw new RuntimeException(e);
                         }
                         String realFileName = path.substring(0, path.length() - PROPERTIES_SUFFIX.length());
-                        
-                        if(this.isClassPathFile(realFileName)) {
-                            String relativePath = this.generateClassPathBasename(realFileName);                   
-                            if(!basenamesList.contains(relativePath)) {
+
+                        if (this.isClassPathFile(realFileName)) {
+                            String relativePath = this.generateClassPathBasename(realFileName);
+                            if (!basenamesList.contains(relativePath)) {
                                 basenamesList.add(relativePath);
                             }
-                        } else if(this.isJarPathFile(realFileName)) {
-                            String relativePath = this.generateJarPathBasename(realFileName);                       
-                            if(!basenamesList.contains(relativePath)) {
+                        } else if (this.isJarPathFile(realFileName)) {
+                            String relativePath = this.generateJarPathBasename(realFileName);
+                            if (!basenamesList.contains(relativePath)) {
                                 basenamesList.add(relativePath);
                             }
-                        } else if(this.isFilePathFile(realFileName)) {
+                        } else if (this.isFilePathFile(realFileName)) {
                             String relativePath = this.generateFilePathBasename(realFileName);
-                            if(!basenamesList.contains(relativePath)) {
+                            if (!basenamesList.contains(relativePath)) {
                                 basenamesList.add(relativePath);
                             }
                         }
@@ -86,14 +87,14 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
                     basenamesList.add(basename);
                 }
             }
-            
+
             super.setBasenames(basenamesList.toArray(new String[0]));
         }
     }
 
     private String generateFilePathBasename(String realFileName) {
         String relativePath = realFileName;
-        if(relativePath.indexOf('_') >= 0) {
+        if (relativePath.indexOf('_') >= 0) {
             relativePath = relativePath.substring(0, relativePath.indexOf('_'));
         }
         return relativePath;
@@ -101,7 +102,7 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
 
     private String generateJarPathBasename(String realFileName) {
         String relativePath = realFileName;
-        if(relativePath.indexOf('_') >= 0) {
+        if (relativePath.indexOf('_') >= 0) {
             relativePath = relativePath.substring(0, relativePath.indexOf('_'));
         }
         return relativePath;
@@ -112,13 +113,13 @@ public class ClassPathReloadableResourceBundleMessageSource extends ReloadableRe
     }
 
     private String generateClassPathBasename(String realFileName) {
-        
+
         String relativePath = realFileName.substring(realFileName.lastIndexOf(CLASS_PATH_PREFIX));
-        
-        if(relativePath.indexOf('_') >= 0) {
+
+        if (relativePath.indexOf('_') >= 0) {
             relativePath = relativePath.substring(0, relativePath.indexOf('_'));
         }
-        
+
         return relativePath;
     }
 

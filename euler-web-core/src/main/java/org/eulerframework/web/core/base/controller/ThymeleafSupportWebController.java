@@ -23,6 +23,7 @@ import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.constant.EulerSysAttributes;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
+import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.*;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -201,9 +202,8 @@ public abstract class ThymeleafSupportWebController extends AbstractWebControlle
      */
     private String error(WebException webException) {
         Assert.notNull(webException, "Error exception can not be null");
-        this.getRequest().setAttribute("__error_description", webException.getLocalizedMessage());
-        this.getRequest().setAttribute("__error", webException.getError());
-        this.getRequest().setAttribute("__code", webException.getCode());
+        ErrorResponse errorResponse = new ErrorResponse(webException);
+        this.getRequest().setAttribute("__error", errorResponse);
         return this.display("/common/error");
     }
 

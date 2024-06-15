@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.eulerframework.net/assets/css/themes/default/demo/info-page.css">
+
+    <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
+</head>
+<body>
+<div class="title error">ERROR</div>
+<div class="info"><span th:text="#{_ERROR_MESSAGE} + ':'">Error Message:</span><span>&nbsp;</span><span th:text="${__error.error_description}">Unknown Error</span></div>
+<div class="info"><span th:text="#{_ERROR_CODE} + ':'">Error Code:</span><span>&nbsp;</span><span th:text="${__error.error}">unknown_error </span><span>&nbsp;(</span><span th:text="${__error.error_code}">500</span><span>)</span></div>
+<div class="target-list">
+    <span><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></span>
+</div>
+</body>
+</html>
