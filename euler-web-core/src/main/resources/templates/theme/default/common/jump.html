@@ -8,7 +8,7 @@
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
 <body>
-<div class="info" th:text="#{${__message}}">Message</div>
+<div class="title" th:text="#{${__message}}">Message</div>
 <div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
 <div class="target-list">
     <span><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></span>
