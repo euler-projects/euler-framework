@@ -25,6 +25,7 @@ import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.*;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
+import org.eulerframework.web.util.ServletUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -145,19 +146,47 @@ public abstract class ThymeleafPageController extends AbstractWebController {
     }
 
     /**
-     * 发送重定向<br>
-     * 不以'/'开头表示相对路径, 以'/'表示绝对路径,不需要加contextPath
+     * Redirect to a same site url path
+     * <p>
+     * <pre>{@code
+     *     url: http://example.com/path/123
+     *     action: abc => http://example.com/path/abc
+     *     action: /abc => http://example.com/abc
      *
-     * @param action 重定向目标
-     * @return 重定向字符串
+     *     url: http://example.com/some/path/
+     *     action: abc => http://example.com/some/path/abc
+     *     action: /abc => http://example.com/abc
+     *
+     *     url: http://example.com/
+     *     action: abc => http://example.com/abc
+     *     action: /abc => http://example.com/abc
+     *
+     *     url: http://example.com/context-path/path/123
+     *     action: abc => http://example.com/context-path/path/abc
+     *     action: /abc => http://example.com/context-path/abc
+     * }</pre>
+     *
+     * @param action start with <code>/</code> to redirect to an absolute path,
+     *               or start without <code>/</code> to a relative path.
+     *               if redirect to an absolute path, <code>context-path</code> is must not provide
+     * @return The redirect target
      */
     protected String redirect(String action) {
         Assert.notNull(action, "action path is empty");
 
-        if (!action.startsWith("/"))
-            return "redirect:" + "/" + this.viewPathPrefix + action;
-        else
+        if (action.startsWith("/")) {
             return "redirect:" + action;
+        } else {
+            String realUrl = ServletUtils.findRealURI(this.getRequest());
+            int lastSlash = realUrl.lastIndexOf('/');
+            if (lastSlash < 0) {
+                return "redirect:/" + action;
+            } else if (lastSlash == realUrl.length() - 1) {
+                return "redirect:" + realUrl + action;
+            } else {
+                return "redirect:" + realUrl.substring(0, lastSlash) + "/" + action;
+            }
+        }
     }
 
     /**
@@ -318,8 +347,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public String methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        return this.error(new WebException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(),
-                SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
+        return this.error(new WebException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
 
     /**
@@ -391,8 +419,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
             Assert.notNull(href, "Target href exception can not be null");
 
             String contextPath = this.getServletContext().getContextPath();
-            if (!contextPath.endsWith("/"))
-                contextPath += "/";
+            if (!contextPath.endsWith("/")) contextPath += "/";
 
             if (href.startsWith("/")) {
                 if (href.length() == 1) {
