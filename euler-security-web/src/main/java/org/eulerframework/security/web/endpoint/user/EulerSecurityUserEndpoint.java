@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.csrf;
+package org.eulerframework.security.web.endpoint.user;
 
-public interface EulerCsrfTokenController {
-    Object csrf();
+public interface EulerSecurityUserEndpoint {
+    String loginPage();
+
+    String logoutPage();
 }

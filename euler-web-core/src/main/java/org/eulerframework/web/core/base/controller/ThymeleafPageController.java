@@ -19,7 +19,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.common.util.Assert;
-import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.constant.EulerSysAttributes;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
@@ -27,6 +26,7 @@ import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.*;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -38,44 +38,27 @@ import java.util.*;
 public abstract class ThymeleafPageController extends AbstractWebController {
     private static final String THEME_PARAM_NAME = "_theme";
     private static final String THEME_COOKIE_NAME = "EULER_THEME";
-    private static final String CONTROLLER_NAME_SUFFIX = "PageController";
     private static final int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
 
     private static volatile Map<String, Object> TEMPLATE_ATTRIBUTES = null;
     private static final Object TEMPLATE_ATTRIBUTES_LOCK = new Object();
 
-    private String webControllerName;
+    private final String viewPathPrefix;
 
-    protected void setWebControllerName(String webControllerName) {
-        Assert.notNull(webControllerName);
-
-        while (webControllerName.startsWith("/"))
-            webControllerName = webControllerName.substring(1);
-
-        Assert.hasText(webControllerName);
-        this.webControllerName = webControllerName;
+    protected ThymeleafPageController() {
+        this(null);
     }
 
-    /**
-     * 获取WebController的名字<br>
-     * 要使用此方法, WebController必须以WebController结尾<br>
-     * 获取到的名字为WebController的类名去掉WebController后缀,首字母变为小写
-     *
-     * @return ExampleControllerWebController的名字为exampleController
-     */
-    private String getWebControllerName() {
-        if (StringUtils.hasText(this.webControllerName))
-            return this.webControllerName;
-
-        String className = this.getClass().getSimpleName();
-
-        int indexOfWebController = className.lastIndexOf(CONTROLLER_NAME_SUFFIX);
-
-        if (indexOfWebController <= 0)
-            throw new RuntimeException(
-                    "If you want to use this.display(), JspController's class name must end with '" + CONTROLLER_NAME_SUFFIX + "'");
-
-        return StringUtils.toLowerCaseFirstChar(className.substring(0, className.lastIndexOf(CONTROLLER_NAME_SUFFIX)));
+    protected ThymeleafPageController(String viewPath) {
+        if (viewPath == null) {
+            this.viewPathPrefix = "/";
+        } else {
+            Assert.isTrue(!viewPath.endsWith("/"), "viewPath must not end with /");
+            while (viewPath.startsWith("/")) {
+                viewPath = viewPath.substring(1);
+            }
+            this.viewPathPrefix = viewPath + "/";
+        }
     }
 
     /**
@@ -84,9 +67,8 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @return 主题名称, 默认为default
      */
     protected String theme() {
-
         String theme = this.getRequest().getParameter(THEME_PARAM_NAME);
-        if (StringUtils.isEmpty(theme)) {
+        if (!StringUtils.hasText(theme)) {
             Cookie[] cookies = this.getRequest().getCookies();
 
             if (cookies != null) {
@@ -103,7 +85,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
             this.getResponse().addCookie(cookie);
         }
 
-        if (StringUtils.isNull(theme)) {
+        if (!StringUtils.hasText(theme)) {
             theme = WebConfig.getDefaultTheme();
         }
 
@@ -111,15 +93,31 @@ public abstract class ThymeleafPageController extends AbstractWebController {
     }
 
     /**
-     * 显示view<br>
-     * 如果只指定view名称,则默认为themeName/webControllerName/view.jsp<br>
-     * 如果view以'/'开头,则显示themeName/view.jsp
+     * open the theme view
      *
      * @param view view name
-     * @return view在JspPath下的路径
+     * @return the prefixed view that format is theme/{@link ThymeleafPageController#theme()}/{@link ThymeleafPageController#viewPathPrefix}/{view}
      */
     protected String display(String view) {
-        Assert.notNull(view, "view path is empty");
+        return this.display(view, true);
+    }
+
+    /**
+     * open a view
+     *
+     * @param view      view name
+     * @param themeView <code>true</code> to use theme like {@link ThymeleafPageController#display(String)}
+     *                  or <code>false</code> to open view {@link ThymeleafPageController#viewPathPrefix}/{view}
+     * @return the prefixed view that format is <pre>{@code
+     *      if(themeView) {
+     *          prefixedView = "theme/" + this.theme() + this.viewPathPrefix + view;
+     *      } else {
+     *          prefixedView = this.viewPathPrefix + view;
+     *      }
+     * }</pre>
+     */
+    protected String display(String view, boolean themeView) {
+        Assert.notNull(view, "view is empty");
 
         if (TEMPLATE_ATTRIBUTES == null) {
             synchronized (TEMPLATE_ATTRIBUTES_LOCK) {
@@ -131,10 +129,19 @@ public abstract class ThymeleafPageController extends AbstractWebController {
 
         this.getRequest().setAttribute("euler", TEMPLATE_ATTRIBUTES);
 
-        if (!view.startsWith("/"))
-            return "theme/" + this.theme() + "/" + this.getWebControllerName() + "/" + view;
-        else
-            return "theme/" + this.theme() + view;
+        // ensure view not start with a '/'
+        while (view.startsWith("/")) {
+            view = view.substring(1);
+        }
+
+        String prefixedView;
+        if (themeView) {
+            prefixedView = "theme/" + this.theme() + this.viewPathPrefix + view;
+        } else {
+            prefixedView = this.viewPathPrefix + view;
+        }
+        this.logger.trace("display view '{}'", prefixedView);
+        return prefixedView;
     }
 
     /**
@@ -148,7 +155,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
         Assert.notNull(action, "action path is empty");
 
         if (!action.startsWith("/"))
-            return "redirect:" + "/" + this.getWebControllerName() + "/" + action;
+            return "redirect:" + "/" + this.viewPathPrefix + action;
         else
             return "redirect:" + action;
     }
@@ -338,6 +345,31 @@ public abstract class ThymeleafPageController extends AbstractWebController {
         }
         return context;
     }
+
+//    private static final String PAGE_CONTROLLER_NAME_SUFFIX = "PageController";
+//    private static final String CONTROLLER_NAME_SUFFIX = "Controller";
+//    /**
+//     * 从类名自动解析ControllerName
+//     * <p>
+//     * 要使用此方法, Controller必须以Controller或PageController结尾,
+//     * 获取到的名字为Controller的类名去掉Controller或PageController后缀,首字母变为小写
+//     * <p>
+//     * 例如: ExampleControllerPageController的名字为exampleController
+//     */
+//    private String initWebControllerName() {
+//        String className = this.getClass().getSimpleName();
+//
+//        int indexOfWebController = className.lastIndexOf(PAGE_CONTROLLER_NAME_SUFFIX);
+//        if (indexOfWebController <= 0) {
+//            indexOfWebController = className.lastIndexOf(CONTROLLER_NAME_SUFFIX);
+//            if (indexOfWebController <= 0) {
+//                throw new RuntimeException(
+//                        "If you want to use this.display(), Controller's class name must end with '" + CONTROLLER_NAME_SUFFIX + "' or '" + PAGE_CONTROLLER_NAME_SUFFIX + "'");
+//            }
+//        }
+//
+//        return org.eulerframework.common.util.StringUtils.toLowerCaseFirstChar(className.substring(0, indexOfWebController));
+//    }
 
     public static class Target extends WebContextAccessible {
         private String href;

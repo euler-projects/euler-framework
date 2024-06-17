@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-public class EulerJsonCsrfTokenController extends ApiSupportWebController implements EulerCsrfTokenController {
+public class EulerSecurityJsonCsrfTokenController extends ApiSupportWebController implements EulerSecurityCsrfTokenEndpoint {
     private boolean csrfEnabled;
 
-    @GetMapping("${" + EulerSecurityEndpoints.CSRF_PATH_PROPERTY_NAME + ":" + EulerSecurityEndpoints.CSRF_PATH + "}")
+    @GetMapping("${" + EulerSecurityEndpoints.CSRF_PATH_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_PATH + "}")
     public DefaultCsrfToken csrf() {
         if (!this.csrfEnabled) {
             throw new ResourceNotFoundException();
@@ -43,7 +43,7 @@ public class EulerJsonCsrfTokenController extends ApiSupportWebController implem
         return new DefaultCsrfToken(csrfToken.getHeaderName(), csrfToken.getParameterName(), csrfToken.getToken());
     }
 
-    @Value("${" + EulerSecurityEndpoints.CSRF_ENABLED_PROPERTY_NAME + ":" + EulerSecurityEndpoints.CSRF_ENABLED + "}")
+    @Value("${" + EulerSecurityEndpoints.CSRF_ENABLED_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_ENABLED + "}")
     public void setCsrfEnabled(boolean csrfEnabled) {
         this.csrfEnabled = csrfEnabled;
     }

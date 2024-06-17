@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user;
+package org.eulerframework.security.web.endpoint.password;
 
-import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-public interface EulerUserSecurityController {
-    String signupPage() throws NoResourceFoundException;
-
-    String loginPage();
-
-    String logoutPage();
-
+public interface EulerSecurityPasswordEndpoint {
     String changePasswordPage();
 
-    String doSignup(String username, String password);
-
-    String doChangePassword(String oldRawPassword, String newRawPassword);
+    Object doChangePassword(String oldRawPassword, String newRawPassword);
 }
