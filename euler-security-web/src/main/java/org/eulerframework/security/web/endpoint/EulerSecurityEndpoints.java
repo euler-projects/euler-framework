@@ -16,23 +16,37 @@
 package org.eulerframework.security.web.endpoint;
 
 public abstract class EulerSecurityEndpoints {
-    public static final String SIGNUP_ENABLED_PROPERTY_NAME = "euler.security.web.signup.enabled";
-    public static final String SIGNUP_PAGE_PROPERTY_NAME = "euler.security.web.signup-page";
-    public static final String LOGIN_PAGE_PROPERTY_NAME = "euler.security.web.login-page";
-    public static final String LOGOUT_PAGE_PROPERTY_NAME = "euler.security.web.logout-page";
-    public static final String CHANGE_PASSWORD_PAGE_PROPERTY_NAME = "euler.security.web.change-password-page";
-    public static final String SIGNUP_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.signup-processing-url";
-    public static final String LOGIN_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.login-processing-url";
-    public static final String LOGOUT_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.logout-processing-url";
-    public static final String CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME = "euler.security.web.change-password-processing-url";
+    private static final String PROPERTY_NAME_PREFIX = "euler.security.web.endpoint.";
+    private static final String USER_ENDPOINT_PROP_PREFIX = PROPERTY_NAME_PREFIX + "user.";
+    private static final String SIGNUP_ENDPOINT_PROP_PREFIX = PROPERTY_NAME_PREFIX + "signup.";
+    private static final String CSRF_ENDPOINT_PROP_PREFIX = PROPERTY_NAME_PREFIX + "csrf.";
 
-    public static final boolean SIGNUP_ENABLED = true;
+
+    public static final String USER_LOGIN_PAGE_PROPERTY_NAME = USER_ENDPOINT_PROP_PREFIX + "login-page";
+    public static final String USER_LOGOUT_PAGE_PROPERTY_NAME = USER_ENDPOINT_PROP_PREFIX + "logout-page";
+    public static final String USER_CHANGE_PASSWORD_PAGE_PROPERTY_NAME = USER_ENDPOINT_PROP_PREFIX + "change-password-page";
+    public static final String USER_LOGIN_PROCESSING_URL_PROPERTY_NAME = USER_ENDPOINT_PROP_PREFIX + "login-processing-url";
+    public static final String USER_LOGOUT_PROCESSING_URL_PROPERTY_NAME = USER_ENDPOINT_PROP_PREFIX + "logout-processing-url";
+    public static final String USER_CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME = USER_ENDPOINT_PROP_PREFIX + "change-password-processing-url";
+
+    public static final String SIGNUP_ENABLED_PROPERTY_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "enabled";
+    public static final String SIGNUP_PAGE_PROPERTY_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "signup-page";
+    public static final String SIGNUP_PROCESSING_URL_PROPERTY_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "signup-processing-url";
+
+    public static final String CSRF_ENABLED_PROPERTY_NAME = CSRF_ENDPOINT_PROP_PREFIX + "enabled";
+    public static final String CSRF_PATH_PROPERTY_NAME = CSRF_ENDPOINT_PROP_PREFIX + "path";
+
+    public static final String USER_LOGIN_PAGE = "/login";
+    public static final String USER_LOGOUT_PAGE = "/logout";
+    public static final String USER_CHANGE_PASSWORD_PAGE = "/change-password";
+    public static final String USER_LOGIN_PROCESSING_URL = "/login";
+    public static final String USER_LOGOUT_PROCESSING_URL = "/logout";
+    public static final String USER_CHANGE_PASSWORD_PROCESSING_URL = "/change-password";
+
+    public static final boolean SIGNUP_ENABLED = false;
     public static final String SIGNUP_PAGE = "/signup";
-    public static final String LOGIN_PAGE = "/login";
-    public static final String LOGOUT_PAGE = "/logout";
-    public static final String CHANGE_PASSWORD_PAGE = "/change-password";
     public static final String SIGNUP_PROCESSING_URL = "/signup";
-    public static final String LOGIN_PROCESSING_URL = "/login";
-    public static final String LOGOUT_PROCESSING_URL = "/logout";
-    public static final String CHANGE_PASSWORD_PROCESSING_URL = "/change-password";
+
+    public static final boolean CSRF_ENABLED = false;
+    public static final String CSRF_PATH = "/_csrf";
 }

@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint;
+package org.eulerframework.security.web.endpoint.csrf;
 
-import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-public interface EulerSecurityController {
-    String signupPage() throws NoResourceFoundException;
-
-    String loginPage();
-
-    String logoutPage();
-
-    String changePassword(String oldRawPassword, String newRawPassword);
+public interface EulerCsrfTokenController {
+    Object csrf();
 }

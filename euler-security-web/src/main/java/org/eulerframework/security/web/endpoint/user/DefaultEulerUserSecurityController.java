@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint;
+package org.eulerframework.security.web.endpoint.user;
 
 import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.provisioning.EulerUserDetailsManager;
+import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
 import org.eulerframework.web.core.base.controller.ThymeleafPageController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +28,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Controller
-public class DefaultEulerSecurityController extends ThymeleafPageController implements EulerSecurityController {
+public class DefaultEulerUserSecurityController extends ThymeleafPageController implements EulerUserSecurityController {
     private boolean signupEnabled;
+    private String loginPage;
     private String signupProcessingUrl;
     private String loginProcessingUrl;
     private String logoutProcessingUrl;
@@ -46,25 +48,26 @@ public class DefaultEulerSecurityController extends ThymeleafPageController impl
     }
 
     @Override
-    @GetMapping("${" + EulerSecurityEndpoints.LOGIN_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.LOGIN_PAGE + "}")
+    @GetMapping("${" + EulerSecurityEndpoints.USER_LOGIN_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PAGE + "}")
     public String loginPage() {
         return this.display("/euler/security/web/login");
     }
 
     @Override
-    @GetMapping("${" + EulerSecurityEndpoints.LOGOUT_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.LOGOUT_PAGE + "}")
+    @GetMapping("${" + EulerSecurityEndpoints.USER_LOGOUT_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_LOGOUT_PAGE + "}")
     public String logoutPage() {
         return this.display("/euler/security/web/logout");
     }
 
-    //@Override
-    @GetMapping("${" + EulerSecurityEndpoints.CHANGE_PASSWORD_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.CHANGE_PASSWORD_PAGE + "}")
+    @Override
+    @GetMapping("${" + EulerSecurityEndpoints.USER_CHANGE_PASSWORD_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_CHANGE_PASSWORD_PAGE + "}")
     public String changePasswordPage() {
         return this.display("/euler/security/web/change-password");
     }
 
+    @Override
     @PostMapping("${" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL + "}")
-    public String signup(@RequestParam String username, @RequestParam String password) {
+    public String doSignup(@RequestParam String username, @RequestParam String password) {
         if (!this.signupEnabled) {
             return this.notfound();
         }
@@ -79,12 +82,12 @@ public class DefaultEulerSecurityController extends ThymeleafPageController impl
                 .authorities(EulerAuthority.USER)
                 .build();
         this.eulerUserDetailsManager.createUser(userDetails);
-        return this.success(null, new Target("login", "_SIGN_IN"));
+        return this.success(null, new Target(this.loginPage, "_SIGN_IN"));
     }
 
     @Override
-    @PostMapping("${" + EulerSecurityEndpoints.CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.CHANGE_PASSWORD_PROCESSING_URL + "}")
-    public String changePassword(String oldRawPassword, String newRawPassword) {
+    @PostMapping("${" + EulerSecurityEndpoints.USER_CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_CHANGE_PASSWORD_PROCESSING_URL + "}")
+    public String doChangePassword(String oldRawPassword, String newRawPassword) {
         this.eulerUserDetailsManager.changePassword(oldRawPassword, this.passwordEncoder.encode(newRawPassword));
         return this.success();
     }
@@ -104,12 +107,17 @@ public class DefaultEulerSecurityController extends ThymeleafPageController impl
         this.signupProcessingUrl = signupProcessingUrl;
     }
 
+    @Value("${" + EulerSecurityEndpoints.USER_LOGIN_PAGE_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PAGE + "}")
+    public void setLoginPage(String loginPage) {
+        this.loginPage = loginPage;
+    }
+
     @ModelAttribute("loginProcessingUrl")
     public String getLoginProcessingUrl() {
         return loginProcessingUrl;
     }
 
-    @Value("${" + EulerSecurityEndpoints.LOGIN_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.LOGIN_PROCESSING_URL + "}")
+    @Value("${" + EulerSecurityEndpoints.USER_LOGIN_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PROCESSING_URL + "}")
     public void setLoginProcessingUrl(String loginProcessingUrl) {
         this.loginProcessingUrl = loginProcessingUrl;
     }
@@ -119,7 +127,7 @@ public class DefaultEulerSecurityController extends ThymeleafPageController impl
         return logoutProcessingUrl;
     }
 
-    @Value("${" + EulerSecurityEndpoints.LOGOUT_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.LOGOUT_PROCESSING_URL + "}")
+    @Value("${" + EulerSecurityEndpoints.USER_LOGOUT_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_LOGOUT_PROCESSING_URL + "}")
     public void setLogoutProcessingUrl(String logoutProcessingUrl) {
         this.logoutProcessingUrl = logoutProcessingUrl;
     }
@@ -129,7 +137,7 @@ public class DefaultEulerSecurityController extends ThymeleafPageController impl
         return changePasswordProcessingUrl;
     }
 
-    @Value("${" + EulerSecurityEndpoints.CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.CHANGE_PASSWORD_PROCESSING_URL + "}")
+    @Value("${" + EulerSecurityEndpoints.USER_CHANGE_PASSWORD_PROCESSING_URL_PROPERTY_NAME + ":" + EulerSecurityEndpoints.USER_CHANGE_PASSWORD_PROCESSING_URL + "}")
     public void setChangePasswordProcessingUrl(String changePasswordProcessingUrl) {
         this.changePasswordProcessingUrl = changePasswordProcessingUrl;
     }
