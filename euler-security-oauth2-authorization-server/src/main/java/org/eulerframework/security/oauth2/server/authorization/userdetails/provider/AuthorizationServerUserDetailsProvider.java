@@ -1,8 +1,8 @@
-package org.eulerframework.security.oauth2.server.authorization.userdetails.provisioning;
+package org.eulerframework.security.oauth2.server.authorization.userdetails.provider;
 
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
-import org.springframework.security.oauth2.core.userdetails.provisioning.OAuth2TokenUserDetailsProvider;
+import org.eulerframework.security.oauth2.core.userdetails.provider.OAuth2TokenUserDetailsProvider;
 
 public class AuthorizationServerUserDetailsProvider implements OAuth2TokenUserDetailsProvider {
     private final EulerUserDetailsService userDetailsService;

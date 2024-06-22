@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.core;
+package org.eulerframework.security.oauth2.core;
 
-public final class ScopePrefixes {
-    public final static String RESOURCE_OWNER_AUTHORITY = "ROA_";
+public class EulerOAuth2TokenIntrospectionClaimNames {
+    public static final String SUB_DETAILS = "sub_details";
 }

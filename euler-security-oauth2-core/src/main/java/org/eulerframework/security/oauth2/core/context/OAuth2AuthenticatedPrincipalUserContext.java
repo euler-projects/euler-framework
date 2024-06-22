@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.core.context;
+package org.eulerframework.security.oauth2.core.context;
 
 import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.springframework.security.oauth2.core.userdetails.provisioning.OAuth2TokenUserDetailsProvider;
+import org.eulerframework.security.oauth2.core.userdetails.provider.OAuth2TokenUserDetailsProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.EulerOAuth2TokenIntrospectionClaimNames;
+import org.eulerframework.security.oauth2.core.EulerOAuth2TokenIntrospectionClaimNames;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.util.Assert;

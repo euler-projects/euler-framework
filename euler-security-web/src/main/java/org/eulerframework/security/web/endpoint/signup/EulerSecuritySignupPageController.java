@@ -66,14 +66,14 @@ public class EulerSecuritySignupPageController extends ThymeleafPageController i
         return this.success(null, new Target(this.loginPage, "_SIGN_IN"));
     }
 
-    @Value("${" + EulerSecurityEndpoints.SIGNUP_ENABLED_PROP_NAME + ":" + EulerSecurityEndpoints.SIGNUP_ENABLED + "}")
-    public void setSignupEnabled(boolean signupEnabled) {
-        this.signupEnabled = signupEnabled;
-    }
-
     @ModelAttribute("signupProcessingUrl")
     public String getSignupProcessingUrl() {
         return signupProcessingUrl;
+    }
+
+    @Value("${" + EulerSecurityEndpoints.SIGNUP_ENABLED_PROP_NAME + ":" + EulerSecurityEndpoints.SIGNUP_ENABLED + "}")
+    public void setSignupEnabled(boolean signupEnabled) {
+        this.signupEnabled = signupEnabled;
     }
 
     @Value("${" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL + "}")
