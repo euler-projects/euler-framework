@@ -15,17 +15,22 @@
  */
 package org.eulerframework.security.web.endpoint;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.core.captcha.StringCaptcha;
 import org.eulerframework.security.core.captcha.provider.StringCaptchaProvider;
 import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
+import org.eulerframework.security.core.captcha.view.DefaultSmsCaptchaView;
+import org.eulerframework.security.core.captcha.view.ImageCaptchaView;
+import org.eulerframework.security.core.captcha.view.SmsCaptchaView;
 import org.eulerframework.security.web.captcha.storage.SessionStringCaptchaStorage;
 import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
-import org.eulerframework.security.core.captcha.util.ImageStringCaptchaDrawer;
-import org.eulerframework.web.core.base.controller.ThymeleafPageController;
+import org.eulerframework.security.core.captcha.view.DefaultImageCaptchaView;
+import org.eulerframework.web.core.base.controller.ApiSupportWebController;
 import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.util.ServletUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -34,69 +39,77 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("captcha")
-public class DefaultEulerCaptchaController extends ThymeleafPageController {
+public class DefaultEulerCaptchaController extends ApiSupportWebController {
     private final StringCaptchaProvider stringCaptchaProvider;
-    private final ImageStringCaptchaDrawer imageStringCaptchaDrawer;
+    private final ImageCaptchaView imageCaptchaView;
+    private SmsCaptchaView smsCaptchaView;
 
     /**
      * Init a DefaultEulerSecurityController use
      * default {@link StringCaptchaProvider} with {@link SessionStringCaptchaStorage},
-     * default {@link ImageStringCaptchaDrawer}
+     * default {@link DefaultImageCaptchaView}
      */
     public DefaultEulerCaptchaController() {
         this.stringCaptchaProvider = new StringCaptchaProvider(new SessionStringCaptchaStorage());
-        this.imageStringCaptchaDrawer = new ImageStringCaptchaDrawer();
+        this.imageCaptchaView = new DefaultImageCaptchaView();
     }
 
     /**
      * Init a DefaultEulerSecurityController use
      * default {@link StringCaptchaProvider} with given {@link CaptchaStorage},
-     * default {@link ImageStringCaptchaDrawer}
+     * default {@link DefaultImageCaptchaView}
      */
     public DefaultEulerCaptchaController(StringCaptchaStorage stringCaptchaStorage) {
         Assert.notNull(stringCaptchaStorage, "stringCaptchaStorage must not be null");
 
         this.stringCaptchaProvider = new StringCaptchaProvider(stringCaptchaStorage);
-        this.imageStringCaptchaDrawer = new ImageStringCaptchaDrawer();
+        this.imageCaptchaView = new DefaultImageCaptchaView();
     }
 
     /**
      * Init a DefaultEulerSecurityController use
      * default {@link StringCaptchaProvider} with given {@link CaptchaStorage},
-     * given {@link ImageStringCaptchaDrawer}
+     * given {@link DefaultImageCaptchaView}
      */
-    public DefaultEulerCaptchaController(StringCaptchaStorage stringCaptchaStorage, ImageStringCaptchaDrawer imageStringCaptchaDrawer) {
+    public DefaultEulerCaptchaController(StringCaptchaStorage stringCaptchaStorage, ImageCaptchaView imageCaptchaView) {
         Assert.notNull(stringCaptchaStorage, "stringCaptchaStorage must not be null");
-        Assert.notNull(imageStringCaptchaDrawer, "imageStringCaptchaDrawer must not be null");
+        Assert.notNull(imageCaptchaView, "imageCaptchaView must not be null");
 
         this.stringCaptchaProvider = new StringCaptchaProvider(stringCaptchaStorage);
-        this.imageStringCaptchaDrawer = imageStringCaptchaDrawer;
+        this.imageCaptchaView = imageCaptchaView;
     }
 
     /**
      * Init a DefaultEulerSecurityController use
      * given {@link StringCaptchaProvider},
-     * given {@link ImageStringCaptchaDrawer}
+     * given {@link DefaultImageCaptchaView}
      */
-    public DefaultEulerCaptchaController(StringCaptchaProvider stringCaptchaProvider, ImageStringCaptchaDrawer imageStringCaptchaDrawer) {
+    public DefaultEulerCaptchaController(StringCaptchaProvider stringCaptchaProvider, ImageCaptchaView imageCaptchaView) {
         Assert.notNull(stringCaptchaProvider, "stringCaptchaProvider must not be null");
-        Assert.notNull(imageStringCaptchaDrawer, "imageStringCaptchaDrawer must not be null");
+        Assert.notNull(imageCaptchaView, "imageCaptchaView must not be null");
 
         this.stringCaptchaProvider = stringCaptchaProvider;
-        this.imageStringCaptchaDrawer = imageStringCaptchaDrawer;
+        this.imageCaptchaView = imageCaptchaView;
     }
 
-    @GetMapping("img")
-    @ResponseBody
-    public void captcha(@RequestParam(required = false) String scope) throws IOException {
+    @GetMapping
+    public void captcha(
+            @RequestParam(required = false) String scope,
+            @RequestParam String mobile) {
         String[] scopes = StringUtils.delimitedListToStringArray(scope, " ");
         StringCaptcha stringCaptcha = this.stringCaptchaProvider.generateCaptcha(scopes);
-        ServletUtils.writeFileHeader(this.getResponse(), "captcha.jpeg", null);
-        this.imageStringCaptchaDrawer.drawCaptchaImage(this.getResponse().getOutputStream(), stringCaptcha);
+        this.smsCaptchaView.sendSms("SIGN_IN", mobile, "1234", 10);
+    }
+
+    @GetMapping(produces = MediaType.IMAGE_PNG_VALUE)
+    public void pngCaptcha(@RequestParam(required = false) String scope) throws IOException {
+        String[] scopes = StringUtils.delimitedListToStringArray(scope, " ");
+        StringCaptcha stringCaptcha = this.stringCaptchaProvider.generateCaptcha(scopes);
+        ServletUtils.writeFileHeader(this.getResponse(), "captcha.png", null);
+        this.imageCaptchaView.draw(stringCaptcha, "png", this.getResponse().getOutputStream());
     }
 
     @GetMapping("validCaptcha")
-    @ResponseBody
     public Object validCaptcha(@RequestParam String captcha, @RequestParam(required = false) String scope) {
         try {
             String[] scopes = StringUtils.delimitedListToStringArray(scope, " ");
@@ -106,5 +119,9 @@ public class DefaultEulerCaptchaController extends ThymeleafPageController {
             this.getResponse().setStatus(HttpStatus.BAD_REQUEST.value());
             return new ErrorResponse(e);
         }
+    }
+
+    public void setSmsCaptchaView(SmsCaptchaView smsCaptchaView) {
+        this.smsCaptchaView = smsCaptchaView;
     }
 }

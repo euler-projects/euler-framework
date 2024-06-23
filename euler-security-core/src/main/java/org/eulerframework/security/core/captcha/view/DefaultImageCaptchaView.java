@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.core.captcha.util;
+package org.eulerframework.security.core.captcha.view;
 
 import org.eulerframework.security.core.captcha.StringCaptcha;
 
@@ -24,14 +24,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Random;
 
-public class ImageStringCaptchaDrawer {
+public class DefaultImageCaptchaView implements ImageCaptchaView {
     private final Random random = new Random();
 
     private int width = 120;// 图片宽
     private int height = 34;// 图片高
     private int lineSize = 40;// 干扰线数量
 
-    public void drawCaptchaImage(OutputStream out, StringCaptcha stringCaptcha) throws IOException {
+    @Override
+    public void draw(StringCaptcha captcha, String formatName, OutputStream out) throws IOException {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
         Graphics g = image.getGraphics();
         g.fillRect(0, 0, width, height);
@@ -42,9 +43,9 @@ public class ImageStringCaptchaDrawer {
             drawLine(g);
         }
         // 绘制随机字符
-        drawString(g, stringCaptcha.getCaptcha());
+        drawString(g, captcha.getCaptcha());
         g.dispose();
-        ImageIO.write(image, "JPEG", out);
+        ImageIO.write(image, formatName, out);
     }
 
     /*

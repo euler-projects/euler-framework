@@ -21,6 +21,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.eulerframework.sms.ConsoleSmsSenderFactory;
+import org.eulerframework.sms.SmsSenderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -32,7 +34,7 @@ import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.module.authentication.conf.SecurityConfig;
 import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import org.eulerframework.web.module.authentication.exception.UserNotFoundException;
-import org.eulerframework.web.module.authentication.service.SmsCodeValidator.SmsCaptchaSenderFactory.SmsCaptchaSender;
+import org.eulerframework.sms.SmsSender;
 
 /**
  * @author cFrost
@@ -46,7 +48,7 @@ public class SmsCodeValidator extends LogSupport {
     private ExecutorService threadPool = Executors.newFixedThreadPool(4);
     
     @Autowired(required = false)
-    private SmsCaptchaSenderFactory smsCaptchaSenderFactory = new ConsoleSmsSenderFactory();
+    private SmsSenderFactory smsSenderFactory = new ConsoleSmsSenderFactory();
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
@@ -57,10 +59,10 @@ public class SmsCodeValidator extends LogSupport {
         private String mobile;
         private String captcha;
         private int expireMinutes;
-        private SmsCaptchaSender smsCaptchaSender;
+        private SmsSender smsSender;
 
-        public SmsSendThread(SmsCaptchaSender smsCaptchaSender, BizCode bizCode, String mobile, String captcha, int expireMinutes) {
-            this.smsCaptchaSender = smsCaptchaSender;
+        public SmsSendThread(SmsSender smsSender, BizCode bizCode, String mobile, String captcha, int expireMinutes) {
+            this.smsSender = smsSender;
             this.bizCode = bizCode;
             this.mobile = mobile;
             this.captcha = captcha;
@@ -69,7 +71,7 @@ public class SmsCodeValidator extends LogSupport {
 
         @Override
         public void run() {
-            this.smsCaptchaSender.sendSms(bizCode, mobile, captcha, expireMinutes);
+            this.smsSender.sendCaptcha(bizCode.name(), mobile, captcha, expireMinutes);
         }
 
     }
@@ -81,7 +83,7 @@ public class SmsCodeValidator extends LogSupport {
         String smsCode = this.generateSmsCode();
         String redisKey = this.generateRedisKey(mobile, bizCode);
         
-        SmsCaptchaSender smsCaptchaSender = this.smsCaptchaSenderFactory.newSmsCaptchaSender();
+        SmsSender smsSender = this.smsSenderFactory.newSmsCaptchaSender();
         int expireMinutes;
         
         switch(bizCode) {
@@ -122,7 +124,7 @@ public class SmsCodeValidator extends LogSupport {
         default: return;
         }
         
-        SmsSendThread thread = new SmsSendThread(smsCaptchaSender, bizCode, mobile, smsCode, expireMinutes);
+        SmsSendThread thread = new SmsSendThread(smsSender, bizCode, mobile, smsCode, expireMinutes);
         this.threadPool.submit(thread);
 
         this.stringRedisTemplate.opsForValue().set(redisKey, smsCode);
@@ -184,43 +186,7 @@ public class SmsCodeValidator extends LogSupport {
         //TODO: 判定启用的逻辑不完备, 如果开发者的实现类也是不想启用短信验证码功能的类怎么处理?
         //return !(this.smsSenderFactory instanceof ConsoleSmsSenderFactory);
     }
-    
-    /**
-     * 用于在发送短信前生成新的短信发送实现类实例，工厂实现类可自行决定是否采用单例模式。
-     * 
-     * @author cFrost
-     *
-     */
-    public interface SmsCaptchaSenderFactory{
-        
-        abstract public SmsCaptchaSender newSmsCaptchaSender();
-        
-        public interface SmsCaptchaSender {
-            public void sendSms(BizCode bizCode, String mobile, String captcha, int expireMinutes);
-        }
-    }
-    
-    public class ConsoleSmsSenderFactory implements SmsCaptchaSenderFactory {
-        private SmsCaptchaSender sender = new ConsoleSmsCaptchaSender();
 
-        @Override
-        public SmsCaptchaSender newSmsCaptchaSender() {
-            return sender;
-        }
-    }
-    
-    public class ConsoleSmsCaptchaSender implements SmsCaptchaSender {
-
-        @Override
-        public void sendSms(BizCode bizCode, String mobile, String captcha, int expireMinutes) {
-            System.out.println(
-                    String.format(
-                            "Sms sender is disabled, bizCode: %s mobile: %s captcha: %s expireMinutes: %d", 
-                            bizCode, mobile, captcha, expireMinutes));
-        }
-        
-    }
-    
     public enum BizCode {
         SIGN_UP, SIGN_IN, RESET_PASSWORD;
     }
