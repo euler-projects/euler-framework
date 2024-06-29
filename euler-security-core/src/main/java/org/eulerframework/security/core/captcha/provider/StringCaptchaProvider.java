@@ -16,17 +16,19 @@
 package org.eulerframework.security.core.captcha.provider;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.eulerframework.common.util.Assert;
-import org.eulerframework.security.core.captcha.storage.StringCaptchaStorage;
-import org.eulerframework.security.core.captcha.StringCaptcha;
+import org.eulerframework.security.core.captcha.CaptchaDetails;
+import org.eulerframework.security.core.captcha.CaptchaVisibility;
+import org.eulerframework.security.core.captcha.StringCaptchaDetails;
+import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
 import org.eulerframework.security.exception.InvalidCaptchaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import javax.annotation.Nonnull;
 import java.util.Random;
 
-public class StringCaptchaProvider implements CaptchaProvider<StringCaptcha> {
+public class StringCaptchaProvider implements CaptchaProvider<StringCaptchaDetails, String> {
     private final Logger logger = LoggerFactory.getLogger(StringCaptchaProvider.class);
     private static final char[] DEFAULT_AVAILABLE_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
     private static final char[] NUMBERS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -34,68 +36,69 @@ public class StringCaptchaProvider implements CaptchaProvider<StringCaptcha> {
     private static final int DEFAULT_LENGTH = 6;
 
     private final Random random = new Random();
-    private final StringCaptchaStorage captchaStorage;
+    private final CaptchaStorage captchaStorage;
 
     private char[] defaultAvailableChars = DEFAULT_AVAILABLE_CHARS;
     private int defaultLength = DEFAULT_LENGTH;
 
-    public StringCaptchaProvider(StringCaptchaStorage captchaStorage) {
+    public StringCaptchaProvider(CaptchaStorage captchaStorage) {
         this.captchaStorage = captchaStorage;
     }
 
-    public StringCaptcha generateCaptcha(char[] availableChars, int length, String... scope) {
+    public StringCaptchaDetails generateCaptcha(char[] availableChars, int length, CaptchaVisibility visibility, String... scope) {
         StringBuilder captchaBuilder = new StringBuilder();
         for (int i = 0; i < length; i++) {
             captchaBuilder.append(availableChars[random.nextInt(availableChars.length)]);
         }
-        StringCaptcha captcha = new StringCaptcha(captchaBuilder.toString(), scope);
 
+        return StringCaptchaDetails.builder()
+                .captcha(captchaBuilder.toString())
+                .scope(scope)
+                .visibility(visibility)
+                .caseSensitive(false)
+                .build();
+    }
+
+    @Override
+    public StringCaptchaDetails generateCaptcha(CaptchaVisibility visibility, String... scope) {
+        StringCaptchaDetails captcha = this.generateCaptcha(this.defaultAvailableChars, this.defaultLength, visibility, scope);
         this.captchaStorage.saveCaptcha(captcha);
         return captcha;
     }
 
     @Override
-    public StringCaptcha generateCaptcha(String... scope) {
-        return this.generateCaptcha(this.defaultAvailableChars, this.defaultLength, scope);
-    }
+    public void validateCaptcha(@Nonnull String provideCaptcha, String... exceptScope) {
+        Assert.hasText(provideCaptcha, "provideCaptcha is empty");
+        Assert.notEmpty(exceptScope, "exceptScopes is empty");
 
-    @Override
-    public void validateCaptcha(@Nonnull StringCaptcha provideCaptcha) {
-        Assert.notNull(provideCaptcha, "provideCaptcha is null");
-        Assert.hasText(provideCaptcha.getCaptcha(), "provideCaptcha is empty");
+        CaptchaDetails savedCaptchaDetails = this.captchaStorage.loadByCaptcha(provideCaptcha);
 
-        StringCaptcha savedCaptcha = this.captchaStorage.loadByCaptcha(provideCaptcha.getCaptcha());
+        if (savedCaptchaDetails instanceof StringCaptchaDetails stringCaptchaDetails) {
+            String savedCaptcha = stringCaptchaDetails.getCaptcha();
 
-        if (savedCaptcha == null) {
-            throw new InvalidCaptchaException();
-        }
-
-//        if (savedCaptcha.getClass() != StringCaptcha.class || provideCaptcha.getClass() != StringCaptcha.class) {
-//            // Only support StringCaptcha
-//            this.logger.warn("Unsupported captcha type, saved type: '{}', provide type: '{}'",
-//                    savedCaptcha.getClass(), provideCaptcha.getClass());
-//            throw new InvalidCaptchaException();
-//        }
-
-        if (!savedCaptcha.getCaptcha().equalsIgnoreCase(provideCaptcha.getCaptcha())) {
-            throw new InvalidCaptchaException();
-        }
-
-        String[] savedScopes = savedCaptcha.getScopes();
-        String[] provideScopes = provideCaptcha.getScopes();
-
-        if (provideScopes.length > savedScopes.length) {
-            throw new InvalidCaptchaException();
-        }
-
-        if (savedScopes.length > 0 && provideScopes.length == 0) {
-            throw new InvalidCaptchaException();
-        }
-
-        for (String provideScope : provideScopes) {
-            if (!ArrayUtils.contains(savedScopes, provideScope)) {
-                throw new InvalidCaptchaException();
+            if (stringCaptchaDetails.isCaseSensitive()) {
+                if (!savedCaptcha.equals(provideCaptcha)) {
+                    throw new InvalidCaptchaException("invalid captcha");
+                }
+            } else {
+                if (!savedCaptcha.equalsIgnoreCase(provideCaptcha)) {
+                    throw new InvalidCaptchaException("invalid captcha");
+                }
             }
+
+            String[] savedScopes = savedCaptchaDetails.getScopes();
+
+            if (exceptScope.length > savedScopes.length) {
+                throw new InvalidCaptchaException("invalid scopes");
+            }
+
+            for (String each : exceptScope) {
+                if (!ArrayUtils.contains(savedScopes, each)) {
+                    throw new InvalidCaptchaException("invalid scopes");
+                }
+            }
+        } else {
+            throw new InvalidCaptchaException("invalid captcha");
         }
     }
 

@@ -18,7 +18,7 @@ package org.eulerframework.security.exception;
 import org.eulerframework.exception.EulerRuntimeException;
 
 public class InvalidCaptchaException extends EulerRuntimeException {
-    public InvalidCaptchaException() {
-        super("_INVALID_CAPTCHA");
+    public InvalidCaptchaException(String message) {
+        super(message);
     }
 }

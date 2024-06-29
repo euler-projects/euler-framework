@@ -15,12 +15,13 @@
  */
 package org.eulerframework.security.core.captcha.provider;
 
-import org.eulerframework.security.core.captcha.Captcha;
+import org.eulerframework.security.core.captcha.CaptchaDetails;
+import org.eulerframework.security.core.captcha.CaptchaVisibility;
 
 import javax.annotation.Nonnull;
 
-public interface CaptchaProvider<C extends Captcha<?>> {
-    C generateCaptcha(String... scope);
+public interface CaptchaProvider<C extends CaptchaDetails, T> {
+    C generateCaptcha(CaptchaVisibility visibility, String... scope);
 
-    void validateCaptcha(@Nonnull C provideCaptcha);
+    void validateCaptcha(@Nonnull T provideCaptcha, String... exceptScope);
 }

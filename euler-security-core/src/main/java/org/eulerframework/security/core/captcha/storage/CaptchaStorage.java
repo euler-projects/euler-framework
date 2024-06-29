@@ -15,12 +15,14 @@
  */
 package org.eulerframework.security.core.captcha.storage;
 
-import org.eulerframework.security.core.captcha.Captcha;
+import org.eulerframework.security.core.captcha.CaptchaDetails;
 
 import javax.annotation.Nonnull;
 
-public interface CaptchaStorage<C extends Captcha<T>, T> {
-    void saveCaptcha(@Nonnull C captcha);
+public interface CaptchaStorage {
+    boolean support(@Nonnull CaptchaDetails captchaDetails);
 
-    C loadByCaptcha(@Nonnull T captcha);
+    void saveCaptcha(@Nonnull CaptchaDetails captchaDetails);
+
+    CaptchaDetails loadByCaptcha(@Nonnull Object captcha);
 }

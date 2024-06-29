@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.core.captcha.view;
 
-import org.eulerframework.security.core.captcha.StringCaptcha;
+import org.eulerframework.security.core.captcha.StringCaptchaDetails;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -32,7 +32,7 @@ public class DefaultImageCaptchaView implements ImageCaptchaView {
     private int lineSize = 40;// 干扰线数量
 
     @Override
-    public void draw(StringCaptcha captcha, String formatName, OutputStream out) throws IOException {
+    public void draw(StringCaptchaDetails captcha, String formatName, OutputStream out) throws IOException {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
         Graphics g = image.getGraphics();
         g.fillRect(0, 0, width, height);
