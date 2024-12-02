@@ -39,7 +39,7 @@
         <hibernate.version>5.2.13.Final</hibernate.version>
         <c3p0.version>0.9.5.2</c3p0.version>
 
-        <jackson.version>2.9.7</jackson.version>
+        <jackson.version>2.12.1</jackson.version>
 
         <junit.version>4.8.2</junit.version>
     </properties>
