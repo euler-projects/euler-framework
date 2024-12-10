@@ -29,11 +29,10 @@
             <artifactId>querydsl-jpa</artifactId>
             <classifier>jakarta</classifier>
         </dependency>
-
         <dependency>
-            <groupId>org.eulerframework</groupId>
-            <artifactId>euler-web-core</artifactId>
-            <optional>true</optional>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

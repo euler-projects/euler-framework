@@ -73,7 +73,7 @@ public interface FileStorage extends Handler<String> {
      * @param dest                待写入的目标文件
      * @param storageFileConsumer 文件索引对象回调, 会在正式写入文件前回调, 调用方可以做一些预处理
      */
-    void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException;
+    void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException;
 
     /**
      * 将文件数据写入输出流
@@ -84,5 +84,5 @@ public interface FileStorage extends Handler<String> {
      *                            可以在在数据正式写入Response的OutputStream前设置Response Header,
      *                            可以参考{@link JdbcStorageFileDownloader#download(String, HttpServletResponse)}
      */
-    void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException;
+    void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException;
 }

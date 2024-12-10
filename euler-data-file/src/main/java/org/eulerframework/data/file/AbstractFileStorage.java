@@ -16,7 +16,6 @@
 package org.eulerframework.data.file;
 
 import org.apache.commons.io.FilenameUtils;
-import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -132,20 +131,20 @@ public abstract class AbstractFileStorage implements FileStorage {
     }
 
     @Override
-    public void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException {
+    public void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException {
         FileIndex storageFile = this.getStorageIndex(fileId);
         if (storageFile == null) {
-            throw new ResourceNotFoundException("Storage file '" + fileId + "' not exists");
+            throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
         }
         storageFileConsumer.accept(storageFile);
         this.writeFileData(storageFile.getStorageIndex(), dest);
     }
 
     @Override
-    public void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException {
+    public void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException {
         FileIndex fileIndex = this.getStorageIndex(fileId);
         if (fileIndex == null) {
-            throw new ResourceNotFoundException("Storage file '" + fileId + "' not exists");
+            throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
         }
         storageFileConsumer.accept(fileIndex);
         this.writeFileData(fileIndex.getStorageIndex(), out);

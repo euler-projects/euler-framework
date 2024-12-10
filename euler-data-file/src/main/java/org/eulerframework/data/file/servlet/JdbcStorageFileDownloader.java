@@ -17,6 +17,8 @@ package org.eulerframework.data.file.servlet;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.data.file.JdbcFileStorage;
+import org.eulerframework.data.file.StorageFileNotFoundException;
+import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.eulerframework.web.util.ServletUtils;
 
 import java.io.IOException;
@@ -32,15 +34,20 @@ public class JdbcStorageFileDownloader implements StorageFileDownloader {
 
     @Override
     public void download(String fileId, HttpServletResponse response) throws IOException {
-        this.jdbcFileStorage.get(fileId, response.getOutputStream(), storageFile -> ServletUtils.writeFileHeader(
-                response,
-                storageFile.getFilename(),
-                Optional.ofNullable(storageFile.getAttribute(JdbcFileStorage.ATTR_FILE_SIZE))
-                        .map(v -> (Integer) v)
-                        .map(Integer::longValue)
-                        .orElse(null)
-        ));
+        try {
+            this.jdbcFileStorage.get(fileId, response.getOutputStream(), storageFile -> ServletUtils.writeFileHeader(
+                    response,
+                    storageFile.getFilename(),
+                    Optional.ofNullable(storageFile.getAttribute(JdbcFileStorage.ATTR_FILE_SIZE))
+                            .map(v -> (Integer) v)
+                            .map(Integer::longValue)
+                            .orElse(null)
+            ));
+        } catch (StorageFileNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage(), e);
+        }
     }
+
 
     @Override
     public boolean support(String type) {
