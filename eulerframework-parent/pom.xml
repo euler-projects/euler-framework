@@ -340,6 +340,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-common-util-extra</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-jwt</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>

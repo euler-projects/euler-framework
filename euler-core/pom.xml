@@ -15,9 +15,19 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.eulerframework</groupId>
             <artifactId>euler-common-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eulerframework</groupId>
+            <artifactId>euler-common-util-extra</artifactId>
         </dependency>
     </dependencies>
 
