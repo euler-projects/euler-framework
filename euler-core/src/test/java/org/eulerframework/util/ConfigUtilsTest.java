@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.config;
+package org.eulerframework.util;
 
 import junit.framework.Assert;
 import org.eulerframework.common.util.CommonUtils;
-import org.eulerframework.util.SystemUtils;
 import org.junit.Test;
 
 import java.nio.file.FileSystemException;

@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eulerframework</groupId>
+        <artifactId>eulerframework-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../eulerframework-parent</relativePath>
+    </parent>
+
+    <artifactId>euler-socket</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>euler-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eulerframework</groupId>
+            <artifactId>euler-common-proto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eulerframework</groupId>
+            <artifactId>euler-common-util-extra</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+            <version>4.1.111.Final</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>
