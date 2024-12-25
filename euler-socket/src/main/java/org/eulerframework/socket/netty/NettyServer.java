@@ -24,43 +24,48 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import jakarta.annotation.Nonnull;
+import org.eulerframework.socket.dispatcher.MessageDispatcher;
+import org.eulerframework.socket.netty.channel.handler.MessageDispatcherHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class NettyServer implements ChannelFuture, Runnable, Closeable {
-    private final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyServer.class);
 
     private final int port;
-    private final List<ChannelHandler> channelHandlers = new ArrayList<>();
+    private final ChannelHandler channelInitializer;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private ChannelFuture channelFuture;
 
-    public NettyServer(int port) {
+    private NettyServer(int port, ChannelHandler channelInitializer) {
+        Assert.isTrue(port > 0 && port < 65538, "invalid server port: " + port);
+        Assert.notNull(channelInitializer, "channelHandlers must not be null");
         this.port = port;
-    }
-
-    public void addChannelHandlerAtLast(ChannelHandler... channelHandlers) {
-        this.channelHandlers.addAll(Arrays.asList(channelHandlers));
+        this.channelInitializer = channelInitializer;
     }
 
     @Override
     public void close() {
+        LOGGER.info("Netty server is closing...");
         if (bossGroup != null && !bossGroup.isShutdown()) {
             this.bossGroup.shutdownGracefully();
         }
         if (workerGroup != null && !workerGroup.isShutdown()) {
             this.workerGroup.shutdownGracefully();
         }
+        LOGGER.info("Netty server closed.");
     }
 
     @Override
@@ -70,17 +75,12 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
         ServerBootstrap serverBootstrap = new ServerBootstrap(); // (2)
         serverBootstrap.group(this.bossGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class) // (3)
-                .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(NettyServer.this.channelHandlers.toArray(new ChannelHandler[0]));
-                    }
-                })
+                .childHandler(this.channelInitializer)
                 .option(ChannelOption.SO_BACKLOG, 128)          // (5)
                 .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
         ChannelFuture f = serverBootstrap.bind(port);
-        logger.info("Netty server is starting...");
+        LOGGER.info("Netty server is starting...");
         try {
             this.channelFuture = f.sync();
         } catch (InterruptedException e) {
@@ -90,7 +90,7 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
 
             Thread.currentThread().interrupt();
         }
-        logger.info("Netty server is listening on port {}", this.port);
+        LOGGER.info("Netty server is listening on port {}", this.port);
     }
 
     @Override
@@ -208,5 +208,61 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
     @Override
     public boolean isVoid() {
         return this.channelFuture.isVoid();
+    }
+
+    public static class Builder {
+        private int port;
+        private MessageDispatcher<?> messageDispatcher;
+        private final List<Consumer<ChannelPipeline>> channelHandlerAppender = new ArrayList<>();
+
+        public Builder port(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder messageDispatcher(MessageDispatcher<?> messageDispatcher) {
+            this.messageDispatcher = messageDispatcher;
+            return this;
+        }
+
+//        public Builder addChannelHandlerAppenderAtLast(Consumer<ChannelPipeline> channelHandlerAppender) {
+//            this.channelHandlerAppender.add(channelHandlerAppender);
+//            return this;
+//        }
+
+        public Builder addChannelHandlersAtLast(Supplier<ChannelHandler[]> channelHandlerSupplier) {
+            this.channelHandlerAppender.add(pipeline -> pipeline.addLast(channelHandlerSupplier.get()));
+            return this;
+        }
+
+        public Builder addChannelHandlerAtLast(Supplier<ChannelHandler> channelHandlerSupplier) {
+            this.channelHandlerAppender.add(pipeline -> pipeline.addLast(channelHandlerSupplier.get()));
+            return this;
+        }
+
+        public NettyServer build() {
+            final MessageDispatcherHandler<?> messageDispatcherHandler =
+                    MessageDispatcherHandler.newInstance(messageDispatcher);
+            ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<>() {
+                @Override
+                public void initChannel(SocketChannel ch) {
+                    long begin = System.currentTimeMillis();
+
+                    ChannelPipeline pipeline = ch.pipeline();
+                    Builder.this.channelHandlerAppender.forEach(appender -> appender.accept(pipeline));
+                    pipeline.addLast(messageDispatcherHandler);
+
+                    LOGGER.info("Init channel pipeline cost {} ms", System.currentTimeMillis() - begin);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The channel pipeline info: {}", pipeline.toMap());
+                    }
+                }
+            };
+            return new NettyServer(this.port, channelInitializer);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }

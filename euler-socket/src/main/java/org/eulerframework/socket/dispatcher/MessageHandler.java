@@ -17,5 +17,6 @@
 package org.eulerframework.socket.dispatcher;
 
 public interface MessageHandler {
-    Object handle(Object value);
+    boolean support(Object message);
+    Object handle(Object message);
 }

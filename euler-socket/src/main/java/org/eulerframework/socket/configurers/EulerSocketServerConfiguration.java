@@ -36,7 +36,8 @@ import java.util.Map;
 public class EulerSocketServerConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EulerSocketServerConfiguration.class);
 
-    public static void setupMessageDispatcher(MessageDispatcher<?> messageDispatcher, ApplicationContext applicationContext) {
+    public static void setupMessageDispatcher(MessageDispatcher<?> messageDispatcher, ApplicationContext
+            applicationContext) {
         Map<String, Object> socketControllers = applicationContext.getBeansWithAnnotation(EulerSocketController.class);
         if (CollectionUtils.isEmpty(socketControllers)) {
             return;
@@ -44,14 +45,15 @@ public class EulerSocketServerConfiguration {
         setupMessageDispatcher(messageDispatcher, socketControllers.values());
     }
 
-    public static void setupMessageDispatcher(MessageDispatcher<?> messageDispatcher, Collection<Object> socketControllers) {
+    public static void setupMessageDispatcher
+            (MessageDispatcher<?> messageDispatcher, Collection<Object> socketControllers) {
         for (Object socketController : socketControllers) {
             List<Method> socketMappingMethods = MethodUtils.getMethodsListWithAnnotation(
                     socketController.getClass(), EulerSocketRequestMapping.class);
 
             for (Method method : socketMappingMethods) {
                 EulerSocketRequestMapping socketRequestMapping = method.getAnnotation(EulerSocketRequestMapping.class);
-                Class<? extends MessageHandlerBuilder> handlerCreatorClass = socketRequestMapping.handlerCreator();
+                Class<? extends MessageHandlerBuilder> handlerCreatorClass = socketRequestMapping.handlerBuilder();
                 MessageHandlerBuilder messageHandlerBuilder = JavaObjectUtils.newInstance(handlerCreatorClass);
                 MessageHandler messageHandler = messageHandlerBuilder.build(socketController, method);
                 messageDispatcher.addHandler(messageHandler);

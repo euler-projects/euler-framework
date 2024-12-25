@@ -18,6 +18,13 @@
         </dependency>
 
         <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+            <version>4.1.115.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>euler-core</artifactId>
             <version>${project.version}</version>
@@ -25,17 +32,7 @@
 
         <dependency>
             <groupId>org.eulerframework</groupId>
-            <artifactId>euler-common-proto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eulerframework</groupId>
             <artifactId>euler-common-util-extra</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport</artifactId>
-            <version>4.1.111.Final</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
