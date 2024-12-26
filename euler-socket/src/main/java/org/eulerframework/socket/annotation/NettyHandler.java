@@ -16,6 +16,7 @@
 
 package org.eulerframework.socket.annotation;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
@@ -28,6 +29,7 @@ import java.lang.annotation.*;
 @Documented
 @Component
 @Order()
+@Scope()
 public @interface NettyHandler {
 
     /**
@@ -41,4 +43,13 @@ public @interface NettyHandler {
      */
     @AliasFor(annotation = Order.class, attribute = "value")
     int order() default Ordered.LOWEST_PRECEDENCE;
+
+    /**
+     * Alias for {@link Scope#value}.
+     */
+    @AliasFor(annotation = Scope.class, attribute = "value")
+    String scope() default NettyHandler.SCOPE_PROTOTYPE;
+
+    String SCOPE_SINGLETON = "singleton";
+    String SCOPE_PROTOTYPE = "prototype";
 }
