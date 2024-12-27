@@ -26,6 +26,8 @@ import io.netty.util.concurrent.GenericFutureListener;
 import jakarta.annotation.Nonnull;
 import org.eulerframework.socket.dispatcher.MessageDispatcher;
 import org.eulerframework.socket.netty.channel.handler.MessageDispatcherHandler;
+import org.eulerframework.socket.netty.channel.handler.SessionInterrupter;
+import org.eulerframework.socket.netty.channel.handler.SessionSupportMessageDispatcherHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -212,11 +214,17 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
 
     public static class Builder {
         private int port;
+        private boolean sessionEnabled = false;
         private MessageDispatcher<?> messageDispatcher;
         private final List<Consumer<ChannelPipeline>> channelHandlerAppender = new ArrayList<>();
 
         public Builder port(int port) {
             this.port = port;
+            return this;
+        }
+
+        public Builder enableSession() {
+            this.sessionEnabled = true;
             return this;
         }
 
@@ -241,7 +249,8 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
         }
 
         public NettyServer build() {
-            final MessageDispatcherHandler<?> messageDispatcherHandler =
+            final MessageDispatcherHandler<?> messageDispatcherHandler = this.sessionEnabled ?
+                    SessionSupportMessageDispatcherHandler.newInstance(this.messageDispatcher) :
                     MessageDispatcherHandler.newInstance(messageDispatcher);
             ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<>() {
                 @Override
@@ -249,6 +258,10 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
                     long begin = System.currentTimeMillis();
 
                     ChannelPipeline pipeline = ch.pipeline();
+
+                    if (Builder.this.sessionEnabled) {
+                        pipeline.addLast(SessionInterrupter.INSTANCE);
+                    }
                     Builder.this.channelHandlerAppender.forEach(appender -> appender.accept(pipeline));
                     pipeline.addLast(messageDispatcherHandler);
 

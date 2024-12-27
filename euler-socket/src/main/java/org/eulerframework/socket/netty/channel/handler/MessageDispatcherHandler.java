@@ -30,13 +30,13 @@ public class MessageDispatcherHandler<T> extends ChannelInboundHandlerAdapter { 
 
     private final MessageDispatcher<T> messageDispatcher;
 
-    private MessageDispatcherHandler(MessageDispatcher<T> messageDispatcher) {
+    protected MessageDispatcherHandler(MessageDispatcher<T> messageDispatcher) {
         this.messageDispatcher = messageDispatcher;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void channelRead(ChannelHandlerContext ctx, Object msg) { // (2)
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ctx
                 .writeAndFlush(this.messageDispatcher.dispatch((T) msg))
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);

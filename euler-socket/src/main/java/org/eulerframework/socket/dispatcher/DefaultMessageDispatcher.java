@@ -19,7 +19,7 @@ package org.eulerframework.socket.dispatcher;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultMessageDispatcher implements MessageDispatcher<Object> {
+public class DefaultMessageDispatcher extends AbstractMessageDispatcher<Object> implements MessageDispatcher<Object> {
     private final List<MessageHandler> handlers = new ArrayList<>();
 
     @Override
