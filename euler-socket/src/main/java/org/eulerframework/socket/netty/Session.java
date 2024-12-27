@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public class Session {
     private final String sessionId;
+    private boolean authenticated;
     private final Map<String, Object> attributes = new HashMap<>();
 
     public Session() {
@@ -20,6 +21,10 @@ public class Session {
         this.attributes.put(key, value);
     }
 
+    public Object getAttribute(String key) {
+        return this.attributes.get(key);
+    }
+
     public Map<String, Object> getAttributes() {
         return attributes;
     }
@@ -29,5 +34,13 @@ public class Session {
         return "Session{" +
                 "sessionId='" + sessionId + '\'' +
                 '}';
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
+    }
+
+    public boolean isAuthenticated() {
+        return authenticated;
     }
 }
