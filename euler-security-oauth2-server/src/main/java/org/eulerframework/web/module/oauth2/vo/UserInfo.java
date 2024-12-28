@@ -15,8 +15,6 @@
  */
 package org.eulerframework.web.module.oauth2.vo;
 
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-
 import java.util.Collection;
 
 /**
