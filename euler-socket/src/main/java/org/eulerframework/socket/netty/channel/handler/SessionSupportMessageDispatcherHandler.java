@@ -23,7 +23,8 @@ import org.eulerframework.socket.netty.Session;
 import org.eulerframework.socket.netty.SessionContext;
 
 @ChannelHandler.Sharable
-public class SessionSupportMessageDispatcherHandler<T> extends MessageDispatcherHandler<T> { // (1)
+public class SessionSupportMessageDispatcherHandler<T> extends MessageDispatcherHandler<T> {
+
     public static <T> SessionSupportMessageDispatcherHandler<T> newInstance(MessageDispatcher<T> messageDispatcher) {
         return new SessionSupportMessageDispatcherHandler<>(messageDispatcher);
     }
@@ -34,11 +35,11 @@ public class SessionSupportMessageDispatcherHandler<T> extends MessageDispatcher
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        Session session = ctx.channel().attr(SessionInterrupter.SESSION_KEY).get();
+        Session session = Session.getSession(ctx);
         if (session == null) {
             throw new IllegalStateException("There is no session in the channel context");
         }
-        new SessionContext(session);
+        SessionContext ignore = session.createSessionContext();
         super.channelRead(ctx, msg);
     }
 }

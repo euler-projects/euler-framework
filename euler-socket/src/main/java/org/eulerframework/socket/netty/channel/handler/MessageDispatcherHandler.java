@@ -23,7 +23,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.eulerframework.socket.dispatcher.MessageDispatcher;
 
 @ChannelHandler.Sharable
-public class MessageDispatcherHandler<T> extends ChannelInboundHandlerAdapter { // (1)
+public class MessageDispatcherHandler<T> extends ChannelInboundHandlerAdapter {
+
     public static <T> MessageDispatcherHandler<T> newInstance(MessageDispatcher<T> messageDispatcher) {
         return new MessageDispatcherHandler<>(messageDispatcher);
     }
