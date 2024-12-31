@@ -23,13 +23,13 @@ import org.eulerframework.socket.netty.Session;
 import org.eulerframework.socket.netty.SessionContext;
 
 @ChannelHandler.Sharable
-public class SessionSupportMessageDispatcherHandler<T> extends MessageDispatcherHandler<T> {
+public class SessionSupportMessageDispatcherHandler<IN, OUT> extends MessageDispatcherHandler<IN, OUT> {
 
-    public static <T> SessionSupportMessageDispatcherHandler<T> newInstance(MessageDispatcher<T> messageDispatcher) {
+    public static <IN, OUT> SessionSupportMessageDispatcherHandler<IN, OUT> newInstance(MessageDispatcher<IN, OUT> messageDispatcher) {
         return new SessionSupportMessageDispatcherHandler<>(messageDispatcher);
     }
 
-    private SessionSupportMessageDispatcherHandler(MessageDispatcher<T> messageDispatcher) {
+    private SessionSupportMessageDispatcherHandler(MessageDispatcher<IN, OUT> messageDispatcher) {
         super(messageDispatcher);
     }
 

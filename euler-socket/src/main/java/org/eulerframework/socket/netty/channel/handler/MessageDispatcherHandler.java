@@ -23,15 +23,15 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.eulerframework.socket.dispatcher.MessageDispatcher;
 
 @ChannelHandler.Sharable
-public class MessageDispatcherHandler<T> extends ChannelInboundHandlerAdapter {
+public class MessageDispatcherHandler<IN, OUT> extends ChannelInboundHandlerAdapter {
 
-    public static <T> MessageDispatcherHandler<T> newInstance(MessageDispatcher<T> messageDispatcher) {
+    public static <IN, OUT> MessageDispatcherHandler<IN, OUT> newInstance(MessageDispatcher<IN, OUT> messageDispatcher) {
         return new MessageDispatcherHandler<>(messageDispatcher);
     }
 
-    private final MessageDispatcher<T> messageDispatcher;
+    private final MessageDispatcher<IN, OUT> messageDispatcher;
 
-    protected MessageDispatcherHandler(MessageDispatcher<T> messageDispatcher) {
+    protected MessageDispatcherHandler(MessageDispatcher<IN, OUT> messageDispatcher) {
         this.messageDispatcher = messageDispatcher;
     }
 
@@ -39,7 +39,7 @@ public class MessageDispatcherHandler<T> extends ChannelInboundHandlerAdapter {
     @SuppressWarnings("unchecked")
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ctx
-                .writeAndFlush(this.messageDispatcher.dispatch((T) msg))
+                .writeAndFlush(this.messageDispatcher.dispatch((IN) msg))
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 

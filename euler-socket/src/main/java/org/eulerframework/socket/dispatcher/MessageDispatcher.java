@@ -16,8 +16,8 @@
 
 package org.eulerframework.socket.dispatcher;
 
-public interface MessageDispatcher<T> {
-    Object dispatch(T message);
+public interface MessageDispatcher<IN, OUT> {
+    OUT dispatch(IN message);
 
     void addHandler(MessageHandler messageHandler);
 }

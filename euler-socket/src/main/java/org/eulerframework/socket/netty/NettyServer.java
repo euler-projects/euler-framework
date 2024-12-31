@@ -215,7 +215,7 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
     public static class Builder {
         private int port;
         private boolean sessionEnabled = false;
-        private MessageDispatcher<?> messageDispatcher;
+        private MessageDispatcher<?, ?> messageDispatcher;
         private final List<Consumer<ChannelPipeline>> channelHandlerAppender = new ArrayList<>();
 
         public Builder port(int port) {
@@ -228,7 +228,7 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
             return this;
         }
 
-        public Builder messageDispatcher(MessageDispatcher<?> messageDispatcher) {
+        public Builder messageDispatcher(MessageDispatcher<?, ?> messageDispatcher) {
             this.messageDispatcher = messageDispatcher;
             return this;
         }
@@ -249,9 +249,9 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
         }
 
         public NettyServer build() {
-            final MessageDispatcherHandler<?> messageDispatcherHandler = this.sessionEnabled ?
+            final MessageDispatcherHandler<?, ?> messageDispatcherHandler = this.sessionEnabled ?
                     SessionSupportMessageDispatcherHandler.newInstance(this.messageDispatcher) :
-                    MessageDispatcherHandler.newInstance(messageDispatcher);
+                    MessageDispatcherHandler.newInstance(this.messageDispatcher);
             ChannelInitializer<SocketChannel> channelInitializer = new ChannelInitializer<>() {
                 @Override
                 public void initChannel(SocketChannel ch) {

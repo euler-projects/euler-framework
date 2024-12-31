@@ -36,7 +36,7 @@ import java.util.Map;
 public class EulerSocketServerConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EulerSocketServerConfiguration.class);
 
-    public static void setupMessageDispatcher(MessageDispatcher<?> messageDispatcher, ApplicationContext
+    public static void setupMessageDispatcher(MessageDispatcher<?, ?> messageDispatcher, ApplicationContext
             applicationContext) {
         Map<String, Object> socketControllers = applicationContext.getBeansWithAnnotation(EulerSocketController.class);
         if (CollectionUtils.isEmpty(socketControllers)) {
@@ -46,7 +46,7 @@ public class EulerSocketServerConfiguration {
     }
 
     public static void setupMessageDispatcher
-            (MessageDispatcher<?> messageDispatcher, Collection<Object> socketControllers) {
+            (MessageDispatcher<?, ?> messageDispatcher, Collection<Object> socketControllers) {
         for (Object socketController : socketControllers) {
             List<Method> socketMappingMethods = MethodUtils.getMethodsListWithAnnotation(
                     socketController.getClass(), EulerSocketRequestMapping.class);
