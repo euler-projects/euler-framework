@@ -45,4 +45,8 @@ public class SessionContext {
     public Session getSession() {
         return session;
     }
+
+    public static void clear() {
+        CURRENT_CONTEXT.remove();
+    }
 }

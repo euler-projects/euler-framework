@@ -39,7 +39,11 @@ public class SessionSupportMessageDispatcherHandler<IN, OUT> extends MessageDisp
         if (session == null) {
             throw new IllegalStateException("There is no session in the channel context");
         }
-        SessionContext ignore = session.createSessionContext();
-        super.channelRead(ctx, msg);
+        try {
+            SessionContext ignore = session.createSessionContext();
+            super.channelRead(ctx, msg);
+        } finally {
+            SessionContext.clear();
+        }
     }
 }
