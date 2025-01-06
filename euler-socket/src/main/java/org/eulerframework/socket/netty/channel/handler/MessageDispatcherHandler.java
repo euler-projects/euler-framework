@@ -21,9 +21,12 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.eulerframework.socket.dispatcher.MessageDispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
 public class MessageDispatcherHandler<IN, OUT> extends ChannelInboundHandlerAdapter {
+    private final Logger logger = LoggerFactory.getLogger(MessageDispatcherHandler.class);
 
     public static <IN, OUT> MessageDispatcherHandler<IN, OUT> newInstance(MessageDispatcher<IN, OUT> messageDispatcher) {
         return new MessageDispatcherHandler<>(messageDispatcher);
@@ -45,8 +48,7 @@ public class MessageDispatcherHandler<IN, OUT> extends ChannelInboundHandlerAdap
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
-        // Close the connection when an exception is raised.
-        cause.printStackTrace();
+        this.logger.error("Channel error: {}", cause.getMessage(), cause);
         ctx.close();
     }
 }
