@@ -48,5 +48,6 @@ public class SessionContext {
 
     public static void clear() {
         CURRENT_CONTEXT.remove();
+        LOGGER.trace("Session context has been cleared");
     }
 }
