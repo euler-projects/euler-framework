@@ -21,6 +21,7 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,6 +40,11 @@ public class Session {
         }
 
         Session session = new Session();
+
+        InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        session.setRemoteAddress(remoteAddress.getAddress().getHostAddress());
+        session.setRemotePort(remoteAddress.getPort());
+
         ctx.channel().attr(SESSION_KEY).set(session);
         return session;
     }
