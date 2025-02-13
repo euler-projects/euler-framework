@@ -20,24 +20,23 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.haproxy.HAProxyMessage;
+import org.eulerframework.socket.netty.HAProxySession;
 import org.eulerframework.socket.netty.Session;
-import org.eulerframework.socket.netty.SessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Sharable
 public class HAProxyInterrupter extends ChannelInboundHandlerAdapter {
+    private final Logger logger = LoggerFactory.getLogger(HAProxyInterrupter.class);
     public static final HAProxyInterrupter INSTANCE = new HAProxyInterrupter();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HAProxyMessage haProxyMessage) {
-            Session session = Session.getSession(ctx);
-            if (session == null) {
-                throw new IllegalStateException("No session available, haproxy need a session in this channel.");
-            }
-            session.setRemoteAddress(haProxyMessage.sourceAddress());
-            session.setRemotePort(haProxyMessage.sourcePort());
+            Session session = HAProxySession.wrapSession(ctx, haProxyMessage);
+            this.logger.trace("wrap session '{}' with haproxy message.", session);
+            ctx.pipeline().remove(this);
+            this.logger.trace("HAProxyInterrupter removed");
         } else {
             super.channelRead(ctx, msg);
         }

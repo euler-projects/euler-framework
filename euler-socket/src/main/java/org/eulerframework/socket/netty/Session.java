@@ -22,93 +22,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-public class Session {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
-    private static final AttributeKey<Session> SESSION_KEY = AttributeKey.newInstance("session");
+public interface Session {
+    String getSessionId();
 
-    public static Session getSession(ChannelHandlerContext ctx) {
-        return ctx.channel().attr(SESSION_KEY).get();
-    }
+    String getRemoteAddress();
 
-    public static Session createSession(ChannelHandlerContext ctx) {
-        if (getSession(ctx) != null) {
-            throw new IllegalStateException("Another session has already been set to this channel context");
-        }
+    int getRemotePort();
 
-        Session session = new Session();
+    void addAttribute(String key, Object value);
 
-        InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-        session.setRemoteAddress(remoteAddress.getAddress().getHostAddress());
-        session.setRemotePort(remoteAddress.getPort());
+    Object getAttribute(String key);
 
-        ctx.channel().attr(SESSION_KEY).set(session);
-        return session;
-    }
+    Map<String, Object> getAttributes();
 
-    public static Session removeSession(ChannelHandlerContext ctx) {
-        Session session = getSession(ctx);
-        if (session != null) {
-            ctx.channel().attr(SESSION_KEY).set(null);
-        }
-        return session;
-    }
+    void setAuthenticated(boolean authenticated);
 
-    private final String sessionId;
-    private String remoteAddress;
-    private int remotePort;
-    private final Map<String, Object> attributes = new HashMap<>();
+    boolean isAuthenticated();
 
-    private boolean authenticated;
-
-    public Session() {
-        this.sessionId = UUID.randomUUID().toString();
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public String getRemoteAddress() {
-        return remoteAddress;
-    }
-
-    public void setRemoteAddress(String remoteAddress) {
-        this.remoteAddress = remoteAddress;
-    }
-
-    public int getRemotePort() {
-        return remotePort;
-    }
-
-    public void setRemotePort(int remotePort) {
-        this.remotePort = remotePort;
-    }
-
-    public void addAttribute(String key, Object value) {
-        this.attributes.put(key, value);
-    }
-
-    public Object getAttribute(String key) {
-        return this.attributes.get(key);
-    }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    public void setAuthenticated(boolean authenticated) {
-        this.authenticated = authenticated;
-    }
-
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
-
-    public SessionContext createSessionContext() {
+    default SessionContext createSessionContext() {
         SessionContext sessionContext = SessionContext.currentContext();
         if (sessionContext != null) {
             LOGGER.trace("Use the existing session context");
@@ -117,10 +50,30 @@ public class Session {
         return new SessionContext(this);
     }
 
-    @Override
-    public String toString() {
-        return "Session{" +
-                "sessionId='" + sessionId + '\'' +
-                '}';
+    Logger LOGGER = LoggerFactory.getLogger(Session.class);
+    AttributeKey<Session> SESSION_KEY = AttributeKey.newInstance("session");
+
+    static Session getSession(ChannelHandlerContext ctx) {
+        return ctx.channel().attr(SESSION_KEY).get();
+    }
+
+    static Session createSession(ChannelHandlerContext ctx) {
+        if (getSession(ctx) != null) {
+            throw new IllegalStateException("Another session has already been set to this channel context");
+        }
+
+        InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        Session session = new DefaultSession(remoteAddress.getAddress().getHostAddress(), remoteAddress.getPort());
+
+        ctx.channel().attr(SESSION_KEY).set(session);
+        return session;
+    }
+
+    static Session removeSession(ChannelHandlerContext ctx) {
+        Session session = getSession(ctx);
+        if (session != null) {
+            ctx.channel().attr(SESSION_KEY).set(null);
+        }
+        return session;
     }
 }
