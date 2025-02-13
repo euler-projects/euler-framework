@@ -21,10 +21,12 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import jakarta.annotation.Nonnull;
 import org.eulerframework.socket.dispatcher.MessageDispatcher;
+import org.eulerframework.socket.netty.channel.handler.HAProxyInterrupter;
 import org.eulerframework.socket.netty.channel.handler.MessageDispatcherHandler;
 import org.eulerframework.socket.netty.channel.handler.SessionInterrupter;
 import org.eulerframework.socket.netty.channel.handler.SessionSupportMessageDispatcherHandler;
@@ -215,6 +217,7 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
     public static class Builder {
         private int port;
         private boolean sessionEnabled = false;
+        private boolean haproxyEnabled = false;
         private MessageDispatcher<?, ?> messageDispatcher;
         private final List<Consumer<ChannelPipeline>> channelHandlerAppender = new ArrayList<>();
 
@@ -225,6 +228,11 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
 
         public Builder enableSession() {
             this.sessionEnabled = true;
+            return this;
+        }
+
+        public Builder enableHAProxy() {
+            this.haproxyEnabled = true;
             return this;
         }
 
@@ -262,6 +270,12 @@ public class NettyServer implements ChannelFuture, Runnable, Closeable {
                     if (Builder.this.sessionEnabled) {
                         pipeline.addLast(SessionInterrupter.INSTANCE);
                     }
+
+                    if (Builder.this.haproxyEnabled) {
+                        pipeline.addLast(new HAProxyMessageDecoder());
+                        pipeline.addLast(HAProxyInterrupter.INSTANCE);
+                    }
+
                     Builder.this.channelHandlerAppender.forEach(appender -> appender.accept(pipeline));
                     pipeline.addLast(messageDispatcherHandler);
 

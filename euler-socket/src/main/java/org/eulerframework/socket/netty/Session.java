@@ -52,6 +52,8 @@ public class Session {
     }
 
     private final String sessionId;
+    private String remoteAddress;
+    private int remotePort;
     private final Map<String, Object> attributes = new HashMap<>();
 
     private boolean authenticated;
@@ -62,6 +64,22 @@ public class Session {
 
     public String getSessionId() {
         return sessionId;
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public void setRemoteAddress(String remoteAddress) {
+        this.remoteAddress = remoteAddress;
+    }
+
+    public int getRemotePort() {
+        return remotePort;
+    }
+
+    public void setRemotePort(int remotePort) {
+        this.remotePort = remotePort;
     }
 
     public void addAttribute(String key, Object value) {
