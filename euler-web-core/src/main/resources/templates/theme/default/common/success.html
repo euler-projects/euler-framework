@@ -11,7 +11,7 @@
 <div class="title success">SUCCESS</div>
 <div class="info" th:text="${__message}"></div>
 <div class="target-list">
-    <span th:each="target : ${__targets}"><a th:href="${target.href}" th:text="${target.name}">Go Somewhere.</a></span>
+    <span th:each="target : ${__targets}"><a th:href="${target.href}" th:text="#{${target.name}}">Go Somewhere.</a></span>
 </div>
 </body>
 </html>
