@@ -2,16 +2,38 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.eulerframework.net/assets/css/themes/default/demo/info-page.css">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.eulerframework.net/assets/lib/bootstrap/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="https://cdn.eulerframework.net/assets/lib/loader/loaders.min.css"
+          rel="stylesheet">
+    <link href="https://cdn.eulerframework.net/assets/css/themes/default/demo/info-page.css"
+          rel="stylesheet" >
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
 <body>
-<div class="title success">SUCCESS</div>
-<div class="info" th:text="${__message}"></div>
-<div class="target-list">
-    <span th:each="target : ${__targets}"><a th:href="${target.href}" th:text="#{${target.name}}">Go Somewhere.</a></span>
+<div class="wrapper">
+    <div class="title success">SUCCESS</div>
+    <div>
+        <div class="info" th:text="${__message}">message</div>
+        <div class="target-list row" style="max-width: 500px; margin-left: auto; margin-right: auto">
+            <div class="col-md-4" th:each="target : ${__targets}"><a th:href="${target.href}" th:text="#{${target.name}}">Go Somewhere.</a></div>
+        </div>
+    </div>
+    <footer class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
+        <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+                 th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
+        <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+                href="https://www.eulerproject.io"
+                th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
+                th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
+    </footer>
 </div>
+<script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
+<script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html>
