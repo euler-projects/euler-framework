@@ -2,21 +2,43 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.eulerframework.net/assets/css/themes/default/demo/info-page.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.eulerframework.net/assets/lib/bootstrap/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="https://cdn.eulerframework.net/assets/lib/loader/loaders.min.css"
+          rel="stylesheet">
+    <link href="https://cdn.eulerframework.net/assets/css/themes/default/demo/info-page.css"
+          rel="stylesheet" >
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
 <body>
+<div class="wrapper">
 <div class="title" th:text="#{${__message}}">Message</div>
 <div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
-<div class="target-list">
-    <span><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></span>
-    <span><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></span>
+<div id="actions" class="target-list">
+    <div class="action"><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
+    <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
 </div>
+
+    <footer class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
+        <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+                 th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
+        <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+                href="https://www.eulerproject.io"
+                th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
+                th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
+    </footer>
+</div>
+<script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
+<script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
     (function(){
+        setClass('#actions')
+
         let wait = document.getElementById('wait'),href = document.getElementById('target').href;
         let interval = setInterval(function(){
             let time = --wait.innerHTML;
@@ -26,6 +48,18 @@
             }
         }, 1000);
     })();
+
+    function setClass(element) {
+        let actionElements = $(element).children('.action');
+        let actionCount = actionElements.length;
+        for (let actionElement of actionElements) {
+            $(actionElement).addClass('col-md-2')
+        }
+        let offset = (12 - 2 * actionCount) / 2;
+        if (offset > 0) {
+            $(actionElements[0]).addClass('col-md-offset-' + offset)
+        }
+    }
 </script>
 </body>
 </html>

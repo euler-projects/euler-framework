@@ -2,7 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,11 +17,9 @@
 <body>
 <div class="wrapper">
     <div class="title success">SUCCESS</div>
-    <div>
-        <div class="info" th:text="${__message}">message</div>
-        <div class="target-list row" style="max-width: 500px; margin-left: auto; margin-right: auto">
-            <div class="col-md-4" th:each="target : ${__targets}"><a th:href="${target.href}" th:text="#{${target.name}}">Go Somewhere.</a></div>
-        </div>
+    <div class="info" th:text="${__message}">message</div>
+    <div id="actions" class="target-list row" style="margin-left: auto; margin-right: auto">
+        <div class="action" th:each="target : ${__targets}"><a th:href="${target.href}" th:text="#{${target.name}}">Go Somewhere.</a></div>
     </div>
     <footer class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
         <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
@@ -35,5 +32,23 @@
 </div>
 <script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
 <script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
+
+<script>
+    (function() {
+        setClass('#actions')
+    })();
+
+    function setClass(element) {
+        let actionElements = $(element).children('.action');
+        let actionCount = actionElements.length;
+        for (let actionElement of actionElements) {
+            $(actionElement).addClass('col-md-2')
+        }
+        let offset = (12 - 2 * actionCount) / 2;
+        if (offset > 0) {
+            $(actionElements[0]).addClass('col-md-offset-' + offset)
+        }
+    }
+</script>
 </body>
 </html>
