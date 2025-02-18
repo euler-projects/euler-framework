@@ -18,7 +18,7 @@
 <div class="wrapper">
 <div class="title" th:text="#{${__message}}">Message</div>
 <div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
-<div id="actions" class="target-list">
+<div id="actions" class="target-list row">
     <div class="action"><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
     <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
 </div>
@@ -34,10 +34,11 @@
 </div>
 <script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
 <script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdn.eulerframework.net/assets/js/info-page.js"></script>
 
 <script type="text/javascript">
     (function(){
-        setClass('#actions')
+        cleanUpActions('#actions')
 
         let wait = document.getElementById('wait'),href = document.getElementById('target').href;
         let interval = setInterval(function(){
@@ -48,18 +49,6 @@
             }
         }, 1000);
     })();
-
-    function setClass(element) {
-        let actionElements = $(element).children('.action');
-        let actionCount = actionElements.length;
-        for (let actionElement of actionElements) {
-            $(actionElement).addClass('col-md-2')
-        }
-        let offset = (12 - 2 * actionCount) / 2;
-        if (offset > 0) {
-            $(actionElements[0]).addClass('col-md-offset-' + offset)
-        }
-    }
 </script>
 </body>
 </html>
