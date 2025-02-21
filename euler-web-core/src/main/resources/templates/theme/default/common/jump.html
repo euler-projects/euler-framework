@@ -15,30 +15,29 @@
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
 <body>
-<div class="wrapper">
-<div class="title" th:text="#{${__message}}">Message</div>
-<div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
-<div id="actions" class="target-list row">
-    <div class="action"><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
-    <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
+<div class="container">
+    <div class="title " th:text="#{${__message}}">Message</div>
+    <div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
+    <div class="actions row">
+        <div class="action"><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
+        <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
+    </div>
 </div>
-
-    <footer class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
-        <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
-                 th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
-        <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
-                href="https://www.eulerproject.io"
-                th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
-                th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
-    </footer>
-</div>
+<footer>
+    <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+             th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
+    <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+            href="https://www.eulerproject.io"
+            th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
+            th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
+</footer>
 <script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
 <script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
 <script src="https://cdn.eulerframework.net/assets/js/info-page.js"></script>
 
 <script type="text/javascript">
     (function(){
-        cleanUpActions('#actions')
+        cleanUpActions($('.actions'))
 
         let wait = document.getElementById('wait'),href = document.getElementById('target').href;
         let interval = setInterval(function(){
