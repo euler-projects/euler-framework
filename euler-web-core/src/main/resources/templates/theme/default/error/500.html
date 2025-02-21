@@ -23,11 +23,12 @@
 
     <div class="exception" th:if="${__crashInfo} != null">
         <div><label>exception:</label><span th:text="${__crashInfo}">Crash Info</span></div>
-        <pre th:if="${__crashStackTrace} != null" th:text="${__crashStackTrace}">some exception thrown:
+        <div th:if="${__crashStackTrace} != null"><pre th:text="${__crashStackTrace}">some exception thrown:
         some error...
         some error...
         some error...
         some error...</pre>
+        </div>
     </div>
 </div>
 <footer>
