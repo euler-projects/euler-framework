@@ -51,14 +51,14 @@ public abstract class ThymeleafPageController extends AbstractWebController {
     }
 
     protected ThymeleafPageController(String viewPath) {
-        if (viewPath == null) {
-            this.viewPathPrefix = "/";
-        } else {
+        if (StringUtils.hasText(viewPath)) {
             Assert.isTrue(!viewPath.endsWith("/"), "viewPath must not end with /");
             while (viewPath.startsWith("/")) {
                 viewPath = viewPath.substring(1);
             }
             this.viewPathPrefix = viewPath + "/";
+        } else {
+            this.viewPathPrefix = "";
         }
     }
 
@@ -137,7 +137,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
 
         String prefixedView;
         if (themeView) {
-            prefixedView = "theme/" + this.theme() + this.viewPathPrefix + view;
+            prefixedView = "theme/" + this.theme() + "/" + this.viewPathPrefix + view;
         } else {
             prefixedView = this.viewPathPrefix + view;
         }
