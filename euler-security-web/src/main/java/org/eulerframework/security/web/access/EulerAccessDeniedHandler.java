@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.web.module.authentication.extend;
+package org.eulerframework.security.web.access;
 
 import java.io.IOException;
 
@@ -21,18 +21,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 
-import org.eulerframework.web.util.ServletUtils;
-
 public class EulerAccessDeniedHandler extends AccessDeniedHandlerImpl {
+    private final Logger logger = LoggerFactory.getLogger(EulerAccessDeniedHandler.class);
     
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
             AccessDeniedException accessDeniedException) throws IOException,
             ServletException {
-        System.out.println("!!!" + ServletUtils.getRealIP(request));
+        this.logger.warn("Access denied: {}", accessDeniedException.getMessage());
         super.handle(request, response, accessDeniedException);
     }
 

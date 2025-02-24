@@ -16,7 +16,6 @@
 package org.eulerframework.web.module.authentication.conf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eulerframework.web.module.authentication.extend.EulerAccessDeniedHandler;
 import org.eulerframework.web.module.authentication.extend.EulerLoginUrlAuthenticationEntryPoint;
 import org.eulerframework.web.module.authentication.extend.EulerUrlAuthenticationFailureHandler;
 import org.eulerframework.web.module.authentication.filter.CaptchaUsernamePasswordAuthenticationFilter;
@@ -25,7 +24,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -33,10 +31,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 public class EulerWebSecurityBeans {
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
-        return new EulerAccessDeniedHandler();
-    }
+//    @Bean
+//    public AccessDeniedHandler accessDeniedHandler() {
+//        return new EulerAccessDeniedHandler();
+//    }
 
     @Bean
     public SessionRegistry sessionRegistry() {

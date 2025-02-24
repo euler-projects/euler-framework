@@ -11,7 +11,7 @@
                             proxy-target-class="true">
     </global-method-security>
     
-    <beans:bean id="accessDeniedHandler" class="org.eulerframework.web.module.authentication.extend.EulerAccessDeniedHandler" />
+    <beans:bean id="accessDeniedHandler" class="org.eulerframework.security.web.access.EulerAccessDeniedHandler" />
 
     <beans:bean id="sessionRegistry"
                 class="org.springframework.security.core.session.SessionRegistryImpl" />
