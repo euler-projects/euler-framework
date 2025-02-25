@@ -16,25 +16,31 @@
 package org.eulerframework.security.web.endpoint.user;
 
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
-import org.eulerframework.web.core.base.controller.ThymeleafPageController;
+import org.eulerframework.web.core.base.controller.PageRender;
+import org.eulerframework.web.core.base.controller.PageSupportWebController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class EulerSecurityUserPageController extends ThymeleafPageController implements EulerSecurityUserEndpoint {
+public class EulerSecurityUserPageController extends PageSupportWebController implements EulerSecurityUserEndpoint {
     private String loginProcessingUrl;
     private String logoutProcessingUrl;
 
+    public EulerSecurityUserPageController(PageRender pageRender) {
+        super(pageRender);
+    }
+
     @Override
     @GetMapping("${" + EulerSecurityEndpoints.USER_LOGIN_PAGE_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PAGE + "}")
-    public String loginPage() {
+    public ModelAndView loginPage() {
         return this.display("/euler/security/login");
     }
 
     @Override
     @GetMapping("${" + EulerSecurityEndpoints.USER_LOGOUT_PAGE_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGOUT_PAGE + "}")
-    public String logoutPage() {
+    public ModelAndView logoutPage() {
         return this.display("/euler/security/logout");
     }
 

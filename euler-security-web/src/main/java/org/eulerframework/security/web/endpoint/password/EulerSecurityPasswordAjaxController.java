@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -33,8 +34,8 @@ public class EulerSecurityPasswordAjaxController extends ApiSupportWebController
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public String changePasswordPage() {
-        throw new ResourceNotFoundException();
+    public ModelAndView changePasswordPage() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

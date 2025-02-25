@@ -19,7 +19,8 @@ import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.provisioning.EulerUserDetailsManager;
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
-import org.eulerframework.web.core.base.controller.ThymeleafPageController;
+import org.eulerframework.web.core.base.controller.PageRender;
+import org.eulerframework.web.core.base.controller.PageSupportWebController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,18 +29,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class EulerSecuritySignupPageController extends ThymeleafPageController implements EulerSecuritySignupEndpoint {
+public class EulerSecuritySignupPageController extends PageSupportWebController implements EulerSecuritySignupEndpoint {
     private boolean signupEnabled;
     private String loginPage;
     private String signupProcessingUrl;
     private EulerUserDetailsManager eulerUserDetailsManager;
     private PasswordEncoder passwordEncoder;
 
+    public EulerSecuritySignupPageController(PageRender pageRender) {
+        super(pageRender);
+    }
+
     @Override
     @GetMapping("${" + EulerSecurityEndpoints.SIGNUP_PAGE_PROP_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PAGE + "}")
-    public String signupPage() {
+    public ModelAndView signupPage() {
         if (!this.signupEnabled) {
             return this.notfound();
         }
@@ -48,7 +54,7 @@ public class EulerSecuritySignupPageController extends ThymeleafPageController i
 
     @Override
     @PostMapping("${" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.SIGNUP_PROCESSING_URL + "}")
-    public String doSignup(@RequestParam String username, @RequestParam String password) {
+    public ModelAndView doSignup(@RequestParam String username, @RequestParam String password) {
         if (!this.signupEnabled) {
             return this.notfound();
         }

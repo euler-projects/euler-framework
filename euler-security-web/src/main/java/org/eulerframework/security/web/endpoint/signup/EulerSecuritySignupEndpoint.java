@@ -15,8 +15,10 @@
  */
 package org.eulerframework.security.web.endpoint.signup;
 
+import org.springframework.web.servlet.ModelAndView;
+
 public interface EulerSecuritySignupEndpoint {
-    String signupPage();
+    ModelAndView signupPage();
 
     Object doSignup(String username, String password);
 }

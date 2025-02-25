@@ -17,7 +17,8 @@ package org.eulerframework.security.web.endpoint.password;
 
 import org.eulerframework.security.provisioning.EulerUserDetailsManager;
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
-import org.eulerframework.web.core.base.controller.ThymeleafPageController;
+import org.eulerframework.web.core.base.controller.PageRender;
+import org.eulerframework.web.core.base.controller.PageSupportWebController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,22 +26,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class EulerSecurityPasswordPageController extends ThymeleafPageController implements EulerSecurityPasswordEndpoint {
+public class EulerSecurityPasswordPageController extends PageSupportWebController implements EulerSecurityPasswordEndpoint {
     private String changePasswordProcessingUrl;
     private EulerUserDetailsManager eulerUserDetailsManager;
     private PasswordEncoder passwordEncoder;
 
+    public EulerSecurityPasswordPageController(PageRender pageRender) {
+        super(pageRender);
+    }
+
     @Override
     @GetMapping("${" + EulerSecurityEndpoints.PASSWORD_CHANGE_PASSWORD_PAGE_PROP_NAME + ":" + EulerSecurityEndpoints.PASSWORD_CHANGE_PASSWORD_PAGE + "}")
-    public String changePasswordPage() {
+    public ModelAndView changePasswordPage() {
         return this.display("/euler/security/change-password");
     }
 
     @Override
     @PostMapping("${" + EulerSecurityEndpoints.PASSWORD_CHANGE_PASSWORD_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.PASSWORD_CHANGE_PASSWORD_PROCESSING_URL + "}")
-    public String doChangePassword(String oldRawPassword, String newRawPassword) {
+    public ModelAndView doChangePassword(String oldRawPassword, String newRawPassword) {
         this.eulerUserDetailsManager.changePassword(oldRawPassword, this.passwordEncoder.encode(newRawPassword));
         return this.success();
     }

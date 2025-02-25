@@ -15,8 +15,10 @@
  */
 package org.eulerframework.security.web.endpoint.user;
 
-public interface EulerSecurityUserEndpoint {
-    String loginPage();
+import org.springframework.web.servlet.ModelAndView;
 
-    String logoutPage();
+public interface EulerSecurityUserEndpoint {
+    ModelAndView loginPage();
+
+    ModelAndView logoutPage();
 }

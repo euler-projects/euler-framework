@@ -15,15 +15,16 @@
  */
 package org.eulerframework.web.core.base.controller;
 
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.common.util.Assert;
-import org.eulerframework.constant.EulerSysAttributes;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.base.response.ErrorResponse;
-import org.eulerframework.web.core.exception.web.*;
+import org.eulerframework.web.core.exception.web.PageNotFoundException;
+import org.eulerframework.web.core.exception.web.SystemWebError;
+import org.eulerframework.web.core.exception.web.UndefinedWebException;
+import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.eulerframework.web.util.ServletUtils;
 import org.springframework.http.HttpStatus;
@@ -31,35 +32,22 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class ThymeleafPageController extends AbstractWebController {
+public abstract class PageSupportWebController extends AbstractWebController {
     private static final String THEME_PARAM_NAME = "_theme";
     private static final String THEME_COOKIE_NAME = "EULER_THEME";
     private static final int THEME_COOKIE_AGE = 10 * 365 * 24 * 60 * 60;
 
-    private static volatile Map<String, Object> TEMPLATE_ATTRIBUTES = null;
-    private static final Object TEMPLATE_ATTRIBUTES_LOCK = new Object();
+    private final PageRender pageRender;
 
-    private final String viewPathPrefix;
-
-    protected ThymeleafPageController() {
-        this(null);
-    }
-
-    protected ThymeleafPageController(String viewPath) {
-        if (StringUtils.hasText(viewPath)) {
-            Assert.isTrue(!viewPath.endsWith("/"), "viewPath must not end with /");
-            while (viewPath.startsWith("/")) {
-                viewPath = viewPath.substring(1);
-            }
-            this.viewPathPrefix = viewPath + "/";
-        } else {
-            this.viewPathPrefix = "";
-        }
+    protected PageSupportWebController(PageRender pageRender) {
+        this.pageRender = pageRender;
     }
 
     /**
@@ -68,9 +56,9 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @return 主题名称, 默认为default
      */
     protected String theme() {
-        String theme = this.getRequest().getParameter(THEME_PARAM_NAME);
+        String theme = ServletUtils.getRequest().getParameter(THEME_PARAM_NAME);
         if (!StringUtils.hasText(theme)) {
-            Cookie[] cookies = this.getRequest().getCookies();
+            Cookie[] cookies = ServletUtils.getRequest().getCookies();
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
@@ -83,7 +71,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
         } else {
             Cookie cookie = new Cookie(THEME_COOKIE_NAME, theme);
             cookie.setMaxAge(THEME_COOKIE_AGE);
-            this.getResponse().addCookie(cookie);
+            ServletUtils.getResponse().addCookie(cookie);
         }
 
         if (!StringUtils.hasText(theme)) {
@@ -97,52 +85,26 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * open the theme view
      *
      * @param view view name
-     * @return the prefixed view that format is theme/{@link ThymeleafPageController#theme()}/{@link ThymeleafPageController#viewPathPrefix}/{view}
+     * @return A {@link ModelAndView} object include system attributes
      */
-    protected String display(String view) {
+    protected ModelAndView display(String view) {
         return this.display(view, true);
+    }
+
+    protected ModelAndView display(String view, boolean themeView) {
+        return this.display(view, themeView, null);
     }
 
     /**
      * open a view
      *
      * @param view      view name
-     * @param themeView <code>true</code> to use theme like {@link ThymeleafPageController#display(String)}
-     *                  or <code>false</code> to open view {@link ThymeleafPageController#viewPathPrefix}/{view}
-     * @return the prefixed view that format is <pre>{@code
-     *      if(themeView) {
-     *          prefixedView = "theme/" + this.theme() + this.viewPathPrefix + view;
-     *      } else {
-     *          prefixedView = this.viewPathPrefix + view;
-     *      }
-     * }</pre>
+     * @param themeView <code>true</code> to use theme view
+     *                  or <code>false</code> to open view without theme
+     * @return A {@link ModelAndView} object include system attributes
      */
-    protected String display(String view, boolean themeView) {
-        Assert.notNull(view, "view is empty");
-
-        if (TEMPLATE_ATTRIBUTES == null) {
-            synchronized (TEMPLATE_ATTRIBUTES_LOCK) {
-                if (TEMPLATE_ATTRIBUTES == null) {
-                    TEMPLATE_ATTRIBUTES = Map.of("ctx", getEulerAttributesContext());
-                }
-            }
-        }
-
-        this.getRequest().setAttribute("euler", TEMPLATE_ATTRIBUTES);
-
-        // ensure view not start with a '/'
-        while (view.startsWith("/")) {
-            view = view.substring(1);
-        }
-
-        String prefixedView;
-        if (themeView) {
-            prefixedView = "theme/" + this.theme() + "/" + this.viewPathPrefix + view;
-        } else {
-            prefixedView = this.viewPathPrefix + view;
-        }
-        this.logger.trace("display view '{}'", prefixedView);
-        return prefixedView;
+    protected ModelAndView display(String view, boolean themeView, Map<String, Object> model) {
+        return this.pageRender.display(view, themeView ? this.theme() : null, model);
     }
 
     /**
@@ -197,7 +159,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @param wait    等待时间(秒)
      * @return 跳转页面
      */
-    protected String jump(String message, Target target, int wait) {
+    protected ModelAndView jump(String message, Target target, int wait) {
         Assert.notNull(message, "Jump message can not be null");
 
         target = target == null ? Target.HOME_TARGET : target;
@@ -214,7 +176,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      *
      * @return 错误页面
      */
-    protected String error() {
+    protected ModelAndView error() {
         return this.error(new UndefinedWebException());
     }
 
@@ -223,7 +185,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      *
      * @return 错误页面
      */
-    protected String error(String message) {
+    protected ModelAndView error(String message) {
         return this.error(new UndefinedWebException(message));
     }
 
@@ -236,7 +198,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @param webException 错误异常
      * @return 错误页面
      */
-    private String error(WebException webException) {
+    private ModelAndView error(WebException webException) {
         Assert.notNull(webException, "Error exception can not be null");
         ErrorResponse errorResponse = new ErrorResponse(webException);
         this.getRequest().setAttribute("__error", errorResponse);
@@ -248,7 +210,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      *
      * @return 成功页面
      */
-    protected String success() {
+    protected ModelAndView success() {
         return this.success(null, Target.HOME_TARGET);
     }
 
@@ -258,7 +220,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @param message 未国际化前的信息,为<code>null</code>时不显示
      * @return 成功页面
      */
-    protected String success(String message) {
+    protected ModelAndView success(String message) {
         return this.success(message, Target.HOME_TARGET);
     }
 
@@ -271,11 +233,11 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @param target  自定义链接
      * @return 成功页面
      */
-    protected String success(String message, Target... target) {
-        this.getRequest().setAttribute("__message", message);
-        this.getRequest().setAttribute("__targets", target);
-        //return this.redirect("/common/success");
-        return this.display("/common/success");
+    protected ModelAndView success(String message, Target... target) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("__message", message);
+        model.put("__targets", target);
+        return this.display("/common/success", true, model);
     }
 
     /**
@@ -283,7 +245,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      *
      * @return 对应主题的404页面
      */
-    protected String notfound() {
+    protected ModelAndView notfound() {
         this.getResponse().setStatus(HttpStatus.NOT_FOUND.value());
         return this.display("/error/404");
     }
@@ -293,19 +255,21 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      *
      * @return 对应主题的500错误页面
      */
-    protected String crashPage(Throwable e) {
+    protected ModelAndView crashPage(Throwable e) {
         this.logger.error(e.getMessage(), e);
+        Map<String, Object> model = null;
         if (WebConfig.showStackTraceInCrashPage()) {
-            this.getRequest().setAttribute("__crashInfo", e.getMessage());
+            model = new HashMap<>();
+            model.put("__crashInfo", e.getMessage());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            this.getRequest().setAttribute("__crashStackTrace", sw.toString());
+            model.put("__crashStackTrace", sw.toString());
         } else {
             // DO_NOTHING
         }
         this.getResponse().setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return this.display("/error/500");
+        return this.display("/error/500", true, model);
     }
 
     /**
@@ -314,7 +278,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @return 对应主题的404页面
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public String resourceNotFoundException(ResourceNotFoundException e) {
+    public ModelAndView resourceNotFoundException(ResourceNotFoundException e) {
         this.logger.warn(e.getMessage(), e);
         return this.notfound();
     }
@@ -325,7 +289,7 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @return 对应主题的404页面
      */
     @ExceptionHandler(PageNotFoundException.class)
-    public String pageNotFoundException(PageNotFoundException e) {
+    public ModelAndView pageNotFoundException(PageNotFoundException e) {
         return this.notfound();
     }
 
@@ -335,18 +299,18 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @return
      */
     @ExceptionHandler(WebException.class)
-    public String webException(WebException e) {
+    public ModelAndView webException(WebException e) {
         this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
         return this.error(e);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public String missingServletRequestParameterException(MissingServletRequestParameterException e) {
+    public ModelAndView missingServletRequestParameterException(MissingServletRequestParameterException e) {
         return this.error(new WebException(e.getMessage(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public String methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+    public ModelAndView methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         return this.error(new WebException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
     }
 
@@ -356,48 +320,10 @@ public abstract class ThymeleafPageController extends AbstractWebController {
      * @return 崩溃页面(500)
      */
     @ExceptionHandler(Exception.class)
-    public String exception(Exception e) {
+    public ModelAndView exception(Exception e) {
         this.logger.error(e.getMessage(), e);
         return this.crashPage(e);
     }
-
-    private Map<String, Object> getEulerAttributesContext() {
-        ServletContext servletContext = getServletContext();
-        Set<String> eulerSysAttributeNames = EulerSysAttributes.getEulerSysAttributeNames();
-        Map<String, Object> context = new HashMap<>();
-        for (String eulerSysAttributeName : eulerSysAttributeNames) {
-            Object value = servletContext.getAttribute(eulerSysAttributeName);
-            if (value != null) {
-                context.put(eulerSysAttributeName, value);
-            }
-        }
-        return context;
-    }
-
-//    private static final String PAGE_CONTROLLER_NAME_SUFFIX = "PageController";
-//    private static final String CONTROLLER_NAME_SUFFIX = "Controller";
-//    /**
-//     * 从类名自动解析ControllerName
-//     * <p>
-//     * 要使用此方法, Controller必须以Controller或PageController结尾,
-//     * 获取到的名字为Controller的类名去掉Controller或PageController后缀,首字母变为小写
-//     * <p>
-//     * 例如: ExampleControllerPageController的名字为exampleController
-//     */
-//    private String initWebControllerName() {
-//        String className = this.getClass().getSimpleName();
-//
-//        int indexOfWebController = className.lastIndexOf(PAGE_CONTROLLER_NAME_SUFFIX);
-//        if (indexOfWebController <= 0) {
-//            indexOfWebController = className.lastIndexOf(CONTROLLER_NAME_SUFFIX);
-//            if (indexOfWebController <= 0) {
-//                throw new RuntimeException(
-//                        "If you want to use this.display(), Controller's class name must end with '" + CONTROLLER_NAME_SUFFIX + "' or '" + PAGE_CONTROLLER_NAME_SUFFIX + "'");
-//            }
-//        }
-//
-//        return org.eulerframework.common.util.StringUtils.toLowerCaseFirstChar(className.substring(0, indexOfWebController));
-//    }
 
     public static class Target extends WebContextAccessible {
         private String href;

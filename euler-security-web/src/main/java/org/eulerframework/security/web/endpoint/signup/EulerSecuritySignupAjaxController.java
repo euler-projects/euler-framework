@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -70,7 +71,7 @@ public class EulerSecuritySignupAjaxController extends ApiSupportWebController i
     }
 
     @Override
-    public String signupPage() {
-        throw new ResourceNotFoundException();
+    public ModelAndView signupPage() {
+        throw new UnsupportedOperationException();
     }
 }

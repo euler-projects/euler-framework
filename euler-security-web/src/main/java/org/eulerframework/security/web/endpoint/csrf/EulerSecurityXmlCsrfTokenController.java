@@ -16,17 +16,24 @@
 package org.eulerframework.security.web.endpoint.csrf;
 
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
-import org.eulerframework.web.core.base.controller.ThymeleafPageController;
+import org.eulerframework.web.core.base.controller.PageRender;
+import org.eulerframework.web.core.base.controller.PageSupportWebController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class EulerSecurityXmlCsrfTokenController extends ThymeleafPageController implements EulerSecurityCsrfTokenEndpoint {
+public class EulerSecurityXmlCsrfTokenController extends PageSupportWebController implements EulerSecurityCsrfTokenEndpoint {
     private boolean csrfEnabled;
+
+    public EulerSecurityXmlCsrfTokenController(PageRender pageRender) {
+        super(pageRender);
+    }
+
     @Override
     @GetMapping("${" + EulerSecurityEndpoints.CSRF_PATH_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_PATH + "}")
-    public String csrf() {
+    public ModelAndView csrf() {
         if(!this.csrfEnabled) {
             return this.notfound();
         }

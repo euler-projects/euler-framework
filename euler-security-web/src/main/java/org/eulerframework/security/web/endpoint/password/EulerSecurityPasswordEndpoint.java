@@ -15,8 +15,10 @@
  */
 package org.eulerframework.security.web.endpoint.password;
 
+import org.springframework.web.servlet.ModelAndView;
+
 public interface EulerSecurityPasswordEndpoint {
-    String changePasswordPage();
+    ModelAndView changePasswordPage();
 
     Object doChangePassword(String oldRawPassword, String newRawPassword);
 }
