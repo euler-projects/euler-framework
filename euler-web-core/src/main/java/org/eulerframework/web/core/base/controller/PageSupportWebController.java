@@ -17,6 +17,7 @@ package org.eulerframework.web.core.base.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
@@ -34,8 +35,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -133,22 +132,23 @@ public abstract class PageSupportWebController extends AbstractWebController {
      *               if redirect to an absolute path, <code>context-path</code> is must not provide
      * @return The redirect target
      */
-    protected String redirect(String action) {
+    protected ModelAndView redirect(String action) {
         Assert.notNull(action, "action path is empty");
-
+        String view;
         if (action.startsWith("/")) {
-            return "redirect:" + action;
+            view = "redirect:" + action;
         } else {
             String realUrl = ServletUtils.findRealURI(this.getRequest());
             int lastSlash = realUrl.lastIndexOf('/');
             if (lastSlash < 0) {
-                return "redirect:/" + action;
+                view = "redirect:/" + action;
             } else if (lastSlash == realUrl.length() - 1) {
-                return "redirect:" + realUrl + action;
+                view = "redirect:" + realUrl + action;
             } else {
-                return "redirect:" + realUrl.substring(0, lastSlash) + "/" + action;
+                view = "redirect:" + realUrl.substring(0, lastSlash) + "/" + action;
             }
         }
+        return new ModelAndView(view);
     }
 
     /**
@@ -191,9 +191,9 @@ public abstract class PageSupportWebController extends AbstractWebController {
 
     /**
      * 显示错误页面
-     * 自定义错误信息可在jsp中用{@code ${__error}}获取
-     * 自定义错误代码可在jsp中用{@code ${__code}}获取
-     * 自定义错误详情可在jsp中用{@code ${__error_description}}获取
+     * 自定义错误信息可在jsp中用{@code ${error.error}}获取
+     * 自定义错误代码可在jsp中用{@code ${error.code}}获取
+     * 自定义错误详情可在jsp中用{@code ${error.message}}获取
      *
      * @param webException 错误异常
      * @return 错误页面
@@ -201,8 +201,13 @@ public abstract class PageSupportWebController extends AbstractWebController {
     private ModelAndView error(WebException webException) {
         Assert.notNull(webException, "Error exception can not be null");
         ErrorResponse errorResponse = new ErrorResponse(webException);
-        this.getRequest().setAttribute("__error", errorResponse);
-        return this.display("/common/error");
+        return this.error(errorResponse);
+    }
+
+    protected ModelAndView error(ErrorResponse errorResponse) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("error", errorResponse);
+        return this.display("/error/default", true, model);
     }
 
     /**
@@ -251,28 +256,6 @@ public abstract class PageSupportWebController extends AbstractWebController {
     }
 
     /**
-     * 崩溃页面(500)
-     *
-     * @return 对应主题的500错误页面
-     */
-    protected ModelAndView crashPage(Throwable e) {
-        this.logger.error(e.getMessage(), e);
-        Map<String, Object> model = null;
-        if (WebConfig.showStackTraceInCrashPage()) {
-            model = new HashMap<>();
-            model.put("__crashInfo", e.getMessage());
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            model.put("__crashStackTrace", sw.toString());
-        } else {
-            // DO_NOTHING
-        }
-        this.getResponse().setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return this.display("/error/500", true, model);
-    }
-
-    /**
      * 用于在程序发生{@link ResourceNotFoundException}异常时统一返回错误信息
      *
      * @return 对应主题的404页面
@@ -300,7 +283,7 @@ public abstract class PageSupportWebController extends AbstractWebController {
      */
     @ExceptionHandler(WebException.class)
     public ModelAndView webException(WebException e) {
-        this.logger.debug("Error Code: " + e.getCode() + "message: " + e.getMessage(), e);
+        this.logger.debug("Error Code: {} message: {}", e.getCode(), e.getMessage(), e);
         return this.error(e);
     }
 
@@ -322,12 +305,12 @@ public abstract class PageSupportWebController extends AbstractWebController {
     @ExceptionHandler(Exception.class)
     public ModelAndView exception(Exception e) {
         this.logger.error(e.getMessage(), e);
-        return this.crashPage(e);
+        throw ExceptionUtils.asRuntimeException(e); // fallback to default error page
     }
 
     public static class Target extends WebContextAccessible {
-        private String href;
-        private String name;
+        private final String href;
+        private final String name;
 
         public String getHref() {
             return href;

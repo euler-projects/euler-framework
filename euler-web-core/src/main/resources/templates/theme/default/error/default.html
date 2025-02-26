@@ -21,9 +21,11 @@
         <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" th:text="#{_GO_HOME}">Go Home</a></div>
     </div>
     <div class="exception">
-        <div><label>error:</label><span th:text="${status + ' ' + error}">400 Bad Request</span><span th:if="${message} != null" th:text="${' ' + message}"> some error message</span></div>
-        <div th:if="${exception} != null"><label>exception:</label><span th:text="${exception}">Crash Info</span></div>
-        <div th:if="${trace} != null"><pre th:text="${trace}">some exception thrown:
+        <div><label>error:</label><span th:text="${error.code + ' ' + error.error}">400 Bad Request</span></div>
+        <div th:if="${error.message} != null"><label>message:</label><span th:text="${error.message}">some error message</span></div>
+        <div><label>timestamp:</label><span th:text="${error.timestamp}">Wed Feb 26 22:55:08 CST 2025</span></div>
+        <div th:if="${error.exception} != null"><label>exception:</label><span th:text="${error.exception}">Exception type</span></div>
+        <div th:if="${error.trace} != null"><pre th:text="${error.trace}">some exception thrown:
 some error...
 some error...
 some error...
