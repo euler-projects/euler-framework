@@ -17,24 +17,22 @@ package org.eulerframework.web.core.i18n;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.springframework.web.servlet.support.RequestContext;
+import org.eulerframework.context.ApplicationContextHolder;
 
 import org.eulerframework.web.util.ServletUtils;
 
 public class Tag {
 
     public static String i18n(String msgKey) {
-        if(msgKey == null)
+        if(msgKey == null) {
             return null;
-        
-        HttpServletRequest request = ServletUtils.getRequest();
-
-        if(request == null) {
-            return msgKey;
         }
 
-        RequestContext requestContext = new RequestContext(request);
-        String message = requestContext.getMessage(msgKey);
-        return message;
+        HttpServletRequest request = ServletUtils.getRequest();
+        return ApplicationContextHolder.getApplicationContext().getMessage(
+                msgKey,
+                null,
+                msgKey,
+                request.getLocale());
     }
 }
