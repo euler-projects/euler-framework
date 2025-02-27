@@ -17,7 +17,6 @@ package org.eulerframework.web.core.base.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.common.util.Assert;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
@@ -295,17 +294,6 @@ public abstract class PageSupportWebController extends AbstractWebController {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ModelAndView methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         return this.error(new WebException("Parameter '" + e.getParameter().getParameterName() + "' has an invalid value: " + e.getValue(), SystemWebError.PARAMETER_NOT_MEET_REQUIREMENT));
-    }
-
-    /**
-     * 用于在程序发生{@link Exception}异常时统一返回错误信息
-     *
-     * @return 崩溃页面(500)
-     */
-    @ExceptionHandler(Exception.class)
-    public ModelAndView exception(Exception e) {
-        this.logger.error(e.getMessage(), e);
-        throw ExceptionUtils.asRuntimeException(e); // fallback to default error page
     }
 
     public static class Target extends WebContextAccessible {

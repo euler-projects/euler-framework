@@ -17,39 +17,26 @@ package org.eulerframework.web.core.exception.web.api;
 
 import org.eulerframework.web.core.exception.web.WebError;
 import org.eulerframework.web.core.exception.web.WebException;
+import org.springframework.http.HttpStatus;
 
 public abstract class ApiException extends WebException {
-    
-    private int httpStatus;    
-
-    public ApiException(WebError webError, int httpStatus) {
-        super(webError);
-        this.httpStatus = httpStatus;
+    public ApiException(WebError webError, HttpStatus httpStatus) {
+        super(webError, httpStatus);
     }
     
-    public ApiException(String message, WebError webError, int httpStatus) {
-        super(message, webError);
-        this.httpStatus = httpStatus;
+    public ApiException(String message, WebError webError, HttpStatus httpStatus) {
+        super(message, webError, httpStatus);
     }
 
-    public ApiException(WebError webError, int httpStatus, Throwable cause) {
-        super(webError, cause);
-        this.httpStatus = httpStatus;
+    public ApiException(WebError webError, Throwable cause, HttpStatus httpStatus) {
+        super(webError, cause, httpStatus);
     }
 
-    public ApiException(String message, WebError webError, int httpStatus, Throwable cause) {
-        super(message, webError, cause);
-        this.httpStatus = httpStatus;
+    public ApiException(String message, WebError webError, Throwable cause, HttpStatus httpStatus) {
+        super(message, webError, cause, httpStatus);
     }
 
-    protected ApiException(String message, WebError webError, int httpStatus, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, webError, cause, enableSuppression, writableStackTrace);
-        this.httpStatus = httpStatus;
+    protected ApiException(String message, WebError webError, Throwable cause, boolean enableSuppression, boolean writableStackTrace, HttpStatus httpStatus) {
+        super(message, webError, cause, enableSuppression, writableStackTrace, httpStatus);
     }
-
-    public int getHttpStatus() {
-        return httpStatus;
-    }
-
 }

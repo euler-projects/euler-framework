@@ -116,16 +116,4 @@ public abstract class ApiSupportWebController extends AbstractWebController {
     public Object webException(WebException e) {
         return new ErrorResponse(e);
     }
-
-    /**
-     * 用于在程序发生{@link Exception}异常时统一返回错误信息
-     *
-     * @return 包含错误信息的Ajax响应体
-     */
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
-    public Object exception(Exception e) {
-        this.logger.error(e.getMessage(), e);
-        return new ErrorResponse();
-    }
 }

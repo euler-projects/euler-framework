@@ -22,18 +22,18 @@ import org.eulerframework.web.core.exception.web.SystemWebError;
 public class ResourceExistsException extends ApiException {
 
     public ResourceExistsException() {
-        super(SystemWebError.RESOURCE_EXISTS, HttpStatus.CONFLICT.value());
+        super(SystemWebError.RESOURCE_EXISTS, HttpStatus.CONFLICT);
     }
 
     public ResourceExistsException(String message) {
-        super(message, SystemWebError.RESOURCE_EXISTS, HttpStatus.CONFLICT.value());
+        super(message, SystemWebError.RESOURCE_EXISTS, HttpStatus.CONFLICT);
     }
 
     public ResourceExistsException(String message, Throwable cause) {
-        super(message, SystemWebError.RESOURCE_EXISTS, HttpStatus.CONFLICT.value(), cause);
+        super(message, SystemWebError.RESOURCE_EXISTS, cause, HttpStatus.CONFLICT);
     }
 
     public ResourceExistsException(Throwable cause) {
-        super(SystemWebError.RESOURCE_EXISTS, HttpStatus.CONFLICT.value(), cause);
+        super(SystemWebError.RESOURCE_EXISTS, cause, HttpStatus.CONFLICT);
     }
 }

@@ -22,25 +22,25 @@ import org.eulerframework.web.core.exception.web.SystemWebError;
 public class ResourceNotFoundException extends ApiException {
 
     public ResourceNotFoundException() {
-        super(SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
+        super(SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     public ResourceNotFoundException(String message) {
-        super(message, SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
+        super(message, SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     public ResourceNotFoundException(String message, Throwable cause) {
-        super(message, SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND.value(), cause);
+        super(message, SystemWebError.RESOURCE_NOT_FOUND, cause, HttpStatus.NOT_FOUND);
     }
 
     public ResourceNotFoundException(Throwable cause) {
-        super(SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND.value(), cause);
+        super(SystemWebError.RESOURCE_NOT_FOUND, cause, HttpStatus.NOT_FOUND);
     }
     
     protected ResourceNotFoundException(String message, Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
-        super(message, SystemWebError.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND.value(), 
-                cause, enableSuppression, writableStackTrace);
+        super(message, SystemWebError.RESOURCE_NOT_FOUND, cause, enableSuppression, writableStackTrace, HttpStatus.NOT_FOUND
+        );
     }
 }
