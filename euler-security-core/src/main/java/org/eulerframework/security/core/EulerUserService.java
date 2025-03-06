@@ -17,18 +17,22 @@ package org.eulerframework.security.core;
 
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 
+import java.util.List;
+
 public interface EulerUserService {
+    EulerUser createUser(EulerUserDetails userDetails);
+
     EulerUser loadUserById(String userId);
 
     EulerUser loadUserByUsername(String username);
 
-    EulerUser createUser(EulerUserDetails userDetails);
+    List<EulerUser> listUsers(int offset, int limit);
 
     void updateUser(EulerUser eulerUser);
+
+    void updatePassword(String userId, String newPassword);
 
     void disableUser(String userId);
 
     void deleteUser(String userId);
-
-    void updatePassword(String userId, String newPassword);
 }
