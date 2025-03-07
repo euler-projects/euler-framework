@@ -22,6 +22,8 @@ import java.util.List;
 public interface EulerUserService {
     EulerUser createUser(EulerUserDetails userDetails);
 
+    EulerUser createUser(EulerUser eulerUser);
+
     EulerUser loadUserById(String userId);
 
     EulerUser loadUserByUsername(String username);

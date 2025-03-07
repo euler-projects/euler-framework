@@ -32,12 +32,8 @@ public abstract class UserDetailsUtils {
             return null;
         }
 
-        EulerUserDetails.UserBuilder builder = EulerUserDetails.builder();
-        if (eulerUser.getUserId() != null) {
-            builder.userId(eulerUser.getUserId());
-        }
-
-        return builder
+        return EulerUserDetails.builder()
+                .userId(eulerUser.getUserId())
                 .password(eulerUser.getPassword())
                 .username(eulerUser.getUsername())
                 .accountExpired(!eulerUser.isAccountNonExpired())
