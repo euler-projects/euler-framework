@@ -48,9 +48,9 @@ public interface PasswordService {
      
     /**
      * 发送密码重置短信
-     * @param mobile 注册手机号，当注册手机号不存在时此方法不做任何响应
+     * @param phone 注册手机号，当注册手机号不存在时此方法不做任何响应
      */
-    void passwdResetSMSGen(String mobile);
+    void passwdResetSMSGen(String phone);
 
     /**
      * 发送密码重置邮件

@@ -59,14 +59,14 @@ public class AuthenticationJspController extends JspSupportWebController {
     public String litesignup(
             @RequestParam String username, 
             @RequestParam(required = false) String email, 
-            @RequestParam(required = false) String mobile, 
+            @RequestParam(required = false) String phone, 
             @RequestParam String password) {
         if(SecurityConfig.isSignUpEnabled()) {
             if(SecurityConfig.isSignUpEnableCaptcha()) {
                 Captcha.validCaptcha(this.getRequest());
             }
             
-            this.userRegistService.signUp(username, email, mobile, password);
+            this.userRegistService.signUp(username, email, phone, password);
             return this.success();
         } else {
             return this.notfound();

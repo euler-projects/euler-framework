@@ -34,7 +34,7 @@ public interface UserManageService extends IBaseService {
      * 后台管理 - 创建新用户
      * @param username 用户名
      * @param email 用户E-Mail
-     * @param mobile 用户手机号
+     * @param phone 用户手机号
      * @param password 密码
      * @param enabled 是否已启用
      * @param accountNonExpired 账号永不过期
@@ -42,7 +42,7 @@ public interface UserManageService extends IBaseService {
      * @param credentialsNonExpired 密码永不过期
      * @throws UserInfoCheckWebException 当用户名、E-Mail、手机号、密码校验不符合要求时抛出此异常
      */
-    void addUser(String username, String email, String mobile, String password, boolean enabled,
+    void addUser(String username, String email, String phone, String password, boolean enabled,
             boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired)
             throws UserInfoCheckWebException;
 
@@ -51,7 +51,7 @@ public interface UserManageService extends IBaseService {
      * @param userId 被修改的用户ID
      * @param username 修改后的用户名
      * @param email 修改后的E-Mail
-     * @param mobile 修改后的手机号
+     * @param phone 修改后的手机号
      * @param enabled 是否已启用
      * @param accountNonExpired 账号永不过期
      * @param accountNonLocked 账号未锁定
@@ -59,7 +59,7 @@ public interface UserManageService extends IBaseService {
      * @throws UserNotFoundException 当被修改的用户ID不存在时抛出此异常
      * @throws UserInfoCheckWebException 当用户名、E-Mail、手机号校验不符合要求时抛出此异常
      */
-    void updateUser(String userId, String username, String email, String mobile, boolean enabled,
+    void updateUser(String userId, String username, String email, String phone, boolean enabled,
             boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired)
             throws UserNotFoundException, UserInfoCheckWebException;
 

@@ -58,7 +58,7 @@ public class ProfileSettingsAjaxController extends ApiSupportWebController {
         userData.put("userId", userEntity.getUserId());
         userData.put("username", userEntity.getUsername());
         userData.put("email", userEntity.getEmail());
-        userData.put("mobile", userEntity.getMobile());
+        userData.put("phone", userEntity.getPhone());
         
         for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : Optional.ofNullable(this.eulerUserExtraDataProcessors).orElse(Collections.emptyList())) {
             Map<String, Object> extraData = eulerUserExtraDataProcessor.loadExtraData(userEntity.getUserId());
@@ -80,15 +80,15 @@ public class ProfileSettingsAjaxController extends ApiSupportWebController {
 //        Assert.hasText(username, "Required String parameter 'username' is not present");
         
         String email = (String) data.get("email");
-        String mobile = (String) data.get("mobile");
+        String phone = (String) data.get("phone");
 
         data.remove("userId");
         data.remove("username");
         data.remove("email");
-        data.remove("mobile");
+        data.remove("phone");
         data.remove("password");
         
-        this.eulerUserExtraDataService.updateUserWithExtraData(userId, email, mobile, data);
+        this.eulerUserExtraDataService.updateUserWithExtraData(userId, email, phone, data);
     }
 
 }

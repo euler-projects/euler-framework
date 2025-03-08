@@ -46,14 +46,14 @@ public class UserManageAjaxContorller extends ApiSupportWebController {
             @RequestParam(required = false) String userId,
             @RequestParam(required = true) String username,
             @RequestParam(required = true) String email,
-            @RequestParam(required = true) String mobile,
+            @RequestParam(required = true) String phone,
             @RequestParam(required = false) String password,
             @RequestParam(required = true) boolean enabled) {
         
         if(!StringUtils.hasText(userId)) {
-            this.userManageService.addUser(username, email, mobile, password, enabled, true, true, true);
+            this.userManageService.addUser(username, email, phone, password, enabled, true, true, true);
         } else {
-            this.userManageService.updateUser(userId, username, email, mobile, enabled, true, true, true);
+            this.userManageService.updateUser(userId, username, email, phone, enabled, true, true, true);
         }
     }
     

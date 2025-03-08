@@ -14,7 +14,7 @@ CREATE TABLE sys_user
   id                      VARCHAR(36)  NOT NULL,
   username                VARCHAR(100) NOT NULL,
   email                   VARCHAR(100) NULL,
-  mobile                  VARCHAR(100) NULL,
+  phone                  VARCHAR(100) NULL,
   password                VARCHAR(255) NOT NULL,
   account_non_expired     BIT          NOT NULL,
   account_non_locked      BIT          NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE sys_user
   PRIMARY KEY (id),
   CONSTRAINT uk_sys_user_username UNIQUE (username),
   CONSTRAINT uk_sys_user_email UNIQUE (email),
-  CONSTRAINT uk_sys_user_mobile UNIQUE (mobile)
+  CONSTRAINT uk_sys_user_phone UNIQUE (phone)
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8mb4
@@ -107,10 +107,10 @@ CREATE TABLE sys_basic_user_profile
   DEFAULT COLLATE utf8mb4_bin;
 
 # 插入根用户
-INSERT INTO sys_user (id, username, email, mobile, password, account_non_expired, account_non_locked, credentials_non_expired, enabled, root, regist_time)
+INSERT INTO sys_user (id, username, email, phone, password, account_non_expired, account_non_locked, credentials_non_expired, enabled, root, regist_time)
 VALUES ('00000000-0000-0000-0000-000000000000', 'root', NULL, NULL, 'NaN', TRUE, TRUE, TRUE, TRUE, TRUE, now());
 # 插入默认管理员用户
-INSERT INTO sys_user (id, username, email, mobile, password, account_non_expired, account_non_locked, credentials_non_expired, enabled, root, regist_time)
+INSERT INTO sys_user (id, username, email, phone, password, account_non_expired, account_non_locked, credentials_non_expired, enabled, root, regist_time)
 VALUES (uuid(), 'admin', NULL, NULL, 'NaN', TRUE, TRUE, TRUE, TRUE, NULL, now());
 # 插入默认管理员权限组
 INSERT INTO sys_group (id, code, description, name) VALUES ('00000000-0000-0000-0000-000000000000', 'g_admin', 'Default system management group', 'Administrators');

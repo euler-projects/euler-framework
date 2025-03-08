@@ -17,5 +17,5 @@
 package org.eulerframework.security.core.captcha.view;
 
 public interface SmsCaptchaView {
-    void sendSms(String template, String mobile, String captcha, int expireMinutes);
+    void sendSms(String template, String phone, String captcha, int expireMinutes);
 }

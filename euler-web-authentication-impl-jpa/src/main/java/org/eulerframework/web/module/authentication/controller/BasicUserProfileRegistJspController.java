@@ -47,7 +47,7 @@ public class BasicUserProfileRegistJspController extends JspSupportWebController
     public String basicSignup(
             @RequestParam String username, 
             @RequestParam(required = false) String email, 
-            @RequestParam(required = false) String mobile, 
+            @RequestParam(required = false) String phone, 
             @RequestParam String password,
             BasicUserProfile basicUserProfile) {
         if(SecurityConfig.isSignUpEnabled()) {
@@ -55,7 +55,7 @@ public class BasicUserProfileRegistJspController extends JspSupportWebController
                 Captcha.validCaptcha(this.getRequest());
             }
             
-            this.userRegistService.signUp(username, email, mobile, password, basicUserProfile);
+            this.userRegistService.signUp(username, email, phone, password, basicUserProfile);
             return this.success();
         } else {
             return this.notfound();

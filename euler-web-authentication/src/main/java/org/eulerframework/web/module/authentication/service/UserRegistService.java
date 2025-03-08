@@ -44,20 +44,20 @@ public abstract class UserRegistService {
 
     private Random random = new Random();
     
-    protected abstract EulerUserEntity doSignup(String username, String email, String mobile, String password) throws UserInfoCheckWebException;
+    protected abstract EulerUserEntity doSignup(String username, String email, String phone, String password) throws UserInfoCheckWebException;
     
     /**
      * 注册新用户，用户名、邮箱、手机号必须有一个有值，当用户名为空时，会随机一个格式为“随机名字_手机号或邮箱”的用户名
      * @param username 用户名
      * @param email 注册邮箱
-     * @param mobile 注册手机号
+     * @param phone 注册手机号
      * @param password 密码
      * @return 注册生成的用户实体
      */
-    public EulerUserEntity signUp(String username, String email, String mobile, String password) 
+    public EulerUserEntity signUp(String username, String email, String phone, String password) 
             throws UserInfoCheckWebException {
         
-        if(StringUtils.isEmpty(username) && (StringUtils.hasText(email) || StringUtils.hasText(mobile))) {
+        if(StringUtils.isEmpty(username) && (StringUtils.hasText(email) || StringUtils.hasText(phone))) {
             username = this.randomUsername();
         }
 
@@ -71,17 +71,17 @@ public abstract class UserRegistService {
             email = null;
         }
         
-        if(StringUtils.hasText(mobile)) {
-            UserDataValidator.validMobile(mobile);
-            mobile = mobile.trim();
+        if(StringUtils.hasText(phone)) {
+            UserDataValidator.validPhone(phone);
+            phone = phone.trim();
         } else {
-            mobile = null;
+            phone = null;
         }
         
         UserDataValidator.validPassword(password);
         password = password.trim();
         
-        return this.doSignup(username, email, mobile, password);
+        return this.doSignup(username, email, phone, password);
     }
     
     private String randomUsername() {
@@ -100,15 +100,15 @@ public abstract class UserRegistService {
      * 注册新用户
      * @param username 用户名
      * @param email 注册邮箱
-     * @param mobile 注册手机号
+     * @param phone 注册手机号
      * @param password 密码
      * @param userProfile 用户档案
      * @return 注册生成的用户实体
      */
-    public EulerUserEntity signUp(String username, String email, String mobile, String password, EulerUserProfileEntity userProfile) 
+    public EulerUserEntity signUp(String username, String email, String phone, String password, EulerUserProfileEntity userProfile) 
             throws UserInfoCheckWebException {
         Assert.notNull(getEulerUserProfileServices(), "At least one EulerUserProfileServices should be implemented");
-        EulerUserEntity user = this.signUp(username, email, mobile, password);
+        EulerUserEntity user = this.signUp(username, email, phone, password);
         userProfile.setUserId(user.getUserId());
         for(EulerUserProfileService<? extends EulerUserProfileEntity> eulerUserProfileService : getEulerUserProfileServices()) {
             if(eulerUserProfileService.isMyProfile(userProfile)) {
@@ -128,14 +128,14 @@ public abstract class UserRegistService {
      * 
      * @param username 用户名
      * @param email 注册邮箱
-     * @param mobile 注册手机号
+     * @param phone 注册手机号
      * @param password 密码
      * @param extraData 附加数据
      * @return 注册生成的用户实体
      */
-    public EulerUserEntity signUp(String username, String email, String mobile, String password, Map<String, Object> extraData) 
+    public EulerUserEntity signUp(String username, String email, String phone, String password, Map<String, Object> extraData) 
             throws UserInfoCheckWebException {
-        EulerUserEntity user = this.signUp(username, email, mobile, password);
+        EulerUserEntity user = this.signUp(username, email, phone, password);
         if(extraData != null && !extraData.isEmpty() && getEulerUserExtraDataProcessors() != null) {
             for(EulerUserExtraDataProcessor eulerUserExtraDataProcessor : getEulerUserExtraDataProcessors()) {
                 if(eulerUserExtraDataProcessor.process(user.getUserId(), extraData)) {

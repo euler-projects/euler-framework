@@ -68,7 +68,7 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     @Override
-    public void passwdResetSMSGen(String mobile) {
+    public void passwdResetSMSGen(String phone) {
         // TODO Auto-generated method stub
     }
 

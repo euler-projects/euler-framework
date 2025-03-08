@@ -123,9 +123,9 @@ public interface EulerUserEntity extends CredentialsContainer {
     void setEmail(String email);
 
     /**
-     * @param mobile
+     * @param phone
      */
-    void setMobile(String mobile);
+    void setPhone(String phone);
 
     /**
      * @return
@@ -135,7 +135,7 @@ public interface EulerUserEntity extends CredentialsContainer {
     /**
      * @return
      */
-    String getMobile();
+    String getPhone();
 
     /**
      * @param enabled

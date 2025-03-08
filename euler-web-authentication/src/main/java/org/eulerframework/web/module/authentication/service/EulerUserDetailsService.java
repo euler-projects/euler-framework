@@ -38,8 +38,8 @@ public class EulerUserDetailsService implements UserDetailsService {
     = ObjectCachePool.generateDefaultObjectCache(SecurityConfig.getUserDetailsCacheLife());
 
     private boolean userDetailsCacheEnabled = SecurityConfig.isEnableUserDetailsCache();
-    private boolean enableEmailSignin = SecurityConfig.isEnableMobileSignin();
-    private boolean enableMobileSignin = SecurityConfig.isEnableMobileSignin();
+    private boolean enableEmailSignin = SecurityConfig.isEnablePhoneSignin();
+    private boolean enablePhoneSignin = SecurityConfig.isEnablePhoneSignin();
 
     @Resource
     private EulerUserEntityService eulerUserEntityService;
@@ -78,22 +78,22 @@ public class EulerUserDetailsService implements UserDetailsService {
                     try {
                         return this.eulerUserEntityService.loadUserByEmail(username).toEulerUserDetails();
                     } catch (UserNotFoundException emailNotFoundException) {
-                        if (this.enableMobileSignin) {
+                        if (this.enablePhoneSignin) {
                             try {
-                                return this.eulerUserEntityService.loadUserByMobile(username).toEulerUserDetails();
-                            } catch (UserNotFoundException mobileNotFoundException) {
-                                throw mobileNotFoundException;
+                                return this.eulerUserEntityService.loadUserByPhone(username).toEulerUserDetails();
+                            } catch (UserNotFoundException phoneNotFoundException) {
+                                throw phoneNotFoundException;
                             }
                         } else {
                             throw emailNotFoundException;
                         }
                     }
                 } else {
-                    if (this.enableMobileSignin) {
+                    if (this.enablePhoneSignin) {
                         try {
-                            return this.eulerUserEntityService.loadUserByMobile(username).toEulerUserDetails();
-                        } catch (UserNotFoundException mobileNotFoundException) {
-                            throw mobileNotFoundException;
+                            return this.eulerUserEntityService.loadUserByPhone(username).toEulerUserDetails();
+                        } catch (UserNotFoundException phoneNotFoundException) {
+                            throw phoneNotFoundException;
                         }
                     } else {
                         throw usernameNotFoundException;

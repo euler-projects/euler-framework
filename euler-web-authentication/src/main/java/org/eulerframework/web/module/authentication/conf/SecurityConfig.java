@@ -63,7 +63,7 @@ public abstract class SecurityConfig {
         private static final String SECURITY_OAUTH_SERVER_TYPE = "security.oauth.severType";
 
         private static final String SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = "security.authentication.enableEmailSignin";
-        private static final String SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = "security.authentication.enableMobileSignin";
+        private static final String SECURITY_AUTHENTICATION_ENABLE_PHONE_SIGNIN = "security.authentication.enablePhoneSignin";
         // private static final String SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = "security.authentication.enableUserCache";
         // private static final String SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = "security.authentication.userCacheLife";
         private static final String SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = "security.authentication.userContext.cacheLife";
@@ -74,11 +74,11 @@ public abstract class SecurityConfig {
         private static final String SECURITY_SIGNUP_ENABLE_CAPTCHA = "security.signup.enableCaptcha";
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "security.signup.username.format";
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "security.signup.email.format";
-        private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "security.signup.mobile.format";
+        private static final String SECURITY_SIGNUP_PHONE_FORMAT = "security.signup.phone.format";
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "security.signup.password.format";
         private static final String SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = "security.signup.password.minLength";
         private static final String SECURITY_SIGNUP_AUTO_SIGNIN = "security.signup.autoSignin";
-        private static final String SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP = "security.signup.enableMobileAutoSignup";
+        private static final String SECURITY_SIGNUP_ENABLE_PHONE_AUTO_SIGNUP = "security.signup.enablePhoneAutoSignup";
         private static final String SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX = "security.signup.enableInterestingUsernamePrefix";
         
         private static final String SECURITY_SMSCODE_TEMPLATE_SIGNUP = "security.smscode.template.signup";
@@ -99,7 +99,7 @@ public abstract class SecurityConfig {
         private static final ApiAuthenticationType SECURITY_API_AUTHENTICATION_TYPE = ApiAuthenticationType.NONE;
         private static final OAuthServerType SECURITY_OAUTH_SERVER_TYPE = OAuthServerType.NEITHER;
         private static final boolean SECURITY_AUTHENTICATION_ENABLE_EMAIL_SIGNIN = false;
-        private static final boolean SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN = false;
+        private static final boolean SECURITY_AUTHENTICATION_ENABLE_PHONE_SIGNIN = false;
         // private static final boolean SECURITY_AUTHENTICATION_ENABLE_USER_CAHCE = false;
         // private static final long SECURITY_AUTHENTICATION_USER_CAHCE_LIFE = 0;
         private static final long SECURITY_AUTHENTICATION_USERCONTEXT_CAHCE_LIFE = 600_000L;
@@ -108,11 +108,11 @@ public abstract class SecurityConfig {
 
         private static final boolean SECURITY_SIGNUP_ENABLED = true;
         private static final boolean SECURITY_SIGNUP_ENABLE_CAPTCHA = true;
-        private static final boolean SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP = false;
+        private static final boolean SECURITY_SIGNUP_ENABLE_PHONE_AUTO_SIGNUP = false;
         private static final boolean SECURITY_SIGNUP_ENABLE_INTERESTING_USERNAME_PREFIX = true;
         private static final String SECURITY_SIGNUP_USERNAME_FORMAT = "^[A-Za-z][A-Za-z0-9_\\-\\.]+[A-Za-z0-9]$"; // 至少三位，以字母开头，中间可含有字符数字_-.,以字母或数字结尾
         private static final String SECURITY_SIGNUP_EMAIL_FORMAT = "^[A-Za-z0-9_\\-\\.]+@[a-zA-Z0-9_\\-]+(\\.[a-zA-Z0-9_\\-]+)+$"; // 可含有-_.的email
-        private static final String SECURITY_SIGNUP_MOBILE_FORMAT = "^[0-9\\+][0-9\\-]+[0-9]$"; //以数字或+开头，后续可含有数字或-，以数字结束
+        private static final String SECURITY_SIGNUP_PHONE_FORMAT = "^[0-9\\+][0-9\\-]+[0-9]$"; //以数字或+开头，后续可含有数字或-，以数字结束
         private static final String SECURITY_SIGNUP_PASSWORD_FORMAT = "^[\\u0021-\\u007e]+$"; // ASCII可显示非空白字符
         private static final int SECURITY_SIGNUP_PASSWORD_MIN_LENGTH = 6;
         private static final boolean SECURITY_SIGNUP_AUTO_SIGNIN = true;
@@ -230,10 +230,10 @@ public abstract class SecurityConfig {
         return (String) cachedConfig;
     }
 
-    public static String getMobileFormat() {
-        Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SIGNUP_MOBILE_FORMAT,
+    public static String getPhoneFormat() {
+        Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SIGNUP_PHONE_FORMAT,
                 configKey -> propertyReader.getString(configKey,
-                        SecurityConfigDefault.SECURITY_SIGNUP_MOBILE_FORMAT));
+                        SecurityConfigDefault.SECURITY_SIGNUP_PHONE_FORMAT));
 
         return (String) cachedConfig;
     }
@@ -269,10 +269,10 @@ public abstract class SecurityConfig {
         return (boolean) cachedConfig;
     }
 
-    public static boolean isEnableMobileSignin() {
-        Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
-                key -> propertyReader.getBooleanValue(SecurityConfigKey.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN,
-                        SecurityConfigDefault.SECURITY_AUTHENTICATION_ENABLE_MOBILE_SIGNIN)
+    public static boolean isEnablePhoneSignin() {
+        Object cachedConfig = CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_AUTHENTICATION_ENABLE_PHONE_SIGNIN,
+                key -> propertyReader.getBooleanValue(SecurityConfigKey.SECURITY_AUTHENTICATION_ENABLE_PHONE_SIGNIN,
+                        SecurityConfigDefault.SECURITY_AUTHENTICATION_ENABLE_PHONE_SIGNIN)
         );
 
         return (boolean) cachedConfig;
@@ -381,10 +381,10 @@ public abstract class SecurityConfig {
     /**
      * @return
      */
-    public static boolean isEnableMobileAutoSignup() {
-        return (boolean)CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP,
+    public static boolean isEnablePhoneAutoSignup() {
+        return (boolean)CONFIG_CAHCE.get(SecurityConfigKey.SECURITY_SIGNUP_ENABLE_PHONE_AUTO_SIGNUP,
                 key -> propertyReader.getBooleanValue(key,
-                                SecurityConfigDefault.SECURITY_SIGNUP_ENABLE_MOBILE_AUTO_SIGNUP));
+                                SecurityConfigDefault.SECURITY_SIGNUP_ENABLE_PHONE_AUTO_SIGNUP));
     }
 
     /**

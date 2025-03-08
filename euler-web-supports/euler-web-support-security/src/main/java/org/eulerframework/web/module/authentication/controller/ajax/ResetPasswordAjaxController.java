@@ -37,8 +37,8 @@ public class ResetPasswordAjaxController extends ApiSupportWebController {
     private PasswordService passwordService;  
 
     @RequestMapping(value = "reset-password-email-sms", method = RequestMethod.POST)
-    public void getPasswordResetSMS(@RequestParam String mobile) {
-        this.passwordService.passwdResetSMSGen(mobile);
+    public void getPasswordResetSMS(@RequestParam String phone) {
+        this.passwordService.passwdResetSMSGen(phone);
     }
 
 }

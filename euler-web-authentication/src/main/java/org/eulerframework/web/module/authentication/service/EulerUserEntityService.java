@@ -57,22 +57,22 @@ public interface EulerUserEntityService {
     /**
      * 通过注册手机号查找用户实体类
      * 
-     * @param mobile 注册手机号
+     * @param phone 注册手机号
      * @return 用户实体类
      * @throws UserNotFoundException 查找的用户不存在
      */
-    EulerUserEntity loadUserByMobile(String mobile) throws UserNotFoundException;
+    EulerUserEntity loadUserByPhone(String phone) throws UserNotFoundException;
 
     /**
      * 通过用户名、注册邮箱、注册手机号组合查找用户实体类，有一个参数满足要求即返回，如有多个参数满足要求，则按用户名、邮箱、手机号的优先级返回
      * 
      * @param username 用户名
      * @param email 注册邮箱
-     * @param mobile 注册手机号
+     * @param phone 注册手机号
      * @return 用户实体类
      * @throws UserNotFoundException 查找的用户不存在
      */
-    //EulerUserEntity loadUserCombox(String username, String email, String mobile) throws UserNotFoundException;
+    //EulerUserEntity loadUserCombox(String username, String email, String phone) throws UserNotFoundException;
     
     /**
      * 创建新用户
@@ -118,14 +118,14 @@ public interface EulerUserEntityService {
     /**
      * 更新注册手机号
      * @param userId 要更新用户的ID
-     * @param newMobile 新手机号
+     * @param newPhone 新手机号
      * @throws UserNotFoundException 用户未找到
      * @throws UserInfoCheckWebException 手机号不符合要求
      */
-    default void updateMobile(String userId, String newMobile) throws UserNotFoundException, UserInfoCheckWebException {
-        UserDataValidator.validMobile(newMobile);
+    default void updatePhone(String userId, String newPhone) throws UserNotFoundException, UserInfoCheckWebException {
+        UserDataValidator.validPhone(newPhone);
         EulerUserEntity user = this.loadUserByUserId(userId);
-        user.setMobile(newMobile.trim());
+        user.setPhone(newPhone.trim());
         this.updateUser(user);
     }
     

@@ -68,7 +68,7 @@ public class UserInfoEndpoint {
             EulerUserEntity eulerUserEntity = this.eulerUserEntityService.loadUserByUserId(user.getUserId().toString());
             if(eulerUserEntity != null) {
                 user.setEmail(eulerUserEntity.getEmail());
-                user.setMobile(eulerUserEntity.getMobile());
+                user.setPhone(eulerUserEntity.getPhone());
             }
         }
 

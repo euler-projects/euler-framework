@@ -25,7 +25,7 @@ public class OAuth2User {
     private UUID userId;
     private String username;
     private String email;
-    private String mobile;
+    private String phone;
     private boolean accountNonExpired;
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
@@ -55,12 +55,12 @@ public class OAuth2User {
         this.email = email;
     }
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public boolean isAccountNonExpired() {

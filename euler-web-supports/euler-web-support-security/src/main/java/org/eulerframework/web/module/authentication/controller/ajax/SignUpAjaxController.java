@@ -80,10 +80,10 @@ public class SignUpAjaxController extends ApiSupportWebController {
         }
     }
 
-    @RequestMapping(path = "validMobile", method = RequestMethod.GET)
-    public void validMobile(@RequestParam String mobile) {
+    @RequestMapping(path = "validPhone", method = RequestMethod.GET)
+    public void validPhone(@RequestParam String phone) {
         if (SecurityConfig.isSignUpEnabled()) {
-            UserDataValidator.validMobile(mobile);
+            UserDataValidator.validPhone(phone);
         } else {
             throw new PageNotFoundException();
         }
@@ -108,16 +108,16 @@ public class SignUpAjaxController extends ApiSupportWebController {
     }
     
     @RequestMapping(value = "sendSmsCode", method = RequestMethod.POST) 
-    public void sendSmsCode(@RequestParam String mobile, @RequestParam BizCode bizCode) {
-        this.smsCodeValidator.sendSmsCode(mobile, bizCode);
+    public void sendSmsCode(@RequestParam String phone, @RequestParam BizCode bizCode) {
+        this.smsCodeValidator.sendSmsCode(phone, bizCode);
     }
     
     @RequestMapping(path = "validSmsCode", method = RequestMethod.GET)
-    public void validSmsCode(@RequestParam String mobile, @RequestParam String smsCode, @RequestParam BizCode bizCode) {
+    public void validSmsCode(@RequestParam String phone, @RequestParam String smsCode, @RequestParam BizCode bizCode) {
         if(this.smsCodeValidator == null) {
             throw new WebException("sms code was disabled");
         }
-        this.smsCodeValidator.check(mobile, smsCode, bizCode);
+        this.smsCodeValidator.check(phone, smsCode, bizCode);
     }
 
     @RequestMapping(
@@ -129,7 +129,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
     public String litesignup(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String email, 
-            @RequestParam(required = false) String mobile,
+            @RequestParam(required = false) String phone,
             @RequestParam(required = false) String smsCode,
             @RequestParam(required = false) String password, 
             @RequestParam Map<String, Object> extraData) {
@@ -137,7 +137,7 @@ public class SignUpAjaxController extends ApiSupportWebController {
             this.isRobotRequest(this.getRequest());
             
             if(this.smsCodeValidator.isEnabled()) {
-                this.smsCodeValidator.check(mobile, smsCode, BizCode.SIGN_UP);
+                this.smsCodeValidator.check(phone, smsCode, BizCode.SIGN_UP);
                 if(StringUtils.isEmpty(password)) {
                     /*
                      * TODO: 短信验证码注册采用随机密码的方式不完美, 
@@ -155,14 +155,14 @@ public class SignUpAjaxController extends ApiSupportWebController {
             if (extraData != null) {
                 extraData.remove("username");
                 extraData.remove("email");
-                extraData.remove("mobile");
+                extraData.remove("phone");
                 extraData.remove("password");
             }
 
             if (extraData == null || extraData.isEmpty()) {
-                return this.userRegistService.signUp(username, email, mobile, password).getUserId();
+                return this.userRegistService.signUp(username, email, phone, password).getUserId();
             } else {
-                return this.userRegistService.signUp(username, email, mobile, password, extraData).getUserId();
+                return this.userRegistService.signUp(username, email, phone, password, extraData).getUserId();
             }
         } else {
             throw new PageNotFoundException();
@@ -178,17 +178,17 @@ public class SignUpAjaxController extends ApiSupportWebController {
     public String signupJson(@RequestBody Map<String, Object> data) {
         String username = (String) data.get("username");
         String email = (String) data.get("email");
-        String mobile = (String) data.get("mobile");
+        String phone = (String) data.get("phone");
         String smsCode = (String) data.get("smsCode");
         String password = (String) data.get("password");
 
         data.remove("username");
         data.remove("email");
-        data.remove("mobile");
+        data.remove("phone");
         data.remove("smsCode");
         data.remove("password");
 
-        return this.litesignup(username, email, mobile, smsCode, password, data);
+        return this.litesignup(username, email, phone, smsCode, password, data);
     }
 
     /**

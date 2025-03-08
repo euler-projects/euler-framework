@@ -75,9 +75,9 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
                     Predicate a = criteriaBuilder.like(criteriaBuilder.upper(root.get("email")), "%" + email.toUpperCase() + "%");
                     p.add(a);
                 }
-                String mobile = pageQueryRequest.getQueryValue("mobile");
-                if(StringUtils.hasText(mobile))  {
-                    Predicate a = criteriaBuilder.like(criteriaBuilder.upper(root.get("mobile")), "%" + mobile.toUpperCase() + "%");
+                String phone = pageQueryRequest.getQueryValue("phone");
+                if(StringUtils.hasText(phone))  {
+                    Predicate a = criteriaBuilder.like(criteriaBuilder.upper(root.get("phone")), "%" + phone.toUpperCase() + "%");
                     p.add(a);
                 }
                 if(p.isEmpty()) {
@@ -103,7 +103,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
     }
 
     @Override
-    public void addUser(String username, String email, String mobile, String password, boolean enabled,
+    public void addUser(String username, String email, String phone, String password, boolean enabled,
             boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired)
             throws UserInfoCheckWebException {
         Assert.hasText(username, "Param 'username' can not be empty");
@@ -119,9 +119,9 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
             user.setEmail(email);
         }
         
-        if(StringUtils.hasText(mobile)) {
-            UserDataValidator.validMobile(mobile);
-            user.setMobile(mobile);
+        if(StringUtils.hasText(phone)) {
+            UserDataValidator.validPhone(phone);
+            user.setPhone(phone);
         }
         
         UserDataValidator.validPassword(password);
@@ -136,7 +136,7 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
     }
 
     @Override
-    public void updateUser(String userId, String username, String email, String mobile, boolean enabled,
+    public void updateUser(String userId, String username, String email, String phone, boolean enabled,
             boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired)
             throws UserNotFoundException, UserInfoCheckWebException {
         Assert.hasText(userId, "Param 'userId' can not be empty");
@@ -158,10 +158,10 @@ public class UserManageServiceImpl extends BaseService implements UserManageServ
         }
         user.setEmail(email);
         
-        if(StringUtils.hasText(mobile) && !mobile.equalsIgnoreCase(user.getMobile())) {
-            UserDataValidator.validMobile(mobile);    
+        if(StringUtils.hasText(phone) && !phone.equalsIgnoreCase(user.getPhone())) {
+            UserDataValidator.validPhone(phone);    
         }
-        user.setMobile(mobile);
+        user.setPhone(phone);
         
         user.setEnabled(enabled);
         user.setAccountNonExpired(accountNonExpired);

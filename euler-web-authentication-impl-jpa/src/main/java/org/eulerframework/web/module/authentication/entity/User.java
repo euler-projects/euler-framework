@@ -41,8 +41,8 @@ public class User extends AuditingUUIDEntity implements EulerUserEntity {
     private String username;
     @Column(name = "email", unique = true)
     private String email;
-    @Column(name = "mobile", unique = true)
-    private String mobile;
+    @Column(name = "phone", unique = true)
+    private String phone;
     @Column(name = "password", nullable = false)
     private String password;
     @Column(name = "enabled", nullable = false)
@@ -144,13 +144,13 @@ public class User extends AuditingUUIDEntity implements EulerUserEntity {
     }
 
     @Override
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
     @Override
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override

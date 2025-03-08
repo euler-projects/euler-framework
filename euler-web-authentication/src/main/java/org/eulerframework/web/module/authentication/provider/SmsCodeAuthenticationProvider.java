@@ -64,11 +64,11 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
                     "Bad credentials"));
         }
 
-        String mobile = authentication.getPrincipal().toString();
+        String phone = authentication.getPrincipal().toString();
         String presentedPassword = authentication.getCredentials().toString();
         
         try {
-            this.smsCodeValidator.check(mobile, presentedPassword, BizCode.SIGN_IN);
+            this.smsCodeValidator.check(phone, presentedPassword, BizCode.SIGN_IN);
         } catch (InvalidSmsCodeException e) {
             logger.debug("Authentication failed: sms code does not match stored value");
 
@@ -92,17 +92,17 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
         }
         catch (UsernameNotFoundException ex) {
             
-            if(SecurityConfig.isEnableMobileAutoSignup()) {
-                String mobile = authentication.getPrincipal().toString();
+            if(SecurityConfig.isEnablePhoneAutoSignup()) {
+                String phone = authentication.getPrincipal().toString();
                 String presentedPassword = authentication.getCredentials().toString();
                 
                 try {
-                    this.smsCodeValidator.check(mobile, presentedPassword, BizCode.SIGN_IN);
+                    this.smsCodeValidator.check(phone, presentedPassword, BizCode.SIGN_IN);
                     /*
                      * TODO: 此处代码与SignUpAjaxController重复, 需改进
                      */
                     String password = StringUtils.randomString(16);
-                    EulerUserEntity eulerUserEntity = this.userRegistService.signUp(null, null, mobile, password);
+                    EulerUserEntity eulerUserEntity = this.userRegistService.signUp(null, null, phone, password);
                     return new EulerUserDetails(eulerUserEntity);
                 } catch (InvalidSmsCodeException e) {
                     throw ex;
@@ -123,10 +123,10 @@ public class SmsCodeAuthenticationProvider extends AbstractUserDetailsAuthentica
     }
 
     private void mitigateAgainstTimingAttack(UsernamePasswordAuthenticationToken authentication) {
-        String mobile = authentication.getPrincipal().toString();
+        String phone = authentication.getPrincipal().toString();
         if (authentication.getCredentials() != null) {
             String presentedSmsCode = authentication.getCredentials().toString();
-            this.smsCodeValidator.check(mobile, presentedSmsCode, BizCode.SIGN_IN);
+            this.smsCodeValidator.check(phone, presentedSmsCode, BizCode.SIGN_IN);
         }
     }
 

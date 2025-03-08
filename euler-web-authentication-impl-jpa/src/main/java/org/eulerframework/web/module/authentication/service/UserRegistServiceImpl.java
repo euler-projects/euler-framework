@@ -58,12 +58,12 @@ public class UserRegistServiceImpl extends UserRegistService {
     }
 
     @Override
-    protected User doSignup(String username, String email, String mobile, String password)
+    protected User doSignup(String username, String email, String phone, String password)
             throws UserInfoCheckWebException {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setMobile(mobile);
+        user.setPhone(phone);
         user.setPassword(this.passwordEncoder.encode(password.trim()));
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);

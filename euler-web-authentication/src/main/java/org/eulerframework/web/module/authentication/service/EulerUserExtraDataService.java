@@ -42,7 +42,7 @@ public class EulerUserExtraDataService {
             String userId, 
             //String newUsername, 
             String newEmail, 
-            String newMobile,
+            String newPhone,
             Map<String, Object> extraData) 
             throws UserInfoCheckWebException {
 //        EulerUserEntity user = this.eulerUserEntityService.loadUserByUserId(userId);
@@ -59,13 +59,13 @@ public class EulerUserExtraDataService {
 //            user.setEmail(null);
 //        }
 //
-//        if(StringUtils.hasText(newMobile)) {
-//            if(!newMobile.equalsIgnoreCase(user.getMobile())) {
-//                UserDataValidator.validMobile(newMobile);
-//                user.setMobile(newMobile.trim());
+//        if(StringUtils.hasText(newPhone)) {
+//            if(!newPhone.equalsIgnoreCase(user.getPhone())) {
+//                UserDataValidator.validPhone(newPhone);
+//                user.setPhone(newPhone.trim());
 //            }
 //        } else {
-//            user.setMobile(null);
+//            user.setPhone(null);
 //        }
 //
 //        this.eulerUserEntityService.updateUser(user);

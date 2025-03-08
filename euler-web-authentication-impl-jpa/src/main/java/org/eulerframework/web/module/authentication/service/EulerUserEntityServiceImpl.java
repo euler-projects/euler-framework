@@ -67,8 +67,8 @@ public class EulerUserEntityServiceImpl extends BaseService implements EulerUser
     }
 
     @Override
-    public User loadUserByMobile(String mobile) throws UserNotFoundException {
-        User result = this.userRepository.findUserByMobileIgnoreCase(mobile);
+    public User loadUserByPhone(String phone) throws UserNotFoundException {
+        User result = this.userRepository.findUserByPhoneIgnoreCase(phone);
         
         if(result == null) {
             throw new UserNotFoundException();

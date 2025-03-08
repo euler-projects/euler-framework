@@ -56,32 +56,32 @@ public class SmsCodeValidator extends LogSupport {
 
     public class SmsSendThread implements Runnable {
         private BizCode bizCode;
-        private String mobile;
+        private String phone;
         private String captcha;
         private int expireMinutes;
         private SmsSender smsSender;
 
-        public SmsSendThread(SmsSender smsSender, BizCode bizCode, String mobile, String captcha, int expireMinutes) {
+        public SmsSendThread(SmsSender smsSender, BizCode bizCode, String phone, String captcha, int expireMinutes) {
             this.smsSender = smsSender;
             this.bizCode = bizCode;
-            this.mobile = mobile;
+            this.phone = phone;
             this.captcha = captcha;
             this.expireMinutes = expireMinutes;
         }
 
         @Override
         public void run() {
-            this.smsSender.sendCaptcha(bizCode.name(), mobile, captcha, expireMinutes);
+            this.smsSender.sendCaptcha(bizCode.name(), phone, captcha, expireMinutes);
         }
 
     }
 
-    public void sendSmsCode(String mobile, BizCode bizCode) {
-        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
+    public void sendSmsCode(String phone, BizCode bizCode) {
+        Assert.hasText(phone, "Required String parameter 'phone' is not present");
         Assert.notNull(bizCode, "Required String parameter 'bizCode' is not present");
 
         String smsCode = this.generateSmsCode();
-        String redisKey = this.generateRedisKey(mobile, bizCode);
+        String redisKey = this.generateRedisKey(phone, bizCode);
         
         SmsSender smsSender = this.smsSenderFactory.newSmsCaptchaSender();
         int expireMinutes;
@@ -89,67 +89,67 @@ public class SmsCodeValidator extends LogSupport {
         switch(bizCode) {
         case RESET_PASSWORD:
             try {
-                EulerUserEntity userEntity = this.eulerUserEntityService.loadUserByMobile(mobile);
+                EulerUserEntity userEntity = this.eulerUserEntityService.loadUserByPhone(phone);
                 if(!userEntity.isEnabled()) {
                     throw new SmsCodeNotSentException("_USER_IS_BLOCKED");
                 }
             } catch (UserNotFoundException userNotFoundException) {
-                throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
+                throw new SmsCodeNotSentException("_PHONE_NOT_EXISTS");
             }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesResetPassword();
             break;
         case SIGN_IN:
             try {
-                EulerUserEntity userEntity = this.eulerUserEntityService.loadUserByMobile(mobile);
+                EulerUserEntity userEntity = this.eulerUserEntityService.loadUserByPhone(phone);
                 if(!userEntity.isEnabled()) {
                     throw new SmsCodeNotSentException("_USER_IS_BLOCKED");
                 }
             } catch (UserNotFoundException userNotFoundException) {
-                if(SecurityConfig.isEnableMobileAutoSignup()) {
-                    this.logger.info("Mobile {} not exists but mobile auto sign up enabled, send the code for one key sign up.", mobile);
+                if(SecurityConfig.isEnablePhoneAutoSignup()) {
+                    this.logger.info("Phone {} not exists but phone auto sign up enabled, send the code for one key sign up.", phone);
                 } else {
-                    throw new SmsCodeNotSentException("_MOBILE_NOT_EXISTS");
+                    throw new SmsCodeNotSentException("_PHONE_NOT_EXISTS");
                 }
             }
             expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignIn();
             break;
         case SIGN_UP:
             try {
-                this.eulerUserEntityService.loadUserByMobile(mobile);
+                this.eulerUserEntityService.loadUserByPhone(phone);
             } catch (UserNotFoundException userNotFoundException) {
                 expireMinutes = SecurityConfig.getSmsCodeExpireMinutesSignUp();
                 break;
             }
-            throw new SmsCodeNotSentException("_MOBILE_ALREADY_BE_USED");
+            throw new SmsCodeNotSentException("_PHONE_ALREADY_BE_USED");
         default: return;
         }
         
-        SmsSendThread thread = new SmsSendThread(smsSender, bizCode, mobile, smsCode, expireMinutes);
+        SmsSendThread thread = new SmsSendThread(smsSender, bizCode, phone, smsCode, expireMinutes);
         this.threadPool.submit(thread);
 
         this.stringRedisTemplate.opsForValue().set(redisKey, smsCode);
         this.stringRedisTemplate.expire(redisKey, expireMinutes, TimeUnit.MINUTES);
     }
 
-    private String generateRedisKey(String mobile, BizCode bizCode) {
-        return REDIS_KEY_PERFIX + bizCode.name().toLowerCase() + ":" + mobile;
+    private String generateRedisKey(String phone, BizCode bizCode) {
+        return REDIS_KEY_PERFIX + bizCode.name().toLowerCase() + ":" + phone;
     }
 
     private String generateSmsCode() {
         return DF.format(RANDOM.nextInt(9999));
     }
 
-    public void check(String mobile, String smsCode, BizCode bizCode) throws InvalidSmsCodeException {
+    public void check(String phone, String smsCode, BizCode bizCode) throws InvalidSmsCodeException {
         if(!this.isEnabled()) {
             this.logger.info("Sms sender is disabled");
             return;
         }
         
-        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
+        Assert.hasText(phone, "Required String parameter 'phone' is not present");
         Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
         Assert.notNull(bizCode, "Required String parameter 'bizCode' is not present");
 
-        String redisKey = this.generateRedisKey(mobile, bizCode);
+        String redisKey = this.generateRedisKey(phone, bizCode);
         String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
 
         if (StringUtils.hasText(realSmsCode) && realSmsCode.equalsIgnoreCase(smsCode)) {
@@ -159,18 +159,18 @@ public class SmsCodeValidator extends LogSupport {
         throw new InvalidSmsCodeException();
     }
     
-    public void check(String mobile, String smsCode, BizCode... bizCodes) throws InvalidSmsCodeException {
+    public void check(String phone, String smsCode, BizCode... bizCodes) throws InvalidSmsCodeException {
         if(!this.isEnabled()) {
             this.logger.info("Sms sender is disabled");
             return;
         }
         
-        Assert.hasText(mobile, "Required String parameter 'mobile' is not present");
+        Assert.hasText(phone, "Required String parameter 'phone' is not present");
         Assert.hasText(smsCode, "Required String parameter 'smsCode' is not present");
         Assert.notEmpty(bizCodes, "Required String parameter 'bizCodes' is not present");
 
         for(BizCode bizCode : bizCodes) {
-            String redisKey = this.generateRedisKey(mobile, bizCode);
+            String redisKey = this.generateRedisKey(phone, bizCode);
             String realSmsCode = this.stringRedisTemplate.opsForValue().get(redisKey);
 
             if (StringUtils.hasText(realSmsCode) && realSmsCode.equalsIgnoreCase(smsCode)) {

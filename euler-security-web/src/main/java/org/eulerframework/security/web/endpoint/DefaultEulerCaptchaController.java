@@ -93,10 +93,10 @@ public class DefaultEulerCaptchaController extends ApiSupportWebController {
     @GetMapping
     public void captcha(
             @RequestParam(required = false) String scope,
-            @RequestParam String mobile) {
+            @RequestParam String phone) {
         String[] scopes = StringUtils.delimitedListToStringArray(scope, " ");
         StringCaptchaDetails stringCaptcha = this.stringCaptchaProvider.generateCaptcha(CaptchaVisibility.SESSION, scopes);
-        this.smsCaptchaView.sendSms("SIGN_IN", mobile, "1234", 10);
+        this.smsCaptchaView.sendSms("SIGN_IN", phone, "1234", 10);
     }
 
     @GetMapping(produces = MediaType.IMAGE_PNG_VALUE)

@@ -38,9 +38,9 @@ public abstract class UserDataValidator {
     private final static String _INCORRECT_EMAIL_FORMAT = "_INCORRECT_EMAIL_FORMAT";
     private final static String _EMAIL_ALREADY_BE_USED = "_EMAIL_ALREADY_BE_USED";
     
-    private final static String _MOBILE_IS_NULL = "_MOBILE_IS_NULL";
-    private final static String _INCORRECT_MOBILE_FORMAT = "_INCORRECT_MOBILE_FORMAT";
-    private final static String _MOBILE_ALREADY_BE_USED = "_MOBILE_ALREADY_BE_USED";
+    private final static String _PHONE_IS_NULL = "_PHONE_IS_NULL";
+    private final static String _INCORRECT_PHONE_FORMAT = "_INCORRECT_PHONE_FORMAT";
+    private final static String _PHONE_ALREADY_BE_USED = "_PHONE_ALREADY_BE_USED";
     
     private final static String _PASSWORD_IS_NULL = "_PASSWORD_IS_NULL";
     private final static String _INCORRECT_PASSWORD_FORMAT = "_INCORRECT_PASSWORD_FORMAT";
@@ -91,22 +91,22 @@ public abstract class UserDataValidator {
         }
     }
 
-    public static void validMobile(String mobile) throws UserInfoCheckWebException {
-        if (!StringUtils.hasText(mobile)) {
-            throw new UserInfoCheckWebException(_MOBILE_IS_NULL);
+    public static void validPhone(String phone) throws UserInfoCheckWebException {
+        if (!StringUtils.hasText(phone)) {
+            throw new UserInfoCheckWebException(_PHONE_IS_NULL);
         }
-        if (!(mobile.matches(SecurityConfig.getMobileFormat()))) {
-            throw new UserInfoCheckWebException(_INCORRECT_MOBILE_FORMAT);
+        if (!(phone.matches(SecurityConfig.getPhoneFormat()))) {
+            throw new UserInfoCheckWebException(_INCORRECT_PHONE_FORMAT);
         }
         try {
-            eulerUserEntityService.loadUserByMobile(mobile);
+            eulerUserEntityService.loadUserByPhone(phone);
             /*
-             * Program running here means this mobile has already been used!
+             * Program running here means this phone has already been used!
              */
-            throw new UserInfoCheckWebException(_MOBILE_ALREADY_BE_USED);
+            throw new UserInfoCheckWebException(_PHONE_ALREADY_BE_USED);
         } catch (UserNotFoundException e) {
             /*
-             * User not found means this mobile has not been used!
+             * User not found means this phone has not been used!
              */
         }
     }

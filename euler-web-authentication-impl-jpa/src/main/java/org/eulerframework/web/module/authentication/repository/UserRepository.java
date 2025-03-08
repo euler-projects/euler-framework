@@ -31,6 +31,6 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     public User findUserById(String userId);
     public User findUserByUsernameIgnoreCase(String username);
     public User findUserByEmailIgnoreCase(String email);
-    public User findUserByMobileIgnoreCase(String mobile);
+    public User findUserByPhoneIgnoreCase(String phone);
 
 }

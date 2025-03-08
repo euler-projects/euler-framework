@@ -27,8 +27,8 @@ public class DefaultSmsCaptchaView implements SmsCaptchaView {
     }
 
     @Override
-    public void sendSms(String template, String mobile, String captcha, int expireMinutes) {
+    public void sendSms(String template, String phone, String captcha, int expireMinutes) {
         SmsSender smsSender = this.smsSenderFactory.newSmsCaptchaSender();
-        smsSender.sendCaptcha(template, mobile, captcha, expireMinutes);
+        smsSender.sendCaptcha(template, phone, captcha, expireMinutes);
     }
 }
