@@ -34,7 +34,5 @@ public interface EulerUserService {
 
     void updatePassword(String userId, String newPassword);
 
-    void disableUser(String userId);
-
     void deleteUser(String userId);
 }

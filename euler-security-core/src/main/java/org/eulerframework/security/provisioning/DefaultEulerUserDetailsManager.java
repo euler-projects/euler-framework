@@ -70,14 +70,6 @@ public class DefaultEulerUserDetailsManager extends DefaultEulerUserDetailsServi
     }
 
     @Override
-    public void disableUser(String username) {
-        EulerUserDetails userDetails = this.loadUserByPrincipal(username);
-        if (userDetails != null) {
-            this.getEulerUserService().disableUser(userDetails.getUserId());
-        }
-    }
-
-    @Override
     public void changePassword(String oldPassword, String newPassword) {
         EulerUserDetails userDetails = this.userContext.getUserDetails();
 

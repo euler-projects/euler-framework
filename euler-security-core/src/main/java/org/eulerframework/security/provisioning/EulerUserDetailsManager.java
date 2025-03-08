@@ -19,5 +19,4 @@ import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 public interface EulerUserDetailsManager extends EulerUserDetailsService, UserDetailsManager {
-    void disableUser(String username);
 }
