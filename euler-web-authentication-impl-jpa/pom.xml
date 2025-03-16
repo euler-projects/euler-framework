@@ -14,6 +14,11 @@
     <url>https://eulerproject.io/euler-framework</url>
     <description>An Implement of Euler Web Authentication Use Spring Data JPA.</description>
 
+    <properties>
+        <maven.install.skip>true</maven.install.skip>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

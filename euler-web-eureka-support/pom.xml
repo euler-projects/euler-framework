@@ -14,35 +14,39 @@
         <eureka.version>2.0.2</eureka.version>
         <log4j.version>1.2.17</log4j.version>
         <log4j2.version>2.24.2</log4j2.version>
+
+        <maven.install.skip>true</maven.install.skip>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>jakarta.inject</groupId>-->
-<!--            <artifactId>jakarta.inject-api</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>jakarta.inject</groupId>-->
+        <!--            <artifactId>jakarta.inject-api</artifactId>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
-            <version>${eureka.version}</version><exclusions>
-            <exclusion>
-                <groupId>com.sun.jersey</groupId>
-                <artifactId>jersey-client</artifactId>
-            </exclusion>
-            <exclusion>
-                <groupId>com.sun.jersey</groupId>
-                <artifactId>jersey-core</artifactId>
-            </exclusion>
-            <exclusion>
-                <groupId>com.sun.jersey.contribs</groupId>
-                <artifactId>jersey-apache-client4</artifactId>
-            </exclusion>
-            <exclusion>
-                <groupId>aopalliance</groupId>
-                <artifactId>aopalliance</artifactId>
-            </exclusion>
-        </exclusions>
+            <version>${eureka.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey.contribs</groupId>
+                    <artifactId>jersey-apache-client4</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>aopalliance</groupId>
+                    <artifactId>aopalliance</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

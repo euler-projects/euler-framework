@@ -51,7 +51,7 @@ public interface EulerUserEntity extends CredentialsContainer {
     Collection<? extends EulerAuthorityEntity> getAuthorities();
 
     /**
-     * @param encode
+     * @param password
      */
     void setPassword(String password);
 
