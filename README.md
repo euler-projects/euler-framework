@@ -1,6 +1,5 @@
-# Euler Framework [![Build Status](https://www.travis-ci.org/euler-projects/euler-framework.svg?branch=develop)](https://www.travis-ci.org/euler-projects/euler-framework)
+# Euler Framework [![Build Status](https://ci.eulerproject.io/buildStatus/icon?job=euler-framework)](https://ci.eulerproject.io/job/euler-framework/)
 
-[![Build Status](https://ci.eulerproject.io/job/euler-framework-latest-jdk8/badge/icon?subject=Jenkins)](https://ci.eulerproject.io/job/euler-framework-latest-jdk8/)
 [![GitHub issues](https://img.shields.io/github/issues/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/issues)
 [![GitHub release](https://img.shields.io/github/release/euler-projects/euler-framework.svg)](https://github.com/euler-projects/euler-framework/releases)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eulerframework/euler-framework/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eulerframework/euler-framework)
