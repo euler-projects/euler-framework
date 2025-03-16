@@ -27,7 +27,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <euler-cache.version>1.0.0.M3-SNAPSHOT</euler-cache.version>
-        <euler-common.version>1.0.0.M7-SNAPSHOT</euler-common.version>
+        <euler-common.version>1.0.0.M7.JDK11-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.17.0</commons-codec.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
