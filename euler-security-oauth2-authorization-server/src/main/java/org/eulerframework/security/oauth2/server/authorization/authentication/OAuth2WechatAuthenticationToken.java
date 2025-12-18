@@ -13,38 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.server.authorization.authentication;
+package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.lang.Nullable;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class OAuth2PasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
-
-    private final UsernamePasswordAuthenticationToken userPrincipal;
+public class OAuth2WechatAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+    private final String wechatLoginCode;
     private final Set<String> scopes;
 
-    public OAuth2PasswordAuthenticationToken(
-            UsernamePasswordAuthenticationToken userPrincipal,
+    public OAuth2WechatAuthenticationToken(
+            String wechatLoginCode,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
-        super(AuthorizationGrantType.PASSWORD, clientPrincipal, additionalParameters);
-        this.userPrincipal = userPrincipal;
+        super(EulerAuthorizationGrantType.WECHAT_LOGIN_CODE, clientPrincipal, additionalParameters);
+        this.wechatLoginCode = wechatLoginCode;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
                         Collections.emptySet());
     }
 
-    public UsernamePasswordAuthenticationToken getUserPrincipal() {
-        return userPrincipal;
+    public String getWechatLoginCode() {
+        return wechatLoginCode;
     }
 
     public Set<String> getScopes() {

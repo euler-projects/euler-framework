@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.server.authorization.web.authentication;
+package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.authentication.*;
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationToken;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -36,7 +35,7 @@ import java.util.*;
 /**
  * @author Dave Syer
  */
-public class OAuth2PasswordAuthenticationConverter implements AuthenticationConverter {
+public class OAuth2WechatAuthenticationConverter implements AuthenticationConverter {
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
     @Override
     public Authentication convert(HttpServletRequest request) {
@@ -44,13 +43,11 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
 
         // grant_type (REQUIRED)
         String grantType = parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE);
-        if (!AuthorizationGrantType.PASSWORD.getValue().equals(grantType)) {
+        if (!EulerAuthorizationGrantType.WECHAT_LOGIN_CODE.getValue().equals(grantType)) {
             return null;
         }
 
-        String username = parameters.getFirst(OAuth2ParameterNames.USERNAME);
-        String password = parameters.getFirst(OAuth2ParameterNames.PASSWORD);
-        parameters.remove(OAuth2ParameterNames.PASSWORD);
+        String code = parameters.getFirst(OAuth2ParameterNames.CODE);
 
         // scope (OPTIONAL)
         Set<String> scopes = null;
@@ -70,14 +67,13 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
-                    !key.equals(OAuth2ParameterNames.USERNAME) &&
-                    !key.equals(OAuth2ParameterNames.PASSWORD)) {
+                    !key.equals(OAuth2ParameterNames.CODE)) {
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
 
-        return new OAuth2PasswordAuthenticationToken(
-                new UsernamePasswordAuthenticationToken(username, password),
+        return new OAuth2WechatAuthenticationToken(
+                code,
                 clientPrincipal,
                 scopes,
                 additionalParameters

@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.server.authorization.authentication;
+package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.authentication.WechatLoginCodeAuthenticationToken;
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +31,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthenticationProviderUtilsAccessor;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
 import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext;
@@ -38,47 +43,48 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import java.security.Principal;
 import java.util.*;
 
-public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
+public class OAuth2WechatAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
-    private final Logger logger = LoggerFactory.getLogger(OAuth2PasswordAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuth2WechatAuthenticationProvider.class);
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
-    private final AuthenticationManager userDetailsAuthenticationManager;
+    private final AuthenticationManager authenticationManager;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
-    public OAuth2PasswordAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
-        this.userDetailsAuthenticationManager = authenticationManager;
+    public OAuth2WechatAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+        this.authenticationManager = authenticationManager;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2PasswordAuthenticationToken passwordAuthenticationToken = (OAuth2PasswordAuthenticationToken) authentication;
+        OAuth2WechatAuthenticationToken wechatAuthenticationToken = (OAuth2WechatAuthenticationToken) authentication;
 
         OAuth2ClientAuthenticationToken clientPrincipal =
-                OAuth2AuthenticationProviderUtils.getAuthenticatedClientElseThrowInvalidClient(passwordAuthenticationToken);
+                OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(wechatAuthenticationToken);
         RegisteredClient registeredClient = clientPrincipal.getRegisteredClient();
 
         if (registeredClient == null) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
-        this.validateScope(passwordAuthenticationToken, registeredClient);
-        Set<String> authorizedScopes = Collections.unmodifiableSet(passwordAuthenticationToken.getScopes());
+        this.validateScope(wechatAuthenticationToken, registeredClient);
+        Set<String> authorizedScopes = Collections.unmodifiableSet(wechatAuthenticationToken.getScopes());
 
-        Authentication userPrincipal = passwordAuthenticationToken.getUserPrincipal();
-        userPrincipal = this.userDetailsAuthenticationManager.authenticate(userPrincipal);
+        String code = wechatAuthenticationToken.getWechatLoginCode();
+        Authentication userPrincipal = WechatLoginCodeAuthenticationToken.unauthenticated(code);
+        userPrincipal = this.authenticationManager.authenticate(userPrincipal);
         if (!userPrincipal.isAuthenticated()) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
         }
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_LOGIN_CODE)
                 .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
 
@@ -86,9 +92,9 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_LOGIN_CODE)
                 .authorizedScopes(authorizedScopes)
-                .authorizationGrant(passwordAuthenticationToken);
+                .authorizationGrant(wechatAuthenticationToken);
 
         // ----- Access token -----
         OAuth2TokenContext tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
@@ -177,12 +183,12 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return OAuth2PasswordAuthenticationToken.class.isAssignableFrom(authentication);
+        return OAuth2WechatAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2PasswordAuthenticationToken passwordAuthenticationToken, RegisteredClient registeredClient) {
+    private void validateScope(OAuth2WechatAuthenticationToken wechatAuthenticationToken, RegisteredClient registeredClient) {
 
-        Set<String> requestedScopes = passwordAuthenticationToken.getScopes();
+        Set<String> requestedScopes = wechatAuthenticationToken.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();
         if (!requestedScopes.isEmpty() && !allowedScopes.containsAll(requestedScopes)) {
             if (this.logger.isDebugEnabled()) {

@@ -17,6 +17,7 @@ package org.eulerframework.security.jackson2;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.eulerframework.security.authentication.WechatLoginCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
@@ -32,6 +33,8 @@ public class EulerSecurityJackson2Module extends SimpleModule {
 		SecurityJackson2Modules.enableDefaultTyping(context.getOwner());
 		context.setMixInAnnotations(EulerUserDetails.class, EulerUserDetailsMixin.class);
 		context.setMixInAnnotations(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
+		context.setMixInAnnotations(WechatLoginCodeAuthenticationToken.class,
+				WechatLoginCodeAuthenticationTokenMixin.class);
 	}
 
 }

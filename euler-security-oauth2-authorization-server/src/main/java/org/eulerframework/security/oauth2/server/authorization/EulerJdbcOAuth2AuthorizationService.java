@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.oauth2.server.authorization;
+package org.eulerframework.security.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.security.oauth2.server.authorization.jackson2.EulerOAuth2ObjectMapper;
@@ -23,6 +23,9 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 import java.util.List;
