@@ -27,7 +27,7 @@ public class WechatLoginCodeAuthenticationProvider
 
     private boolean forcePrincipalAsString = false;
 
-    protected boolean hideUserNotFoundExceptions = true;
+    protected boolean autoCreateUserIfNotExists = false;
 
     private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
 
@@ -42,19 +42,18 @@ public class WechatLoginCodeAuthenticationProvider
         // fetch WechatUser with jscode2session
         String loginCode = (String) token.getCredentials();
         WechatUser wechatUser = new WechatUser();
+        wechatUser.setOpenId("anonymous");
 
         UserDetails user;
         try {
             user = this.wechatUserDetailsService.loadUserByWechatUser(wechatUser);
         } catch (UsernameNotFoundException ex) {
             this.logger.debug("Failed to find user with open ID '" + wechatUser.getOpenId() + "'");
-            if (!this.hideUserNotFoundExceptions) {
+            if (!this.autoCreateUserIfNotExists) {
                 throw ex;
             }
 
-            // TODO 微信用户未找到似乎不应隐藏未找到并报错误凭据
-            throw new BadCredentialsException(this.messages
-                    .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
+            user = this.wechatUserDetailsService.createUser(wechatUser);
         }
 
         this.postAuthenticationChecks.check(user);
@@ -80,16 +79,16 @@ public class WechatLoginCodeAuthenticationProvider
         return this.forcePrincipalAsString;
     }
 
-    public boolean isHideUserNotFoundExceptions() {
-        return this.hideUserNotFoundExceptions;
+    public boolean isAutoCreateUserIfNotExists() {
+        return autoCreateUserIfNotExists;
     }
 
     public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
         this.forcePrincipalAsString = forcePrincipalAsString;
     }
 
-    public void setHideUserNotFoundExceptions(boolean hideUserNotFoundExceptions) {
-        this.hideUserNotFoundExceptions = hideUserNotFoundExceptions;
+    public void setAutoCreateUserIfNotExists(boolean autoCreateUserIfNotExists) {
+        this.autoCreateUserIfNotExists = autoCreateUserIfNotExists;
     }
 
     public void setWechatUserDetailsService(EulerWechatUserDetailsService wechatUserDetailsService) {
