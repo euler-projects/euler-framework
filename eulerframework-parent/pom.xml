@@ -376,6 +376,11 @@
                 <artifactId>euler-common-proto</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-common-http</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>

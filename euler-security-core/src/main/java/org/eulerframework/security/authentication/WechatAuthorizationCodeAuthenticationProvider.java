@@ -2,6 +2,9 @@ package org.eulerframework.security.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eulerframework.common.http.*;
+import org.eulerframework.common.http.util.HttpResponseUtils;
+import org.eulerframework.common.util.json.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
 import org.springframework.context.MessageSource;
@@ -15,6 +18,9 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.util.Assert;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 
 public class WechatAuthorizationCodeAuthenticationProvider
@@ -34,6 +40,21 @@ public class WechatAuthorizationCodeAuthenticationProvider
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
+    private final HttpTemplate httpTemplate = new JdkHttpClientTemplate();
+
+    private final String code2SessionEndpoint;
+    private final String appid;
+    private final String secret;
+
+    public WechatAuthorizationCodeAuthenticationProvider(String code2SessionEndpoint, String appid, String secret) {
+        Assert.hasText(code2SessionEndpoint, "code2SessionEndpoint must not be empty");
+        Assert.hasText(appid, "appid must not be empty");
+        Assert.hasText(secret, "secret must not be empty");
+        this.code2SessionEndpoint = code2SessionEndpoint;
+        this.appid = appid;
+        this.secret = secret;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Assert.isInstanceOf(WechatAuthorizationCodeAuthenticationToken.class, authentication,
@@ -41,9 +62,28 @@ public class WechatAuthorizationCodeAuthenticationProvider
         WechatAuthorizationCodeAuthenticationToken token = (WechatAuthorizationCodeAuthenticationToken) authentication;
 
         // fetch WechatUser with jscode2session
-        String wechatAuthorizationCode = (String) token.getCredentials();
         WechatUser wechatUser = new WechatUser();
-        wechatUser.setOpenId("anonymous");
+        try {
+            String wechatAuthorizationCode = (String) token.getCredentials();
+            HttpRequest.UriBuilderSupportBuilder requestBuilder = (HttpRequest.UriBuilderSupportBuilder) HttpRequest.get(this.code2SessionEndpoint);
+            requestBuilder.query("grant_type", "authorization_code");
+            requestBuilder.query("appid", this.appid);
+            requestBuilder.query("secret", this.secret);
+            requestBuilder.query("js_code", wechatAuthorizationCode);
+            HttpRequest httpRequest = requestBuilder.build();
+
+            try (HttpResponse response = httpTemplate.execute(httpRequest);
+                 InputStream in = (InputStream) response.getBody().getContent()) {
+                byte[] data = in.readAllBytes();
+                String resp = new String(data, StandardCharsets.UTF_8);
+                Jscode2sessionReosponse jscode2sessionReosponse = JacksonUtils.readValue(resp, Jscode2sessionReosponse.class);
+                wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
+                wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
+            }
+        } catch (Exception e) {
+            this.logger.warn("WechatAuthorizationCode validation failed.", e);
+            wechatUser.setOpenId("anonymous");
+        }
 
         UserDetails user;
         try {
@@ -143,6 +183,54 @@ public class WechatAuthorizationCodeAuthenticationProvider
                         .getMessage("AbstractUserDetailsAuthenticationProvider.credentialsExpired",
                                 "User credentials have expired"));
             }
+        }
+    }
+
+    private class Jscode2sessionReosponse {
+        private String session_key;//	会话密钥
+        private String unionid;//	用户在开放平台的唯一标识符，若当前小程序已绑定到微信开放平台帐号下会返回，详见 UnionID 机制说明。
+        private String openid;//	用户唯一标识
+        private Integer errcode;//	错误码，请求失败时返回
+        private String errmsg;//	错误信息，请求失败时返回
+
+        public String getSession_key() {
+            return session_key;
+        }
+
+        public void setSession_key(String session_key) {
+            this.session_key = session_key;
+        }
+
+        public String getUnionid() {
+            return unionid;
+        }
+
+        public void setUnionid(String unionid) {
+            this.unionid = unionid;
+        }
+
+        public String getOpenid() {
+            return openid;
+        }
+
+        public void setOpenid(String openid) {
+            this.openid = openid;
+        }
+
+        public Integer getErrcode() {
+            return errcode;
+        }
+
+        public void setErrcode(Integer errcode) {
+            this.errcode = errcode;
+        }
+
+        public String getErrmsg() {
+            return errmsg;
+        }
+
+        public void setErrmsg(String errmsg) {
+            this.errmsg = errmsg;
         }
     }
 }
