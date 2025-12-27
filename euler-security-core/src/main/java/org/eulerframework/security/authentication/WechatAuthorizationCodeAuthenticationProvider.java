@@ -17,7 +17,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.util.Assert;
 
 
-public class WechatLoginCodeAuthenticationProvider
+public class WechatAuthorizationCodeAuthenticationProvider
         implements AuthenticationProvider, MessageSourceAware {
 
     protected final Log logger = LogFactory.getLog(getClass());
@@ -36,12 +36,12 @@ public class WechatLoginCodeAuthenticationProvider
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Assert.isInstanceOf(WechatLoginCodeAuthenticationToken.class, authentication,
-                () -> "Only WechatLoginCodeAuthenticationToken is supported");
-        WechatLoginCodeAuthenticationToken token = (WechatLoginCodeAuthenticationToken) authentication;
+        Assert.isInstanceOf(WechatAuthorizationCodeAuthenticationToken.class, authentication,
+                () -> "Only WechatAuthorizationCodeAuthenticationToken is supported");
+        WechatAuthorizationCodeAuthenticationToken token = (WechatAuthorizationCodeAuthenticationToken) authentication;
 
         // fetch WechatUser with jscode2session
-        String loginCode = (String) token.getCredentials();
+        String wechatAuthorizationCode = (String) token.getCredentials();
         WechatUser wechatUser = new WechatUser();
         wechatUser.setOpenId("anonymous");
 
@@ -69,7 +69,7 @@ public class WechatLoginCodeAuthenticationProvider
         // so subsequent attempts are successful even with encoded passwords.
         // Also ensure we return the original getDetails(), so that future
         // authentication events after cache expiry contain the details
-        WechatLoginCodeAuthenticationToken result = WechatLoginCodeAuthenticationToken.authenticated(principal,
+        WechatAuthorizationCodeAuthenticationToken result = WechatAuthorizationCodeAuthenticationToken.authenticated(principal,
                 authentication.getCredentials(), this.authoritiesMapper.mapAuthorities(user.getAuthorities()));
         result.setDetails(authentication.getDetails());
         this.logger.debug("Authenticated user");
@@ -103,7 +103,7 @@ public class WechatLoginCodeAuthenticationProvider
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return (WechatLoginCodeAuthenticationToken.class.isAssignableFrom(authentication));
+        return (WechatAuthorizationCodeAuthenticationToken.class.isAssignableFrom(authentication));
     }
 
     public void setPostAuthenticationChecks(UserDetailsChecker postAuthenticationChecks) {
@@ -119,27 +119,27 @@ public class WechatLoginCodeAuthenticationProvider
         @Override
         public void check(UserDetails user) {
             if (!user.isAccountNonLocked()) {
-                WechatLoginCodeAuthenticationProvider.this.logger
+                WechatAuthorizationCodeAuthenticationProvider.this.logger
                         .debug("Failed to authenticate since user account is locked");
-                throw new LockedException(WechatLoginCodeAuthenticationProvider.this.messages
+                throw new LockedException(WechatAuthorizationCodeAuthenticationProvider.this.messages
                         .getMessage("AbstractUserDetailsAuthenticationProvider.locked", "User account is locked"));
             }
             if (!user.isEnabled()) {
-                WechatLoginCodeAuthenticationProvider.this.logger
+                WechatAuthorizationCodeAuthenticationProvider.this.logger
                         .debug("Failed to authenticate since user account is disabled");
-                throw new DisabledException(WechatLoginCodeAuthenticationProvider.this.messages
+                throw new DisabledException(WechatAuthorizationCodeAuthenticationProvider.this.messages
                         .getMessage("AbstractUserDetailsAuthenticationProvider.disabled", "User is disabled"));
             }
             if (!user.isAccountNonExpired()) {
-                WechatLoginCodeAuthenticationProvider.this.logger
+                WechatAuthorizationCodeAuthenticationProvider.this.logger
                         .debug("Failed to authenticate since user account has expired");
-                throw new AccountExpiredException(WechatLoginCodeAuthenticationProvider.this.messages
+                throw new AccountExpiredException(WechatAuthorizationCodeAuthenticationProvider.this.messages
                         .getMessage("AbstractUserDetailsAuthenticationProvider.expired", "User account has expired"));
             }
             if (!user.isCredentialsNonExpired()) {
-                WechatLoginCodeAuthenticationProvider.this.logger
+                WechatAuthorizationCodeAuthenticationProvider.this.logger
                         .debug("Failed to authenticate since user account credentials have expired");
-                throw new CredentialsExpiredException(WechatLoginCodeAuthenticationProvider.this.messages
+                throw new CredentialsExpiredException(WechatAuthorizationCodeAuthenticationProvider.this.messages
                         .getMessage("AbstractUserDetailsAuthenticationProvider.credentialsExpired",
                                 "User credentials have expired"));
             }

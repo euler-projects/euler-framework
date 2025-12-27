@@ -25,25 +25,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class OAuth2WechatAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
-    private final String wechatLoginCode;
+public class OAuth2WechatAuthorizationCodeAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+    private final String wechatAuthorizationCode;
     private final Set<String> scopes;
 
-    public OAuth2WechatAuthenticationToken(
-            String wechatLoginCode,
+    public OAuth2WechatAuthorizationCodeAuthenticationToken(
+            String wechatAuthorizationCode,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
-        super(EulerAuthorizationGrantType.WECHAT_LOGIN_CODE, clientPrincipal, additionalParameters);
-        this.wechatLoginCode = wechatLoginCode;
+        super(EulerAuthorizationGrantType.WECHAT_AUTHORIZATION_CODE, clientPrincipal, additionalParameters);
+        this.wechatAuthorizationCode = wechatAuthorizationCode;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
                         Collections.emptySet());
     }
 
-    public String getWechatLoginCode() {
-        return wechatLoginCode;
+    public String getWechatAuthorizationCode() {
+        return wechatAuthorizationCode;
     }
 
     public Set<String> getScopes() {

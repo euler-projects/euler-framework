@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonDeserialize(using = WechatLoginCodeAuthenticationTokenDeserializer.class)
-abstract class WechatLoginCodeAuthenticationTokenMixin {
+@JsonDeserialize(using = WechatAuthorizationCodeAuthenticationTokenDeserializer.class)
+abstract class WechatAuthorizationCodeAuthenticationTokenMixin {
 
 }

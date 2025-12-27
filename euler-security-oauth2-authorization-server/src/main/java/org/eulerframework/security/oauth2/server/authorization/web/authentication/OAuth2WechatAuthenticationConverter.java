@@ -24,7 +24,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthenticationToken;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,7 +43,7 @@ public class OAuth2WechatAuthenticationConverter implements AuthenticationConver
 
         // grant_type (REQUIRED)
         String grantType = parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE);
-        if (!EulerAuthorizationGrantType.WECHAT_LOGIN_CODE.getValue().equals(grantType)) {
+        if (!EulerAuthorizationGrantType.WECHAT_AUTHORIZATION_CODE.getValue().equals(grantType)) {
             return null;
         }
 
@@ -72,7 +72,7 @@ public class OAuth2WechatAuthenticationConverter implements AuthenticationConver
             }
         });
 
-        return new OAuth2WechatAuthenticationToken(
+        return new OAuth2WechatAuthorizationCodeAuthenticationToken(
                 code,
                 clientPrincipal,
                 scopes,

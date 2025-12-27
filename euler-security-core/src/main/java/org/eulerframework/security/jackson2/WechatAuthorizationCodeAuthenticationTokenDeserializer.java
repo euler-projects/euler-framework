@@ -6,13 +6,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.MissingNode;
-import org.eulerframework.security.authentication.WechatLoginCodeAuthenticationToken;
+import org.eulerframework.security.authentication.WechatAuthorizationCodeAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.io.IOException;
 import java.util.List;
 
-public class WechatLoginCodeAuthenticationTokenDeserializer extends JsonDeserializer<WechatLoginCodeAuthenticationToken> {
+public class WechatAuthorizationCodeAuthenticationTokenDeserializer extends JsonDeserializer<WechatAuthorizationCodeAuthenticationToken> {
 
     private static final TypeReference<List<GrantedAuthority>> GRANTED_AUTHORITY_LIST = new TypeReference<>() {
     };
@@ -21,7 +21,7 @@ public class WechatLoginCodeAuthenticationTokenDeserializer extends JsonDeserial
     };
 
     @Override
-    public WechatLoginCodeAuthenticationToken deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JacksonException {
+    public WechatAuthorizationCodeAuthenticationToken deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JacksonException {
         ObjectMapper mapper = (ObjectMapper) jp.getCodec();
         JsonNode jsonNode = mapper.readTree(jp);
         boolean authenticated = readJsonNode(jsonNode, "authenticated").asBoolean();
@@ -31,9 +31,9 @@ public class WechatLoginCodeAuthenticationTokenDeserializer extends JsonDeserial
         Object credentials = getCredentials(credentialsNode);
         List<GrantedAuthority> authorities = mapper.readValue(readJsonNode(jsonNode, "authorities").traverse(mapper),
                 GRANTED_AUTHORITY_LIST);
-        WechatLoginCodeAuthenticationToken token = (!authenticated)
-                ? WechatLoginCodeAuthenticationToken.unauthenticated(credentials)
-                : WechatLoginCodeAuthenticationToken.authenticated(principal, credentials, authorities);
+        WechatAuthorizationCodeAuthenticationToken token = (!authenticated)
+                ? WechatAuthorizationCodeAuthenticationToken.unauthenticated(credentials)
+                : WechatAuthorizationCodeAuthenticationToken.authenticated(principal, credentials, authorities);
         JsonNode detailsNode = readJsonNode(jsonNode, "details");
         if (detailsNode.isNull() || detailsNode.isMissingNode()) {
             token.setDetails(null);

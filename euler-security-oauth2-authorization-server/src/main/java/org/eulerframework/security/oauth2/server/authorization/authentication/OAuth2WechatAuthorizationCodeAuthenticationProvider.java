@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
-import org.eulerframework.security.authentication.WechatLoginCodeAuthenticationToken;
+import org.eulerframework.security.authentication.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +43,10 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import java.security.Principal;
 import java.util.*;
 
-public class OAuth2WechatAuthenticationProvider implements AuthenticationProvider {
+public class OAuth2WechatAuthorizationCodeAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
-    private final Logger logger = LoggerFactory.getLogger(OAuth2WechatAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuth2WechatAuthorizationCodeAuthenticationProvider.class);
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
@@ -54,7 +54,7 @@ public class OAuth2WechatAuthenticationProvider implements AuthenticationProvide
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
-    public OAuth2WechatAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+    public OAuth2WechatAuthorizationCodeAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
         this.authenticationManager = authenticationManager;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
@@ -62,7 +62,7 @@ public class OAuth2WechatAuthenticationProvider implements AuthenticationProvide
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2WechatAuthenticationToken wechatAuthenticationToken = (OAuth2WechatAuthenticationToken) authentication;
+        OAuth2WechatAuthorizationCodeAuthenticationToken wechatAuthenticationToken = (OAuth2WechatAuthorizationCodeAuthenticationToken) authentication;
 
         OAuth2ClientAuthenticationToken clientPrincipal =
                 OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(wechatAuthenticationToken);
@@ -75,8 +75,8 @@ public class OAuth2WechatAuthenticationProvider implements AuthenticationProvide
         this.validateScope(wechatAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(wechatAuthenticationToken.getScopes());
 
-        String code = wechatAuthenticationToken.getWechatLoginCode();
-        Authentication userPrincipal = WechatLoginCodeAuthenticationToken.unauthenticated(code);
+        String code = wechatAuthenticationToken.getWechatAuthorizationCode();
+        Authentication userPrincipal = WechatAuthorizationCodeAuthenticationToken.unauthenticated(code);
         userPrincipal = this.authenticationManager.authenticate(userPrincipal);
         if (!userPrincipal.isAuthenticated()) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
@@ -84,7 +84,7 @@ public class OAuth2WechatAuthenticationProvider implements AuthenticationProvide
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
-                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_LOGIN_CODE)
+                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_AUTHORIZATION_CODE)
                 .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
 
@@ -92,7 +92,7 @@ public class OAuth2WechatAuthenticationProvider implements AuthenticationProvide
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_LOGIN_CODE)
+                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_AUTHORIZATION_CODE)
                 .authorizedScopes(authorizedScopes)
                 .authorizationGrant(wechatAuthenticationToken);
 
@@ -183,10 +183,10 @@ public class OAuth2WechatAuthenticationProvider implements AuthenticationProvide
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return OAuth2WechatAuthenticationToken.class.isAssignableFrom(authentication);
+        return OAuth2WechatAuthorizationCodeAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2WechatAuthenticationToken wechatAuthenticationToken, RegisteredClient registeredClient) {
+    private void validateScope(OAuth2WechatAuthorizationCodeAuthenticationToken wechatAuthenticationToken, RegisteredClient registeredClient) {
 
         Set<String> requestedScopes = wechatAuthenticationToken.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();

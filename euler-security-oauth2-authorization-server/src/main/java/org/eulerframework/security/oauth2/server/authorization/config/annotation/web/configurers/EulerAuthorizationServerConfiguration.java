@@ -18,7 +18,7 @@ package org.eulerframework.security.oauth2.server.authorization.config.annotatio
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthenticationConverter;
@@ -56,9 +56,9 @@ public class EulerAuthorizationServerConfiguration {
                         .accessTokenRequestConverter(getOAuth2WechatAuthenticationConverter()));
     }
 
-    private static OAuth2WechatAuthenticationProvider getOAuth2WechatAuthenticationProvider(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+    private static OAuth2WechatAuthorizationCodeAuthenticationProvider getOAuth2WechatAuthenticationProvider(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
         try {
-            return new OAuth2WechatAuthenticationProvider(
+            return new OAuth2WechatAuthorizationCodeAuthenticationProvider(
                     authenticationConfiguration.getAuthenticationManager(),
                     OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
                     OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http)
