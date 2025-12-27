@@ -76,11 +76,16 @@ public class WechatAuthorizationCodeAuthenticationProvider
                 byte[] data = in.readAllBytes();
                 String resp = new String(data, StandardCharsets.UTF_8);
                 Jscode2sessionReosponse jscode2sessionReosponse = JacksonUtils.readValue(resp, Jscode2sessionReosponse.class);
-                wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
-                wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
-                this.logger.info("✨✨✨WechatAuthorizationCode validation success, sessionKey: {}", jscode2sessionReosponse.getSession_key());
+                if(jscode2sessionReosponse.getErrcode().equals(0)) {
+                    wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
+                    wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
+                    this.logger.info("✨✨✨WechatAuthorizationCode validation success, sessionKey: {}", jscode2sessionReosponse.getSession_key());
+                } else {
+                    throw new AuthenticationServiceException(String.format("Wechat API code2Session request failed, errorCode: %d, errorMessage: %s",
+                            jscode2sessionReosponse.getErrcode(),
+                            jscode2sessionReosponse.getErrmsg()));
+                }
             }
-
         } catch (Exception e) {
             this.logger.warn("❌❌❌WechatAuthorizationCode validation failed.", e);
             wechatUser.setOpenId("anonymous");
