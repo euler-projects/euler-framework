@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
 import org.springframework.security.core.userdetails.*;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -71,20 +72,28 @@ public class WechatAuthorizationCodeAuthenticationProvider
             requestBuilder.query("js_code", wechatAuthorizationCode);
             HttpRequest httpRequest = requestBuilder.build();
 
+            String resp;
             try (HttpResponse response = httpTemplate.execute(httpRequest);
                  InputStream in = (InputStream) response.getBody().getContent()) {
                 byte[] data = in.readAllBytes();
-                String resp = new String(data, StandardCharsets.UTF_8);
-                Jscode2sessionReosponse jscode2sessionReosponse = JacksonUtils.readValue(resp, Jscode2sessionReosponse.class);
-                if(jscode2sessionReosponse.getErrcode().equals(0)) {
-                    wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
-                    wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
-                    this.logger.info("✨✨✨WechatAuthorizationCode validation success, sessionKey: {}", jscode2sessionReosponse.getSession_key());
-                } else {
-                    throw new AuthenticationServiceException(String.format("Wechat API code2Session request failed, errorCode: %d, errorMessage: %s",
-                            jscode2sessionReosponse.getErrcode(),
-                            jscode2sessionReosponse.getErrmsg()));
-                }
+                resp = new String(data, StandardCharsets.UTF_8);
+            }
+
+            Jscode2sessionReosponse jscode2sessionReosponse;
+            try {
+                jscode2sessionReosponse = JacksonUtils.readValue(resp, Jscode2sessionReosponse.class);
+            } catch (Exception e) {
+                throw new IOException("Deserialize code2Session response failed, the original response is " + resp, e);
+            }
+
+            if (jscode2sessionReosponse.getErrcode().equals(0)) {
+                wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
+                wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
+                this.logger.info("✨✨✨WechatAuthorizationCode validation success, sessionKey: {}", jscode2sessionReosponse.getSession_key());
+            } else {
+                throw new AuthenticationServiceException(String.format("Wechat API code2Session request failed, errorCode: %d, errorMessage: %s",
+                        jscode2sessionReosponse.getErrcode(),
+                        jscode2sessionReosponse.getErrmsg()));
             }
         } catch (Exception e) {
             this.logger.warn("❌❌❌WechatAuthorizationCode validation failed.", e);
@@ -192,7 +201,7 @@ public class WechatAuthorizationCodeAuthenticationProvider
         }
     }
 
-    private class Jscode2sessionReosponse {
+    public static class Jscode2sessionReosponse {
         private String session_key;//	会话密钥
         private String unionid;//	用户在开放平台的唯一标识符，若当前小程序已绑定到微信开放平台帐号下会返回，详见 UnionID 机制说明。
         private String openid;//	用户唯一标识
