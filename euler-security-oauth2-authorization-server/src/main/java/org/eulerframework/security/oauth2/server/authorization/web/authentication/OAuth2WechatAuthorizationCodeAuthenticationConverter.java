@@ -35,7 +35,7 @@ import java.util.*;
 /**
  * @author Dave Syer
  */
-public class OAuth2WechatAuthenticationConverter implements AuthenticationConverter {
+public class OAuth2WechatAuthorizationCodeAuthenticationConverter implements AuthenticationConverter {
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
     @Override
     public Authentication convert(HttpServletRequest request) {

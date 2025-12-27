@@ -21,7 +21,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2ConfigurerUtilsAccessor;
 
@@ -68,7 +68,7 @@ public class EulerAuthorizationServerConfiguration {
         }
     }
 
-    private static OAuth2WechatAuthenticationConverter getOAuth2WechatAuthenticationConverter() {
-        return new OAuth2WechatAuthenticationConverter();
+    private static OAuth2WechatAuthorizationCodeAuthenticationConverter getOAuth2WechatAuthenticationConverter() {
+        return new OAuth2WechatAuthorizationCodeAuthenticationConverter();
     }
 }
