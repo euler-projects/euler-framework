@@ -1,12 +1,11 @@
 package org.eulerframework.security.authentication;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eulerframework.common.http.*;
-import org.eulerframework.common.http.util.HttpResponseUtils;
 import org.eulerframework.common.util.json.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -26,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 public class WechatAuthorizationCodeAuthenticationProvider
         implements AuthenticationProvider, MessageSourceAware {
 
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private EulerWechatUserDetailsService wechatUserDetailsService;
 
@@ -79,9 +78,11 @@ public class WechatAuthorizationCodeAuthenticationProvider
                 Jscode2sessionReosponse jscode2sessionReosponse = JacksonUtils.readValue(resp, Jscode2sessionReosponse.class);
                 wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
                 wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
+                this.logger.info("✨✨✨WechatAuthorizationCode validation success, sessionKey: {}", jscode2sessionReosponse.getSession_key());
             }
+
         } catch (Exception e) {
-            this.logger.warn("WechatAuthorizationCode validation failed.", e);
+            this.logger.warn("❌❌❌WechatAuthorizationCode validation failed.", e);
             wechatUser.setOpenId("anonymous");
         }
 
