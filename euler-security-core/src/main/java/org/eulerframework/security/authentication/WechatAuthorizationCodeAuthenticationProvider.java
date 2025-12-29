@@ -86,7 +86,7 @@ public class WechatAuthorizationCodeAuthenticationProvider
                 throw new IOException("Deserialize code2Session response failed, the original response is " + resp, e);
             }
 
-            if (jscode2sessionReosponse.getErrcode().equals(0)) {
+            if (jscode2sessionReosponse.getErrcode() == null || jscode2sessionReosponse.getErrcode().equals(0)) {
                 wechatUser.setOpenId(jscode2sessionReosponse.getOpenid());
                 wechatUser.setUnionId(jscode2sessionReosponse.getUnionid());
                 this.logger.info("✨✨✨WechatAuthorizationCode validation success, sessionKey: {}", jscode2sessionReosponse.getSession_key());
