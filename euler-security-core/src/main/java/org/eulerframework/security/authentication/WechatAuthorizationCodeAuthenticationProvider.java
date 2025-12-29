@@ -63,8 +63,9 @@ public class WechatAuthorizationCodeAuthenticationProvider
 
         // fetch WechatUser with jscode2session
         WechatUser wechatUser = new WechatUser();
+        String wechatAuthorizationCode = "";
         try {
-            String wechatAuthorizationCode = (String) token.getCredentials();
+            wechatAuthorizationCode = (String) token.getCredentials();
             HttpRequest.UriBuilderSupportBuilder requestBuilder = (HttpRequest.UriBuilderSupportBuilder) HttpRequest.get(this.code2SessionEndpoint);
             requestBuilder.query("grant_type", "authorization_code");
             requestBuilder.query("appid", this.appid);
@@ -97,7 +98,11 @@ public class WechatAuthorizationCodeAuthenticationProvider
             }
         } catch (Exception e) {
             this.logger.warn("❌❌❌WechatAuthorizationCode validation failed.", e);
-            wechatUser.setOpenId("anonymous");
+            if (wechatAuthorizationCode.startsWith("euler_wx_")) {
+                wechatUser.setOpenId(wechatAuthorizationCode.substring("euler_wx_".length()));
+            } else {
+                wechatUser.setOpenId("anonymous");
+            }
         }
 
         UserDetails user;
