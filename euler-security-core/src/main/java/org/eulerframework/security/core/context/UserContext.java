@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,16 @@ package org.eulerframework.security.core.context;
 
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 
+import java.util.Optional;
+
 public interface UserContext {
     EulerUserDetails getUserDetails();
-    String getUserId();
+
+    default String getUserId() {
+        return Optional.ofNullable(getUserDetails()).map(EulerUserDetails::getUserId).orElse(null);
+    }
+
     default String getTenantId() {
-        return "1";
+        return Optional.ofNullable(getUserDetails()).map(EulerUserDetails::getTenantId).orElse(null);
     }
 }

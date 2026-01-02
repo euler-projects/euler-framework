@@ -41,6 +41,7 @@ public class ServiceUserContext implements UserContext {
     public EulerUserDetails getUserDetails() {
         return Optional.ofNullable(this.getUserInfo())
                 .map(userInfo -> EulerUserDetails.builder()
+                        .tenantId(userInfo.tenantId())
                         .userId(userInfo.userId())
                         .username(userInfo.username())
                         .password("-")
@@ -51,15 +52,5 @@ public class ServiceUserContext implements UserContext {
                     return userDetails;
                 })
                 .orElse(null);
-    }
-
-    @Override
-    public String getUserId() {
-        return Optional.ofNullable(getUserInfo()).map(GatewayUserInfo::userId).orElse(null);
-    }
-
-    @Override
-    public String getTenantId() {
-        return Optional.ofNullable(getUserInfo()).map(GatewayUserInfo::tenantId).orElse(null);
     }
 }
