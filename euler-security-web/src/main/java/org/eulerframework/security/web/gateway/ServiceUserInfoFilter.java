@@ -54,6 +54,7 @@ public class ServiceUserInfoFilter extends OncePerRequestFilter {
         try {
             gatewayUserInfo = GatewayUserInfoHeaderHelper.parseHeaderValue(eulerGatewayUserInfoHeaderValue);
             logger.info("User Info parsed success, tenantId: {}, userId {}, username: {}", gatewayUserInfo.tenantId(), gatewayUserInfo.userId(), gatewayUserInfo.username());
+            request.setAttribute(ServiceUserContext.REQUEST_ATTR_NAME, gatewayUserInfo);
         } catch (Exception e) {
             logger.error("Exception thrown while parsing user info from header value '{}'", eulerGatewayUserInfoHeaderValue, e);
             response.setStatus(HttpStatus.FORBIDDEN.value());

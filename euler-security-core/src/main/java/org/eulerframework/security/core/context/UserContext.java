@@ -21,6 +21,6 @@ public interface UserContext {
     EulerUserDetails getUserDetails();
     String getUserId();
     default String getTenantId() {
-        return "1";
+        return "default";
     }
 }
