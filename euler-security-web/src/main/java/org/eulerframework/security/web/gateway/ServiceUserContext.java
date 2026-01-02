@@ -16,23 +16,33 @@
 package org.eulerframework.security.web.gateway;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.eulerframework.security.core.context.UserContext;
+import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.web.util.ServletUtils;
 
-import java.util.Optional;
-
-public class ServiceUserContext {
+public class ServiceUserContext implements UserContext {
     static final String REQUEST_ATTR_NAME = "__EULER_SERVICE_USER_INFO";
 
-    public GatewayUserInfo getUserDetails() {
+    @Override
+    public EulerUserDetails getUserDetails() {
         HttpServletRequest request = ServletUtils.getRequest();
-        return (GatewayUserInfo) request.getAttribute(REQUEST_ATTR_NAME);
+        GatewayUserInfo userInfo = (GatewayUserInfo) request.getAttribute(REQUEST_ATTR_NAME);
+        if (userInfo == null) {
+            return null;
+        }
+        return EulerUserDetails.builder()
+                .userId(userInfo.userId())
+                .username(userInfo.username())
+                .build();
     }
 
+    @Override
     public String getUserId() {
-        return Optional.ofNullable(getUserDetails()).map(GatewayUserInfo::userId).orElse(null);
-    }
-
-    public String getTenantId() {
-        return Optional.ofNullable(getUserDetails()).map(GatewayUserInfo::tenantId).orElse(null);
+        HttpServletRequest request = ServletUtils.getRequest();
+        GatewayUserInfo userInfo = (GatewayUserInfo) request.getAttribute(REQUEST_ATTR_NAME);
+        if (userInfo == null) {
+            return null;
+        }
+        return userInfo.userId();
     }
 }
