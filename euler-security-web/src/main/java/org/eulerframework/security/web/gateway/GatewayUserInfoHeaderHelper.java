@@ -15,5 +15,18 @@
  */
 package org.eulerframework.security.web.gateway;
 
-public record GatewayUserInfo(String tenantId, String userId, String username) {
+import org.eulerframework.common.util.json.JacksonUtils;
+
+import java.util.Base64;
+
+public class GatewayUserInfoHeaderHelper {
+    public final static String GATEWAY_USER_INFO_HEADER_NAME = "Euler-UserInfo";
+
+    public static String toHeaderValue(GatewayUserInfo gatewayUserInfo) {
+        return Base64.getEncoder().encodeToString(JacksonUtils.writeValueAsBytes(gatewayUserInfo));
+    }
+
+    public static GatewayUserInfo parseHeaderValue(String headerValue) {
+        return JacksonUtils.readValue(Base64.getDecoder().decode(headerValue), GatewayUserInfo.class);
+    }
 }

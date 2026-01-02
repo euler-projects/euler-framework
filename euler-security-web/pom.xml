@@ -46,6 +46,10 @@
             <artifactId>euler-common-util</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eulerframework</groupId>
+            <artifactId>euler-common-util-extra</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
@@ -59,6 +63,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>euler-web-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.14.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -40,9 +40,9 @@ public class ServiceUserInfoFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws IOException, ServletException {
 
-        String eulerUserInfo = request.getHeader(GatewayUserInfo.GATEWAY_USER_INFO_HEADER_NAME);
+        String eulerGatewayUserInfoHeaderValue = request.getHeader(GatewayUserInfoHeaderHelper.GATEWAY_USER_INFO_HEADER_NAME);
 
-        if (!StringUtils.hasText(eulerUserInfo)) {
+        if (!StringUtils.hasText(eulerGatewayUserInfoHeaderValue)) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -52,10 +52,10 @@ public class ServiceUserInfoFilter extends OncePerRequestFilter {
 
         GatewayUserInfo gatewayUserInfo;
         try {
-            gatewayUserInfo = JacksonUtils.readValue(eulerUserInfo, GatewayUserInfo.class);
+            gatewayUserInfo = GatewayUserInfoHeaderHelper.parseHeaderValue(eulerGatewayUserInfoHeaderValue);
             logger.info("User Info parsed success, tenantId: {}, userId {}, username: {}", gatewayUserInfo.tenantId(), gatewayUserInfo.userId(), gatewayUserInfo.username());
         } catch (Exception e) {
-            logger.error("Exception thrown while parsing user info from header value '{}'", eulerUserInfo, e);
+            logger.error("Exception thrown while parsing user info from header value '{}'", eulerGatewayUserInfoHeaderValue, e);
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
