@@ -18,9 +18,13 @@ package org.eulerframework.security.web.gateway;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 class GatewayUserInfoHeaderHelperTest {
 
-    private final static String TEST_HEADER_VALUE = "eyJ0ZW5hbnRJZCI6InQxIiwidXNlcklkIjoidTEiLCJ1c2VybmFtZSI6Im5hbWUifQ==";
+    private final static String TEST_HEADER_VALUE = // "eyJ0ZW5hbnRJZCI6InQxIiwidXNlcklkIjoidTEiLCJ1c2VybmFtZSI6Im5hbWUifQ==";
+            Base64.getEncoder().encodeToString("{\"tenantId\":\"t1\",\"userId\":\"u1\",\"username\":\"name\"}".getBytes(StandardCharsets.UTF_8));
     private final static GatewayUserInfo TEST_INFO = new GatewayUserInfo("t1", "u1", "name");
 
     @Test
