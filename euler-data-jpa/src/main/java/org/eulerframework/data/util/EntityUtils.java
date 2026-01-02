@@ -28,14 +28,6 @@ public class EntityUtils {
         }
     }
 
-    public static void updateResourceEntity(ResourceModel model, ResourceEntity entity) {
-        entity.setTenantId(model.getTenantId());
-        entity.setCreatedBy(model.getCreatedBy());
-        entity.setModifiedBy(model.getLastModifiedBy());
-        entity.setCreatedDate(model.getCreatedDate());
-        entity.setModifiedDate(model.getLastModifiedDate());
-    }
-
     public static void updateResourceModel(ResourceEntity entity, AbstractResourceModel model) {
         model.setTenantId(entity.getTenantId());
         model.setCreatedBy(entity.getCreatedBy());
