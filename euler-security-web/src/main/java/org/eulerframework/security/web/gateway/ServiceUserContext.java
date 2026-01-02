@@ -20,35 +20,46 @@ import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.web.util.ServletUtils;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ServiceUserContext implements UserContext {
     static final String REQUEST_ATTR_NAME = "__EULER_SERVICE_USER_INFO";
 
-    @Override
-    public EulerUserDetails getUserDetails() {
+    GatewayUserInfo getUserInfo() {
         HttpServletRequest request = ServletUtils.getRequest();
         GatewayUserInfo userInfo = (GatewayUserInfo) request.getAttribute(REQUEST_ATTR_NAME);
+
         if (userInfo == null) {
             return null;
         }
-        EulerUserDetails eulerUserDetails = EulerUserDetails.builder()
-                .userId(userInfo.userId())
-                .username(userInfo.username())
-                .password("-")
-                .passwordEncoder(Function.identity())
-                .build();
-        eulerUserDetails.eraseCredentials();
-        return eulerUserDetails;
+
+        return userInfo;
+    }
+
+    @Override
+    public EulerUserDetails getUserDetails() {
+        return Optional.ofNullable(this.getUserInfo())
+                .map(userInfo -> EulerUserDetails.builder()
+                        .userId(userInfo.userId())
+                        .username(userInfo.username())
+                        .password("-")
+                        .passwordEncoder(Function.identity())
+                        .build())
+                .map(userDetails -> {
+                    userDetails.eraseCredentials();
+                    return userDetails;
+                })
+                .orElse(null);
     }
 
     @Override
     public String getUserId() {
-        HttpServletRequest request = ServletUtils.getRequest();
-        GatewayUserInfo userInfo = (GatewayUserInfo) request.getAttribute(REQUEST_ATTR_NAME);
-        if (userInfo == null) {
-            return null;
-        }
-        return userInfo.userId();
+        return Optional.ofNullable(getUserInfo()).map(GatewayUserInfo::userId).orElse(null);
+    }
+
+    @Override
+    public String getTenantId() {
+        return Optional.ofNullable(getUserInfo()).map(GatewayUserInfo::tenantId).orElse(null);
     }
 }
