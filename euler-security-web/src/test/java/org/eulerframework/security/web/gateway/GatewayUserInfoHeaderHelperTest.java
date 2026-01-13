@@ -40,4 +40,8 @@ class GatewayUserInfoHeaderHelperTest {
         Assertions.assertEquals(TEST_INFO.userId(), parsedUserInfo.userId());
         Assertions.assertEquals(TEST_INFO.username(), parsedUserInfo.username());
     }
+
+    public static void main(String[] args) {
+        System.out.println(Base64.getEncoder().encodeToString("{\"tenantId\":\"survey\",\"userId\":\"survey\",\"username\":\"survey\"}".getBytes(StandardCharsets.UTF_8)));
+    }
 }

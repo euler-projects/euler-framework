@@ -39,6 +39,10 @@ public class ServiceUserInfoFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws IOException, ServletException {
+        if(request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String eulerGatewayUserInfoHeaderValue = request.getHeader(GatewayUserInfoHeaderHelper.GATEWAY_USER_INFO_HEADER_NAME);
 
