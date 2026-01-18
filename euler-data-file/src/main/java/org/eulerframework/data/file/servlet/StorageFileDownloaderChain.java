@@ -32,7 +32,7 @@ public class StorageFileDownloaderChain {
         for (StorageFileDownloader storageFileDownloader : this.storageFileDownloader) {
             if (storageFileDownloader.support(fileIndex.getStorageType())) {
                 storageFileDownloader.download(fileId, response);
-                break;
+                return;
             }
         }
 
