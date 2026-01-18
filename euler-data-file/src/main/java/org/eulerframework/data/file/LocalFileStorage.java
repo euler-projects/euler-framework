@@ -11,6 +11,8 @@ import java.io.*;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -18,6 +20,7 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
     public final static String TYPE = "local";
 
     private static final String INSERT = "insert into t_file_storage_local (id, prefix, saved_name, size) VALUES (?, ?, ?, ?)";
+    private static final String SELECT = "select prefix, saved_name from t_file_storage_local where id = ?";
     private static final String SELECT_SIZE = "select size from t_file_storage_local where id = ?";
 
     private final String baseDir;
@@ -83,12 +86,36 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
 
     @Override
     protected void writeFileData(String fileIndex, File dest) throws IOException {
-
+        try (OutputStream out = FileUtils.openOutputStream(dest)) {
+            this.writeFileData(fileIndex, out);
+        }
     }
 
     @Override
     protected void writeFileData(String fileIndex, OutputStream out) throws IOException {
+        String prefix, savedName;
+        Map<String, String> info = this.getJdbcOperations().query(
+                SELECT,
+                ps -> ps.setString(1, fileIndex),
+                rs -> {
+                    if (!rs.next()) {
+                        return null;
+                    }
 
+                    Map<String, String> result = new HashMap<>();
+                    result.put("prefix", rs.getString("prefix"));
+                    result.put("savedName", rs.getString("saved_name"));
+                    return result;
+                });
+        if (info == null) {
+            throw new IOException("Local file data for storage file index is " + fileIndex + " not found");
+        }
+        prefix = info.get("prefix");
+        savedName = info.get("savedName");
+        File savedFile = FileUtils.getFile(this.baseDir, prefix, savedName);
+        try (FileInputStream in = new FileInputStream(savedFile)) {
+            IOUtils.copy(in, out);
+        }
     }
 
     @Override
@@ -98,7 +125,7 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
 
     @Override
     public boolean support(String type) {
-        return false;
+        return TYPE.equals(type);
     }
 
     @Override

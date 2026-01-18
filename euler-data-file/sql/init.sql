@@ -17,7 +17,6 @@ create table t_file_storage_index
     default collate utf8mb4_bin
     COMMENT ='The file storage index';
 
-
 create table t_file_storage_jdbc
 (
     id   bigint unsigned not null auto_increment comment '上传文件id',
@@ -29,3 +28,16 @@ create table t_file_storage_jdbc
     default character set utf8mb4
     default collate utf8mb4_bin
     COMMENT ='JDBC file storage';
+
+create table t_file_storage_local
+(
+    id         varchar(36) not null comment '上传文件id',
+    prefix     varchar(10) not null comment '保存路径前缀',
+    saved_name varchar(36) not null comment '保存文件名称',
+    size       int         not null comment '文件大小',
+    primary key (id)
+)
+    engine = innodb
+    default character set utf8mb4
+    default collate utf8mb4_bin
+    COMMENT ='Local file storage';
