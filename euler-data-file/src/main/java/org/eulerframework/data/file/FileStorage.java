@@ -16,8 +16,9 @@
 package org.eulerframework.data.file;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.util.function.Handler;
-import org.eulerframework.data.file.servlet.JdbcStorageFileDownloader;
+import org.eulerframework.data.file.servlet.LocalStorageFileDownloader;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +84,7 @@ public interface FileStorage extends Handler<String> {
      * @param out                 待写入的输出流
      * @param storageFileConsumer 文件索引对象回调, 会在正式写入输出流前回调, 调用方可以做一些预处理, 一个常见的场景是在下载文件时，
      *                            可以在在数据正式写入Response的OutputStream前设置Response Header,
-     *                            可以参考{@link JdbcStorageFileDownloader#download(String, HttpServletResponse)}
+     *                            可以参考{@link LocalStorageFileDownloader#download(String, HttpServletResponse)}
      */
     void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException;
 

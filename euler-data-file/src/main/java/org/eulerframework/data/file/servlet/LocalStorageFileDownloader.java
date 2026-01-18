@@ -16,6 +16,7 @@
 package org.eulerframework.data.file.servlet;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.data.file.AbstractLocalFileStorage;
 import org.eulerframework.data.file.JdbcFileStorage;
 import org.eulerframework.data.file.StorageFileNotFoundException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
@@ -24,18 +25,18 @@ import org.eulerframework.web.util.ServletUtils;
 import java.io.IOException;
 import java.util.Optional;
 
-public class JdbcStorageFileDownloader implements StorageFileDownloader {
+public class LocalStorageFileDownloader implements StorageFileDownloader {
 
-    private final JdbcFileStorage jdbcFileStorage;
+    private final AbstractLocalFileStorage fileStorage;
 
-    public JdbcStorageFileDownloader(JdbcFileStorage jdbcFileStorage) {
-        this.jdbcFileStorage = jdbcFileStorage;
+    public LocalStorageFileDownloader(AbstractLocalFileStorage fileStorage) {
+        this.fileStorage = fileStorage;
     }
 
     @Override
     public void download(String fileId, HttpServletResponse response) throws IOException {
         try {
-            this.jdbcFileStorage.get(fileId, response.getOutputStream(), storageFile -> ServletUtils.writeFileHeader(
+            this.fileStorage.get(fileId, response.getOutputStream(), storageFile -> ServletUtils.writeFileHeader(
                     response,
                     storageFile.getFilename(),
                     Optional.ofNullable(storageFile.getAttribute(JdbcFileStorage.ATTR_FILE_SIZE))
@@ -51,6 +52,6 @@ public class JdbcStorageFileDownloader implements StorageFileDownloader {
 
     @Override
     public boolean support(String type) {
-        return jdbcFileStorage.support(type);
+        return fileStorage.support(type);
     }
 }

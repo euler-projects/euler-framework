@@ -18,6 +18,7 @@ package org.eulerframework.data.file;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
+import org.eulerframework.data.file.registry.FileIndexRegistry;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -39,8 +40,8 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
     private final BiFunction<JdbcOperations, byte[], Long> fileDataSaver;
     private final BiFunction<JdbcOperations, String, byte[]> fileDataLoader;
 
-    public JdbcFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate) {
-        super(jdbcOperations, fileDownloadUrlTemplate);
+    public JdbcFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry) {
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry);
         this.fileDataSaver = defaultFileDataSaver();
         this.fileDataLoader = defaultFileDataLoader();
     }
@@ -48,12 +49,11 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
     public JdbcFileStorage(
             JdbcOperations jdbcOperations,
             String fileDownloadUrlTemplate,
-            FileIndexDataSaver fileIndexDataSaver,
-            BiFunction<JdbcOperations, String, FileIndex> fileIndexDataLoader,
+            FileIndexRegistry fileIndexRegistry,
             BiFunction<JdbcOperations, byte[], Long> fileDataSaver,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
             BiFunction<JdbcOperations, String, byte[]> fileDataLoader) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexDataSaver, fileIndexDataLoader, fileSizeLoader);
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileSizeLoader);
         this.fileDataSaver = fileDataSaver;
         this.fileDataLoader = fileDataLoader;
     }

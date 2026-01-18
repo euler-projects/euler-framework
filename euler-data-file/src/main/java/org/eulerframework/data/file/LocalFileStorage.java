@@ -2,6 +2,7 @@ package org.eulerframework.data.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eulerframework.data.file.registry.FileIndexRegistry;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -21,8 +22,8 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
 
     private final String baseDir;
 
-    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir) {
-        super(jdbcOperations, fileDownloadUrlTemplate);
+    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir, FileIndexRegistry fileIndexRegistry) {
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry);
 
         this.baseDir = baseDir;
     }
@@ -30,11 +31,10 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
     public LocalFileStorage(
             JdbcOperations jdbcOperations,
             String fileDownloadUrlTemplate,
-            FileIndexDataSaver fileIndexDataSaver,
-            BiFunction<JdbcOperations, String, FileIndex> fileIndexDataLoader,
+            FileIndexRegistry fileIndexRegistry,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
             String baseDir) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexDataSaver, fileIndexDataLoader, fileSizeLoader);
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileSizeLoader);
 
         this.baseDir = baseDir;
     }

@@ -1,5 +1,7 @@
 package org.eulerframework.data.file;
 
+import org.eulerframework.data.file.registry.FileIndex;
+import org.eulerframework.data.file.registry.FileIndexRegistry;
 import org.springframework.jdbc.core.JdbcOperations;
 
 import java.net.URI;
@@ -11,8 +13,8 @@ public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
     private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
     private final String fileDownloadUrlTemplate;
 
-    public AbstractLocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate) {
-        super(jdbcOperations);
+    public AbstractLocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry) {
+        super(jdbcOperations, fileIndexRegistry);
         this.fileSizeLoader = defaultFileSizeLoader();
 
         this.fileDownloadUrlTemplate = fileDownloadUrlTemplate;
@@ -21,10 +23,9 @@ public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
     public AbstractLocalFileStorage(
             JdbcOperations jdbcOperations,
             String fileDownloadUrlTemplate,
-            FileIndexDataSaver fileIndexDataSaver,
-            BiFunction<JdbcOperations, String, FileIndex> fileIndexDataLoader,
+            FileIndexRegistry fileIndexRegistry,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader) {
-        super(jdbcOperations, fileIndexDataSaver, fileIndexDataLoader);
+        super(jdbcOperations, fileIndexRegistry);
         this.fileSizeLoader = fileSizeLoader;
 
         this.fileDownloadUrlTemplate = fileDownloadUrlTemplate;

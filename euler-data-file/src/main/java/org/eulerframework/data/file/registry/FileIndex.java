@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.data.file;
+package org.eulerframework.data.file.registry;
 
 import org.eulerframework.model.AbstractResourceModel;
 import org.springframework.util.CollectionUtils;
