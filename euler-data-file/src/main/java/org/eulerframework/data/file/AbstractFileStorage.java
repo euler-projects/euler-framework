@@ -75,6 +75,14 @@ public abstract class AbstractFileStorage implements FileStorage {
 
     protected abstract String saveFileData(File file, String filename) throws IOException;
 
+    /**
+     * 读取并保存一个 {@link InputStream} 中的全部数据
+     *
+     * @param in       {@link InputStream} 对象, <code>FileStorage</code> 将读取其全部数据作为一个文件存储
+     * @param filename 原始文件名, 由于无法从 {@link InputStream} 中获取文件的原始文件名, 所以要从过此参数传入
+     * @return 保存后的文件索引, <code>FileStorage</code> 将会存储此索引,
+     * 并在需要的时候用此索引从具体的 <code>FileStorage</code> 实现获取对应文件
+     */
     protected abstract String saveFileData(InputStream in, String filename) throws IOException;
 
     protected abstract void applyAttributes(FileIndex storageFile);

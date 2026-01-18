@@ -28,9 +28,8 @@ import java.math.BigInteger;
 import java.sql.*;
 import java.util.function.BiFunction;
 
-public class JdbcFileStorage extends AbstractFileStorage {
+public class JdbcFileStorage extends AbstractLocalFileStorage {
     public final static String TYPE = "jdbc";
-    public final static String ATTR_FILE_SIZE = "fileSize";
 
     private static final String INSERT = "insert into t_file_storage_jdbc (size, data) VALUES (?, ?)";
     private static final String SELECT_SIZE = "select size from t_file_storage_jdbc where id = ?";
@@ -38,26 +37,24 @@ public class JdbcFileStorage extends AbstractFileStorage {
 
     private DataSize maxFileSize = DataSize.ofKilobytes(512);
     private final BiFunction<JdbcOperations, byte[], Long> fileDataSaver;
-    private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
     private final BiFunction<JdbcOperations, String, byte[]> fileDataLoader;
 
-    public JdbcFileStorage(JdbcOperations jdbcOperations) {
-        super(jdbcOperations);
+    public JdbcFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate) {
+        super(jdbcOperations, fileDownloadUrlTemplate);
         this.fileDataSaver = defaultFileDataSaver();
-        this.fileSizeLoader = defaultFileSizeLoader();
         this.fileDataLoader = defaultFileDataLoader();
     }
 
     public JdbcFileStorage(
             JdbcOperations jdbcOperations,
+            String fileDownloadUrlTemplate,
             FileIndexDataSaver fileIndexDataSaver,
             BiFunction<JdbcOperations, String, FileIndex> fileIndexDataLoader,
             BiFunction<JdbcOperations, byte[], Long> fileDataSaver,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
             BiFunction<JdbcOperations, String, byte[]> fileDataLoader) {
-        super(jdbcOperations, fileIndexDataSaver, fileIndexDataLoader);
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexDataSaver, fileIndexDataLoader, fileSizeLoader);
         this.fileDataSaver = fileDataSaver;
-        this.fileSizeLoader = fileSizeLoader;
         this.fileDataLoader = fileDataLoader;
     }
 
@@ -87,12 +84,6 @@ public class JdbcFileStorage extends AbstractFileStorage {
         byte[] data = this.toByteArray(in);
         long id = this.fileDataSaver.apply(this.getJdbcOperations(), data);
         return String.valueOf(id);
-    }
-
-    @Override
-    protected void applyAttributes(FileIndex storageFile) {
-        Integer fileSize = this.fileSizeLoader.apply(this.getJdbcOperations(), storageFile.getStorageIndex());
-        storageFile.addAttribute(ATTR_FILE_SIZE, fileSize);
     }
 
     @Override
@@ -127,7 +118,8 @@ public class JdbcFileStorage extends AbstractFileStorage {
         };
     }
 
-    private static BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
+    @Override
+    BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
         return (jdbcOperations, fileIndex) -> jdbcOperations.query(
                 SELECT_SIZE,
                 ps -> ps.setLong(1, Long.parseLong(fileIndex)),
