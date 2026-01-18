@@ -76,7 +76,7 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
                 ps -> {
                     ps.setString(1, storageIndex);
                     ps.setString(2, datePrefix);
-                    ps.setString(3, filename);
+                    ps.setString(3, savedFilename);
                     ps.setInt(4, size);
                 }
         );
