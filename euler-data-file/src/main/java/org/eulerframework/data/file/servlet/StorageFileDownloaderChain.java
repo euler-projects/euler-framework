@@ -12,7 +12,11 @@ import java.util.List;
 public class StorageFileDownloaderChain {
     private final List<StorageFileDownloader> storageFileDownloader = new ArrayList<>();
 
-    private FileIndexRegistry fileIndexRegistry;
+    private final FileIndexRegistry fileIndexRegistry;
+
+    public StorageFileDownloaderChain(FileIndexRegistry fileIndexRegistry) {
+        this.fileIndexRegistry = fileIndexRegistry;
+    }
 
     public StorageFileDownloaderChain add(StorageFileDownloader storageFileDownloader) {
         this.storageFileDownloader.add(storageFileDownloader);
