@@ -3,6 +3,8 @@ package org.eulerframework.data.file;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -85,22 +87,27 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
     }
 
     @Override
-    protected void writeFileData(String fileIndex, File dest) throws IOException, StorageFileNotFoundException {
+    protected void writeFileData(String fileIndex, File dest) throws IOException {
         try (OutputStream out = FileUtils.openOutputStream(dest)) {
             this.writeFileData(fileIndex, out);
         }
     }
 
     @Override
-    protected void writeFileData(String fileIndex, OutputStream out) throws IOException, StorageFileNotFoundException {
-        File savedFile = this.getFileInternal(fileIndex);
+    protected void writeFileData(String fileIndex, OutputStream out) throws IOException {
+        File savedFile = this.getSavedFile(fileIndex);
         try (FileInputStream in = new FileInputStream(savedFile)) {
             IOUtils.copy(in, out);
         }
     }
 
     @Override
-    public File getFileInternal(String fileIndex) throws StorageFileNotFoundException, IOException {
+    protected Resource getResourceInternal(String fileIndex) throws IOException {
+        File savedFile = this.getSavedFile(fileIndex);
+        return new FileSystemResource(savedFile);
+    }
+
+    private File getSavedFile(String fileIndex) throws IOException {
         String prefix, savedName;
         Map<String, String> info = this.getJdbcOperations().query(
                 SELECT,
@@ -116,14 +123,14 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
                     return result;
                 });
         if (info == null) {
-            throw new IOException("Local file data for storage file index is " + fileIndex + " not found");
+            throw new FileNotFoundException("Local file data for storage file index is " + fileIndex + " not found");
         }
         prefix = info.get("prefix");
         savedName = info.get("savedName");
         File savedFile = FileUtils.getFile(this.baseDir, prefix, savedName);
 
         if (!savedFile.exists() || !savedFile.isFile()) {
-            throw new StorageFileNotFoundException("File index is " + fileIndex + " not found.");
+            throw new FileNotFoundException("Local file data for storage file index is " + fileIndex + " not found");
         }
 
         return savedFile;

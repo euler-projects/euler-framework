@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -99,6 +100,12 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
         IOUtils.write(data, out);
     }
 
+    @Override
+    protected Resource getResourceInternal(String storageIndex) throws IOException {
+        return null;
+    }
+
+
     private static BiFunction<JdbcOperations, byte[], Long> defaultFileDataSaver() {
         return (jdbcOperations, data) -> {
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -129,11 +136,6 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
                     }
                     return rs.getInt("size");
                 });
-    }
-
-    @Override
-    protected File getFileInternal(String storageIndex) throws StorageFileNotFoundException, IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private static BiFunction<JdbcOperations, String, byte[]> defaultFileDataLoader() {

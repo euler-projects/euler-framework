@@ -10,17 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RandomStorageFileDownloaderChain {
-    private final List<RandomStorageFileDownloader> randomStorageFileDownloader = new ArrayList<>();
+public class RangeStorageFileDownloaderChain {
+    private final List<RangeStorageFileDownloader> rangeStorageFileDownloader = new ArrayList<>();
 
     private final FileIndexRegistry fileIndexRegistry;
 
-    public RandomStorageFileDownloaderChain(FileIndexRegistry fileIndexRegistry) {
+    public RangeStorageFileDownloaderChain(FileIndexRegistry fileIndexRegistry) {
         this.fileIndexRegistry = fileIndexRegistry;
     }
 
-    public RandomStorageFileDownloaderChain add(RandomStorageFileDownloader randomStorageFileDownloader) {
-        this.randomStorageFileDownloader.add(randomStorageFileDownloader);
+    public RangeStorageFileDownloaderChain add(RangeStorageFileDownloader rangeStorageFileDownloader) {
+        this.rangeStorageFileDownloader.add(rangeStorageFileDownloader);
         return this;
     }
 
@@ -30,9 +30,9 @@ public class RandomStorageFileDownloaderChain {
             throw new ResourceNotFoundException("Storage file " + fileId + "not found");
         }
 
-        for (RandomStorageFileDownloader randomStorageFileDownloader : this.randomStorageFileDownloader) {
-            if (randomStorageFileDownloader.support(fileIndex.getStorageType())) {
-                return randomStorageFileDownloader.download(fileId);
+        for (RangeStorageFileDownloader rangeStorageFileDownloader : this.rangeStorageFileDownloader) {
+            if (rangeStorageFileDownloader.support(fileIndex.getStorageType())) {
+                return rangeStorageFileDownloader.download(fileId);
             }
         }
 

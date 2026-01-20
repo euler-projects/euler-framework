@@ -2,9 +2,9 @@ package org.eulerframework.data.file;
 
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.function.BiFunction;
@@ -48,14 +48,15 @@ public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
         return URI.create(url);
     }
 
-    public File getFile(String fileId, Consumer<FileIndex> storageFileConsumer)  throws IOException, StorageFileNotFoundException {
+    public Resource getFileResource(String fileId, Consumer<FileIndex> storageFileConsumer) throws StorageFileNotFoundException, IOException {
         FileIndex storageFile = this.getStorageIndex(fileId);
         if (storageFile == null) {
             throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
         }
         storageFileConsumer.accept(storageFile);
-        return this.getFileInternal(storageFile.getStorageIndex());
+        return this.getResourceInternal(storageFile.getStorageIndex());
     }
 
-    protected abstract File getFileInternal(String storageIndex) throws StorageFileNotFoundException, IOException;
+    protected abstract Resource getResourceInternal(String storageIndex) throws IOException;
+
 }

@@ -15,31 +15,23 @@
  */
 package org.eulerframework.data.file.servlet;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.common.util.MIMEUtils;
 import org.eulerframework.data.file.AbstractLocalFileStorage;
 import org.eulerframework.data.file.JdbcFileStorage;
 import org.eulerframework.data.file.StorageFileNotFoundException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.eulerframework.web.util.ResponseUtils;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-public class LocalRandomAccessStorageFileDownloader implements RandomStorageFileDownloader {
+public class LocalRangeStorageFileDownloader implements RangeStorageFileDownloader {
 
     private final AbstractLocalFileStorage fileStorage;
 
-    public LocalRandomAccessStorageFileDownloader(AbstractLocalFileStorage fileStorage) {
+    public LocalRangeStorageFileDownloader(AbstractLocalFileStorage fileStorage) {
         this.fileStorage = fileStorage;
     }
 
@@ -49,7 +41,7 @@ public class LocalRandomAccessStorageFileDownloader implements RandomStorageFile
             HttpHeaders headers = new HttpHeaders();
             // 设置支持 Range 请求
             headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
-            File file = this.fileStorage.getFile(fileId, fileIndex -> {
+            Resource resource = this.fileStorage.getFileResource(fileId, fileIndex -> {
                 ResponseUtils.writeFileHeader(headers,
                         fileIndex.getFilename(),
                         Optional.ofNullable(fileIndex.getAttribute(JdbcFileStorage.ATTR_FILE_SIZE))
@@ -63,14 +55,12 @@ public class LocalRandomAccessStorageFileDownloader implements RandomStorageFile
             // 返回 ResponseEntity，Spring 会自动处理 Range 请求
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(new FileSystemResource(file));
+                    .body(resource);
 
         } catch (StorageFileNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage(), e);
         }
     }
-
-
 
 
     @Override
