@@ -32,7 +32,7 @@ import org.eulerframework.web.module.authentication.exception.InvalidEmailResetT
 import org.eulerframework.web.module.authentication.exception.InvalidSmsResetPinException;
 import org.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import org.eulerframework.web.module.authentication.vo.UserResetJwtClaims;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 
 /**
  * @author cFrost

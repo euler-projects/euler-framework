@@ -29,7 +29,7 @@ import org.eulerframework.web.module.authentication.entity.EulerUserEntity;
 import org.eulerframework.web.module.authentication.exception.PasswordResetErrorException;
 import org.eulerframework.web.module.authentication.exception.UserNotFoundException;
 import org.eulerframework.web.module.authentication.principal.EulerUserDetails;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 
 /**
  * root用户和admin用户密码重置业务逻辑类

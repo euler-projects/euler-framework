@@ -26,7 +26,7 @@ import org.eulerframework.web.core.exception.web.SystemWebError;
 import org.eulerframework.web.core.exception.web.UndefinedWebException;
 import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;

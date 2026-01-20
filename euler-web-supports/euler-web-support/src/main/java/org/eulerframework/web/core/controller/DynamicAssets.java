@@ -23,7 +23,7 @@ import java.util.Set;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;

@@ -20,7 +20,7 @@ import org.eulerframework.data.file.AbstractLocalFileStorage;
 import org.eulerframework.data.file.JdbcFileStorage;
 import org.eulerframework.data.file.StorageFileNotFoundException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 
 import java.io.IOException;
 import java.util.Optional;

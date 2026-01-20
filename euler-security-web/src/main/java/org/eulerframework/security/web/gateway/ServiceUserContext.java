@@ -18,7 +18,7 @@ package org.eulerframework.security.web.gateway;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 
 import java.util.Optional;
 import java.util.function.Function;

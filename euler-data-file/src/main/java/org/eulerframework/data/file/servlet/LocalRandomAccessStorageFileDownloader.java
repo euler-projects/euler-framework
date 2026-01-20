@@ -22,6 +22,7 @@ import org.eulerframework.data.file.AbstractLocalFileStorage;
 import org.eulerframework.data.file.JdbcFileStorage;
 import org.eulerframework.data.file.StorageFileNotFoundException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
+import org.eulerframework.web.util.ResponseUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -49,7 +50,7 @@ public class LocalRandomAccessStorageFileDownloader implements RandomStorageFile
             // 设置支持 Range 请求
             headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
             File file = this.fileStorage.getFile(fileId, fileIndex -> {
-                writeFileHeader(headers,
+                ResponseUtils.writeFileHeader(headers,
                         fileIndex.getFilename(),
                         Optional.ofNullable(fileIndex.getAttribute(JdbcFileStorage.ATTR_FILE_SIZE))
                                 .map(v -> (Integer) v)
@@ -70,25 +71,7 @@ public class LocalRandomAccessStorageFileDownloader implements RandomStorageFile
     }
 
 
-    public static void writeFileHeader(HttpHeaders headers, String fileName, Long fileSize, boolean forceAttachment) {
-        String extension = FilenameUtils.getExtension(fileName);
-        MIMEUtils.MIME mime;
-        if (StringUtils.hasText(extension)) {
-            mime = MIMEUtils.getMIME(extension);
-        } else {
-            mime = MIMEUtils.getDefaultMIME();
-        }
-        headers.setContentType(MediaType.parseMediaType(mime.getContentType()));
-        try {
-            headers.setContentDisposition(ContentDisposition.parse((forceAttachment ? "attachment" : mime.getContentDisposition()) +
-                    ";fileName=\"" + new String(fileName.getBytes(StandardCharsets.UTF_8), "ISO8859-1") + "\""));
-        } catch (UnsupportedEncodingException e) {
-            throw ExceptionUtils.asRuntimeException(e);
-        }
-        if (fileSize != null && fileSize > 0) {
-            headers.setContentLength(fileSize);
-        }
-    }
+
 
     @Override
     public boolean support(String type) {

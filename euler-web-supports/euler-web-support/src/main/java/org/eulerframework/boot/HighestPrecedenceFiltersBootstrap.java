@@ -25,10 +25,9 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
 import org.eulerframework.common.util.property.FilePropertySource;
-import org.eulerframework.common.util.property.PropertyReader;
 import org.eulerframework.common.util.property.PropertySource;
 import org.eulerframework.config.EulerWebSupportConfig;
-import org.eulerframework.web.util.ServletContextHolder;
+import org.eulerframework.web.servlet.util.ServletContextHolder;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
