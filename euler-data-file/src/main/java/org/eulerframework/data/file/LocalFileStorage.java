@@ -85,14 +85,22 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
     }
 
     @Override
-    protected void writeFileData(String fileIndex, File dest) throws IOException {
+    protected void writeFileData(String fileIndex, File dest) throws IOException, StorageFileNotFoundException {
         try (OutputStream out = FileUtils.openOutputStream(dest)) {
             this.writeFileData(fileIndex, out);
         }
     }
 
     @Override
-    protected void writeFileData(String fileIndex, OutputStream out) throws IOException {
+    protected void writeFileData(String fileIndex, OutputStream out) throws IOException, StorageFileNotFoundException {
+        File savedFile = this.getFileInternal(fileIndex);
+        try (FileInputStream in = new FileInputStream(savedFile)) {
+            IOUtils.copy(in, out);
+        }
+    }
+
+    @Override
+    public File getFileInternal(String fileIndex) throws StorageFileNotFoundException, IOException {
         String prefix, savedName;
         Map<String, String> info = this.getJdbcOperations().query(
                 SELECT,
@@ -113,9 +121,12 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
         prefix = info.get("prefix");
         savedName = info.get("savedName");
         File savedFile = FileUtils.getFile(this.baseDir, prefix, savedName);
-        try (FileInputStream in = new FileInputStream(savedFile)) {
-            IOUtils.copy(in, out);
+
+        if (!savedFile.exists() || !savedFile.isFile()) {
+            throw new StorageFileNotFoundException("File index is " + fileIndex + " not found.");
         }
+
+        return savedFile;
     }
 
     @Override

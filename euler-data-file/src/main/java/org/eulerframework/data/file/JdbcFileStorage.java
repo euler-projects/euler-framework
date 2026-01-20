@@ -131,6 +131,11 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
                 });
     }
 
+    @Override
+    protected File getFileInternal(String storageIndex) throws StorageFileNotFoundException, IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     private static BiFunction<JdbcOperations, String, byte[]> defaultFileDataLoader() {
         return (jdbcOperations, fileIndex) -> jdbcOperations.query(
                 SELECT_DATA,

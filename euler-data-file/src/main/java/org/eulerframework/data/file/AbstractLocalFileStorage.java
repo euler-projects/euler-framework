@@ -4,8 +4,11 @@ import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
 import org.springframework.jdbc.core.JdbcOperations;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
     public final static String ATTR_FILE_SIZE = "fileSize";
@@ -44,4 +47,15 @@ public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
         String url = this.fileDownloadUrlTemplate.replace("{fileId}", fileId);
         return URI.create(url);
     }
+
+    public File getFile(String fileId, Consumer<FileIndex> storageFileConsumer)  throws IOException, StorageFileNotFoundException {
+        FileIndex storageFile = this.getStorageIndex(fileId);
+        if (storageFile == null) {
+            throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
+        }
+        storageFileConsumer.accept(storageFile);
+        return this.getFileInternal(storageFile.getStorageIndex());
+    }
+
+    protected abstract File getFileInternal(String storageIndex) throws StorageFileNotFoundException, IOException;
 }

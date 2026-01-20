@@ -56,9 +56,9 @@ public abstract class AbstractFileStorage implements FileStorage {
 
     protected abstract void applyAttributes(FileIndex storageFile);
 
-    protected abstract void writeFileData(String fileIndex, File dest) throws IOException;
+    protected abstract void writeFileData(String fileIndex, File dest) throws IOException, StorageFileNotFoundException;
 
-    protected abstract void writeFileData(String fileIndex, OutputStream out) throws IOException;
+    protected abstract void writeFileData(String fileIndex, OutputStream out) throws IOException, StorageFileNotFoundException;
 
     @Override
     @Transactional
