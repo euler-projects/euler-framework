@@ -18,7 +18,6 @@ package org.eulerframework.data.file;
 import org.apache.commons.io.FilenameUtils;
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
-import org.eulerframework.data.file.registry.JdbcFileIndexRegistry;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -63,13 +62,17 @@ public abstract class AbstractFileStorage implements FileStorage {
     @Override
     @Transactional
     public FileIndex save(File file, String filename) throws IOException {
-        return this.createFileIndex(this.saveFileData(file, filename), filename);
+        FileIndex fileIndex = this.createFileIndex(this.saveFileData(file, filename), filename);
+        this.applyAttributes(fileIndex);
+        return fileIndex;
     }
 
     @Override
     @Transactional
     public FileIndex save(InputStream in, String filename) throws IOException {
-        return this.createFileIndex(this.saveFileData(in, filename), filename);
+        FileIndex fileIndex = this.createFileIndex(this.saveFileData(in, filename), filename);
+        this.applyAttributes(fileIndex);
+        return fileIndex;
     }
 
     @Override
@@ -120,6 +123,5 @@ public abstract class AbstractFileStorage implements FileStorage {
         fileIndex.setStorageType(this.getType());
         fileIndex.setStorageIndex(storageIndex);
         return this.fileIndexRegistry.createFileIndex(fileIndex);
-
     }
 }
