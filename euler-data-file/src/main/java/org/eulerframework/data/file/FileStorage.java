@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.util.function.Handler;
 import org.eulerframework.data.file.servlet.LocalStorageFileDownloader;
+import org.springframework.core.io.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,22 +72,35 @@ public interface FileStorage extends Handler<String> {
     /**
      * 将文件数据写入指定文件
      *
-     * @param fileId              文件ID, 可以在ID后携带文件扩展名
-     * @param dest                待写入的目标文件
-     * @param storageFileConsumer 文件索引对象回调, 会在正式写入文件前回调, 调用方可以做一些预处理
+     * @param fileId           文件ID, 可以在ID后携带文件扩展名
+     * @param dest             待写入的目标文件
+     * @param fileIndexConsumer 文件索引对象回调, 会在正式写入文件前回调, 调用方可以做一些预处理
      */
-    void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException;
+    void get(String fileId, File dest, Consumer<FileIndex> fileIndexConsumer) throws IOException, StorageFileNotFoundException;
 
     /**
      * 将文件数据写入输出流
      *
-     * @param fileId              文件ID, 可以在ID后携带文件扩展名
-     * @param out                 待写入的输出流
-     * @param storageFileConsumer 文件索引对象回调, 会在正式写入输出流前回调, 调用方可以做一些预处理, 一个常见的场景是在下载文件时，
-     *                            可以在在数据正式写入Response的OutputStream前设置Response Header,
-     *                            可以参考{@link LocalStorageFileDownloader#download(String, HttpServletResponse)}
+     * @param fileId           文件ID, 可以在ID后携带文件扩展名
+     * @param out              待写入的输出流
+     * @param fileIndexConsumer 文件索引对象回调, 会在正式写入输出流前回调, 调用方可以做一些预处理, 一个常见的场景是在下载文件时，
+     *                         可以在在数据正式写入Response的OutputStream前设置Response Header,
+     *                         可以参考{@link LocalStorageFileDownloader#download(String, HttpServletResponse)}
      */
-    void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException;
+    void get(String fileId, OutputStream out, Consumer<FileIndex> fileIndexConsumer) throws IOException, StorageFileNotFoundException;
+
+    /**
+     * 获取文件资源对象
+     * <p>
+     * 返回一个 Spring {@link Resource} 对象, 用于支持 HTTP Range 请求等高级文件访问场景.
+     * 通过 {@link Resource} 可以实现断点续传、部分内容下载等功能.
+     *
+     * @param fileId           文件ID, 可以在ID后携带文件扩展名
+     * @param fileIndexConsumer 文件索引对象回调, 会在返回资源对象前回调, 调用方可以做一些预处理,
+     *                         例如在返回前设置 Response Header
+     * @return Spring {@link Resource} 对象, 可用于支持 Range 请求的文件访问
+     */
+    Resource getFileResource(String fileId, Consumer<FileIndex> fileIndexConsumer) throws StorageFileNotFoundException, IOException;
 
     /**
      * 获取文件 <code>URI</code>
@@ -98,5 +112,5 @@ public interface FileStorage extends Handler<String> {
      * @param fileId 文件ID, 可以在ID后携带文件扩展名
      * @return 指向文件存储服务的 <code>URI</code>, 可以通过该 <code>URI</code> 直接下载文件, 无需通过本地转发
      */
-    URI getUri(String fileId);
+    URI getUri(String fileId) throws StorageFileNotFoundException, IOException;
 }

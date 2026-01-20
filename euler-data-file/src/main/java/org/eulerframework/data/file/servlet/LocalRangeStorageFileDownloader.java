@@ -47,9 +47,7 @@ public class LocalRangeStorageFileDownloader implements RangeStorageFileDownload
                         Optional.ofNullable(fileIndex.getAttribute(JdbcFileStorage.ATTR_FILE_SIZE))
                                 .map(v -> (Integer) v)
                                 .map(Integer::longValue)
-                                .orElse(null),
-                        false);
-
+                                .orElse(null));
             });
 
             // 返回 ResponseEntity，Spring 会自动处理 Range 请求

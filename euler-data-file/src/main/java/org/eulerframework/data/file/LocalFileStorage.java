@@ -102,7 +102,7 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
     }
 
     @Override
-    protected Resource getResourceInternal(String fileIndex) throws IOException {
+    Resource getResourceInternal(String fileIndex) throws IOException {
         File savedFile = this.getSavedFile(fileIndex);
         return new FileSystemResource(savedFile);
     }

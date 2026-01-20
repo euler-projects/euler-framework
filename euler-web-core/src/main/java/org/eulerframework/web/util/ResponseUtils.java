@@ -12,6 +12,11 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 public class ResponseUtils {
+
+    public static void writeFileHeader(HttpHeaders headers, String fileName, Long fileSize) {
+        writeFileHeader(headers, fileName, fileSize, false);
+    }
+
     public static void writeFileHeader(HttpHeaders headers, String fileName, Long fileSize, boolean forceAttachment) {
         String extension = FilenameUtils.getExtension(fileName);
         MIMEUtils.MIME mime;

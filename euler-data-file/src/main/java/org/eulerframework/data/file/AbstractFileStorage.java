@@ -18,6 +18,7 @@ package org.eulerframework.data.file;
 import org.apache.commons.io.FilenameUtils;
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -59,6 +60,8 @@ public abstract class AbstractFileStorage implements FileStorage {
 
     protected abstract void writeFileData(String fileIndex, OutputStream out) throws IOException;
 
+    abstract Resource getResourceInternal(String storageIndex) throws IOException;
+
     @Override
     @Transactional
     public FileIndex save(File file, String filename) throws IOException {
@@ -95,23 +98,33 @@ public abstract class AbstractFileStorage implements FileStorage {
     }
 
     @Override
-    public void get(String fileId, File dest, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException {
+    public void get(String fileId, File dest, Consumer<FileIndex> fileIndexConsumer) throws IOException, StorageFileNotFoundException {
         FileIndex storageFile = this.getStorageIndex(fileId);
         if (storageFile == null) {
             throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
         }
-        storageFileConsumer.accept(storageFile);
+        fileIndexConsumer.accept(storageFile);
         this.writeFileData(storageFile.getStorageIndex(), dest);
     }
 
     @Override
-    public void get(String fileId, OutputStream out, Consumer<FileIndex> storageFileConsumer) throws IOException, StorageFileNotFoundException {
+    public void get(String fileId, OutputStream out, Consumer<FileIndex> fileIndexConsumer) throws IOException, StorageFileNotFoundException {
         FileIndex fileIndex = this.getStorageIndex(fileId);
         if (fileIndex == null) {
             throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
         }
-        storageFileConsumer.accept(fileIndex);
+        fileIndexConsumer.accept(fileIndex);
         this.writeFileData(fileIndex.getStorageIndex(), out);
+    }
+
+    @Override
+    public Resource getFileResource(String fileId, Consumer<FileIndex> fileIndexConsumer) throws StorageFileNotFoundException, IOException {
+        FileIndex storageFile = this.getStorageIndex(fileId);
+        if (storageFile == null) {
+            throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
+        }
+        fileIndexConsumer.accept(storageFile);
+        return this.getResourceInternal(storageFile.getStorageIndex());
     }
 
     private FileIndex createFileIndex(String storageIndex, String filename) {

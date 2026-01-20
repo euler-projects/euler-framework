@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -101,8 +102,12 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
     }
 
     @Override
-    protected Resource getResourceInternal(String storageIndex) throws IOException {
-        return null;
+    Resource getResourceInternal(String storageIndex) throws IOException {
+        byte[] data = this.fileDataLoader.apply(this.getJdbcOperations(), storageIndex);
+        if (data == null) {
+            throw new FileNotFoundException("File data for storage index " + storageIndex + " not found");
+        }
+        return new ByteArrayResource(data);
     }
 
 

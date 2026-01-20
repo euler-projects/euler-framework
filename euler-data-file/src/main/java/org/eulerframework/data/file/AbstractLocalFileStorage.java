@@ -47,16 +47,4 @@ public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
         String url = this.fileDownloadUrlTemplate.replace("{fileId}", fileId);
         return URI.create(url);
     }
-
-    public Resource getFileResource(String fileId, Consumer<FileIndex> storageFileConsumer) throws StorageFileNotFoundException, IOException {
-        FileIndex storageFile = this.getStorageIndex(fileId);
-        if (storageFile == null) {
-            throw new StorageFileNotFoundException("Storage file '" + fileId + "' not exists");
-        }
-        storageFileConsumer.accept(storageFile);
-        return this.getResourceInternal(storageFile.getStorageIndex());
-    }
-
-    protected abstract Resource getResourceInternal(String storageIndex) throws IOException;
-
 }
