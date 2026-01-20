@@ -1,4 +1,4 @@
-package org.eulerframework.data.file.servlet;
+package org.eulerframework.data.file.web;
 
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;

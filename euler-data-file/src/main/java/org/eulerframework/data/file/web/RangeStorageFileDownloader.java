@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.data.file.servlet;
+package org.eulerframework.data.file.web;
 
 import org.eulerframework.util.function.Handler;
 import org.springframework.core.io.Resource;

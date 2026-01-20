@@ -1,4 +1,4 @@
-package org.eulerframework.data.file.servlet;
+package org.eulerframework.data.file.web.servlet;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.data.file.registry.FileIndex;

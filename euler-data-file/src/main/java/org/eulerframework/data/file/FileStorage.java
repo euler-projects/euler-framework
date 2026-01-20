@@ -18,7 +18,7 @@ package org.eulerframework.data.file;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.util.function.Handler;
-import org.eulerframework.data.file.servlet.LocalStorageFileDownloader;
+import org.eulerframework.data.file.web.servlet.LocalStorageFileDownloader;
 import org.springframework.core.io.Resource;
 
 import java.io.File;
