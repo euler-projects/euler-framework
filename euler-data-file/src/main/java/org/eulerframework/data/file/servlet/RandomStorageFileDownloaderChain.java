@@ -24,7 +24,7 @@ public class RandomStorageFileDownloaderChain {
         return this;
     }
 
-    ResponseEntity<Resource> download(String fileId) throws IOException {
+    public ResponseEntity<Resource> download(String fileId) throws IOException {
         FileIndex fileIndex = this.fileIndexRegistry.getFileIndex(fileId);
         if (fileIndex == null) {
             throw new ResourceNotFoundException("Storage file " + fileId + "not found");
