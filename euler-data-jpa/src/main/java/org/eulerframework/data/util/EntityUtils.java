@@ -30,6 +30,7 @@ public class EntityUtils {
 
     public static void updateResourceModel(ResourceEntity entity, AbstractResourceModel model) {
         model.setTenantId(entity.getTenantId());
+        model.setUserId(entity.getUserId());
         model.setCreatedBy(entity.getCreatedBy());
         model.setLastModifiedBy(entity.getModifiedBy());
         model.setCreatedDate(entity.getCreatedDate());

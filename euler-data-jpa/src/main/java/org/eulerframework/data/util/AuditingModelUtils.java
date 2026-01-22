@@ -37,5 +37,6 @@ public class AuditingModelUtils {
     public static void updateModelResourceFields(ResourceEntity entity, AbstractResourceModel model) {
         updateModelPrincipalAuditingFields(entity, model);
         model.setTenantId(entity.getTenantId());
+        model.setUserId(entity.getUserId());
     }
 }

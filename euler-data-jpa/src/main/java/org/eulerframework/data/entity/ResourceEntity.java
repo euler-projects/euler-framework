@@ -24,11 +24,22 @@ public abstract class ResourceEntity extends PrincipalAuditingEntity {
     @Column(name = "tenant_id")
     private String tenantId;
 
+    @Column(name = "user_id")
+    private String userId;
+
     public String getTenantId() {
         return tenantId;
     }
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

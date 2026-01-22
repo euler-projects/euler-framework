@@ -12,12 +12,13 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
             "storage_type,  " +
             "storage_index,  " +
             "tenant_id,  " +
+            "user_id,  " +
             "created_by,  " +
             "created_date,  " +
             "modified_by,  " +
             "modified_date) " +
             "VALUES " +
-            "(?, ?, ?, ?, ?, '1', '1', now(), '1', now())";
+            "(?, ?, ?, ?, ?, '1', '1', '1', now(), '1', now())";
     private static final String SELECT_FILE_INDEX_DATA = "select " +
             "id, " +
             "filename,  " +
@@ -25,6 +26,7 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
             "storage_type,  " +
             "storage_index,  " +
             "tenant_id,  " +
+            "user_id,  " +
             "created_by,  " +
             "created_date,  " +
             "modified_by,  " +
@@ -68,6 +70,7 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
                     fileIndex.setStorageType(rs.getString("storage_type"));
                     fileIndex.setStorageIndex(rs.getString("storage_index"));
                     fileIndex.setTenantId(rs.getString("tenant_id"));
+                    fileIndex.setUserId(rs.getString("user_id"));
                     fileIndex.setCreatedBy(rs.getString("created_by"));
                     fileIndex.setCreatedDate(rs.getDate("created_date"));
                     fileIndex.setLastModifiedBy(rs.getString("modified_by"));

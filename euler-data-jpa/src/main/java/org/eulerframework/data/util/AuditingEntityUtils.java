@@ -34,10 +34,11 @@ public class AuditingEntityUtils {
         entity.setModifiedBy(model.getLastModifiedBy());
     }
 
-    public static <E extends ResourceEntity> E newResourceEntity(String tenantId, Class<E> clazz) {
+    public static <E extends ResourceEntity> E newResourceEntity(String tenantId, String userId, Class<E> clazz) {
         try {
             E resourceEntity = clazz.getDeclaredConstructor().newInstance();
             resourceEntity.setTenantId(tenantId);
+            resourceEntity.setUserId(userId);
             return resourceEntity;
         } catch (Exception e) {
             throw ExceptionUtils.<RuntimeException>rethrow(e);

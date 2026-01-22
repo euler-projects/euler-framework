@@ -16,5 +16,13 @@
 package org.eulerframework.model;
 
 public interface ResourceModel extends PrincipalAuditingModel {
+    /**
+     * 资源所属租户 ID
+     */
     String getTenantId();
+
+    /**
+     * 资源所属用户 ID
+     */
+    String getUserId();
 }

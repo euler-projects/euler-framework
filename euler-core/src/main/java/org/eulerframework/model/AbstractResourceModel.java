@@ -18,6 +18,8 @@ package org.eulerframework.model;
 public class AbstractResourceModel extends AbstractPrincipalAuditingModel implements ResourceModel {
     private String tenantId;
 
+    private String userId;
+
     @Override
     public String getTenantId() {
         return tenantId;
@@ -25,5 +27,14 @@ public class AbstractResourceModel extends AbstractPrincipalAuditingModel implem
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    @Override
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
