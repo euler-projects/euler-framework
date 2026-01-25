@@ -3,6 +3,7 @@ package org.eulerframework.data.file;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.eulerframework.data.file.web.security.FileTokenRegistry;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -27,8 +28,8 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
 
     private final String baseDir;
 
-    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir, FileIndexRegistry fileIndexRegistry) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry);
+    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
 
         this.baseDir = baseDir;
     }
@@ -37,9 +38,10 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
             JdbcOperations jdbcOperations,
             String fileDownloadUrlTemplate,
             FileIndexRegistry fileIndexRegistry,
+            FileTokenRegistry fileTokenRegistry,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
             String baseDir) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileSizeLoader);
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry, fileSizeLoader);
 
         this.baseDir = baseDir;
     }

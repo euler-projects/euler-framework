@@ -24,7 +24,7 @@ public class RangeStorageFileDownloaderChain {
         return this;
     }
 
-    public ResponseEntity<Resource> download(String fileId) throws IOException {
+    public ResponseEntity<Resource> download(String fileId, String token) throws IOException {
         FileIndex fileIndex = this.fileIndexRegistry.getFileIndex(fileId);
         if (fileIndex == null) {
             throw new ResourceNotFoundException("Storage file " + fileId + "not found");
@@ -32,7 +32,7 @@ public class RangeStorageFileDownloaderChain {
 
         for (RangeStorageFileDownloader rangeStorageFileDownloader : this.rangeStorageFileDownloader) {
             if (rangeStorageFileDownloader.support(fileIndex.getStorageType())) {
-                return rangeStorageFileDownloader.download(fileId);
+                return rangeStorageFileDownloader.download(fileId, token);
             }
         }
 

@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.eulerframework.data.file.web.security.FileTokenRegistry;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -42,8 +43,8 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
     private final BiFunction<JdbcOperations, byte[], Long> fileDataSaver;
     private final BiFunction<JdbcOperations, String, byte[]> fileDataLoader;
 
-    public JdbcFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry);
+    public JdbcFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
         this.fileDataSaver = defaultFileDataSaver();
         this.fileDataLoader = defaultFileDataLoader();
     }
@@ -52,10 +53,11 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
             JdbcOperations jdbcOperations,
             String fileDownloadUrlTemplate,
             FileIndexRegistry fileIndexRegistry,
+            FileTokenRegistry fileTokenRegistry,
             BiFunction<JdbcOperations, byte[], Long> fileDataSaver,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
             BiFunction<JdbcOperations, String, byte[]> fileDataLoader) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileSizeLoader);
+        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry, fileSizeLoader);
         this.fileDataSaver = fileDataSaver;
         this.fileDataLoader = fileDataLoader;
     }

@@ -22,5 +22,5 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 
 public interface RangeStorageFileDownloader extends Handler<String> {
-    ResponseEntity<Resource> download(String fileId) throws IOException;
+    ResponseEntity<Resource> download(String fileId, String token) throws IOException;
 }

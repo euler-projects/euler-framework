@@ -1,37 +1,43 @@
 package org.eulerframework.data.file;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.common.util.net.URIBuilder;
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
-import org.springframework.core.io.Resource;
+import org.eulerframework.data.file.web.security.FileToken;
+import org.eulerframework.data.file.web.security.FileTokenRegistry;
 import org.springframework.jdbc.core.JdbcOperations;
 
-import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
     public final static String ATTR_FILE_SIZE = "fileSize";
 
     private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
     private final String fileDownloadUrlTemplate;
+    private final FileTokenRegistry fileTokenRegistry;
 
-    public AbstractLocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry) {
+    public AbstractLocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
         super(jdbcOperations, fileIndexRegistry);
         this.fileSizeLoader = defaultFileSizeLoader();
 
         this.fileDownloadUrlTemplate = fileDownloadUrlTemplate;
+        this.fileTokenRegistry = fileTokenRegistry;
     }
 
     public AbstractLocalFileStorage(
             JdbcOperations jdbcOperations,
             String fileDownloadUrlTemplate,
             FileIndexRegistry fileIndexRegistry,
+            FileTokenRegistry fileTokenRegistry,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader) {
         super(jdbcOperations, fileIndexRegistry);
         this.fileSizeLoader = fileSizeLoader;
 
         this.fileDownloadUrlTemplate = fileDownloadUrlTemplate;
+        this.fileTokenRegistry = fileTokenRegistry;
     }
 
     abstract BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader();
@@ -45,6 +51,13 @@ public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
     @Override
     public URI getUri(String fileId) {
         String url = this.fileDownloadUrlTemplate.replace("{fileId}", fileId);
-        return URI.create(url);
+        FileToken token = this.fileTokenRegistry.generateToken(fileId);
+        URIBuilder builder = URIBuilder.of(url);
+        builder.query("access_token", token.getTokenValue());
+        try {
+            return builder.build();
+        } catch (URISyntaxException e) {
+            throw ExceptionUtils.asRuntimeException(e);
+        }
     }
 }

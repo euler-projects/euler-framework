@@ -15,28 +15,46 @@
  */
 package org.eulerframework.data.file.web;
 
+import org.eulerframework.common.util.Assert;
 import org.eulerframework.data.file.AbstractLocalFileStorage;
 import org.eulerframework.data.file.JdbcFileStorage;
 import org.eulerframework.data.file.StorageFileNotFoundException;
+import org.eulerframework.data.file.web.security.FileToken;
+import org.eulerframework.data.file.web.security.FileTokenRegistry;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.eulerframework.web.util.ResponseUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import java.io.*;
+import java.nio.file.AccessDeniedException;
 import java.util.Optional;
 
 public class LocalRangeStorageFileDownloader implements RangeStorageFileDownloader {
 
-    private final AbstractLocalFileStorage fileStorage;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public LocalRangeStorageFileDownloader(AbstractLocalFileStorage fileStorage) {
+    private final AbstractLocalFileStorage fileStorage;
+    private final FileTokenRegistry fileTokenRegistry;
+
+    public LocalRangeStorageFileDownloader(AbstractLocalFileStorage fileStorage, FileTokenRegistry fileTokenRegistry) {
         this.fileStorage = fileStorage;
+        this.fileTokenRegistry = fileTokenRegistry;
     }
 
     @Override
-    public ResponseEntity<Resource> download(String fileId) throws IOException {
+    public ResponseEntity<Resource> download(String fileId, String token) throws IOException {
+        try {
+            FileToken fileToken = this.fileTokenRegistry.getTokenByTokenValue(token);
+            Assert.isTrue(fileId.equals(fileToken.getFileId()));
+        } catch (Exception e) {
+            this.logger.warn("File download access denied: {}", e.getMessage(), e);
+            throw new AccessDeniedException("Access denied");
+        }
+
         try {
             HttpHeaders headers = new HttpHeaders();
             // 设置支持 Range 请求
