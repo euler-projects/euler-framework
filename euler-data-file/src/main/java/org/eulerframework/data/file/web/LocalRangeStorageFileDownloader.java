@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.*;
-import java.nio.file.AccessDeniedException;
 import java.util.Optional;
 
 public class LocalRangeStorageFileDownloader implements RangeStorageFileDownloader {
@@ -52,7 +52,7 @@ public class LocalRangeStorageFileDownloader implements RangeStorageFileDownload
             Assert.isTrue(fileId.equals(fileToken.getFileId()));
         } catch (Exception e) {
             this.logger.warn("File download access denied: {}", e.getMessage(), e);
-            throw new AccessDeniedException("Access denied");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         try {
