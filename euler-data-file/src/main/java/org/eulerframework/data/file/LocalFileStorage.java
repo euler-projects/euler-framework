@@ -28,10 +28,11 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
 
     private final String baseDir;
 
-    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
+    private final JdbcOperations jdbcOperations;
+    private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
 
-        this.baseDir = baseDir;
+    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
+        this(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry, defaultFileSizeLoader(), baseDir);
     }
 
     public LocalFileStorage(
@@ -41,9 +42,22 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
             FileTokenRegistry fileTokenRegistry,
             BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
             String baseDir) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry, fileSizeLoader);
+        super(fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
 
         this.baseDir = baseDir;
+
+        this.jdbcOperations = jdbcOperations;
+        this.fileSizeLoader = fileSizeLoader;
+    }
+
+    @Override
+    public boolean support(String type) {
+        return TYPE.equals(type);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
     }
 
     @Override
@@ -75,7 +89,7 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
         }
 
         String storageIndex = UUID.randomUUID().toString();
-        this.getJdbcOperations().update(
+        this.jdbcOperations.update(
                 INSERT,
                 ps -> {
                     ps.setString(1, storageIndex);
@@ -109,9 +123,14 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
         return new FileSystemResource(savedFile);
     }
 
+    @Override
+    int getFileSize(String fileIndex) {
+        return this.fileSizeLoader.apply(this.jdbcOperations, fileIndex);
+    }
+
     private File getSavedFile(String fileIndex) throws IOException {
         String prefix, savedName;
-        Map<String, String> info = this.getJdbcOperations().query(
+        Map<String, String> info = this.jdbcOperations.query(
                 SELECT,
                 ps -> ps.setString(1, fileIndex),
                 rs -> {
@@ -138,18 +157,7 @@ public class LocalFileStorage extends AbstractLocalFileStorage {
         return savedFile;
     }
 
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public boolean support(String type) {
-        return TYPE.equals(type);
-    }
-
-    @Override
-    BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
+    private static BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
         return (jdbcOperations, fileIndex) -> jdbcOperations.query(
                 SELECT_SIZE,
                 ps -> ps.setString(1, fileIndex),

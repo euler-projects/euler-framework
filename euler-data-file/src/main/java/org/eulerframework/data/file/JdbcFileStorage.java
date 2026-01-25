@@ -40,13 +40,22 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
     private static final String SELECT_DATA = "select data from t_file_storage_jdbc where id = ?";
 
     private DataSize maxFileSize = DataSize.ofKilobytes(512);
+
+    private final JdbcOperations jdbcOperations;
+
     private final BiFunction<JdbcOperations, byte[], Long> fileDataSaver;
     private final BiFunction<JdbcOperations, String, byte[]> fileDataLoader;
+    private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
 
     public JdbcFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
-        this.fileDataSaver = defaultFileDataSaver();
-        this.fileDataLoader = defaultFileDataLoader();
+        this(jdbcOperations,
+                fileDownloadUrlTemplate,
+                fileIndexRegistry,
+                fileTokenRegistry,
+                defaultFileDataSaver(),
+                defaultFileDataLoader(),
+                defaultFileSizeLoader()
+        );
     }
 
     public JdbcFileStorage(
@@ -55,11 +64,16 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
             FileIndexRegistry fileIndexRegistry,
             FileTokenRegistry fileTokenRegistry,
             BiFunction<JdbcOperations, byte[], Long> fileDataSaver,
-            BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
-            BiFunction<JdbcOperations, String, byte[]> fileDataLoader) {
-        super(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry, fileSizeLoader);
+            BiFunction<JdbcOperations, String, byte[]> fileDataLoader,
+            BiFunction<JdbcOperations, String, Integer> fileSizeLoader) {
+        super(fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
+
+        this.jdbcOperations = jdbcOperations;
+
         this.fileDataSaver = fileDataSaver;
+
         this.fileDataLoader = fileDataLoader;
+        this.fileSizeLoader = fileSizeLoader;
     }
 
     public void setMaxFileSize(DataSize maxFileSize) {
@@ -86,7 +100,7 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
     @Override
     protected String saveFileData(InputStream in, String filename) throws IOException {
         byte[] data = this.toByteArray(in);
-        long id = this.fileDataSaver.apply(this.getJdbcOperations(), data);
+        long id = this.fileDataSaver.apply(this.jdbcOperations, data);
         return String.valueOf(id);
     }
 
@@ -99,19 +113,34 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
 
     @Override
     protected void writeFileData(String fileIndex, OutputStream out) throws IOException {
-        byte[] data = this.fileDataLoader.apply(this.getJdbcOperations(), fileIndex);
+        byte[] data = this.fileDataLoader.apply(this.jdbcOperations, fileIndex);
         IOUtils.write(data, out);
     }
 
     @Override
     Resource getResourceInternal(String storageIndex) throws IOException {
-        byte[] data = this.fileDataLoader.apply(this.getJdbcOperations(), storageIndex);
+        byte[] data = this.fileDataLoader.apply(this.jdbcOperations, storageIndex);
         if (data == null) {
             throw new FileNotFoundException("File data for storage index " + storageIndex + " not found");
         }
         return new ByteArrayResource(data);
     }
 
+    @Override
+    int getFileSize(String fileIndex) {
+        return this.fileSizeLoader.apply(this.jdbcOperations, fileIndex);
+    }
+
+    private byte[] toByteArray(InputStream in) throws IOException {
+        long maxBytes = this.maxFileSize.toBytes();
+        try (UnsynchronizedByteArrayOutputStream out = UnsynchronizedByteArrayOutputStream.builder().get()) {
+            long totalRead = IOUtils.copyLarge(in, out, 0, maxBytes + 1, IOUtils.byteArray(IOUtils.DEFAULT_BUFFER_SIZE));
+            if (totalRead > maxBytes) {
+                throw new FileStorageException("File is too large to be saved in jdbc storage, maximum is " + maxBytes + " Bytes.");
+            }
+            return out.toByteArray();
+        }
+    }
 
     private static BiFunction<JdbcOperations, byte[], Long> defaultFileDataSaver() {
         return (jdbcOperations, data) -> {
@@ -132,8 +161,7 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
         };
     }
 
-    @Override
-    BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
+    private static BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
         return (jdbcOperations, fileIndex) -> jdbcOperations.query(
                 SELECT_SIZE,
                 ps -> ps.setLong(1, Long.parseLong(fileIndex)),
@@ -155,16 +183,5 @@ public class JdbcFileStorage extends AbstractLocalFileStorage {
                     }
                     return rs.getBytes("data");
                 });
-    }
-
-    private byte[] toByteArray(InputStream in) throws IOException {
-        long maxBytes = this.maxFileSize.toBytes();
-        try (UnsynchronizedByteArrayOutputStream out = UnsynchronizedByteArrayOutputStream.builder().get()) {
-            long totalRead = IOUtils.copyLarge(in, out, 0, maxBytes + 1, IOUtils.byteArray(IOUtils.DEFAULT_BUFFER_SIZE));
-            if (totalRead > maxBytes) {
-                throw new FileStorageException("File is too large to be saved in jdbc storage, maximum is " + maxBytes + " Bytes.");
-            }
-            return out.toByteArray();
-        }
     }
 }

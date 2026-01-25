@@ -6,46 +6,31 @@ import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
 import org.eulerframework.data.file.web.security.FileToken;
 import org.eulerframework.data.file.web.security.FileTokenRegistry;
-import org.springframework.jdbc.core.JdbcOperations;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.function.BiFunction;
+import java.util.Map;
 
 public abstract class AbstractLocalFileStorage extends AbstractFileStorage {
     public final static String ATTR_FILE_SIZE = "fileSize";
 
-    private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
     private final String fileDownloadUrlTemplate;
     private final FileTokenRegistry fileTokenRegistry;
 
-    public AbstractLocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
-        super(jdbcOperations, fileIndexRegistry);
-        this.fileSizeLoader = defaultFileSizeLoader();
+    public AbstractLocalFileStorage(String fileDownloadUrlTemplate, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
+        super(fileIndexRegistry);
 
         this.fileDownloadUrlTemplate = fileDownloadUrlTemplate;
         this.fileTokenRegistry = fileTokenRegistry;
     }
 
-    public AbstractLocalFileStorage(
-            JdbcOperations jdbcOperations,
-            String fileDownloadUrlTemplate,
-            FileIndexRegistry fileIndexRegistry,
-            FileTokenRegistry fileTokenRegistry,
-            BiFunction<JdbcOperations, String, Integer> fileSizeLoader) {
-        super(jdbcOperations, fileIndexRegistry);
-        this.fileSizeLoader = fileSizeLoader;
-
-        this.fileDownloadUrlTemplate = fileDownloadUrlTemplate;
-        this.fileTokenRegistry = fileTokenRegistry;
-    }
-
-    abstract BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader();
+    abstract int getFileSize(String fileIndex);
 
     @Override
-    protected void applyAttributes(FileIndex storageFile) {
-        Integer fileSize = this.fileSizeLoader.apply(this.getJdbcOperations(), storageFile.getStorageIndex());
-        storageFile.addAttribute(ATTR_FILE_SIZE, fileSize);
+    protected void applyAttributes(FileIndex storageFile, Map<String, Object> options) throws IOException {
+        super.applyAttributes(storageFile, options);
+        storageFile.addAttribute(ATTR_FILE_SIZE, this.getFileSize(storageFile.getStorageIndex()));
     }
 
     @Override

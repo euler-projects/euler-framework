@@ -16,30 +16,27 @@
 package org.eulerframework.data.file;
 
 import org.apache.commons.io.FilenameUtils;
+import org.eulerframework.common.util.collections.MapUtils;
 import org.eulerframework.data.file.registry.FileIndex;
 import org.eulerframework.data.file.registry.FileIndexRegistry;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public abstract class AbstractFileStorage implements FileStorage {
-
-    private final JdbcOperations jdbcOperations;
+    public final static String ATTR_URL = "url";
 
     private final FileIndexRegistry fileIndexRegistry;
 
-    public AbstractFileStorage(JdbcOperations jdbcOperations, FileIndexRegistry fileIndexRegistry) {
-        this.jdbcOperations = jdbcOperations;
+    public AbstractFileStorage(FileIndexRegistry fileIndexRegistry) {
         this.fileIndexRegistry = fileIndexRegistry;
-    }
-
-    protected JdbcOperations getJdbcOperations() {
-        return jdbcOperations;
     }
 
     protected abstract String saveFileData(File file, String filename) throws IOException;
@@ -54,7 +51,13 @@ public abstract class AbstractFileStorage implements FileStorage {
      */
     protected abstract String saveFileData(InputStream in, String filename) throws IOException;
 
-    protected abstract void applyAttributes(FileIndex storageFile);
+    protected void applyAttributes(FileIndex storageFile, Map<String, Object> options) throws IOException {
+        if (Optional.ofNullable(options)
+                .map(ops -> MapUtils.getBoolean(ops, "genDownloadUrl", false))
+                .orElse(false)) {
+            storageFile.addAttribute(ATTR_URL, this.getUri(storageFile.getFileId()));
+        }
+    }
 
     protected abstract void writeFileData(String fileIndex, File dest) throws IOException;
 
@@ -66,7 +69,7 @@ public abstract class AbstractFileStorage implements FileStorage {
     @Transactional
     public FileIndex save(File file, String filename) throws IOException {
         FileIndex fileIndex = this.createFileIndex(this.saveFileData(file, filename), filename);
-        this.applyAttributes(fileIndex);
+        this.applyAttributes(fileIndex, Collections.emptyMap());
         return fileIndex;
     }
 
@@ -74,12 +77,12 @@ public abstract class AbstractFileStorage implements FileStorage {
     @Transactional
     public FileIndex save(InputStream in, String filename) throws IOException {
         FileIndex fileIndex = this.createFileIndex(this.saveFileData(in, filename), filename);
-        this.applyAttributes(fileIndex);
+        this.applyAttributes(fileIndex, Collections.emptyMap());
         return fileIndex;
     }
 
     @Override
-    public FileIndex getStorageIndex(String fileId) {
+    public FileIndex getStorageIndex(String fileId, Map<String, Object> options) throws IOException {
         String baseName = FilenameUtils.getBaseName(fileId);
         String exceptedExtension = FilenameUtils.getExtension(fileId);
 
@@ -93,7 +96,8 @@ public abstract class AbstractFileStorage implements FileStorage {
             return null;
         }
 
-        this.applyAttributes(storageFile);
+        this.applyAttributes(storageFile, options);
+
         return storageFile;
     }
 
