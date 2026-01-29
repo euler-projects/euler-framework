@@ -21,18 +21,15 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.common.util.MIMEUtils;
-import org.springframework.util.StringUtils;
+import org.eulerframework.web.util.ResponseUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -97,15 +94,15 @@ public class ServletUtils {
         return ip;
     }
 
-    public static  void writeString(HttpServletResponse response, String string) throws IOException {
+    public static void writeString(HttpServletResponse response, String string) throws IOException {
         response.getOutputStream().write(string.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static  void writeFile(HttpServletResponse response, File file, String fileName) throws IOException {
+    public static void writeFile(HttpServletResponse response, File file, String fileName) throws IOException {
         writeFile(response, file, fileName, false);
     }
 
-    public static  void writeFile(HttpServletResponse response, File file, String fileName, boolean forceAttachment) throws IOException {
+    public static void writeFile(HttpServletResponse response, File file, String fileName, boolean forceAttachment) throws IOException {
         ServletUtils.writeFileHeader(response, fileName, file.length(), forceAttachment);
         try (InputStream in = FileUtils.openInputStream(file)) {
             IOUtils.copy(in, response.getOutputStream());
@@ -117,22 +114,10 @@ public class ServletUtils {
     }
 
     public static void writeFileHeader(HttpServletResponse response, String fileName, Long fileSize, boolean forceAttachment) {
-        String extension = FilenameUtils.getExtension(fileName);
-        MIMEUtils.MIME mime;
-        if (StringUtils.hasText(extension)) {
-            mime = MIMEUtils.getMIME(extension);
-        } else {
-            mime = MIMEUtils.getDefaultMIME();
-        }
-        response.setHeader("Content-Type", mime.getContentType());
-        try {
-            response.setHeader("Content-Disposition", (forceAttachment ? "attachment" : mime.getContentDisposition()) +
-                    ";fileName=\"" + new String(fileName.getBytes(StandardCharsets.UTF_8), "ISO8859-1") + "\"");
-        } catch (UnsupportedEncodingException e) {
-            throw ExceptionUtils.<RuntimeException>rethrow(e);
-        }
-        if (fileSize != null && fileSize > 0) {
-            response.setHeader("Content-Length", String.valueOf(fileSize));
-        }
+        HttpHeaders headers = new HttpHeaders();
+        ResponseUtils.writeFileHeader(headers, fileName, fileSize, forceAttachment);
+        headers.forEach((key, values) ->
+                // use setHeader to override all existing file response headers.
+                values.forEach(value -> response.setHeader(key, value)));
     }
 }
