@@ -15,7 +15,6 @@
  */
 package org.eulerframework.security.web.gateway;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.web.servlet.util.ServletUtils;
@@ -27,14 +26,9 @@ public class ServiceUserContext implements UserContext {
     static final String REQUEST_ATTR_NAME = "__EULER_SERVICE_USER_INFO";
 
     GatewayUserInfo getUserInfo() {
-        HttpServletRequest request = ServletUtils.getRequest();
-        GatewayUserInfo userInfo = (GatewayUserInfo) request.getAttribute(REQUEST_ATTR_NAME);
-
-        if (userInfo == null) {
-            return null;
-        }
-
-        return userInfo;
+        return (GatewayUserInfo) Optional.ofNullable(ServletUtils.getRequest())
+                .map(request -> request.getAttribute(REQUEST_ATTR_NAME))
+                .orElse(null);
     }
 
     @Override
