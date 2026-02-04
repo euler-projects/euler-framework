@@ -16,13 +16,16 @@
 
 package org.eulerframework.security.web.authentication;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.*;
+import org.springframework.security.web.util.RedirectUrlBuilder;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -32,8 +35,19 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class UrlRedirectLoginUrlAuthenticationEntryPoint implements AuthenticationEntryPoint, InitializingBean {
+    private final Logger logger = LoggerFactory.getLogger(UrlRedirectLoginUrlAuthenticationEntryPoint.class);
+
     private final String loginFormUrl;
-    private String redirectParameter = "continue";
+
+    private String redirectParameter = EulerSecurityEndpoints.USER_LOGIN_SUCCESS_REDIRECT_PARAMETER;
+
+    private PortMapper portMapper = new PortMapperImpl();
+
+    private PortResolver portResolver = new PortResolverImpl();
+
+    private boolean forceHttps = false;
+
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     public UrlRedirectLoginUrlAuthenticationEntryPoint(String loginFormUrl) {
         this.loginFormUrl = loginFormUrl;
@@ -46,9 +60,36 @@ public class UrlRedirectLoginUrlAuthenticationEntryPoint implements Authenticati
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
+        String redirectUrl = buildRedirectUrlToLoginPage(request, response, authException);
+        this.redirectStrategy.sendRedirect(request, response, redirectUrl);
+        return;
+    }
+
+    protected String buildRedirectUrlToLoginPage(HttpServletRequest request, HttpServletResponse response,
+                                                 AuthenticationException authException) {
         String loginForm = determineUrlToUseForThisRequest(request, response, authException);
-        RequestDispatcher dispatcher = request.getRequestDispatcher(loginForm);
-        dispatcher.forward(request, response);
+        if (UrlUtils.isAbsoluteUrl(loginForm)) {
+            return loginForm;
+        }
+        int serverPort = this.portResolver.getServerPort(request);
+        String scheme = request.getScheme();
+        RedirectUrlBuilder urlBuilder = new RedirectUrlBuilder();
+        urlBuilder.setScheme(scheme);
+        urlBuilder.setServerName(request.getServerName());
+        urlBuilder.setPort(serverPort);
+        urlBuilder.setContextPath(request.getContextPath());
+        urlBuilder.setPathInfo(loginForm);
+        if (this.forceHttps && "http".equals(scheme)) {
+            Integer httpsPort = this.portMapper.lookupHttpsPort(serverPort);
+            if (httpsPort != null) {
+                // Overwrite scheme and port in the redirect URL
+                urlBuilder.setScheme("https");
+                urlBuilder.setPort(httpsPort);
+            } else {
+                logger.warn("Unable to redirect to HTTPS as no port mapping found for HTTP port {}", serverPort);
+            }
+        }
+        return urlBuilder.getUrl();
     }
 
     protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
