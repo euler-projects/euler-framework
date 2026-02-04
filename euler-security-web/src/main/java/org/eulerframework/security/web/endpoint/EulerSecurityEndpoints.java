@@ -28,7 +28,7 @@ public abstract class EulerSecurityEndpoints {
     public static final String USER_LOGOUT_PAGE_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "logout-page";
     public static final String USER_LOGIN_PROCESSING_URL_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "login-processing-url";
     public static final String USER_LOGOUT_PROCESSING_URL_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "logout-processing-url";
-    public static final String LOGIN_SUCCESS_REDIRECT_PARAMETER_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "login-success-redirect-parameter";
+    public static final String USER_LOGIN_SUCCESS_REDIRECT_PARAMETER_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "login-success-redirect-parameter";
 
     public static final String SIGNUP_ENABLED_PROP_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "." + ENABLED_PROP;
     public static final String SIGNUP_PAGE_PROP_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "." + "signup-page";

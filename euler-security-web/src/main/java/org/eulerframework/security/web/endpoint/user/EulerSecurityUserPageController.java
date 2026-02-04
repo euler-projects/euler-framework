@@ -27,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class EulerSecurityUserPageController extends PageSupportWebController implements EulerSecurityUserEndpoint {
     private String loginProcessingUrl;
     private String logoutProcessingUrl;
+    private String loginSuccessRedirectParameter;
 
     public EulerSecurityUserPageController(PageRender pageRender) {
         super(pageRender);
@@ -54,6 +55,11 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
         return logoutProcessingUrl;
     }
 
+    @ModelAttribute("loginSuccessRedirectParameter")
+    public String getLoginSuccessRedirectParameter() {
+        return loginSuccessRedirectParameter;
+    }
+
     @Value("${" + EulerSecurityEndpoints.USER_LOGIN_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PROCESSING_URL + "}")
     public void setLoginProcessingUrl(String loginProcessingUrl) {
         this.loginProcessingUrl = loginProcessingUrl;
@@ -62,5 +68,10 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
     @Value("${" + EulerSecurityEndpoints.USER_LOGOUT_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGOUT_PROCESSING_URL + "}")
     public void setLogoutProcessingUrl(String logoutProcessingUrl) {
         this.logoutProcessingUrl = logoutProcessingUrl;
+    }
+
+    @Value("${" + EulerSecurityEndpoints.USER_LOGIN_SUCCESS_REDIRECT_PARAMETER_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_SUCCESS_REDIRECT_PARAMETER + "}")
+    public void setLoginSuccessRedirectParameter(String loginSuccessRedirectParameter) {
+        this.loginSuccessRedirectParameter = loginSuccessRedirectParameter;
     }
 }
