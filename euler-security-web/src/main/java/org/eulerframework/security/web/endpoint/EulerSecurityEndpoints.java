@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ public abstract class EulerSecurityEndpoints {
     public static final String USER_LOGOUT_PAGE_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "logout-page";
     public static final String USER_LOGIN_PROCESSING_URL_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "login-processing-url";
     public static final String USER_LOGOUT_PROCESSING_URL_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "logout-processing-url";
+    public static final String LOGIN_SUCCESS_REDIRECT_PARAMETER_PROP_NAME = USER_ENDPOINT_PROP_PREFIX + "." + "login-success-redirect-parameter";
 
     public static final String SIGNUP_ENABLED_PROP_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "." + ENABLED_PROP;
     public static final String SIGNUP_PAGE_PROP_NAME = SIGNUP_ENDPOINT_PROP_PREFIX + "." + "signup-page";
@@ -45,6 +46,7 @@ public abstract class EulerSecurityEndpoints {
     public static final String USER_LOGOUT_PAGE = "/logout";
     public static final String USER_LOGIN_PROCESSING_URL = "/login";
     public static final String USER_LOGOUT_PROCESSING_URL = "/logout";
+    public static final String USER_LOGIN_SUCCESS_REDIRECT_PARAMETER = "continue";
 
     public static final boolean SIGNUP_ENABLED = false;
     public static final String SIGNUP_PAGE = "/signup";
