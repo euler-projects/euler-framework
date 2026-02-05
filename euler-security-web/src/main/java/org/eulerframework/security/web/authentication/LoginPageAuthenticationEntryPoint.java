@@ -34,35 +34,22 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-public class UrlRedirectLoginUrlAuthenticationEntryPoint implements AuthenticationEntryPoint, InitializingBean {
-    private final Logger logger = LoggerFactory.getLogger(UrlRedirectLoginUrlAuthenticationEntryPoint.class);
+public class LoginPageAuthenticationEntryPoint implements AuthenticationEntryPoint, InitializingBean {
+    private final Logger logger = LoggerFactory.getLogger(LoginPageAuthenticationEntryPoint.class);
 
-    private final String loginFormUrl;
+    private String loginPage = EulerSecurityEndpoints.USER_LOGIN_PAGE;
 
     private String redirectParameter = EulerSecurityEndpoints.USER_LOGIN_SUCCESS_REDIRECT_PARAMETER;
 
-    private PortMapper portMapper = new PortMapperImpl();
-
-    private PortResolver portResolver = new PortResolverImpl();
-
     private boolean forceHttps = false;
 
-    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-
-    public UrlRedirectLoginUrlAuthenticationEntryPoint(String loginFormUrl) {
-        this.loginFormUrl = loginFormUrl;
-    }
-
-    public void setRedirectParameter(String redirectParameter) {
-        this.redirectParameter = redirectParameter;
-    }
+    private RedirectStrategy redirectStrategy;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
         String redirectUrl = buildRedirectUrlToLoginPage(request, response, authException);
         this.redirectStrategy.sendRedirect(request, response, redirectUrl);
-        return;
     }
 
     protected String buildRedirectUrlToLoginPage(HttpServletRequest request, HttpServletResponse response,
@@ -71,7 +58,7 @@ public class UrlRedirectLoginUrlAuthenticationEntryPoint implements Authenticati
         if (UrlUtils.isAbsoluteUrl(loginForm)) {
             return loginForm;
         }
-        int serverPort = this.portResolver.getServerPort(request);
+        int serverPort = request.getServerPort();
         String scheme = request.getScheme();
         RedirectUrlBuilder urlBuilder = new RedirectUrlBuilder();
         urlBuilder.setScheme(scheme);
@@ -80,14 +67,8 @@ public class UrlRedirectLoginUrlAuthenticationEntryPoint implements Authenticati
         urlBuilder.setContextPath(request.getContextPath());
         urlBuilder.setPathInfo(loginForm);
         if (this.forceHttps && "http".equals(scheme)) {
-            Integer httpsPort = this.portMapper.lookupHttpsPort(serverPort);
-            if (httpsPort != null) {
-                // Overwrite scheme and port in the redirect URL
-                urlBuilder.setScheme("https");
-                urlBuilder.setPort(httpsPort);
-            } else {
-                logger.warn("Unable to redirect to HTTPS as no port mapping found for HTTP port {}", serverPort);
-            }
+            urlBuilder.setScheme("https");
+            urlBuilder.setPort(443);
         }
         return urlBuilder.getUrl();
     }
@@ -112,7 +93,7 @@ public class UrlRedirectLoginUrlAuthenticationEntryPoint implements Authenticati
             redirectValueBuilder.append("?").append(queryString);
         }
 
-        String loginFormUrl = this.loginFormUrl;
+        String loginFormUrl = this.loginPage;
 
         if (loginFormUrl.endsWith("?")) {
             loginFormUrl += this.redirectParameter + "=" + URLEncoder.encode(redirectValueBuilder.toString(), StandardCharsets.UTF_8);
@@ -125,9 +106,28 @@ public class UrlRedirectLoginUrlAuthenticationEntryPoint implements Authenticati
         return loginFormUrl;
     }
 
+    public void setLoginPage(String loginPage) {
+        Assert.isTrue(StringUtils.hasText(loginPage) && UrlUtils.isValidRedirectUrl(loginPage),
+                "loginFormUrl must be specified and must be a valid redirect URL");
+        this.loginPage = loginPage;
+    }
+
+    public void setRedirectParameter(String redirectParameter) {
+        this.redirectParameter = redirectParameter;
+    }
+
+    public void setForceHttps(boolean forceHttps) {
+        this.forceHttps = forceHttps;
+    }
+
+    public void setRedirectStrategy(RedirectStrategy redirectStrategy) {
+        this.redirectStrategy = redirectStrategy;
+    }
+
     @Override
     public void afterPropertiesSet() {
-        Assert.isTrue(StringUtils.hasText(this.loginFormUrl) && UrlUtils.isValidRedirectUrl(this.loginFormUrl),
-                "loginFormUrl must be specified and must be a valid redirect URL");
+        if (this.redirectStrategy == null) {
+            this.redirectStrategy = new DefaultRedirectStrategy();
+        }
     }
 }

@@ -46,7 +46,7 @@ public abstract class EulerSecurityEndpoints {
     public static final String USER_LOGOUT_PAGE = "/logout";
     public static final String USER_LOGIN_PROCESSING_URL = "/login";
     public static final String USER_LOGOUT_PROCESSING_URL = "/logout";
-    public static final String USER_LOGIN_SUCCESS_REDIRECT_PARAMETER = "continue";
+    public static final String USER_LOGIN_SUCCESS_REDIRECT_PARAMETER = "redirect_url";
 
     public static final boolean SIGNUP_ENABLED = false;
     public static final String SIGNUP_PAGE = "/signup";
