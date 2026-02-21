@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <revision>1.0.0.M7.JDK17-SNAPSHOT</revision>
+        <revision>2.0.0-SNAPSHOT</revision>
         <main.basedir>${basedir}</main.basedir>
     </properties>
 
