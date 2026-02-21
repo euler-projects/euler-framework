@@ -43,10 +43,9 @@
 
         <netty.version>4.1.115.Final</netty.version>
 
-        <spring-framework.version>6.2.3</spring-framework.version>
-        <spring-security.version>6.4.3</spring-security.version>
-        <spring-security-oauth2-authorization-server.version>1.4.2</spring-security-oauth2-authorization-server.version>
-        <spring-data.version>3.4.3</spring-data.version>
+        <spring-framework.version>7.0.5</spring-framework.version>
+        <spring-security.version>7.0.3</spring-security.version>
+        <spring-data.version>4.0.3</spring-data.version>
 
         <querydsl.version>5.1.0</querydsl.version>
 
