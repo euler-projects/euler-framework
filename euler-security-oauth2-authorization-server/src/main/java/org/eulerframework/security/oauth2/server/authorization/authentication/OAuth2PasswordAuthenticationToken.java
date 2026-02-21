@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,7 +37,7 @@ public class OAuth2PasswordAuthenticationToken extends OAuth2AuthorizationGrantA
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
-        super(AuthorizationGrantType.PASSWORD, clientPrincipal, additionalParameters);
+        super(EulerAuthorizationGrantType.PASSWORD, clientPrincipal, additionalParameters);
         this.userPrincipal = userPrincipal;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?

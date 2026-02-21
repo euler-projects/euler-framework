@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * An {@link org.springframework.security.core.Authentication} implementation that is
@@ -22,7 +23,7 @@ public class WechatAuthorizationCodeAuthenticationToken extends AbstractAuthenti
      * will return <code>false</code>.
      */
     public WechatAuthorizationCodeAuthenticationToken(Object credentials) {
-        super(null);
+        super(Collections.emptyList());
         this.principal = null;
         this.credentials = credentials;
         setAuthenticated(false);

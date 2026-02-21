@@ -25,20 +25,15 @@
         <module>eulerframework-dependencies</module>
         <module>eulerframework-parent</module>
         <module>euler-core</module>
-        <module>euler-socket</module>
         <module>euler-web-core</module>
-        <module>euler-web-authentication</module>
-        <module>euler-web-authentication-impl-jpa</module>
         <module>euler-security-core</module>
         <module>euler-security-web</module>
         <module>euler-security-oauth2-core</module>
         <module>euler-security-oauth2-authorization-server</module>
         <module>euler-security-oauth2-resource-server</module>
-        <module>euler-security-oauth2-server</module>
-        <module>euler-web-eureka-support</module>
-        <module>euler-web-supports</module>
         <module>euler-data-file</module>
         <module>euler-data-jpa</module>
+        <module>euler-socket</module>
     </modules>
 
     <scm>

@@ -17,6 +17,8 @@
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,13 +46,13 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
 
         // grant_type (REQUIRED)
         String grantType = parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE);
-        if (!AuthorizationGrantType.PASSWORD.getValue().equals(grantType)) {
+        if (!EulerAuthorizationGrantType.PASSWORD.getValue().equals(grantType)) {
             return null;
         }
 
-        String username = parameters.getFirst(OAuth2ParameterNames.USERNAME);
-        String password = parameters.getFirst(OAuth2ParameterNames.PASSWORD);
-        parameters.remove(OAuth2ParameterNames.PASSWORD);
+        String username = parameters.getFirst(EulerOAuth2ParameterNames.USERNAME);
+        String password = parameters.getFirst(EulerOAuth2ParameterNames.PASSWORD);
+        parameters.remove(EulerOAuth2ParameterNames.PASSWORD);
 
         // scope (OPTIONAL)
         Set<String> scopes = null;
@@ -70,8 +72,8 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
-                    !key.equals(OAuth2ParameterNames.USERNAME) &&
-                    !key.equals(OAuth2ParameterNames.PASSWORD)) {
+                    !key.equals(EulerOAuth2ParameterNames.USERNAME) &&
+                    !key.equals(EulerOAuth2ParameterNames.PASSWORD)) {
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });

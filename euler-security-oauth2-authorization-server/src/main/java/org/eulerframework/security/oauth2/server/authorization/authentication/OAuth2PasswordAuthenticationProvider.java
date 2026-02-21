@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -81,7 +82,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(EulerAuthorizationGrantType.PASSWORD)
                 .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
 
@@ -89,7 +90,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(EulerAuthorizationGrantType.PASSWORD)
                 .authorizedScopes(authorizedScopes)
                 .authorizationGrant(passwordAuthenticationToken);
 
