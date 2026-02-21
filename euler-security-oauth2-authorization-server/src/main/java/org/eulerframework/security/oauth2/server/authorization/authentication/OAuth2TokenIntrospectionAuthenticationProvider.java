@@ -22,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
@@ -40,9 +41,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.net.URL;
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An {@link AuthenticationProvider} implementation for OAuth 2.0 Token Introspection.
@@ -118,9 +117,27 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
         RegisteredClient authorizedClient = this.registeredClientRepository
                 .findById(authorization.getRegisteredClientId());
 
-        Object principal = authorization.getAttribute(Principal.class.getName());
+        OAuth2TokenIntrospection tokenClaims;
+        Set<String> authorizedScopes = authorization.getAuthorizedScopes();
+        if (authorizedScopes != null && authorizedScopes.contains("granted-authorities")) {
+            Object principal = authorization.getAttribute(Principal.class.getName());
 
-        OAuth2TokenIntrospection tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient, principal);
+            String username = null;
+            Collection<? extends GrantedAuthority> authorities = null;
+
+            if (principal instanceof UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+                    && usernamePasswordAuthenticationToken.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+                authorities = userDetails.getAuthorities();
+            } else if (principal instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+                authorities = userDetails.getAuthorities();
+            }
+
+            tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient, username, authorities);
+        } else {
+            tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient);
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace("Authenticated token introspection request");
@@ -135,10 +152,18 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
         return OAuth2TokenIntrospectionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
+
+    private static OAuth2TokenIntrospection withActiveTokenClaims(
+            OAuth2Authorization.Token<OAuth2Token> authorizedToken,
+            RegisteredClient authorizedClient) {
+        return withActiveTokenClaims(authorizedToken, authorizedClient, null, null);
+    }
+
     private static OAuth2TokenIntrospection withActiveTokenClaims(
             OAuth2Authorization.Token<OAuth2Token> authorizedToken,
             RegisteredClient authorizedClient,
-            Object principal) {
+            String username,
+            Collection<? extends GrantedAuthority> authorities) {
 
         OAuth2TokenIntrospection.Builder tokenClaims;
         if (!CollectionUtils.isEmpty(authorizedToken.getClaims())) {
@@ -150,15 +175,12 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
 
         tokenClaims.clientId(authorizedClient.getClientId());
 
-        if (principal instanceof UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                && usernamePasswordAuthenticationToken.getPrincipal() instanceof UserDetails userDetails) {
-            tokenClaims.username(userDetails.getUsername());
-            tokenClaims.claim("principal", userDetails);
-            tokenClaims.claim("authorities", userDetails.getAuthorities());
-        } else if (principal instanceof UserDetails userDetails) {
-            tokenClaims.username(userDetails.getUsername());
-            tokenClaims.claim("principal", userDetails);
-            tokenClaims.claim("authorities", userDetails.getAuthorities());
+        if (username != null) {
+            tokenClaims.username(username);
+        }
+
+        if (authorities != null) {
+            tokenClaims.claim("authorities", authorities);
         }
 
         OAuth2Token token = authorizedToken.getToken();
