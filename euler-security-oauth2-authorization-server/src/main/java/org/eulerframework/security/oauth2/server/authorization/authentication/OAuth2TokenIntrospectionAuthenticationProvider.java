@@ -17,6 +17,7 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eulerframework.security.oauth2.core.EulerScopes;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -119,7 +120,7 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
 
         OAuth2TokenIntrospection tokenClaims;
         Set<String> authorizedScopes = authorization.getAuthorizedScopes();
-        if (authorizedScopes != null && authorizedScopes.contains("granted-authorities")) {
+        if (authorizedScopes != null && authorizedScopes.contains(EulerScopes.GRANTED_AUTHORITIES)) {
             Object principal = authorization.getAttribute(Principal.class.getName());
 
             String username = null;
