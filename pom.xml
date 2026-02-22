@@ -16,7 +16,7 @@
     <description>Parent POM for Euler Framework projects.</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
         <revision>2.0.0-SNAPSHOT</revision>
         <main.basedir>${basedir}</main.basedir>
     </properties>
