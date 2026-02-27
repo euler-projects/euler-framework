@@ -16,198 +16,178 @@
 
 package org.eulerframework.resource;
 
+import javax.annotation.Nonnull;
+
 /**
- * Represents the visibility scope of a resource and defines a total ordering over all scopes
- * based on visibility breadth. A higher {@link #visibilityLevel} indicates a wider (more
- * permissive) scope — {@code PUBLIC.compareTo(PRIVATE)} therefore yields a positive integer —
- * so instances can be placed directly into sorted collections, used as {@code TreeMap} keys, or
- * compared with the predicate methods {@link #isWiderThan}, {@link #isNarrowerThan}, and their
- * inclusive counterparts.
+ * {@link ResourceScope} represents the visibility scope of a resource. Each scope is associated
+ * with a numeric level, accessible via {@link #getLevel()}, where a higher value indicates a
+ * broader visibility scope.
  *
- * <p>The four standard scopes — {@link #PUBLIC}, {@link #TENANT}, {@link #USER}, and
- * {@link #PRIVATE} — are provided as static constants whose visibility levels are defined by
- * {@link StandardResourceScope}. Application code that requires an intermediate scope may define
- * one via {@link #resolve(int)}, using any level value not already occupied by a standard
- * constant:
- * <pre>
- *   public static final ResourceScope GROUP = ResourceScope.resolve(250);
- * </pre>
+ * <p>Several standard scopes are predefined as static constants on this class, each corresponding
+ * to one of the named entries in the {@link StandardResourceScope} enumeration.
  *
- * <p>Two instances are {@linkplain #equals equal} if and only if they share the same
- * {@link #visibilityLevel}. The four standard constants are singletons, so identity ({@code ==})
- * comparison is safe when dealing exclusively with standard scopes.
+ * <p>Application-defined scopes may be created via {@link #resolve(int)}, but callers must
+ * ensure that the chosen level value does not conflict with any value already reserved by
+ * {@link StandardResourceScope}. Furthermore, the relative ordering of level values must remain
+ * semantically coherent with respect to the existing standard scopes — for example, a
+ * {@code USER_GROUP} scope, which is conceptually broader than an individual user but narrower
+ * than a tenant, must be assigned a level that falls strictly between the levels of
+ * {@link StandardResourceScope#USER} and {@link StandardResourceScope#TENANT}:
+ * <pre>{@code
+ * public static final ResourceScope USER_GROUP = ResourceScope.resolve(300);
+ * }</pre>
  *
- * <p>Note that {@code ResourceScope} does not enforce any access isolation by itself — it is a
- * descriptive marker only. All access control decisions based on scope values remain the
- * responsibility of the consuming application.
+ * <p>Two {@link ResourceScope} instances are considered equal if and only if their level values
+ * are identical; {@link #equals(Object)} and {@link #compareTo(ResourceScope)} are both defined
+ * in terms of this numeric comparison.
+ *
+ * @see StandardResourceScope
  */
 public class ResourceScope implements Comparable<ResourceScope> {
 
     /**
      * Pre-initialized singleton for {@link StandardResourceScope#PUBLIC}.
      */
-    public static final ResourceScope PUBLIC = new ResourceScope(StandardResourceScope.PUBLIC.getVisibilityLevel());
+    public static final ResourceScope PUBLIC = new ResourceScope(StandardResourceScope.PUBLIC.intScope());
 
     /**
      * Pre-initialized singleton for {@link StandardResourceScope#TENANT}.
      */
-    public static final ResourceScope TENANT = new ResourceScope(StandardResourceScope.TENANT.getVisibilityLevel());
+    public static final ResourceScope TENANT = new ResourceScope(StandardResourceScope.TENANT.intScope());
 
     /**
      * Pre-initialized singleton for {@link StandardResourceScope#USER}.
      */
-    public static final ResourceScope USER = new ResourceScope(StandardResourceScope.USER.getVisibilityLevel());
+    public static final ResourceScope USER = new ResourceScope(StandardResourceScope.USER.intScope());
 
     /**
      * Pre-initialized singleton for {@link StandardResourceScope#PRIVATE}.
      */
-    public static final ResourceScope PRIVATE = new ResourceScope(StandardResourceScope.PRIVATE.getVisibilityLevel());
+    public static final ResourceScope PRIVATE = new ResourceScope(StandardResourceScope.PRIVATE.intScope());
 
     /**
      * The set of built-in singleton constants, used by {@link #resolve(int)} to return the
-     * canonical instance for any standard visibility level.
+     * canonical instance for any standard numeric visibility level.
      */
     private static final ResourceScope[] WELL_KNOWN = {PUBLIC, TENANT, USER, PRIVATE};
 
     /**
-     * The numeric visibility level of this scope. A higher value indicates a wider (more
-     * permissive) visibility range.
+     * The numeric visibility level of this scope. A higher value indicates a broader visibility scope.
      */
-    private final int visibilityLevel;
+    private final int level;
 
     /**
-     * Creates a new {@code ResourceScope} with the given visibility level.
+     * Creates a new {@code ResourceScope} with the given numeric visibility level.
      *
-     * <p>This constructor is intentionally private. Callers should always use {@link #resolve(int)} to obtain
-     * a {@code ResourceScope} from a numeric level.
+     * <p>This constructor is intentionally private. Callers should always use {@link #resolve(int)}
+     * to obtain a {@code ResourceScope} from a numeric value.
      *
-     * @param visibilityLevel the numeric visibility level
+     * @param level the numeric visibility level
      */
-    private ResourceScope(int visibilityLevel) {
-        this.visibilityLevel = visibilityLevel;
+    private ResourceScope(int level) {
+        this.level = level;
     }
 
     /**
-     * Returns the canonical {@code ResourceScope} instance for the given visibility level.
+     * Returns the canonical {@code ResourceScope} instance for the given numeric level.
      *
-     * <p>If the level matches one of the built-in constants ({@link #PUBLIC}, {@link #TENANT},
-     * {@link #USER}, {@link #PRIVATE}), the corresponding singleton is returned. For any other
-     * level a new {@code ResourceScope} instance is created and returned.
+     * <p>If the value matches one of the predefined constants, the corresponding singleton is returned.
+     * For any other value, a new {@code ResourceScope} instance is created and returned.
      *
      * <p>This is the only public way to obtain a {@code ResourceScope} instance and is the
-     * preferred method for reconstructing a scope from a stored value (e.g. reading from a
-     * database or deserializing from JSON). Application-defined scopes should be declared as
-     * static constants resolved through this method:
-     * <pre>
-     *   public static final ResourceScope GROUP = ResourceScope.resolve(550);
-     * </pre>
+     * preferred method for reconstructing a scope from a stored value (e.g., reading from a
+     * database or deserializing from JSON).
      *
-     * @param visibilityLevel the numeric visibility level to resolve
-     * @return the matching singleton constant, or a new instance for application-defined levels
+     * @param level the numeric visibility level to resolve
+     * @return the matching singleton constant, or a new instance for application-defined values
      */
-    public static ResourceScope resolve(int visibilityLevel) {
+    public static ResourceScope resolve(int level) {
         for (ResourceScope scope : WELL_KNOWN) {
-            if (scope.visibilityLevel == visibilityLevel) {
+            if (scope.level == level) {
                 return scope;
             }
         }
-        return new ResourceScope(visibilityLevel);
+        return new ResourceScope(level);
     }
 
     /**
-     * Returns the numeric visibility level of this scope. A higher value means a wider (more
-     * permissive) visibility range.
+     * Returns the numeric visibility level of this scope. A higher value indicates a broader visibility scope.
      *
-     * @return the visibility level
+     * @return the numeric visibility level
      */
-    public int getVisibilityLevel() {
-        return visibilityLevel;
+    public int getLevel() {
+        return level;
     }
 
     /**
-     * Compares this scope to {@code other} by {@link #visibilityLevel}.
+     * Returns {@code true} if this scope's visibility is strictly broader than that of {@code other}.
      *
-     * <p>Returns a negative integer if this scope is narrower than {@code other}, zero if they
-     * have the same visibility level, or a positive integer if this scope is wider.
-     *
-     * @param other the scope to compare to; must not be {@code null}
-     * @return a negative integer, zero, or a positive integer as this scope's visibility level is
-     *         less than, equal to, or greater than {@code other}'s visibility level
+     * @param other the scope to compare to
+     * @return {@code true} if this scope is broader than {@code other}
      */
-    @Override
-    public int compareTo(ResourceScope other) {
-        return Integer.compare(this.visibilityLevel, other.visibilityLevel);
+    public boolean isBroaderThan(@Nonnull ResourceScope other) {
+        return this.level > other.level;
     }
 
     /**
-     * Returns {@code true} if this scope's visibility is strictly wider (more permissive) than
-     * that of {@code other}.
+     * Returns {@code true} if this scope's visibility is strictly narrower than that of {@code other}.
      *
-     * @param other the scope to compare to; must not be {@code null}
-     * @return {@code true} if this scope is wider than {@code other}
-     */
-    public boolean isWiderThan(ResourceScope other) {
-        return this.visibilityLevel > other.visibilityLevel;
-    }
-
-    /**
-     * Returns {@code true} if this scope's visibility is strictly narrower (more restrictive) than
-     * that of {@code other}.
-     *
-     * @param other the scope to compare to; must not be {@code null}
+     * @param other the scope to compare to
      * @return {@code true} if this scope is narrower than {@code other}
      */
-    public boolean isNarrowerThan(ResourceScope other) {
-        return this.visibilityLevel < other.visibilityLevel;
+    public boolean isNarrowerThan(@Nonnull ResourceScope other) {
+        return this.level < other.level;
     }
 
     /**
-     * Returns {@code true} if this scope's visibility is the same as or wider than that of
+     * Returns {@code true} if this scope's visibility is the same as or broader than that of
      * {@code other}.
      *
-     * @param other the scope to compare to; must not be {@code null}
-     * @return {@code true} if this scope is at least as wide as {@code other}
+     * @param other the scope to compare to
+     * @return {@code true} if this scope is at least as broad as {@code other}
      */
-    public boolean isSameOrWiderThan(ResourceScope other) {
-        return this.visibilityLevel >= other.visibilityLevel;
+    public boolean isSameOrBroaderThan(@Nonnull ResourceScope other) {
+        return this.level >= other.level;
     }
 
     /**
      * Returns {@code true} if this scope's visibility is the same as or narrower than that of
      * {@code other}.
      *
-     * @param other the scope to compare to; must not be {@code null}
-     * @return {@code true} if this scope is at most as wide as {@code other}
+     * @param other the scope to compare to
+     * @return {@code true} if this scope is at most as broad as {@code other}
      */
-    public boolean isSameOrNarrowerThan(ResourceScope other) {
-        return this.visibilityLevel <= other.visibilityLevel;
+    public boolean isSameOrNarrowerThan(@Nonnull ResourceScope other) {
+        return this.level <= other.level;
     }
 
-    /**
-     * Returns {@code true} if {@code obj} is a {@code ResourceScope} with the same
-     * {@link #visibilityLevel} as this instance.
-     */
+    @Override
+    public int compareTo(@Nonnull ResourceScope other) {
+        if (this == other) {
+            return 0;
+        }
+
+        return Integer.compare(this.level, other.level);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ResourceScope)) {
+        if (!(obj instanceof ResourceScope other)) {
             return false;
         }
-        return this.visibilityLevel == ((ResourceScope) obj).visibilityLevel;
+        return this.level == other.level;
     }
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(visibilityLevel);
+        return Integer.hashCode(level);
     }
 
-    /**
-     * Returns a string representation of this scope in the form {@code ResourceScope(visibilityLevel)}.
-     */
     @Override
     public String toString() {
-        return "ResourceScope(" + visibilityLevel + ")";
+        return "ResourceScope(" + level + ")";
     }
 }
