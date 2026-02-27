@@ -16,6 +16,9 @@
 
 package org.eulerframework.resource;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -101,6 +104,7 @@ public class ResourceScope implements Comparable<ResourceScope> {
      * @param level the numeric visibility level to resolve
      * @return the matching singleton constant, or a new instance for application-defined values
      */
+    @JsonCreator
     public static ResourceScope resolve(int level) {
         for (ResourceScope scope : WELL_KNOWN) {
             if (scope.level == level) {
@@ -115,6 +119,7 @@ public class ResourceScope implements Comparable<ResourceScope> {
      *
      * @return the numeric visibility level
      */
+    @JsonValue
     public int getLevel() {
         return level;
     }
