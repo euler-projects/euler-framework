@@ -166,14 +166,25 @@ public class ResourceScope implements Comparable<ResourceScope> {
         return this.level <= other.level;
     }
 
+    /**
+     * Converts this {@link ResourceScope} to the nearest {@link StandardResourceScope},
+     * where "nearest" is defined as the {@link StandardResourceScope} whose numeric
+     * visibility level is the smallest value that is greater than or equal to the
+     * visibility level of this {@link ResourceScope}. In other words, this method
+     * performs a ceiling lookup over the ordered set of {@link StandardResourceScope}
+     * values with respect to their numeric visibility levels.
+     *
+     * @throws IllegalArgumentException if the visibility level of this {@link ResourceScope}
+     *         exceeds the maximum defined {@link StandardResourceScope}
+     */
     public StandardResourceScope toStandardResourceScope() {
         for (StandardResourceScope standardResourceScope : StandardResourceScope.values()) {
             if (standardResourceScope.intScope() >= this.level) {
                 return standardResourceScope;
             }
         }
-        throw new IllegalArgumentException("The visibility level " + this.level
-                + " is higher than the broadest standard resource scope.");
+        throw new IllegalArgumentException(
+                "Visibility level " + this.level + " exceeds the maximum defined StandardResourceScope.");
     }
 
     @Override
