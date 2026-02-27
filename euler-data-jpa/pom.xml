@@ -29,6 +29,11 @@
             <artifactId>euler-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eulerframework</groupId>
+            <artifactId>euler-security-core</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>com.querydsl</groupId>
