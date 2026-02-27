@@ -2,7 +2,6 @@ package org.eulerframework.data.util;
 
 import org.eulerframework.data.entity.ResourceEntity;
 import org.eulerframework.model.AbstractResourceModel;
-import org.eulerframework.model.ResourceModel;
 import org.springframework.util.StringUtils;
 
 import java.util.function.Consumer;
