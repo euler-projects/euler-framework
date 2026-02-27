@@ -23,51 +23,43 @@ package org.eulerframework.resource;
  */
 public enum StandardResourceScope {
     /**
-     * Resources with a scope of {@code PUBLIC} are visible to everyone. Anonymous
-     * (unauthenticated) access is permissible for this scope, but not required.
-     *
-     * <p>Visibility level: {@code 400}.
+     * Resources with a scope of {@code PRIVATE} have minimal visibility, and are typically visible
+     * only to their owner. This scope is semantically very close to {@code USER} and can often be
+     * treated as equivalent; however, in certain user hierarchy designs,
+     * the effective visibility of {@code PRIVATE} may be narrower than that of {@code USER}.
+     * The exact semantics are left to the implementor's discretion,
+     * but under no circumstances should a {@code PRIVATE} resource be accessible to a broader audience
+     * than a {@code USER}-scoped resource.
      */
-    PUBLIC(400),
-    /**
-     * Resources with a scope of {@code TENANT} are visible to all authenticated users within the
-     * same tenant. Anonymous access is generally not permitted for this scope.
-     *
-     * <p>Visibility level: {@code 300}.
-     */
-    TENANT(300),
+    PRIVATE(0),
     /**
      * Resources with a scope of {@code USER} are visible only to the user who created them.
      * Anonymous access is generally not permitted for this scope.
-     *
-     * <p>Visibility level: {@code 200}.
      */
     USER(200),
     /**
-     * Resources with a scope of {@code PRIVATE} are visible only to their owner. This scope is
-     * semantically very close to {@code USER} and can often be treated as equivalent; however, in
-     * certain user hierarchy designs, the effective visibility of {@code PRIVATE} may be narrower
-     * than that of {@code USER}. The exact semantics are left to the implementor's discretion, but
-     * under no circumstances should a {@code PRIVATE} resource be accessible to a broader audience
-     * than a {@code USER}-scoped resource.
-     *
-     * <p>Visibility level: {@code 100}.
+     * Resources with a scope of {@code TENANT} are visible to all authenticated users within the
+     * same tenant. Anonymous access is generally not permitted for this scope.
      */
-    PRIVATE(100);
+    TENANT(400),
+    /**
+     * Resources with a scope of {@code PUBLIC} are visible to everyone. Anonymous
+     * (unauthenticated) access is permissible for this scope, but not required.
+     */
+    PUBLIC(600);
 
-    private final int visibilityLevel;
+    private final int intScope;
 
-    StandardResourceScope(int visibilityLevel) {
-        this.visibilityLevel = visibilityLevel;
+    StandardResourceScope(int intScope) {
+        this.intScope = intScope;
     }
 
     /**
-     * Returns the numeric visibility level of this scope. A higher value means a wider (more
-     * permissive) visibility range.
+     * Returns the numeric scope value of this scope. A higher value indicates a broader visibility scope.
      *
-     * @return the visibility level
+     * @return the numeric scope value
      */
-    public int getVisibilityLevel() {
-        return visibilityLevel;
+    public int intScope() {
+        return intScope;
     }
 }

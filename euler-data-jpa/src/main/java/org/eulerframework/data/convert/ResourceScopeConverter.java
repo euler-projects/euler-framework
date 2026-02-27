@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,60 +20,32 @@ import jakarta.persistence.Converter;
 import org.eulerframework.resource.ResourceScope;
 
 /**
- * JPA {@link AttributeConverter} that maps a {@link ResourceScope} to its numeric
- * {@link ResourceScope#getVisibilityLevel() visibilityLevel} when persisting to the database, and
+ * JPA {@link ResourceScopeConverter} that maps a {@link ResourceScope} to its numeric
+ * {@link ResourceScope#getLevel() visibility level} when persisting to the database, and
  * delegates to {@link ResourceScope#resolve(int)} when reading from the database.
- *
- * <p>Storing the visibility level as an integer offers two key benefits over storing a name:
- * <ul>
- *   <li><b>Stable storage:</b> the column value is not affected by changes to the constant name or
- *       declaration.</li>
- *   <li><b>Extensibility:</b> any {@link ResourceScope} instance — including application-defined
- *       ones — round-trips correctly through the database without requiring modifications to this
- *       converter.</li>
- * </ul>
  *
  * <p>This converter is <em>not</em> registered for auto-apply ({@code autoApply = false}) so that
  * it must be opted into explicitly via {@code @Convert(converter = ResourceScopeConverter.class)}
- * on each entity attribute. This avoids unexpected behaviour when an application defines its own
- * scope representation strategy.
+ * on each entity attribute.
  *
  * <p>Usage example:
- * <pre>
- *   &#64;Convert(converter = ResourceScopeConverter.class)
- *   &#64;Column(name = "scope")
+ * <pre>{@code
+ *   @Convert(converter = ResourceScopeConverter.class)
+ *   @Column(name = "scope")
  *   private ResourceScope scope;
- * </pre>
+ * }</pre>
  */
 @Converter
 public class ResourceScopeConverter implements AttributeConverter<ResourceScope, Integer> {
 
-    /**
-     * Converts a {@link ResourceScope} to its {@link ResourceScope#getVisibilityLevel()
-     * visibilityLevel} for storage in the database column.
-     *
-     * @param attribute the scope to convert; may be {@code null}
-     * @return the visibility level integer, or {@code null} if {@code attribute} is {@code null}
-     */
     @Override
     public Integer convertToDatabaseColumn(ResourceScope attribute) {
         if (attribute == null) {
             return null;
         }
-        return attribute.getVisibilityLevel();
+        return attribute.getLevel();
     }
 
-    /**
-     * Converts a visibility-level integer read from the database back to a {@link ResourceScope}
-     * by delegating to {@link ResourceScope#resolve(int)}.
-     *
-     * <p>The singleton constant is returned for any standard visibility level; a new
-     * {@link ResourceScope} instance is constructed for application-defined levels.
-     *
-     * @param dbData the integer value stored in the database column; may be {@code null}
-     * @return the resolved {@link ResourceScope} instance, or {@code null} if {@code dbData} is
-     *         {@code null}
-     */
     @Override
     public ResourceScope convertToEntityAttribute(Integer dbData) {
         if (dbData == null) {
