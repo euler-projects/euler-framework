@@ -1,96 +1,84 @@
+/*
+ * Copyright 2013-2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.eulerframework.resource;
 
 /**
- * {@link ResourceScope} defines a set of well-known visibility scopes that can be associated with
- * a resource. Note that this class does not enforce any isolation by itself — it is purely a
- * descriptive marker. The actual access control logic must be implemented by the consuming
- * application according to its own requirements.
+ * Represents the visibility scope of a resource and defines a total ordering over all scopes
+ * based on visibility breadth. A higher {@link #visibilityLevel} indicates a wider (more
+ * permissive) scope — {@code PUBLIC.compareTo(PRIVATE)} therefore yields a positive integer —
+ * so instances can be placed directly into sorted collections, used as {@code TreeMap} keys, or
+ * compared with the predicate methods {@link #isWiderThan}, {@link #isNarrowerThan}, and their
+ * inclusive counterparts.
  *
- * <p>Each instance carries a {@link #visibilityLevel} value that numerically represents its
- * visibility breadth: a higher value means a wider (more permissive) scope. The built-in constants
- * are assigned non-consecutive values so that application-defined scopes can be interleaved by
- * constructing new instances with intermediate levels, without modifying this class.
- *
- * <p><b>Built-in visibility levels:</b>
+ * <p>The four standard scopes — {@link #PUBLIC}, {@link #TENANT}, {@link #USER}, and
+ * {@link #PRIVATE} — are provided as static constants whose visibility levels are defined by
+ * {@link StandardResourceScope}. Application code that requires an intermediate scope may define
+ * one via {@link #resolve(int)}, using any level value not already occupied by a standard
+ * constant:
  * <pre>
- *   PRIVATE  = 100
- *   USER     = 400
- *   TENANT   = 700
- *   PUBLIC   = 1000
+ *   public static final ResourceScope GROUP = ResourceScope.resolve(250);
  * </pre>
  *
- * <p>This class implements {@link Comparable} based on {@link #visibilityLevel}, so
- * {@code PUBLIC.compareTo(PRIVATE)} returns a positive integer and instances can be used directly
- * in sorted collections or streams without a custom comparator.
+ * <p>Two instances are {@linkplain #equals equal} if and only if they share the same
+ * {@link #visibilityLevel}. The four standard constants are singletons, so identity ({@code ==})
+ * comparison is safe when dealing exclusively with standard scopes.
  *
- * <p>Two {@code ResourceScope} instances are considered {@link #equals equal} if and only if they
- * have the same {@link #visibilityLevel}.
- *
- * <p>Use {@link #resolve(int)} to obtain a {@code ResourceScope} from a raw visibility level. This
- * method returns the singleton constant for any built-in level, or a new instance for
- * application-defined levels. The standard scopes and their canonical visibility levels are
- * enumerated in {@link StandardResourceScope}.
+ * <p>Note that {@code ResourceScope} does not enforce any access isolation by itself — it is a
+ * descriptive marker only. All access control decisions based on scope values remain the
+ * responsibility of the consuming application.
  */
 public class ResourceScope implements Comparable<ResourceScope> {
 
     /**
-     * Resources with a scope of {@code PUBLIC} are visible to everyone. Anonymous
-     * (unauthenticated) access is permissible for this scope, but not required.
-     *
-     * <p>Visibility level: {@code 1000}.
+     * Pre-initialized singleton for {@link StandardResourceScope#PUBLIC}.
      */
     public static final ResourceScope PUBLIC = new ResourceScope(StandardResourceScope.PUBLIC.getVisibilityLevel());
 
     /**
-     * Resources with a scope of {@code TENANT} are visible to all authenticated users within the
-     * same tenant. Anonymous access is generally not permitted for this scope.
-     *
-     * <p>Visibility level: {@code 700}.
+     * Pre-initialized singleton for {@link StandardResourceScope#TENANT}.
      */
     public static final ResourceScope TENANT = new ResourceScope(StandardResourceScope.TENANT.getVisibilityLevel());
 
     /**
-     * Resources with a scope of {@code USER} are visible only to the user who created them.
-     * Anonymous access is generally not permitted for this scope.
-     *
-     * <p>Visibility level: {@code 400}.
+     * Pre-initialized singleton for {@link StandardResourceScope#USER}.
      */
     public static final ResourceScope USER = new ResourceScope(StandardResourceScope.USER.getVisibilityLevel());
 
     /**
-     * Resources with a scope of {@code PRIVATE} are visible only to their owner. This scope is
-     * semantically very close to {@code USER} and can often be treated as equivalent; however, in
-     * certain user hierarchy designs, the effective visibility of {@code PRIVATE} may be narrower
-     * than that of {@code USER}. The exact semantics are left to the implementor's discretion, but
-     * under no circumstances should a {@code PRIVATE} resource be accessible to a broader audience
-     * than a {@code USER}-scoped resource.
-     *
-     * <p>Visibility level: {@code 100}.
+     * Pre-initialized singleton for {@link StandardResourceScope#PRIVATE}.
      */
     public static final ResourceScope PRIVATE = new ResourceScope(StandardResourceScope.PRIVATE.getVisibilityLevel());
 
     /**
      * The set of built-in singleton constants, used by {@link #resolve(int)} to return the
      * canonical instance for any standard visibility level.
-     *
-     * <p>This array must be declared <em>after</em> all four constants above so that the static
-     * initializer sees their fully constructed values.
      */
     private static final ResourceScope[] WELL_KNOWN = {PUBLIC, TENANT, USER, PRIVATE};
 
     /**
      * The numeric visibility level of this scope. A higher value indicates a wider (more
-     * permissive) visibility range. Values are intentionally non-consecutive to allow
-     * application-specific scopes to be inserted between the built-in ones.
+     * permissive) visibility range.
      */
     private final int visibilityLevel;
 
     /**
      * Creates a new {@code ResourceScope} with the given visibility level.
      *
-     * <p>This constructor is intentionally private. Instances are created exclusively by this
-     * class's own static initializer (for the built-in constants) and by {@link #resolve(int)}
-     * (for application-defined levels). Callers should always use {@link #resolve(int)} to obtain
+     * <p>This constructor is intentionally private. Callers should always use {@link #resolve(int)} to obtain
      * a {@code ResourceScope} from a numeric level.
      *
      * @param visibilityLevel the numeric visibility level
