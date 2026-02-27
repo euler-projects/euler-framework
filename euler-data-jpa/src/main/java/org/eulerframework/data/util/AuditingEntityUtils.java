@@ -41,7 +41,7 @@ public class AuditingEntityUtils {
     }
 
     public static <E extends ResourceEntity> E newResourceEntity(String tenantId, String userId, Class<E> clazz) {
-        return newResourceEntity(tenantId, userId, ResourceScope.USER, clazz);
+        return newResourceEntity(tenantId, userId, ResourceScope.PRIVATE, clazz);
     }
 
     public static <E extends ResourceEntity> E newResourceEntity(String tenantId, String userId, ResourceScope scope, Class<E> clazz) {
