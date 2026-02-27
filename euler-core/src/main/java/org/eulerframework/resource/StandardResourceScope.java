@@ -30,6 +30,8 @@ public enum StandardResourceScope {
      * The exact semantics are left to the implementor's discretion,
      * but under no circumstances should a {@code PRIVATE} resource be accessible to a broader audience
      * than a {@code USER}-scoped resource.
+     * <p>
+     * This scope is also the default visibility for any resource without an explicit scope.
      */
     PRIVATE(0),
     /**
