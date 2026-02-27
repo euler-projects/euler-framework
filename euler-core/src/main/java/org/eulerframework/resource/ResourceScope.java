@@ -166,6 +166,16 @@ public class ResourceScope implements Comparable<ResourceScope> {
         return this.level <= other.level;
     }
 
+    public StandardResourceScope toStandardResourceScope() {
+        for (StandardResourceScope standardResourceScope : StandardResourceScope.values()) {
+            if (standardResourceScope.intScope() >= this.level) {
+                return standardResourceScope;
+            }
+        }
+        throw new IllegalArgumentException("The visibility level " + this.level
+                + " is higher than the broadest standard resource scope.");
+    }
+
     @Override
     public int compareTo(@Nonnull ResourceScope other) {
         if (this == other) {
