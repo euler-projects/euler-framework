@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,22 @@ public enum StandardResourceScope {
     /**
      * Resources with a scope of {@code PUBLIC} are visible to everyone. Anonymous
      * (unauthenticated) access is permissible for this scope, but not required.
+     *
+     * <p>Visibility level: {@code 400}.
      */
     PUBLIC(400),
     /**
      * Resources with a scope of {@code TENANT} are visible to all authenticated users within the
      * same tenant. Anonymous access is generally not permitted for this scope.
+     *
+     * <p>Visibility level: {@code 300}.
      */
     TENANT(300),
     /**
      * Resources with a scope of {@code USER} are visible only to the user who created them.
      * Anonymous access is generally not permitted for this scope.
+     *
+     * <p>Visibility level: {@code 200}.
      */
     USER(200),
     /**
@@ -44,6 +50,8 @@ public enum StandardResourceScope {
      * than that of {@code USER}. The exact semantics are left to the implementor's discretion, but
      * under no circumstances should a {@code PRIVATE} resource be accessible to a broader audience
      * than a {@code USER}-scoped resource.
+     *
+     * <p>Visibility level: {@code 100}.
      */
     PRIVATE(100);
 
