@@ -5,6 +5,13 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eulerframework/euler-framework/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eulerframework/euler-framework)
 [![GitHub license](https://img.shields.io/github/license/euler-projects/euler-framework.svg)](https://raw.githubusercontent.com/euler-projects/euler-framework/master/LICENSE)
 
+## Requirements
+
+- Java 25 or later
+- Spring Boot 4.x
+- Spring Framework 7.x
+- Spring Security 7.x
+
 ## About
 
 The Euler Framework is based on Spring MVC, provides a set of base classes to make website building easier.
