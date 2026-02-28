@@ -1,7 +1,6 @@
 package org.eulerframework.data.file.web.security;
 
 import io.jsonwebtoken.*;
-import org.eulerframework.common.util.json.JacksonUtils;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -52,13 +51,5 @@ public class JwtFileTokenRegistry implements FileTokenRegistry {
         Claims claims = jws.getPayload();
 
         return new JwtFileToken(tokenValue, claims);
-    }
-
-    public static void main(String[] args) {
-        JwtFileTokenRegistry jwtFileTokenRegistry = new JwtFileTokenRegistry();
-        FileToken fileToken = jwtFileTokenRegistry.generateToken("admin");
-        System.out.println("File token: " + JacksonUtils.writeValueAsString(fileToken));
-        FileToken varifiedToken = jwtFileTokenRegistry.getTokenByTokenValue(fileToken.getTokenValue());
-        System.out.println("Varified Token: " + JacksonUtils.writeValueAsString(varifiedToken));
     }
 }
