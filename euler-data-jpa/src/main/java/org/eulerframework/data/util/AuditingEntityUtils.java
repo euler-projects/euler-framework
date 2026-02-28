@@ -15,14 +15,10 @@
  */
 package org.eulerframework.data.util;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.model.AbstractAuditingModel;
 import org.eulerframework.model.AbstractPrincipalAuditingModel;
 import org.eulerframework.data.entity.AuditingEntity;
 import org.eulerframework.data.entity.PrincipalAuditingEntity;
-import org.eulerframework.data.entity.ResourceEntity;
-import org.eulerframework.resource.ResourceScope;
-import org.eulerframework.security.core.userdetails.EulerUserDetails;
 
 public class AuditingEntityUtils {
     public static void updateAuditingEntity(AbstractAuditingModel model, AuditingEntity entity) {
@@ -36,23 +32,4 @@ public class AuditingEntityUtils {
         entity.setModifiedBy(model.getLastModifiedBy());
     }
 
-    public static <E extends ResourceEntity> E newResourceEntity(String userId, Class<E> clazz) {
-        return newResourceEntity(EulerUserDetails.DEFAULT_TENANT_ID, userId, ResourceScope.USER, clazz);
-    }
-
-    public static <E extends ResourceEntity> E newResourceEntity(String tenantId, String userId, Class<E> clazz) {
-        return newResourceEntity(tenantId, userId, ResourceScope.PRIVATE, clazz);
-    }
-
-    public static <E extends ResourceEntity> E newResourceEntity(String tenantId, String userId, ResourceScope scope, Class<E> clazz) {
-        try {
-            E resourceEntity = clazz.getDeclaredConstructor().newInstance();
-            resourceEntity.setTenantId(tenantId);
-            resourceEntity.setUserId(userId);
-            resourceEntity.setResourceScope(scope);
-            return resourceEntity;
-        } catch (Exception e) {
-            throw ExceptionUtils.<RuntimeException>rethrow(e);
-        }
-    }
 }

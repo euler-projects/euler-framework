@@ -17,10 +17,12 @@ package org.eulerframework.data.util;
 
 import org.eulerframework.model.AbstractAuditingModel;
 import org.eulerframework.model.AbstractPrincipalAuditingModel;
-import org.eulerframework.model.AbstractResourceModel;
 import org.eulerframework.data.entity.AuditingEntity;
 import org.eulerframework.data.entity.PrincipalAuditingEntity;
-import org.eulerframework.data.entity.ResourceEntity;
+import org.eulerframework.model.AbstractResourceModel;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class AuditingModelUtils {
     public static void updateModelAuditingFields(AuditingEntity entity, AbstractAuditingModel model) {
@@ -34,9 +36,14 @@ public class AuditingModelUtils {
         model.setLastModifiedBy(entity.getModifiedBy());
     }
 
-    public static void updateModelResourceFields(ResourceEntity entity, AbstractResourceModel model) {
-        updateModelPrincipalAuditingFields(entity, model);
-        model.setTenantId(entity.getTenantId());
-        model.setUserId(entity.getUserId());
+    public static void updateModelAuditingFields(ResultSet rs, AbstractResourceModel model) throws SQLException {
+        model.setCreatedDate(rs.getDate("created_date"));
+        model.setLastModifiedDate(rs.getDate("modified_date"));
+    }
+
+    public static void updateModelPrincipalAuditingFields(ResultSet rs, AbstractResourceModel model) throws SQLException {
+        updateModelAuditingFields(rs, model);
+        model.setCreatedBy(rs.getString("created_by"));
+        model.setLastModifiedBy(rs.getString("modified_by"));
     }
 }

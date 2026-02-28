@@ -24,23 +24,15 @@ import org.eulerframework.resource.ResourceScope;
 @MappedSuperclass
 public abstract class ResourceEntity extends PrincipalAuditingEntity {
 
-    @Column(name = "tenant_id")
-    private String tenantId;
-
     @Column(name = "user_id")
     private String userId;
+
+    @Column(name = "tenant_id")
+    private String tenantId;
 
     @Convert(converter = ResourceScopeConverter.class)
     @Column(name = "resource_scope")
     private ResourceScope resourceScope;
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public String getUserId() {
         return userId;
@@ -48,6 +40,14 @@ public abstract class ResourceEntity extends PrincipalAuditingEntity {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public ResourceScope getResourceScope() {
