@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link ResourceScope} represents the visibility scope of a resource. Each scope is associated
@@ -49,30 +51,31 @@ import javax.annotation.Nonnull;
 public class ResourceScope implements Comparable<ResourceScope> {
 
     /**
-     * Pre-initialized singleton for {@link StandardResourceScope#PUBLIC}.
+     * The global registry of all interned {@code ResourceScope} instances, keyed by numeric visibility level.
+     * Every instance obtained via {@link #resolve(int)} is stored here, ensuring that any two
+     * calls with the same level value return the identical object reference.
      */
-    public static final ResourceScope PUBLIC = new ResourceScope(StandardResourceScope.PUBLIC.intScope());
+    private static final ConcurrentMap<Integer, ResourceScope> WELL_KNOWN = new ConcurrentHashMap<>();
 
     /**
-     * Pre-initialized singleton for {@link StandardResourceScope#TENANT}.
+     * Pre-initialized instance for {@link StandardResourceScope#PUBLIC}.
      */
-    public static final ResourceScope TENANT = new ResourceScope(StandardResourceScope.TENANT.intScope());
+    public static final ResourceScope PUBLIC = resolve(StandardResourceScope.PUBLIC);
 
     /**
-     * Pre-initialized singleton for {@link StandardResourceScope#USER}.
+     * Pre-initialized instance for {@link StandardResourceScope#TENANT}.
      */
-    public static final ResourceScope USER = new ResourceScope(StandardResourceScope.USER.intScope());
+    public static final ResourceScope TENANT = resolve(StandardResourceScope.TENANT);
 
     /**
-     * Pre-initialized singleton for {@link StandardResourceScope#PRIVATE}.
+     * Pre-initialized instance for {@link StandardResourceScope#USER}.
      */
-    public static final ResourceScope PRIVATE = new ResourceScope(StandardResourceScope.PRIVATE.intScope());
+    public static final ResourceScope USER = resolve(StandardResourceScope.USER);
 
     /**
-     * The set of built-in singleton constants, used by {@link #resolve(int)} to return the
-     * canonical instance for any standard numeric visibility level.
+     * Pre-initialized instance for {@link StandardResourceScope#PRIVATE}.
      */
-    private static final ResourceScope[] WELL_KNOWN = {PUBLIC, TENANT, USER, PRIVATE};
+    public static final ResourceScope PRIVATE = resolve(StandardResourceScope.PRIVATE);
 
     /**
      * The numeric visibility level of this scope. A higher value indicates a broader visibility scope.
@@ -92,26 +95,39 @@ public class ResourceScope implements Comparable<ResourceScope> {
     }
 
     /**
-     * Returns the canonical {@code ResourceScope} instance for the given numeric level.
+     * Returns the singleton {@code ResourceScope} instance for the given numeric level.
      *
-     * <p>If the value matches one of the predefined constants, the corresponding singleton is returned.
-     * For any other value, a new {@code ResourceScope} instance is created and returned.
+     * <p>Instances are interned globally: the first call for a given level allocates a new
+     * {@code ResourceScope} and registers it in the global registry; subsequent calls with
+     * the same level return the previously registered instance. This guarantee holds for
+     * both the predefined standard scopes and any application-defined scopes.
      *
-     * <p>This is the only public way to obtain a {@code ResourceScope} instance and is the
-     * preferred method for reconstructing a scope from a stored value (e.g., reading from a
-     * database or deserializing from JSON).
+     * <p>This is the preferred method for reconstructing a scope from a stored value
+     * (e.g., reading from a database or deserializing from JSON).
      *
      * @param level the numeric visibility level to resolve
-     * @return the matching singleton constant, or a new instance for application-defined values
+     * @return the singleton instance for the given level
      */
     @JsonCreator
+    @Nonnull
     public static ResourceScope resolve(int level) {
-        for (ResourceScope scope : WELL_KNOWN) {
-            if (scope.level == level) {
-                return scope;
-            }
-        }
-        return new ResourceScope(level);
+        return WELL_KNOWN.computeIfAbsent(level, ResourceScope::new);
+    }
+
+    /**
+     * Returns the singleton {@code ResourceScope} instance corresponding to the given
+     * {@link StandardResourceScope}.
+     *
+     * <p>This is a convenience overload of {@link #resolve(int)} and returns the same
+     * instance as {@code resolve(standardResourceScope.intScope())}. It is not used as
+     * the Jackson deserialization entry point; that role is fulfilled by {@link #resolve(int)}.
+     *
+     * @param standardResourceScope the standard scope to resolve
+     * @return the singleton instance for the corresponding numeric level
+     */
+    @Nonnull
+    public static ResourceScope resolve(@Nonnull StandardResourceScope standardResourceScope) {
+        return resolve(standardResourceScope.intScope());
     }
 
     /**
@@ -175,7 +191,7 @@ public class ResourceScope implements Comparable<ResourceScope> {
      * values with respect to their numeric visibility levels.
      *
      * @throws IllegalArgumentException if the visibility level of this {@link ResourceScope}
-     *         exceeds the maximum defined {@link StandardResourceScope}
+     *                                  exceeds the maximum defined {@link StandardResourceScope}
      */
     public StandardResourceScope toStandardResourceScope() {
         for (StandardResourceScope standardResourceScope : StandardResourceScope.values()) {
