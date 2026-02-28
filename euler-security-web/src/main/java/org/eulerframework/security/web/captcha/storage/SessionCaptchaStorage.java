@@ -16,7 +16,7 @@
 package org.eulerframework.security.web.captcha.storage;
 
 import jakarta.servlet.http.HttpSession;
-import org.eulerframework.common.util.json.JacksonUtils;
+import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.core.captcha.CaptchaDetails;
 import org.eulerframework.security.core.captcha.CaptchaVisibility;
 import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
