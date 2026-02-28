@@ -27,7 +27,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <euler-cache.version>1.0.0.M3-SNAPSHOT</euler-cache.version>
-        <euler-common.version>1.0.0.M7.JDK11-SNAPSHOT</euler-common.version>
+        <euler-common.version>2.0.0-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.17.0</commons-codec.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -59,7 +59,8 @@
         <slf4j.version>2.0.16</slf4j.version>
         <log4j2.version>2.24.2</log4j2.version>
 
-        <jackson.version>2.17.1</jackson.version>
+        <jackson2.version>2.21.1</jackson2.version>
+        <jackson3.version>3.1.0</jackson3.version>
         <gson.version>2.11.0</gson.version>
         <fastjson2.version>2.0.61</fastjson2.version>
 
@@ -305,24 +306,18 @@
 
             <!-- Jackson -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson2.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson3.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Gson -->
@@ -374,6 +369,11 @@
             <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-util</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-common-util-json</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
             <dependency>

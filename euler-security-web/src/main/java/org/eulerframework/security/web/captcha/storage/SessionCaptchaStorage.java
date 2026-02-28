@@ -16,7 +16,7 @@
 package org.eulerframework.security.web.captcha.storage;
 
 import jakarta.servlet.http.HttpSession;
-import org.eulerframework.common.util.json.JacksonUtils;
+import org.eulerframework.common.util.json.Jackson2Utils;
 import org.eulerframework.security.core.captcha.CaptchaDetails;
 import org.eulerframework.security.core.captcha.CaptchaVisibility;
 import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
@@ -64,7 +64,7 @@ public class SessionCaptchaStorage implements CaptchaStorage {
     @Override
     @SuppressWarnings("unchecked")
     public void saveCaptcha(@Nonnull CaptchaDetails captchaDetails) {
-        Assert.isTrue(this.support(captchaDetails), () -> "Unsupported captcha: " + JacksonUtils.writeValueAsString(captchaDetails));
+        Assert.isTrue(this.support(captchaDetails), () -> "Unsupported captcha: " + Jackson2Utils.writeValueAsString(captchaDetails));
 
         HttpSession session = ServletUtils.getSession();
         if (session == null) {
