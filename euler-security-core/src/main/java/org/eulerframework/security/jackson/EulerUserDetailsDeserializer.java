@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.jackson2;
+package org.eulerframework.security.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.node.MissingNode;
 
-import java.io.IOException;
 import java.util.Set;
 
 
-class EulerUserDetailsDeserializer extends JsonDeserializer<EulerUserDetails> {
+class EulerUserDetailsDeserializer extends ValueDeserializer<EulerUserDetails> {
 
-    private static final TypeReference<Set<EulerGrantedAuthority>> SIMPLE_GRANTED_AUTHORITY_SET = new TypeReference<>() {
+    private static final TypeReference<Set<EulerGrantedAuthority>> GRANTED_AUTHORITY_SET = new TypeReference<>() {
     };
 
     /**
@@ -47,26 +45,25 @@ class EulerUserDetailsDeserializer extends JsonDeserializer<EulerUserDetails> {
      * @param jp   the JsonParser
      * @param ctxt the DeserializationContext
      * @return the user
-     * @throws IOException             if a exception during IO occurs
-     * @throws JsonProcessingException if an error during JSON processing occurs
+     * @throws JacksonException if an error during JSON processing occurs
      */
     @Override
-    public EulerUserDetails deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        ObjectMapper mapper = (ObjectMapper) jp.getCodec();
-        JsonNode jsonNode = mapper.readTree(jp);
-        Set<? extends GrantedAuthority> authorities = mapper.convertValue(jsonNode.get("authorities"),
-                SIMPLE_GRANTED_AUTHORITY_SET);
+    public EulerUserDetails deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
+        JsonNode jsonNode = ctxt.readTree(jp);
+        JsonNode authoritiesNode = readJsonNode(jsonNode, "authorities");
+        Set<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
+                ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_SET));
         JsonNode passwordNode = readJsonNode(jsonNode, "password");
-        String tenantId = readJsonNode(jsonNode, "tenantId").asText(EulerUserDetails.DEFAULT_TENANT_ID);
-        String userId = readJsonNode(jsonNode, "userId").asText();
-        String username = readJsonNode(jsonNode, "username").asText();
-        String password = passwordNode.asText("");
+        String tenantId = readJsonNode(jsonNode, "tenantId").asString(EulerUserDetails.DEFAULT_TENANT_ID);
+        String userId = readJsonNode(jsonNode, "userId").asString();
+        String username = readJsonNode(jsonNode, "username").asString();
+        String password = passwordNode.asString("");
         boolean enabled = readJsonNode(jsonNode, "enabled").asBoolean();
         boolean accountNonExpired = readJsonNode(jsonNode, "accountNonExpired").asBoolean();
         boolean credentialsNonExpired = readJsonNode(jsonNode, "credentialsNonExpired").asBoolean();
         boolean accountNonLocked = readJsonNode(jsonNode, "accountNonLocked").asBoolean();
         EulerUserDetails result = new EulerUserDetails(tenantId, userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-        if (passwordNode.asText(null) == null) {
+        if (passwordNode.asString(null) == null) {
             result.eraseCredentials();
         }
         return result;

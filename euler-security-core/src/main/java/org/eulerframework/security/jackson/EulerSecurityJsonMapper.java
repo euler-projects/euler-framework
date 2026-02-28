@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.jackson2;
+package org.eulerframework.security.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.security.jackson2.CoreJackson2Module;
+import org.springframework.security.jackson.CoreJacksonModule;
+import tools.jackson.databind.json.JsonMapper;
 
-public abstract class EulerSecurityObjectMapper {
-    private static ObjectMapper objectMapper;
+public abstract class EulerSecurityJsonMapper {
+    private static JsonMapper objectMapper;
 
-    public static ObjectMapper getInstance() {
+    public static JsonMapper getInstance() {
         if (objectMapper != null) {
             return objectMapper;
         }
 
-        synchronized (EulerSecurityObjectMapper.class) {
+        synchronized (EulerSecurityJsonMapper.class) {
             if (objectMapper != null) {
                 return objectMapper;
             }
-            objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new CoreJackson2Module());
-            objectMapper.registerModule(new EulerSecurityJackson2Module());
+            objectMapper = JsonMapper.builder()
+                    .addModule(new CoreJacksonModule())
+                    .addModule(new EulerSecurityJackson2Module())
+                    .build();
             return objectMapper;
         }
     }

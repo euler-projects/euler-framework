@@ -15,11 +15,7 @@
  */
 package org.eulerframework.security.oauth2.server.authorization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.oauth2.server.authorization.jackson2.EulerOAuth2ObjectMapper;
+import org.eulerframework.security.oauth2.server.authorization.jackson.EulerOAuth2JsonMapper;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,6 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -91,13 +89,13 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
 
     private String keyPrefix = "oauth2:auth:";
     private final StringRedisTemplate stringRedisTemplate;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final RegisteredClientRepository registeredClientRepository;
     private final Duration expireTime;
 
     public EulerRedisOAuth2AuthorizationService(StringRedisTemplate stringRedisTemplate, RegisteredClientRepository registeredClientRepository, Duration expireTime) {
         this.stringRedisTemplate = stringRedisTemplate;
-        this.objectMapper = EulerOAuth2ObjectMapper.getInstance();
+        this.jsonMapper = EulerOAuth2JsonMapper.getInstance();
         this.registeredClientRepository = registeredClientRepository;
         this.expireTime = expireTime;
     }
@@ -381,11 +379,7 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
         if (CollectionUtils.isEmpty(map)) {
             return;
         }
-        try {
-            this.saveAuthorizationProperty(property, authorizationId, this.objectMapper.writeValueAsString(map));
-        } catch (JsonProcessingException e) {
-            ExceptionUtils.<RuntimeException>rethrow(e);
-        }
+        this.saveAuthorizationProperty(property, authorizationId, this.jsonMapper.writeValueAsString(map));
     }
 
     private void saveAuthorizationProperty(String property, String authorizationId, Instant instant) {
@@ -408,14 +402,8 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
 
     private Map<String, Object> getAuthorizationMapProperty(String property, String authorizationId) {
         return Optional.ofNullable(this.getAuthorizationStringProperty(property, authorizationId))
-                .map(a -> {
-                    try {
-                        return this.objectMapper.readValue(a, new TypeReference<Map<String, Object>>() {
-                        });
-                    } catch (JsonProcessingException e) {
-                        throw ExceptionUtils.<RuntimeException>rethrow(e);
-                    }
-                })
+                .map(a -> this.jsonMapper.readValue(a, new TypeReference<Map<String, Object>>() {
+                }))
                 .orElse(null);
     }
 

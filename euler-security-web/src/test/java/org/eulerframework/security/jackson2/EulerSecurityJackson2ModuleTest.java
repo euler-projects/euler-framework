@@ -20,6 +20,7 @@ package org.eulerframework.security.jackson2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.jackson.EulerSecurityJackson2Module;
 import org.springframework.security.jackson2.CoreJackson2Module;
 
 import java.util.ArrayList;

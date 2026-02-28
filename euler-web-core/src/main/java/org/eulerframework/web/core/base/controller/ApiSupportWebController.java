@@ -25,11 +25,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-
 import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.SystemWebError;
 import org.eulerframework.web.core.exception.web.WebException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 @ResponseBody
 public abstract class ApiSupportWebController extends AbstractWebController {

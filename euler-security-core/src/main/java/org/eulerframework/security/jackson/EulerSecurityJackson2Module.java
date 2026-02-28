@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.jackson2;
+package org.eulerframework.security.jackson;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.eulerframework.security.authentication.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
+import tools.jackson.core.Version;
+import tools.jackson.databind.module.SimpleModule;
 
 public class EulerSecurityJackson2Module extends SimpleModule {
 
@@ -30,10 +29,10 @@ public class EulerSecurityJackson2Module extends SimpleModule {
 
 	@Override
 	public void setupModule(SetupContext context) {
-		SecurityJackson2Modules.enableDefaultTyping(context.getOwner());
-		context.setMixInAnnotations(EulerUserDetails.class, EulerUserDetailsMixin.class);
-		context.setMixInAnnotations(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
-		context.setMixInAnnotations(WechatAuthorizationCodeAuthenticationToken.class,
+		//SecurityJackson2Modules.enableDefaultTyping(context.getOwner());
+		context.setMixIn(EulerUserDetails.class, EulerUserDetailsMixin.class);
+		context.setMixIn(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
+		context.setMixIn(WechatAuthorizationCodeAuthenticationToken.class,
 				WechatAuthorizationCodeAuthenticationTokenMixin.class);
 	}
 
