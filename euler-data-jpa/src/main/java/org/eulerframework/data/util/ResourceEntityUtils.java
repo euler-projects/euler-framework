@@ -1,7 +1,6 @@
 package org.eulerframework.data.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.data.convert.ResourceScopeConverter;
 import org.eulerframework.data.entity.ResourceEntity;
 import org.eulerframework.model.AbstractResourceModel;
 import org.eulerframework.resource.ResourceScope;
@@ -56,7 +55,7 @@ public class ResourceEntityUtils {
     public static int updatePreparedStatement(AbstractResourceModel model, PreparedStatement ps, int parameterIndex) throws SQLException {
         ps.setString(++parameterIndex, model.getUserId());
         ps.setString(++parameterIndex, model.getTenantId());
-        ps.setObject(++parameterIndex, Optional.ofNullable(model.getResourceScope()).map(ResourceScopeConverter.INSTANCE::convertToDatabaseColumn).orElse(null), Types.INTEGER);
+        ps.setObject(++parameterIndex, Optional.ofNullable(model.getResourceScope()).map(ResourceScope::getLevel).orElse(null), Types.INTEGER);
         ps.setString(++parameterIndex, model.getCreatedBy());
         ps.setString(++parameterIndex, model.getLastModifiedBy());
         ps.setDate(++parameterIndex, Optional.ofNullable(model.getCreatedDate()).map(java.util.Date::getTime).map(java.sql.Date::new).orElse(null));
