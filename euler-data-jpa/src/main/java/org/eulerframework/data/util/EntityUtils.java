@@ -1,7 +1,5 @@
 package org.eulerframework.data.util;
 
-import org.eulerframework.data.entity.ResourceEntity;
-import org.eulerframework.model.AbstractResourceModel;
 import org.springframework.util.StringUtils;
 
 import java.util.function.Consumer;
@@ -25,14 +23,5 @@ public class EntityUtils {
         } else {
             consumer.accept(null);
         }
-    }
-
-    public static void updateResourceModel(ResourceEntity entity, AbstractResourceModel model) {
-        model.setTenantId(entity.getTenantId());
-        model.setUserId(entity.getUserId());
-        model.setCreatedBy(entity.getCreatedBy());
-        model.setLastModifiedBy(entity.getModifiedBy());
-        model.setCreatedDate(entity.getCreatedDate());
-        model.setLastModifiedDate(entity.getModifiedDate());
     }
 }
