@@ -1,7 +1,7 @@
 package org.eulerframework.security.authentication;
 
 import org.eulerframework.common.http.*;
-import org.eulerframework.common.util.json.jackson3.JacksonUtils;
+import org.eulerframework.common.util.json.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
 import org.slf4j.Logger;

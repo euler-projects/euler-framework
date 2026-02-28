@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.web.gateway;
 
-import org.eulerframework.common.util.json.jackson3.JacksonUtils;
+import org.eulerframework.common.util.json.JacksonUtils;
 
 import java.util.Base64;
 
