@@ -1,9 +1,17 @@
 package org.eulerframework.data.file.registry;
 
+import org.eulerframework.data.util.ResourceEntityUtils;
+import org.eulerframework.data.util.ResourceModelUtils;
+import org.eulerframework.resource.ResourceScope;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 public class JdbcFileIndexRegistry implements FileIndexRegistry {
+    private final static String DEFAULT_USER_ID = "anonymous";
+    private final static String DEFAULT_TENANT_ID = "default";
+    private final static ResourceScope DEFAULT_RS_SCOPE = ResourceScope.PUBLIC;
 
     private static final String INSERT_FILE_INDEX_DATA = "insert into t_file_storage_index (" +
             "id, " +
@@ -11,25 +19,27 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
             "extension,  " +
             "storage_type,  " +
             "storage_index,  " +
-            "tenant_id,  " +
             "user_id,  " +
+            "tenant_id,  " +
+            "resource_scope,  " +
             "created_by,  " +
-            "created_date,  " +
             "modified_by,  " +
+            "created_date,  " +
             "modified_date) " +
             "VALUES " +
-            "(?, ?, ?, ?, ?, '1', '1', '1', now(), '1', now())";
+            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SELECT_FILE_INDEX_DATA = "select " +
             "id, " +
             "filename,  " +
             "extension,  " +
             "storage_type,  " +
             "storage_index,  " +
-            "tenant_id,  " +
             "user_id,  " +
+            "tenant_id,  " +
+            "resource_scope,  " +
             "created_by,  " +
-            "created_date,  " +
             "modified_by,  " +
+            "created_date,  " +
             "modified_date " +
             "from t_file_storage_index " +
             "where id = ?";
@@ -44,6 +54,24 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
     @Override
     @Transactional
     public FileIndex createFileIndex(FileIndex fileIndex) {
+        if (fileIndex.getUserId() == null) {
+            fileIndex.setUserId(DEFAULT_USER_ID);
+        }
+        if (fileIndex.getTenantId() == null) {
+            fileIndex.setTenantId(DEFAULT_TENANT_ID);
+        }
+        if (fileIndex.getResourceScope() == null) {
+            fileIndex.setResourceScope(DEFAULT_RS_SCOPE);
+        }
+        if (fileIndex.getCreatedBy() == null) {
+            fileIndex.setCreatedBy(DEFAULT_USER_ID);
+        }
+        if (fileIndex.getLastModifiedBy() == null) {
+            fileIndex.setLastModifiedBy(DEFAULT_USER_ID);
+        }
+        fileIndex.setCreatedDate(new Date());
+        fileIndex.setLastModifiedDate(fileIndex.getCreatedDate());
+
         this.jdbcOperations.update(INSERT_FILE_INDEX_DATA, ps -> {
             int index = 0;
             ps.setString(++index, fileIndex.getFileId());
@@ -51,6 +79,7 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
             ps.setString(++index, fileIndex.getExtension());
             ps.setString(++index, fileIndex.getStorageType());
             ps.setString(++index, fileIndex.getStorageIndex());
+            index = ResourceEntityUtils.updatePreparedStatement(fileIndex, ps, index);
         });
         return this.getFileIndex(fileIndex.getFileId());
     }
@@ -69,12 +98,7 @@ public class JdbcFileIndexRegistry implements FileIndexRegistry {
                     fileIndex.setExtension(rs.getString("extension"));
                     fileIndex.setStorageType(rs.getString("storage_type"));
                     fileIndex.setStorageIndex(rs.getString("storage_index"));
-                    fileIndex.setTenantId(rs.getString("tenant_id"));
-                    fileIndex.setUserId(rs.getString("user_id"));
-                    fileIndex.setCreatedBy(rs.getString("created_by"));
-                    fileIndex.setCreatedDate(rs.getDate("created_date"));
-                    fileIndex.setLastModifiedBy(rs.getString("modified_by"));
-                    fileIndex.setLastModifiedDate(rs.getDate("modified_date"));
+                    ResourceModelUtils.updateModelResourceFields(rs, fileIndex);
                     return fileIndex;
                 });
     }
