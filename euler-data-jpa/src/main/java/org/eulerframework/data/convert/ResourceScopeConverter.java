@@ -37,6 +37,7 @@ import org.eulerframework.resource.ResourceScope;
  */
 @Converter
 public class ResourceScopeConverter implements AttributeConverter<ResourceScope, Integer> {
+    public final static ResourceScopeConverter INSTANCE = new ResourceScopeConverter();
 
     @Override
     public Integer convertToDatabaseColumn(ResourceScope attribute) {

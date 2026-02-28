@@ -15,10 +15,24 @@
  */
 package org.eulerframework.model;
 
-public class AbstractResourceModel extends AbstractPrincipalAuditingModel implements ResourceModel {
-    private String tenantId;
+import org.eulerframework.resource.ResourceScope;
+
+public abstract class AbstractResourceModel extends AbstractPrincipalAuditingModel implements ResourceModel {
 
     private String userId;
+
+    private String tenantId;
+
+    private ResourceScope resourceScope;
+
+    @Override
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     @Override
     public String getTenantId() {
@@ -30,11 +44,11 @@ public class AbstractResourceModel extends AbstractPrincipalAuditingModel implem
     }
 
     @Override
-    public String getUserId() {
-        return userId;
+    public ResourceScope getResourceScope() {
+        return resourceScope;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setResourceScope(ResourceScope resourceScope) {
+        this.resourceScope = resourceScope;
     }
 }
