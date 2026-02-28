@@ -1,0 +1,171 @@
+package org.eulerframework.data.file;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.eulerframework.data.file.registry.FileIndexRegistry;
+import org.eulerframework.data.file.web.security.FileTokenRegistry;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import java.io.*;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.BiFunction;
+
+public class LocalFileStorage extends AbstractLocalFileStorage {
+    public final static String TYPE = "local";
+
+    private static final String INSERT = "insert into t_file_storage_local (id, prefix, saved_name, size) VALUES (?, ?, ?, ?)";
+    private static final String SELECT = "select prefix, saved_name from t_file_storage_local where id = ?";
+    private static final String SELECT_SIZE = "select size from t_file_storage_local where id = ?";
+
+    private final String baseDir;
+
+    private final JdbcOperations jdbcOperations;
+    private final BiFunction<JdbcOperations, String, Integer> fileSizeLoader;
+
+    public LocalFileStorage(JdbcOperations jdbcOperations, String fileDownloadUrlTemplate, String baseDir, FileIndexRegistry fileIndexRegistry, FileTokenRegistry fileTokenRegistry) {
+        this(jdbcOperations, fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry, defaultFileSizeLoader(), baseDir);
+    }
+
+    public LocalFileStorage(
+            JdbcOperations jdbcOperations,
+            String fileDownloadUrlTemplate,
+            FileIndexRegistry fileIndexRegistry,
+            FileTokenRegistry fileTokenRegistry,
+            BiFunction<JdbcOperations, String, Integer> fileSizeLoader,
+            String baseDir) {
+        super(fileDownloadUrlTemplate, fileIndexRegistry, fileTokenRegistry);
+
+        this.baseDir = baseDir;
+
+        this.jdbcOperations = jdbcOperations;
+        this.fileSizeLoader = fileSizeLoader;
+    }
+
+    @Override
+    public boolean support(String type) {
+        return TYPE.equals(type);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+
+    @Override
+    protected String saveFileData(File file, String filename) throws IOException {
+        Assert.notNull(file, "argument file is required.");
+        try (InputStream inputStream = FileUtils.openInputStream(file)) {
+            return this.saveFileData(inputStream, StringUtils.hasText(filename) ? filename : file.getName());
+        }
+    }
+
+    @Override
+    protected String saveFileData(InputStream in, String filename) throws IOException {
+        Assert.notNull(in, "argument in is required.");
+        Assert.hasText(filename, "argument filename is required.");
+
+        String datePrefix = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String savedFilename = UUID.randomUUID().toString();
+        int size;
+
+        File file = FileUtils.getFile(
+                this.baseDir,
+                Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                savedFilename);
+
+        FileUtils.createParentDirectories(file);
+
+        try (FileOutputStream out = FileUtils.openOutputStream(file)) {
+            size = IOUtils.copy(in, out);
+        }
+
+        String storageIndex = UUID.randomUUID().toString();
+        this.jdbcOperations.update(
+                INSERT,
+                ps -> {
+                    ps.setString(1, storageIndex);
+                    ps.setString(2, datePrefix);
+                    ps.setString(3, savedFilename);
+                    ps.setInt(4, size);
+                }
+        );
+
+        return storageIndex;
+    }
+
+    @Override
+    protected void writeFileData(String fileIndex, File dest) throws IOException {
+        try (OutputStream out = FileUtils.openOutputStream(dest)) {
+            this.writeFileData(fileIndex, out);
+        }
+    }
+
+    @Override
+    protected void writeFileData(String fileIndex, OutputStream out) throws IOException {
+        File savedFile = this.getSavedFile(fileIndex);
+        try (FileInputStream in = new FileInputStream(savedFile)) {
+            IOUtils.copy(in, out);
+        }
+    }
+
+    @Override
+    Resource getResourceInternal(String fileIndex) throws IOException {
+        File savedFile = this.getSavedFile(fileIndex);
+        return new FileSystemResource(savedFile);
+    }
+
+    @Override
+    int getFileSize(String fileIndex) {
+        return this.fileSizeLoader.apply(this.jdbcOperations, fileIndex);
+    }
+
+    private File getSavedFile(String fileIndex) throws IOException {
+        String prefix, savedName;
+        Map<String, String> info = this.jdbcOperations.query(
+                SELECT,
+                ps -> ps.setString(1, fileIndex),
+                rs -> {
+                    if (!rs.next()) {
+                        return null;
+                    }
+
+                    Map<String, String> result = new HashMap<>();
+                    result.put("prefix", rs.getString("prefix"));
+                    result.put("savedName", rs.getString("saved_name"));
+                    return result;
+                });
+        if (info == null) {
+            throw new FileNotFoundException("Local file data for storage file index is " + fileIndex + " not found");
+        }
+        prefix = info.get("prefix");
+        savedName = info.get("savedName");
+        File savedFile = FileUtils.getFile(this.baseDir, prefix, savedName);
+
+        if (!savedFile.exists() || !savedFile.isFile()) {
+            throw new FileNotFoundException("Local file data for storage file index is " + fileIndex + " not found");
+        }
+
+        return savedFile;
+    }
+
+    private static BiFunction<JdbcOperations, String, Integer> defaultFileSizeLoader() {
+        return (jdbcOperations, fileIndex) -> jdbcOperations.query(
+                SELECT_SIZE,
+                ps -> ps.setString(1, fileIndex),
+                rs -> {
+                    if (!rs.next()) {
+                        return null;
+                    }
+                    return rs.getInt("size");
+                });
+    }
+}

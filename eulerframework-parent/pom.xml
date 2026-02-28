@@ -22,15 +22,15 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <java.version>17</java.version>
+        <java.version>25</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <euler-cache.version>1.0.0.M3-SNAPSHOT</euler-cache.version>
-        <euler-common.version>1.0.0.M7.JDK11-SNAPSHOT</euler-common.version>
+        <euler-common.version>2.0.0-SNAPSHOT</euler-common.version>
 
         <commons-codec.version>1.17.0</commons-codec.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-io.version>2.16.1</commons-io.version>
         <guava.version>33.1.0-jre</guava.version>
 
@@ -43,10 +43,9 @@
 
         <netty.version>4.1.115.Final</netty.version>
 
-        <spring-framework.version>6.2.3</spring-framework.version>
-        <spring-security.version>6.4.3</spring-security.version>
-        <spring-security-oauth2-authorization-server.version>1.4.2</spring-security-oauth2-authorization-server.version>
-        <spring-data.version>3.4.3</spring-data.version>
+        <spring-framework.version>7.0.5</spring-framework.version>
+        <spring-security.version>7.0.3</spring-security.version>
+        <spring-data.version>4.0.3</spring-data.version>
 
         <querydsl.version>5.1.0</querydsl.version>
 
@@ -60,7 +59,10 @@
         <slf4j.version>2.0.16</slf4j.version>
         <log4j2.version>2.24.2</log4j2.version>
 
-        <jackson.version>2.17.1</jackson.version>
+        <jackson2.version>2.21.1</jackson2.version>
+        <jackson3.version>3.1.0</jackson3.version>
+        <gson.version>2.11.0</gson.version>
+        <fastjson2.version>2.0.61</fastjson2.version>
 
         <junit.version>4.13.2</junit.version>
 
@@ -214,7 +216,7 @@
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-oauth2-authorization-server</artifactId>
-                <version>${spring-security-oauth2-authorization-server.version}</version>
+                <version>${spring-security.version}</version>
                 <scope>compile</scope>
             </dependency>
 
@@ -304,24 +306,32 @@
 
             <!-- Jackson -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson2.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson3.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
+
+            <!-- Gson -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
             </dependency>
+
+            <!-- Fastjson -->
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
             </dependency>
 
             <dependency>
@@ -363,6 +373,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
+                <artifactId>euler-common-util-json</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-util-extra</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
@@ -374,6 +389,11 @@
             <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-common-proto</artifactId>
+                <version>${euler-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-common-http</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
 

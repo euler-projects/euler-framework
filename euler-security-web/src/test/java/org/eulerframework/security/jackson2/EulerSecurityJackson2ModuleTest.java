@@ -31,7 +31,7 @@ public class EulerSecurityJackson2ModuleTest {
         mapper.registerModule(new CoreJackson2Module());
         mapper.registerModule(new EulerSecurityJackson2Module());
         List<Object> rawList = new ArrayList<>();
-        rawList.add(new EulerUserDetails("1", "1", "1", new ArrayList<>()));
+        rawList.add(new EulerUserDetails(EulerUserDetails.DEFAULT_TENANT_ID,"1", "1", "1", new ArrayList<>()));
         String json = mapper.writeValueAsString(rawList);
         System.out.println(json);
         List<Object> readList = mapper.readValue(json, List.class);

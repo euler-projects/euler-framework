@@ -19,7 +19,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

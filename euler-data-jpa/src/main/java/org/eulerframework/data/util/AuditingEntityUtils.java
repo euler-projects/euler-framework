@@ -15,12 +15,10 @@
  */
 package org.eulerframework.data.util;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.model.AbstractAuditingModel;
 import org.eulerframework.model.AbstractPrincipalAuditingModel;
 import org.eulerframework.data.entity.AuditingEntity;
 import org.eulerframework.data.entity.PrincipalAuditingEntity;
-import org.eulerframework.data.entity.ResourceEntity;
 
 public class AuditingEntityUtils {
     public static void updateAuditingEntity(AbstractAuditingModel model, AuditingEntity entity) {
@@ -34,13 +32,4 @@ public class AuditingEntityUtils {
         entity.setModifiedBy(model.getLastModifiedBy());
     }
 
-    public static <E extends ResourceEntity> E newResourceEntity(String tenantId, Class<E> clazz) {
-        try {
-            E resourceEntity = clazz.getDeclaredConstructor().newInstance();
-            resourceEntity.setTenantId(tenantId);
-            return resourceEntity;
-        } catch (Exception e) {
-            throw ExceptionUtils.<RuntimeException>rethrow(e);
-        }
-    }
 }

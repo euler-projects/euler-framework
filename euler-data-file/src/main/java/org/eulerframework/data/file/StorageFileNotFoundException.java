@@ -16,9 +16,9 @@
 
 package org.eulerframework.data.file;
 
-import org.eulerframework.exception.EulerException;
+import org.eulerframework.exception.EulerRuntimeException;
 
-public class StorageFileNotFoundException extends EulerException {
+public class StorageFileNotFoundException extends EulerRuntimeException {
     public StorageFileNotFoundException(String message) {
         super(message);
     }

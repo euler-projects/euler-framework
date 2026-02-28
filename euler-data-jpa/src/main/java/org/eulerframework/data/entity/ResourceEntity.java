@@ -16,13 +16,31 @@
 package org.eulerframework.data.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.MappedSuperclass;
+import org.eulerframework.data.convert.ResourceScopeConverter;
+import org.eulerframework.resource.ResourceScope;
 
 @MappedSuperclass
 public abstract class ResourceEntity extends PrincipalAuditingEntity {
 
+    @Column(name = "user_id")
+    private String userId;
+
     @Column(name = "tenant_id")
     private String tenantId;
+
+    @Convert(converter = ResourceScopeConverter.class)
+    @Column(name = "resource_scope")
+    private ResourceScope resourceScope;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getTenantId() {
         return tenantId;
@@ -30,5 +48,13 @@ public abstract class ResourceEntity extends PrincipalAuditingEntity {
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public ResourceScope getResourceScope() {
+        return resourceScope;
+    }
+
+    public void setResourceScope(ResourceScope resourceScope) {
+        this.resourceScope = resourceScope;
     }
 }

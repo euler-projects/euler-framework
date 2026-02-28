@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,5 +48,16 @@ public class DelegatingUserContext implements UserContext {
             }
         }
         return userId;
+    }
+
+    @Override
+    public String getTenantId() {
+        String tenantId = null;
+        for (UserContext userContext : this.userContexts) {
+            if ((tenantId = userContext.getTenantId()) != null) {
+                break;
+            }
+        }
+        return tenantId;
     }
 }

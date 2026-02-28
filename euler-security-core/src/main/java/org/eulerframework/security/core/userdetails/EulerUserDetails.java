@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,10 @@ import java.util.*;
 import java.util.function.Function;
 
 public final class EulerUserDetails implements UserDetails, CredentialsContainer {
+    public static final String DEFAULT_TENANT_ID = "default";
+
+    private final String tenantId;
+
     private String userId;
 
     private String password;
@@ -46,8 +50,8 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
     /**
      * Calls the more complex constructor with all boolean arguments set to {@code true}.
      */
-    public EulerUserDetails(String userId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        this(userId, username, password, true, true, true, true, authorities);
+    public EulerUserDetails(String tenantId, String userId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        this(tenantId, userId, username, password, true, true, true, true, authorities);
     }
 
     /**
@@ -68,12 +72,13 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
      * @throws IllegalArgumentException if a <code>null</code> value was passed either as
      *                                  a parameter or as an element in the <code>GrantedAuthority</code> collection
      */
-    public EulerUserDetails(String userId, String username, String password, boolean enabled, boolean accountNonExpired,
+    public EulerUserDetails(String tenantId, String userId, String username, String password, boolean enabled, boolean accountNonExpired,
                             boolean credentialsNonExpired, boolean accountNonLocked,
                             Collection<? extends GrantedAuthority> authorities) {
         Assert.isTrue(username != null && !username.isEmpty() && password != null,
                 "Cannot pass null or empty values to constructor");
 
+        this.tenantId = tenantId;
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -82,6 +87,10 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
         this.authorities = Collections.unmodifiableSet(UserDetailsUtils.sortGrantedAuthorities(authorities));
+    }
+
+    public String getTenantId() {
+        return tenantId;
     }
 
     public String getUserId() {
@@ -181,6 +190,8 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
      * should provided. The remaining attributes have reasonable defaults.
      */
     public static final class UserBuilder {
+        private String tenantId = DEFAULT_TENANT_ID;
+
         private String userId;
 
         private String username;
@@ -203,6 +214,12 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
          * Creates a new instance
          */
         private UserBuilder() {
+        }
+
+        public UserBuilder tenantId(String tenantId) {
+            Assert.notNull(tenantId, "tenantId cannot be null");
+            this.tenantId = tenantId;
+            return this;
         }
 
         /**
@@ -386,7 +403,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
 
         public EulerUserDetails build() {
             String encodedPassword = this.passwordEncoder.apply(this.password);
-            return new EulerUserDetails(this.userId, this.username, encodedPassword, !this.disabled, !this.accountExpired,
+            return new EulerUserDetails(this.tenantId, this.userId, this.username, encodedPassword, !this.disabled, !this.accountExpired,
                     !this.credentialsExpired, !this.accountLocked, this.authorities);
         }
     }

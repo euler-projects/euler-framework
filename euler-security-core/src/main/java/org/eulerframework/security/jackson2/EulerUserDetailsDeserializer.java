@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,43 +35,45 @@ import java.util.Set;
 
 class EulerUserDetailsDeserializer extends JsonDeserializer<EulerUserDetails> {
 
-	private static final TypeReference<Set<EulerGrantedAuthority>> SIMPLE_GRANTED_AUTHORITY_SET = new TypeReference<>() {
+    private static final TypeReference<Set<EulerGrantedAuthority>> SIMPLE_GRANTED_AUTHORITY_SET = new TypeReference<>() {
     };
 
-	/**
-	 * This method will create {@link User} object. It will ensure successful object
-	 * creation even if password key is null in serialized json, because credentials may
-	 * be removed from the {@link User} by invoking {@link User#eraseCredentials()}. In
-	 * that case there won't be any password key in serialized json.
-	 * @param jp the JsonParser
-	 * @param ctxt the DeserializationContext
-	 * @return the user
-	 * @throws IOException if a exception during IO occurs
-	 * @throws JsonProcessingException if an error during JSON processing occurs
-	 */
-	@Override
-	public EulerUserDetails deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-		ObjectMapper mapper = (ObjectMapper) jp.getCodec();
-		JsonNode jsonNode = mapper.readTree(jp);
-		Set<? extends GrantedAuthority> authorities = mapper.convertValue(jsonNode.get("authorities"),
-				SIMPLE_GRANTED_AUTHORITY_SET);
-		JsonNode passwordNode = readJsonNode(jsonNode, "password");
-		String userId  = readJsonNode(jsonNode, "userId").asText();
-		String username = readJsonNode(jsonNode, "username").asText();
-		String password = passwordNode.asText("");
-		boolean enabled = readJsonNode(jsonNode, "enabled").asBoolean();
-		boolean accountNonExpired = readJsonNode(jsonNode, "accountNonExpired").asBoolean();
-		boolean credentialsNonExpired = readJsonNode(jsonNode, "credentialsNonExpired").asBoolean();
-		boolean accountNonLocked = readJsonNode(jsonNode, "accountNonLocked").asBoolean();
-		EulerUserDetails result = new EulerUserDetails(userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-		if (passwordNode.asText(null) == null) {
-			result.eraseCredentials();
-		}
-		return result;
-	}
+    /**
+     * This method will create {@link User} object. It will ensure successful object
+     * creation even if password key is null in serialized json, because credentials may
+     * be removed from the {@link User} by invoking {@link User#eraseCredentials()}. In
+     * that case there won't be any password key in serialized json.
+     *
+     * @param jp   the JsonParser
+     * @param ctxt the DeserializationContext
+     * @return the user
+     * @throws IOException             if a exception during IO occurs
+     * @throws JsonProcessingException if an error during JSON processing occurs
+     */
+    @Override
+    public EulerUserDetails deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        ObjectMapper mapper = (ObjectMapper) jp.getCodec();
+        JsonNode jsonNode = mapper.readTree(jp);
+        Set<? extends GrantedAuthority> authorities = mapper.convertValue(jsonNode.get("authorities"),
+                SIMPLE_GRANTED_AUTHORITY_SET);
+        JsonNode passwordNode = readJsonNode(jsonNode, "password");
+        String tenantId = readJsonNode(jsonNode, "tenantId").asText(EulerUserDetails.DEFAULT_TENANT_ID);
+        String userId = readJsonNode(jsonNode, "userId").asText();
+        String username = readJsonNode(jsonNode, "username").asText();
+        String password = passwordNode.asText("");
+        boolean enabled = readJsonNode(jsonNode, "enabled").asBoolean();
+        boolean accountNonExpired = readJsonNode(jsonNode, "accountNonExpired").asBoolean();
+        boolean credentialsNonExpired = readJsonNode(jsonNode, "credentialsNonExpired").asBoolean();
+        boolean accountNonLocked = readJsonNode(jsonNode, "accountNonLocked").asBoolean();
+        EulerUserDetails result = new EulerUserDetails(tenantId, userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
+        if (passwordNode.asText(null) == null) {
+            result.eraseCredentials();
+        }
+        return result;
+    }
 
-	private JsonNode readJsonNode(JsonNode jsonNode, String field) {
-		return jsonNode.has(field) ? jsonNode.get(field) : MissingNode.getInstance();
-	}
+    private JsonNode readJsonNode(JsonNode jsonNode, String field) {
+        return jsonNode.has(field) ? jsonNode.get(field) : MissingNode.getInstance();
+    }
 
 }

@@ -15,6 +15,25 @@
  */
 package org.eulerframework.model;
 
+import org.eulerframework.resource.ResourceScope;
+
 public interface ResourceModel extends PrincipalAuditingModel {
-    String getTenantId();
+    /**
+     * 资源所属用户 ID
+     */
+    String getUserId();
+
+    /**
+     * 资源所属租户 ID
+     */
+    default String getTenantId() {
+        return null;
+    }
+
+    /**
+     * 资源可见范围
+     */
+    default ResourceScope getResourceScope() {
+        return null;
+    }
 }

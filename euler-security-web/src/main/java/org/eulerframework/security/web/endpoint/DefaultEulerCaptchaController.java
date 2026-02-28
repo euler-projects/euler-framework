@@ -26,7 +26,7 @@ import org.eulerframework.security.web.captcha.storage.SessionCaptchaStorage;
 import org.eulerframework.web.core.base.controller.ApiSupportWebController;
 import org.eulerframework.web.core.base.response.ErrorResponse;
 import org.eulerframework.web.core.exception.web.WebException;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;

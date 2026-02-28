@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.eulerframework.context.ApplicationContextHolder;
 
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 
 public class Tag {
 

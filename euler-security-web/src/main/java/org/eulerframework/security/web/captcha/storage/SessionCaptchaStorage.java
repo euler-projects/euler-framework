@@ -16,11 +16,11 @@
 package org.eulerframework.security.web.captcha.storage;
 
 import jakarta.servlet.http.HttpSession;
-import org.eulerframework.common.util.json.JacksonUtils;
+import org.eulerframework.common.util.json.jackson3.JacksonUtils;
 import org.eulerframework.security.core.captcha.CaptchaDetails;
 import org.eulerframework.security.core.captcha.CaptchaVisibility;
 import org.eulerframework.security.core.captcha.storage.CaptchaStorage;
-import org.eulerframework.web.util.ServletUtils;
+import org.eulerframework.web.servlet.util.ServletUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 

@@ -28,16 +28,13 @@
                 <artifactId>euler-core</artifactId>
                 <version>${revision}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-socket</artifactId>
+                <artifactId>euler-web-core</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-support</artifactId>
-                <version>${revision}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-security-core</artifactId>
@@ -63,32 +60,7 @@
                 <artifactId>euler-security-oauth2-resource-server</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-support-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-support-oauth2-server</artifactId>
-                <version>${revision}</version>
-            </dependency>
 
-            <dependency>
-                <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-core</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-authentication</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eulerframework</groupId>
-                <artifactId>euler-web-authentication-impl-jpa</artifactId>
-                <version>${revision}</version>
-            </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-data-jpa</artifactId>
@@ -97,6 +69,12 @@
             <dependency>
                 <groupId>org.eulerframework</groupId>
                 <artifactId>euler-data-file</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-socket</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>
