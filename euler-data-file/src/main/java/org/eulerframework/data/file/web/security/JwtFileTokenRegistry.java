@@ -27,9 +27,10 @@ public class JwtFileTokenRegistry implements FileTokenRegistry {
         Instant exp = isa.plus(1, ChronoUnit.HOURS);
 
         Claims claims = Jwts.claims()
-                .subject(fileId)
+                .subject("anonymous")
                 .issuedAt(Date.from(isa))
                 .expiration(Date.from(exp))
+                .add(JwtFileToken.FILE_ID_CLAIM, fileId)
                 .build();
 
 

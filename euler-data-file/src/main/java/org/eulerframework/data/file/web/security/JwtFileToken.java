@@ -5,6 +5,8 @@ import io.jsonwebtoken.Claims;
 import java.time.Instant;
 
 public class JwtFileToken implements FileToken {
+    static final String FILE_ID_CLAIM = "file_id";
+
     private final String tokenValue;
     private final Claims claims;
 
@@ -15,7 +17,7 @@ public class JwtFileToken implements FileToken {
 
     @Override
     public String getFileId() {
-        return this.claims.getSubject();
+        return this.claims.get(FILE_ID_CLAIM, String.class);
     }
 
     @Override
