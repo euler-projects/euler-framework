@@ -1,7 +1,7 @@
 package org.eulerframework.security.authentication;
 
 import org.eulerframework.common.http.*;
-import org.eulerframework.common.util.json.Jackson2Utils;
+import org.eulerframework.common.util.json.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
 import org.slf4j.Logger;
@@ -82,7 +82,7 @@ public class WechatAuthorizationCodeAuthenticationProvider
 
             Jscode2sessionReosponse jscode2sessionReosponse;
             try {
-                jscode2sessionReosponse = Jackson2Utils.readValue(resp, Jscode2sessionReosponse.class);
+                jscode2sessionReosponse = JacksonUtils.readValue(resp, Jscode2sessionReosponse.class);
             } catch (Exception e) {
                 throw new IOException("Deserialize code2Session response failed, the original response is " + resp, e);
             }
