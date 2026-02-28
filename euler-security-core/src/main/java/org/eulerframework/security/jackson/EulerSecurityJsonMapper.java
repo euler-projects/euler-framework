@@ -15,26 +15,31 @@
  */
 package org.eulerframework.security.jackson;
 
-import org.springframework.security.jackson.CoreJacksonModule;
+import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.List;
+
 public abstract class EulerSecurityJsonMapper {
-    private static JsonMapper objectMapper;
+    private static JsonMapper jsonMapper;
 
     public static JsonMapper getInstance() {
-        if (objectMapper != null) {
-            return objectMapper;
+        if (jsonMapper != null) {
+            return jsonMapper;
         }
 
         synchronized (EulerSecurityJsonMapper.class) {
-            if (objectMapper != null) {
-                return objectMapper;
+            if (jsonMapper != null) {
+                return jsonMapper;
             }
-            objectMapper = JsonMapper.builder()
-                    .addModule(new CoreJacksonModule())
-                    .addModule(new EulerSecurityJackson2Module())
+
+            List<JacksonModule> securityModules = EulerSecurityJacksonModule.getModules(EulerSecurityJsonMapper.class.getClassLoader());
+
+            jsonMapper = JsonMapper.builder()
+                    .addModules(securityModules)
                     .build();
-            return objectMapper;
+            return jsonMapper;
         }
     }
+
 }
