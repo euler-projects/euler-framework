@@ -22,6 +22,10 @@ public class ResourceEntityUtils {
         return newResourceEntity(userId, tenantId, ResourceScope.PRIVATE, clazz);
     }
 
+    public static <E extends ResourceEntity> E newResourceEntity(String userId, ResourceScope scope, Class<E> clazz) {
+        return newResourceEntity(userId, EulerUserDetails.DEFAULT_TENANT_ID, scope, clazz);
+    }
+
     public static <E extends ResourceEntity> E newResourceEntity(String userId, String tenantId, ResourceScope scope, Class<E> clazz) {
         try {
             E resourceEntity = clazz.getDeclaredConstructor().newInstance();
