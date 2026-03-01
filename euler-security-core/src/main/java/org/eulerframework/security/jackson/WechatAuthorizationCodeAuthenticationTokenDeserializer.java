@@ -11,11 +11,11 @@ import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.node.MissingNode;
 
 import javax.annotation.Nullable;
-import java.util.Set;
+import java.util.Collection;
 
 public class WechatAuthorizationCodeAuthenticationTokenDeserializer extends ValueDeserializer<WechatAuthorizationCodeAuthenticationToken> {
 
-    private static final TypeReference<Set<GrantedAuthority>> GRANTED_AUTHORITY_SET = new TypeReference<>() {
+    private static final TypeReference<Collection<GrantedAuthority>> GRANTED_AUTHORITY_COLLECTION = new TypeReference<>() {
     };
 
     @Override
@@ -27,8 +27,8 @@ public class WechatAuthorizationCodeAuthenticationTokenDeserializer extends Valu
         JsonNode credentialsNode = readJsonNode(jsonNode, "credentials");
         Object credentials = getCredentials(credentialsNode);
         JsonNode authoritiesNode = readJsonNode(jsonNode, "authorities");
-        Set<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
-                ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_SET));
+        Collection<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
+                ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_COLLECTION));
         WechatAuthorizationCodeAuthenticationToken token = (!authenticated)
                 ? WechatAuthorizationCodeAuthenticationToken.unauthenticated(credentials)
                 : WechatAuthorizationCodeAuthenticationToken.authenticated(principal, credentials, authorities);

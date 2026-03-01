@@ -16,7 +16,6 @@
 
 package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -28,12 +27,12 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.node.MissingNode;
 
-import java.util.Set;
+import java.util.Collection;
 
 
 class EulerUserDetailsDeserializer extends ValueDeserializer<EulerUserDetails> {
 
-    private static final TypeReference<Set<EulerGrantedAuthority>> GRANTED_AUTHORITY_SET = new TypeReference<>() {
+    private static final TypeReference<Collection<GrantedAuthority>> GRANTED_AUTHORITY_COLLECTION = new TypeReference<>() {
     };
 
     /**
@@ -51,8 +50,8 @@ class EulerUserDetailsDeserializer extends ValueDeserializer<EulerUserDetails> {
     public EulerUserDetails deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
         JsonNode jsonNode = ctxt.readTree(jp);
         JsonNode authoritiesNode = readJsonNode(jsonNode, "authorities");
-        Set<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
-                ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_SET));
+        Collection<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
+                ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_COLLECTION));
         JsonNode passwordNode = readJsonNode(jsonNode, "password");
         String tenantId = readJsonNode(jsonNode, "tenantId").asString(EulerUserDetails.DEFAULT_TENANT_ID);
         String userId = readJsonNode(jsonNode, "userId").asString();
