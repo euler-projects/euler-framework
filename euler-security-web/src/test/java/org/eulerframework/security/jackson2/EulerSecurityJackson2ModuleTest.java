@@ -18,9 +18,7 @@ package org.eulerframework.security.jackson2;
 
 
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.jackson.EulerSecurityJacksonModule;
-import org.eulerframework.security.jackson.EulerSecurityJsonMapper;
-import org.springframework.security.jackson.CoreJacksonModule;
+import org.eulerframework.security.jackson.EulerSecurityJsonMapperFactory;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ import java.util.List;
 
 public class EulerSecurityJackson2ModuleTest {
     public static void main(String[] args) {
-        JsonMapper mapper = EulerSecurityJsonMapper.getInstance();
+        JsonMapper mapper = EulerSecurityJsonMapperFactory.getInstance();
         List<Object> rawList = new ArrayList<>();
         rawList.add(new EulerUserDetails(EulerUserDetails.DEFAULT_TENANT_ID, "1", "1", "1", new ArrayList<>()));
         String json = mapper.writeValueAsString(rawList);

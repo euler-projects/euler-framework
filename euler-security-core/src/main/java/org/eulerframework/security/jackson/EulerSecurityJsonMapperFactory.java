@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.oauth2.server.authorization.jackson;
+package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.jackson.EulerSecurityJacksonModule;
-import org.springframework.security.oauth2.server.authorization.jackson.OAuth2AuthorizationServerJacksonModule;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
-public abstract class EulerOAuth2JsonMapper {
+public abstract class EulerSecurityJsonMapperFactory {
     private static JsonMapper jsonMapper;
 
     public static JsonMapper getInstance() {
@@ -30,21 +28,18 @@ public abstract class EulerOAuth2JsonMapper {
             return jsonMapper;
         }
 
-        synchronized (EulerOAuth2JsonMapper.class) {
+        synchronized (EulerSecurityJsonMapperFactory.class) {
             if (jsonMapper != null) {
                 return jsonMapper;
             }
 
-            List<JacksonModule> securityModules = EulerSecurityJacksonModule.getModules(
-                    EulerOAuth2JsonMapper.class.getClassLoader(),
-                    new OAuth2AuthorizationServerJacksonModule()
-            );
+            List<JacksonModule> securityModules = EulerSecurityJacksonModules.getModules(EulerSecurityJsonMapperFactory.class.getClassLoader());
 
             jsonMapper = JsonMapper.builder()
                     .addModules(securityModules)
                     .build();
-
             return jsonMapper;
         }
     }
+
 }

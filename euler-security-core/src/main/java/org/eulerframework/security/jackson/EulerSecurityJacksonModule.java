@@ -15,19 +15,12 @@
  */
 package org.eulerframework.security.jackson;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eulerframework.security.authentication.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.jackson.SecurityJacksonModule;
-import org.springframework.security.jackson.SecurityJacksonModules;
 import tools.jackson.core.Version;
-import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class EulerSecurityJacksonModule extends SecurityJacksonModule {
 
@@ -51,29 +44,4 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
                 WechatAuthorizationCodeAuthenticationTokenMixin.class);
     }
 
-    public static List<JacksonModule> getModules(ClassLoader loader, JacksonModule... customModules) {
-
-        BasicPolymorphicTypeValidator.Builder builder = BasicPolymorphicTypeValidator.builder();
-
-        List<JacksonModule> modules = new ArrayList<>();
-        modules.add(new EulerSecurityJacksonModule());
-
-        if (ArrayUtils.isNotEmpty(customModules)) {
-            modules.addAll(Arrays.asList(customModules));
-        }
-
-        applyPolymorphicTypeValidator(modules, builder);
-        List<JacksonModule> securityModules = SecurityJacksonModules.getModules(loader, builder);
-        modules.addAll(securityModules);
-        return modules;
-    }
-
-    private static void applyPolymorphicTypeValidator(List<JacksonModule> modules,
-                                                      BasicPolymorphicTypeValidator.Builder typeValidatorBuilder) {
-        for (JacksonModule module : modules) {
-            if (module instanceof SecurityJacksonModule securityModule) {
-                securityModule.configurePolymorphicTypeValidator(typeValidatorBuilder);
-            }
-        }
-    }
 }
