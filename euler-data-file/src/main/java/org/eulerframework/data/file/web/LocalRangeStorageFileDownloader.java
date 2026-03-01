@@ -15,7 +15,6 @@
  */
 package org.eulerframework.data.file.web;
 
-import org.eulerframework.common.util.Assert;
 import org.eulerframework.data.file.AbstractLocalFileStorage;
 import org.eulerframework.data.file.JdbcFileStorage;
 import org.eulerframework.data.file.StorageFileNotFoundException;
@@ -29,6 +28,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 
 import java.io.*;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class LocalRangeStorageFileDownloader implements RangeStorageFileDownload
     public ResponseEntity<Resource> download(String fileId, String token) throws IOException {
         try {
             FileToken fileToken = this.fileTokenRegistry.getTokenByTokenValue(token);
-            Assert.isTrue(fileId.equals(fileToken.getFileId()));
+            Assert.isTrue(fileId.equals(fileToken.getFileId()), "fileId not match");
         } catch (Exception e) {
             this.logger.warn("File download access denied: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

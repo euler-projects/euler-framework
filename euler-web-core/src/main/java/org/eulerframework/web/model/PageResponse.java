@@ -15,8 +15,8 @@
  */
 package org.eulerframework.web.model;
 
-import org.eulerframework.common.util.Assert;
 import org.eulerframework.web.core.base.response.BaseResponse;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
