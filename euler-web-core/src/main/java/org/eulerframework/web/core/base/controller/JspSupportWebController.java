@@ -21,13 +21,13 @@ import java.io.StringWriter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.eulerframework.common.util.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import org.eulerframework.common.util.Assert;
-import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.exception.web.PageNotFoundException;
@@ -46,12 +46,12 @@ public abstract class JspSupportWebController extends AbstractWebController {
     private String webControllerName;
     
     protected void setWebControllerName(String webControllerName) {
-        Assert.notNull(webControllerName);
+        Assert.notNull(webControllerName, "webControllerName cannot be null");
         
         while(webControllerName.startsWith("/"))
             webControllerName = webControllerName.substring(1);
         
-        Assert.hasText(webControllerName);
+        Assert.hasText(webControllerName, "webControllerName cannot be empty");
         this.webControllerName = webControllerName;
     }
     

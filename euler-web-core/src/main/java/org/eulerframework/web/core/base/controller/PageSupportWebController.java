@@ -17,7 +17,6 @@ package org.eulerframework.web.core.base.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.common.util.Assert;
 import org.eulerframework.web.config.WebConfig;
 import org.eulerframework.web.core.base.WebContextAccessible;
 import org.eulerframework.web.core.base.response.ErrorResponse;
@@ -28,6 +27,7 @@ import org.eulerframework.web.core.exception.web.WebException;
 import org.eulerframework.web.core.exception.web.api.ResourceNotFoundException;
 import org.eulerframework.web.servlet.util.ServletUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
