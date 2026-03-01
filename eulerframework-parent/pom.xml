@@ -360,12 +360,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-common-util</artifactId>
+                <artifactId>euler-common-json</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eulerframework</groupId>
-                <artifactId>euler-common-util-json</artifactId>
+                <artifactId>euler-common-util</artifactId>
                 <version>${euler-common.version}</version>
             </dependency>
             <dependency>
