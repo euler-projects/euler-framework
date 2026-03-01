@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.oauth2.server.authorization.jackson2.EulerOAuth2ObjectMapper;
+import org.eulerframework.security.jackson2.EulerSecurityObjectMapperFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -97,7 +97,7 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
 
     public EulerRedisOAuth2AuthorizationService(StringRedisTemplate stringRedisTemplate, RegisteredClientRepository registeredClientRepository, Duration expireTime) {
         this.stringRedisTemplate = stringRedisTemplate;
-        this.objectMapper = EulerOAuth2ObjectMapper.getInstance();
+        this.objectMapper = EulerSecurityObjectMapperFactory.getInstance();
         this.registeredClientRepository = registeredClientRepository;
         this.expireTime = expireTime;
     }

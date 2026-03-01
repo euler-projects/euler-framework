@@ -16,7 +16,7 @@
 package org.eulerframework.security.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.oauth2.server.authorization.jackson2.EulerOAuth2ObjectMapper;
+import org.eulerframework.security.jackson2.EulerSecurityObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -88,12 +88,12 @@ public class EulerJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorization
     private void mixIn() {
         RowMapper<OAuth2Authorization> authorizationRowMapper = this.getAuthorizationRowMapper();
         if (authorizationRowMapper instanceof OAuth2AuthorizationRowMapper) {
-            ((OAuth2AuthorizationRowMapper) authorizationRowMapper).setObjectMapper(EulerOAuth2ObjectMapper.getInstance());
+            ((OAuth2AuthorizationRowMapper) authorizationRowMapper).setObjectMapper(EulerSecurityObjectMapperFactory.getInstance());
                     //.getObjectMapper().registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
         }
         Function<OAuth2Authorization, List<SqlParameterValue>> authorizationParametersMapper = this.getAuthorizationParametersMapper();
         if (authorizationParametersMapper instanceof OAuth2AuthorizationParametersMapper) {
-            ((OAuth2AuthorizationParametersMapper) authorizationParametersMapper).setObjectMapper(EulerOAuth2ObjectMapper.getInstance());
+            ((OAuth2AuthorizationParametersMapper) authorizationParametersMapper).setObjectMapper(EulerSecurityObjectMapperFactory.getInstance());
                     //.getObjectMapper().registerModule(new EulerOAuth2AuthorizationServerJackson2Module());
         }
     }

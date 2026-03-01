@@ -15,10 +15,12 @@
  */
 package org.eulerframework.security.jackson2;
 
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.security.jackson2.CoreJackson2Module;
 
-public abstract class EulerSecurityObjectMapper {
+import java.util.List;
+
+public abstract class EulerSecurityObjectMapperFactory {
     private static ObjectMapper objectMapper;
 
     public static ObjectMapper getInstance() {
@@ -26,13 +28,13 @@ public abstract class EulerSecurityObjectMapper {
             return objectMapper;
         }
 
-        synchronized (EulerSecurityObjectMapper.class) {
+        synchronized (EulerSecurityObjectMapperFactory.class) {
             if (objectMapper != null) {
                 return objectMapper;
             }
             objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new CoreJackson2Module());
-            objectMapper.registerModule(new EulerSecurityJackson2Module());
+            List<Module> securityModules = EulerSecurityJackson2Modules.getModules(EulerSecurityObjectMapperFactory.class.getClassLoader());
+            objectMapper.registerModules(securityModules);
             return objectMapper;
         }
     }
