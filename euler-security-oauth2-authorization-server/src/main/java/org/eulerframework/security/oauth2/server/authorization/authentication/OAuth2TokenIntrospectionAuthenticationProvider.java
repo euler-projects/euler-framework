@@ -17,14 +17,11 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eulerframework.security.oauth2.core.EulerScopes;
+import org.eulerframework.security.oauth2.server.authorization.OAuth2AuthorizationUtils;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
@@ -41,8 +38,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.net.URL;
-import java.security.Principal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An {@link AuthenticationProvider} implementation for OAuth 2.0 Token Introspection.
@@ -118,34 +116,16 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
         RegisteredClient authorizedClient = this.registeredClientRepository
                 .findById(authorization.getRegisteredClientId());
 
-        OAuth2TokenIntrospection tokenClaims;
-        Set<String> authorizedScopes = authorization.getAuthorizedScopes();
-        if (authorizedScopes != null && authorizedScopes.contains(EulerScopes.GRANTED_AUTHORITIES)) {
-            Object principal = authorization.getAttribute(Principal.class.getName());
-
-            String username = null;
-            Collection<? extends GrantedAuthority> authorities = null;
-
-            if (principal instanceof UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                    && usernamePasswordAuthenticationToken.getPrincipal() instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-                authorities = userDetails.getAuthorities();
-            } else if (principal instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-                authorities = userDetails.getAuthorities();
-            }
-
-            tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient, username, authorities);
-        } else {
-            tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient);
-        }
+        OAuth2TokenIntrospection tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient, authorization);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace("Authenticated token introspection request");
         }
 
-        return new OAuth2TokenIntrospectionAuthenticationToken(authorizedToken.getToken().getTokenValue(),
-                clientPrincipal, tokenClaims);
+        return new OAuth2TokenIntrospectionAuthenticationToken(
+                authorizedToken.getToken().getTokenValue(),
+                clientPrincipal,
+                tokenClaims);
     }
 
     @Override
@@ -153,18 +133,10 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
         return OAuth2TokenIntrospectionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-
-    private static OAuth2TokenIntrospection withActiveTokenClaims(
-            OAuth2Authorization.Token<OAuth2Token> authorizedToken,
-            RegisteredClient authorizedClient) {
-        return withActiveTokenClaims(authorizedToken, authorizedClient, null, null);
-    }
-
     private static OAuth2TokenIntrospection withActiveTokenClaims(
             OAuth2Authorization.Token<OAuth2Token> authorizedToken,
             RegisteredClient authorizedClient,
-            String username,
-            Collection<? extends GrantedAuthority> authorities) {
+            OAuth2Authorization authorization) {
 
         OAuth2TokenIntrospection.Builder tokenClaims;
         if (!CollectionUtils.isEmpty(authorizedToken.getClaims())) {
@@ -176,13 +148,8 @@ public final class OAuth2TokenIntrospectionAuthenticationProvider implements Aut
 
         tokenClaims.clientId(authorizedClient.getClientId());
 
-        if (username != null) {
-            tokenClaims.username(username);
-        }
-
-        if (authorities != null) {
-            tokenClaims.claim("authorities", authorities);
-        }
+        tokenClaims.claims(claims -> OAuth2AuthorizationUtils.putExtendClaims(
+                authorization, authorization.getAuthorizedScopes(), claims));
 
         OAuth2Token token = authorizedToken.getToken();
         if (token.getIssuedAt() != null) {

@@ -1,8 +1,6 @@
 package org.eulerframework.security.oauth2.server.authorization.oidc.authentication;
 
-import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.eulerframework.security.oauth2.server.authorization.OAuth2AuthorizationUtils;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -76,16 +74,7 @@ public class UserDetailsOidcUserInfoMapper implements Function<OidcUserInfoAuthe
         Map<String, Object> requestedClaims = new HashMap<>(claims);
         requestedClaims.keySet().removeIf((claimName) -> !scopeRequestedClaimNames.contains(claimName));
 
-        if (requestedScopes.contains(EulerOidcScopes.AUTHORITIES)) {
-            if (authorization.getAttribute("java.security.Principal") instanceof
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) {
-                if (usernamePasswordAuthenticationToken.getPrincipal() instanceof UserDetails userDetails) {
-                    requestedClaims.put("authorities", userDetails.getAuthorities());
-                } else {
-                    requestedClaims.put("authorities", usernamePasswordAuthenticationToken.getAuthorities());
-                }
-            }
-        }
+        OAuth2AuthorizationUtils.putExtendClaims(authorization, requestedScopes, requestedClaims);
 
         return requestedClaims;
     }
