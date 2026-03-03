@@ -2,6 +2,7 @@ package org.eulerframework.security.oauth2.server.authorization.oidc.authenticat
 
 import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -76,9 +77,13 @@ public class UserDetailsOidcUserInfoMapper implements Function<OidcUserInfoAuthe
         requestedClaims.keySet().removeIf((claimName) -> !scopeRequestedClaimNames.contains(claimName));
 
         if (requestedScopes.contains(EulerOidcScopes.AUTHORITIES)) {
-            Object principal = authorization.getAttribute("java.security.Principal");
-            if (principal instanceof UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) {
-                requestedClaims.put("authorities", usernamePasswordAuthenticationToken.getAuthorities());
+            if (authorization.getAttribute("java.security.Principal") instanceof
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) {
+                if (usernamePasswordAuthenticationToken.getPrincipal() instanceof UserDetails userDetails) {
+                    requestedClaims.put("authorities", userDetails.getAuthorities());
+                } else {
+                    requestedClaims.put("authorities", usernamePasswordAuthenticationToken.getAuthorities());
+                }
             }
         }
 
