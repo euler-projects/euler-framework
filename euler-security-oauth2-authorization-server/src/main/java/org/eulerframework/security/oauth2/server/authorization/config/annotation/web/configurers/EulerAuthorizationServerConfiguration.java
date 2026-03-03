@@ -23,8 +23,14 @@ import org.eulerframework.security.oauth2.server.authorization.authentication.OA
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2ConfigurerUtilsAccessor;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+
+import java.util.function.Function;
 
 public class EulerAuthorizationServerConfiguration {
     public static void configPasswordAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
@@ -73,6 +79,15 @@ public class EulerAuthorizationServerConfiguration {
         return new OAuth2WechatAuthorizationCodeAuthenticationConverter();
     }
 
+    /**
+     * @deprecated OIDC claims such as {@code name}, {@code preferred_username}, and {@code profile},
+     * as well as any additional information from a custom {@link UserDetails},
+     * should be exposed either by defining an {@link OAuth2TokenCustomizer} bean
+     * (which is automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}),
+     * or by customizing the {@code userinfo} endpoint response via
+     * {@link  OidcUserInfoAuthenticationProvider#setUserInfoMapper(Function)}.
+     */
+    @Deprecated
     public static void configPrincipalSupportTokenIntrospectionAuthentication(HttpSecurity http) {
         OAuth2TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider = new OAuth2TokenIntrospectionAuthenticationProvider(
                 OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http),
