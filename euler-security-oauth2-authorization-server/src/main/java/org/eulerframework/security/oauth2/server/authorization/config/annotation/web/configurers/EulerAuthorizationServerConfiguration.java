@@ -16,21 +16,18 @@
 package org.eulerframework.security.oauth2.server.authorization.config.annotation.web.configurers;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2TokenIntrospectionAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2ConfigurerUtilsAccessor;
-import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-
-import java.util.function.Function;
 
 public class EulerAuthorizationServerConfiguration {
     public static void configPasswordAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
@@ -80,26 +77,24 @@ public class EulerAuthorizationServerConfiguration {
     }
 
     /**
-     * Enables extended claims support for the OAuth2 Token Introspection endpoint.
+     * Enables extended claims support for both the Token Introspection endpoint and the
+     * OIDC UserInfo endpoint.
      * <p>
-     * When claims extension is enabled, the following should also be configured to ensure
-     * consistent claims exposure across all endpoints:
-     * <ul>
-     *   <li>An {@link OAuth2TokenCustomizer} bean to enrich token claims at issuance time
-     *       (automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}).</li>
-     *   <li>A custom {@code userinfo} endpoint mapping via
-     *       {@link OidcUserInfoAuthenticationProvider#setUserInfoMapper(Function)}
-     *       to expose extended claims through the UserInfo endpoint.</li>
-     * </ul>
+     * To provide the actual claim values, an {@link OAuth2TokenCustomizer} bean must be defined
+     * to enrich token claims at issuance time
+     * (automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}).
      */
-    public static void configTokenIntrospectionClaimsExtension(HttpSecurity http) {
+    public static void enableExtendedClaims(HttpSecurity http) {
         OAuth2TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider = new OAuth2TokenIntrospectionAuthenticationProvider(
                 OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http),
                 OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http));
 
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .tokenIntrospectionEndpoint(configurer -> configurer
-                        .authenticationProvider(tokenIntrospectionAuthenticationProvider));
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).tokenIntrospectionEndpoint(configurer -> configurer
+                .authenticationProvider(tokenIntrospectionAuthenticationProvider));
 
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(configurer -> configurer
+                .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+                        .userInfoMapper(new UserDetailsOidcUserInfoMapper())
+                ));
     }
 }
