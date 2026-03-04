@@ -85,12 +85,12 @@ public class EulerAuthorizationServerConfiguration {
      * (automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}).
      */
     public static void enableExtendedClaims(HttpSecurity http) {
-        OAuth2TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider = new OAuth2TokenIntrospectionAuthenticationProvider(
-                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http),
-                OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http));
-
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).tokenIntrospectionEndpoint(configurer -> configurer
-                .authenticationProvider(tokenIntrospectionAuthenticationProvider));
+//        OAuth2TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider = new OAuth2TokenIntrospectionAuthenticationProvider(
+//                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http),
+//                OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http));
+//
+//        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).tokenIntrospectionEndpoint(configurer -> configurer
+//                .authenticationProvider(tokenIntrospectionAuthenticationProvider));
 
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(configurer -> configurer
                 .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
