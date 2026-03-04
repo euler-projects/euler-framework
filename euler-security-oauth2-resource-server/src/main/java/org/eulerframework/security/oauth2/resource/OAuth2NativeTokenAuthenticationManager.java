@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.oauth2.resource;
 
+import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +32,6 @@ import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -68,13 +68,29 @@ public class OAuth2NativeTokenAuthenticationManager implements AuthenticationMan
                 .map(SimpleGrantedAuthority::new)
                 .forEach(authorities::add);
 
+        if (accessToken.getScopes().contains(EulerOidcScopes.AUTHORITIES)) {
+            Optional.ofNullable(authorizedToken.getClaims())
+                    .map(claims -> claims.get(EulerOidcScopes.AUTHORITIES))
+                    .filter(claimsAuthorities -> claimsAuthorities instanceof Collection)
+                    .map(claimsAuthorities -> (Collection<?>) claimsAuthorities)
+                    .orElse(Collections.emptySet())
+                    .forEach(tokenAuthority -> {
+                        if (tokenAuthority instanceof Map<?, ?> map) {
+                            Optional.ofNullable(map.get("authority"))
+                                    .ifPresent(authority -> authorities.add(new SimpleGrantedAuthority(authority.toString())));
+                        } else if (tokenAuthority instanceof GrantedAuthority grantedAuthority) {
+                            authorities.add(new SimpleGrantedAuthority(Objects.requireNonNull(grantedAuthority.getAuthority())));
+                        } else if (tokenAuthority instanceof String) {
+                            authorities.add(new SimpleGrantedAuthority((String) tokenAuthority));
+                        }
+                    });
+        }
+
+
         Collection<GrantedAuthority> resourceOwnerAuthorities = null;
         Object resourceOwnerPrincipal = authorization.getAttribute("java.security.Principal");
         if (resourceOwnerPrincipal instanceof UsernamePasswordAuthenticationToken) {
             resourceOwnerAuthorities = ((UsernamePasswordAuthenticationToken) resourceOwnerPrincipal).getAuthorities();
-            if (!CollectionUtils.isEmpty(resourceOwnerAuthorities)) {
-                authorities.addAll(resourceOwnerAuthorities);
-            }
         }
 
         Map<String, Object> claims = authorizedToken.getClaims();
