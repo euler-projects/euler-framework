@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -102,6 +103,7 @@ public class OAuth2NativeTokenAuthenticationManager implements AuthenticationMan
         attributes.put(OAuth2TokenIntrospectionClaimNames.CLIENT_ID, authorization.getRegisteredClientId());
 
         OAuth2AuthenticatedPrincipal principal = new NativeOAuth2AuthenticatedPrincipal(attributes, authorities, resourceOwnerAuthorities);
+        authorities.add(FactorGrantedAuthority.fromAuthority(FactorGrantedAuthority.BEARER_AUTHORITY));
         return new BearerTokenAuthentication(principal, accessToken, authorities);
     }
 }
