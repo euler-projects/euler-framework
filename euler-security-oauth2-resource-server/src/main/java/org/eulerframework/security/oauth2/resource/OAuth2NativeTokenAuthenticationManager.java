@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -69,8 +70,11 @@ public class OAuth2NativeTokenAuthenticationManager implements AuthenticationMan
 
         Collection<GrantedAuthority> resourceOwnerAuthorities = null;
         Object resourceOwnerPrincipal = authorization.getAttribute("java.security.Principal");
-        if(resourceOwnerPrincipal instanceof UsernamePasswordAuthenticationToken) {
+        if (resourceOwnerPrincipal instanceof UsernamePasswordAuthenticationToken) {
             resourceOwnerAuthorities = ((UsernamePasswordAuthenticationToken) resourceOwnerPrincipal).getAuthorities();
+            if (!CollectionUtils.isEmpty(resourceOwnerAuthorities)) {
+                authorities.addAll(resourceOwnerAuthorities);
+            }
         }
 
         Map<String, Object> claims = authorizedToken.getClaims();
