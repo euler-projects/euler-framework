@@ -80,15 +80,19 @@ public class EulerAuthorizationServerConfiguration {
     }
 
     /**
-     * @deprecated OIDC claims such as {@code name}, {@code preferred_username}, and {@code profile},
-     * as well as any additional information from a custom {@link UserDetails},
-     * should be exposed either by defining an {@link OAuth2TokenCustomizer} bean
-     * (which is automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}),
-     * or by customizing the {@code userinfo} endpoint response via
-     * {@link  OidcUserInfoAuthenticationProvider#setUserInfoMapper(Function)}.
+     * Enables extended claims support for the OAuth2 Token Introspection endpoint.
+     * <p>
+     * When claims extension is enabled, the following should also be configured to ensure
+     * consistent claims exposure across all endpoints:
+     * <ul>
+     *   <li>An {@link OAuth2TokenCustomizer} bean to enrich token claims at issuance time
+     *       (automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}).</li>
+     *   <li>A custom {@code userinfo} endpoint mapping via
+     *       {@link OidcUserInfoAuthenticationProvider#setUserInfoMapper(Function)}
+     *       to expose extended claims through the UserInfo endpoint.</li>
+     * </ul>
      */
-    @Deprecated
-    public static void configPrincipalSupportTokenIntrospectionAuthentication(HttpSecurity http) {
+    public static void configTokenIntrospectionClaimsExtension(HttpSecurity http) {
         OAuth2TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider = new OAuth2TokenIntrospectionAuthenticationProvider(
                 OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http),
                 OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http));
