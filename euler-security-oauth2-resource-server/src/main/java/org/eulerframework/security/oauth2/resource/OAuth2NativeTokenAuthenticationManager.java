@@ -76,13 +76,13 @@ public class OAuth2NativeTokenAuthenticationManager implements AuthenticationMan
                     .map(claimsAuthorities -> (Collection<?>) claimsAuthorities)
                     .orElse(Collections.emptySet())
                     .forEach(tokenAuthority -> {
-                        if (tokenAuthority instanceof Map<?, ?> map) {
+                        if (tokenAuthority instanceof String) {
+                            authorities.add(new SimpleGrantedAuthority((String) tokenAuthority));
+                        } else if (tokenAuthority instanceof Map<?, ?> map) {
                             Optional.ofNullable(map.get("authority"))
                                     .ifPresent(authority -> authorities.add(new SimpleGrantedAuthority(authority.toString())));
                         } else if (tokenAuthority instanceof GrantedAuthority grantedAuthority) {
                             authorities.add(new SimpleGrantedAuthority(Objects.requireNonNull(grantedAuthority.getAuthority())));
-                        } else if (tokenAuthority instanceof String) {
-                            authorities.add(new SimpleGrantedAuthority((String) tokenAuthority));
                         }
                     });
         }

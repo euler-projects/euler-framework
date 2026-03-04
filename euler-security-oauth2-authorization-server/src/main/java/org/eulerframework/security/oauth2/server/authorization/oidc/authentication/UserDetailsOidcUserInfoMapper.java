@@ -76,9 +76,6 @@ public class UserDetailsOidcUserInfoMapper implements Function<OidcUserInfoAuthe
 
         Map<String, Object> requestedClaims = new HashMap<>(claims);
         requestedClaims.keySet().removeIf((claimName) -> !scopeRequestedClaimNames.contains(claimName));
-
-        //OAuth2AuthorizationUtils.putExtendClaims(authorization, requestedScopes, requestedClaims);
-
         return requestedClaims;
     }
 

@@ -17,7 +17,6 @@ package org.eulerframework.security.oauth2.server.authorization.config.annotatio
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2TokenIntrospectionAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
@@ -77,21 +76,13 @@ public class EulerAuthorizationServerConfiguration {
     }
 
     /**
-     * Enables extended claims support for both the Token Introspection endpoint and the
-     * OIDC UserInfo endpoint.
+     * Enable extended claims support for the OIDC {@code userinfo} endpoint.
      * <p>
      * To provide the actual claim values, an {@link OAuth2TokenCustomizer} bean must be defined
      * to enrich token claims at issuance time
      * (automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}).
      */
     public static void enableExtendedClaims(HttpSecurity http) {
-//        OAuth2TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider = new OAuth2TokenIntrospectionAuthenticationProvider(
-//                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http),
-//                OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http));
-//
-//        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).tokenIntrospectionEndpoint(configurer -> configurer
-//                .authenticationProvider(tokenIntrospectionAuthenticationProvider));
-
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(configurer -> configurer
                 .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
                         .userInfoMapper(new UserDetailsOidcUserInfoMapper())
