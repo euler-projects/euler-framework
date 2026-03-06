@@ -4,6 +4,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.data.entity.ResourceEntity;
 import org.eulerframework.model.AbstractResourceModel;
 import org.eulerframework.resource.ResourceScope;
+import org.eulerframework.resource.StandardResourceScope;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 
 import java.sql.PreparedStatement;
@@ -85,5 +86,13 @@ public class ResourceEntityUtils {
         } catch (Exception e) {
             throw ExceptionUtils.<RuntimeException>rethrow(e);
         }
+    }
+
+    public static <E extends ResourceEntity> E newResourceEntity(String userId, StandardResourceScope standardScope, Class<E> clazz) {
+        return newResourceEntity(userId, ResourceScope.resolve(standardScope), clazz);
+    }
+
+    public static <E extends ResourceEntity> E newResourceEntity(String userId, String tenantId, StandardResourceScope standardScope, Class<E> clazz) {
+        return newResourceEntity(userId, tenantId, ResourceScope.resolve(standardScope), clazz);
     }
 }
