@@ -1,6 +1,6 @@
 package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
+import org.eulerframework.security.authentication.apple.AppleAppAttestAssertionAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.type.TypeReference;
@@ -13,25 +13,27 @@ import tools.jackson.databind.node.MissingNode;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
-public class WechatAuthorizationCodeAuthenticationTokenDeserializer extends ValueDeserializer<WechatAuthorizationCodeAuthenticationToken> {
+public class AppleAppAttestAssertionAuthenticationTokenDeserializer extends ValueDeserializer<AppleAppAttestAssertionAuthenticationToken> {
 
     private static final TypeReference<Collection<GrantedAuthority>> GRANTED_AUTHORITY_COLLECTION = new TypeReference<>() {
     };
 
     @Override
-    public WechatAuthorizationCodeAuthenticationToken deserialize(tools.jackson.core.JsonParser jp, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
+    public AppleAppAttestAssertionAuthenticationToken deserialize(tools.jackson.core.JsonParser jp, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
         JsonNode jsonNode = ctxt.readTree(jp);
         boolean authenticated = readJsonNode(jsonNode, "authenticated").asBoolean();
         JsonNode principalNode = readJsonNode(jsonNode, "principal");
         Object principal = getPrincipal(ctxt, principalNode);
         JsonNode credentialsNode = readJsonNode(jsonNode, "credentials");
         Object credentials = getCredentials(credentialsNode);
+        String keyId = readJsonNode(jsonNode, "keyId").asString();
+        String challenge = readJsonNode(jsonNode, "challenge").asString();
         JsonNode authoritiesNode = readJsonNode(jsonNode, "authorities");
         Collection<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
                 ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_COLLECTION));
-        WechatAuthorizationCodeAuthenticationToken token = (!authenticated)
-                ? WechatAuthorizationCodeAuthenticationToken.unauthenticated(credentials)
-                : WechatAuthorizationCodeAuthenticationToken.authenticated(principal, credentials, authorities);
+        AppleAppAttestAssertionAuthenticationToken token = (!authenticated)
+                ? AppleAppAttestAssertionAuthenticationToken.unauthenticated(keyId, credentials, challenge)
+                : AppleAppAttestAssertionAuthenticationToken.authenticated(principal, credentials, keyId, challenge, authorities);
         JsonNode detailsNode = readJsonNode(jsonNode, "details");
         if (detailsNode.isNull() || detailsNode.isMissingNode()) {
             token.setDetails(null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
-import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
+import org.eulerframework.security.authentication.apple.AppleAppAttestAssertionAuthenticationToken;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.authentication.ChallengeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,44 +40,69 @@ import org.springframework.security.oauth2.server.authorization.context.Authoriz
 import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.util.Assert;
 
 import java.security.Principal;
 import java.util.*;
 
-public class OAuth2WechatAuthorizationCodeAuthenticationProvider implements AuthenticationProvider {
+public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
-    private final Logger logger = LoggerFactory.getLogger(OAuth2WechatAuthorizationCodeAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuth2AppleAppAttestAssertionAuthenticationProvider.class);
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
     private final AuthenticationManager authenticationManager;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
+    private final ChallengeService challengeService;
 
-    public OAuth2WechatAuthorizationCodeAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+    public OAuth2AppleAppAttestAssertionAuthenticationProvider(
+            AuthenticationManager authenticationManager,
+            OAuth2AuthorizationService authorizationService,
+            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
+            ChallengeService challengeService) {
+        Assert.notNull(authenticationManager, "authenticationManager must not be null");
+        Assert.notNull(authorizationService, "authorizationService must not be null");
+        Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
+        Assert.notNull(challengeService, "challengeService must not be null");
         this.authenticationManager = authenticationManager;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
+        this.challengeService = challengeService;
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2WechatAuthorizationCodeAuthenticationToken wechatAuthenticationToken = (OAuth2WechatAuthorizationCodeAuthenticationToken) authentication;
+        OAuth2AppleAppAttestAssertionAuthenticationToken assertionAuthenticationToken =
+                (OAuth2AppleAppAttestAssertionAuthenticationToken) authentication;
 
         OAuth2ClientAuthenticationToken clientPrincipal =
-                OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(wechatAuthenticationToken);
+                OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(assertionAuthenticationToken);
         RegisteredClient registeredClient = clientPrincipal.getRegisteredClient();
 
         if (registeredClient == null) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
-        this.validateScope(wechatAuthenticationToken, registeredClient);
-        Set<String> authorizedScopes = Collections.unmodifiableSet(wechatAuthenticationToken.getScopes());
+        if (!registeredClient.getAuthorizationGrantTypes().contains(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION)) {
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+        }
 
-        String code = wechatAuthenticationToken.getWechatAuthorizationCode();
-        Authentication userPrincipal = WechatAuthorizationCodeAuthenticationToken.unauthenticated(code);
+        String keyId = assertionAuthenticationToken.getKeyId();
+        String assertion = assertionAuthenticationToken.getAssertion();
+        String challenge = assertionAuthenticationToken.getChallenge();
+
+        // Consume the challenge first to ensure single-use, preventing replay attacks
+        if (!this.challengeService.consumeChallenge(challenge, registeredClient.getClientId())) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
+                    "Invalid or expired challenge.", ERROR_URI));
+        }
+
+        this.validateScope(assertionAuthenticationToken, registeredClient);
+        Set<String> authorizedScopes = Collections.unmodifiableSet(assertionAuthenticationToken.getScopes());
+
+        Authentication userPrincipal = AppleAppAttestAssertionAuthenticationToken.unauthenticated(keyId, assertion, challenge);
         userPrincipal = this.authenticationManager.authenticate(userPrincipal);
         if (!userPrincipal.isAuthenticated()) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
@@ -84,7 +110,7 @@ public class OAuth2WechatAuthorizationCodeAuthenticationProvider implements Auth
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
-                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_AUTHORIZATION_CODE)
+                .authorizationGrantType(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION)
                 .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
 
@@ -92,9 +118,9 @@ public class OAuth2WechatAuthorizationCodeAuthenticationProvider implements Auth
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorizationGrantType(EulerAuthorizationGrantType.WECHAT_AUTHORIZATION_CODE)
+                .authorizationGrantType(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION)
                 .authorizedScopes(authorizedScopes)
-                .authorizationGrant(wechatAuthenticationToken);
+                .authorizationGrant(assertionAuthenticationToken);
 
         // ----- Access token -----
         OAuth2TokenContext tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
@@ -146,7 +172,7 @@ public class OAuth2WechatAuthorizationCodeAuthenticationProvider implements Auth
             // @formatter:off
             tokenContext = tokenContextBuilder
                     .tokenType(ID_TOKEN_TOKEN_TYPE)
-                    .authorization(authorizationBuilder.build())	// ID token customizer may need access to the access token and/or refresh token
+                    .authorization(authorizationBuilder.build())
                     .build();
             // @formatter:on
             OAuth2Token generatedIdToken = this.tokenGenerator.generate(tokenContext);
@@ -183,12 +209,11 @@ public class OAuth2WechatAuthorizationCodeAuthenticationProvider implements Auth
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return OAuth2WechatAuthorizationCodeAuthenticationToken.class.isAssignableFrom(authentication);
+        return OAuth2AppleAppAttestAssertionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2WechatAuthorizationCodeAuthenticationToken wechatAuthenticationToken, RegisteredClient registeredClient) {
-
-        Set<String> requestedScopes = wechatAuthenticationToken.getScopes();
+    private void validateScope(OAuth2AppleAppAttestAssertionAuthenticationToken authenticationToken, RegisteredClient registeredClient) {
+        Set<String> requestedScopes = authenticationToken.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();
         if (!requestedScopes.isEmpty() && !allowedScopes.containsAll(requestedScopes)) {
             if (this.logger.isDebugEnabled()) {

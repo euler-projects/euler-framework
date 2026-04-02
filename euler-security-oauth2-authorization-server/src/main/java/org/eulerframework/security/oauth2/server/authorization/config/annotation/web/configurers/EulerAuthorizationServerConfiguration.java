@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,15 @@
 package org.eulerframework.security.oauth2.server.authorization.config.annotation.web.configurers;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
+import org.eulerframework.security.authentication.ChallengeService;
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -73,6 +79,78 @@ public class EulerAuthorizationServerConfiguration {
 
     private static OAuth2WechatAuthorizationCodeAuthenticationConverter getOAuth2WechatAuthenticationConverter() {
         return new OAuth2WechatAuthorizationCodeAuthenticationConverter();
+    }
+
+    public static void configAppleAppAttestAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
+
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .tokenEndpoint(configurer -> configurer
+                        .authenticationProvider(getOAuth2AppleAppAttestAttestationAuthenticationProvider(http, authenticationConfiguration, challengeService))
+                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAttestationAuthenticationConverter()));
+
+        // Auto-register grant type with challenge endpoint
+        EulerOAuth2AuthorizationServerConfigurer eulerConfigurer =
+                http.getConfigurer(EulerOAuth2AuthorizationServerConfigurer.class);
+        if (eulerConfigurer != null) {
+            eulerConfigurer.challengeEndpoint(challenge ->
+                    challenge.authorizedGrantTypes(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ATTESTATION));
+        }
+    }
+
+    public static void configAppleAppAttestAssertionAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
+
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .tokenEndpoint(configurer -> configurer
+                        .authenticationProvider(getOAuth2AppleAppAttestAssertionAuthenticationProvider(http, authenticationConfiguration, challengeService))
+                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAssertionAuthenticationConverter()));
+
+        // Auto-register grant type with challenge endpoint
+        EulerOAuth2AuthorizationServerConfigurer eulerConfigurer =
+                http.getConfigurer(EulerOAuth2AuthorizationServerConfigurer.class);
+        if (eulerConfigurer != null) {
+            eulerConfigurer.challengeEndpoint(challenge ->
+                    challenge.authorizedGrantTypes(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION));
+        }
+    }
+
+    private static OAuth2AppleAppAttestAttestationAuthenticationProvider getOAuth2AppleAppAttestAttestationAuthenticationProvider(
+            HttpSecurity http, AuthenticationConfiguration authenticationConfiguration,
+            ChallengeService challengeService) {
+        try {
+            return new OAuth2AppleAppAttestAttestationAuthenticationProvider(
+                    authenticationConfiguration.getAuthenticationManager(),
+                    OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
+                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http),
+                    challengeService
+            );
+        } catch (Exception e) {
+            throw ExceptionUtils.asRuntimeException(e);
+        }
+    }
+
+    private static OAuth2AppleAppAttestAttestationAuthenticationConverter getOAuth2AppleAppAttestAttestationAuthenticationConverter() {
+        return new OAuth2AppleAppAttestAttestationAuthenticationConverter();
+    }
+
+    private static OAuth2AppleAppAttestAssertionAuthenticationProvider getOAuth2AppleAppAttestAssertionAuthenticationProvider(
+            HttpSecurity http, AuthenticationConfiguration authenticationConfiguration,
+            ChallengeService challengeService) {
+        try {
+            return new OAuth2AppleAppAttestAssertionAuthenticationProvider(
+                    authenticationConfiguration.getAuthenticationManager(),
+                    OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
+                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http),
+                    challengeService
+            );
+        } catch (Exception e) {
+            throw ExceptionUtils.asRuntimeException(e);
+        }
+    }
+
+    private static OAuth2AppleAppAttestAssertionAuthenticationConverter getOAuth2AppleAppAttestAssertionAuthenticationConverter() {
+        return new OAuth2AppleAppAttestAssertionAuthenticationConverter();
     }
 
     /**

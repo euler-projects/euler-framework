@@ -15,7 +15,9 @@
  */
 package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.authentication.WechatAuthorizationCodeAuthenticationToken;
+import org.eulerframework.security.authentication.apple.AppleAppAttestAssertionAuthenticationToken;
+import org.eulerframework.security.authentication.apple.AppleAppAttestAttestationAuthenticationToken;
+import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.jackson.SecurityJacksonModule;
@@ -32,7 +34,9 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
     public void configurePolymorphicTypeValidator(BasicPolymorphicTypeValidator.Builder builder) {
         builder.allowIfSubType(EulerUserDetails.class)
                 .allowIfSubType(EulerGrantedAuthority.class)
-                .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class);
+                .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class)
+                .allowIfSubType(AppleAppAttestAttestationAuthenticationToken.class)
+                .allowIfSubType(AppleAppAttestAssertionAuthenticationToken.class);
 
     }
 
@@ -42,6 +46,10 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         context.setMixIn(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
         context.setMixIn(WechatAuthorizationCodeAuthenticationToken.class,
                 WechatAuthorizationCodeAuthenticationTokenMixin.class);
+        context.setMixIn(AppleAppAttestAttestationAuthenticationToken.class,
+                AppleAppAttestAttestationAuthenticationTokenMixin.class);
+        context.setMixIn(AppleAppAttestAssertionAuthenticationToken.class,
+                AppleAppAttestAssertionAuthenticationTokenMixin.class);
     }
 
 }

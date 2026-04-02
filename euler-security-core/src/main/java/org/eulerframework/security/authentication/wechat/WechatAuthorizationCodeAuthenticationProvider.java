@@ -1,4 +1,4 @@
-package org.eulerframework.security.authentication;
+package org.eulerframework.security.authentication.wechat;
 
 import org.eulerframework.common.http.*;
 import org.eulerframework.common.util.jackson.JacksonUtils;

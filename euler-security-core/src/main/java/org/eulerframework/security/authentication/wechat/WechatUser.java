@@ -1,4 +1,4 @@
-package org.eulerframework.security.authentication;
+package org.eulerframework.security.authentication.wechat;
 
 import java.io.Serializable;
 
