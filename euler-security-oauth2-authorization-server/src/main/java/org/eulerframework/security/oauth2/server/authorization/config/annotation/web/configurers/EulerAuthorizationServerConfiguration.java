@@ -23,6 +23,7 @@ import org.eulerframework.security.oauth2.server.authorization.authentication.OA
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerPublicClientAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
@@ -81,37 +82,47 @@ public class EulerAuthorizationServerConfiguration {
         return new OAuth2WechatAuthorizationCodeAuthenticationConverter();
     }
 
+    /**
+     * Configure Apple App Attest authentication for both attestation and assertion grant types.
+     * <p>
+     * This method registers {@link EulerPublicClientAuthenticationConverter} with the token endpoint's
+     * client authentication filter, enabling public clients
+     * ({@link org.springframework.security.oauth2.core.ClientAuthenticationMethod#NONE NONE})
+     * to use Apple App Attest grant types.
+     * <p>
+     * Note: The corresponding {@link org.eulerframework.security.oauth2.server.authorization.authentication.EulerPublicClientAuthenticationProvider
+     * EulerPublicClientAuthenticationProvider} is registered by {@link EulerOAuth2AuthorizationServerConfigurer}
+     * into the shared {@link org.springframework.security.authentication.AuthenticationManager AuthenticationManager},
+     * which is shared by both the token endpoint and the Euler endpoint client authentication filters.
+     * Only the converter needs to be added here since converters are per-filter.
+     */
     public static void configAppleAppAttestAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
         ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
 
+        // Register the public client authentication converter for the token endpoint.
+        // The provider is already in the shared AuthenticationManager, registered by
+        // EulerOAuth2AuthorizationServerConfigurer.init() — only the converter is per-filter.
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .clientAuthentication(clientAuth -> clientAuth
+                        .authenticationConverter(new EulerPublicClientAuthenticationConverter())
+                );
+
+        // Register attestation and assertion grant types
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2AppleAppAttestAttestationAuthenticationProvider(http, authenticationConfiguration, challengeService))
-                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAttestationAuthenticationConverter()));
-
-        // Auto-register grant type with challenge endpoint
-        EulerOAuth2AuthorizationServerConfigurer eulerConfigurer =
-                http.getConfigurer(EulerOAuth2AuthorizationServerConfigurer.class);
-        if (eulerConfigurer != null) {
-            eulerConfigurer.challengeEndpoint(challenge ->
-                    challenge.authorizedGrantTypes(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ATTESTATION));
-        }
-    }
-
-    public static void configAppleAppAttestAssertionAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
-        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
-
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .tokenEndpoint(configurer -> configurer
+                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAttestationAuthenticationConverter())
                         .authenticationProvider(getOAuth2AppleAppAttestAssertionAuthenticationProvider(http, authenticationConfiguration, challengeService))
                         .accessTokenRequestConverter(getOAuth2AppleAppAttestAssertionAuthenticationConverter()));
 
-        // Auto-register grant type with challenge endpoint
+        // Auto-register grant types with challenge endpoint
         EulerOAuth2AuthorizationServerConfigurer eulerConfigurer =
                 http.getConfigurer(EulerOAuth2AuthorizationServerConfigurer.class);
         if (eulerConfigurer != null) {
             eulerConfigurer.challengeEndpoint(challenge ->
-                    challenge.authorizedGrantTypes(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION));
+                    challenge.authorizedGrantTypes(
+                            EulerAuthorizationGrantType.APPLE_APP_ATTEST_ATTESTATION,
+                            EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION));
         }
     }
 

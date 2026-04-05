@@ -15,15 +15,19 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.config.annotation.web.configurers;
 
+import org.eulerframework.security.oauth2.server.authorization.authentication.EulerPublicClientAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerPublicClientAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.ClientSecretBasicAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.ClientSecretPostAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.JwtClientAssertionAuthenticationConverter;
-import org.springframework.security.oauth2.server.authorization.web.authentication.PublicClientAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.X509ClientCertificateAuthenticationConverter;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
@@ -121,6 +125,14 @@ public class EulerOAuth2AuthorizationServerConfigurer
         if (!matchers.isEmpty()) {
             http.csrf(csrf -> csrf.ignoringRequestMatchers(this.endpointsMatcher));
         }
+
+        // Register default authentication providers into the shared AuthenticationManager,
+        // symmetric with OAuth2ClientAuthenticationConfigurer.init() which registers its own
+        // default providers the same way. Both configurers' filters share the same
+        // AuthenticationManager via http.getSharedObject(AuthenticationManager.class).
+        List<AuthenticationProvider> authenticationProviders = createDefaultAuthenticationProviders(http);
+        authenticationProviders.forEach(
+                authenticationProvider -> http.authenticationProvider(postProcess(authenticationProvider)));
     }
 
     @Override
@@ -147,12 +159,22 @@ public class EulerOAuth2AuthorizationServerConfigurer
         }
     }
 
+    private static List<AuthenticationProvider> createDefaultAuthenticationProviders(HttpSecurity http) {
+        List<AuthenticationProvider> authenticationProviders = new ArrayList<>();
+
+        RegisteredClientRepository registeredClientRepository =
+                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
+        authenticationProviders.add(new EulerPublicClientAuthenticationProvider(registeredClientRepository));
+
+        return authenticationProviders;
+    }
+
     private static List<AuthenticationConverter> createDefaultAuthenticationConverters() {
         List<AuthenticationConverter> authenticationConverters = new ArrayList<>();
         authenticationConverters.add(new JwtClientAssertionAuthenticationConverter());
         authenticationConverters.add(new ClientSecretBasicAuthenticationConverter());
         authenticationConverters.add(new ClientSecretPostAuthenticationConverter());
-        authenticationConverters.add(new PublicClientAuthenticationConverter());
+        authenticationConverters.add(new EulerPublicClientAuthenticationConverter());
         authenticationConverters.add(new X509ClientCertificateAuthenticationConverter());
         return authenticationConverters;
     }

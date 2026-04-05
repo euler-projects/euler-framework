@@ -105,29 +105,23 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
             "-----END CERTIFICATE-----";
 
     private final CBORMapper cborMapper = new CBORMapper();
-    private final String teamId;
-    private final String bundleId;
-    private final String appId;
+    private final AppleAppRepository appRepository;
     private final X509Certificate rootCertificate;
     private final AppleAppAttestKeyCredentialService keyCredentialService;
     private volatile boolean allowDevelopmentEnvironment = false;
     private boolean revocationEnabled = false;
 
     /**
-     * Create a new instance.
+     * Create a new instance with an {@link AppleAppRepository} for multi-app support.
      *
-     * @param teamId               the Apple Developer Team ID
-     * @param bundleId             the App Bundle ID
+     * @param appRepository        the repository of registered Apple Apps
      * @param keyCredentialService the service for storing and retrieving key credentials
      */
-    public DefaultAppleAppAttestValidationService(String teamId, String bundleId,
+    public DefaultAppleAppAttestValidationService(AppleAppRepository appRepository,
                                                    AppleAppAttestKeyCredentialService keyCredentialService) {
-        Assert.hasText(teamId, "teamId must not be empty");
-        Assert.hasText(bundleId, "bundleId must not be empty");
+        Assert.notNull(appRepository, "appRepository must not be null");
         Assert.notNull(keyCredentialService, "keyCredentialService must not be null");
-        this.teamId = teamId;
-        this.bundleId = bundleId;
-        this.appId = teamId + "." + bundleId;
+        this.appRepository = appRepository;
         this.rootCertificate = loadRootCertificate();
         this.keyCredentialService = keyCredentialService;
     }
@@ -214,11 +208,12 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                         "Key ID mismatch: credential ID does not match the provided key ID");
             }
 
-            // Step 5: Verify the RP ID hash matches SHA256(appId)
+            // Step 5: Look up the registered Apple App by RP ID hash
             byte[] rpIdHash = Arrays.copyOfRange(authData, 0, 32);
-            byte[] expectedRpIdHash = sha256(appId.getBytes(StandardCharsets.UTF_8));
-            if (!MessageDigest.isEqual(rpIdHash, expectedRpIdHash)) {
-                throw new AuthenticationServiceException("RP ID hash mismatch");
+            RegisteredAppleApp app = this.appRepository.findByAppIdHash(rpIdHash);
+            if (app == null) {
+                throw new AuthenticationServiceException(
+                        "RP ID hash does not match any registered Apple App");
             }
 
             // Step 6: Verify the AAGUID matches Apple App Attest
@@ -240,8 +235,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                 logger.debug("Apple App Attest validation succeeded for keyId: {}", keyId);
             }
 
-            AppleAppAttestUser user = new AppleAppAttestUser(keyId, this.teamId, this.bundleId, certificates.get(0).getPublicKey());
-            return user;
+            return new AppleAppAttestUser(keyId, app.teamId(), app.bundleId(), certificates.get(0).getPublicKey());
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
@@ -273,11 +267,12 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                 throw new AuthenticationServiceException("Missing signature in assertion");
             }
 
-            // Step 3: Verify the RP ID hash matches SHA256(appId)
+            // Step 3: Look up the registered Apple App by RP ID hash
             byte[] rpIdHash = Arrays.copyOfRange(authenticatorData, 0, 32);
-            byte[] expectedRpIdHash = sha256(appId.getBytes(StandardCharsets.UTF_8));
-            if (!MessageDigest.isEqual(rpIdHash, expectedRpIdHash)) {
-                throw new AuthenticationServiceException("RP ID hash mismatch in assertion");
+            RegisteredAppleApp app = this.appRepository.findByAppIdHash(rpIdHash);
+            if (app == null) {
+                throw new AuthenticationServiceException(
+                        "RP ID hash does not match any registered Apple App");
             }
 
             // Step 4: Verify the sign count is greater than the stored challenge
@@ -310,7 +305,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                 logger.debug("Apple App Attest assertion validation succeeded for keyId: {}", keyId);
             }
 
-            return new AppleAppAttestUser(keyId, this.teamId, this.bundleId, storedCredential.getPublicKey());
+            return new AppleAppAttestUser(keyId, app.teamId(), app.bundleId(), storedCredential.getPublicKey());
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
