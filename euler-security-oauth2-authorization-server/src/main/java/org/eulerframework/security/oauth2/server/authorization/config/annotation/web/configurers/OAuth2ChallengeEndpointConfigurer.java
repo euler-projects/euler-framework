@@ -72,7 +72,7 @@ public class OAuth2ChallengeEndpointConfigurer {
     /**
      * Set the {@link ChallengeService} to use.
      * <p>
-     * If not set, the service will be resolved from the {@link ApplicationContext}.
+     * If not set, the service will be resolved from the {@link org.springframework.context.ApplicationContext}.
      *
      * @param challengeService the challenge service
      * @return this configurer for further customization

@@ -15,8 +15,6 @@
  */
 package org.eulerframework.web.config;
 
-import org.eulerframework.cache.inMemoryCache.DefaultObjectCache;
-import org.eulerframework.cache.inMemoryCache.ObjectCachePool;
 import org.eulerframework.common.util.CommonUtils;
 import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.common.util.property.FilePropertySource;
@@ -33,14 +31,15 @@ import java.net.URISyntaxException;
 import java.nio.file.FileSystemException;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class WebConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConfig.class);
 
     public static final String DEFAULT_CONFIG_FILE = "/config.properties";
 
-    private static final DefaultObjectCache<String, Object> CONFIG_CACHE = ObjectCachePool
-            .generateDefaultObjectCache(Long.MAX_VALUE);
+    private static final Map<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private static PropertyReader propertyReader;
 
@@ -226,12 +225,13 @@ public abstract class WebConfig {
     }
 
     public static String getApplicationName() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_APPLICATION_NAME, key -> propertyReader.get(key, String.class, WebConfigDefault.CORE_APPLICATION_NAME));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.CORE_APPLICATION_NAME, key ->
+                propertyReader.get(key, String.class, WebConfigDefault.CORE_APPLICATION_NAME));
         return cachedConfig == null ? null : (String) cachedConfig;
     }
 
     public static String getRuntimePath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_RUNTIME_PATH, key -> {
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.CORE_RUNTIME_PATH, key -> {
             String result = propertyReader.get(key, String.class, null);
             try {
                 return ConfigUtils.handleApplicationPath(
@@ -251,7 +251,7 @@ public abstract class WebConfig {
     }
 
     public static String getTempPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_TEMP_PATH, key -> {
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.CORE_TEMP_PATH, key -> {
             String result = propertyReader.get(key, String.class, null);
             try {
                 return ConfigUtils.handleApplicationPath(
@@ -276,7 +276,7 @@ public abstract class WebConfig {
      * @return 外部配置文件路径
      */
     public static String getAdditionalConfigPath() {
-        return (String) CONFIG_CACHE.get(WebConfigKey.CORE_ADDITIONAL_CONF_PATH, key -> {
+        return (String) CONFIG_CACHE.computeIfAbsent(WebConfigKey.CORE_ADDITIONAL_CONF_PATH, key -> {
             String result = propertyReader.get(key, String.class, null);
 
             try {
@@ -300,18 +300,21 @@ public abstract class WebConfig {
      * @return 站点默认语言
      */
     public static Locale getDefaultLanguage() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_LANGUAGE_DEFAULT, key -> propertyReader.get(WebConfigKey.WEB_LANGUAGE_DEFAULT, WebConfigDefault.WEB_LANGUAGE_DEFAULT));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_LANGUAGE_DEFAULT, key ->
+                propertyReader.get(key, WebConfigDefault.WEB_LANGUAGE_DEFAULT));
         return (Locale) cachedConfig;
     }
 
     public static Locale[] getSupportLanguages() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, key -> propertyReader.get(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, WebConfigDefault.WEB_LANGUAGE_SUPPORT_LANGUAGES));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_LANGUAGE_SUPPORT_LANGUAGES, key ->
+                propertyReader.get(key, WebConfigDefault.WEB_LANGUAGE_SUPPORT_LANGUAGES));
         return (Locale[]) cachedConfig;
     }
 
 
     public static boolean isApiEnabled() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_API_ENABLED, key -> propertyReader.getBooleanValue(key, WebConfigDefault.WEB_API_ENABLED));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_API_ENABLED, key ->
+                propertyReader.getBooleanValue(key, WebConfigDefault.WEB_API_ENABLED));
         return (boolean) cachedConfig;
     }
 
@@ -326,10 +329,10 @@ public abstract class WebConfig {
      * https://eulerproject.io
      */
     public static String getWebUrl() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_URL, key -> {
-            String result = propertyReader.getString(WebConfigKey.WEB_SITE_URL, WebConfigDefault.WEB_SITE_URL);
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_SITE_URL, key -> {
+            String result = propertyReader.getString(key, WebConfigDefault.WEB_SITE_URL);
             if (!StringUtils.hasText(result))
-                throw new RuntimeException(WebConfigKey.WEB_SITE_URL + "can not be empty");
+                throw new RuntimeException(key + "can not be empty");
 
             while (result.endsWith("/")) {
                 result = result.substring(0, result.length() - 1);
@@ -342,12 +345,12 @@ public abstract class WebConfig {
     }
 
     public static String getAdminRootPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_ADMIN_ROOT_PATH, key -> {
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_ADMIN_ROOT_PATH, key -> {
 
-            String result = propertyReader.getString(WebConfigKey.WEB_ADMIN_ROOT_PATH, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
+            String result = propertyReader.getString(key, WebConfigDefault.WEB_ADMIN_ROOT_PATH);
 
             if (!StringUtils.hasText(result))
-                throw new RuntimeException(WebConfigKey.WEB_ADMIN_ROOT_PATH + " can not be empty");
+                throw new RuntimeException(key + " can not be empty");
 
             while (result.endsWith("*")) {
                 result = result.substring(0, result.length() - 1);
@@ -365,7 +368,7 @@ public abstract class WebConfig {
     }
 
     public static String getStaticPagesRootPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_STATIC_PAGES_PATH, key -> {
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_SITE_STATIC_PAGES_PATH, key -> {
 
             String result = propertyReader.getString(key, WebConfigDefault.WEB_SITE_STATIC_PAGES_PATH);
 
@@ -388,21 +391,21 @@ public abstract class WebConfig {
     }
 
     public static String getJspPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_JSP_PATH, key -> CommonUtils.convertDirToUnixFormat(
-                propertyReader.getString(WebConfigKey.WEB_SITE_JSP_PATH, WebConfigDefault.WEB_SITE_JSP_PATH), true));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_SITE_JSP_PATH, key ->
+                CommonUtils.convertDirToUnixFormat(propertyReader.getString(key, WebConfigDefault.WEB_SITE_JSP_PATH), true));
 
         return (String) cachedConfig;
     }
 
     public static String getAdminJspPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_ADMIN_JSP_PATH, key -> CommonUtils.convertDirToUnixFormat(
-                propertyReader.getString(key, WebConfigDefault.WEB_ADMIN_JSP_PATH), true));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_ADMIN_JSP_PATH, key ->
+                CommonUtils.convertDirToUnixFormat(propertyReader.getString(key, WebConfigDefault.WEB_ADMIN_JSP_PATH), true));
 
         return (String) cachedConfig;
     }
 
     public static String getApiRootPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_API_ROOT_PATH, key -> {
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_API_ROOT_PATH, key -> {
             String result = propertyReader.getString(key, WebConfigDefault.WEB_API_ROOT_PATH);
 
             if (!StringUtils.hasText(result))
@@ -424,71 +427,72 @@ public abstract class WebConfig {
     }
 
     public static String getSiteName() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_NAME, key -> propertyReader.getString(WebConfigKey.WEB_SITE_NAME, WebConfigDefault.WEB_SITE_NAME));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_SITE_NAME, key ->
+                propertyReader.getString(key, WebConfigDefault.WEB_SITE_NAME));
 
         return (String) cachedConfig;
     }
 
 
     public static String getCopyrightHolderName() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.COPYRIGHT_HOLDER_NAME, key -> propertyReader.getString(WebConfigKey.COPYRIGHT_HOLDER_NAME, WebConfigDefault.COPYRIGHT_HOLDER_NAME));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.COPYRIGHT_HOLDER_NAME, key ->
+                propertyReader.getString(key, WebConfigDefault.COPYRIGHT_HOLDER_NAME));
 
         return (String) cachedConfig;
     }
 
     public static String getCopyrightHolderWebsite() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.COPYRIGHT_HOLDER_WEBSITE, key -> propertyReader.getString(WebConfigKey.COPYRIGHT_HOLDER_WEBSITE, WebConfigDefault.COPYRIGHT_HOLDER_WEBSITE));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.COPYRIGHT_HOLDER_WEBSITE, key ->
+                propertyReader.getString(key, WebConfigDefault.COPYRIGHT_HOLDER_WEBSITE));
 
         return (String) cachedConfig;
     }
 
     public static String getAssetsPath() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_ASSETS_PATH, key -> propertyReader.getString(WebConfigKey.WEB_SITE_ASSETS_PATH, WebConfigDefault.WEB_SITE_ASSETS_PATH));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_SITE_ASSETS_PATH, key ->
+                propertyReader.getString(key, WebConfigDefault.WEB_SITE_ASSETS_PATH));
 
         return (String) cachedConfig;
     }
 
     public static String getDefaultTheme() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_SITE_DEFAULT_THEME, key -> propertyReader.getString(WebConfigKey.WEB_SITE_DEFAULT_THEME, WebConfigDefault.WEB_SITE_DEFAULT_THEME));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_SITE_DEFAULT_THEME, key ->
+                propertyReader.getString(key, WebConfigDefault.WEB_SITE_DEFAULT_THEME));
 
         return (String) cachedConfig;
     }
 
     public static String getAdminDashboardBrandIcon() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON,
-                key -> propertyReader.getString(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON,
-                        WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_ICON));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_ICON, key ->
+                propertyReader.getString(key, WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_ICON));
 
         return (String) cachedConfig;
     }
 
     public static String getAdminDashboardBrandText() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT,
-                key -> propertyReader.getString(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT,
-                        WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_TEXT));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_ADMIN_DASHBOARD_BRAND_TEXT, key ->
+                propertyReader.getString(key, WebConfigDefault.WEB_ADMIN_DASHBOARD_BRAND_TEXT));
 
         return (String) cachedConfig;
     }
 
 
     public static Duration getRamCacheCleanFreq() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ,
-                key -> propertyReader.get(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ,
-                        WebConfigDefault.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ, key ->
+                propertyReader.get(key, WebConfigDefault.CORE_CACHE_RAM_CACHE_POOL_CLEAN_FREQ));
 
         return (Duration) cachedConfig;
     }
 
     public static boolean showStackTraceInCrashPage() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_JSP_SHOW_STACK_TRACE,
-                key -> propertyReader.getBooleanValue(WebConfigKey.WEB_JSP_SHOW_STACK_TRACE,
-                        WebConfigDefault.WEB_JSP_SHOW_STACK_TRACE));
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_JSP_SHOW_STACK_TRACE, key ->
+                propertyReader.getBooleanValue(key, WebConfigDefault.WEB_JSP_SHOW_STACK_TRACE));
 
         return (boolean) cachedConfig;
     }
 
     public static MultipartConfig getMultipartConfig() {
-        Object cachedConfig = CONFIG_CACHE.get(WebConfigKey.WEB_MULTIPART, key -> {
+        Object cachedConfig = CONFIG_CACHE.computeIfAbsent(WebConfigKey.WEB_MULTIPART, _ -> {
             String location = propertyReader.getString(WebConfigKey.WEB_MULTIPART_LOCATION,
                     WebConfigDefault.WEB_MULTIPART_LOCATION);
             DataSize maxFileSize = propertyReader.get(WebConfigKey.WEB_MULTIPART_MAX_FILE_SIZE,

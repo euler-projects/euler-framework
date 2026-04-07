@@ -78,11 +78,6 @@
 
         <dependency>
             <groupId>org.eulerframework</groupId>
-            <artifactId>euler-cache</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eulerframework</groupId>
             <artifactId>euler-common-logging</artifactId>
         </dependency>
         <dependency>
