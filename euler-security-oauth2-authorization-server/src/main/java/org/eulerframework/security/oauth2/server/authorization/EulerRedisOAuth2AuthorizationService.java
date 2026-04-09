@@ -404,7 +404,7 @@ public class EulerRedisOAuth2AuthorizationService implements OAuth2Authorization
         return Optional.ofNullable(this.getAuthorizationStringProperty(property, authorizationId))
                 .map(a -> this.jsonMapper.readValue(a, new TypeReference<Map<String, Object>>() {
                 }))
-                .orElse(null);
+                .orElse(Collections.emptyMap());
     }
 
     private Instant getAuthorizationStringInstantProperty(String property, String authorizationId) {

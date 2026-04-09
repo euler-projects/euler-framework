@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,25 +22,49 @@ import org.eulerframework.security.oauth2.server.authorization.authentication.OA
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
+import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerPublicClientAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.ConfigurerAccessor;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 
 public class EulerAuthorizationServerConfiguration {
+    public static void configClientRegistrationEndpoint(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
+                .clientRegistrationEndpoint(configurer -> configurer
+                        .openRegistrationAllowed(true)
+                        .authenticationProviders(authenticationProviders -> {
+                            for (AuthenticationProvider authenticationProvider : authenticationProviders) {
+                                if (authenticationProvider instanceof OAuth2ClientRegistrationAuthenticationProvider oauth2ClientRegistrationAuthenticationProvider) {
+                                    oauth2ClientRegistrationAuthenticationProvider.setRegisteredClientConverter(new EulerOAuth2ClientRegistrationRegisteredClientConverter());
+                                    oauth2ClientRegistrationAuthenticationProvider.setClientRegistrationConverter(new EulerRegisteredClientOAuth2ClientRegistrationConverter());
+                                }
+                            }
+                        })));
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
+                .clientRegistrationEndpoint(configurer ->
+                        http.authorizeHttpRequests((authorize) -> authorize
+                                .requestMatchers(ConfigurerAccessor.getDeferredRequestMatcher(configurer))
+                                .permitAll())));
+    }
+
+
     public static void configPasswordAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2PasswordAuthenticationProvider(http, authenticationConfiguration))
-                        .accessTokenRequestConverter(getOAuth2PasswordAuthenticationConverter()));
+                        .accessTokenRequestConverter(getOAuth2PasswordAuthenticationConverter())));
     }
 
     private static OAuth2PasswordAuthenticationProvider getOAuth2PasswordAuthenticationProvider(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
@@ -60,10 +84,10 @@ public class EulerAuthorizationServerConfiguration {
     }
 
     public static void configWechatAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2WechatAuthenticationProvider(http, authenticationConfiguration))
-                        .accessTokenRequestConverter(getOAuth2WechatAuthenticationConverter()));
+                        .accessTokenRequestConverter(getOAuth2WechatAuthenticationConverter())));
     }
 
     private static OAuth2WechatAuthorizationCodeAuthenticationProvider getOAuth2WechatAuthenticationProvider(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
@@ -102,18 +126,18 @@ public class EulerAuthorizationServerConfiguration {
         // Register the public client authentication converter for the token endpoint.
         // The provider is already in the shared AuthenticationManager, registered by
         // EulerOAuth2AuthorizationServerConfigurer.init() — only the converter is per-filter.
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .clientAuthentication(clientAuth -> clientAuth
                         .authenticationConverter(new EulerPublicClientAuthenticationConverter())
-                );
+                ));
 
         // Register attestation and assertion grant types
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2AppleAppAttestAttestationAuthenticationProvider(http, authenticationConfiguration, challengeService))
                         .accessTokenRequestConverter(getOAuth2AppleAppAttestAttestationAuthenticationConverter())
                         .authenticationProvider(getOAuth2AppleAppAttestAssertionAuthenticationProvider(http, authenticationConfiguration, challengeService))
-                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAssertionAuthenticationConverter()));
+                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAssertionAuthenticationConverter())));
 
         // Auto-register grant types with challenge endpoint
         EulerOAuth2AuthorizationServerConfigurer eulerConfigurer =
@@ -172,9 +196,9 @@ public class EulerAuthorizationServerConfiguration {
      * (automatically injected via {@link JwtGenerator#setJwtCustomizer(OAuth2TokenCustomizer)}).
      */
     public static void enableExtendedClaims(HttpSecurity http) {
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(configurer -> configurer
-                .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
-                        .userInfoMapper(new UserDetailsOidcUserInfoMapper())
-                ));
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
+                .oidc(oidc -> oidc
+                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+                                .userInfoMapper(new UserDetailsOidcUserInfoMapper()))));
     }
 }
