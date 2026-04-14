@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.eulerframework.security.jackson;
 
+import org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken;
 import org.eulerframework.security.authentication.apple.AppleAppAttestAssertionAuthenticationToken;
-import org.eulerframework.security.authentication.apple.AppleAppAttestAttestationAuthenticationToken;
 import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
@@ -35,8 +35,8 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         builder.allowIfSubType(EulerUserDetails.class)
                 .allowIfSubType(EulerGrantedAuthority.class)
                 .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class)
-                .allowIfSubType(AppleAppAttestAttestationAuthenticationToken.class)
-                .allowIfSubType(AppleAppAttestAssertionAuthenticationToken.class);
+                .allowIfSubType(AppleAppAttestAssertionAuthenticationToken.class)
+                .allowIfSubType(AppAttestRegistrationAuthenticationToken.class);
 
     }
 
@@ -46,10 +46,12 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         context.setMixIn(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
         context.setMixIn(WechatAuthorizationCodeAuthenticationToken.class,
                 WechatAuthorizationCodeAuthenticationTokenMixin.class);
-        context.setMixIn(AppleAppAttestAttestationAuthenticationToken.class,
-                AppleAppAttestAttestationAuthenticationTokenMixin.class);
         context.setMixIn(AppleAppAttestAssertionAuthenticationToken.class,
                 AppleAppAttestAssertionAuthenticationTokenMixin.class);
+        // Registration token is not currently persisted to SecurityContext (the endpoint
+        // returns an HTTP JSON response directly), but mixin is registered for
+        // forward-compatibility in case session persistence is added later.
+        context.setMixIn(AppAttestRegistrationAuthenticationToken.class,
+                AppAttestRegistrationAuthenticationTokenMixin.class);
     }
-
 }

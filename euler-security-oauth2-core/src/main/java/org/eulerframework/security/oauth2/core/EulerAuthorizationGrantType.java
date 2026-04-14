@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,5 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 public class EulerAuthorizationGrantType {
     public static final AuthorizationGrantType PASSWORD = new AuthorizationGrantType("password");
     public static final AuthorizationGrantType WECHAT_AUTHORIZATION_CODE = new AuthorizationGrantType("wechat_authorization_code");
-    public static final AuthorizationGrantType APPLE_APP_ATTEST_ATTESTATION = new AuthorizationGrantType("apple_app_attest_attestation");
     public static final AuthorizationGrantType APPLE_APP_ATTEST_ASSERTION = new AuthorizationGrantType("apple_app_attest_assertion");
 }

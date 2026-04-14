@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,11 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
 
         String keyId = assertionAuthenticationToken.getKeyId();
         String assertion = assertionAuthenticationToken.getAssertion();
-        String challenge = assertionAuthenticationToken.getChallenge();
+        String challengeId = assertionAuthenticationToken.getChallengeId();
 
-        // Consume the challenge first to ensure single-use, preventing replay attacks
-        if (!this.challengeService.consumeChallenge(challenge, registeredClient.getClientId())) {
+        // Consume the challenge by ID to ensure single-use, preventing replay attacks
+        String challenge = this.challengeService.consumeChallenge(challengeId);
+        if (challenge == null) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
                     "Invalid or expired challenge.", ERROR_URI));
         }

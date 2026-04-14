@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.eulerframework.security.core.userdetails;
 
 import org.eulerframework.security.authentication.apple.AppleAppAttestUser;
-import org.eulerframework.security.authentication.apple.AppleAppAttestAttestationAuthenticationProvider;
 
 /**
  * Service interface for loading and creating user details based on Apple App Attest identities.
@@ -39,8 +38,8 @@ public interface EulerAppleAppAttestUserDetailsService {
     /**
      * Create a new user account associated with the given Apple App Attest identity.
      * <p>
-     * This method is called when {@link AppleAppAttestAttestationAuthenticationProvider#autoCreateUserIfNotExists}
-     * is enabled and no existing user is found.
+     * This method is called when auto-user-creation is enabled during the attestation
+     * (device registration) flow and no existing user is found.
      *
      * @param attestUser the validated App Attest user containing the device key ID
      * @return the newly created user details

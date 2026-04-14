@@ -28,6 +28,7 @@
         <module>euler-web-core</module>
         <module>euler-security-core</module>
         <module>euler-security-web</module>
+        <module>euler-security-webauthn</module>
         <module>euler-security-oauth2-core</module>
         <module>euler-security-oauth2-authorization-server</module>
         <module>euler-security-oauth2-resource-server</module>

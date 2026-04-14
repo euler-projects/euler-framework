@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.eulerframework.security.oauth2.server.authorization.web.authenticati
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -29,6 +28,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public final class EulerPublicClientAuthenticationConverter implements Authentic
 
     @Nullable
     @Override
-    public Authentication convert(HttpServletRequest request) {
+    public Authentication convert(@Nonnull HttpServletRequest request) {
         MultiValueMap<String, String> parameters = getFormParameters(request);
 
         // client_id (REQUIRED for public clients)

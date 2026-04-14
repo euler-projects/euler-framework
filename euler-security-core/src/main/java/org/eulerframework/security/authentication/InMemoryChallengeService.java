@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * In-memory implementation of {@link ChallengeService}.
  * <p>
  * Challenges are stored in a {@link ConcurrentHashMap} with automatic expiration.
- * Expired entries are cleaned up lazily on each {@link #generateChallenge(String)} call.
+ * Expired entries are cleaned up lazily on each {@link #generateChallenge()} call.
  * <p>
  * Suitable for single-instance deployments or development/testing environments.
  * For clustered deployments, use {@link RedisChallengeService} or
@@ -90,8 +90,7 @@ public class InMemoryChallengeService implements ChallengeService {
     }
 
     @Override
-    public GeneratedChallenge generateChallenge(String clientId) {
-        Assert.hasText(clientId, "clientId must not be empty");
+    public GeneratedChallenge generateChallenge() {
         cleanupExpired();
 
         if (this.challenges.size() >= this.maxChallenges) {
@@ -99,19 +98,20 @@ public class InMemoryChallengeService implements ChallengeService {
                     "Maximum number of active challenges (" + this.maxChallenges + ") reached. Please try again later.");
         }
 
+        String id = UUID.randomUUID().toString();
         String challenge = this.challengeGenerator.generateChallenge();
 
-        this.challenges.put(challenge, new ChallengeEntry(clientId, Instant.now().plus(this.challengeLifetime)));
-        return new GeneratedChallenge(challenge);
+        this.challenges.put(id, new ChallengeEntry(challenge, Instant.now().plus(this.challengeLifetime)));
+        return new GeneratedChallenge(id, challenge);
     }
 
     @Override
-    public boolean consumeChallenge(String challenge, String clientId) {
-        Assert.hasText(clientId, "clientId must not be empty");
-        ChallengeEntry entry = this.challenges.remove(challenge);
-        return entry != null
-                && Instant.now().isBefore(entry.expiresAt)
-                && Objects.equals(clientId, entry.clientId);
+    public String consumeChallenge(String challengeId) {
+        ChallengeEntry entry = this.challenges.remove(challengeId);
+        if (entry != null && Instant.now().isBefore(entry.expiresAt)) {
+            return entry.challenge;
+        }
+        return null;
     }
 
     private void cleanupExpired() {
@@ -125,11 +125,11 @@ public class InMemoryChallengeService implements ChallengeService {
     }
 
     private static class ChallengeEntry {
-        final String clientId;
+        final String challenge;
         final Instant expiresAt;
 
-        ChallengeEntry(String clientId, Instant expiresAt) {
-            this.clientId = clientId;
+        ChallengeEntry(String challenge, Instant expiresAt) {
+            this.challenge = challenge;
             this.expiresAt = expiresAt;
         }
     }

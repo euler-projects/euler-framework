@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,32 @@ package org.eulerframework.security.authentication;
 import org.springframework.util.Assert;
 
 /**
- * Represents a generated challenge with its challenge and format descriptor.
+ * Represents a generated challenge with its unique ID, value, and format descriptor.
  * <p>
- * The {@code format} field describes the encoding/format of the challenge,
- * allowing clients to interpret the challenge correctly. Different verification
- * mechanisms may produce challenges in different formats.
+ * The {@code id} field is a unique identifier for the challenge, allowing clients to
+ * reference it later when consuming the challenge. The {@code format} field describes
+ * the encoding/format of the challenge value.
  *
+ * @param id        the unique identifier for this challenge
  * @param challenge the challenge string
  * @param format    optional, the format descriptor of the challenge
  * @see ChallengeService
  */
-public record GeneratedChallenge(String challenge, String format) {
+public record GeneratedChallenge(String id, String challenge, String format) {
 
     /**
-     * Creates a {@code GeneratedChallenge} with the specified challenge string
+     * Creates a {@code GeneratedChallenge} with the specified id and challenge string
      * without format info
      *
+     * @param id        the unique identifier for this challenge
      * @param challenge the challenge string
      */
-    public GeneratedChallenge(String challenge) {
-        this(challenge, null);
+    public GeneratedChallenge(String id, String challenge) {
+        this(id, challenge, null);
     }
 
     public GeneratedChallenge {
+        Assert.hasText(id, "id must not be empty");
         Assert.hasText(challenge, "challenge must not be empty");
     }
 }

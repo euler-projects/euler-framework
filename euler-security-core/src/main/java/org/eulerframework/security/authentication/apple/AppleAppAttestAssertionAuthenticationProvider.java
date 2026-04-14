@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import org.springframework.util.Assert;
  * handles Apple App Attest assertion authentication (re-authentication with a previously
  * registered device).
  * <p>
- * Unlike {@link AppleAppAttestAttestationAuthenticationProvider}, this provider does <b>not</b>
- * support automatic user creation. The user must have been previously registered through
- * the attestation flow.
+ * This provider does <b>not</b> support automatic user creation. The user must have been
+ * previously registered through the attestation flow handled by
+ * {@code AppAttestRegistrationAuthenticationProvider}.
  */
 public class AppleAppAttestAssertionAuthenticationProvider
         implements AuthenticationProvider, MessageSourceAware {
@@ -76,9 +76,11 @@ public class AppleAppAttestAssertionAuthenticationProvider
         String challenge = token.getChallenge();
 
         // Validate assertion via the delegated validation service
-        AppleAppAttestUser attestUser = this.validationService.validateAssertion(keyId, assertion, challenge);
+        AppAttestRegistration registration = this.validationService.validateAssertion(keyId, assertion, challenge);
 
         // Assertion flow: user must already exist (registered via attestation)
+        AppleAppAttestUser attestUser = new AppleAppAttestUser(
+                keyId, registration.getTeamId(), registration.getBundleId(), registration.getPublicKey());
         UserDetails user = this.appleAppAttestUserDetailsService.loadUserByAppleAppAttestUser(attestUser);
 
         this.preAuthenticationChecks.check(user);

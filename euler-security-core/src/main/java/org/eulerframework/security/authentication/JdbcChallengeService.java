@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,19 @@ import org.springframework.util.Assert;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * JDBC-backed implementation of {@link ChallengeService}.
  * <p>
- * Challenges are stored in a database table with an expiration timestamp and client binding.
- * Expired entries are cleaned up lazily on each {@link #generateChallenge(String)} call.
+ * Challenges are stored in a database table with an expiration timestamp.
+ * Expired entries are cleaned up lazily on each {@link #generateChallenge()} call.
  * <p>
  * Requires the following table:
  * <pre>
  * CREATE TABLE oauth2_challenge (
- *     challenge   VARCHAR(64)  PRIMARY KEY,
- *     client_id   VARCHAR(256) NOT NULL,
+ *     id          VARCHAR(64)  PRIMARY KEY,
+ *     challenge   VARCHAR(64)  NOT NULL,
  *     expires_at  TIMESTAMP    NOT NULL
  * );
  * </pre>
@@ -42,8 +43,8 @@ public class JdbcChallengeService implements ChallengeService {
     private static final String DEFAULT_TABLE_NAME = "oauth2_challenge";
     private static final java.util.regex.Pattern TABLE_NAME_PATTERN = java.util.regex.Pattern.compile("^[a-zA-Z0-9_]+$");
 
+    private static final String COLUMN_ID = "id";
     private static final String COLUMN_CHALLENGE = "challenge";
-    private static final String COLUMN_CLIENT_ID = "client_id";
     private static final String COLUMN_EXPIRES_AT = "expires_at";
 
     private final JdbcOperations jdbcOperations;
@@ -91,26 +92,32 @@ public class JdbcChallengeService implements ChallengeService {
     }
 
     @Override
-    public GeneratedChallenge generateChallenge(String clientId) {
-        Assert.hasText(clientId, "clientId must not be empty");
+    public GeneratedChallenge generateChallenge() {
         cleanupExpired();
 
+        String id = UUID.randomUUID().toString();
         String challenge = this.challengeGenerator.generateChallenge();
 
         Instant expiresAt = Instant.now().plus(this.challengeLifetime);
         this.jdbcOperations.update(
-                "INSERT INTO " + this.tableName + " (" + COLUMN_CHALLENGE + ", " + COLUMN_CLIENT_ID + ", " + COLUMN_EXPIRES_AT + ") VALUES (?, ?, ?)",
-                challenge, clientId, Timestamp.from(expiresAt));
-        return new GeneratedChallenge(challenge);
+                "INSERT INTO " + this.tableName + " (" + COLUMN_ID + ", " + COLUMN_CHALLENGE + ", " + COLUMN_EXPIRES_AT + ") VALUES (?, ?, ?)",
+                id, challenge, Timestamp.from(expiresAt));
+        return new GeneratedChallenge(id, challenge);
     }
 
     @Override
-    public boolean consumeChallenge(String challenge, String clientId) {
-        Assert.hasText(clientId, "clientId must not be empty");
+    public String consumeChallenge(String challengeId) {
+        var results = this.jdbcOperations.query(
+                "SELECT " + COLUMN_CHALLENGE + " FROM " + this.tableName + " WHERE " + COLUMN_ID + " = ? AND " + COLUMN_EXPIRES_AT + " > ?",
+                (rs, rowNum) -> rs.getString(COLUMN_CHALLENGE),
+                challengeId, Timestamp.from(Instant.now()));
+        if (results.isEmpty()) {
+            return null;
+        }
         int deleted = this.jdbcOperations.update(
-                "DELETE FROM " + this.tableName + " WHERE " + COLUMN_CHALLENGE + " = ? AND " + COLUMN_CLIENT_ID + " = ? AND " + COLUMN_EXPIRES_AT + " > ?",
-                challenge, clientId, Timestamp.from(Instant.now()));
-        return deleted > 0;
+                "DELETE FROM " + this.tableName + " WHERE " + COLUMN_ID + " = ?",
+                challengeId);
+        return deleted > 0 ? results.get(0) : null;
     }
 
     public void setTableName(String tableName) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2026 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
+import java.util.UUID;
 
 /**
  * Redis-backed implementation of {@link ChallengeService}.
  * <p>
  * Challenges are stored as Redis keys with automatic TTL-based expiration.
- * The challenge is bound to a specific client ID embedded in the Redis key.
+ * The challenge is referenced by a unique ID.
  * Suitable for clustered deployments where multiple server instances need to
  * share challenge state.
  */
@@ -77,19 +78,25 @@ public class RedisChallengeService implements ChallengeService {
     }
 
     @Override
-    public GeneratedChallenge generateChallenge(String clientId) {
-        Assert.hasText(clientId, "clientId must not be empty");
+    public GeneratedChallenge generateChallenge() {
+        String id = UUID.randomUUID().toString();
         String challenge = this.challengeGenerator.generateChallenge();
 
-        this.redisTemplate.opsForValue().set(buildKey(clientId, challenge), "1", this.challengeLifetime);
-        return new GeneratedChallenge(challenge);
+        this.redisTemplate.opsForValue().set(buildKey(id), challenge, this.challengeLifetime);
+        return new GeneratedChallenge(id, challenge);
     }
 
     @Override
-    public boolean consumeChallenge(String challenge, String clientId) {
-        Assert.hasText(clientId, "clientId must not be empty");
-        Boolean deleted = this.redisTemplate.delete(buildKey(clientId, challenge));
-        return Boolean.TRUE.equals(deleted);
+    public String consumeChallenge(String challengeId) {
+        String key = buildKey(challengeId);
+        String challenge = this.redisTemplate.opsForValue().get(key);
+        if (challenge != null) {
+            Boolean deleted = this.redisTemplate.delete(key);
+            if (Boolean.TRUE.equals(deleted)) {
+                return challenge;
+            }
+        }
+        return null;
     }
 
     public void setKeyPrefix(String keyPrefix) {
@@ -97,7 +104,7 @@ public class RedisChallengeService implements ChallengeService {
         this.keyPrefix = keyPrefix;
     }
 
-    private String buildKey(String clientId, String challenge) {
-        return this.keyPrefix + clientId + ":" + challenge;
+    private String buildKey(String challengeId) {
+        return this.keyPrefix + challengeId;
     }
 }
