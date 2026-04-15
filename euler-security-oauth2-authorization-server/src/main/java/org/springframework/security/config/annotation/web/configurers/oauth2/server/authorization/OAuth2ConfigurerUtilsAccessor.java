@@ -4,6 +4,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 
 public class OAuth2ConfigurerUtilsAccessor {
@@ -17,5 +18,9 @@ public class OAuth2ConfigurerUtilsAccessor {
 
     public static RegisteredClientRepository getRegisteredClientRepository(HttpSecurity http) {
         return OAuth2ConfigurerUtils.getRegisteredClientRepository(http);
+    }
+
+    public static AuthorizationServerSettings getAuthorizationServerSettings(HttpSecurity http) {
+        return OAuth2ConfigurerUtils.getAuthorizationServerSettings(http);
     }
 }

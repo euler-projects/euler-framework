@@ -24,23 +24,23 @@ import java.util.Collections;
 
 /**
  * Authentication token for App Attest registration (attestation) requests.
- * Contains keyId, attestation data, and challengeId.
+ * Contains keyId, attestation data, and challenge.
  */
 public class AppAttestRegistrationAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String keyId;
     private final String attestation;
-    private final String challengeId;
+    private final String challenge;
     private final Object principal;
 
     /**
      * Create an unauthenticated token.
      */
-    AppAttestRegistrationAuthenticationToken(String keyId, String attestation, String challengeId) {
+    AppAttestRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
         super(Collections.emptyList());
         this.keyId = keyId;
         this.attestation = attestation;
-        this.challengeId = challengeId;
+        this.challenge = challenge;
         this.principal = null;
         setAuthenticated(false);
     }
@@ -54,15 +54,15 @@ public class AppAttestRegistrationAuthenticationToken extends AbstractAuthentica
         this.principal = principal;
         this.keyId = keyId;
         this.attestation = null;
-        this.challengeId = null;
+        this.challenge = null;
         super.setAuthenticated(true);
     }
 
     /**
      * Creates an unauthenticated token containing the attestation data.
      */
-    public static AppAttestRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challengeId) {
-        return new AppAttestRegistrationAuthenticationToken(keyId, attestation, challengeId);
+    public static AppAttestRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
+        return new AppAttestRegistrationAuthenticationToken(keyId, attestation, challenge);
     }
 
     /**
@@ -91,7 +91,7 @@ public class AppAttestRegistrationAuthenticationToken extends AbstractAuthentica
         return attestation;
     }
 
-    public String getChallengeId() {
-        return challengeId;
+    public String getChallenge() {
+        return challenge;
     }
 }

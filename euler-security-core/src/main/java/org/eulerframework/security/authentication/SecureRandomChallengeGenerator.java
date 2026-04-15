@@ -18,17 +18,12 @@ package org.eulerframework.security.authentication;
 import org.springframework.util.Assert;
 
 import java.security.SecureRandom;
-import java.util.Base64;
 
 /**
- * Default {@link ChallengeGenerator} implementation that produces Base64 URL-encoded
- * random challenges without padding.
- * <p>
- * Uses {@link SecureRandom} to generate cryptographically strong random bytes,
- * then encodes them with {@link Base64.Encoder#withoutPadding() Base64 URL encoding
- * without padding}.
+ * {@link ChallengeGenerator} implementation that uses {@link SecureRandom} to generate
+ * cryptographically strong random bytes.
  */
-public class Base64UrlChallengeGenerator implements ChallengeGenerator {
+public class SecureRandomChallengeGenerator implements ChallengeGenerator {
 
     private static final int DEFAULT_BYTE_LENGTH = 32;
 
@@ -38,7 +33,7 @@ public class Base64UrlChallengeGenerator implements ChallengeGenerator {
     /**
      * Create an instance that generates 32-byte (256-bit) random challenges.
      */
-    public Base64UrlChallengeGenerator() {
+    public SecureRandomChallengeGenerator() {
         this(DEFAULT_BYTE_LENGTH);
     }
 
@@ -47,15 +42,15 @@ public class Base64UrlChallengeGenerator implements ChallengeGenerator {
      *
      * @param byteLength the number of random bytes to generate
      */
-    public Base64UrlChallengeGenerator(int byteLength) {
+    public SecureRandomChallengeGenerator(int byteLength) {
         Assert.isTrue(byteLength > 0, "byteLength must be positive");
         this.byteLength = byteLength;
     }
 
     @Override
-    public String generateChallenge() {
+    public byte[] generateChallenge() {
         byte[] bytes = new byte[this.byteLength];
         this.secureRandom.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        return bytes;
     }
 }

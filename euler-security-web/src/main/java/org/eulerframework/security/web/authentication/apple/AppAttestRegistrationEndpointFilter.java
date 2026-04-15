@@ -20,6 +20,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A filter that exposes a {@code POST /app/attest/register} endpoint for Apple App Attest
@@ -51,7 +54,7 @@ import java.nio.charset.StandardCharsets;
  * <ul>
  *     <li>{@code key_id} - the key identifier from DCAppAttestService</li>
  *     <li>{@code attestation} - the Base64-encoded attestation object</li>
- *     <li>{@code challenge_id} - the ID of the previously obtained challenge</li>
+ *     <li>{@code challenge} - the challenge value obtained from the challenge endpoint</li>
  * </ul>
  * <p>
  * Success response (HTTP 200):
@@ -73,13 +76,13 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
     private final RequestMatcher requestMatcher;
 
     public AppAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
-                                                AuthenticationProvider authenticationProvider) {
+                                               AuthenticationProvider authenticationProvider) {
         this(authenticationConverter, authenticationProvider, DEFAULT_REGISTRATION_ENDPOINT_URI);
     }
 
     public AppAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
-                                                AuthenticationProvider authenticationProvider,
-                                                String endpointUri) {
+                                               AuthenticationProvider authenticationProvider,
+                                               String endpointUri) {
         Assert.notNull(authenticationConverter, "authenticationConverter must not be null");
         Assert.notNull(authenticationProvider, "authenticationProvider must not be null");
         Assert.hasText(endpointUri, "endpointUri must not be empty");
@@ -104,7 +107,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             Authentication authRequest = this.authenticationConverter.convert(request);
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
-                        "invalid_request", "Missing required parameters: key_id, attestation, challenge_id");
+                        "invalid_request", "Missing required parameters: key_id, attestation, challenge");
                 return;
             }
 
@@ -118,40 +121,33 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
     }
 
     private void sendSuccessResponse(HttpServletResponse response,
-                                      org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken result) throws IOException {
+                                     org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken result) throws IOException {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        StringBuilder json = new StringBuilder();
-        json.append("{\"key_id\":\"").append(escapeJson(result.getKeyId())).append("\"");
+        Map<String, Object> body = new HashMap<>();
+        body.put("key_id", result.getKeyId());
         Object principal = result.getPrincipal();
         if (principal != null) {
-            json.append(",\"username\":\"").append(escapeJson(principal.toString())).append("\"");
+            body.put("username", principal.toString());
         }
-        json.append("}");
 
-        response.getWriter().write(json.toString());
+        response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }
 
     private void sendErrorResponse(HttpServletResponse response, HttpStatus status,
-                                    String error, String description) throws IOException {
+                                   String error, String description) throws IOException {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        StringBuilder json = new StringBuilder();
-        json.append("{\"error\":\"").append(escapeJson(error)).append("\"");
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", error);
         if (description != null) {
-            json.append(",\"error_description\":\"").append(escapeJson(description)).append("\"");
+            body.put("error_description", description);
         }
-        json.append("}");
 
-        response.getWriter().write(json.toString());
-    }
-
-    private static String escapeJson(String value) {
-        if (value == null) return "";
-        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+        response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }
 }

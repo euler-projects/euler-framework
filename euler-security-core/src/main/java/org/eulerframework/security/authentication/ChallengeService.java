@@ -20,27 +20,27 @@ package org.eulerframework.security.authentication;
  * that require a challenge-response mechanism (e.g., Apple App Attest, WebAuthn).
  * <p>
  * Challenges are single-use, time-limited tokens that prevent replay attacks. The server
- * generates a challenge with a unique ID, the client references the challenge by its ID
- * during verification, and the server consumes (invalidates) the challenge during verification.
+ * generates a challenge, the client returns the challenge during verification, and the
+ * server consumes (invalidates) the challenge during verification.
  */
 public interface ChallengeService {
 
     /**
      * Generate a new one-time challenge.
      *
-     * @return a {@link GeneratedChallenge} containing the challenge ID, value, and its format
+     * @return a {@link GeneratedChallenge} containing the challenge value
      */
     GeneratedChallenge generateChallenge();
 
     /**
-     * Consume a previously generated challenge by its ID, marking it as used.
+     * Consume a previously generated challenge, marking it as used.
      * <p>
-     * A challenge can only be consumed once. Subsequent calls with the same challengeId
+     * A challenge can only be consumed once. Subsequent calls with the same challenge
      * must return {@code null}.
      *
-     * @param challengeId the unique identifier of the challenge to consume
-     * @return the original challenge value if the challenge was valid and successfully
-     *         consumed; {@code null} if the challenge is unknown, expired, or already consumed
+     * @param challenge the challenge value to consume
+     * @return {@code true} if the challenge was valid and successfully consumed;
+     *         {@code false} if the challenge is unknown, expired, or already consumed
      */
-    String consumeChallenge(String challengeId);
+    boolean consumeChallenge(String challenge);
 }

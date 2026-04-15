@@ -16,15 +16,11 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
-import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerPublicClientAuthenticationConverter;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -34,6 +30,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+
 
 public class EulerAuthorizationServerConfiguration {
     public static void configClientRegistrationEndpoint(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
@@ -100,52 +97,6 @@ public class EulerAuthorizationServerConfiguration {
 
     private static OAuth2WechatAuthorizationCodeAuthenticationConverter getOAuth2WechatAuthenticationConverter() {
         return new OAuth2WechatAuthorizationCodeAuthenticationConverter();
-    }
-
-    /**
-     * Configure Apple App Attest assertion grant type for the token endpoint.
-     * <p>
-     * This method registers {@link EulerPublicClientAuthenticationConverter} with the token endpoint's
-     * client authentication filter, enabling public clients
-     * ({@link org.springframework.security.oauth2.core.ClientAuthenticationMethod#NONE NONE})
-     * to use the Apple App Attest assertion grant type.
-     * <p>
-     * Note: Attestation (device registration) is now handled outside OAuth by
-     * {@code AppAttestSecurityConfigurer} and {@code AppAttestRegistrationAuthenticationProvider}.
-     */
-    public static void configAppleAppAttestAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
-        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
-
-        // Register the public client authentication converter for the token endpoint.
-        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
-                .clientAuthentication(clientAuth -> clientAuth
-                        .authenticationConverter(new EulerPublicClientAuthenticationConverter())
-                ));
-
-        // Register assertion grant type only
-        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
-                .tokenEndpoint(configurer -> configurer
-                        .authenticationProvider(getOAuth2AppleAppAttestAssertionAuthenticationProvider(http, authenticationConfiguration, challengeService))
-                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAssertionAuthenticationConverter())));
-    }
-
-    private static OAuth2AppleAppAttestAssertionAuthenticationProvider getOAuth2AppleAppAttestAssertionAuthenticationProvider(
-            HttpSecurity http, AuthenticationConfiguration authenticationConfiguration,
-            ChallengeService challengeService) {
-        try {
-            return new OAuth2AppleAppAttestAssertionAuthenticationProvider(
-                    authenticationConfiguration.getAuthenticationManager(),
-                    OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
-                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http),
-                    challengeService
-            );
-        } catch (Exception e) {
-            throw ExceptionUtils.asRuntimeException(e);
-        }
-    }
-
-    private static OAuth2AppleAppAttestAssertionAuthenticationConverter getOAuth2AppleAppAttestAssertionAuthenticationConverter() {
-        return new OAuth2AppleAppAttestAssertionAuthenticationConverter();
     }
 
     /**

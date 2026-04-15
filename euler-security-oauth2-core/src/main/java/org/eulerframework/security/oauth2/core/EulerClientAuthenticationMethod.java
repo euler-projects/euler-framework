@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.authentication;
 
-import org.springframework.util.Assert;
+package org.eulerframework.security.oauth2.core;
 
-/**
- * Represents a generated challenge with its value.
- * <p>
- * The challenge value is returned to the client and must be returned by the client
- * during verification. The server stores the challenge and consumes (invalidates) it
- * when the client presents it for verification.
- *
- * @param challenge the challenge string
- * @see ChallengeService
- */
-public record GeneratedChallenge(String challenge) {
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
-    public GeneratedChallenge {
-        Assert.hasText(challenge, "challenge must not be empty");
-    }
+public class EulerClientAuthenticationMethod {
+
+    /**
+     * Attestation-based JWT client authentication method as registered in
+     * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html#section-13.4">
+     * Section 13.4</a> of the draft.
+     */
+    public static final ClientAuthenticationMethod ATTEST_JWT_CLIENT_AUTH = new ClientAuthenticationMethod(
+            "attest_jwt_client_auth");
 }

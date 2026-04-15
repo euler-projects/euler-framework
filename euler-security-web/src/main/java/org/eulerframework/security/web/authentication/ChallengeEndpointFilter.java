@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.eulerframework.security.web.authentication.apple;
+package org.eulerframework.security.web.authentication;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.GeneratedChallenge;
 import org.springframework.http.HttpMethod;
@@ -32,36 +32,54 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 
 /**
- * A filter that exposes a {@code POST /app/attest/challenge} endpoint for generating
- * one-time challenges used in Apple App Attest registration and assertion flows.
+ * A generic filter that exposes a challenge endpoint ({@code POST}) for generating
+ * one-time challenges used in challenge-response authentication flows
+ * (e.g., Apple App Attest, Attestation-Based Client Authentication).
  * <p>
- * This endpoint is anonymous (no authentication required).
+ * This endpoint is typically anonymous (no authentication required) and should be
+ * exempt from CSRF protection. The response includes {@code Cache-Control: no-store}
+ * and {@code Pragma: no-cache} headers to prevent caching.
  * <p>
  * Response format:
  * <pre>
- * {"id": "uuid-xxx", "challenge": "base64url-data", "format": "base64url"}
+ * HTTP/1.1 200 OK
+ * Content-Type: application/json
+ * Cache-Control: no-store
+ *
+ * {"challenge": "base64url-data"}
  * </pre>
+ *
+ * @see ChallengeService
  */
-public class AppAttestChallengeEndpointFilter extends OncePerRequestFilter {
-
-    public static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app/attest/challenge";
+public class ChallengeEndpointFilter extends OncePerRequestFilter {
 
     private final ChallengeService challengeService;
     private final RequestMatcher requestMatcher;
 
-    public AppAttestChallengeEndpointFilter(ChallengeService challengeService) {
-        this(challengeService, DEFAULT_CHALLENGE_ENDPOINT_URI);
-    }
-
-    public AppAttestChallengeEndpointFilter(ChallengeService challengeService, String endpointUri) {
+    /**
+     * Create a new {@code ChallengeEndpointFilter} that handles {@code POST} requests
+     * to the specified endpoint URI.
+     *
+     * @param challengeService the service used to generate one-time challenges
+     * @param endpointUri      the URI path for this challenge endpoint (e.g., {@code /oauth2/challenge})
+     */
+    public ChallengeEndpointFilter(ChallengeService challengeService, String endpointUri) {
         Assert.notNull(challengeService, "challengeService must not be null");
         Assert.hasText(endpointUri, "endpointUri must not be empty");
         this.challengeService = challengeService;
         this.requestMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.POST, endpointUri);
     }
 
+    /**
+     * Returns the {@link RequestMatcher} for this endpoint.
+     * Can be used to configure CSRF exemption, security matcher, and authorization rules.
+     *
+     * @return the request matcher for this challenge endpoint
+     */
     public RequestMatcher getRequestMatcher() {
         return this.requestMatcher;
     }
@@ -89,20 +107,10 @@ public class AppAttestChallengeEndpointFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.addHeader("Cache-Control", "no-store");
+        response.addHeader("Pragma", "no-cache");
 
-        StringBuilder json = new StringBuilder();
-        json.append("{\"id\":\"").append(escapeJson(generatedChallenge.id())).append("\"");
-        json.append(",\"challenge\":\"").append(escapeJson(generatedChallenge.challenge())).append("\"");
-        if (generatedChallenge.format() != null) {
-            json.append(",\"format\":\"").append(escapeJson(generatedChallenge.format())).append("\"");
-        }
-        json.append("}");
-
-        response.getWriter().write(json.toString());
-    }
-
-    private static String escapeJson(String value) {
-        if (value == null) return "";
-        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+        Map<String, Object> body = Collections.singletonMap("challenge", generatedChallenge);
+        response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }
 }

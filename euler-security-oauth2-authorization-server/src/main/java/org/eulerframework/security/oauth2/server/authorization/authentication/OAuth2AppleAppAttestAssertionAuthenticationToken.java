@@ -25,23 +25,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Authentication token for the {@code apple_app_attest_assertion} grant type.
+ * <p>
+ * This token carries the verified {@code keyId} (set by {@code ClientAttestationFilter})
+ * and requested scopes. Assertion and challenge validation have already been performed
+ * by the filter; this grant type is a thin layer responsible only for anonymous user
+ * resolution and token issuance.
+ */
 public class OAuth2AppleAppAttestAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
     private final String keyId;
-    private final String assertion;
-    private final String challengeId;
     private final Set<String> scopes;
 
     public OAuth2AppleAppAttestAssertionAuthenticationToken(
             String keyId,
-            String assertion,
-            String challengeId,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
         super(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION, clientPrincipal, additionalParameters);
         this.keyId = keyId;
-        this.assertion = assertion;
-        this.challengeId = challengeId;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
@@ -50,14 +52,6 @@ public class OAuth2AppleAppAttestAssertionAuthenticationToken extends OAuth2Auth
 
     public String getKeyId() {
         return keyId;
-    }
-
-    public String getAssertion() {
-        return assertion;
-    }
-
-    public String getChallengeId() {
-        return challengeId;
     }
 
     public Set<String> getScopes() {

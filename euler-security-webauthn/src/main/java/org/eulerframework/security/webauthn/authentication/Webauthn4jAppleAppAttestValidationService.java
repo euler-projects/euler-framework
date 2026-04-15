@@ -51,6 +51,7 @@ import java.security.cert.CertPath;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -64,17 +65,35 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
 
     private static final Logger logger = LoggerFactory.getLogger(Webauthn4jAppleAppAttestValidationService.class);
 
+    /**
+     * AAGUID for the Apple App Attest production environment.
+     * <p>ASCII encoding of {@code "appattest"} followed by 7 null bytes (16 bytes total).
+     */
+    private static final byte[] PRODUCTION_AAGUID = new byte[]{
+            'a', 'p', 'p', 'a', 't', 't', 'e', 's', 't',
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+    /**
+     * AAGUID for the Apple App Attest development environment.
+     * <p>ASCII encoding of {@code "appattestdevelop"} (16 bytes).
+     */
+    private static final byte[] DEVELOPMENT_AAGUID = new byte[]{
+            'a', 'p', 'p', 'a', 't', 't', 'e', 's', 't',
+            'd', 'e', 'v', 'e', 'l', 'o', 'p'};
+
     private final DeviceCheckManager deviceCheckManager;
     private final AppleAppRepository appRepository;
     private final AppAttestRegistrationService registrationService;
+    private final boolean allowDevelopmentEnvironment;
 
     /**
      * Creates a new instance with the given {@link DeviceCheckManager}.
      * <p>
-     * Use {@link AppleAppAttestRootCA#deviceCheckManager()} to create a production-ready
-     * {@code DeviceCheckManager} with Apple's built-in root CA certificate chain validation.
+     * Equivalent to calling
+     * {@link #Webauthn4jAppleAppAttestValidationService(DeviceCheckManager, AppleAppRepository, AppAttestRegistrationService, boolean)}
+     * with {@code allowDevelopmentEnvironment = false}.
      *
-     * @param deviceCheckManager the device check manager (must not be {@code null})
+     * @param deviceCheckManager  the device check manager (must not be {@code null})
      * @param appRepository       the registered Apple app repository (must not be {@code null})
      * @param registrationService the registration persistence service (must not be {@code null})
      * @see AppleAppAttestRootCA#deviceCheckManager()
@@ -82,12 +101,32 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
     public Webauthn4jAppleAppAttestValidationService(DeviceCheckManager deviceCheckManager,
                                                       AppleAppRepository appRepository,
                                                       AppAttestRegistrationService registrationService) {
+        this(deviceCheckManager, appRepository, registrationService, false);
+    }
+
+    /**
+     * Creates a new instance with the given {@link DeviceCheckManager}.
+     * <p>
+     * Use {@link AppleAppAttestRootCA#deviceCheckManager()} to create a production-ready
+     * {@code DeviceCheckManager} with Apple's built-in root CA certificate chain validation.
+     *
+     * @param deviceCheckManager           the device check manager (must not be {@code null})
+     * @param appRepository                the registered Apple app repository (must not be {@code null})
+     * @param registrationService          the registration persistence service (must not be {@code null})
+     * @param allowDevelopmentEnvironment  whether to accept attestations from the development environment
+     * @see AppleAppAttestRootCA#deviceCheckManager()
+     */
+    public Webauthn4jAppleAppAttestValidationService(DeviceCheckManager deviceCheckManager,
+                                                      AppleAppRepository appRepository,
+                                                      AppAttestRegistrationService registrationService,
+                                                      boolean allowDevelopmentEnvironment) {
         Assert.notNull(deviceCheckManager, "deviceCheckManager must not be null");
         Assert.notNull(appRepository, "appRepository must not be null");
         Assert.notNull(registrationService, "registrationService must not be null");
         this.deviceCheckManager = deviceCheckManager;
         this.appRepository = appRepository;
         this.registrationService = registrationService;
+        this.allowDevelopmentEnvironment = allowDevelopmentEnvironment;
     }
 
     @Override
@@ -123,6 +162,10 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
                 throw new AuthenticationServiceException("No attested credential data in attestation response");
             }
             byte[] aaguid = attestedCredentialData.getAaguid().getBytes();
+
+            // 5.1 Validate AAGUID (development vs production environment)
+            validateAaguid(aaguid);
+
             byte[] credentialId = attestedCredentialData.getCredentialId();
             PublicKey publicKey = attestedCredentialData.getCOSEKey().getPublicKey();
 
@@ -199,6 +242,31 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
         } catch (Exception e) {
             throw new AuthenticationServiceException("Apple App Attest assertion validation failed", e);
         }
+    }
+
+    /**
+     * Validates the AAGUID from the attestation data.
+     * <p>
+     * If {@code allowDevelopmentEnvironment} is {@code false}, only the production AAGUID is accepted.
+     * If {@code true}, both production and development AAGUIDs are accepted.
+     *
+     * @param aaguid the AAGUID bytes extracted from attested credential data
+     * @throws AuthenticationServiceException if the AAGUID does not match any accepted value
+     */
+    private void validateAaguid(byte[] aaguid) {
+        if (Arrays.equals(aaguid, PRODUCTION_AAGUID)) {
+            return;
+        }
+        if (Arrays.equals(aaguid, DEVELOPMENT_AAGUID)) {
+            if (this.allowDevelopmentEnvironment) {
+                logger.debug("Accepted attestation from development environment");
+                return;
+            }
+            throw new AuthenticationServiceException(
+                    "Attestation from development environment is not allowed; "
+                            + "set euler.security.app-attest.allow-development-environment=true to allow");
+        }
+        throw new AuthenticationServiceException("Unrecognized AAGUID in attestation data");
     }
 
     private static String generateJwksJson(PublicKey publicKey) {

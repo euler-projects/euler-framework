@@ -19,7 +19,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
-import java.util.UUID;
+import java.util.Base64;
 
 /**
  * Redis-backed implementation of {@link ChallengeService}.
@@ -41,7 +41,7 @@ public class RedisChallengeService implements ChallengeService {
 
     /**
      * Create an instance with a 5-minute challenge lifetime and the default
-     * {@link Base64UrlChallengeGenerator}.
+     * {@link SecureRandomChallengeGenerator}.
      *
      * @param redisTemplate the Redis template to use
      */
@@ -51,13 +51,13 @@ public class RedisChallengeService implements ChallengeService {
 
     /**
      * Create an instance with the specified challenge lifetime and the default
-     * {@link Base64UrlChallengeGenerator}.
+     * {@link SecureRandomChallengeGenerator}.
      *
      * @param redisTemplate     the Redis template to use
      * @param challengeLifetime how long a challenge remains valid
      */
     public RedisChallengeService(StringRedisTemplate redisTemplate, Duration challengeLifetime) {
-        this(redisTemplate, challengeLifetime, new Base64UrlChallengeGenerator());
+        this(redisTemplate, challengeLifetime, new SecureRandomChallengeGenerator());
     }
 
     /**
@@ -79,24 +79,21 @@ public class RedisChallengeService implements ChallengeService {
 
     @Override
     public GeneratedChallenge generateChallenge() {
-        String id = UUID.randomUUID().toString();
-        String challenge = this.challengeGenerator.generateChallenge();
-
-        this.redisTemplate.opsForValue().set(buildKey(id), challenge, this.challengeLifetime);
-        return new GeneratedChallenge(id, challenge);
+        String challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(
+                this.challengeGenerator.generateChallenge());
+        this.redisTemplate.opsForValue().set(buildKey(challenge), "", this.challengeLifetime);
+        return new GeneratedChallenge(challenge);
     }
 
     @Override
-    public String consumeChallenge(String challengeId) {
-        String key = buildKey(challengeId);
-        String challenge = this.redisTemplate.opsForValue().get(key);
-        if (challenge != null) {
+    public boolean consumeChallenge(String challenge) {
+        String key = buildKey(challenge);
+        Boolean exists = this.redisTemplate.hasKey(key);
+        if (Boolean.TRUE.equals(exists)) {
             Boolean deleted = this.redisTemplate.delete(key);
-            if (Boolean.TRUE.equals(deleted)) {
-                return challenge;
-            }
+            return Boolean.TRUE.equals(deleted);
         }
-        return null;
+        return false;
     }
 
     public void setKeyPrefix(String keyPrefix) {

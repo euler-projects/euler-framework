@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
 
 /**
- * Extracts {@code key_id}, {@code attestation}, and {@code challenge_id} parameters from
+ * Extracts {@code key_id}, {@code attestation}, and {@code challenge} parameters from
  * an HTTP request and constructs an {@link org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken}.
  * <p>
  * Returns {@code null} if any required parameter is missing, indicating the request
@@ -32,18 +32,18 @@ public class AppAttestRegistrationAuthenticationConverter implements Authenticat
 
     private static final String PARAM_KEY_ID = "key_id";
     private static final String PARAM_ATTESTATION = "attestation";
-    private static final String PARAM_CHALLENGE_ID = "challenge_id";
+    private static final String PARAM_CHALLENGE = "challenge";
 
     @Override
     public Authentication convert(HttpServletRequest request) {
         String keyId = request.getParameter(PARAM_KEY_ID);
         String attestation = request.getParameter(PARAM_ATTESTATION);
-        String challengeId = request.getParameter(PARAM_CHALLENGE_ID);
+        String challenge = request.getParameter(PARAM_CHALLENGE);
 
-        if (!StringUtils.hasText(keyId) || !StringUtils.hasText(attestation) || !StringUtils.hasText(challengeId)) {
+        if (!StringUtils.hasText(keyId) || !StringUtils.hasText(attestation) || !StringUtils.hasText(challenge)) {
             return null;
         }
 
-        return org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challengeId);
+        return org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challenge);
     }
 }

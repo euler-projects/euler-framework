@@ -24,7 +24,6 @@ package org.eulerframework.security.authentication.apple;
  * only contains the RP ID hash, not the original App ID.
  *
  * @see RegisteredAppleApp
- * @see Webauthn4jAppleAppAttestValidationService
  */
 public interface AppleAppRepository {
 

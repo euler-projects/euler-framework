@@ -22,7 +22,7 @@ import org.eulerframework.security.authentication.apple.AppleAppAttestValidation
 import org.eulerframework.security.authentication.apple.AppleAppRepository;
 import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
 import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
-import org.eulerframework.security.web.authentication.apple.AppAttestChallengeEndpointFilter;
+import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
 import org.eulerframework.security.web.authentication.apple.AppAttestRegistrationAuthenticationConverter;
 import org.eulerframework.security.web.authentication.apple.AppAttestRegistrationEndpointFilter;
 import org.springframework.context.ApplicationContext;
@@ -55,7 +55,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  * );
  * </pre>
  *
- * @see AppAttestChallengeEndpointFilter
+ * @see ChallengeEndpointFilter
  * @see AppAttestRegistrationEndpointFilter
  */
 public class AppAttestSecurityConfigurer
@@ -67,7 +67,9 @@ public class AppAttestSecurityConfigurer
     private AppAttestRegistrationService registrationService;
     private EulerAppleAppAttestUserDetailsService userDetailsService;
 
-    private String challengeEndpointUri = AppAttestChallengeEndpointFilter.DEFAULT_CHALLENGE_ENDPOINT_URI;
+    private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app/attest/challenge";
+
+    private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
     private String registrationEndpointUri = AppAttestRegistrationEndpointFilter.DEFAULT_REGISTRATION_ENDPOINT_URI;
 
     private RequestMatcher endpointsMatcher;
@@ -120,8 +122,8 @@ public class AppAttestSecurityConfigurer
     @Override
     public void init(HttpSecurity http) {
         // Build endpoint filters to obtain their request matchers
-        AppAttestChallengeEndpointFilter challengeFilter =
-                new AppAttestChallengeEndpointFilter(resolveChallengeService(http), this.challengeEndpointUri);
+        ChallengeEndpointFilter challengeFilter =
+                new ChallengeEndpointFilter(resolveChallengeService(http), this.challengeEndpointUri);
         AppAttestRegistrationEndpointFilter registrationFilter =
                 new AppAttestRegistrationEndpointFilter(
                         new AppAttestRegistrationAuthenticationConverter(),
@@ -136,14 +138,14 @@ public class AppAttestSecurityConfigurer
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.endpointsMatcher));
 
         // Store filters as shared objects for configure() to retrieve
-        http.setSharedObject(AppAttestChallengeEndpointFilter.class, challengeFilter);
+        http.setSharedObject(ChallengeEndpointFilter.class, challengeFilter);
         http.setSharedObject(AppAttestRegistrationEndpointFilter.class, registrationFilter);
     }
 
     @Override
     public void configure(HttpSecurity http) {
-        AppAttestChallengeEndpointFilter challengeFilter =
-                http.getSharedObject(AppAttestChallengeEndpointFilter.class);
+        ChallengeEndpointFilter challengeFilter =
+                http.getSharedObject(ChallengeEndpointFilter.class);
         AppAttestRegistrationEndpointFilter registrationFilter =
                 http.getSharedObject(AppAttestRegistrationEndpointFilter.class);
 

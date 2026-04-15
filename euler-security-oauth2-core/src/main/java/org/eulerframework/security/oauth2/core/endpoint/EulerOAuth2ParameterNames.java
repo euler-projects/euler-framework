@@ -19,9 +19,26 @@ package org.eulerframework.security.oauth2.core.endpoint;
 public final class EulerOAuth2ParameterNames {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
-    public static final String KEY_ID = "key_id";
+    public static final String KEY_ID = "kid";
     public static final String ATTESTATION = "attestation";
-    public static final String ASSERTION = "assertion_data";
+    public static final String ASSERTION = "assertion";
     public static final String CHALLENGE = "challenge";
-    public static final String CHALLENGE_ID = "challenge_id";
+
+    /**
+     * Client Attestation JWT header.
+     */
+    public static final String OAUTH_CLIENT_ATTESTATION = "OAuth-Client-Attestation";
+
+    /**
+     * Client Attestation Proof-of-Possession data header.
+     */
+    public static final String OAUTH_CLIENT_ATTESTATION_POP = "OAuth-Client-Attestation-PoP";
+
+    /**
+     * Custom extension: PoP verification type identifier.
+     * Defaults to {@link org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType#JWT} when absent.
+     */
+    public static final String OAUTH_CLIENT_ATTESTATION_POP_TYPE = "OAuth-Client-Attestation-PoP-Type";
+
+    public static final String ADDITIONAL_SECURITY_SIGNAL = "additional-security-signal";
 }

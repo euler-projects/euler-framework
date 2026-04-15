@@ -71,12 +71,11 @@ public class AppAttestRegistrationAuthenticationProvider implements Authenticati
 
         String keyId = token.getKeyId();
         String attestation = token.getAttestation();
-        String challengeId = token.getChallengeId();
+        String challenge = token.getChallenge();
 
         // 1. Consume the one-time challenge
-        String challenge = this.challengeService.consumeChallenge(challengeId);
-        if (challenge == null) {
-            throw new BadCredentialsException("Invalid or expired challenge_id");
+        if (!this.challengeService.consumeChallenge(challenge)) {
+            throw new BadCredentialsException("Invalid or expired challenge");
         }
 
         try {

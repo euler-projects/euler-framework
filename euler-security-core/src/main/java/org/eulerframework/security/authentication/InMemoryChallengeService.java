@@ -19,9 +19,9 @@ import org.springframework.util.Assert;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -38,14 +38,14 @@ public class InMemoryChallengeService implements ChallengeService {
 
     private static final int DEFAULT_MAX_CHALLENGES = 10000;
 
-    private final Map<String, ChallengeEntry> challenges = new ConcurrentHashMap<>();
+    private final Map<String, Instant> challenges = new ConcurrentHashMap<>();
     private final ChallengeGenerator challengeGenerator;
     private final Duration challengeLifetime;
     private final int maxChallenges;
 
     /**
      * Create an instance with a 5-minute challenge lifetime, default max capacity,
-     * and the default {@link Base64UrlChallengeGenerator}.
+     * and the default {@link SecureRandomChallengeGenerator}.
      */
     public InMemoryChallengeService() {
         this(Duration.ofMinutes(5));
@@ -53,7 +53,7 @@ public class InMemoryChallengeService implements ChallengeService {
 
     /**
      * Create an instance with the specified challenge lifetime, default max capacity,
-     * and the default {@link Base64UrlChallengeGenerator}.
+     * and the default {@link SecureRandomChallengeGenerator}.
      *
      * @param challengeLifetime how long a challenge remains valid
      */
@@ -63,13 +63,13 @@ public class InMemoryChallengeService implements ChallengeService {
 
     /**
      * Create an instance with the specified challenge lifetime, max capacity,
-     * and the default {@link Base64UrlChallengeGenerator}.
+     * and the default {@link SecureRandomChallengeGenerator}.
      *
      * @param challengeLifetime how long a challenge remains valid
      * @param maxChallenges     maximum number of active challenges allowed
      */
     public InMemoryChallengeService(Duration challengeLifetime, int maxChallenges) {
-        this(challengeLifetime, maxChallenges, new Base64UrlChallengeGenerator());
+        this(challengeLifetime, maxChallenges, new SecureRandomChallengeGenerator());
     }
 
     /**
@@ -98,39 +98,25 @@ public class InMemoryChallengeService implements ChallengeService {
                     "Maximum number of active challenges (" + this.maxChallenges + ") reached. Please try again later.");
         }
 
-        String id = UUID.randomUUID().toString();
-        String challenge = this.challengeGenerator.generateChallenge();
-
-        this.challenges.put(id, new ChallengeEntry(challenge, Instant.now().plus(this.challengeLifetime)));
-        return new GeneratedChallenge(id, challenge);
+        String challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(
+                this.challengeGenerator.generateChallenge());
+        this.challenges.put(challenge, Instant.now().plus(this.challengeLifetime));
+        return new GeneratedChallenge(challenge);
     }
 
     @Override
-    public String consumeChallenge(String challengeId) {
-        ChallengeEntry entry = this.challenges.remove(challengeId);
-        if (entry != null && Instant.now().isBefore(entry.expiresAt)) {
-            return entry.challenge;
-        }
-        return null;
+    public boolean consumeChallenge(String challenge) {
+        Instant expiresAt = this.challenges.remove(challenge);
+        return expiresAt != null && Instant.now().isBefore(expiresAt);
     }
 
     private void cleanupExpired() {
         Instant now = Instant.now();
-        Iterator<Map.Entry<String, ChallengeEntry>> it = this.challenges.entrySet().iterator();
+        Iterator<Map.Entry<String, Instant>> it = this.challenges.entrySet().iterator();
         while (it.hasNext()) {
-            if (now.isAfter(it.next().getValue().expiresAt)) {
+            if (now.isAfter(it.next().getValue())) {
                 it.remove();
             }
-        }
-    }
-
-    private static class ChallengeEntry {
-        final String challenge;
-        final Instant expiresAt;
-
-        ChallengeEntry(String challenge, Instant expiresAt) {
-            this.challenge = challenge;
-            this.expiresAt = expiresAt;
         }
     }
 }

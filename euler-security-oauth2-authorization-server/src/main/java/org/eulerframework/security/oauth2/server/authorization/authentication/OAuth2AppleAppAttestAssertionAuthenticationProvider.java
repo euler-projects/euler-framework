@@ -15,16 +15,30 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
-import org.eulerframework.security.authentication.apple.AppleAppAttestAssertionAuthenticationToken;
-import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
-import org.eulerframework.security.authentication.ChallengeService;
+import java.security.Principal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationManager;
+
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClaimAccessor;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
@@ -42,9 +56,26 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.util.Assert;
 
-import java.security.Principal;
-import java.util.*;
+import org.eulerframework.security.authentication.apple.AppleAppAttestUser;
+import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
+import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 
+/**
+ * Authentication provider for the {@code apple_app_attest_assertion} grant type.
+ * <p>
+ * This is a <b>thin layer</b> responsible only for anonymous user resolution and
+ * token issuance. Assertion/challenge cryptographic verification is performed
+ * upstream by {@code ClientAttestationFilter}.
+ * <p>
+ * Flow:
+ * <ol>
+ *   <li>Retrieve the already-authenticated {@code RegisteredClient}.</li>
+ *   <li>Validate the grant type and requested scopes.</li>
+ *   <li>Load or create an anonymous user via {@link EulerAppleAppAttestUserDetailsService}.</li>
+ *   <li>Generate Access Token, Refresh Token (if applicable), and ID Token (if openid scope).</li>
+ * </ol>
+ */
 public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
@@ -52,24 +83,27 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
-    private final AuthenticationManager authenticationManager;
+    private final EulerAppleAppAttestUserDetailsService userDetailsService;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
-    private final ChallengeService challengeService;
+
+    private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
     public OAuth2AppleAppAttestAssertionAuthenticationProvider(
-            AuthenticationManager authenticationManager,
+            EulerAppleAppAttestUserDetailsService userDetailsService,
             OAuth2AuthorizationService authorizationService,
-            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
-            ChallengeService challengeService) {
-        Assert.notNull(authenticationManager, "authenticationManager must not be null");
+            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+        Assert.notNull(userDetailsService, "userDetailsService must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
-        Assert.notNull(challengeService, "challengeService must not be null");
-        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
-        this.challengeService = challengeService;
+    }
+
+    public void setUserDetailsChecker(UserDetailsChecker userDetailsChecker) {
+        Assert.notNull(userDetailsChecker, "userDetailsChecker must not be null");
+        this.userDetailsChecker = userDetailsChecker;
     }
 
     @Override
@@ -89,25 +123,27 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
         }
 
-        String keyId = assertionAuthenticationToken.getKeyId();
-        String assertion = assertionAuthenticationToken.getAssertion();
-        String challengeId = assertionAuthenticationToken.getChallengeId();
-
-        // Consume the challenge by ID to ensure single-use, preventing replay attacks
-        String challenge = this.challengeService.consumeChallenge(challengeId);
-        if (challenge == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                    "Invalid or expired challenge.", ERROR_URI));
-        }
-
         this.validateScope(assertionAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(assertionAuthenticationToken.getScopes());
 
-        Authentication userPrincipal = AppleAppAttestAssertionAuthenticationToken.unauthenticated(keyId, assertion, challenge);
-        userPrincipal = this.authenticationManager.authenticate(userPrincipal);
-        if (!userPrincipal.isAuthenticated()) {
-            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
+        // Resolve anonymous user by keyId
+        String keyId = assertionAuthenticationToken.getKeyId();
+        AppleAppAttestUser attestUser = new AppleAppAttestUser(keyId);
+        UserDetails user;
+        try {
+            user = this.userDetailsService.loadUserByAppleAppAttestUser(attestUser);
+        } catch (UserDetailsNotFountException e) {
+            // First-time use: auto-create anonymous user
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("User not found for keyId '{}', creating new anonymous user", keyId);
+            }
+            user = this.userDetailsService.createUser(attestUser);
         }
+
+        this.userDetailsChecker.check(user);
+
+        Authentication userPrincipal = UsernamePasswordAuthenticationToken.authenticated(
+                user, null, user.getAuthorities());
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
@@ -213,12 +249,14 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
         return OAuth2AppleAppAttestAssertionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2AppleAppAttestAssertionAuthenticationToken authenticationToken, RegisteredClient registeredClient) {
+    private void validateScope(OAuth2AppleAppAttestAssertionAuthenticationToken authenticationToken,
+                               RegisteredClient registeredClient) {
         Set<String> requestedScopes = authenticationToken.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();
         if (!requestedScopes.isEmpty() && !allowedScopes.containsAll(requestedScopes)) {
             if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Invalid request: requested scope is not allowed for registered client '{}'", registeredClient.getId());
+                this.logger.debug("Invalid request: requested scope is not allowed for registered client '{}'",
+                        registeredClient.getId());
             }
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));
         }
