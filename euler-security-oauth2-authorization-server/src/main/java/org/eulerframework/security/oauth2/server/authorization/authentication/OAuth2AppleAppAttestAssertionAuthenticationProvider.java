@@ -91,11 +91,10 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
 
         String keyId = assertionAuthenticationToken.getKeyId();
         String assertion = assertionAuthenticationToken.getAssertion();
-        String challengeId = assertionAuthenticationToken.getChallengeId();
+        String challenge = assertionAuthenticationToken.getChallenge();
 
-        // Consume the challenge by ID to ensure single-use, preventing replay attacks
-        String challenge = this.challengeService.consumeChallenge(challengeId);
-        if (challenge == null) {
+        // Consume the challenge to ensure single-use, preventing replay attacks
+        if (!this.challengeService.consumeChallenge(challenge)) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
                     "Invalid or expired challenge.", ERROR_URI));
         }

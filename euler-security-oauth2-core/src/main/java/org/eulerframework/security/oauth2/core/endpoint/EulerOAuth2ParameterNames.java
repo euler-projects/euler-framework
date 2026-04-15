@@ -23,5 +23,4 @@ public final class EulerOAuth2ParameterNames {
     public static final String ATTESTATION = "attestation";
     public static final String ASSERTION = "assertion_data";
     public static final String CHALLENGE = "challenge";
-    public static final String CHALLENGE_ID = "challenge_id";
 }

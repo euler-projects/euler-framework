@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets;
  * <p>
  * Response format:
  * <pre>
- * {"id": "uuid-xxx", "challenge": "base64url-data", "format": "base64url"}
+ * {"challenge": "base64url-data"}
  * </pre>
  */
 public class AppAttestChallengeEndpointFilter extends OncePerRequestFilter {
@@ -90,15 +90,8 @@ public class AppAttestChallengeEndpointFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        StringBuilder json = new StringBuilder();
-        json.append("{\"id\":\"").append(escapeJson(generatedChallenge.id())).append("\"");
-        json.append(",\"challenge\":\"").append(escapeJson(generatedChallenge.challenge())).append("\"");
-        if (generatedChallenge.format() != null) {
-            json.append(",\"format\":\"").append(escapeJson(generatedChallenge.format())).append("\"");
-        }
-        json.append("}");
-
-        response.getWriter().write(json.toString());
+        String json = "{\"challenge\":\"" + escapeJson(generatedChallenge.challenge()) + "\"}";
+        response.getWriter().write(json);
     }
 
     private static String escapeJson(String value) {

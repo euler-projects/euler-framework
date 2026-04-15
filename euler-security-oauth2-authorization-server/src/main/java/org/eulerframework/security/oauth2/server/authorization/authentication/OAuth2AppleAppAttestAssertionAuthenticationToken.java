@@ -28,20 +28,20 @@ import java.util.Set;
 public class OAuth2AppleAppAttestAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
     private final String keyId;
     private final String assertion;
-    private final String challengeId;
+    private final String challenge;
     private final Set<String> scopes;
 
     public OAuth2AppleAppAttestAssertionAuthenticationToken(
             String keyId,
             String assertion,
-            String challengeId,
+            String challenge,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
         super(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION, clientPrincipal, additionalParameters);
         this.keyId = keyId;
         this.assertion = assertion;
-        this.challengeId = challengeId;
+        this.challenge = challenge;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
@@ -56,8 +56,8 @@ public class OAuth2AppleAppAttestAssertionAuthenticationToken extends OAuth2Auth
         return assertion;
     }
 
-    public String getChallengeId() {
-        return challengeId;
+    public String getChallenge() {
+        return challenge;
     }
 
     public Set<String> getScopes() {

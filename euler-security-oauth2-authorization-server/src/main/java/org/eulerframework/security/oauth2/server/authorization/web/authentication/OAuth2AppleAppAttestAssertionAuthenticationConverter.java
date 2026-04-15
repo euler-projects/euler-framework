@@ -60,11 +60,11 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
                     "OAuth 2.0 Parameter: " + EulerOAuth2ParameterNames.ASSERTION, DEFAULT_ERROR_URI));
         }
 
-        // challenge_id (REQUIRED)
-        String challengeId = parameters.getFirst(EulerOAuth2ParameterNames.CHALLENGE_ID);
-        if (!StringUtils.hasText(challengeId) || parameters.get(EulerOAuth2ParameterNames.CHALLENGE_ID).size() != 1) {
+        // challenge (REQUIRED)
+        String challenge = parameters.getFirst(EulerOAuth2ParameterNames.CHALLENGE);
+        if (!StringUtils.hasText(challenge) || parameters.get(EulerOAuth2ParameterNames.CHALLENGE).size() != 1) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                    "OAuth 2.0 Parameter: " + EulerOAuth2ParameterNames.CHALLENGE_ID, DEFAULT_ERROR_URI));
+                    "OAuth 2.0 Parameter: " + EulerOAuth2ParameterNames.CHALLENGE, DEFAULT_ERROR_URI));
         }
 
         // scope (OPTIONAL)
@@ -88,7 +88,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
                     !key.equals(OAuth2ParameterNames.SCOPE) &&
                     !key.equals(EulerOAuth2ParameterNames.KEY_ID) &&
                     !key.equals(EulerOAuth2ParameterNames.ASSERTION) &&
-                    !key.equals(EulerOAuth2ParameterNames.CHALLENGE_ID)) {
+                    !key.equals(EulerOAuth2ParameterNames.CHALLENGE)) {
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
@@ -96,7 +96,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
         return new OAuth2AppleAppAttestAssertionAuthenticationToken(
                 keyId,
                 assertion,
-                challengeId,
+                challenge,
                 clientPrincipal,
                 scopes,
                 additionalParameters

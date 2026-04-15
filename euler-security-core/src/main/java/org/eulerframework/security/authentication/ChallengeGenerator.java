@@ -16,23 +16,23 @@
 package org.eulerframework.security.authentication;
 
 /**
- * Strategy interface for generating challenge strings used in challenge-response
+ * Strategy interface for generating raw challenge data used in challenge-response
  * authentication flows.
  * <p>
- * Implementations define how the raw challenge string is produced (e.g., Base64 URL
- * encoding of random bytes, hex encoding, etc.). The storage and lifecycle management
- * of challenges is handled by {@link ChallengeService} implementations.
+ * Implementations are responsible only for producing raw binary challenge data.
+ * Encoding (e.g., Base64 URL) and lifecycle management are handled by
+ * {@link ChallengeService} implementations.
  *
- * @see Base64UrlChallengeGenerator
+ * @see SecureRandomChallengeGenerator
  * @see ChallengeService
  */
 @FunctionalInterface
 public interface ChallengeGenerator {
 
     /**
-     * Generate a new challenge string.
+     * Generate new raw challenge bytes.
      *
-     * @return the generated challenge string, never {@code null} or empty
+     * @return the generated challenge bytes, never {@code null} or empty
      */
-    String generateChallenge();
+    byte[] generateChallenge();
 }

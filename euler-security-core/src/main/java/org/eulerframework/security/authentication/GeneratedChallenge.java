@@ -18,32 +18,18 @@ package org.eulerframework.security.authentication;
 import org.springframework.util.Assert;
 
 /**
- * Represents a generated challenge with its unique ID, value, and format descriptor.
+ * Represents a generated challenge with its value.
  * <p>
- * The {@code id} field is a unique identifier for the challenge, allowing clients to
- * reference it later when consuming the challenge. The {@code format} field describes
- * the encoding/format of the challenge value.
+ * The challenge value is returned to the client and must be returned by the client
+ * during verification. The server stores the challenge and consumes (invalidates) it
+ * when the client presents it for verification.
  *
- * @param id        the unique identifier for this challenge
  * @param challenge the challenge string
- * @param format    optional, the format descriptor of the challenge
  * @see ChallengeService
  */
-public record GeneratedChallenge(String id, String challenge, String format) {
-
-    /**
-     * Creates a {@code GeneratedChallenge} with the specified id and challenge string
-     * without format info
-     *
-     * @param id        the unique identifier for this challenge
-     * @param challenge the challenge string
-     */
-    public GeneratedChallenge(String id, String challenge) {
-        this(id, challenge, null);
-    }
+public record GeneratedChallenge(String challenge) {
 
     public GeneratedChallenge {
-        Assert.hasText(id, "id must not be empty");
         Assert.hasText(challenge, "challenge must not be empty");
     }
 }

@@ -51,7 +51,7 @@ import java.nio.charset.StandardCharsets;
  * <ul>
  *     <li>{@code key_id} - the key identifier from DCAppAttestService</li>
  *     <li>{@code attestation} - the Base64-encoded attestation object</li>
- *     <li>{@code challenge_id} - the ID of the previously obtained challenge</li>
+ *     <li>{@code challenge} - the challenge value obtained from the challenge endpoint</li>
  * </ul>
  * <p>
  * Success response (HTTP 200):
@@ -104,7 +104,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             Authentication authRequest = this.authenticationConverter.convert(request);
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
-                        "invalid_request", "Missing required parameters: key_id, attestation, challenge_id");
+                        "invalid_request", "Missing required parameters: key_id, attestation, challenge");
                 return;
             }
 
