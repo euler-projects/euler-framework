@@ -89,8 +89,15 @@ public class AppAttestChallengeEndpointFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.addHeader("Cache-Control", "no-store");
+        response.addHeader("Pragma", "no-cache");
 
-        String json = "{\"challenge\":\"" + escapeJson(generatedChallenge.challenge()) + "\"}";
+        String challengeValue = escapeJson(generatedChallenge.challenge());
+        // Return both field names for compatibility:
+        // - "challenge": original field name used by existing clients
+        // - "attestation_challenge": field name per draft-ietf-oauth-attestation-based-client-auth-08 Section 7
+        String json = "{\"challenge\":\"" + challengeValue
+                + "\",\"attestation_challenge\":\"" + challengeValue + "\"}";
         response.getWriter().write(json);
     }
 

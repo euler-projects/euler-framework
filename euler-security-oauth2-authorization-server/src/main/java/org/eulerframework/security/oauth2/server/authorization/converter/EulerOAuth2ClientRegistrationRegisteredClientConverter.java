@@ -17,8 +17,10 @@
 package org.eulerframework.security.oauth2.server.authorization.converter;
 
 import com.nimbusds.jose.jwk.JWKSet;
+import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.EulerOAuth2ClientMetadataClaimNames;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
@@ -108,6 +110,10 @@ public final class EulerOAuth2ClientRegistrationRegisteredClientConverter
 		else if (ClientAuthenticationMethod.NONE.getValue().equals(authMethod)) {
 			builder.clientAuthenticationMethod(ClientAuthenticationMethod.NONE);
 			// Public client — no client_secret
+		}
+		else if (EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue().equals(authMethod)) {
+			builder.clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH);
+			// Attestation-based client — no client_secret
 		}
 		else {
 			// Default: client_secret_basic (Spring original behavior)

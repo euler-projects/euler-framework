@@ -23,4 +23,36 @@ public final class EulerOAuth2ParameterNames {
     public static final String ATTESTATION = "attestation";
     public static final String ASSERTION = "assertion_data";
     public static final String CHALLENGE = "challenge";
+
+    // --- Attestation HTTP Header names (draft-ietf-oauth-attestation-based-client-auth-08 Section 6.1) ---
+
+    /**
+     * Client Attestation JWT header.
+     */
+    public static final String OAUTH_CLIENT_ATTESTATION = "OAuth-Client-Attestation";
+
+    /**
+     * Client Attestation Proof-of-Possession data header.
+     */
+    public static final String OAUTH_CLIENT_ATTESTATION_POP = "OAuth-Client-Attestation-PoP";
+
+    /**
+     * Custom extension: PoP verification type identifier.
+     * Defaults to {@link #POP_TYPE_JWT} when absent.
+     */
+    public static final String OAUTH_CLIENT_ATTESTATION_POP_TYPE = "OAuth-Client-Attestation-PoP-Type";
+
+    // --- PoP type values ---
+
+    /**
+     * Standard PoP JWT as defined in the draft.
+     */
+    public static final String POP_TYPE_JWT = "jwt";
+
+    /**
+     * Apple App Attest Assertion used as PoP.
+     * When this type is specified, the assertion parameters ({@link #KEY_ID},
+     * {@link #ASSERTION}, {@link #CHALLENGE}) are sent as body parameters.
+     */
+    public static final String POP_TYPE_APP_ATTEST = "App-Attest";
 }

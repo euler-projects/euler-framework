@@ -29,7 +29,6 @@ import java.io.Serializable;
  * The SHA-256 hash of the App ID is used as the RP ID hash in the App Attest protocol.
  *
  * @see AppleAppRepository
- * @see Webauthn4jAppleAppAttestValidationService
  */
 public record RegisteredAppleApp(String teamId, String bundleId) implements Serializable {
 

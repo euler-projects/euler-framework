@@ -16,8 +16,15 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.eulerframework.security.authentication.ChallengeService;
+import org.eulerframework.security.authentication.ClientAttestationVerifier;
 import org.eulerframework.security.authentication.InMemoryChallengeService;
+import org.eulerframework.security.authentication.InMemoryNonceService;
+import org.eulerframework.security.authentication.NonceService;
+import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
+import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 /**
@@ -57,6 +64,85 @@ final class EulerOAuth2ConfigurerUtils {
             service = new InMemoryChallengeService();
         }
         http.setSharedObject(ChallengeService.class, service);
+        return service;
+    }
+
+    /**
+     * Resolve an {@link AppAttestRegistrationService} bean from the {@link ApplicationContext}.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved service
+     * @throws IllegalStateException if no bean is found
+     */
+    static AppAttestRegistrationService getAppAttestRegistrationService(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        return ctx.getBean(AppAttestRegistrationService.class);
+    }
+
+    /**
+     * Resolve an {@link AppleAppAttestValidationService} bean from the {@link ApplicationContext}.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved service
+     * @throws IllegalStateException if no bean is found
+     */
+    static AppleAppAttestValidationService getAppleAppAttestValidationService(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        return ctx.getBean(AppleAppAttestValidationService.class);
+    }
+
+    /**
+     * Resolve an {@link EulerAppleAppAttestUserDetailsService} bean from the {@link ApplicationContext}.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved service
+     * @throws IllegalStateException if no bean is found
+     */
+    static EulerAppleAppAttestUserDetailsService getAppleAppAttestUserDetailsService(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        return ctx.getBean(EulerAppleAppAttestUserDetailsService.class);
+    }
+
+    /**
+     * Resolve an optional {@link ClientAttestationVerifier} bean from the {@link ApplicationContext}.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the verifier, or {@code null} if no bean is available
+     */
+    @Nullable
+    static ClientAttestationVerifier getClientAttestationVerifier(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        if (ctx.getBeanNamesForType(ClientAttestationVerifier.class).length > 0) {
+            return ctx.getBean(ClientAttestationVerifier.class);
+        }
+        return null;
+    }
+
+    /**
+     * Resolve a {@link NonceService} instance using the following precedence:
+     * <ol>
+     *     <li>An instance previously cached in {@link HttpSecurity} shared objects</li>
+     *     <li>A bean from the {@link ApplicationContext}</li>
+     *     <li>A default {@link InMemoryNonceService} instance</li>
+     * </ol>
+     * The resolved instance is cached in shared objects for subsequent calls.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved {@link NonceService}, never {@code null}
+     */
+    static NonceService getNonceService(HttpSecurity http) {
+        NonceService service = http.getSharedObject(NonceService.class);
+        if (service != null) {
+            return service;
+        }
+
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
+        if (applicationContext.getBeanNamesForType(NonceService.class).length > 0) {
+            service = applicationContext.getBean(NonceService.class);
+        } else {
+            service = new InMemoryNonceService();
+        }
+        http.setSharedObject(NonceService.class, service);
         return service;
     }
 }

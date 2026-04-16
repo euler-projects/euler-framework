@@ -16,24 +16,41 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.authentication.ChallengeService;
+import org.eulerframework.security.authentication.ClientAttestationVerifier;
+import org.eulerframework.security.authentication.NonceService;
+import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
+import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
+import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.oauth2.server.authorization.authentication.ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2PasswordAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2WechatAuthorizationCodeAuthenticationProvider;
-import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerPublicClientAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.ClientAttestationFilter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.List;
 
 public class EulerAuthorizationServerConfiguration {
     public static void configClientRegistrationEndpoint(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
@@ -103,49 +120,110 @@ public class EulerAuthorizationServerConfiguration {
     }
 
     /**
-     * Configure Apple App Attest assertion grant type for the token endpoint.
+     * Configure Apple App Attest authentication for the token endpoint.
      * <p>
-     * This method registers {@link EulerPublicClientAuthenticationConverter} with the token endpoint's
-     * client authentication filter, enabling public clients
-     * ({@link org.springframework.security.oauth2.core.ClientAuthenticationMethod#NONE NONE})
-     * to use the Apple App Attest assertion grant type.
-     * <p>
-     * Note: Attestation (device registration) is now handled outside OAuth by
-     * {@code AppAttestSecurityConfigurer} and {@code AppAttestRegistrationAuthenticationProvider}.
+     * This method registers:
+     * <ul>
+     *   <li>{@link ClientAttestationFilter} — runs after {@code OAuth2ClientAuthenticationFilter}
+     *       to verify attestation headers (Client Attestation JWT and/or PoP).</li>
+     *   <li>{@link OAuth2AppleAppAttestAssertionAuthenticationProvider} — a thin grant type
+     *       provider for anonymous user resolution and token issuance.</li>
+     *   <li>{@link OAuth2AppleAppAttestAssertionAuthenticationConverter} — reads the verified
+     *       {@code keyId} from request attributes set by the filter.</li>
+     * </ul>
      */
     public static void configAppleAppAttestAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
         ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
+        AppAttestRegistrationService registrationService =
+                EulerOAuth2ConfigurerUtils.getAppAttestRegistrationService(http);
+        AppleAppAttestValidationService validationService =
+                EulerOAuth2ConfigurerUtils.getAppleAppAttestValidationService(http);
+        RegisteredClientRepository registeredClientRepository =
+                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
+        EulerAppleAppAttestUserDetailsService userDetailsService =
+                EulerOAuth2ConfigurerUtils.getAppleAppAttestUserDetailsService(http);
+        ClientAttestationVerifier clientAttestationVerifier =
+                EulerOAuth2ConfigurerUtils.getClientAttestationVerifier(http);
+        NonceService nonceService = EulerOAuth2ConfigurerUtils.getNonceService(http);
 
-        // Register the public client authentication converter for the token endpoint.
-        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
-                .clientAuthentication(clientAuth -> clientAuth
-                        .authenticationConverter(new EulerPublicClientAuthenticationConverter())
-                ));
+        // 1. Resolve the token endpoint RequestMatcher for the ClientAttestationFilter
+        AuthorizationServerSettings authorizationServerSettings = OAuth2ConfigurerUtilsAccessor
+                .getAuthorizationServerSettings(http);
+        String tokenEndpointUri = authorizationServerSettings.getTokenEndpoint();
+        RequestMatcher tokenEndpointMatcher = PathPatternRequestMatcher
+                .pathPattern(HttpMethod.POST, tokenEndpointUri);
 
-        // Register assertion grant type only
-        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
-                .tokenEndpoint(configurer -> configurer
-                        .authenticationProvider(getOAuth2AppleAppAttestAssertionAuthenticationProvider(http, authenticationConfiguration, challengeService))
-                        .accessTokenRequestConverter(getOAuth2AppleAppAttestAssertionAuthenticationConverter())));
-    }
-
-    private static OAuth2AppleAppAttestAssertionAuthenticationProvider getOAuth2AppleAppAttestAssertionAuthenticationProvider(
-            HttpSecurity http, AuthenticationConfiguration authenticationConfiguration,
-            ChallengeService challengeService) {
-        try {
-            return new OAuth2AppleAppAttestAssertionAuthenticationProvider(
-                    authenticationConfiguration.getAuthenticationManager(),
-                    OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
-                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http),
-                    challengeService
-            );
-        } catch (Exception e) {
-            throw ExceptionUtils.asRuntimeException(e);
+        // 2. Register Converter + Provider for attest_jwt_client_auth client authentication
+        ClientAttestationAuthenticationConverter attestConverter =
+                new ClientAttestationAuthenticationConverter(registrationService);
+        ClientAttestationAuthenticationProvider attestProvider =
+                new ClientAttestationAuthenticationProvider(
+                        registeredClientRepository, registrationService, validationService);
+        if (clientAttestationVerifier != null) {
+            attestProvider.setClientAttestationVerifier(clientAttestationVerifier);
         }
-    }
+        attestProvider.setChallengeService(challengeService);
+        attestProvider.setNonceService(nonceService);
 
-    private static OAuth2AppleAppAttestAssertionAuthenticationConverter getOAuth2AppleAppAttestAssertionAuthenticationConverter() {
-        return new OAuth2AppleAppAttestAssertionAuthenticationConverter();
+        http.oauth2AuthorizationServer(oauth2 -> oauth2
+                .clientAuthentication(clientAuth -> clientAuth
+                        .authenticationConverter(attestConverter)
+                        .authenticationProvider(attestProvider)));
+
+        // 3. Register ClientAttestationFilter for Scenario A enhancement and keyId extraction
+        ClientAttestationFilter attestationFilter = new ClientAttestationFilter(
+                registrationService, validationService, tokenEndpointMatcher);
+        attestationFilter.setChallengeService(challengeService);
+        attestationFilter.setNonceService(nonceService);
+        if (clientAttestationVerifier != null) {
+            attestationFilter.setClientAttestationVerifier(clientAttestationVerifier);
+        }
+        http.addFilterAfter(attestationFilter, OAuth2ClientAuthenticationFilter.class);
+
+        // 4. Register the slimmed-down grant type (anonymous user mode)
+        OAuth2AppleAppAttestAssertionAuthenticationProvider provider =
+                new OAuth2AppleAppAttestAssertionAuthenticationProvider(
+                        userDetailsService,
+                        OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
+                        OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http));
+
+        http.oauth2AuthorizationServer(oauth2 -> oauth2
+                .tokenEndpoint(configurer -> configurer
+                        .authenticationProvider(provider)
+                        .accessTokenRequestConverter(new OAuth2AppleAppAttestAssertionAuthenticationConverter())));
+
+        // 5. Add attestation metadata to OIDC provider configuration and AS metadata endpoints
+        //    (draft-ietf-oauth-attestation-based-client-auth-08 Section 9)
+        String issuer = authorizationServerSettings.getIssuer();
+        String challengeEndpoint = (issuer != null ? issuer : "") + "/app/attest/challenge";
+        List<String> supportedSigningAlgs = List.of("ES256");
+
+        http.oauth2AuthorizationServer(oauth2 -> oauth2
+                .oidc(oidc -> oidc
+                        .providerConfigurationEndpoint(config -> config
+                                .providerConfigurationCustomizer(builder -> {
+                                    builder.tokenEndpointAuthenticationMethod(
+                                            EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
+                                    builder.claim("attestation_challenge_endpoint", challengeEndpoint);
+                                    builder.claim("client_attestation_signing_alg_values_supported",
+                                            supportedSigningAlgs);
+                                    builder.claim("client_attestation_pop_signing_alg_values_supported",
+                                            supportedSigningAlgs);
+                                })
+                        )
+                )
+                .authorizationServerMetadataEndpoint(metadata -> metadata
+                        .authorizationServerMetadataCustomizer(builder -> {
+                            builder.tokenEndpointAuthenticationMethod(
+                                    EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
+                            builder.claim("attestation_challenge_endpoint", challengeEndpoint);
+                            builder.claim("client_attestation_signing_alg_values_supported",
+                                    supportedSigningAlgs);
+                            builder.claim("client_attestation_pop_signing_alg_values_supported",
+                                    supportedSigningAlgs);
+                        })
+                )
+        );
     }
 
     /**

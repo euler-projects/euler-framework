@@ -16,10 +16,14 @@
 
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -31,8 +35,23 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationToken;
+import org.eulerframework.security.oauth2.server.authorization.web.ClientAttestationFilter;
 
+/**
+ * Converts HTTP requests for the {@code apple_app_attest_assertion} grant type into
+ * {@link OAuth2AppleAppAttestAssertionAuthenticationToken} instances.
+ * <p>
+ * This converter reads the verified {@code keyId} from a request attribute
+ * ({@link ClientAttestationFilter#ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE}) set by
+ * {@link ClientAttestationFilter}. If the attribute is absent, the converter returns
+ * {@code null} (indicating the request did not pass attestation verification).
+ * <p>
+ * Assertion and challenge parameters ({@code key_id}, {@code assertion_data},
+ * {@code challenge}) are no longer extracted here — they are consumed by
+ * {@link ClientAttestationFilter} during PoP verification.
+ */
 public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements AuthenticationConverter {
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
@@ -46,25 +65,12 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
             return null;
         }
 
-        // key_id (REQUIRED)
-        String keyId = parameters.getFirst(EulerOAuth2ParameterNames.KEY_ID);
-        if (!StringUtils.hasText(keyId) || parameters.get(EulerOAuth2ParameterNames.KEY_ID).size() != 1) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                    "OAuth 2.0 Parameter: " + EulerOAuth2ParameterNames.KEY_ID, DEFAULT_ERROR_URI));
-        }
-
-        // assertion_data (REQUIRED)
-        String assertion = parameters.getFirst(EulerOAuth2ParameterNames.ASSERTION);
-        if (!StringUtils.hasText(assertion) || parameters.get(EulerOAuth2ParameterNames.ASSERTION).size() != 1) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                    "OAuth 2.0 Parameter: " + EulerOAuth2ParameterNames.ASSERTION, DEFAULT_ERROR_URI));
-        }
-
-        // challenge (REQUIRED)
-        String challenge = parameters.getFirst(EulerOAuth2ParameterNames.CHALLENGE);
-        if (!StringUtils.hasText(challenge) || parameters.get(EulerOAuth2ParameterNames.CHALLENGE).size() != 1) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                    "OAuth 2.0 Parameter: " + EulerOAuth2ParameterNames.CHALLENGE, DEFAULT_ERROR_URI));
+        // keyId from request attribute (set by ClientAttestationFilter after successful verification)
+        String keyId = (String) request.getAttribute(
+                ClientAttestationFilter.ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE);
+        if (keyId == null) {
+            // Filter did not verify attestation → this request is not attestation-backed
+            return null;
         }
 
         // scope (OPTIONAL)
@@ -85,18 +91,13 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
-                    !key.equals(OAuth2ParameterNames.SCOPE) &&
-                    !key.equals(EulerOAuth2ParameterNames.KEY_ID) &&
-                    !key.equals(EulerOAuth2ParameterNames.ASSERTION) &&
-                    !key.equals(EulerOAuth2ParameterNames.CHALLENGE)) {
+                    !key.equals(OAuth2ParameterNames.SCOPE)) {
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
 
         return new OAuth2AppleAppAttestAssertionAuthenticationToken(
                 keyId,
-                assertion,
-                challenge,
                 clientPrincipal,
                 scopes,
                 additionalParameters
