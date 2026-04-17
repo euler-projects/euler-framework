@@ -15,31 +15,20 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.web;
 
-import java.io.IOException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JOSEObjectType;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
-import com.nimbusds.jwt.SignedJWT;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.security.authentication.apple.AppAttestRegistration;
+import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
+import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
+import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.oauth2.server.authorization.authentication.ClientAttestationVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,21 +37,12 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContext;
-import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.ClientAttestationVerifier;
-import org.eulerframework.security.authentication.NonceService;
-import org.eulerframework.security.authentication.apple.AppAttestRegistration;
-import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
-import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import java.io.IOException;
 
 /**
  * Post-authentication filter that handles Client Attestation on token endpoint requests,
@@ -105,10 +85,6 @@ public class ClientAttestationFilter extends OncePerRequestFilter {
      */
     public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "attestation.verified.key_id";
 
-    private static final Duration POP_JWT_MAX_AGE = Duration.ofMinutes(5);
-    private static final Duration POP_JWT_CLOCK_SKEW = Duration.ofSeconds(30);
-    private static final String POP_JWT_TYPE = "oauth-client-attestation-pop+jwt";
-
     // --- Required dependencies ---
     private final AppAttestRegistrationService appAttestRegistrationService;
     private final AppleAppAttestValidationService appleAppAttestValidationService;
@@ -117,10 +93,6 @@ public class ClientAttestationFilter extends OncePerRequestFilter {
     // --- Optional dependencies ---
     @Nullable
     private ClientAttestationVerifier clientAttestationVerifier;
-    @Nullable
-    private ChallengeService challengeService;
-    @Nullable
-    private NonceService nonceService;
 
     public ClientAttestationFilter(
             AppAttestRegistrationService appAttestRegistrationService,
@@ -136,14 +108,6 @@ public class ClientAttestationFilter extends OncePerRequestFilter {
 
     public void setClientAttestationVerifier(@Nullable ClientAttestationVerifier clientAttestationVerifier) {
         this.clientAttestationVerifier = clientAttestationVerifier;
-    }
-
-    public void setChallengeService(@Nullable ChallengeService challengeService) {
-        this.challengeService = challengeService;
-    }
-
-    public void setNonceService(@Nullable NonceService nonceService) {
-        this.nonceService = nonceService;
     }
 
     @Override
@@ -220,111 +184,33 @@ public class ClientAttestationFilter extends OncePerRequestFilter {
             String popType,
             @Nullable RegisteredClient registeredClient) {
 
-        PublicKey publicKey = null;
         AppAttestRegistration registration = null;
         String resolvedClientId = null;
         String resolvedKeyId = null;
 
-        // === 1. Client Attestation JWT verification (optional) ===
-        if (attestationJwt != null) {
-            if (this.clientAttestationVerifier != null) {
-                publicKey = this.clientAttestationVerifier.verifyClientAttestation(attestationJwt);
-                resolvedClientId = extractSubFromAttestationJwt(attestationJwt);
-            } else {
-                logger.warn("Received Client Attestation JWT but no ClientAttestationVerifier configured; ignoring");
-            }
-        }
-
-        // === 2. PoP verification (dispatched by popType, mutually exclusive) ===
+        // === 1. PoP verification (dispatched by popType, mutually exclusive) ===
         switch (popType) {
 
             case EulerOAuth2ParameterNames.POP_TYPE_JWT -> {
-                // Standard PoP JWT (draft Section 5.2)
+                // Standard PoP JWT (draft Section 5.2) — delegated to ClientAttestationVerifier
                 if (popData == null) {
                     throw attestationError("PoP-Type=jwt but missing "
                             + EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP + " header");
                 }
+                if (this.clientAttestationVerifier == null) {
+                    throw attestationError("ClientAttestationVerifier is not configured");
+                }
 
-                try {
-                    SignedJWT signedJWT = SignedJWT.parse(popData);
-                    JWSHeader header = signedJWT.getHeader();
-                    String kid = header.getKeyID();
-                    resolvedKeyId = kid;
-
-                    // If no public key from attestation JWT, look up by kid
-                    if (publicKey == null) {
-                        if (kid == null) {
-                            throw attestationError("PoP JWT missing kid in header");
-                        }
-                        registration = this.appAttestRegistrationService.findByKeyId(kid);
-                        if (registration == null) {
-                            throw attestationError("Unknown key_id: " + kid);
-                        }
-                        publicKey = registration.getPublicKey();
-                        if (resolvedClientId == null) {
-                            resolvedClientId = registration.getClientId();
-                        }
-                    }
-
-                    // Verify signature
-                    JWSVerifier verifier = new DefaultJWSVerifierFactory()
-                            .createJWSVerifier(header, publicKey);
-                    if (!signedJWT.verify(verifier)) {
-                        throw attestationError("PoP JWT signature verification failed");
-                    }
-
-                    // Verify typ (REQUIRED per draft)
-                    JOSEObjectType typ = header.getType();
-                    if (typ == null || !POP_JWT_TYPE.equals(typ.getType())) {
-                        throw attestationError("PoP JWT typ must be '" + POP_JWT_TYPE + "'");
-                    }
-
-                    // Verify claims
-                    JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
-
-                    // aud (REQUIRED) — must contain AS issuer
-                    AuthorizationServerContext asContext = AuthorizationServerContextHolder.getContext();
-                    if (asContext != null && asContext.getIssuer() != null) {
-                        List<String> audience = claims.getAudience();
-                        if (audience == null || !audience.contains(asContext.getIssuer())) {
-                            throw attestationError(
-                                    "PoP JWT aud does not match authorization server issuer");
-                        }
-                    }
-
-                    // iat (REQUIRED) — must be within acceptable time window
-                    Date iat = claims.getIssueTime();
-                    if (iat == null) {
-                        throw attestationError("PoP JWT missing iat claim");
-                    }
-                    Instant now = Instant.now();
-                    Instant issuedAt = iat.toInstant();
-                    if (issuedAt.isAfter(now.plus(POP_JWT_CLOCK_SKEW))
-                            || issuedAt.isBefore(now.minus(POP_JWT_MAX_AGE))) {
-                        throw attestationError("PoP JWT iat is outside acceptable time window");
-                    }
-
-                    // challenge claim (optional; verified via ChallengeService if present)
-                    Object challengeClaim = claims.getClaim("challenge");
-                    if (challengeClaim instanceof String challenge && this.challengeService != null) {
-                        if (!this.challengeService.consumeChallenge(challenge)) {
-                            throw attestationError("PoP JWT challenge is invalid or expired");
-                        }
-                    }
-
-                    // jti replay detection (Section 12.1)
-                    String jti = claims.getJWTID();
-                    if (this.nonceService != null) {
-                        if (jti == null || jti.isBlank()) {
-                            throw attestationError("PoP JWT missing jti claim");
-                        }
-                        if (!this.nonceService.recordIfAbsent(jti, POP_JWT_MAX_AGE)) {
-                            throw attestationError("PoP JWT replay detected (duplicate jti)");
-                        }
-                    }
-
-                } catch (ParseException | JOSEException e) {
-                    throw attestationError("Failed to parse or verify PoP JWT: " + e.getMessage());
+                ClientAttestationVerifier.PopVerificationResult result;
+                if (attestationJwt != null) {
+                    result = this.clientAttestationVerifier.verify(attestationJwt, popData);
+                } else {
+                    result = this.clientAttestationVerifier.verify(popData);
+                }
+                resolvedKeyId = result.keyId();
+                registration = result.registration();
+                if (resolvedClientId == null) {
+                    resolvedClientId = result.clientId();
                 }
             }
 
@@ -369,16 +255,6 @@ public class ClientAttestationFilter extends OncePerRequestFilter {
     }
 
     // ========== Helpers ==========
-
-    @Nullable
-    private static String extractSubFromAttestationJwt(String attestationJwt) {
-        try {
-            return JWTParser.parse(attestationJwt).getJWTClaimsSet().getSubject();
-        } catch (ParseException e) {
-            logger.warn("Failed to extract sub claim from Client Attestation JWT", e);
-            return null;
-        }
-    }
 
     private static OAuth2AuthenticationException attestationError(String description) {
         return new OAuth2AuthenticationException(

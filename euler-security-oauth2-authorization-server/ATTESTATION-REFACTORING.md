@@ -108,6 +108,24 @@
 - 移除 `ClientAttestationFilter` 对 `RegisteredClientRepository` 的依赖
 - `EulerAuthorizationServerConfiguration` — 通过 `clientAuthentication()` 注册 Converter + Provider
 
+### Task 16: 合并 `ClientAttestationVerifier` 与 `PopJwtVerifier`
+
+将原 `PopJwtVerifier`（PoP JWT 验证）和原 `ClientAttestationVerifier` 接口（euler-security-core，可选的 Client Attestation JWT 验证扩展点）合并为统一的 `ClientAttestationVerifier` 具体类（euler-security-oauth2-authorization-server），提供两种验证入口：
+
+- `verify(attestationJwt, popJwt)` — 标准草案流程（暂未实现 attestation JWT 验证，降级为 kid 反查）
+- `verify(popJwt)` — kid 反查模式，从 PoP JWT header 取 kid 查公钥验证
+
+同时彻底简化 Converter，将所有解析和验证职责后移到 Provider：
+
+- 删除 `PopJwtVerifier.java`（euler-security-oauth2-authorization-server）
+- 删除旧 `ClientAttestationVerifier.java` 接口（euler-security-core）
+- 新建 `ClientAttestationVerifier.java`（euler-security-oauth2-authorization-server）— 合并 PoP JWT 验证逻辑和 kid 反查，返回 `PopVerificationResult(keyId, clientId, registration)`
+- 简化 `ClientAttestationAuthenticationConverter` — 移除所有依赖（`AppAttestRegistrationService`）和解析逻辑（JWT 解析、kid 提取、clientId 解析），变为纯数据搬运：仅收集原始 header/参数，用占位符 `__attestation__` 作为临时 principal
+- 重构 `ClientAttestationAuthenticationProvider` — 承担全部解析和验证职责：kid 提取和 clientId 解析由 `ClientAttestationVerifier` 完成（JWT PoP），或由 `AppAttestRegistrationService` 完成（App-Attest PoP）；验证后再查 RegisteredClient
+- 更新 `ClientAttestationFilter` — 替换旧的 `clientAttestationVerifier`（接口类型）和 `popJwtVerifier` 为新的 `ClientAttestationVerifier`，移除 `extractSubFromAttestationJwt` 方法
+- 更新 `EulerAuthorizationServerConfiguration` — 创建 `ClientAttestationVerifier` 替代 `PopJwtVerifier`，Converter 改为无参构造
+- 清理 `EulerOAuth2ConfigurerUtils` — 移除 `getClientAttestationVerifier` 方法（旧接口）
+
 ## 文件变更摘要
 
 | 操作 | 文件路径 |
@@ -119,6 +137,7 @@
 | 新建 | `euler-security-core/.../authentication/ClientAttestationVerifier.java` |
 | 新建 | `euler-security-core/.../authentication/NonceService.java` |
 | 新建 | `euler-security-core/.../authentication/InMemoryNonceService.java` |
+| 新建 | `euler-security-oauth2-authorization-server/.../authentication/ClientAttestationVerifier.java` |
 | 新建 | `euler-security-oauth2-authorization-server/.../web/ClientAttestationFilter.java` |
 | 修改 | `euler-security-oauth2-core/.../endpoint/EulerOAuth2ParameterNames.java` |
 | 修改 | `euler-security-core/.../apple/AppAttestRegistration.java` |
@@ -131,6 +150,8 @@
 | 修改 | `euler-security-oauth2-authorization-server/.../EulerOAuth2ConfigurerUtils.java` |
 | 修改 | `euler-security-oauth2-authorization-server/.../OAuth2ConfigurerUtilsAccessor.java` |
 | 修改 | `euler-boot-autoconfigure/.../EulerBootSecurityAutoConfiguration.java` |
+| 删除 | `euler-security-core/.../authentication/ClientAttestationVerifier.java` |
+| 删除 | `euler-security-oauth2-authorization-server/.../authentication/PopJwtVerifier.java` |
 | 删除 | `euler-security-oauth2-authorization-server/.../web/authentication/EulerPublicClientAuthenticationConverter.java` |
 | 删除 | `euler-security-oauth2-authorization-server/.../authentication/EulerPublicClientAuthenticationProvider.java` |
 | 删除 | `euler-security-core/.../apple/AppleAppAttestAssertionAuthenticationProvider.java` |
@@ -157,10 +178,10 @@
 
 ### 3. ClientAttestationVerifier 实际启用（草案 Section 5.1）
 
-当前为预留接口，无默认实现。要启用需要：
+当前 `ClientAttestationVerifier.verify(attestationJwt, popJwt)` 中的 attestation JWT 验证暂未实现，降级为 kid 反查。要启用需要：
 - App 后端（Client Attester）部署签发 JWT 的密钥对
 - Authorization Server 配置 Attester 的公钥以验签
-- 实现 `ClientAttestationVerifier` Bean
+- 在 `ClientAttestationVerifier` 中实现 attestation JWT 验证逻辑
 
 ### 4. 非 OAuth2 场景 Assertion 认证迁移至 WebAuthn
 

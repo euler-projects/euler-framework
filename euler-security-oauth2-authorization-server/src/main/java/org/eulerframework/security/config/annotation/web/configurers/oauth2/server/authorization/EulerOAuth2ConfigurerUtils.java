@@ -16,7 +16,6 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.ClientAttestationVerifier;
 import org.eulerframework.security.authentication.InMemoryChallengeService;
 import org.eulerframework.security.authentication.InMemoryNonceService;
 import org.eulerframework.security.authentication.NonceService;
@@ -24,7 +23,6 @@ import org.eulerframework.security.authentication.apple.AppAttestRegistrationSer
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 /**
@@ -101,21 +99,6 @@ final class EulerOAuth2ConfigurerUtils {
     static EulerAppleAppAttestUserDetailsService getAppleAppAttestUserDetailsService(HttpSecurity http) {
         ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
         return ctx.getBean(EulerAppleAppAttestUserDetailsService.class);
-    }
-
-    /**
-     * Resolve an optional {@link ClientAttestationVerifier} bean from the {@link ApplicationContext}.
-     *
-     * @param http the {@link HttpSecurity} to resolve from
-     * @return the verifier, or {@code null} if no bean is available
-     */
-    @Nullable
-    static ClientAttestationVerifier getClientAttestationVerifier(HttpSecurity http) {
-        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
-        if (ctx.getBeanNamesForType(ClientAttestationVerifier.class).length > 0) {
-            return ctx.getBean(ClientAttestationVerifier.class);
-        }
-        return null;
     }
 
     /**
