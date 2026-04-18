@@ -19,6 +19,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.GeneratedChallenge;
 import org.springframework.http.HttpMethod;
@@ -31,6 +32,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A generic filter that exposes a challenge endpoint ({@code POST}) for generating
@@ -107,13 +110,7 @@ public class ChallengeEndpointFilter extends OncePerRequestFilter {
         response.addHeader("Cache-Control", "no-store");
         response.addHeader("Pragma", "no-cache");
 
-        String challengeValue = escapeJson(generatedChallenge.challenge());
-        String json = "{\"challenge\":\"" + challengeValue + "\"}";
-        response.getWriter().write(json);
-    }
-
-    private static String escapeJson(String value) {
-        if (value == null) return "";
-        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+        Map<String, Object> body = Collections.singletonMap("challenge", generatedChallenge);
+        response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }
 }
