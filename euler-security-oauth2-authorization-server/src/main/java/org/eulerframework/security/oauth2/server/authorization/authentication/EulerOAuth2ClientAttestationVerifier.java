@@ -30,11 +30,11 @@ import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import jakarta.annotation.Nullable;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContext;
@@ -71,45 +71,42 @@ import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
  * @see EulerOAuth2AttestationBasedClientAuthenticationFilter
  */
-public final class ClientAttestationVerifier {
+public final class EulerOAuth2ClientAttestationVerifier {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientAttestationVerifier.class);
+    private final Logger logger = LoggerFactory.getLogger(EulerOAuth2ClientAttestationVerifier.class);
 
     static final Duration POP_JWT_MAX_AGE = Duration.ofMinutes(5);
     static final Duration POP_JWT_CLOCK_SKEW = Duration.ofSeconds(30);
     static final String POP_JWT_TYPE = "oauth-client-attestation-pop+jwt";
 
-    private final AppAttestRegistrationService appAttestRegistrationService;
+    private final ChallengeService challengeService;
+    private final NonceService nonceService;
 
-    @Nullable
-    private ChallengeService challengeService;
-    @Nullable
-    private NonceService nonceService;
+    private AppAttestRegistrationService appAttestRegistrationService;
 
-    public ClientAttestationVerifier(AppAttestRegistrationService appAttestRegistrationService) {
-        Assert.notNull(appAttestRegistrationService, "appAttestRegistrationService must not be null");
-        this.appAttestRegistrationService = appAttestRegistrationService;
-    }
 
-    public void setChallengeService(@Nullable ChallengeService challengeService) {
+    public EulerOAuth2ClientAttestationVerifier(ChallengeService challengeService, NonceService nonceService) {
+        Assert.notNull(challengeService, "challengeService must not be null");
+        Assert.notNull(nonceService, "nonceService must not be null");
         this.challengeService = challengeService;
+        this.nonceService = nonceService;
     }
 
-    public void setNonceService(@Nullable NonceService nonceService) {
-        this.nonceService = nonceService;
+    public void setAppAttestRegistrationService(AppAttestRegistrationService appAttestRegistrationService) {
+        this.appAttestRegistrationService = appAttestRegistrationService;
     }
 
     /**
      * Verify a Client Attestation JWT together with a PoP JWT (standard draft flow,
      * Section 6.2).
      * <p>
-     * <b>Note:</b> Client Attestation JWT verification is not yet implemented. This method
-     * logs a warning and degrades to the kid-based lookup mode ({@link #verify(String)}).
+     * <b>Note:</b> Client Attestation JWT verification is not yet implemented.
+     * This method always throws an error.
      *
      * @param attestationJwt the Client Attestation JWT (Section 5.1)
      * @param popJwt         the PoP JWT (Section 5.2)
-     * @return the verification result containing keyId, clientId and registration
-     * @throws OAuth2AuthenticationException if verification fails
+     * @return never returns normally
+     * @throws OAuth2AuthenticationException always, indicating the feature is not yet implemented
      */
     public PopVerificationResult verify(String attestationJwt, String popJwt) {
         Assert.hasText(attestationJwt, "attestationJwt must not be empty");
@@ -119,10 +116,7 @@ public final class ClientAttestationVerifier {
         //       - Verify signature using the Client Attester's public key
         //       - Extract cnf claim to obtain the client instance public key
         //       - Use that public key to verify the PoP JWT instead of kid lookup
-        logger.warn("Client Attestation JWT verification is not yet implemented; "
-                + "degrading to kid-based lookup from PoP JWT");
-
-        return verify(popJwt);
+        throw attestationError("Client Attestation JWT verification is not yet implemented");
     }
 
     /**
@@ -138,6 +132,12 @@ public final class ClientAttestationVerifier {
      */
     public PopVerificationResult verify(String popJwt) {
         Assert.hasText(popJwt, "popJwt must not be empty");
+
+        if (this.appAttestRegistrationService == null) {
+            throw attestationError(
+                    "Single PoP JWT verification mode requires App Attest registration service; "
+                            + "enable euler.security.app-attest or provide both OAuth-Client-Attestation and OAuth-Client-Attestation-PoP headers");
+        }
 
         try {
             SignedJWT signedJWT = SignedJWT.parse(popJwt);
@@ -207,23 +207,19 @@ public final class ClientAttestationVerifier {
                 throw attestationError("PoP JWT iat is outside acceptable time window");
             }
 
-            // challenge claim (optional; verified via ChallengeService if present)
-            Object challengeClaim = claims.getClaim("challenge");
-            if (challengeClaim instanceof String challenge && this.challengeService != null) {
-                if (!this.challengeService.consumeChallenge(challenge)) {
-                    throw attestationError("PoP JWT challenge is invalid or expired");
-                }
+            // challenge claim
+            String challenge = (String) claims.getClaim("challenge");
+            if (challenge == null || !this.challengeService.consumeChallenge(challenge)) {
+                throw attestationError("PoP JWT challenge is invalid or expired");
             }
 
             // jti replay detection (Section 12.1)
             String jti = claims.getJWTID();
-            if (this.nonceService != null) {
-                if (jti == null || jti.isBlank()) {
-                    throw attestationError("PoP JWT missing jti claim");
-                }
-                if (!this.nonceService.recordIfAbsent(jti, POP_JWT_MAX_AGE)) {
-                    throw attestationError("PoP JWT replay detected (duplicate jti)");
-                }
+            if (jti == null || jti.isBlank()) {
+                throw attestationError("PoP JWT missing jti claim");
+            }
+            if (!this.nonceService.recordIfAbsent(jti, POP_JWT_MAX_AGE)) {
+                throw attestationError("PoP JWT replay detected (duplicate jti)");
             }
 
         } catch (ParseException | JOSEException e) {

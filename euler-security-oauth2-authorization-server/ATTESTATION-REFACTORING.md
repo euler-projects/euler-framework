@@ -123,7 +123,7 @@
 - 新建 `ClientAttestationVerifier.java`（euler-security-oauth2-authorization-server）— 合并 PoP JWT 验证逻辑和 kid 反查，返回 `PopVerificationResult(keyId, clientId, registration)`
 - 简化 `ClientAttestationAuthenticationConverter` — 移除所有依赖（`AppAttestRegistrationService`）和解析逻辑（JWT 解析、kid 提取、clientId 解析），变为纯数据搬运：仅收集原始 header/参数，用占位符 `__attestation__` 作为临时 principal
 - 重构 `ClientAttestationAuthenticationProvider` — 承担全部解析和验证职责：kid 提取和 clientId 解析由 `ClientAttestationVerifier` 完成（JWT PoP），或由 `AppAttestRegistrationService` 完成（App-Attest PoP）；验证后再查 RegisteredClient
-- 更新 `ClientAttestationFilter` — 替换旧的 `clientAttestationVerifier`（接口类型）和 `popJwtVerifier` 为新的 `ClientAttestationVerifier`，移除 `extractSubFromAttestationJwt` 方法
+- 更新 `ClientAttestationFilter` — 替换旧的 `oauth2ClientAttestationVerifier`（接口类型）和 `popJwtVerifier` 为新的 `ClientAttestationVerifier`，移除 `extractSubFromAttestationJwt` 方法
 - 更新 `EulerAuthorizationServerConfiguration` — 创建 `ClientAttestationVerifier` 替代 `PopJwtVerifier`，Converter 改为无参构造
 - 清理 `EulerOAuth2ConfigurerUtils` — 移除 `getClientAttestationVerifier` 方法（旧接口）
 

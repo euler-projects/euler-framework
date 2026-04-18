@@ -15,6 +15,8 @@
  */
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.InMemoryChallengeService;
 import org.eulerframework.security.authentication.InMemoryNonceService;
@@ -49,6 +51,7 @@ final class EulerOAuth2ConfigurerUtils {
      * @param http the {@link HttpSecurity} to resolve from
      * @return the resolved {@link ChallengeService}, never {@code null}
      */
+    @Nonnull
     static ChallengeService getChallengeService(HttpSecurity http) {
         ChallengeService service = http.getSharedObject(ChallengeService.class);
         if (service != null) {
@@ -66,42 +69,6 @@ final class EulerOAuth2ConfigurerUtils {
     }
 
     /**
-     * Resolve an {@link AppAttestRegistrationService} bean from the {@link ApplicationContext}.
-     *
-     * @param http the {@link HttpSecurity} to resolve from
-     * @return the resolved service
-     * @throws IllegalStateException if no bean is found
-     */
-    static AppAttestRegistrationService getAppAttestRegistrationService(HttpSecurity http) {
-        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
-        return ctx.getBean(AppAttestRegistrationService.class);
-    }
-
-    /**
-     * Resolve an {@link AppleAppAttestValidationService} bean from the {@link ApplicationContext}.
-     *
-     * @param http the {@link HttpSecurity} to resolve from
-     * @return the resolved service
-     * @throws IllegalStateException if no bean is found
-     */
-    static AppleAppAttestValidationService getAppleAppAttestValidationService(HttpSecurity http) {
-        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
-        return ctx.getBean(AppleAppAttestValidationService.class);
-    }
-
-    /**
-     * Resolve an {@link EulerAppleAppAttestUserDetailsService} bean from the {@link ApplicationContext}.
-     *
-     * @param http the {@link HttpSecurity} to resolve from
-     * @return the resolved service
-     * @throws IllegalStateException if no bean is found
-     */
-    static EulerAppleAppAttestUserDetailsService getAppleAppAttestUserDetailsService(HttpSecurity http) {
-        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
-        return ctx.getBean(EulerAppleAppAttestUserDetailsService.class);
-    }
-
-    /**
      * Resolve a {@link NonceService} instance using the following precedence:
      * <ol>
      *     <li>An instance previously cached in {@link HttpSecurity} shared objects</li>
@@ -113,6 +80,7 @@ final class EulerOAuth2ConfigurerUtils {
      * @param http the {@link HttpSecurity} to resolve from
      * @return the resolved {@link NonceService}, never {@code null}
      */
+    @Nonnull
     static NonceService getNonceService(HttpSecurity http) {
         NonceService service = http.getSharedObject(NonceService.class);
         if (service != null) {
@@ -127,5 +95,53 @@ final class EulerOAuth2ConfigurerUtils {
         }
         http.setSharedObject(NonceService.class, service);
         return service;
+    }
+
+    /**
+     * Resolve an {@link AppAttestRegistrationService} bean from the {@link ApplicationContext}.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved service
+     * @throws IllegalStateException if no bean is found
+     */
+    @Nullable
+    static AppAttestRegistrationService getAppAttestRegistrationServiceIfAvailable(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        if (ctx.getBeanNamesForType(AppleAppAttestValidationService.class).length > 0) {
+            return ctx.getBean(AppAttestRegistrationService.class);
+        }
+        return null;
+    }
+
+    /**
+     * Resolve an {@link AppleAppAttestValidationService} bean from the {@link ApplicationContext},
+     * or return {@code null} if no such bean is available.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved service, or {@code null} if not available
+     */
+    @Nullable
+    static AppleAppAttestValidationService getAppleAppAttestValidationServiceIfAvailable(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        if (ctx.getBeanNamesForType(AppleAppAttestValidationService.class).length > 0) {
+            return ctx.getBean(AppleAppAttestValidationService.class);
+        }
+        return null;
+    }
+
+    /**
+     * Resolve an {@link EulerAppleAppAttestUserDetailsService} bean from the {@link ApplicationContext},
+     * or return {@code null} if no such bean is available.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved service, or {@code null} if not available
+     */
+    @Nullable
+    static EulerAppleAppAttestUserDetailsService getAppleAppAttestUserDetailsServiceIfAvailable(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        if (ctx.getBeanNamesForType(EulerAppleAppAttestUserDetailsService.class).length > 0) {
+            return ctx.getBean(EulerAppleAppAttestUserDetailsService.class);
+        }
+        return null;
     }
 }

@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
-import org.eulerframework.security.oauth2.server.authorization.authentication.ClientAttestationVerifier;
+import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.slf4j.Logger;
@@ -36,7 +36,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2ErrorHttpMessageConverter;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -76,7 +75,7 @@ import java.util.Map;
  * </ul>
  *
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
- * @see ClientAttestationVerifier
+ * @see EulerOAuth2ClientAttestationVerifier
  * @see EulerOAuth2ParameterNames
  */
 public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OncePerRequestFilter {
