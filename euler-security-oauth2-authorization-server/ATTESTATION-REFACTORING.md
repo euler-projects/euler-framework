@@ -55,14 +55,15 @@
 
 ### Task 7: 配置集成
 
-- `EulerAuthorizationServerConfiguration.configAppleAppAttestAuthentication()` — 注册 `ClientAttestationFilter`（addFilterAfter）+ 精简版 Grant Type
+- `EulerAuthorizationServerConfiguration.configAttestationBasedClientAuthentication()` — 注册 `ClientAttestationFilter`（addFilterAfter）+ 精简版 Grant Type + Challenge 端点（`/oauth2/challenge`）
 - `EulerOAuth2ConfigurerUtils` — 新增 `getAppAttestRegistrationService`、`getAppleAppAttestValidationService`、`getAppleAppAttestUserDetailsService`、`getClientAttestationVerifier`、`getNonceService` 方法
 - `OAuth2ConfigurerUtilsAccessor` — 新增 `getAuthorizationServerSettings` 方法
 
 ### Task 9: Challenge 端点适配
 
-- `AppAttestChallengeEndpointFilter` — 响应同时返回 `challenge` 和 `attestation_challenge` 字段（兼容草案 Section 7）
+- `ChallengeEndpointFilter`（`euler-security-web`）— 通用 challenge 端点过滤器，响应返回 `challenge` 字段
 - 添加 `Cache-Control: no-store` 和 `Pragma: no-cache` 响应头
+- 原 `AppAttestChallengeEndpointFilter` 和 `OAuth2AttestationChallengeEndpointFilter` 合并为此通用实现
 
 ### Task 11: PoP JWT jti 重放检测
 
@@ -142,7 +143,7 @@
 | 修改 | `euler-security-oauth2-core/.../endpoint/EulerOAuth2ParameterNames.java` |
 | 修改 | `euler-security-core/.../apple/AppAttestRegistration.java` |
 | 修改 | `euler-security-core/.../apple/JdbcAppAttestRegistrationService.java` |
-| 修改 | `euler-security-web/.../apple/AppAttestChallengeEndpointFilter.java` |
+| 新建 | `euler-security-web/.../web/authentication/ChallengeEndpointFilter.java` |
 | 重写 | `euler-security-oauth2-authorization-server/.../authentication/OAuth2AppleAppAttestAssertionAuthenticationProvider.java` |
 | 重写 | `euler-security-oauth2-authorization-server/.../authentication/OAuth2AppleAppAttestAssertionAuthenticationToken.java` |
 | 重写 | `euler-security-oauth2-authorization-server/.../web/authentication/OAuth2AppleAppAttestAssertionAuthenticationConverter.java` |

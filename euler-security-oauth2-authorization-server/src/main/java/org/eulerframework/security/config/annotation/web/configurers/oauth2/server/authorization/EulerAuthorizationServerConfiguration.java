@@ -48,6 +48,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
 
 import java.util.List;
 
@@ -119,19 +120,36 @@ public class EulerAuthorizationServerConfiguration {
     }
 
     /**
-     * Configure Apple App Attest authentication for the token endpoint.
+     * Configure OAuth 2.0 Attestation-Based Client Authentication for the authorization server.
      * <p>
-     * This method registers:
+     * This method implements the server-side support for
+     * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html">
+     * draft-ietf-oauth-attestation-based-client-auth-08</a>, including:
      * <ul>
-     *   <li>{@link EulerOAuth2AttestationBasedClientAuthenticationFilter} — runs after {@code OAuth2ClientAuthenticationFilter}
-     *       to verify attestation headers (Client Attestation JWT and/or PoP).</li>
+     *   <li><b>Challenge endpoint</b> ({@code POST /oauth2/challenge}) — generates fresh
+     *       challenges for clients to include in the Client Attestation PoP JWT
+     *       (Section 7 of the draft). The {@link ChallengeService} is shared with other
+     *       security filter chains (e.g., App Attest registration) via the ApplicationContext.
+     *       Uses a shared {@link ChallengeEndpointFilter} instance.</li>
+     *   <li>{@link EulerOAuth2AttestationBasedClientAuthenticationFilter} — runs after
+     *       {@code OAuth2ClientAuthenticationFilter} to verify attestation headers
+     *       ({@code OAuth-Client-Attestation} and/or {@code OAuth-Client-Attestation-PoP}).</li>
+     *   <li>{@link EulerOAuth2ClientAttestationAuthenticationProvider} — verifies the
+     *       {@code attest_jwt_client_auth} client authentication method (Section 6.3 / 13.4).</li>
      *   <li>{@link OAuth2AppleAppAttestAssertionAuthenticationProvider} — a thin grant type
      *       provider for anonymous user resolution and token issuance.</li>
-     *   <li>{@link OAuth2AppleAppAttestAssertionAuthenticationConverter} — reads the verified
-     *       {@code keyId} from request attributes set by the filter.</li>
+     *   <li><b>Authorization Server Metadata</b> — advertises {@code challenge_endpoint},
+     *       {@code attest_jwt_client_auth} method, and supported signing algorithms
+     *       (Section 9 of the draft).</li>
      * </ul>
+     *
+     * @param http                        the {@link HttpSecurity} to configure
+     * @param authenticationConfiguration the authentication configuration
+     * @return a {@link RequestMatcher} for the challenge endpoint; the caller should include
+     *         this in the security filter chain's security matcher via
+     *         {@link org.springframework.security.web.util.matcher.OrRequestMatcher}
      */
-    public static void configAppleAppAttestAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+    public static RequestMatcher configAttestationBasedClientAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
         ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
         AppAttestRegistrationService registrationService =
                 EulerOAuth2ConfigurerUtils.getAppAttestRegistrationService(http);
@@ -184,10 +202,22 @@ public class EulerAuthorizationServerConfiguration {
                         .authenticationProvider(provider)
                         .accessTokenRequestConverter(new OAuth2AppleAppAttestAssertionAuthenticationConverter())));
 
-        // 6. Add attestation metadata to OIDC provider configuration and AS metadata endpoints
+        // 6. Register the challenge endpoint (draft Section 7)
+        //    Shares the same ChallengeService with other filter chains (e.g., AppAttestSecurityConfigurer)
+        String challengeEndpointPath = "/oauth2/challenge";
+        ChallengeEndpointFilter challengeFilter =
+                new ChallengeEndpointFilter(challengeService, challengeEndpointPath);
+        RequestMatcher challengeEndpointMatcher = challengeFilter.getRequestMatcher();
+
+        http.addFilterBefore(challengeFilter, OAuth2ClientAuthenticationFilter.class);
+        http.csrf(csrf -> csrf.ignoringRequestMatchers(challengeEndpointMatcher));
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(challengeEndpointMatcher).permitAll());
+
+        // 7. Add attestation metadata to OIDC provider configuration and AS metadata endpoints
         //    (draft-ietf-oauth-attestation-based-client-auth-08 Section 9)
         String issuer = authorizationServerSettings.getIssuer();
-        String challengeEndpoint = (issuer != null ? issuer : "") + "/app/attest/challenge";
+        String challengeEndpointUri = (issuer != null ? issuer : "") + challengeEndpointPath;
         List<String> supportedSigningAlgs = List.of("ES256");
 
         http.oauth2AuthorizationServer(oauth2 -> oauth2
@@ -196,7 +226,7 @@ public class EulerAuthorizationServerConfiguration {
                                 .providerConfigurationCustomizer(builder -> {
                                     builder.tokenEndpointAuthenticationMethod(
                                             EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
-                                    builder.claim("attestation_challenge_endpoint", challengeEndpoint);
+                                    builder.claim("challenge_endpoint", challengeEndpointUri);
                                     builder.claim("client_attestation_signing_alg_values_supported",
                                             supportedSigningAlgs);
                                     builder.claim("client_attestation_pop_signing_alg_values_supported",
@@ -208,7 +238,7 @@ public class EulerAuthorizationServerConfiguration {
                         .authorizationServerMetadataCustomizer(builder -> {
                             builder.tokenEndpointAuthenticationMethod(
                                     EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
-                            builder.claim("attestation_challenge_endpoint", challengeEndpoint);
+                            builder.claim("challenge_endpoint", challengeEndpointUri);
                             builder.claim("client_attestation_signing_alg_values_supported",
                                     supportedSigningAlgs);
                             builder.claim("client_attestation_pop_signing_alg_values_supported",
@@ -216,6 +246,8 @@ public class EulerAuthorizationServerConfiguration {
                         })
                 )
         );
+
+        return challengeEndpointMatcher;
     }
 
     /**
