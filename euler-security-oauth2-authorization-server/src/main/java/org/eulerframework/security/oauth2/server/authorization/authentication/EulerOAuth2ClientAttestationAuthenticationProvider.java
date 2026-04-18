@@ -101,6 +101,10 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
         this.appleAppAttestValidationService = appleAppAttestValidationService;
     }
 
+    public EulerOAuth2ClientAttestationVerifier getOauth2ClientAttestationVerifier() {
+        return oauth2ClientAttestationVerifier;
+    }
+
     @Override
     public Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException {
         OAuth2ClientAuthenticationToken clientAuthentication = (OAuth2ClientAuthenticationToken) authentication;

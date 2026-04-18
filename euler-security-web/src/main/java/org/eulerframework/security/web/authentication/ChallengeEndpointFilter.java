@@ -110,7 +110,7 @@ public class ChallengeEndpointFilter extends OncePerRequestFilter {
         response.addHeader("Cache-Control", "no-store");
         response.addHeader("Pragma", "no-cache");
 
-        Map<String, Object> body = Collections.singletonMap("challenge", generatedChallenge);
+        Map<String, Object> body = Collections.singletonMap("challenge", generatedChallenge.challenge());
         response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }
 }

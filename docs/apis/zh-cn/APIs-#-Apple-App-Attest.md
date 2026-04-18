@@ -175,7 +175,13 @@ sequenceDiagram
     Note over App: Token过期后...
 
     alt 持有有效的 refresh_token
+        App->>Server: POST /oauth2/challenge
+        Server-->>App: {"challenge": "..."}
+        App->>App: SHA256(challenge) 计算 clientDataHash
+        App->>Apple: generateAssertion(keyId, clientDataHash)
+        Apple-->>App: Assertion Object (CBOR)
         App->>Server: POST /oauth2/token (grant_type=refresh_token)
+        Note right of App: OAuth-Client-Attestation-PoP-Type: app-attest<br/>grant_type=refresh_token&refresh_token=...<br/>kid=...&assertion=Base64(...)&challenge=...
         Server-->>App: {access_token, refresh_token, ...}
     else refresh_token 也已过期
         Note over App,Server: 回退到阶段二 Assertion 流程
@@ -192,7 +198,7 @@ Token过期?
   └─ refresh_token 也已过期 → 重新执行阶段二 Assertion 流程 (回退)
 ```
 
-* **Refresh Token 续期**: 参考 [通用续期文档](APIs-%23-OAuth2-Grant.md#3-token-续期-refresh-token), 无需获取 challenge, 直接使用 `grant_type=refresh_token` 续期
+* **Refresh Token 续期**: 参考 [通用续期文档](APIs-%23-OAuth2-Grant.md#3-token-续期-refresh-token), 使用 `grant_type=refresh_token` 续期, 仍需携带 `kid`/`assertion`/`challenge` 参数和 `OAuth-Client-Attestation-PoP-Type` 请求头作为客户端认证
 * **Assertion 回退**: 当 `refresh_token` 失效时, 重新执行阶段二完整流程 (获取 challenge → 生成 Assertion → 请求 Token)
 
 ---

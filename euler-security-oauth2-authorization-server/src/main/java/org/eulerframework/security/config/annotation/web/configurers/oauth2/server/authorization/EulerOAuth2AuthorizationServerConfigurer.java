@@ -35,6 +35,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -79,7 +80,7 @@ import java.util.List;
 public class EulerOAuth2AuthorizationServerConfigurer
         extends AbstractHttpConfigurer<EulerOAuth2AuthorizationServerConfigurer, HttpSecurity> {
 
-    private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/oauth2/challenge";
+    public static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/oauth2/challenge";
 
     private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
 
@@ -122,33 +123,17 @@ public class EulerOAuth2AuthorizationServerConfigurer
         RequestMatcher tokenEndpointMatcher = PathPatternRequestMatcher
                 .pathPattern(HttpMethod.POST, tokenEndpointUri);
 
-        // Resolve shared services
-        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
-        NonceService nonceService = EulerOAuth2ConfigurerUtils.getNonceService(http);
-        EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier =
-                new EulerOAuth2ClientAttestationVerifier(challengeService, nonceService);
-
-        RegisteredClientRepository registeredClientRepository =
-                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
-
-        // Create converter and provider
-        EulerOAuth2ClientAttestationAuthenticationConverter attestConverter =
-                new EulerOAuth2ClientAttestationAuthenticationConverter();
-        EulerOAuth2ClientAttestationAuthenticationProvider attestProvider =
-                new EulerOAuth2ClientAttestationAuthenticationProvider(
-                        registeredClientRepository, oauth2ClientAttestationVerifier);
-
-        // Register as standard Client Authentication
-        http.oauth2AuthorizationServer(oauth2 -> oauth2
-                .clientAuthentication(clientAuth -> clientAuth
-                        .authenticationConverter(attestConverter)
-                        .authenticationProvider(attestProvider)));
+        EulerOAuth2ClientAttestationAuthenticationConverter attestConverter = EulerOAuth2ConfigurerUtils
+                .getEulerOAuth2ClientAttestationAuthenticationConverter(http);
+        EulerOAuth2ClientAttestationAuthenticationProvider attestProvider = EulerOAuth2ConfigurerUtils
+                .getEulerOAuth2ClientAttestationAuthenticationProvider(http);
 
         // Create post-auth filter (installed in configure())
         this.attestationFilter = new EulerOAuth2AttestationBasedClientAuthenticationFilter(
                 tokenEndpointMatcher, attestConverter, attestProvider);
 
         // Create challenge endpoint filter (draft Section 7)
+        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
         this.challengeFilter = new ChallengeEndpointFilter(challengeService, this.challengeEndpointUri);
         this.challengeEndpointMatcher = this.challengeFilter.getRequestMatcher();
         this.endpointsMatcher = this.challengeEndpointMatcher;
@@ -156,44 +141,11 @@ public class EulerOAuth2AuthorizationServerConfigurer
         // Exempt challenge endpoint from CSRF protection
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.challengeEndpointMatcher));
 
-        // Add attestation metadata to OIDC provider configuration and AS metadata endpoints
-        //   (draft-ietf-oauth-attestation-based-client-auth-08 Section 9)
-        String issuer = authorizationServerSettings.getIssuer();
-        String challengeEndpointFullUri = (issuer != null ? issuer : "") + this.challengeEndpointUri;
-        List<String> supportedSigningAlgs = List.of("ES256");
-
-        http.oauth2AuthorizationServer(oauth2 -> oauth2
-                .oidc(oidc -> oidc
-                        .providerConfigurationEndpoint(config -> config
-                                .providerConfigurationCustomizer(builder -> {
-                                    builder.tokenEndpointAuthenticationMethod(
-                                            EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
-                                    builder.claim("challenge_endpoint", challengeEndpointFullUri);
-                                    builder.claim("client_attestation_signing_alg_values_supported",
-                                            supportedSigningAlgs);
-                                    builder.claim("client_attestation_pop_signing_alg_values_supported",
-                                            supportedSigningAlgs);
-                                })
-                        )
-                )
-                .authorizationServerMetadataEndpoint(metadata -> metadata
-                        .authorizationServerMetadataCustomizer(builder -> {
-                            builder.tokenEndpointAuthenticationMethod(
-                                    EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
-                            builder.claim("challenge_endpoint", challengeEndpointFullUri);
-                            builder.claim("client_attestation_signing_alg_values_supported",
-                                    supportedSigningAlgs);
-                            builder.claim("client_attestation_pop_signing_alg_values_supported",
-                                    supportedSigningAlgs);
-                        })
-                )
-        );
-
         // Apple App Attest support for Attestation Based Client Authentication
         AppAttestRegistrationService registrationService =
                 EulerOAuth2ConfigurerUtils.getAppAttestRegistrationServiceIfAvailable(http);
         if (registrationService != null) {
-            oauth2ClientAttestationVerifier.setAppAttestRegistrationService(registrationService);
+            attestProvider.getOauth2ClientAttestationVerifier().setAppAttestRegistrationService(registrationService);
         }
 
         AppleAppAttestValidationService appleAppAttestValidationService =
@@ -201,28 +153,11 @@ public class EulerOAuth2AuthorizationServerConfigurer
         if (appleAppAttestValidationService != null) {
             attestProvider.setAppleAppAttestValidationService(appleAppAttestValidationService);
         }
-
-        EulerAppleAppAttestUserDetailsService userDetailsService =
-                EulerOAuth2ConfigurerUtils.getAppleAppAttestUserDetailsServiceIfAvailable(http);
-        if (userDetailsService != null) {
-            OAuth2AppleAppAttestAssertionAuthenticationProvider grantProvider =
-                    new OAuth2AppleAppAttestAssertionAuthenticationProvider(
-                            userDetailsService,
-                            OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
-                            OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http));
-
-            http.oauth2AuthorizationServer(oauth2 -> oauth2
-                    .tokenEndpoint(configurer -> configurer
-                            .authenticationProvider(grantProvider)
-                            .accessTokenRequestConverter(new OAuth2AppleAppAttestAssertionAuthenticationConverter())));
-        }
     }
 
     @Override
     public void configure(HttpSecurity http) {
-        http.addFilterBefore(postProcess(this.challengeFilter), OAuth2ClientAuthenticationFilter.class);
+        http.addFilterBefore(postProcess(this.challengeFilter), AbstractPreAuthenticatedProcessingFilter.class);
         http.addFilterAfter(postProcess(this.attestationFilter), OAuth2ClientAuthenticationFilter.class);
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(this.challengeEndpointMatcher).permitAll());
     }
 }

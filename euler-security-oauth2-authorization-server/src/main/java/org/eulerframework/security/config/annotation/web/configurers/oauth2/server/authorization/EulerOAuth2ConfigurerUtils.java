@@ -24,8 +24,13 @@ import org.eulerframework.security.authentication.NonceService;
 import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
+import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 /**
  * Utility methods for resolving shared services used by Euler OAuth 2.0 configurers.
@@ -37,6 +42,44 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 final class EulerOAuth2ConfigurerUtils {
 
     private EulerOAuth2ConfigurerUtils() {
+    }
+
+    @Nonnull
+    static EulerOAuth2ClientAttestationAuthenticationConverter getEulerOAuth2ClientAttestationAuthenticationConverter(HttpSecurity http) {
+        EulerOAuth2ClientAttestationAuthenticationConverter converter = http.getSharedObject(EulerOAuth2ClientAttestationAuthenticationConverter.class);
+        if (converter != null) {
+            return converter;
+        }
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
+        if (applicationContext.getBeanNamesForType(EulerOAuth2ClientAttestationAuthenticationConverter.class).length > 0) {
+            converter = applicationContext.getBean(EulerOAuth2ClientAttestationAuthenticationConverter.class);
+        } else {
+            converter = new EulerOAuth2ClientAttestationAuthenticationConverter();
+        }
+        http.setSharedObject(EulerOAuth2ClientAttestationAuthenticationConverter.class, converter);
+        return converter;
+    }
+
+    @Nonnull
+    public static EulerOAuth2ClientAttestationAuthenticationProvider getEulerOAuth2ClientAttestationAuthenticationProvider(HttpSecurity http) {
+        EulerOAuth2ClientAttestationAuthenticationProvider provider = http.getSharedObject(EulerOAuth2ClientAttestationAuthenticationProvider.class);
+        if (provider != null) {
+            return provider;
+        }
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
+        if (applicationContext.getBeanNamesForType(EulerOAuth2ClientAttestationAuthenticationProvider.class).length > 0) {
+            provider = applicationContext.getBean(EulerOAuth2ClientAttestationAuthenticationProvider.class);
+        } else {
+            ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
+            NonceService nonceService = EulerOAuth2ConfigurerUtils.getNonceService(http);
+            EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier =
+                    new EulerOAuth2ClientAttestationVerifier(challengeService, nonceService);
+            RegisteredClientRepository registeredClientRepository =
+                    OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
+            provider = new EulerOAuth2ClientAttestationAuthenticationProvider(registeredClientRepository, oauth2ClientAttestationVerifier);
+        }
+        http.setSharedObject(EulerOAuth2ClientAttestationAuthenticationProvider.class, provider);
+        return provider;
     }
 
     /**

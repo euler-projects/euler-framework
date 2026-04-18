@@ -51,17 +51,17 @@ public class AppAttestRegistration implements Serializable {
     private long signCount;
 
     public AppAttestRegistration(String keyId, String teamId, String bundleId,
-                                  byte[] aaguid, byte[] credentialId,
-                                  byte[] attestationCertificateChain, byte[] receipt,
-                                  PublicKey publicKey, String jwks, long signCount) {
-        this(keyId, teamId, bundleId, null, aaguid, credentialId,
+                                 byte[] aaguid, byte[] credentialId,
+                                 byte[] attestationCertificateChain, byte[] receipt,
+                                 PublicKey publicKey, String jwks, long signCount) {
+        this(keyId, teamId, bundleId, teamId + "." + bundleId, aaguid, credentialId,
                 attestationCertificateChain, receipt, publicKey, jwks, signCount);
     }
 
     public AppAttestRegistration(String keyId, String teamId, String bundleId, String clientId,
-                                  byte[] aaguid, byte[] credentialId,
-                                  byte[] attestationCertificateChain, byte[] receipt,
-                                  PublicKey publicKey, String jwks, long signCount) {
+                                 byte[] aaguid, byte[] credentialId,
+                                 byte[] attestationCertificateChain, byte[] receipt,
+                                 PublicKey publicKey, String jwks, long signCount) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;

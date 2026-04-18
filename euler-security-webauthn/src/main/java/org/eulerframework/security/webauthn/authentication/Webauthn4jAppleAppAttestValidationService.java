@@ -63,7 +63,7 @@ import java.util.List;
  */
 public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttestValidationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(Webauthn4jAppleAppAttestValidationService.class);
+    private final Logger logger = LoggerFactory.getLogger(Webauthn4jAppleAppAttestValidationService.class);
 
     /**
      * AAGUID for the Apple App Attest production environment.
@@ -192,6 +192,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
+            this.logger.error("Apple App Attest attestation validation failed {}", e.getMessage(), e);
             throw new AuthenticationServiceException("Apple App Attest attestation validation failed", e);
         }
     }
@@ -240,6 +241,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
+            this.logger.error("Apple App Attest assertion validation failed {}", e.getMessage(), e);
             throw new AuthenticationServiceException("Apple App Attest assertion validation failed", e);
         }
     }
