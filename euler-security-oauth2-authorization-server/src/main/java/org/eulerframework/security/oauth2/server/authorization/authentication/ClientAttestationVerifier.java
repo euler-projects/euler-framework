@@ -30,6 +30,7 @@ import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +68,8 @@ import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
  * Both methods return a {@link PopVerificationResult} containing the resolved {@code keyId},
  * {@code clientId}, and {@link AppAttestRegistration}.
  *
- * @see ClientAttestationAuthenticationProvider
- * @see org.eulerframework.security.oauth2.server.authorization.web.ClientAttestationFilter
+ * @see EulerOAuth2ClientAttestationAuthenticationProvider
+ * @see EulerOAuth2AttestationBasedClientAuthenticationFilter
  */
 public final class ClientAttestationVerifier {
 

@@ -37,20 +37,20 @@ import org.springframework.util.StringUtils;
 
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationToken;
-import org.eulerframework.security.oauth2.server.authorization.web.ClientAttestationFilter;
+import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 
 /**
  * Converts HTTP requests for the {@code apple_app_attest_assertion} grant type into
  * {@link OAuth2AppleAppAttestAssertionAuthenticationToken} instances.
  * <p>
  * This converter reads the verified {@code keyId} from a request attribute
- * ({@link ClientAttestationFilter#ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE}) set by
- * {@link ClientAttestationFilter}. If the attribute is absent, the converter returns
+ * ({@link EulerOAuth2AttestationBasedClientAuthenticationFilter#ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE}) set by
+ * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter}. If the attribute is absent, the converter returns
  * {@code null} (indicating the request did not pass attestation verification).
  * <p>
- * Assertion and challenge parameters ({@code key_id}, {@code assertion_data},
+ * Assertion and challenge parameters ({@code kid}, {@code assertion},
  * {@code challenge}) are no longer extracted here — they are consumed by
- * {@link ClientAttestationFilter} during PoP verification.
+ * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter} during PoP verification.
  */
 public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements AuthenticationConverter {
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
@@ -65,9 +65,9 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
             return null;
         }
 
-        // keyId from request attribute (set by ClientAttestationFilter after successful verification)
+        // keyId from request attribute (set by EulerOAuth2AttestationBasedClientAuthenticationFilter after successful verification)
         String keyId = (String) request.getAttribute(
-                ClientAttestationFilter.ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE);
+                EulerOAuth2AttestationBasedClientAuthenticationFilter.ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE);
         if (keyId == null) {
             // Filter did not verify attestation → this request is not attestation-backed
             return null;
