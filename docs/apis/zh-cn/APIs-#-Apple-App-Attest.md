@@ -68,7 +68,7 @@ key_id={keyId}&attestation={Base64编码的Attestation Object}&challenge={challe
 
 > 设备注册成功后, 通过 Assertion 获取初始 Token.
 >
-> **续期策略**: 机密客户端会收到 `refresh_token`, Token 过期后应优先使用 [Refresh Token 续期](APIs-%23-OAuth2-Grant.md#1-通用续期-refresh-token), 仅在 `refresh_token` 也过期时才回退到 Assertion 重新获取.
+> **续期策略**: 机密客户端会收到 `refresh_token`, Token 过期后应优先使用 [Refresh Token 续期](APIs-%23-OAuth2-Grant.md#3-token-续期-refresh-token), 仅在 `refresh_token` 也过期时才回退到 Assertion 重新获取.
 
 ### 2.1 获取 Challenge
 
@@ -192,7 +192,7 @@ Token过期?
   └─ refresh_token 也已过期 → 重新执行阶段二 Assertion 流程 (回退)
 ```
 
-* **Refresh Token 续期**: 参考 [通用续期文档](APIs-%23-OAuth2-Grant.md#1-通用续期-refresh-token), 无需获取 challenge, 直接使用 `grant_type=refresh_token` 续期
+* **Refresh Token 续期**: 参考 [通用续期文档](APIs-%23-OAuth2-Grant.md#3-token-续期-refresh-token), 无需获取 challenge, 直接使用 `grant_type=refresh_token` 续期
 * **Assertion 回退**: 当 `refresh_token` 失效时, 重新执行阶段二完整流程 (获取 challenge → 生成 Assertion → 请求 Token)
 
 ---
