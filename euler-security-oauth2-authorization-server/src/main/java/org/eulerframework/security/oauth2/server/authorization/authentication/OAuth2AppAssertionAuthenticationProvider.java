@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eulerframework.security.authentication.device.DeviceUser;
+import org.eulerframework.security.authentication.appattest.DeviceAppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFountException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 
 /**
- * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:device_assertion} grant type.
+ * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type.
  * <p>
  * This is a <b>thin layer</b> responsible only for anonymous user resolution and
  * token issuance. Assertion/challenge cryptographic verification is performed
@@ -76,10 +76,10 @@ import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
  *       refresh tokens redundant.</li>
  * </ol>
  */
-public class OAuth2DeviceAssertionAuthenticationProvider implements AuthenticationProvider {
+public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
-    private final Logger logger = LoggerFactory.getLogger(OAuth2DeviceAssertionAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuth2AppAssertionAuthenticationProvider.class);
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
@@ -89,7 +89,7 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
 
     private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
-    public OAuth2DeviceAssertionAuthenticationProvider(
+    public OAuth2AppAssertionAuthenticationProvider(
             EulerDeviceUserDetailsService userDetailsService,
             OAuth2AuthorizationService authorizationService,
             OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
@@ -108,8 +108,8 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2DeviceAssertionAuthenticationToken assertionAuthenticationToken =
-                (OAuth2DeviceAssertionAuthenticationToken) authentication;
+        OAuth2AppAssertionAuthenticationToken assertionAuthenticationToken =
+                (OAuth2AppAssertionAuthenticationToken) authentication;
 
         OAuth2ClientAuthenticationToken clientPrincipal =
                 OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(assertionAuthenticationToken);
@@ -119,7 +119,7 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
-        if (!registeredClient.getAuthorizationGrantTypes().contains(EulerAuthorizationGrantType.DEVICE_ASSERTION)) {
+        if (!registeredClient.getAuthorizationGrantTypes().contains(EulerAuthorizationGrantType.APP_ASSERTION)) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
         }
 
@@ -128,7 +128,7 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
 
         // Resolve anonymous user by keyId
         String keyId = assertionAuthenticationToken.getKeyId();
-        DeviceUser attestUser = new DeviceUser(keyId);
+        DeviceAppUser attestUser = new DeviceAppUser(keyId);
         UserDetails user;
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);
@@ -147,7 +147,7 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
-                .authorizationGrantType(EulerAuthorizationGrantType.DEVICE_ASSERTION)
+                .authorizationGrantType(EulerAuthorizationGrantType.APP_ASSERTION)
                 .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
 
@@ -155,7 +155,7 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorizationGrantType(EulerAuthorizationGrantType.DEVICE_ASSERTION)
+                .authorizationGrantType(EulerAuthorizationGrantType.APP_ASSERTION)
                 .authorizedScopes(authorizedScopes)
                 .authorizationGrant(assertionAuthenticationToken);
 
@@ -228,10 +228,10 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return OAuth2DeviceAssertionAuthenticationToken.class.isAssignableFrom(authentication);
+        return OAuth2AppAssertionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2DeviceAssertionAuthenticationToken authenticationToken,
+    private void validateScope(OAuth2AppAssertionAuthenticationToken authenticationToken,
                                RegisteredClient registeredClient) {
         Set<String> requestedScopes = authenticationToken.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();

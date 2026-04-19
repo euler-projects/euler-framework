@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +26,7 @@ import java.util.Collections;
  * Authentication token for device attestation registration requests.
  * Contains keyId, attestation data, and challenge.
  */
-public class DeviceAttestationRegistrationAuthenticationToken extends AbstractAuthenticationToken {
+public class DeviceAppAttestationRegistrationAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String keyId;
     private final String attestation;
@@ -36,7 +36,7 @@ public class DeviceAttestationRegistrationAuthenticationToken extends AbstractAu
     /**
      * Create an unauthenticated token.
      */
-    DeviceAttestationRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
+    DeviceAppAttestationRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
         super(Collections.emptyList());
         this.keyId = keyId;
         this.attestation = attestation;
@@ -48,8 +48,8 @@ public class DeviceAttestationRegistrationAuthenticationToken extends AbstractAu
     /**
      * Create an authenticated token.
      */
-    DeviceAttestationRegistrationAuthenticationToken(Object principal, String keyId,
-                                                     Collection<? extends GrantedAuthority> authorities) {
+    DeviceAppAttestationRegistrationAuthenticationToken(Object principal, String keyId,
+                                                        Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
         this.keyId = keyId;
@@ -61,16 +61,16 @@ public class DeviceAttestationRegistrationAuthenticationToken extends AbstractAu
     /**
      * Creates an unauthenticated token containing the attestation data.
      */
-    public static DeviceAttestationRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
-        return new DeviceAttestationRegistrationAuthenticationToken(keyId, attestation, challenge);
+    public static DeviceAppAttestationRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
+        return new DeviceAppAttestationRegistrationAuthenticationToken(keyId, attestation, challenge);
     }
 
     /**
      * Creates an authenticated token with the resolved principal and authorities.
      */
-    public static DeviceAttestationRegistrationAuthenticationToken authenticated(Object principal, String keyId,
-                                                                                 Collection<? extends GrantedAuthority> authorities) {
-        return new DeviceAttestationRegistrationAuthenticationToken(principal, keyId, authorities);
+    public static DeviceAppAttestationRegistrationAuthenticationToken authenticated(Object principal, String keyId,
+                                                                                    Collection<? extends GrantedAuthority> authorities) {
+        return new DeviceAppAttestationRegistrationAuthenticationToken(principal, keyId, authorities);
     }
 
     @Override

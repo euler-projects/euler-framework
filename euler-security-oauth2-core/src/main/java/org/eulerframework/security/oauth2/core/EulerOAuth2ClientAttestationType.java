@@ -25,7 +25,7 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 public record EulerOAuth2ClientAttestationType(String value) {
 
     /**
-     * Standard PoP JWT as defined in the draft.
+     * Standard JWT as defined in the draft.
      */
     public static final EulerOAuth2ClientAttestationType JWT = new EulerOAuth2ClientAttestationType("jwt");
 
@@ -37,13 +37,13 @@ public record EulerOAuth2ClientAttestationType(String value) {
      * {@link EulerOAuth2ParameterNames#CHALLENGE})
      * are sent as body parameters.
      */
-    public static final EulerOAuth2ClientAttestationType APP_ATTEST = new EulerOAuth2ClientAttestationType("app-attest");
+    public static final EulerOAuth2ClientAttestationType APPLE_APP_ATTEST = new EulerOAuth2ClientAttestationType("apple_app_attest");
 
     public static EulerOAuth2ClientAttestationType parse(String value) {
         if (JWT.value().equalsIgnoreCase(value)) {
             return JWT;
-        } else if (APP_ATTEST.value().equalsIgnoreCase(value)) {
-            return APP_ATTEST;
+        } else if (APPLE_APP_ATTEST.value().equalsIgnoreCase(value)) {
+            return APPLE_APP_ATTEST;
         } else {
             throw new OAuth2AuthenticationException(
                     new OAuth2Error(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,

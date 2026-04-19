@@ -37,8 +37,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import org.eulerframework.security.authentication.device.DeviceAttestationRegistration;
-import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistration;
+import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
@@ -60,10 +60,10 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
  *       <ul>
  *         <li>{@code jwt}: delegates to {@link EulerOAuth2ClientAttestationVerifier} which handles
  *             kid extraction, key lookup, and PoP JWT verification.</li>
- *         <li>{@code app-attest}: looks up the registration by {@code kid} and
+ *         <li>{@code apple_app_attest}: looks up the registration by {@code kid} and
  *             validates the assertion via {@link AppleAppAttestValidationService}.
- *             Only available when App Attest is enabled (requires a non-null
- *             {@code AppleAppAttestValidationService}).</li>
+ *             Only available when Apple App Attest is enabled (requires a non-null
+ *             {@link AppleAppAttestValidationService}).</li>
  *       </ul>
  *   </li>
  *   <li>Resolves the {@code client_id} from the verification result.</li>
@@ -134,12 +134,12 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
             resolvedKeyId = result.keyId();
             resolvedClientId = result.clientId();
-        } else if (EulerOAuth2ClientAttestationType.APP_ATTEST.equals(auth2ClientAttestationType)) {
+        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(auth2ClientAttestationType)) {
             if (this.appleAppAttestValidationService == null) {
                 throw new OAuth2AuthenticationException(
                         new OAuth2Error(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,
                                 "APP_ATTEST attestation type is not supported; "
-                                        + "enable euler.security.device-attest to use this attestation type", null));
+                                        + "enable euler.security.app-attest to use this attestation type", null));
             }
 
             String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.KEY_ID);
@@ -167,7 +167,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                 throw invalidClientAttestation(EulerOAuth2ParameterNames.CHALLENGE);
             }
 
-            DeviceAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
+            DeviceAppAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
 
             resolvedKeyId = registration.getKeyId();
             resolvedClientId = registration.getTeamId() + "." + registration.getBundleId();

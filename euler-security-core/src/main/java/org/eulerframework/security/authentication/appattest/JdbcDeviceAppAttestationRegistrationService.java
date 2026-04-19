@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
@@ -24,13 +24,13 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * JDBC implementation of {@link DeviceAttestationRegistrationService} that persists
+ * JDBC implementation of {@link DeviceAppAttestationRegistrationService} that persists
  * device attestation registrations in a relational database.
  * <p>
- * By default, this implementation uses the table {@code device_attestation_registration}
+ * By default, this implementation uses the table {@code device_app_attestation_registration}
  * with the following schema:
  * <pre>{@code
- * CREATE TABLE device_attestation_registration (
+ * CREATE TABLE device_app_attestation_registration (
  *     key_id                        VARCHAR(255)  NOT NULL PRIMARY KEY,
  *     team_id                       VARCHAR(255)  NOT NULL,
  *     bundle_id                     VARCHAR(255)  NOT NULL,
@@ -44,13 +44,13 @@ import java.security.spec.X509EncodedKeySpec;
  * );
  * }</pre>
  *
- * @see DeviceAttestationRegistrationService
- * @see InMemoryDeviceAttestationRegistrationService
+ * @see DeviceAppAttestationRegistrationService
+ * @see InMemoryDeviceAppAttestationRegistrationService
  */
-public class JdbcDeviceAttestationRegistrationService implements DeviceAttestationRegistrationService {
+public class JdbcDeviceAppAttestationRegistrationService implements DeviceAppAttestationRegistrationService {
 
     // @formatter:off
-    private static final String DEFAULT_TABLE_NAME = "device_attestation_registration";
+    private static final String DEFAULT_TABLE_NAME = "device_app_attestation_registration";
 
     private static final String COLUMN_KEY_ID                        = "key_id";
     private static final String COLUMN_TEAM_ID                       = "team_id";
@@ -83,7 +83,7 @@ public class JdbcDeviceAttestationRegistrationService implements DeviceAttestati
      *
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      */
-    public JdbcDeviceAttestationRegistrationService(JdbcOperations jdbcOperations) {
+    public JdbcDeviceAppAttestationRegistrationService(JdbcOperations jdbcOperations) {
         this(jdbcOperations, DEFAULT_TABLE_NAME);
     }
 
@@ -93,7 +93,7 @@ public class JdbcDeviceAttestationRegistrationService implements DeviceAttestati
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      * @param tableName      the table name to use (must not be empty)
      */
-    public JdbcDeviceAttestationRegistrationService(JdbcOperations jdbcOperations, String tableName) {
+    public JdbcDeviceAppAttestationRegistrationService(JdbcOperations jdbcOperations, String tableName) {
         Assert.notNull(jdbcOperations, "jdbcOperations must not be null");
         Assert.hasText(tableName, "tableName must not be empty");
         this.jdbcOperations = jdbcOperations;
@@ -113,7 +113,7 @@ public class JdbcDeviceAttestationRegistrationService implements DeviceAttestati
     }
 
     @Override
-    public void saveRegistration(DeviceAttestationRegistration registration) {
+    public void saveRegistration(DeviceAppAttestationRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
         Assert.hasText(registration.getKeyId(), "keyId must not be empty");
         this.jdbcOperations.update(this.insertSql, ps -> {
@@ -132,7 +132,7 @@ public class JdbcDeviceAttestationRegistrationService implements DeviceAttestati
     }
 
     @Override
-    public DeviceAttestationRegistration findByKeyId(String keyId) {
+    public DeviceAppAttestationRegistration findByKeyId(String keyId) {
         return this.jdbcOperations.query(this.selectSql,
                 ps -> ps.setString(1, keyId),
                 rs -> {
@@ -140,7 +140,7 @@ public class JdbcDeviceAttestationRegistrationService implements DeviceAttestati
                         return null;
                     }
                     PublicKey publicKey = deserializePublicKey(rs.getBytes(COLUMN_PUBLIC_KEY));
-                    return new DeviceAttestationRegistration(
+                    return new DeviceAppAttestationRegistration(
                             rs.getString(COLUMN_KEY_ID),
                             rs.getString(COLUMN_TEAM_ID),
                             rs.getString(COLUMN_BUNDLE_ID),

@@ -15,8 +15,8 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import jakarta.annotation.Nullable;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
-import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
 
@@ -25,24 +25,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Authentication token for the {@code urn:ietf:params:oauth:grant-type:device_assertion} grant type.
- * <p>
- * This token carries the verified {@code keyId} (set by {@code ClientAttestationFilter})
- * and requested scopes. Assertion and challenge validation have already been performed
- * by the filter; this grant type is a thin layer responsible only for anonymous user
- * resolution and token issuance.
- */
-public class OAuth2DeviceAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+
+public class OAuth2AppAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
     private final String keyId;
     private final Set<String> scopes;
 
-    public OAuth2DeviceAssertionAuthenticationToken(
+    public OAuth2AppAssertionAuthenticationToken(
             String keyId,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
-        super(EulerAuthorizationGrantType.DEVICE_ASSERTION, clientPrincipal, additionalParameters);
+        super(EulerAuthorizationGrantType.APP_ASSERTION, clientPrincipal, additionalParameters);
         this.keyId = keyId;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?

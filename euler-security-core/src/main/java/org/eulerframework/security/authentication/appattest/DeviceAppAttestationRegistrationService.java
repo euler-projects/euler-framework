@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 /**
  * Service interface for storing and retrieving device attestation registrations.
@@ -22,16 +22,16 @@ package org.eulerframework.security.authentication.device;
  * Registrations are created during the attestation (device registration) process
  * and used during assertion (device re-authentication) to verify the device's identity.
  *
- * @see DeviceAttestationRegistration
+ * @see DeviceAppAttestationRegistration
  */
-public interface DeviceAttestationRegistrationService {
+public interface DeviceAppAttestationRegistrationService {
 
     /**
      * Save a registration after successful attestation.
      *
      * @param registration the registration to save
      */
-    void saveRegistration(DeviceAttestationRegistration registration);
+    void saveRegistration(DeviceAppAttestationRegistration registration);
 
     /**
      * Retrieve a registration by its key ID.
@@ -39,7 +39,7 @@ public interface DeviceAttestationRegistrationService {
      * @param keyId the key identifier
      * @return the registration, or {@code null} if not found
      */
-    DeviceAttestationRegistration findByKeyId(String keyId);
+    DeviceAppAttestationRegistration findByKeyId(String keyId);
 
     /**
      * Update the sign count for a registration.

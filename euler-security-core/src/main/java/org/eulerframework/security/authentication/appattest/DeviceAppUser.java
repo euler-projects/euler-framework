@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 import java.io.Serializable;
 import java.security.PublicKey;
@@ -23,22 +23,22 @@ import java.util.Objects;
 /**
  * Represents a validated device anonymous user identified by their key ID.
  */
-public class DeviceUser implements Serializable {
+public class DeviceAppUser implements Serializable {
 
     private final String keyId;
     private final String teamId;
     private final String bundleId;
     private final PublicKey publicKey;
 
-    public DeviceUser(String keyId) {
+    public DeviceAppUser(String keyId) {
         this(keyId, null, null, null);
     }
 
-    public DeviceUser(String keyId, PublicKey publicKey) {
+    public DeviceAppUser(String keyId, PublicKey publicKey) {
         this(keyId, null, null, publicKey);
     }
 
-    public DeviceUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
+    public DeviceAppUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;
@@ -65,7 +65,7 @@ public class DeviceUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DeviceUser that = (DeviceUser) o;
+        DeviceAppUser that = (DeviceAppUser) o;
         return Objects.equals(keyId, that.keyId);
     }
 

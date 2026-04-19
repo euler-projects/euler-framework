@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.util.Assert;
 
@@ -22,29 +22,29 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of {@link DeviceAttestationRegistrationService}.
+ * In-memory implementation of {@link DeviceAppAttestationRegistrationService}.
  * <p>
  * Suitable for single-instance deployments or development/testing environments.
  */
-public class InMemoryDeviceAttestationRegistrationService implements DeviceAttestationRegistrationService {
+public class InMemoryDeviceAppAttestationRegistrationService implements DeviceAppAttestationRegistrationService {
 
-    private final Map<String, DeviceAttestationRegistration> registrations = new ConcurrentHashMap<>();
+    private final Map<String, DeviceAppAttestationRegistration> registrations = new ConcurrentHashMap<>();
 
     @Override
-    public void saveRegistration(DeviceAttestationRegistration registration) {
+    public void saveRegistration(DeviceAppAttestationRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
         Assert.hasText(registration.getKeyId(), "keyId must not be empty");
         this.registrations.put(registration.getKeyId(), registration);
     }
 
     @Override
-    public DeviceAttestationRegistration findByKeyId(String keyId) {
+    public DeviceAppAttestationRegistration findByKeyId(String keyId) {
         return this.registrations.get(keyId);
     }
 
     @Override
     public void updateSignCount(String keyId, long newSignCount) {
-        DeviceAttestationRegistration registration = this.registrations.get(keyId);
+        DeviceAppAttestationRegistration registration = this.registrations.get(keyId);
         if (registration != null && newSignCount > registration.getSignCount()) {
             registration.setSignCount(newSignCount);
         }

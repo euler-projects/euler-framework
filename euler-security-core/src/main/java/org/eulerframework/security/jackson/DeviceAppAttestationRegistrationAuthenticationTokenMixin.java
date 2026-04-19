@@ -18,11 +18,11 @@ package org.eulerframework.security.jackson;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistrationAuthenticationToken;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
- * Jackson mixin for {@link DeviceAttestationRegistrationAuthenticationToken}.
+ * Jackson mixin for {@link DeviceAppAttestationRegistrationAuthenticationToken}.
  * <p>
  * Note: The registration endpoint currently does not persist this token to the
  * {@code SecurityContext}; it returns an HTTP JSON response directly. This mixin
@@ -32,7 +32,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonDeserialize(using = DeviceAttestationRegistrationAuthenticationTokenDeserializer.class)
-abstract class DeviceAttestationRegistrationAuthenticationTokenMixin {
+@JsonDeserialize(using = DeviceAppAttestationRegistrationAuthenticationTokenDeserializer.class)
+abstract class DeviceAppAttestationRegistrationAuthenticationTokenMixin {
 
 }

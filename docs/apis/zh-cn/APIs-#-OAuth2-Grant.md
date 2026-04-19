@@ -37,7 +37,7 @@ Authorization: Basic ZGVmYXVsdDoxMjM=
 在请求体中传入```client_id```参数, 无需```client_secret```:
 
 ```
-client_id=app-attest
+client_id=demo
 ```
 
 > 公共客户端适用于无法安全存储密钥客户端, 如 WEB 应用

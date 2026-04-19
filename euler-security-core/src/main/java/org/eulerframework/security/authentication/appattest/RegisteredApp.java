@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.util.Assert;
 
@@ -28,7 +28,7 @@ import java.io.Serializable;
  * The SHA-256 hash of the device ID is used as the RP ID hash in the Apple App Attest protocol.
  *
  */
-public record RegisteredDevice(String teamId, String bundleId) implements Serializable {
+public record RegisteredApp(String teamId, String bundleId) implements Serializable {
 
     /**
      * Create a new {@code RegisteredAppleApp} with the specified Team ID and Bundle ID.
@@ -36,12 +36,12 @@ public record RegisteredDevice(String teamId, String bundleId) implements Serial
      * @param teamId   the Apple Developer Team ID (10-character string)
      * @param bundleId the iOS app's Bundle ID (e.g. {@code com.example.myapp})
      */
-    public RegisteredDevice {
+    public RegisteredApp {
         Assert.hasText(teamId, "teamId must not be empty");
         Assert.hasText(bundleId, "bundleId must not be empty");
     }
 
-    public String deviceId() {
+    public String appId() {
         return this.teamId + "." + this.bundleId;
     }
 }

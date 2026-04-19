@@ -16,8 +16,8 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
-import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
@@ -133,7 +133,7 @@ public class EulerOAuth2AuthorizationServerConfigurer
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.challengeEndpointMatcher));
 
         // Apple App Attest support for Attestation Based Client Authentication
-        DeviceAttestationRegistrationService registrationService =
+        DeviceAppAttestationRegistrationService registrationService =
                 EulerOAuth2ConfigurerUtils.getDeviceAttestRegistrationServiceIfAvailable(http);
         if (registrationService != null) {
             attestProvider.getOauth2ClientAttestationVerifier().setDeviceAttestRegistrationService(registrationService);

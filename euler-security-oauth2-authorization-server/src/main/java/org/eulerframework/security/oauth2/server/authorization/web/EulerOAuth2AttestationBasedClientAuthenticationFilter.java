@@ -70,7 +70,7 @@ import java.util.Map;
  * {@code OAuth-Client-Attestation-Type} header:
  * <ul>
  *   <li>{@code jwt} (default) — standard PoP JWT as defined in Section 5.2 of the draft.</li>
- *   <li>{@code app-attest} — Apple App Attest Assertion used as PoP, with parameters
+ *   <li>{@code apple_app_attest} — Apple App Attest Assertion used as PoP, with parameters
  *       ({@code kid}, {@code assertion}, {@code challenge}) in the request body.</li>
  * </ul>
  *
@@ -85,9 +85,9 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
     /**
      * Request attribute name for the verified key ID.
      * Set by this filter after successful attestation verification; read by downstream
-     * converters (e.g., {@code OAuth2DeviceAssertionAuthenticationConverter}).
+     * converters (e.g., {@link org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter}).
      */
-    public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "attestation.verified.key_id";
+    public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "oauth2.client-attestation.verified.key_id";
 
     private final RequestMatcher tokenEndpointMatcher;
 

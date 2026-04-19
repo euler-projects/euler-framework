@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.device;
+package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.util.Assert;
 
@@ -26,46 +26,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/// An in-memory implementation of [DeviceRepository] that stores registered devices
-/// in a [ConcurrentHashMap] keyed by the hex-encoded SHA-256 hash of the device ID.
+/// An in-memory implementation of [RegisteredAppRepository] that stores registered Apps
+/// in a [ConcurrentHashMap] keyed by the hex-encoded SHA-256 hash of the App ID.
 ///
 /// This implementation is suitable for development, testing, or deployments where the
-/// set of registered devices is known at startup and configured via application properties.
-public class InMemoryDeviceRepository implements DeviceRepository {
+/// set of registered Apps is known at startup and configured via application properties.
+public class InMemoryRegisteredAppRepository implements RegisteredAppRepository {
 
-    private final Map<String /* Device ID Hash Hex */, RegisteredDevice> devices = new ConcurrentHashMap<>();
+    private final Map<String /* App ID Hash Hex */, RegisteredApp> registeredApps
+            = new ConcurrentHashMap<>();
 
     /**
      * Create a new {@code InMemoryDeviceRepository} with the specified registered devices.
      *
-     * @param registeredDevices the registered devices
+     * @param registeredApps the registered devices
      */
-    public InMemoryDeviceRepository(RegisteredDevice... registeredDevices) {
-        this(Arrays.asList(registeredDevices));
+    public InMemoryRegisteredAppRepository(RegisteredApp... registeredApps) {
+        this(Arrays.asList(registeredApps));
     }
 
     /**
      * Create a new {@code InMemoryAppleAppRepository} with the specified registered apps.
      *
-     * @param registeredDevices the list of registered Apple Apps
+     * @param registeredApps the list of registered Apple Apps
      */
-    public InMemoryDeviceRepository(List<RegisteredDevice> registeredDevices) {
-        Assert.notEmpty(registeredDevices, "registeredDevices must not be empty");
-        for (RegisteredDevice device : registeredDevices) {
-            String deviceIdHashHex = bytesToHex(computeDeviceIdHash(device));
-            this.devices.put(deviceIdHashHex, device);
+    public InMemoryRegisteredAppRepository(List<RegisteredApp> registeredApps) {
+        Assert.notEmpty(registeredApps, "registeredDevices must not be empty");
+        for (RegisteredApp device : registeredApps) {
+            String deviceIdHashHex = bytesToHex(computeAppIdHash(device));
+            this.registeredApps.put(deviceIdHashHex, device);
         }
     }
 
     @Override
-    public RegisteredDevice findByDeviceIdHash(byte[] deviceIdHash) {
-        Assert.notNull(deviceIdHash, "deviceIdHash must not be null");
-        return this.devices.get(bytesToHex(deviceIdHash));
+    public RegisteredApp findByAppIdHash(byte[] appIdHash) {
+        Assert.notNull(appIdHash, "deviceIdHash must not be null");
+        return this.registeredApps.get(bytesToHex(appIdHash));
     }
 
-    private static byte[] computeDeviceIdHash(RegisteredDevice registeredDevice) {
-        String deviceId = registeredDevice.deviceId();
-        return sha256(deviceId.getBytes(StandardCharsets.UTF_8));
+    private static byte[] computeAppIdHash(RegisteredApp registeredApp) {
+        String appId = registeredApp.appId();
+        return sha256(appId.getBytes(StandardCharsets.UTF_8));
     }
 
     private static byte[] sha256(byte[] data) {

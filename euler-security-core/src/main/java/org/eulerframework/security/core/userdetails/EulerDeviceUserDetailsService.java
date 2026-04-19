@@ -17,12 +17,12 @@
 package org.eulerframework.security.core.userdetails;
 
 
-import org.eulerframework.security.authentication.device.DeviceUser;
+import org.eulerframework.security.authentication.appattest.DeviceAppUser;
 
 /**
  * Service interface for loading and creating user details based on Apple App Attest identities.
  * <p>
- * Implementations are responsible for mapping an {@link DeviceUser} (identified by
+ * Implementations are responsible for mapping an {@link DeviceAppUser} (identified by
  * a device key ID) to the application's user model.
  */
 public interface EulerDeviceUserDetailsService {
@@ -30,11 +30,11 @@ public interface EulerDeviceUserDetailsService {
     /**
      * Load the user associated with the given Apple App Attest identity.
      *
-     * @param deviceUser the validated App Attest user containing the device key ID
+     * @param deviceAppUser the validated App Attest user containing the device key ID
      * @return the user details for the matching user
      * @throws UserDetailsNotFountException if no user is found for the given key ID
      */
-    EulerUserDetails loadUserByDeviceUser(DeviceUser deviceUser) throws UserDetailsNotFountException;
+    EulerUserDetails loadUserByDeviceUser(DeviceAppUser deviceAppUser) throws UserDetailsNotFountException;
 
     /**
      * Create a new user account associated with the given Apple App Attest identity.
@@ -42,8 +42,8 @@ public interface EulerDeviceUserDetailsService {
      * This method is called when auto-user-creation is enabled during the attestation
      * (device registration) flow and no existing user is found.
      *
-     * @param deviceUser the validated App Attest user containing the device key ID
+     * @param deviceAppUser the validated App Attest user containing the device key ID
      * @return the newly created user details
      */
-    EulerUserDetails createUser(DeviceUser deviceUser);
+    EulerUserDetails createUser(DeviceAppUser deviceAppUser);
 }

@@ -43,8 +43,8 @@ import org.springframework.util.Assert;
 
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.NonceService;
-import org.eulerframework.security.authentication.device.DeviceAttestationRegistration;
-import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistration;
+import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistrationService;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 
 /**
@@ -62,11 +62,11 @@ import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
  *       degrades to kid-based lookup.</li>
  *   <li>{@link #verify(String)} — kid-based lookup mode: the PoP JWT header must carry a
  *       {@code kid}, which is used to look up the public key from
- *       {@link DeviceAttestationRegistrationService}.</li>
+ *       {@link DeviceAppAttestationRegistrationService}.</li>
  * </ul>
  * <p>
  * Both methods return a {@link PopVerificationResult} containing the resolved {@code keyId},
- * {@code clientId}, and {@link DeviceAttestationRegistration}.
+ * {@code clientId}, and {@link DeviceAppAttestationRegistration}.
  *
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
  * @see EulerOAuth2AttestationBasedClientAuthenticationFilter
@@ -82,7 +82,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
     private final ChallengeService challengeService;
     private final NonceService nonceService;
 
-    private DeviceAttestationRegistrationService deviceAttestationRegistrationService;
+    private DeviceAppAttestationRegistrationService deviceAppAttestationRegistrationService;
 
 
     public EulerOAuth2ClientAttestationVerifier(ChallengeService challengeService, NonceService nonceService) {
@@ -92,8 +92,8 @@ public final class EulerOAuth2ClientAttestationVerifier {
         this.nonceService = nonceService;
     }
 
-    public void setDeviceAttestRegistrationService(DeviceAttestationRegistrationService deviceAttestationRegistrationService) {
-        this.deviceAttestationRegistrationService = deviceAttestationRegistrationService;
+    public void setDeviceAttestRegistrationService(DeviceAppAttestationRegistrationService deviceAppAttestationRegistrationService) {
+        this.deviceAppAttestationRegistrationService = deviceAppAttestationRegistrationService;
     }
 
     /**
@@ -123,8 +123,8 @@ public final class EulerOAuth2ClientAttestationVerifier {
      * Verify a PoP JWT using kid-based key lookup.
      * <p>
      * The PoP JWT header must carry a {@code kid} which is used to look up the
-     * {@link DeviceAttestationRegistration} and its public key from
-     * {@link DeviceAttestationRegistrationService}.
+     * {@link DeviceAppAttestationRegistration} and its public key from
+     * {@link DeviceAppAttestationRegistrationService}.
      *
      * @param popJwt the PoP JWT (Section 5.2)
      * @return the verification result containing keyId, clientId and registration
@@ -133,10 +133,10 @@ public final class EulerOAuth2ClientAttestationVerifier {
     public PopVerificationResult verify(String popJwt) {
         Assert.hasText(popJwt, "popJwt must not be empty");
 
-        if (this.deviceAttestationRegistrationService == null) {
+        if (this.deviceAppAttestationRegistrationService == null) {
             throw attestationError(
-                    "Single PoP JWT verification mode requires Device Attest registration service; "
-                            + "enable euler.security.device-attest or provide both OAuth-Client-Attestation and OAuth-Client-Attestation-PoP headers");
+                    "Single PoP JWT verification mode requires App Attest registration service; "
+                            + "enable euler.security.app-attest or provide both OAuth-Client-Attestation and OAuth-Client-Attestation-PoP headers");
         }
 
         try {
@@ -148,7 +148,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
                 throw attestationError("PoP JWT missing kid in header");
             }
 
-            DeviceAttestationRegistration registration = this.deviceAttestationRegistrationService.findByKeyId(kid);
+            DeviceAppAttestationRegistration registration = this.deviceAppAttestationRegistrationService.findByKeyId(kid);
             if (registration == null) {
                 throw attestationError("Unknown key_id: " + kid);
             }
@@ -234,16 +234,16 @@ public final class EulerOAuth2ClientAttestationVerifier {
 
     /**
      * Result of Client Attestation PoP verification, containing the resolved key ID,
-     * client ID, and the associated {@link DeviceAttestationRegistration}.
+     * client ID, and the associated {@link DeviceAppAttestationRegistration}.
      *
      * @param keyId        the verified key ID from the PoP JWT header
      * @param clientId     the client ID associated with the key, or {@code null} if not bound
-     * @param registration the {@link DeviceAttestationRegistration} associated with the key,
+     * @param registration the {@link DeviceAppAttestationRegistration} associated with the key,
      *                     or {@code null} if resolved from attestation JWT cnf (future)
      */
     public record PopVerificationResult(
             String keyId,
             @Nullable String clientId,
-            @Nullable DeviceAttestationRegistration registration) {
+            @Nullable DeviceAppAttestationRegistration registration) {
     }
 }

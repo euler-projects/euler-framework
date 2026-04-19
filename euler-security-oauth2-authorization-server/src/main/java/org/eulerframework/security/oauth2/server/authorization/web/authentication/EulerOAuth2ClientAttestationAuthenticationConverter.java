@@ -82,7 +82,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
             // However, if OAuth-Client-Attestation is omitted, the PoP JWT header must carry a verified kid.
             copyOptional(attestationJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION, additionalParams);
             copyRequired(attestationPopJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParams);
-        } else if (EulerOAuth2ClientAttestationType.APP_ATTEST.equals(auth2ClientAttestationType)) {
+        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(auth2ClientAttestationType)) {
             // Unless the App Attest key is regenerated (causing attestation data to change),
             // attestation data is not required since it was already submitted and verified at device registration.
             copyOptional(request, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
