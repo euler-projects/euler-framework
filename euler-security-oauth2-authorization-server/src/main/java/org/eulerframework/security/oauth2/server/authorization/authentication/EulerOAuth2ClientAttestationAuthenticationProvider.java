@@ -116,7 +116,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
         Map<String, Object> additionalParams = clientAuthentication.getAdditionalParameters();
         EulerOAuth2ClientAttestationType auth2ClientAttestationType = (EulerOAuth2ClientAttestationType) additionalParams
-                .get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP_TYPE);
+                .get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
 
         final String resolvedKeyId;
         final String resolvedClientId;
@@ -173,7 +173,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             resolvedKeyId = registration.getKeyId();
             resolvedClientId = registration.getClientId();
         } else {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP_TYPE);
+            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }
 
         if (resolvedClientId == null) {

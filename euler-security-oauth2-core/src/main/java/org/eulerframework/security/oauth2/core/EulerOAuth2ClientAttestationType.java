@@ -30,7 +30,7 @@ public record EulerOAuth2ClientAttestationType(String value) {
     public static final EulerOAuth2ClientAttestationType JWT = new EulerOAuth2ClientAttestationType("jwt");
 
     /**
-     * Apple App Attest Assertion used as PoP.
+     * Apple App Attest used as Client Attestation.
      * When this type is specified, the assertion parameters
      * ({@link EulerOAuth2ParameterNames#KEY_ID},
      * {@link EulerOAuth2ParameterNames#ASSERTION},

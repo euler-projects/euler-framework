@@ -2,7 +2,7 @@
 
 本文档描述 Apple 客户端如何利用 [App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) 能力完成服务端的 Device Attest 注册与认证流程, 实现无账号登录并获取用户级 OAuth2 Token.
 
-> **术语说明**: 服务端的 **Device Attest** 是一个泛化的设备证明机制, 不限于特定平台; Apple **App Attest** 是其客户端实现之一, 基于 `DCAppAttestService` 提供硬件级设备证明. 因此服务端 API 路径使用 `/device/*` 命名, 而请求头 `OAuth-Client-Attestation-PoP-Type: app-attest` 标识具体的客户端证明方式.
+> **术语说明**: 服务端的 **Device Attest** 是一个泛化的设备证明机制, 不限于特定平台; Apple **App Attest** 是其客户端实现之一, 基于 `DCAppAttestService` 提供硬件级设备证明. 因此服务端 API 路径使用 `/device/*` 命名, 而请求头 `OAuth-Client-Attestation-Type: app-attest` 标识具体的客户端证明方式.
 
 整个流程分为两个阶段:
 1. **设备注册 (Attestation)**: 首次使用时, 将设备密钥注册到服务端
@@ -100,7 +100,7 @@ let assertion = try await DCAppAttestService.shared.generateAssertion(keyId, cli
 
 ```http
 POST /oauth2/token
-OAuth-Client-Attestation-PoP-Type: app-attest
+OAuth-Client-Attestation-Type: app-attest
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:device-assertion&kid={keyId}&assertion={Base64编码的Assertion Object}&challenge={challenge}&scope=openid
@@ -110,7 +110,7 @@ grant_type=urn:ietf:params:oauth:grant-type:device-assertion&kid={keyId}&asserti
 
 |头部|值|说明|
 |---|---|---|
-|OAuth-Client-Attestation-PoP-Type|`app-attest`|指定使用 Apple App Attest 作为客户端证明方式|
+|OAuth-Client-Attestation-Type|`app-attest`|指定使用 Apple App Attest 作为客户端证明方式|
 
 **请求体参数:**
 
@@ -170,7 +170,7 @@ sequenceDiagram
     Apple-->>App: Assertion Object (CBOR)
 
     App->>Server: POST /oauth2/token
-    Note right of App: OAuth-Client-Attestation-PoP-Type: app-attest<br/>grant_type=urn:ietf:params:oauth:grant-type:device-assertion<br/>kid=...&assertion=Base64(...)&challenge=...
+    Note right of App: OAuth-Client-Attestation-Type: app-attest<br/>grant_type=urn:ietf:params:oauth:grant-type:device-assertion<br/>kid=...&assertion=Base64(...)&challenge=...
     Server->>Server: 消费 challenge
     Server->>Server: 验证 Assertion (签名验证、sign count 检查)
     Server->>Server: 解析/创建匿名用户

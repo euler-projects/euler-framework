@@ -62,7 +62,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
         // 1. Check for attestation signal
         String attestationJwt = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION);
         String attestationPopJwt = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP);
-        String attestationType = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP_TYPE);
+        String attestationType = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
 
         if (attestationJwt == null && attestationPopJwt == null && attestationType == null) {
             return null;
@@ -74,7 +74,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
 
         // 2. Collect all raw attestation data — no parsing, no DB lookup
         Map<String, Object> additionalParams = new LinkedHashMap<>();
-        additionalParams.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP_TYPE, auth2ClientAttestationType);
+        additionalParams.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE, auth2ClientAttestationType);
 
         if (EulerOAuth2ClientAttestationType.JWT.equals(auth2ClientAttestationType)) {
             // Unlike the draft, we treat OAuth-Client-Attestation as an optional header.

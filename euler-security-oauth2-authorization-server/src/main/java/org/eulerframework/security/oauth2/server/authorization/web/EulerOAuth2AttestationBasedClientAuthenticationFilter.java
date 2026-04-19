@@ -67,7 +67,7 @@ import java.util.Map;
  * </ul>
  * <p>
  * For Scenario A, PoP verification is dispatched by the
- * {@code OAuth-Client-Attestation-PoP-Type} header:
+ * {@code OAuth-Client-Attestation-Type} header:
  * <ul>
  *   <li>{@code jwt} (default) — standard PoP JWT as defined in Section 5.2 of the draft.</li>
  *   <li>{@code app-attest} — Apple App Attest Assertion used as PoP, with parameters

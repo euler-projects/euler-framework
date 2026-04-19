@@ -35,10 +35,10 @@ public final class EulerOAuth2ParameterNames {
     public static final String OAUTH_CLIENT_ATTESTATION_POP = "OAuth-Client-Attestation-PoP";
 
     /**
-     * Custom extension: PoP verification type identifier.
+     * Custom extension: Client Attestation type identifier.
      * Defaults to {@link org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType#JWT} when absent.
      */
-    public static final String OAUTH_CLIENT_ATTESTATION_POP_TYPE = "OAuth-Client-Attestation-PoP-Type";
+    public static final String OAUTH_CLIENT_ATTESTATION_TYPE = "OAuth-Client-Attestation-Type";
 
     public static final String ADDITIONAL_SECURITY_SIGNAL = "additional-security-signal";
 }
