@@ -170,7 +170,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             DeviceAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
 
             resolvedKeyId = registration.getKeyId();
-            resolvedClientId = registration.getClientId();
+            resolvedClientId = registration.getTeamId() + "." + registration.getBundleId();
         } else {
             throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }

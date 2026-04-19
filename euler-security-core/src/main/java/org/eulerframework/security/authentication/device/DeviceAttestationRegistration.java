@@ -36,7 +36,6 @@ public class DeviceAttestationRegistration implements Serializable {
     private final String keyId;
     private final String teamId;
     private final String bundleId;
-    private String clientId;
 
     // Flattened from AttestedCredentialData
     private final byte[] aaguid;
@@ -54,18 +53,9 @@ public class DeviceAttestationRegistration implements Serializable {
                                          byte[] aaguid, byte[] credentialId,
                                          byte[] attestationCertificateChain, byte[] receipt,
                                          PublicKey publicKey, String jwks, long signCount) {
-        this(keyId, teamId, bundleId, teamId + "." + bundleId, aaguid, credentialId,
-                attestationCertificateChain, receipt, publicKey, jwks, signCount);
-    }
-
-    public DeviceAttestationRegistration(String keyId, String teamId, String bundleId, String clientId,
-                                         byte[] aaguid, byte[] credentialId,
-                                         byte[] attestationCertificateChain, byte[] receipt,
-                                         PublicKey publicKey, String jwks, long signCount) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;
-        this.clientId = clientId;
         this.aaguid = aaguid;
         this.credentialId = credentialId;
         this.attestationCertificateChain = attestationCertificateChain;
@@ -85,24 +75,6 @@ public class DeviceAttestationRegistration implements Serializable {
 
     public String getBundleId() {
         return bundleId;
-    }
-
-    /**
-     * Get the OAuth2 client_id associated with this device registration.
-     *
-     * @return the client_id, or {@code null} if not yet bound
-     */
-    public String getClientId() {
-        return clientId;
-    }
-
-    /**
-     * Set the OAuth2 client_id associated with this device registration.
-     *
-     * @param clientId the client_id to bind
-     */
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 
     public byte[] getAaguid() {
