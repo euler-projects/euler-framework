@@ -18,17 +18,15 @@ package org.eulerframework.security.authentication.device;
 
 import org.springframework.util.Assert;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 
 /**
- * Represents a registered Apple App for Apple App Attest validation.
+ * Represents a registered device for device attestation.
  * <p>
- * Each registered app is identified by a combination of {@link #teamId () teamId} and
- * {@link #bundleId () bundleId}, which together form the App ID ({@code teamId.bundleId}).
- * The SHA-256 hash of the App ID is used as the RP ID hash in the App Attest protocol.
+ * Each registered device is identified by a combination of {@link #teamId () teamId} and
+ * {@link #bundleId () bundleId}, which together form the device ID ({@code teamId.bundleId}).
+ * The SHA-256 hash of the device ID is used as the RP ID hash in the Apple App Attest protocol.
  *
- * @see org.eulerframework.security.authentication.device.DeviceRepository
  */
 public record RegisteredDevice(String teamId, String bundleId) implements Serializable {
 
@@ -43,25 +41,7 @@ public record RegisteredDevice(String teamId, String bundleId) implements Serial
         Assert.hasText(bundleId, "bundleId must not be empty");
     }
 
-    /**
-     * Return the Apple Developer Team ID.
-     */
-    @Override
-    public String teamId() {
-        return teamId;
-    }
-
-    /**
-     * Return the iOS app's Bundle ID.
-     */
-    @Override
-    public String bundleId() {
-        return bundleId;
-    }
-
-    @Override
-    @Nonnull
-    public String toString() {
-        return "RegisteredAppleApp{teamId='" + teamId + "', bundleId='" + bundleId + "'}";
+    public String deviceId() {
+        return this.teamId + "." + this.bundleId;
     }
 }

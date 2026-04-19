@@ -143,17 +143,17 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
             // 1. Construct the attestation request
             DCAttestationRequest request = new DCAttestationRequest(keyIdBytes, attestationBytes, clientDataHash);
 
-            // 2. Parse to extract rpIdHash, then look up the registered app
+            // 2. Parse to extract rpIdHash, then look up the registered device
             DCAttestationData parsed = this.deviceCheckManager.parse(request);
             byte[] rpIdHash = parsed.getAttestationObject().getAuthenticatorData().getRpIdHash();
-            RegisteredDevice app = this.deviceRepository.findByDeviceIdHash(rpIdHash);
-            if (app == null) {
+            RegisteredDevice registeredDevice = this.deviceRepository.findByDeviceIdHash(rpIdHash);
+            if (registeredDevice == null) {
                 throw new AuthenticationServiceException("RP ID hash does not match any registered Apple App");
             }
 
             // 3. Construct server property with looked-up teamId + bundleId
             Challenge challengeObj = new DefaultChallenge(challenge.getBytes(StandardCharsets.UTF_8));
-            DCServerProperty serverProperty = new DCServerProperty(app.teamId(), app.bundleId(), challengeObj);
+            DCServerProperty serverProperty = new DCServerProperty(registeredDevice.teamId(), registeredDevice.bundleId(), challengeObj);
             DCAttestationParameters params = new DCAttestationParameters(serverProperty);
 
             // 4. Validate (certificate chain, nonce, AAGUID, credentialId, etc.)
@@ -184,7 +184,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
 
             // 8. Save the registration with flattened data
             DeviceAttestationRegistration registration = new DeviceAttestationRegistration(
-                    keyId, app.teamId(), app.bundleId(),
+                    keyId, registeredDevice.teamId(), registeredDevice.bundleId(),
                     aaguid, credentialId,
                     certChainBytes, receipt,
                     publicKey, jwksJson, 0);

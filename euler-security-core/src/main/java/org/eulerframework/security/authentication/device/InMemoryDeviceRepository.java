@@ -26,22 +26,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/// An in-memory implementation of [DeviceRepository] that stores registered Apple Apps
-/// in a [ConcurrentHashMap] keyed by the hex-encoded SHA-256 hash of the App ID.
+/// An in-memory implementation of [DeviceRepository] that stores registered devices
+/// in a [ConcurrentHashMap] keyed by the hex-encoded SHA-256 hash of the device ID.
 ///
 /// This implementation is suitable for development, testing, or deployments where the
-/// set of registered apps is known at startup and configured via application properties.
-///
-/// @see DeviceRepository
-/// @see RegisteredDevice
+/// set of registered devices is known at startup and configured via application properties.
 public class InMemoryDeviceRepository implements DeviceRepository {
 
-    private final Map<String, RegisteredDevice> appsByHashHex = new ConcurrentHashMap<>();
+    private final Map<String /* Device ID Hash Hex */, RegisteredDevice> devices = new ConcurrentHashMap<>();
 
     /**
-     * Create a new {@code InMemoryAppleAppRepository} with the specified registered apps.
+     * Create a new {@code InMemoryDeviceRepository} with the specified registered devices.
      *
-     * @param registeredDevices the registered Apple Apps
+     * @param registeredDevices the registered devices
      */
     public InMemoryDeviceRepository(RegisteredDevice... registeredDevices) {
         this(Arrays.asList(registeredDevices));
@@ -55,20 +52,20 @@ public class InMemoryDeviceRepository implements DeviceRepository {
     public InMemoryDeviceRepository(List<RegisteredDevice> registeredDevices) {
         Assert.notEmpty(registeredDevices, "registeredDevices must not be empty");
         for (RegisteredDevice device : registeredDevices) {
-            String hexKey = bytesToHex(computeAppIdHash(device));
-            this.appsByHashHex.put(hexKey, device);
+            String deviceIdHashHex = bytesToHex(computeDeviceIdHash(device));
+            this.devices.put(deviceIdHashHex, device);
         }
     }
 
     @Override
     public RegisteredDevice findByDeviceIdHash(byte[] deviceIdHash) {
-        Assert.notNull(deviceIdHash, "appIdHash must not be null");
-        return this.appsByHashHex.get(bytesToHex(deviceIdHash));
+        Assert.notNull(deviceIdHash, "deviceIdHash must not be null");
+        return this.devices.get(bytesToHex(deviceIdHash));
     }
 
-    private static byte[] computeAppIdHash(RegisteredDevice app) {
-        String appId = app.teamId() + "." + app.bundleId();
-        return sha256(appId.getBytes(StandardCharsets.UTF_8));
+    private static byte[] computeDeviceIdHash(RegisteredDevice registeredDevice) {
+        String deviceId = registeredDevice.deviceId();
+        return sha256(deviceId.getBytes(StandardCharsets.UTF_8));
     }
 
     private static byte[] sha256(byte[] data) {
