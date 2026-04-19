@@ -40,7 +40,7 @@ import org.eulerframework.security.oauth2.server.authorization.authentication.OA
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 
 /**
- * Converts HTTP requests for the {@code urn:ietf:params:oauth:grant-type:device-assertion} grant type into
+ * Converts HTTP requests for the {@code urn:ietf:params:oauth:grant-type:device_assertion} grant type into
  * {@link OAuth2DeviceAssertionAuthenticationToken} instances.
  * <p>
  * This converter reads the verified {@code keyId} from a request attribute

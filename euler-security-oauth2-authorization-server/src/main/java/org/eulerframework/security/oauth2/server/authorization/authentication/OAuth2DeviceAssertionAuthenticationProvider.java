@@ -60,7 +60,7 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFountException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 
 /**
- * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:device-assertion} grant type.
+ * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:device_assertion} grant type.
  * <p>
  * This is a <b>thin layer</b> responsible only for anonymous user resolution and
  * token issuance. Assertion/challenge cryptographic verification is performed

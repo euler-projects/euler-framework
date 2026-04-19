@@ -103,7 +103,7 @@ POST /oauth2/token
 OAuth-Client-Attestation-Type: app-attest
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=urn:ietf:params:oauth:grant-type:device-assertion&kid={keyId}&assertion={Base64编码的Assertion Object}&challenge={challenge}&scope=openid
+grant_type=urn:ietf:params:oauth:grant-type:device_assertion&kid={keyId}&assertion={Base64编码的Assertion Object}&challenge={challenge}&scope=openid
 ```
 
 **请求头:**
@@ -116,7 +116,7 @@ grant_type=urn:ietf:params:oauth:grant-type:device-assertion&kid={keyId}&asserti
 
 |参数名|类型|说明|是否必填|
 |---|---|---|---|
-|grant_type|enum|固定为 `urn:ietf:params:oauth:grant-type:device-assertion`|是|
+|grant_type|enum|固定为 `urn:ietf:params:oauth:grant-type:device_assertion`|是|
 |kid|string|设备 Key Identifier (与注册时的 `key_id` 相同)|是|
 |assertion|string|Base64 编码的 Assertion Object|是|
 |challenge|string|步骤 2.1 获取的 challenge 原始值|是|
@@ -170,7 +170,7 @@ sequenceDiagram
     Apple-->>App: Assertion Object (CBOR)
 
     App->>Server: POST /oauth2/token
-    Note right of App: OAuth-Client-Attestation-Type: app-attest<br/>grant_type=urn:ietf:params:oauth:grant-type:device-assertion<br/>kid=...&assertion=Base64(...)&challenge=...
+    Note right of App: OAuth-Client-Attestation-Type: app-attest<br/>grant_type=urn:ietf:params:oauth:grant-type:device_assertion<br/>kid=...&assertion=Base64(...)&challenge=...
     Server->>Server: 消费 challenge
     Server->>Server: 验证 Assertion (签名验证、sign count 检查)
     Server->>Server: 解析/创建匿名用户

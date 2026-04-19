@@ -21,5 +21,5 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 public class EulerAuthorizationGrantType {
     public static final AuthorizationGrantType PASSWORD = new AuthorizationGrantType("password");
     public static final AuthorizationGrantType WECHAT_AUTHORIZATION_CODE = new AuthorizationGrantType("wechat_authorization_code");
-    public static final AuthorizationGrantType DEVICE_ASSERTION = new AuthorizationGrantType("urn:ietf:params:oauth:grant-type:device-assertion");
+    public static final AuthorizationGrantType DEVICE_ASSERTION = new AuthorizationGrantType("urn:ietf:params:oauth:grant-type:device_assertion");
 }

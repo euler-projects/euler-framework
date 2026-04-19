@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Authentication token for the {@code urn:ietf:params:oauth:grant-type:device-assertion} grant type.
+ * Authentication token for the {@code urn:ietf:params:oauth:grant-type:device_assertion} grant type.
  * <p>
  * This token carries the verified {@code keyId} (set by {@code ClientAttestationFilter})
  * and requested scopes. Assertion and challenge validation have already been performed
