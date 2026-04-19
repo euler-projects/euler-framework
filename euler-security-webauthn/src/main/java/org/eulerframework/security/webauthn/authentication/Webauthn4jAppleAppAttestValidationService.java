@@ -37,6 +37,8 @@ import com.webauthn4j.data.attestation.statement.AttestationCertificatePath;
 import com.webauthn4j.data.client.challenge.Challenge;
 import com.webauthn4j.data.client.challenge.DefaultChallenge;
 import org.eulerframework.security.authentication.apple.*;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistration;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -83,14 +85,14 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
 
     private final DeviceCheckManager deviceCheckManager;
     private final AppleAppRepository appRepository;
-    private final AppAttestRegistrationService registrationService;
+    private final DeviceAttestRegistrationService registrationService;
     private final boolean allowDevelopmentEnvironment;
 
     /**
      * Creates a new instance with the given {@link DeviceCheckManager}.
      * <p>
      * Equivalent to calling
-     * {@link #Webauthn4jAppleAppAttestValidationService(DeviceCheckManager, AppleAppRepository, AppAttestRegistrationService, boolean)}
+     * {@link #Webauthn4jAppleAppAttestValidationService(DeviceCheckManager, AppleAppRepository, DeviceAttestRegistrationService, boolean)}
      * with {@code allowDevelopmentEnvironment = false}.
      *
      * @param deviceCheckManager  the device check manager (must not be {@code null})
@@ -100,7 +102,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
      */
     public Webauthn4jAppleAppAttestValidationService(DeviceCheckManager deviceCheckManager,
                                                       AppleAppRepository appRepository,
-                                                      AppAttestRegistrationService registrationService) {
+                                                      DeviceAttestRegistrationService registrationService) {
         this(deviceCheckManager, appRepository, registrationService, false);
     }
 
@@ -118,7 +120,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
      */
     public Webauthn4jAppleAppAttestValidationService(DeviceCheckManager deviceCheckManager,
                                                       AppleAppRepository appRepository,
-                                                      AppAttestRegistrationService registrationService,
+                                                      DeviceAttestRegistrationService registrationService,
                                                       boolean allowDevelopmentEnvironment) {
         Assert.notNull(deviceCheckManager, "deviceCheckManager must not be null");
         Assert.notNull(appRepository, "appRepository must not be null");
@@ -130,7 +132,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
     }
 
     @Override
-    public AppAttestRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException {
+    public DeviceAttestRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException {
         try {
             byte[] keyIdBytes = Base64.getDecoder().decode(keyId);
             byte[] attestationBytes = Base64.getDecoder().decode(attestation);
@@ -179,7 +181,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
             String jwksJson = generateJwksJson(publicKey);
 
             // 8. Save the registration with flattened data
-            AppAttestRegistration registration = new AppAttestRegistration(
+            DeviceAttestRegistration registration = new DeviceAttestRegistration(
                     keyId, app.teamId(), app.bundleId(),
                     aaguid, credentialId,
                     certChainBytes, receipt,
@@ -198,14 +200,14 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
     }
 
     @Override
-    public AppAttestRegistration validateAssertion(String keyId, String assertion, String challenge) throws AuthenticationException {
+    public DeviceAttestRegistration validateAssertion(String keyId, String assertion, String challenge) throws AuthenticationException {
         try {
             byte[] keyIdBytes = Base64.getDecoder().decode(keyId);
             byte[] assertionBytes = Base64.getDecoder().decode(assertion);
             byte[] clientDataHash = sha256(challenge.getBytes(StandardCharsets.UTF_8));
 
             // 1. Load the stored registration
-            AppAttestRegistration reg = this.registrationService.findByKeyId(keyId);
+            DeviceAttestRegistration reg = this.registrationService.findByKeyId(keyId);
             if (reg == null) {
                 throw new AuthenticationServiceException("No registered device found for key ID");
             }
@@ -266,7 +268,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
             }
             throw new AuthenticationServiceException(
                     "Attestation from development environment is not allowed; "
-                            + "set euler.security.app-attest.allow-development-environment=true to allow");
+                            + "set euler.security.device-attest.allow-development-environment=true to allow");
         }
         throw new AuthenticationServiceException("Unrecognized AAGUID in attestation data");
     }

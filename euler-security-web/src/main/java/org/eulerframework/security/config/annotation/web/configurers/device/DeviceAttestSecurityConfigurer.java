@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.config.annotation.web.configurers.apple;
+package org.eulerframework.security.config.annotation.web.configurers.device;
 
 import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationProvider;
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.authentication.apple.AppleAppRepository;
-import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationService;
 import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
-import org.eulerframework.security.web.authentication.apple.AppAttestRegistrationAuthenticationConverter;
-import org.eulerframework.security.web.authentication.apple.AppAttestRegistrationEndpointFilter;
+import org.eulerframework.security.web.authentication.device.DeviceAttestRegistrationAuthenticationConverter;
+import org.eulerframework.security.web.authentication.device.DeviceAttestRegistrationEndpointFilter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -33,7 +33,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
- * An {@link AbstractHttpConfigurer} for Apple App Attest device registration.
+ * An {@link AbstractHttpConfigurer} for device attestation registration.
  * <p>
  * This configurer registers the challenge and registration endpoint filters into
  * the default security filter chain. Both endpoints are anonymous (no authentication
@@ -41,13 +41,13 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  *
  * <h2>Endpoints</h2>
  * <ul>
- *     <li>{@code POST /app/attest/challenge} - generates a one-time challenge</li>
- *     <li>{@code POST /app/attest/register} - validates attestation and registers the device</li>
+ *     <li>{@code POST /device/challenge} - generates a one-time challenge</li>
+ *     <li>{@code POST /device/attest} - validates attestation and registers the device</li>
  * </ul>
  *
  * <h2>Usage Example</h2>
  * <pre>
- * http.with(new AppAttestSecurityConfigurer(), appAttest -&gt; appAttest
+ * http.with(new DeviceAttestSecurityConfigurer(), deviceAttest -&gt; deviceAttest
  *     .challengeService(challengeService)
  *     .appleAppRepository(appleAppRepository)
  *     .registrationService(registrationService)
@@ -56,63 +56,63 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  * </pre>
  *
  * @see ChallengeEndpointFilter
- * @see AppAttestRegistrationEndpointFilter
+ * @see DeviceAttestRegistrationEndpointFilter
  */
-public class AppAttestSecurityConfigurer
-        extends AbstractHttpConfigurer<AppAttestSecurityConfigurer, HttpSecurity> {
+public class DeviceAttestSecurityConfigurer
+        extends AbstractHttpConfigurer<DeviceAttestSecurityConfigurer, HttpSecurity> {
 
     private ChallengeService challengeService;
     private AppleAppAttestValidationService validationService;
     private AppleAppRepository appleAppRepository;
-    private AppAttestRegistrationService registrationService;
+    private DeviceAttestRegistrationService registrationService;
     private EulerAppleAppAttestUserDetailsService userDetailsService;
 
-    private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app/attest/challenge";
+    private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/device/challenge";
 
     private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
-    private String registrationEndpointUri = AppAttestRegistrationEndpointFilter.DEFAULT_REGISTRATION_ENDPOINT_URI;
+    private String registrationEndpointUri = DeviceAttestRegistrationEndpointFilter.DEFAULT_REGISTRATION_ENDPOINT_URI;
 
     private RequestMatcher endpointsMatcher;
 
     // ---- Fluent API ----
 
-    public AppAttestSecurityConfigurer challengeService(ChallengeService challengeService) {
+    public DeviceAttestSecurityConfigurer challengeService(ChallengeService challengeService) {
         this.challengeService = challengeService;
         return this;
     }
 
-    public AppAttestSecurityConfigurer validationService(AppleAppAttestValidationService validationService) {
+    public DeviceAttestSecurityConfigurer validationService(AppleAppAttestValidationService validationService) {
         this.validationService = validationService;
         return this;
     }
 
-    public AppAttestSecurityConfigurer appleAppRepository(AppleAppRepository appleAppRepository) {
+    public DeviceAttestSecurityConfigurer appleAppRepository(AppleAppRepository appleAppRepository) {
         this.appleAppRepository = appleAppRepository;
         return this;
     }
 
-    public AppAttestSecurityConfigurer registrationService(AppAttestRegistrationService registrationService) {
+    public DeviceAttestSecurityConfigurer registrationService(DeviceAttestRegistrationService registrationService) {
         this.registrationService = registrationService;
         return this;
     }
 
-    public AppAttestSecurityConfigurer userDetailsService(EulerAppleAppAttestUserDetailsService userDetailsService) {
+    public DeviceAttestSecurityConfigurer userDetailsService(EulerAppleAppAttestUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
         return this;
     }
 
-    public AppAttestSecurityConfigurer challengeEndpointUri(String challengeEndpointUri) {
+    public DeviceAttestSecurityConfigurer challengeEndpointUri(String challengeEndpointUri) {
         this.challengeEndpointUri = challengeEndpointUri;
         return this;
     }
 
-    public AppAttestSecurityConfigurer registrationEndpointUri(String registrationEndpointUri) {
+    public DeviceAttestSecurityConfigurer registrationEndpointUri(String registrationEndpointUri) {
         this.registrationEndpointUri = registrationEndpointUri;
         return this;
     }
 
     /**
-     * Returns a {@link RequestMatcher} that matches all App Attest endpoints.
+     * Returns a {@link RequestMatcher} that matches all device attest endpoints.
      * This can be used externally to configure additional security rules.
      */
     public RequestMatcher getEndpointsMatcher() {
@@ -124,9 +124,9 @@ public class AppAttestSecurityConfigurer
         // Build endpoint filters to obtain their request matchers
         ChallengeEndpointFilter challengeFilter =
                 new ChallengeEndpointFilter(resolveChallengeService(http), this.challengeEndpointUri);
-        AppAttestRegistrationEndpointFilter registrationFilter =
-                new AppAttestRegistrationEndpointFilter(
-                        new AppAttestRegistrationAuthenticationConverter(),
+        DeviceAttestRegistrationEndpointFilter registrationFilter =
+                new DeviceAttestRegistrationEndpointFilter(
+                        new DeviceAttestRegistrationAuthenticationConverter(),
                         createRegistrationProvider(http),
                         this.registrationEndpointUri);
 
@@ -134,20 +134,20 @@ public class AppAttestSecurityConfigurer
                 challengeFilter.getRequestMatcher(),
                 registrationFilter.getRequestMatcher());
 
-        // Exempt App Attest endpoints from CSRF protection
+        // Exempt device attest endpoints from CSRF protection
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.endpointsMatcher));
 
         // Store filters as shared objects for configure() to retrieve
         http.setSharedObject(ChallengeEndpointFilter.class, challengeFilter);
-        http.setSharedObject(AppAttestRegistrationEndpointFilter.class, registrationFilter);
+        http.setSharedObject(DeviceAttestRegistrationEndpointFilter.class, registrationFilter);
     }
 
     @Override
     public void configure(HttpSecurity http) {
         ChallengeEndpointFilter challengeFilter =
                 http.getSharedObject(ChallengeEndpointFilter.class);
-        AppAttestRegistrationEndpointFilter registrationFilter =
-                http.getSharedObject(AppAttestRegistrationEndpointFilter.class);
+        DeviceAttestRegistrationEndpointFilter registrationFilter =
+                http.getSharedObject(DeviceAttestRegistrationEndpointFilter.class);
 
         http.addFilterBefore(postProcess(challengeFilter), AuthorizationFilter.class);
         http.addFilterBefore(postProcess(registrationFilter), AuthorizationFilter.class);
@@ -155,8 +155,8 @@ public class AppAttestSecurityConfigurer
 
     // ---- Dependency resolution ----
 
-    private AppAttestRegistrationAuthenticationProvider createRegistrationProvider(HttpSecurity http) {
-        return new AppAttestRegistrationAuthenticationProvider(
+    private DeviceAttestRegistrationAuthenticationProvider createRegistrationProvider(HttpSecurity http) {
+        return new DeviceAttestRegistrationAuthenticationProvider(
                 resolveChallengeService(http),
                 resolveValidationService(http),
                 resolveUserDetailsService(http));
@@ -186,12 +186,12 @@ public class AppAttestSecurityConfigurer
         return context.getBean(AppleAppRepository.class);
     }
 
-    private AppAttestRegistrationService resolveRegistrationService(HttpSecurity http) {
+    private DeviceAttestRegistrationService resolveRegistrationService(HttpSecurity http) {
         if (this.registrationService != null) {
             return this.registrationService;
         }
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        return context.getBean(AppAttestRegistrationService.class);
+        return context.getBean(DeviceAttestRegistrationService.class);
     }
 
     private EulerAppleAppAttestUserDetailsService resolveUserDetailsService(HttpSecurity http) {

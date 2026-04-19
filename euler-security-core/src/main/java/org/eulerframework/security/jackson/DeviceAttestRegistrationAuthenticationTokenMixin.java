@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
- * Jackson mixin for {@link org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken}.
+ * Jackson mixin for {@link org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationToken}.
  * <p>
  * Note: The registration endpoint currently does not persist this token to the
  * {@code SecurityContext}; it returns an HTTP JSON response directly. This mixin
@@ -31,7 +31,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonDeserialize(using = AppAttestRegistrationAuthenticationTokenDeserializer.class)
-abstract class AppAttestRegistrationAuthenticationTokenMixin {
+@JsonDeserialize(using = DeviceAttestRegistrationAuthenticationTokenDeserializer.class)
+abstract class DeviceAttestRegistrationAuthenticationTokenMixin {
 
 }

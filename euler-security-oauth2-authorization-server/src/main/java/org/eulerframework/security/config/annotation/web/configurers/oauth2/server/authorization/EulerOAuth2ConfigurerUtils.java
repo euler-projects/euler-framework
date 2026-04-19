@@ -21,7 +21,7 @@ import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.InMemoryChallengeService;
 import org.eulerframework.security.authentication.InMemoryNonceService;
 import org.eulerframework.security.authentication.NonceService;
-import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationService;
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
@@ -141,17 +141,17 @@ final class EulerOAuth2ConfigurerUtils {
     }
 
     /**
-     * Resolve an {@link AppAttestRegistrationService} bean from the {@link ApplicationContext}.
+     * Resolve an {@link DeviceAttestRegistrationService} bean from the {@link ApplicationContext}.
      *
      * @param http the {@link HttpSecurity} to resolve from
      * @return the resolved service
      * @throws IllegalStateException if no bean is found
      */
     @Nullable
-    static AppAttestRegistrationService getAppAttestRegistrationServiceIfAvailable(HttpSecurity http) {
+    static DeviceAttestRegistrationService getDeviceAttestRegistrationServiceIfAvailable(HttpSecurity http) {
         ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
         if (ctx.getBeanNamesForType(AppleAppAttestValidationService.class).length > 0) {
-            return ctx.getBean(AppAttestRegistrationService.class);
+            return ctx.getBean(DeviceAttestRegistrationService.class);
         }
         return null;
     }

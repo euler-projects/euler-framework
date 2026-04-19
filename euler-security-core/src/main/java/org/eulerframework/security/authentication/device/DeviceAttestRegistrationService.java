@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 /**
- * Service interface for storing and retrieving Apple App Attest device registrations.
+ * Service interface for storing and retrieving device attestation registrations.
  * <p>
  * Registrations are created during the attestation (device registration) process
  * and used during assertion (device re-authentication) to verify the device's identity.
  *
- * @see AppAttestRegistration
+ * @see DeviceAttestRegistration
  */
-public interface AppAttestRegistrationService {
+public interface DeviceAttestRegistrationService {
 
     /**
      * Save a registration after successful attestation.
      *
      * @param registration the registration to save
      */
-    void saveRegistration(AppAttestRegistration registration);
+    void saveRegistration(DeviceAttestRegistration registration);
 
     /**
      * Retrieve a registration by its key ID.
@@ -39,7 +39,7 @@ public interface AppAttestRegistrationService {
      * @param keyId the key identifier
      * @return the registration, or {@code null} if not found
      */
-    AppAttestRegistration findByKeyId(String keyId);
+    DeviceAttestRegistration findByKeyId(String keyId);
 
     /**
      * Update the sign count for a registration.

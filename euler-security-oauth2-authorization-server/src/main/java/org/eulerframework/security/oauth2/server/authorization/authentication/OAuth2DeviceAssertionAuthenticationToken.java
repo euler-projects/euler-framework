@@ -26,23 +26,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Authentication token for the {@code apple_app_attest_assertion} grant type.
+ * Authentication token for the {@code urn:ietf:params:oauth:grant-type:device-assertion} grant type.
  * <p>
  * This token carries the verified {@code keyId} (set by {@code ClientAttestationFilter})
  * and requested scopes. Assertion and challenge validation have already been performed
  * by the filter; this grant type is a thin layer responsible only for anonymous user
  * resolution and token issuance.
  */
-public class OAuth2AppleAppAttestAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+public class OAuth2DeviceAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
     private final String keyId;
     private final Set<String> scopes;
 
-    public OAuth2AppleAppAttestAssertionAuthenticationToken(
+    public OAuth2DeviceAssertionAuthenticationToken(
             String keyId,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
-        super(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION, clientPrincipal, additionalParameters);
+        super(EulerAuthorizationGrantType.DEVICE_ASSERTION, clientPrincipal, additionalParameters);
         this.keyId = keyId;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?

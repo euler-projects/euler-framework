@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.web.authentication.apple;
+package org.eulerframework.security.web.authentication.device;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.common.util.jackson.JacksonUtils;
-import org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -42,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A filter that exposes a {@code POST /app/attest/register} endpoint for Apple App Attest
+ * A filter that exposes a {@code POST /device/attest} endpoint for device attestation
  * device registration (attestation).
  * <p>
  * This endpoint is anonymous (no authentication required). The filter uses an
@@ -62,25 +63,25 @@ import java.util.Map;
  * {"key_id": "...", "username": "apple_app_..."}
  * </pre>
  *
- * @see AppAttestRegistrationAuthenticationConverter
- * @see AppAttestRegistrationAuthenticationProvider
+ * @see DeviceAttestRegistrationAuthenticationConverter
+ * @see DeviceAttestRegistrationAuthenticationProvider
  */
-public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
+public class DeviceAttestRegistrationEndpointFilter extends OncePerRequestFilter {
 
-    public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app/attest/register";
+    public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/device/attest";
 
-    private static final Logger logger = LoggerFactory.getLogger(AppAttestRegistrationEndpointFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeviceAttestRegistrationEndpointFilter.class);
 
     private final AuthenticationConverter authenticationConverter;
     private final AuthenticationProvider authenticationProvider;
     private final RequestMatcher requestMatcher;
 
-    public AppAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
+    public DeviceAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
                                                AuthenticationProvider authenticationProvider) {
         this(authenticationConverter, authenticationProvider, DEFAULT_REGISTRATION_ENDPOINT_URI);
     }
 
-    public AppAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
+    public DeviceAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
                                                AuthenticationProvider authenticationProvider,
                                                String endpointUri) {
         Assert.notNull(authenticationConverter, "authenticationConverter must not be null");
@@ -112,16 +113,16 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             }
 
             Authentication result = this.authenticationProvider.authenticate(authRequest);
-            sendSuccessResponse(response, (org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken) result);
+            sendSuccessResponse(response, (DeviceAttestRegistrationAuthenticationToken) result);
         } catch (AuthenticationException ex) {
-            logger.debug("App Attest registration failed: {}", ex.getMessage());
+            logger.debug("Device attestation registration failed: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
                     "registration_failed", ex.getMessage());
         }
     }
 
     private void sendSuccessResponse(HttpServletResponse response,
-                                     org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken result) throws IOException {
+                                     DeviceAttestRegistrationAuthenticationToken result) throws IOException {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());

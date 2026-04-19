@@ -25,7 +25,7 @@ import org.eulerframework.security.oauth2.server.authorization.converter.EulerOA
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2DeviceAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -157,8 +157,8 @@ public class EulerAuthorizationServerConfiguration {
         EulerAppleAppAttestUserDetailsService userDetailsService =
                 EulerOAuth2ConfigurerUtils.getAppleAppAttestUserDetailsServiceIfAvailable(http);
         if (userDetailsService != null) {
-            OAuth2AppleAppAttestAssertionAuthenticationProvider grantProvider =
-                    new OAuth2AppleAppAttestAssertionAuthenticationProvider(
+            OAuth2DeviceAssertionAuthenticationProvider grantProvider =
+                    new OAuth2DeviceAssertionAuthenticationProvider(
                             userDetailsService,
                             OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
                             OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http));
@@ -166,7 +166,7 @@ public class EulerAuthorizationServerConfiguration {
             http.oauth2AuthorizationServer(oauth2 -> oauth2
                     .tokenEndpoint(configurer -> configurer
                             .authenticationProvider(grantProvider)
-                            .accessTokenRequestConverter(new OAuth2AppleAppAttestAssertionAuthenticationConverter())));
+                            .accessTokenRequestConverter(new OAuth2DeviceAssertionAuthenticationConverter())));
         }
     }
 

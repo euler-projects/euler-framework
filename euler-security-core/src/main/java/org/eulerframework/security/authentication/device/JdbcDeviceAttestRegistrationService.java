@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
@@ -24,8 +24,8 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * JDBC implementation of {@link AppAttestRegistrationService} that persists
- * App Attest device registrations in a relational database.
+ * JDBC implementation of {@link DeviceAttestRegistrationService} that persists
+ * device attestation registrations in a relational database.
  * <p>
  * By default, this implementation uses the table {@code app_attest_registration}
  * with the following schema:
@@ -45,10 +45,10 @@ import java.security.spec.X509EncodedKeySpec;
  * );
  * }</pre>
  *
- * @see AppAttestRegistrationService
- * @see InMemoryAppAttestRegistrationService
+ * @see DeviceAttestRegistrationService
+ * @see InMemoryDeviceAttestRegistrationService
  */
-public class JdbcAppAttestRegistrationService implements AppAttestRegistrationService {
+public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistrationService {
 
     // @formatter:off
     private static final String DEFAULT_TABLE_NAME = "app_attest_registration";
@@ -81,21 +81,21 @@ public class JdbcAppAttestRegistrationService implements AppAttestRegistrationSe
     private final String updateSignCountSql;
 
     /**
-     * Create a new {@code JdbcAppAttestRegistrationService} with the default table name.
+     * Create a new {@code JdbcDeviceAttestRegistrationService} with the default table name.
      *
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      */
-    public JdbcAppAttestRegistrationService(JdbcOperations jdbcOperations) {
+    public JdbcDeviceAttestRegistrationService(JdbcOperations jdbcOperations) {
         this(jdbcOperations, DEFAULT_TABLE_NAME);
     }
 
     /**
-     * Create a new {@code JdbcAppAttestRegistrationService} with a custom table name.
+     * Create a new {@code JdbcDeviceAttestRegistrationService} with a custom table name.
      *
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      * @param tableName      the table name to use (must not be empty)
      */
-    public JdbcAppAttestRegistrationService(JdbcOperations jdbcOperations, String tableName) {
+    public JdbcDeviceAttestRegistrationService(JdbcOperations jdbcOperations, String tableName) {
         Assert.notNull(jdbcOperations, "jdbcOperations must not be null");
         Assert.hasText(tableName, "tableName must not be empty");
         this.jdbcOperations = jdbcOperations;
@@ -115,7 +115,7 @@ public class JdbcAppAttestRegistrationService implements AppAttestRegistrationSe
     }
 
     @Override
-    public void saveRegistration(AppAttestRegistration registration) {
+    public void saveRegistration(DeviceAttestRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
         Assert.hasText(registration.getKeyId(), "keyId must not be empty");
         this.jdbcOperations.update(this.insertSql, ps -> {
@@ -135,7 +135,7 @@ public class JdbcAppAttestRegistrationService implements AppAttestRegistrationSe
     }
 
     @Override
-    public AppAttestRegistration findByKeyId(String keyId) {
+    public DeviceAttestRegistration findByKeyId(String keyId) {
         return this.jdbcOperations.query(this.selectSql,
                 ps -> ps.setString(1, keyId),
                 rs -> {
@@ -143,7 +143,7 @@ public class JdbcAppAttestRegistrationService implements AppAttestRegistrationSe
                         return null;
                     }
                     PublicKey publicKey = deserializePublicKey(rs.getBytes(COLUMN_PUBLIC_KEY));
-                    return new AppAttestRegistration(
+                    return new DeviceAttestRegistration(
                             rs.getString(COLUMN_KEY_ID),
                             rs.getString(COLUMN_TEAM_ID),
                             rs.getString(COLUMN_BUNDLE_ID),
@@ -167,7 +167,7 @@ public class JdbcAppAttestRegistrationService implements AppAttestRegistrationSe
     /**
      * Deserialize a public key from its X.509 encoded form.
      * <p>
-     * App Attest uses EC keys on the P-256 curve.
+     * Device attestation typically uses EC keys on the P-256 curve.
      */
     private static PublicKey deserializePublicKey(byte[] encoded) {
         try {

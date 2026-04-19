@@ -36,12 +36,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationToken;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2DeviceAssertionAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 
 /**
- * Converts HTTP requests for the {@code apple_app_attest_assertion} grant type into
- * {@link OAuth2AppleAppAttestAssertionAuthenticationToken} instances.
+ * Converts HTTP requests for the {@code urn:ietf:params:oauth:grant-type:device-assertion} grant type into
+ * {@link OAuth2DeviceAssertionAuthenticationToken} instances.
  * <p>
  * This converter reads the verified {@code keyId} from a request attribute
  * ({@link EulerOAuth2AttestationBasedClientAuthenticationFilter#ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE}) set by
@@ -52,7 +52,7 @@ import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2At
  * {@code challenge}) are no longer extracted here — they are consumed by
  * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter} during PoP verification.
  */
-public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements AuthenticationConverter {
+public class OAuth2DeviceAssertionAuthenticationConverter implements AuthenticationConverter {
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
     @Override
@@ -61,7 +61,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
 
         // grant_type (REQUIRED)
         String grantType = parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE);
-        if (!EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION.getValue().equals(grantType)) {
+        if (!EulerAuthorizationGrantType.DEVICE_ASSERTION.getValue().equals(grantType)) {
             return null;
         }
 
@@ -96,7 +96,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationConverter implements Aut
             }
         });
 
-        return new OAuth2AppleAppAttestAssertionAuthenticationToken(
+        return new OAuth2DeviceAssertionAuthenticationToken(
                 keyId,
                 clientPrincipal,
                 scopes,

@@ -38,7 +38,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import org.eulerframework.security.authentication.apple.AppAttestRegistration;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistration;
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
@@ -140,7 +140,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                 throw new OAuth2AuthenticationException(
                         new OAuth2Error(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,
                                 "APP_ATTEST attestation type is not supported; "
-                                        + "enable euler.security.app-attest to use this attestation type", null));
+                                        + "enable euler.security.device-attest to use this attestation type", null));
             }
 
             String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.KEY_ID);
@@ -168,7 +168,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                 throw invalidClientAttestation(EulerOAuth2ParameterNames.CHALLENGE);
             }
 
-            AppAttestRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
+            DeviceAttestRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
 
             resolvedKeyId = registration.getKeyId();
             resolvedClientId = registration.getClientId();

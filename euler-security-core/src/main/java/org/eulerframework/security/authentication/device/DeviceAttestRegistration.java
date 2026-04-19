@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 import java.io.Serializable;
 import java.security.PublicKey;
 
 /**
- * Represents a registered Apple App Attest device, containing the flattened attestation
+ * Represents a registered device attestation, containing the flattened attestation
  * data, public key, JWKSet, and current sign count.
  * <p>
  * Created during the attestation (device registration) flow and used during assertion
@@ -29,9 +29,9 @@ import java.security.PublicKey;
  * All attestation-specific fields are stored as primitive/JDK types for JDBC persistence
  * friendliness, avoiding direct coupling to any third-party validation library.
  *
- * @see AppAttestRegistrationService
+ * @see DeviceAttestRegistrationService
  */
-public class AppAttestRegistration implements Serializable {
+public class DeviceAttestRegistration implements Serializable {
 
     private final String keyId;
     private final String teamId;
@@ -50,7 +50,7 @@ public class AppAttestRegistration implements Serializable {
     private final String jwks;
     private long signCount;
 
-    public AppAttestRegistration(String keyId, String teamId, String bundleId,
+    public DeviceAttestRegistration(String keyId, String teamId, String bundleId,
                                  byte[] aaguid, byte[] credentialId,
                                  byte[] attestationCertificateChain, byte[] receipt,
                                  PublicKey publicKey, String jwks, long signCount) {
@@ -58,7 +58,7 @@ public class AppAttestRegistration implements Serializable {
                 attestationCertificateChain, receipt, publicKey, jwks, signCount);
     }
 
-    public AppAttestRegistration(String keyId, String teamId, String bundleId, String clientId,
+    public DeviceAttestRegistration(String keyId, String teamId, String bundleId, String clientId,
                                  byte[] aaguid, byte[] credentialId,
                                  byte[] attestationCertificateChain, byte[] receipt,
                                  PublicKey publicKey, String jwks, long signCount) {

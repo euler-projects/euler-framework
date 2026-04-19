@@ -85,7 +85,7 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
     /**
      * Request attribute name for the verified key ID.
      * Set by this filter after successful attestation verification; read by downstream
-     * converters (e.g., {@code OAuth2AppleAppAttestAssertionAuthenticationConverter}).
+     * converters (e.g., {@code OAuth2DeviceAssertionAuthenticationConverter}).
      */
     public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "attestation.verified.key_id";
 

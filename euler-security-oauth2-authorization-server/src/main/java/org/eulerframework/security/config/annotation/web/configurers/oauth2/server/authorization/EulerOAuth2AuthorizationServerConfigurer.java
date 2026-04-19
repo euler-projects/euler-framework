@@ -17,16 +17,11 @@ package org.eulerframework.security.config.annotation.web.configurers.oauth2.ser
 
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.NonceService;
-import org.eulerframework.security.authentication.apple.AppAttestRegistrationService;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationService;
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
-import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
-import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppleAppAttestAssertionAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppleAppAttestAssertionAuthenticationConverter;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -142,10 +137,10 @@ public class EulerOAuth2AuthorizationServerConfigurer
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.challengeEndpointMatcher));
 
         // Apple App Attest support for Attestation Based Client Authentication
-        AppAttestRegistrationService registrationService =
-                EulerOAuth2ConfigurerUtils.getAppAttestRegistrationServiceIfAvailable(http);
+        DeviceAttestRegistrationService registrationService =
+                EulerOAuth2ConfigurerUtils.getDeviceAttestRegistrationServiceIfAvailable(http);
         if (registrationService != null) {
-            attestProvider.getOauth2ClientAttestationVerifier().setAppAttestRegistrationService(registrationService);
+            attestProvider.getOauth2ClientAttestationVerifier().setDeviceAttestRegistrationService(registrationService);
         }
 
         AppleAppAttestValidationService appleAppAttestValidationService =

@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.web.authentication.apple;
+package org.eulerframework.security.web.authentication.device;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
 
 /**
  * Extracts {@code key_id}, {@code attestation}, and {@code challenge} parameters from
- * an HTTP request and constructs an {@link org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken}.
+ * an HTTP request and constructs a {@link DeviceAttestRegistrationAuthenticationToken}.
  * <p>
  * Returns {@code null} if any required parameter is missing, indicating the request
- * is not an App Attest registration request.
+ * is not a device attestation registration request.
  */
-public class AppAttestRegistrationAuthenticationConverter implements AuthenticationConverter {
+public class DeviceAttestRegistrationAuthenticationConverter implements AuthenticationConverter {
 
     private static final String PARAM_KEY_ID = "key_id";
     private static final String PARAM_ATTESTATION = "attestation";
@@ -44,6 +45,6 @@ public class AppAttestRegistrationAuthenticationConverter implements Authenticat
             return null;
         }
 
-        return org.eulerframework.security.authentication.apple.AppAttestRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challenge);
+        return DeviceAttestRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challenge);
     }
 }

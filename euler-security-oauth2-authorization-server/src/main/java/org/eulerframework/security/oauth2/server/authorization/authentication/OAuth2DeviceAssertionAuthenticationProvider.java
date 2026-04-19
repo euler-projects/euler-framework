@@ -31,13 +31,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClaimAccessor;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -62,7 +60,7 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFountException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 
 /**
- * Authentication provider for the {@code apple_app_attest_assertion} grant type.
+ * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:device-assertion} grant type.
  * <p>
  * This is a <b>thin layer</b> responsible only for anonymous user resolution and
  * token issuance. Assertion/challenge cryptographic verification is performed
@@ -73,13 +71,15 @@ import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
  *   <li>Retrieve the already-authenticated {@code RegisteredClient}.</li>
  *   <li>Validate the grant type and requested scopes.</li>
  *   <li>Load or create an anonymous user via {@link EulerAppleAppAttestUserDetailsService}.</li>
- *   <li>Generate Access Token, Refresh Token (if applicable), and ID Token (if openid scope).</li>
+ *   <li>Generate Access Token and ID Token (if openid scope). No Refresh Token is issued
+ *       because every token request already requires full device attestation, making
+ *       refresh tokens redundant.</li>
  * </ol>
  */
-public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements AuthenticationProvider {
+public class OAuth2DeviceAssertionAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
-    private final Logger logger = LoggerFactory.getLogger(OAuth2AppleAppAttestAssertionAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuth2DeviceAssertionAuthenticationProvider.class);
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
@@ -89,7 +89,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
 
     private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
-    public OAuth2AppleAppAttestAssertionAuthenticationProvider(
+    public OAuth2DeviceAssertionAuthenticationProvider(
             EulerAppleAppAttestUserDetailsService userDetailsService,
             OAuth2AuthorizationService authorizationService,
             OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
@@ -108,8 +108,8 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2AppleAppAttestAssertionAuthenticationToken assertionAuthenticationToken =
-                (OAuth2AppleAppAttestAssertionAuthenticationToken) authentication;
+        OAuth2DeviceAssertionAuthenticationToken assertionAuthenticationToken =
+                (OAuth2DeviceAssertionAuthenticationToken) authentication;
 
         OAuth2ClientAuthenticationToken clientPrincipal =
                 OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(assertionAuthenticationToken);
@@ -119,7 +119,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
-        if (!registeredClient.getAuthorizationGrantTypes().contains(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION)) {
+        if (!registeredClient.getAuthorizationGrantTypes().contains(EulerAuthorizationGrantType.DEVICE_ASSERTION)) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
         }
 
@@ -147,7 +147,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
-                .authorizationGrantType(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION)
+                .authorizationGrantType(EulerAuthorizationGrantType.DEVICE_ASSERTION)
                 .authorizedScopes(authorizedScopes)
                 .attribute(Principal.class.getName(), userPrincipal);
 
@@ -155,7 +155,7 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
                 .registeredClient(registeredClient)
                 .principal(userPrincipal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .authorizationGrantType(EulerAuthorizationGrantType.APPLE_APP_ATTEST_ASSERTION)
+                .authorizationGrantType(EulerAuthorizationGrantType.DEVICE_ASSERTION)
                 .authorizedScopes(authorizedScopes)
                 .authorizationGrant(assertionAuthenticationToken);
 
@@ -182,28 +182,10 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
             authorizationBuilder.accessToken(accessToken);
         }
 
-        // ----- Refresh token -----
-        OAuth2RefreshToken refreshToken = null;
-        if (registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)) {
-            tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.REFRESH_TOKEN).build();
-            OAuth2Token generatedRefreshToken = this.tokenGenerator.generate(tokenContext);
-            if (generatedRefreshToken != null) {
-                if (!(generatedRefreshToken instanceof OAuth2RefreshToken)) {
-                    OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
-                            "The token generator failed to generate a valid refresh token.", ERROR_URI);
-                    throw new OAuth2AuthenticationException(error);
-                }
-
-                if (this.logger.isTraceEnabled()) {
-                    this.logger.trace("Generated refresh token");
-                }
-
-                refreshToken = (OAuth2RefreshToken) generatedRefreshToken;
-                authorizationBuilder.refreshToken(refreshToken);
-            }
-        }
-
         // ----- ID token -----
+        // NOTE: No refresh token is generated for device-assertion grant.
+        // Each token request requires full attestation verification (kid + assertion + challenge),
+        // so a refresh token provides no additional security benefit.
         OidcIdToken idToken;
         if (tokenContext.getAuthorizedScopes().contains(OidcScopes.OPENID)) {
             // @formatter:off
@@ -241,15 +223,15 @@ public class OAuth2AppleAppAttestAssertionAuthenticationProvider implements Auth
         }
 
         return new OAuth2AccessTokenAuthenticationToken(
-                registeredClient, clientPrincipal, accessToken, refreshToken, additionalParameters);
+                registeredClient, clientPrincipal, accessToken, null, additionalParameters);
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return OAuth2AppleAppAttestAssertionAuthenticationToken.class.isAssignableFrom(authentication);
+        return OAuth2DeviceAssertionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2AppleAppAttestAssertionAuthenticationToken authenticationToken,
+    private void validateScope(OAuth2DeviceAssertionAuthenticationToken authenticationToken,
                                RegisteredClient registeredClient) {
         Set<String> requestedScopes = authenticationToken.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();

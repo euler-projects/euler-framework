@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,10 +23,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Authentication token for App Attest registration (attestation) requests.
+ * Authentication token for device attestation registration requests.
  * Contains keyId, attestation data, and challenge.
  */
-public class AppAttestRegistrationAuthenticationToken extends AbstractAuthenticationToken {
+public class DeviceAttestRegistrationAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String keyId;
     private final String attestation;
@@ -36,7 +36,7 @@ public class AppAttestRegistrationAuthenticationToken extends AbstractAuthentica
     /**
      * Create an unauthenticated token.
      */
-    AppAttestRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
+    DeviceAttestRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
         super(Collections.emptyList());
         this.keyId = keyId;
         this.attestation = attestation;
@@ -48,7 +48,7 @@ public class AppAttestRegistrationAuthenticationToken extends AbstractAuthentica
     /**
      * Create an authenticated token.
      */
-    AppAttestRegistrationAuthenticationToken(Object principal, String keyId,
+    DeviceAttestRegistrationAuthenticationToken(Object principal, String keyId,
                                                      Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
@@ -61,16 +61,16 @@ public class AppAttestRegistrationAuthenticationToken extends AbstractAuthentica
     /**
      * Creates an unauthenticated token containing the attestation data.
      */
-    public static AppAttestRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
-        return new AppAttestRegistrationAuthenticationToken(keyId, attestation, challenge);
+    public static DeviceAttestRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
+        return new DeviceAttestRegistrationAuthenticationToken(keyId, attestation, challenge);
     }
 
     /**
      * Creates an authenticated token with the resolved principal and authorities.
      */
-    public static AppAttestRegistrationAuthenticationToken authenticated(Object principal, String keyId,
+    public static DeviceAttestRegistrationAuthenticationToken authenticated(Object principal, String keyId,
                                                                           Collection<? extends GrantedAuthority> authorities) {
-        return new AppAttestRegistrationAuthenticationToken(principal, keyId, authorities);
+        return new DeviceAttestRegistrationAuthenticationToken(principal, keyId, authorities);
     }
 
     @Override
