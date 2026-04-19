@@ -23,22 +23,22 @@ import java.util.Objects;
 /**
  * Represents a validated device anonymous user identified by their key ID.
  */
-public class DeviceAttestationUser implements Serializable {
+public class DeviceUser implements Serializable {
 
     private final String keyId;
     private final String teamId;
     private final String bundleId;
     private final PublicKey publicKey;
 
-    public DeviceAttestationUser(String keyId) {
+    public DeviceUser(String keyId) {
         this(keyId, null, null, null);
     }
 
-    public DeviceAttestationUser(String keyId, PublicKey publicKey) {
+    public DeviceUser(String keyId, PublicKey publicKey) {
         this(keyId, null, null, publicKey);
     }
 
-    public DeviceAttestationUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
+    public DeviceUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;
@@ -65,7 +65,7 @@ public class DeviceAttestationUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DeviceAttestationUser that = (DeviceAttestationUser) o;
+        DeviceUser that = (DeviceUser) o;
         return Objects.equals(keyId, that.keyId);
     }
 

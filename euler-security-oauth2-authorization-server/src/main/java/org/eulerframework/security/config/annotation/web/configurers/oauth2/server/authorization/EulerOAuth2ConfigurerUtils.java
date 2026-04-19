@@ -22,8 +22,8 @@ import org.eulerframework.security.authentication.InMemoryChallengeService;
 import org.eulerframework.security.authentication.InMemoryNonceService;
 import org.eulerframework.security.authentication.NonceService;
 import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
-import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.core.userdetails.EulerDeviceAttestationUserDetailsService;
+import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
@@ -173,17 +173,17 @@ final class EulerOAuth2ConfigurerUtils {
     }
 
     /**
-     * Resolve an {@link EulerDeviceAttestationUserDetailsService} bean from the {@link ApplicationContext},
+     * Resolve an {@link EulerDeviceUserDetailsService} bean from the {@link ApplicationContext},
      * or return {@code null} if no such bean is available.
      *
      * @param http the {@link HttpSecurity} to resolve from
      * @return the resolved service, or {@code null} if not available
      */
     @Nullable
-    static EulerDeviceAttestationUserDetailsService getAppleAppAttestUserDetailsServiceIfAvailable(HttpSecurity http) {
+    static EulerDeviceUserDetailsService getAppleAppAttestUserDetailsServiceIfAvailable(HttpSecurity http) {
         ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
-        if (ctx.getBeanNamesForType(EulerDeviceAttestationUserDetailsService.class).length > 0) {
-            return ctx.getBean(EulerDeviceAttestationUserDetailsService.class);
+        if (ctx.getBeanNamesForType(EulerDeviceUserDetailsService.class).length > 0) {
+            return ctx.getBean(EulerDeviceUserDetailsService.class);
         }
         return null;
     }

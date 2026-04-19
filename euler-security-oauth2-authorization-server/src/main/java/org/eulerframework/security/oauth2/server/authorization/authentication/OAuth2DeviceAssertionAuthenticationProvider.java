@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eulerframework.security.authentication.device.DeviceAttestationUser;
+import org.eulerframework.security.authentication.device.DeviceUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.util.Assert;
 
-import org.eulerframework.security.core.userdetails.EulerDeviceAttestationUserDetailsService;
+import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 
@@ -70,7 +70,7 @@ import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
  * <ol>
  *   <li>Retrieve the already-authenticated {@code RegisteredClient}.</li>
  *   <li>Validate the grant type and requested scopes.</li>
- *   <li>Load or create an anonymous user via {@link EulerDeviceAttestationUserDetailsService}.</li>
+ *   <li>Load or create an anonymous user via {@link EulerDeviceUserDetailsService}.</li>
  *   <li>Generate Access Token and ID Token (if openid scope). No Refresh Token is issued
  *       because every token request already requires full device attestation, making
  *       refresh tokens redundant.</li>
@@ -83,14 +83,14 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
-    private final EulerDeviceAttestationUserDetailsService userDetailsService;
+    private final EulerDeviceUserDetailsService userDetailsService;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
     private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
     public OAuth2DeviceAssertionAuthenticationProvider(
-            EulerDeviceAttestationUserDetailsService userDetailsService,
+            EulerDeviceUserDetailsService userDetailsService,
             OAuth2AuthorizationService authorizationService,
             OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
@@ -128,10 +128,10 @@ public class OAuth2DeviceAssertionAuthenticationProvider implements Authenticati
 
         // Resolve anonymous user by keyId
         String keyId = assertionAuthenticationToken.getKeyId();
-        DeviceAttestationUser attestUser = new DeviceAttestationUser(keyId);
+        DeviceUser attestUser = new DeviceUser(keyId);
         UserDetails user;
         try {
-            user = this.userDetailsService.loadUserByAppleAppAttestUser(attestUser);
+            user = this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFountException e) {
             // First-time use: auto-create anonymous user
             if (this.logger.isDebugEnabled()) {

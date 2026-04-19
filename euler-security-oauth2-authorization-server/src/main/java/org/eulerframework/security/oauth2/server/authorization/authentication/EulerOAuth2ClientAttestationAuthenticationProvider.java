@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import org.eulerframework.security.authentication.device.DeviceAttestationRegistration;
-import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;

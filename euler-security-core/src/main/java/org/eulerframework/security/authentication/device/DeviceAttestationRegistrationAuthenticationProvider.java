@@ -17,8 +17,8 @@
 package org.eulerframework.security.authentication.device;
 
 import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.core.userdetails.EulerDeviceAttestationUserDetailsService;
+import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import javax.annotation.Nonnull;
  * <ol>
  *     <li>Consumes the one-time challenge via {@link ChallengeService}</li>
  *     <li>Delegates attestation validation to {@link AppleAppAttestValidationService#validateAttestation}</li>
- *     <li>Loads or creates the user via {@link EulerDeviceAttestationUserDetailsService}</li>
+ *     <li>Loads or creates the user via {@link EulerDeviceUserDetailsService}</li>
  * </ol>
  *
  * @see DeviceAttestationRegistrationAuthenticationToken
@@ -51,11 +51,11 @@ public class DeviceAttestationRegistrationAuthenticationProvider implements Auth
 
     private final ChallengeService challengeService;
     private final AppleAppAttestValidationService validationService;
-    private final EulerDeviceAttestationUserDetailsService userDetailsService;
+    private final EulerDeviceUserDetailsService userDetailsService;
 
     public DeviceAttestationRegistrationAuthenticationProvider(ChallengeService challengeService,
                                                                AppleAppAttestValidationService validationService,
-                                                               EulerDeviceAttestationUserDetailsService userDetailsService) {
+                                                               EulerDeviceUserDetailsService userDetailsService) {
         Assert.notNull(challengeService, "challengeService must not be null");
         Assert.notNull(validationService, "validationService must not be null");
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
@@ -86,7 +86,7 @@ public class DeviceAttestationRegistrationAuthenticationProvider implements Auth
             logger.debug("Device attestation registration succeeded for keyId: {}", keyId);
 
             // 3. Load or create the user
-            DeviceAttestationUser attestUser = new DeviceAttestationUser(
+            DeviceUser attestUser = new DeviceUser(
                     keyId, registration.getTeamId(), registration.getBundleId(), registration.getPublicKey());
             UserDetails user = loadOrCreateUser(attestUser);
 
@@ -99,9 +99,9 @@ public class DeviceAttestationRegistrationAuthenticationProvider implements Auth
         }
     }
 
-    private UserDetails loadOrCreateUser(DeviceAttestationUser attestUser) {
+    private UserDetails loadOrCreateUser(DeviceUser attestUser) {
         try {
-            return this.userDetailsService.loadUserByAppleAppAttestUser(attestUser);
+            return this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFountException ex) {
             logger.debug("No existing user found for keyId '{}', creating new user", attestUser.getKeyId());
             return this.userDetailsService.createUser(attestUser);

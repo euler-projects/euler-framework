@@ -17,11 +17,11 @@
 package org.eulerframework.security.config.annotation.web.configurers.device;
 
 import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationAuthenticationProvider;
 import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
 import org.eulerframework.security.authentication.device.DeviceRepository;
-import org.eulerframework.security.core.userdetails.EulerDeviceAttestationUserDetailsService;
+import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
 import org.eulerframework.security.web.authentication.device.DeviceAttestRegistrationAuthenticationConverter;
 import org.eulerframework.security.web.authentication.device.DeviceAttestRegistrationEndpointFilter;
@@ -65,7 +65,7 @@ public class DeviceAttestSecurityConfigurer
     private AppleAppAttestValidationService validationService;
     private DeviceRepository deviceRepository;
     private DeviceAttestationRegistrationService registrationService;
-    private EulerDeviceAttestationUserDetailsService userDetailsService;
+    private EulerDeviceUserDetailsService userDetailsService;
 
     private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/device/challenge";
 
@@ -96,7 +96,7 @@ public class DeviceAttestSecurityConfigurer
         return this;
     }
 
-    public DeviceAttestSecurityConfigurer userDetailsService(EulerDeviceAttestationUserDetailsService userDetailsService) {
+    public DeviceAttestSecurityConfigurer userDetailsService(EulerDeviceUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
         return this;
     }
@@ -194,11 +194,11 @@ public class DeviceAttestSecurityConfigurer
         return context.getBean(DeviceAttestationRegistrationService.class);
     }
 
-    private EulerDeviceAttestationUserDetailsService resolveUserDetailsService(HttpSecurity http) {
+    private EulerDeviceUserDetailsService resolveUserDetailsService(HttpSecurity http) {
         if (this.userDetailsService != null) {
             return this.userDetailsService;
         }
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        return context.getBean(EulerDeviceAttestationUserDetailsService.class);
+        return context.getBean(EulerDeviceUserDetailsService.class);
     }
 }

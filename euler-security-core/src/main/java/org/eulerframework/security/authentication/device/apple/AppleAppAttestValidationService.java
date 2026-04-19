@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device.apple;
 
 import org.eulerframework.security.authentication.device.DeviceAttestationRegistration;
 import org.springframework.security.core.AuthenticationException;

@@ -16,7 +16,7 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.core.userdetails.EulerDeviceAttestationUserDetailsService;
+import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.authentication.*;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
@@ -151,7 +151,7 @@ public class EulerAuthorizationServerConfiguration {
                 )
         );
 
-        EulerDeviceAttestationUserDetailsService userDetailsService =
+        EulerDeviceUserDetailsService userDetailsService =
                 EulerOAuth2ConfigurerUtils.getAppleAppAttestUserDetailsServiceIfAvailable(http);
         if (userDetailsService != null) {
             OAuth2DeviceAssertionAuthenticationProvider grantProvider =

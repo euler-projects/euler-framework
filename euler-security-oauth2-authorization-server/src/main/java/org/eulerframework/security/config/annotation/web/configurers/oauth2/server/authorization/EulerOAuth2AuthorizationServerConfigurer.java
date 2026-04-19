@@ -17,7 +17,7 @@ package org.eulerframework.security.config.annotation.web.configurers.oauth2.ser
 
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
-import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.authentication.device.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
