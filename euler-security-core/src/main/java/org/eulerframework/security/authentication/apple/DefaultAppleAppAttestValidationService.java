@@ -25,12 +25,17 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.Assert;
 import tools.jackson.dataformat.cbor.CBORMapper;
 
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWKSet;
+
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.Signature;
 import java.security.cert.*;
+import java.security.interfaces.ECPublicKey;
 import java.util.*;
 
 /**
@@ -62,7 +67,7 @@ import java.util.*;
  */
 public class DefaultAppleAppAttestValidationService implements AppleAppAttestValidationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultAppleAppAttestValidationService.class);
+    private final Logger logger = LoggerFactory.getLogger(DefaultAppleAppAttestValidationService.class);
 
     /**
      * OID of the Apple credential certificate extension containing the nonce.
@@ -116,7 +121,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
     /**
      * Create a new instance with an {@link AppleAppRepository} for multi-app support.
      *
-     * @param appRepository                the repository of registered Apple Apps
+     * @param appRepository                   the repository of registered Apple Apps
      * @param deviceAttestRegistrationService the service for storing and retrieving key credentials
      */
     public DefaultAppleAppAttestValidationService(AppleAppRepository appRepository,
@@ -233,14 +238,24 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                         "Sign count must be 0 for attestation");
             }
 
+            // Step 8: Encode the certificate chain as PkiPath
+            byte[] certChainBytes = cf.generateCertPath(certificates).getEncoded();
+
+            // Step 9: Extract the receipt from the attestation statement
+            byte[] receipt = (byte[]) attStmt.get("receipt");
+
+            // Step 10: Generate JWK Set JSON from the EC public key
+            ECPublicKey ecPublicKey = (ECPublicKey) certificates.get(0).getPublicKey();
+            String jwksJson = new JWKSet(new ECKey.Builder(Curve.P_256, ecPublicKey).build()).toString();
+
             if (logger.isDebugEnabled()) {
                 logger.debug("Apple App Attest validation succeeded for keyId: {}", keyId);
             }
             DeviceAttestRegistration registration = new DeviceAttestRegistration(
                     keyId, app.teamId(), app.bundleId(),
                     aaguid, credentialId,
-                    null, null,
-                    certificates.get(0).getPublicKey(), null, 0);
+                    certChainBytes, receipt,
+                    ecPublicKey, jwksJson, 0);
             this.deviceAttestRegistrationService.saveRegistration(registration);
 
             logger.debug("Apple App Attest attestation validation succeeded for keyId: {}", keyId);
@@ -249,6 +264,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
+            this.logger.error("Apple App Attest attestation validation failed {}", e.getMessage(), e);
             throw new AuthenticationServiceException("Apple App Attest attestation validation failed", e);
         }
     }

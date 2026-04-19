@@ -31,9 +31,15 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Required for Apple App Attest Validation -->
         <dependency>
             <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-cbor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
             <optional>true</optional>
         </dependency>
 
