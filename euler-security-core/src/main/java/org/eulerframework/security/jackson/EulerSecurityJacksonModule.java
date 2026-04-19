@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationAuthenticationToken;
 import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
@@ -34,7 +34,7 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         builder.allowIfSubType(EulerUserDetails.class)
                 .allowIfSubType(EulerGrantedAuthority.class)
                 .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class)
-                .allowIfSubType(DeviceAttestRegistrationAuthenticationToken.class);
+                .allowIfSubType(DeviceAttestationRegistrationAuthenticationToken.class);
 
     }
 
@@ -47,7 +47,7 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         // Registration token is not currently persisted to SecurityContext (the endpoint
         // returns an HTTP JSON response directly), but mixin is registered for
         // forward-compatibility in case session persistence is added later.
-        context.setMixIn(DeviceAttestRegistrationAuthenticationToken.class,
-                DeviceAttestRegistrationAuthenticationTokenMixin.class);
+        context.setMixIn(DeviceAttestationRegistrationAuthenticationToken.class,
+                DeviceAttestationRegistrationAuthenticationTokenMixin.class);
     }
 }

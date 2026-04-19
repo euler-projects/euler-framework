@@ -21,8 +21,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.common.util.jackson.JacksonUtils;
-import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationProvider;
-import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -64,7 +64,7 @@ import java.util.Map;
  * </pre>
  *
  * @see DeviceAttestRegistrationAuthenticationConverter
- * @see DeviceAttestRegistrationAuthenticationProvider
+ * @see DeviceAttestationRegistrationAuthenticationProvider
  */
 public class DeviceAttestRegistrationEndpointFilter extends OncePerRequestFilter {
 
@@ -113,7 +113,7 @@ public class DeviceAttestRegistrationEndpointFilter extends OncePerRequestFilter
             }
 
             Authentication result = this.authenticationProvider.authenticate(authRequest);
-            sendSuccessResponse(response, (DeviceAttestRegistrationAuthenticationToken) result);
+            sendSuccessResponse(response, (DeviceAttestationRegistrationAuthenticationToken) result);
         } catch (AuthenticationException ex) {
             logger.debug("Device attestation registration failed: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
@@ -122,7 +122,7 @@ public class DeviceAttestRegistrationEndpointFilter extends OncePerRequestFilter
     }
 
     private void sendSuccessResponse(HttpServletResponse response,
-                                     DeviceAttestRegistrationAuthenticationToken result) throws IOException {
+                                     DeviceAttestationRegistrationAuthenticationToken result) throws IOException {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());

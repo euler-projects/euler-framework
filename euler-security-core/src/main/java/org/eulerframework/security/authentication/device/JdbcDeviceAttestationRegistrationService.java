@@ -24,13 +24,13 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * JDBC implementation of {@link DeviceAttestRegistrationService} that persists
+ * JDBC implementation of {@link DeviceAttestationRegistrationService} that persists
  * device attestation registrations in a relational database.
  * <p>
- * By default, this implementation uses the table {@code app_attest_registration}
+ * By default, this implementation uses the table {@code device_attestation_registration}
  * with the following schema:
  * <pre>{@code
- * CREATE TABLE app_attest_registration (
+ * CREATE TABLE device_attestation_registration (
  *     key_id                        VARCHAR(255)  NOT NULL PRIMARY KEY,
  *     team_id                       VARCHAR(255)  NOT NULL,
  *     bundle_id                     VARCHAR(255)  NOT NULL,
@@ -45,13 +45,13 @@ import java.security.spec.X509EncodedKeySpec;
  * );
  * }</pre>
  *
- * @see DeviceAttestRegistrationService
- * @see InMemoryDeviceAttestRegistrationService
+ * @see DeviceAttestationRegistrationService
+ * @see InMemoryDeviceAttestationRegistrationService
  */
-public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistrationService {
+public class JdbcDeviceAttestationRegistrationService implements DeviceAttestationRegistrationService {
 
     // @formatter:off
-    private static final String DEFAULT_TABLE_NAME = "app_attest_registration";
+    private static final String DEFAULT_TABLE_NAME = "device_attestation_registration";
 
     private static final String COLUMN_KEY_ID                        = "key_id";
     private static final String COLUMN_TEAM_ID                       = "team_id";
@@ -85,7 +85,7 @@ public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistra
      *
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      */
-    public JdbcDeviceAttestRegistrationService(JdbcOperations jdbcOperations) {
+    public JdbcDeviceAttestationRegistrationService(JdbcOperations jdbcOperations) {
         this(jdbcOperations, DEFAULT_TABLE_NAME);
     }
 
@@ -95,7 +95,7 @@ public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistra
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      * @param tableName      the table name to use (must not be empty)
      */
-    public JdbcDeviceAttestRegistrationService(JdbcOperations jdbcOperations, String tableName) {
+    public JdbcDeviceAttestationRegistrationService(JdbcOperations jdbcOperations, String tableName) {
         Assert.notNull(jdbcOperations, "jdbcOperations must not be null");
         Assert.hasText(tableName, "tableName must not be empty");
         this.jdbcOperations = jdbcOperations;
@@ -115,7 +115,7 @@ public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistra
     }
 
     @Override
-    public void saveRegistration(DeviceAttestRegistration registration) {
+    public void saveRegistration(DeviceAttestationRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
         Assert.hasText(registration.getKeyId(), "keyId must not be empty");
         this.jdbcOperations.update(this.insertSql, ps -> {
@@ -135,7 +135,7 @@ public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistra
     }
 
     @Override
-    public DeviceAttestRegistration findByKeyId(String keyId) {
+    public DeviceAttestationRegistration findByKeyId(String keyId) {
         return this.jdbcOperations.query(this.selectSql,
                 ps -> ps.setString(1, keyId),
                 rs -> {
@@ -143,7 +143,7 @@ public class JdbcDeviceAttestRegistrationService implements DeviceAttestRegistra
                         return null;
                     }
                     PublicKey publicKey = deserializePublicKey(rs.getBytes(COLUMN_PUBLIC_KEY));
-                    return new DeviceAttestRegistration(
+                    return new DeviceAttestationRegistration(
                             rs.getString(COLUMN_KEY_ID),
                             rs.getString(COLUMN_TEAM_ID),
                             rs.getString(COLUMN_BUNDLE_ID),

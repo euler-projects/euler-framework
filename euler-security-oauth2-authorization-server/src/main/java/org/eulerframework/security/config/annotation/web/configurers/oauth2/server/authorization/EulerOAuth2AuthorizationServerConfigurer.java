@@ -16,8 +16,7 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.NonceService;
-import org.eulerframework.security.authentication.device.DeviceAttestRegistrationService;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
 import org.eulerframework.security.authentication.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
@@ -27,14 +26,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import java.util.List;
 
 /**
  * An {@link AbstractHttpConfigurer} for OAuth 2.0 Attestation-Based Client Authentication
@@ -137,7 +133,7 @@ public class EulerOAuth2AuthorizationServerConfigurer
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.challengeEndpointMatcher));
 
         // Apple App Attest support for Attestation Based Client Authentication
-        DeviceAttestRegistrationService registrationService =
+        DeviceAttestationRegistrationService registrationService =
                 EulerOAuth2ConfigurerUtils.getDeviceAttestRegistrationServiceIfAvailable(http);
         if (registrationService != null) {
             attestProvider.getOauth2ClientAttestationVerifier().setDeviceAttestRegistrationService(registrationService);

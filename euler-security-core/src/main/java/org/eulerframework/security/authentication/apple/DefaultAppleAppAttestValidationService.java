@@ -16,8 +16,10 @@
 
 package org.eulerframework.security.authentication.apple;
 
-import org.eulerframework.security.authentication.device.DeviceAttestRegistration;
-import org.eulerframework.security.authentication.device.DeviceAttestRegistrationService;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistration;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationService;
+import org.eulerframework.security.authentication.device.DeviceRepository;
+import org.eulerframework.security.authentication.device.RegisteredDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -112,25 +114,25 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                     "-----END CERTIFICATE-----";
 
     private final CBORMapper cborMapper = new CBORMapper();
-    private final AppleAppRepository appRepository;
+    private final DeviceRepository appRepository;
     private final X509Certificate rootCertificate;
-    private final DeviceAttestRegistrationService deviceAttestRegistrationService;
+    private final DeviceAttestationRegistrationService deviceAttestationRegistrationService;
     private volatile boolean allowDevelopmentEnvironment = false;
     private boolean revocationEnabled = false;
 
     /**
-     * Create a new instance with an {@link AppleAppRepository} for multi-app support.
+     * Create a new instance with an {@link DeviceRepository} for multi-app support.
      *
-     * @param appRepository                   the repository of registered Apple Apps
-     * @param deviceAttestRegistrationService the service for storing and retrieving key credentials
+     * @param deviceRepository                     the repository of registered Apple Apps
+     * @param deviceAttestationRegistrationService the service for storing and retrieving key credentials
      */
-    public DefaultAppleAppAttestValidationService(AppleAppRepository appRepository,
-                                                  DeviceAttestRegistrationService deviceAttestRegistrationService) {
-        Assert.notNull(appRepository, "appRepository must not be null");
-        Assert.notNull(deviceAttestRegistrationService, "deviceAttestRegistrationService must not be null");
-        this.appRepository = appRepository;
+    public DefaultAppleAppAttestValidationService(DeviceRepository deviceRepository,
+                                                  DeviceAttestationRegistrationService deviceAttestationRegistrationService) {
+        Assert.notNull(deviceRepository, "deviceRepository must not be null");
+        Assert.notNull(deviceAttestationRegistrationService, "deviceAttestRegistrationService must not be null");
+        this.appRepository = deviceRepository;
         this.rootCertificate = loadRootCertificate();
-        this.deviceAttestRegistrationService = deviceAttestRegistrationService;
+        this.deviceAttestationRegistrationService = deviceAttestationRegistrationService;
     }
 
     /**
@@ -159,7 +161,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
     @Override
     @SuppressWarnings("unchecked")
-    public DeviceAttestRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException {
+    public DeviceAttestationRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException {
         try {
             // Step 1: Base64-decode and CBOR-decode the attestation object
             byte[] attestationBytes = Base64.getDecoder().decode(attestation);
@@ -217,7 +219,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
             // Step 5: Look up the registered Apple App by RP ID hash
             byte[] rpIdHash = Arrays.copyOfRange(authData, 0, 32);
-            RegisteredAppleApp app = this.appRepository.findByAppIdHash(rpIdHash);
+            RegisteredDevice app = this.appRepository.findByDeviceIdHash(rpIdHash);
             if (app == null) {
                 throw new AuthenticationServiceException(
                         "RP ID hash does not match any registered Apple App");
@@ -251,12 +253,12 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
             if (logger.isDebugEnabled()) {
                 logger.debug("Apple App Attest validation succeeded for keyId: {}", keyId);
             }
-            DeviceAttestRegistration registration = new DeviceAttestRegistration(
+            DeviceAttestationRegistration registration = new DeviceAttestationRegistration(
                     keyId, app.teamId(), app.bundleId(),
                     aaguid, credentialId,
                     certChainBytes, receipt,
                     ecPublicKey, jwksJson, 0);
-            this.deviceAttestRegistrationService.saveRegistration(registration);
+            this.deviceAttestationRegistrationService.saveRegistration(registration);
 
             logger.debug("Apple App Attest attestation validation succeeded for keyId: {}", keyId);
 
@@ -271,11 +273,11 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
     @Override
     @SuppressWarnings("unchecked")
-    public DeviceAttestRegistration validateAssertion(String keyId, String assertion, String challenge) throws AuthenticationException {
+    public DeviceAttestationRegistration validateAssertion(String keyId, String assertion, String challenge) throws AuthenticationException {
         try {
             // Step 1: Load the stored key credential
-            DeviceAttestRegistration appAttestRegistration = this.deviceAttestRegistrationService.findByKeyId(keyId);
-            if (appAttestRegistration == null) {
+            DeviceAttestationRegistration deviceAttestationRegistration = this.deviceAttestationRegistrationService.findByKeyId(keyId);
+            if (deviceAttestationRegistration == null) {
                 throw new AuthenticationServiceException("No registered key credential found for key ID");
             }
 
@@ -295,7 +297,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
             // Step 3: Look up the registered Apple App by RP ID hash
             byte[] rpIdHash = Arrays.copyOfRange(authenticatorData, 0, 32);
-            RegisteredAppleApp app = this.appRepository.findByAppIdHash(rpIdHash);
+            RegisteredDevice app = this.appRepository.findByDeviceIdHash(rpIdHash);
             if (app == null) {
                 throw new AuthenticationServiceException(
                         "RP ID hash does not match any registered Apple App");
@@ -304,7 +306,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
             // Step 4: Verify the sign count is greater than the stored challenge
             int counter = ByteBuffer.wrap(authenticatorData, 33, 4).getInt();
             long unsignedCounter = Integer.toUnsignedLong(counter);
-            if (unsignedCounter <= appAttestRegistration.getSignCount()) {
+            if (unsignedCounter <= deviceAttestationRegistration.getSignCount()) {
                 throw new AuthenticationServiceException("Sign count not incremented, possible replay attack");
             }
 
@@ -318,20 +320,20 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
             // Verify the signature over the nonce using the stored public key
             Signature sig = Signature.getInstance("SHA256withECDSA");
-            sig.initVerify(appAttestRegistration.getPublicKey());
+            sig.initVerify(deviceAttestationRegistration.getPublicKey());
             sig.update(nonce);
             if (!sig.verify(signature)) {
                 throw new AuthenticationServiceException("Assertion signature verification failed");
             }
 
             // Step 6: Update the stored sign count
-            this.deviceAttestRegistrationService.updateSignCount(keyId, unsignedCounter);
+            this.deviceAttestationRegistrationService.updateSignCount(keyId, unsignedCounter);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Apple App Attest assertion validation succeeded for keyId: {}", keyId);
             }
 
-            return appAttestRegistration;
+            return deviceAttestationRegistration;
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {

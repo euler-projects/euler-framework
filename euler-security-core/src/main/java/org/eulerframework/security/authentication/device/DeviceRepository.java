@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 /**
  * Repository for managing registered Apple Apps used in Apple App Attest validation.
@@ -23,9 +23,9 @@ package org.eulerframework.security.authentication.apple;
  * ({@code teamId.bundleId}), since the attestation and assertion authenticator data
  * only contains the RP ID hash, not the original App ID.
  *
- * @see RegisteredAppleApp
+ * @see RegisteredDevice
  */
-public interface AppleAppRepository {
+public interface DeviceRepository {
 
     /**
      * Find a registered Apple App by the SHA-256 hash of its App ID.
@@ -34,8 +34,8 @@ public interface AppleAppRepository {
      * authenticator data contains only the RP ID hash (SHA-256 of App ID), so this method
      * enables lookup without knowing the original App ID.
      *
-     * @param appIdHash the SHA-256 hash of the App ID (32 bytes)
+     * @param deviceIdHash the SHA-256 hash of the App ID (32 bytes)
      * @return the registered Apple App, or {@code null} if no matching app is found
      */
-    RegisteredAppleApp findByAppIdHash(byte[] appIdHash);
+    RegisteredDevice findByDeviceIdHash(byte[] deviceIdHash);
 }

@@ -16,9 +16,7 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.authentication.ChallengeService;
-import org.eulerframework.security.authentication.NonceService;
-import org.eulerframework.security.core.userdetails.EulerAppleAppAttestUserDetailsService;
+import org.eulerframework.security.core.userdetails.EulerDeviceAttestationUserDetailsService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.authentication.*;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
@@ -33,7 +31,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
@@ -154,7 +151,7 @@ public class EulerAuthorizationServerConfiguration {
                 )
         );
 
-        EulerAppleAppAttestUserDetailsService userDetailsService =
+        EulerDeviceAttestationUserDetailsService userDetailsService =
                 EulerOAuth2ConfigurerUtils.getAppleAppAttestUserDetailsServiceIfAvailable(http);
         if (userDetailsService != null) {
             OAuth2DeviceAssertionAuthenticationProvider grantProvider =

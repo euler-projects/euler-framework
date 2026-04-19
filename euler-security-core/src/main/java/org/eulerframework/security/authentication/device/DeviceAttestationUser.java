@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.Objects;
 
 /**
- * Represents a validated Apple App Attest user identified by their key ID.
- * <p>
- * This object is produced by {@link AppleAppAttestValidationService} after successful
- * attestation validation and is used by the authentication providers
- * to look up or create the corresponding user account.
+ * Represents a validated device anonymous user identified by their key ID.
  */
-public class AppleAppAttestUser implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class DeviceAttestationUser implements Serializable {
 
     private final String keyId;
     private final String teamId;
     private final String bundleId;
     private final PublicKey publicKey;
 
-    public AppleAppAttestUser(String keyId) {
+    public DeviceAttestationUser(String keyId) {
         this(keyId, null, null, null);
     }
 
-    public AppleAppAttestUser(String keyId, PublicKey publicKey) {
+    public DeviceAttestationUser(String keyId, PublicKey publicKey) {
         this(keyId, null, null, publicKey);
     }
 
-    public AppleAppAttestUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
+    public DeviceAttestationUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;
@@ -70,7 +65,7 @@ public class AppleAppAttestUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AppleAppAttestUser that = (AppleAppAttestUser) o;
+        DeviceAttestationUser that = (DeviceAttestationUser) o;
         return Objects.equals(keyId, that.keyId);
     }
 
@@ -81,6 +76,6 @@ public class AppleAppAttestUser implements Serializable {
 
     @Override
     public String toString() {
-        return "AppleAppAttestUser{keyId='" + keyId + "', teamId='" + teamId + "', bundleId='" + bundleId + "'}";
+        return "DeviceAttestationUser{keyId='" + keyId + "', teamId='" + teamId + "', bundleId='" + bundleId + "'}";
     }
 }

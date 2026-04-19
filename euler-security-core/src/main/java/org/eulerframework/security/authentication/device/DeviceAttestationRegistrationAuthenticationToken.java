@@ -26,7 +26,7 @@ import java.util.Collections;
  * Authentication token for device attestation registration requests.
  * Contains keyId, attestation data, and challenge.
  */
-public class DeviceAttestRegistrationAuthenticationToken extends AbstractAuthenticationToken {
+public class DeviceAttestationRegistrationAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String keyId;
     private final String attestation;
@@ -36,7 +36,7 @@ public class DeviceAttestRegistrationAuthenticationToken extends AbstractAuthent
     /**
      * Create an unauthenticated token.
      */
-    DeviceAttestRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
+    DeviceAttestationRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
         super(Collections.emptyList());
         this.keyId = keyId;
         this.attestation = attestation;
@@ -48,7 +48,7 @@ public class DeviceAttestRegistrationAuthenticationToken extends AbstractAuthent
     /**
      * Create an authenticated token.
      */
-    DeviceAttestRegistrationAuthenticationToken(Object principal, String keyId,
+    DeviceAttestationRegistrationAuthenticationToken(Object principal, String keyId,
                                                      Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
@@ -61,16 +61,16 @@ public class DeviceAttestRegistrationAuthenticationToken extends AbstractAuthent
     /**
      * Creates an unauthenticated token containing the attestation data.
      */
-    public static DeviceAttestRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
-        return new DeviceAttestRegistrationAuthenticationToken(keyId, attestation, challenge);
+    public static DeviceAttestationRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
+        return new DeviceAttestationRegistrationAuthenticationToken(keyId, attestation, challenge);
     }
 
     /**
      * Creates an authenticated token with the resolved principal and authorities.
      */
-    public static DeviceAttestRegistrationAuthenticationToken authenticated(Object principal, String keyId,
-                                                                          Collection<? extends GrantedAuthority> authorities) {
-        return new DeviceAttestRegistrationAuthenticationToken(principal, keyId, authorities);
+    public static DeviceAttestationRegistrationAuthenticationToken authenticated(Object principal, String keyId,
+                                                                                 Collection<? extends GrantedAuthority> authorities) {
+        return new DeviceAttestationRegistrationAuthenticationToken(principal, keyId, authorities);
     }
 
     @Override

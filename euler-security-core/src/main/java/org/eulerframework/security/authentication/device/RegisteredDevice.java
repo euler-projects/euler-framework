@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eulerframework.security.authentication.apple;
+package org.eulerframework.security.authentication.device;
 
 import org.springframework.util.Assert;
 
@@ -28,9 +28,9 @@ import java.io.Serializable;
  * {@link #bundleId () bundleId}, which together form the App ID ({@code teamId.bundleId}).
  * The SHA-256 hash of the App ID is used as the RP ID hash in the App Attest protocol.
  *
- * @see AppleAppRepository
+ * @see org.eulerframework.security.authentication.device.DeviceRepository
  */
-public record RegisteredAppleApp(String teamId, String bundleId) implements Serializable {
+public record RegisteredDevice(String teamId, String bundleId) implements Serializable {
 
     /**
      * Create a new {@code RegisteredAppleApp} with the specified Team ID and Bundle ID.
@@ -38,7 +38,7 @@ public record RegisteredAppleApp(String teamId, String bundleId) implements Seri
      * @param teamId   the Apple Developer Team ID (10-character string)
      * @param bundleId the iOS app's Bundle ID (e.g. {@code com.example.myapp})
      */
-    public RegisteredAppleApp {
+    public RegisteredDevice {
         Assert.hasText(teamId, "teamId must not be empty");
         Assert.hasText(bundleId, "bundleId must not be empty");
     }

@@ -29,9 +29,9 @@ import java.security.PublicKey;
  * All attestation-specific fields are stored as primitive/JDK types for JDBC persistence
  * friendliness, avoiding direct coupling to any third-party validation library.
  *
- * @see DeviceAttestRegistrationService
+ * @see DeviceAttestationRegistrationService
  */
-public class DeviceAttestRegistration implements Serializable {
+public class DeviceAttestationRegistration implements Serializable {
 
     private final String keyId;
     private final String teamId;
@@ -50,18 +50,18 @@ public class DeviceAttestRegistration implements Serializable {
     private final String jwks;
     private long signCount;
 
-    public DeviceAttestRegistration(String keyId, String teamId, String bundleId,
-                                 byte[] aaguid, byte[] credentialId,
-                                 byte[] attestationCertificateChain, byte[] receipt,
-                                 PublicKey publicKey, String jwks, long signCount) {
+    public DeviceAttestationRegistration(String keyId, String teamId, String bundleId,
+                                         byte[] aaguid, byte[] credentialId,
+                                         byte[] attestationCertificateChain, byte[] receipt,
+                                         PublicKey publicKey, String jwks, long signCount) {
         this(keyId, teamId, bundleId, teamId + "." + bundleId, aaguid, credentialId,
                 attestationCertificateChain, receipt, publicKey, jwks, signCount);
     }
 
-    public DeviceAttestRegistration(String keyId, String teamId, String bundleId, String clientId,
-                                 byte[] aaguid, byte[] credentialId,
-                                 byte[] attestationCertificateChain, byte[] receipt,
-                                 PublicKey publicKey, String jwks, long signCount) {
+    public DeviceAttestationRegistration(String keyId, String teamId, String bundleId, String clientId,
+                                         byte[] aaguid, byte[] credentialId,
+                                         byte[] attestationCertificateChain, byte[] receipt,
+                                         PublicKey publicKey, String jwks, long signCount) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;

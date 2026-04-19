@@ -16,7 +16,7 @@
 
 package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.authentication.device.DeviceAttestRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.device.DeviceAttestationRegistrationAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.type.TypeReference;
@@ -29,20 +29,20 @@ import tools.jackson.databind.node.MissingNode;
 import java.util.Collection;
 
 /**
- * Jackson deserializer for {@link DeviceAttestRegistrationAuthenticationToken}.
+ * Jackson deserializer for {@link DeviceAttestationRegistrationAuthenticationToken}.
  * <p>
  * Note: The registration endpoint currently does not persist this token to the
  * {@code SecurityContext}; it returns an HTTP JSON response directly. This
  * deserializer is provided for forward-compatibility in case the token needs
- * to be serialised in the future (e.g. session persistence, event logging).
+ * to be serialized in the future (e.g. session persistence, event logging).
  */
-public class DeviceAttestRegistrationAuthenticationTokenDeserializer extends ValueDeserializer<DeviceAttestRegistrationAuthenticationToken> {
+public class DeviceAttestationRegistrationAuthenticationTokenDeserializer extends ValueDeserializer<DeviceAttestationRegistrationAuthenticationToken> {
 
     private static final TypeReference<Collection<GrantedAuthority>> GRANTED_AUTHORITY_COLLECTION = new TypeReference<>() {
     };
 
     @Override
-    public DeviceAttestRegistrationAuthenticationToken deserialize(tools.jackson.core.JsonParser jp, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
+    public DeviceAttestationRegistrationAuthenticationToken deserialize(tools.jackson.core.JsonParser jp, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
         JsonNode jsonNode = ctxt.readTree(jp);
         boolean authenticated = readJsonNode(jsonNode, "authenticated").asBoolean();
         JsonNode principalNode = readJsonNode(jsonNode, "principal");
@@ -51,13 +51,13 @@ public class DeviceAttestRegistrationAuthenticationTokenDeserializer extends Val
         JsonNode authoritiesNode = readJsonNode(jsonNode, "authorities");
         Collection<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
                 ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_COLLECTION));
-        DeviceAttestRegistrationAuthenticationToken token;
+        DeviceAttestationRegistrationAuthenticationToken token;
         if (!authenticated) {
             String attestation = readJsonNode(jsonNode, "attestation").asString();
             String challengeId = readJsonNode(jsonNode, "challengeId").asString();
-            token = DeviceAttestRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challengeId);
+            token = DeviceAttestationRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challengeId);
         } else {
-            token = DeviceAttestRegistrationAuthenticationToken.authenticated(principal, keyId, authorities);
+            token = DeviceAttestationRegistrationAuthenticationToken.authenticated(principal, keyId, authorities);
         }
         JsonNode detailsNode = readJsonNode(jsonNode, "details");
         if (detailsNode.isNull() || detailsNode.isMissingNode()) {
