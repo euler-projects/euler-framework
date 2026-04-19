@@ -193,7 +193,7 @@ sequenceDiagram
 ## 注意事项
 
 * 每个 challenge 只能使用一次, 有效期5分钟, 过期或已使用的 challenge 会被拒绝
-* `AccessToken` 有效期较短 (目前5分钟), 过期后应重新执行阶段二 Assertion 流程获取新 Token
+* `AccessToken` 过期后应重新执行阶段二 Assertion 流程获取新 Token
 * 阶段一的注册只需执行一次, App 应在 Keychain 中持久化 Key ID
 * 如果设备密钥丢失或需要重新注册, 需重新执行完整的阶段一流程
 
