@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A filter that exposes a {@code POST /device/register} endpoint for device attestation
+ * A filter that exposes a {@code POST /app_attest/register} endpoint for device attestation
  * device registration (attestation).
  * <p>
  * This endpoint is anonymous (no authentication required). The filter uses an
@@ -69,7 +69,7 @@ import java.util.Map;
  */
 public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
 
-    public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/device/register";
+    public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app_attest/register";
 
     private static final Logger logger = LoggerFactory.getLogger(AppAttestRegistrationEndpointFilter.class);
 

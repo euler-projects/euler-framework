@@ -1,12 +1,14 @@
 # Apple App Attest 接入文档
 
-本文档描述 Apple 客户端如何利用 [App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) 能力完成服务端的 App Attest 注册与认证流程, 实现无账号登录并获取用户级 OAuth2 Token.
-
-> **术语说明**: 服务端的 **App Attest** 是一个跨平台的设备证明机制; 在 iOS 和 iPad OS 等 Apple 平台, 使用 **Apple App Attest**, 提供基于 `DCAppAttestService` 的硬件级设备证明. 因此服务端 API 路径使用 `/device/*` 命名, 而请求头 `OAuth-Client-Attestation-Type: apple_app_attest` 标识具体的客户端证明方式.
+本文档描述 Apple Native App 如何利用 [Apple App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) 能力完成服务端的 App Attest 注册与 OAuth2 认证流程, 实现无账号登录并获取用户级 OAuth2 Token.
 
 整个流程分为两个阶段:
 1. **设备注册 (App Attestation)**: 首次使用时, 将设备密钥注册到服务端
 2. **获取/续期 Token (App Assertion)**: 通过设备私钥签名证明身份, 获取用户级 Token
+
+> 阶段一通过 `App Attest` 机制完成, `App Attest` 是一个跨平台的应用证明机制, 可以证明应用运行在一台真实的设备上, 并且可以让服务端安全地取应用在该设备上的唯一标识, 无需担心是否被篡改. 而在 Apple 平台上, 可以使用 Apple 官方提供的 `Apple App Attest` 能力完成服务端 `App Attest`.
+
+> 阶段二通过 `Attestation-Based Client Authentication` 完成客户端校验, 但在 Apple 平台上, 不使用标准的 `Attestation JWT` + `Attestation PoP JWT`, 而是使用 `Apple App Attest` 的 `Assertion` 代替, 因此需要在请求头 `OAuth-Client-Attestation-Type: apple_app_attest` 标识具体的应用证明方式.
 
 > **安全须知**: 所有敏感数据(Key ID、Token等)均应使用 Keychain 存储,
 > **切勿**使用 `UserDefaults`、`plist` 或其他明文方式存储任何敏感信息, 因为这些存储方式在越狱设备上可被轻易读取.
@@ -16,13 +18,11 @@
 ## 阶段一: 设备注册 (App Attestation)
 
 > 仅在首次使用时执行一次. 设备注册成功后, 后续直接进入阶段二获取Token.
->
-> 以下 `/device/*` 端点是服务端 App Attest 的通用接口, Apple 客户端通过 Apple App Attest 与之交互.
 
 ### 1.1 获取 Challenge
 
 ```http
-POST /device/challenge
+POST /app_attest/challenge
 ```
 
 无需认证, 无需请求体.
@@ -44,7 +44,7 @@ let attestation = try await DCAppAttestService.shared.attestKey(keyId, clientDat
 ### 1.3 注册设备
 
 ```http
-POST /device/register
+POST /app_attest/register
 Content-Type: application/x-www-form-urlencoded
 
 key_id={keyId}&attestation={Base64编码的Attestation Object}&challenge={challenge}
@@ -70,9 +70,10 @@ key_id={keyId}&attestation={Base64编码的Attestation Object}&challenge={challe
 
 ## 阶段二: 获取 OAuth2 Token (App Assertion)
 
-> 设备注册成功后, 通过 App Assertion 获取初始 Token.
->
-> **续期策略**: 该 grant type 不签发 `refresh_token`. Token 过期后直接重新执行 App Assertion 流程获取新 Token. 原因: 每次请求都需要完整的 `attest_jwt_client_auth` 验证 (kid + assertion + challenge), `refresh_token` 不提供额外安全价值.
+> 设备注册成功后, 通过 App Assertion 获取 Access Token.
+
+> **续期策略**: 该 grant type 不签发 `refresh_token`. Token 过期后直接重新执行 App Assertion 流程获取新 Token. 
+> 原因: 每次请求 `/oauht2/token` 接口都需要跟初始获取一样携带 `Attestation-Based Client Authentication` 要求的请求头证明客户端身份, `refresh_token` 无法提供额外的安全价值, 反而增加存储和验证开销.
 
 ### 2.1 获取 Challenge
 
@@ -133,6 +134,13 @@ grant_type=urn:ietf:params:oauth:grant-type:app_assertion&kid={keyId}&assertion=
 
 > Token响应格式详见 [OAuth2 Token 接口文档](APIs-%23-OAuth2-Grant.md#response)
 
+
+## 2.4 续期 Token
+
+该 grant type 不签发 `refresh_token`. Token 过期后直接重新执行 2.1 到 2.3 的 Assertion 流程 (获取 challenge → 生成 Assertion → 请求 Token)
+
+> 原因: 每次请求 `/oauht2/token` 接口都需要跟初始获取一样携带 `Attestation-Based Client Authentication` 要求的请求头证明客户端身份, `refresh_token` 无法提供额外的安全价值, 反而增加存储和验证开销.
+
 ---
 
 ## 完整时序图
@@ -145,14 +153,14 @@ sequenceDiagram
 
     Note over App,Server: 阶段一: 设备注册 (仅首次)
     App->>App: DCAppAttestService.generateKey()
-    App->>Server: POST /device/challenge
+    App->>Server: POST /app_attest/challenge
     Server-->>App: {"challenge": "..."}
 
     App->>App: SHA256(challenge) 计算 clientDataHash
     App->>Apple: attestKey(keyId, clientDataHash)
     Apple-->>App: Attestation Object (CBOR)
 
-    App->>Server: POST /device/register
+    App->>Server: POST /app_attest/register
     Note right of App: key_id=...&attestation=Base64(...)&challenge=...
     Server->>Server: 消费 challenge
     Server->>Server: 验证 Attestation (证书链、Nonce、AAGUID等)
@@ -182,14 +190,6 @@ sequenceDiagram
 
 ---
 
-## Token 续期策略
-
- 重新执行阶段二 Assertion 流程 (获取 challenge → 生成 Assertion → 请求 Token)
-
-> 该 grant type **不签发 `refresh_token`**. 因为每次 token 请求都需要完整的 attestation 验证 (kid + assertion + challenge), `refresh_token` 不提供额外安全价值, 反而增加存储和验证开销.
-
----
-
 ## 注意事项
 
 * 每个 challenge 只能使用一次, 有效期5分钟, 过期或已使用的 challenge 会被拒绝
@@ -197,7 +197,8 @@ sequenceDiagram
 * 阶段一的注册只需执行一次, App 应在 Keychain 中持久化 Key ID
 * 如果设备密钥丢失或需要重新注册, 需重新执行完整的阶段一流程
 
-## Apple 官方文档
+## 相关文档
 
 * [Establishing Your App's Integrity](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity)
 * [Validating Apps That Connect to Your Server](https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server)
+* [OAuth 2.0 Attestation-Based Client Authentication (Draft）](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-08)

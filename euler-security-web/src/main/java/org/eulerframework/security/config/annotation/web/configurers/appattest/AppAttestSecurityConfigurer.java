@@ -41,8 +41,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  *
  * <h2>Endpoints</h2>
  * <ul>
- *     <li>{@code POST /device/challenge} - generates a one-time challenge</li>
- *     <li>{@code POST /device/register} - validates attestation and registers the device</li>
+ *     <li>{@code POST /app_attest/challenge} - generates a one-time challenge</li>
+ *     <li>{@code POST /app_attest/register} - validates attestation and registers the device</li>
  * </ul>
  *
  * <h2>Usage Example</h2>
@@ -67,7 +67,7 @@ public class AppAttestSecurityConfigurer
     private DeviceAppAttestationRegistrationService registrationService;
     private EulerDeviceUserDetailsService userDetailsService;
 
-    private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/device/challenge";
+    private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app_attest/challenge";
 
     private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
     private String registrationEndpointUri = AppAttestRegistrationEndpointFilter.DEFAULT_REGISTRATION_ENDPOINT_URI;
