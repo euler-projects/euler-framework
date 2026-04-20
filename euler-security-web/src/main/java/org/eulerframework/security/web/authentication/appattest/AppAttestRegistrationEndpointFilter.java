@@ -16,6 +16,7 @@
 
 package org.eulerframework.security.web.authentication.appattest;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,18 +70,11 @@ import java.util.Map;
  */
 public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
 
-    public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app_attest/register";
-
     private static final Logger logger = LoggerFactory.getLogger(AppAttestRegistrationEndpointFilter.class);
 
     private final AuthenticationConverter authenticationConverter;
     private final AuthenticationProvider authenticationProvider;
     private final RequestMatcher requestMatcher;
-
-    public AppAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
-                                               AuthenticationProvider authenticationProvider) {
-        this(authenticationConverter, authenticationProvider, DEFAULT_REGISTRATION_ENDPOINT_URI);
-    }
 
     public AppAttestRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
                                                AuthenticationProvider authenticationProvider,
@@ -98,8 +92,10 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain) throws ServletException, IOException {
         if (!this.requestMatcher.matches(request)) {
             filterChain.doFilter(request, response);
             return;
@@ -132,7 +128,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
         body.put("kid", result.getKeyId());
         UserDetails principal = (UserDetails) result.getPrincipal();
         if (principal != null) {
-            body.put("username", principal.getUsername());
+            body.put("sub", principal.getUsername());
         }
 
         response.getWriter().write(JacksonUtils.writeValueAsString(body));

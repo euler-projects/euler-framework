@@ -56,8 +56,12 @@ kid={keyId}&attestation={Base64编码的Attestation Object}&challenge={challenge
 
 **Success Response (200):**
 ```json
-{"kid": "...", "username": "apple_app_..."}
+{"kid": "...", "sub": "apple_app_..."}
 ```
+|属性名|类型|说明|
+|---|---|---|
+|kid|string|密钥 ID, 与传入的 `kid` 相同|
+|sub|string|密钥在服务端的所有者, 通常是为该客户端创建的匿名用户的 `username`|
 
 **Error Response (401):**
 ```json
@@ -163,7 +167,7 @@ sequenceDiagram
     Server->>Server: 验证 Attestation (证书链、Nonce、AAGUID等)
     Server->>Server: 存储设备公钥和 sign count
     Server->>Server: 创建匿名用户
-    Server-->>App: {"kid": "...", "username": "..."}
+    Server-->>App: {"kid": "...", "sub": "..."}
 
     Note over App: 设备注册完成, 后续直接进入阶段二
 

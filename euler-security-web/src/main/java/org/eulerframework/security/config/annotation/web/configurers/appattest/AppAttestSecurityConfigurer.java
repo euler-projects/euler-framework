@@ -68,9 +68,10 @@ public class AppAttestSecurityConfigurer
     private EulerDeviceUserDetailsService userDetailsService;
 
     private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app_attest/challenge";
+    public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app_attest/register";
 
     private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
-    private String registrationEndpointUri = AppAttestRegistrationEndpointFilter.DEFAULT_REGISTRATION_ENDPOINT_URI;
+    private String registrationEndpointUri = DEFAULT_REGISTRATION_ENDPOINT_URI;
 
     private RequestMatcher endpointsMatcher;
 
