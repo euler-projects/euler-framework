@@ -16,8 +16,8 @@
 
 package org.eulerframework.security.authentication.appattest.apple;
 
-import org.eulerframework.security.authentication.appattest.DeviceAppUser;
-import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestUser;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.springframework.security.core.AuthenticationException;
 
 /**
@@ -27,8 +27,8 @@ import org.springframework.security.core.AuthenticationException;
  * nonce validation (attestation), and signature verification (assertion) according to
  * Apple's App Attest documentation.
  * <p>
- * Both methods return {@link DeviceAppAttestationRegistration} containing the validated cryptographic
- * data. Callers are responsible for constructing {@link DeviceAppUser} or performing
+ * Both methods return {@link AppAttestAttestationRegistration} containing the validated cryptographic
+ * data. Callers are responsible for constructing {@link AppAttestUser} or performing
  * user lookup/creation as needed.
  *
  * @see <a href="https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server">
@@ -46,7 +46,7 @@ public interface AppleAppAttestValidationService {
      * @return the validated and persisted registration
      * @throws AuthenticationException if validation fails
      */
-    DeviceAppAttestationRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException;
+    AppAttestAttestationRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException;
 
     /**
      * Validate an App Attest assertion object (re-authentication with a registered device)
@@ -58,5 +58,5 @@ public interface AppleAppAttestValidationService {
      * @return the registration associated with the validated assertion
      * @throws AuthenticationException if validation fails
      */
-    DeviceAppAttestationRegistration validateAssertion(String keyId, String assertion, String challenge) throws AuthenticationException;
+    AppAttestAttestationRegistration validateAssertion(String keyId, String assertion, String challenge) throws AuthenticationException;
 }

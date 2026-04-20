@@ -18,8 +18,8 @@ package org.eulerframework.security.config.annotation.web.configurers.appattest;
 
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistrationAuthenticationProvider;
-import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
@@ -64,7 +64,7 @@ public class AppAttestSecurityConfigurer
     private ChallengeService challengeService;
     private AppleAppAttestValidationService validationService;
     private RegisteredAppRepository registeredAppRepository;
-    private DeviceAppAttestationRegistrationService registrationService;
+    private AppAttestAttestationRegistrationService registrationService;
     private EulerDeviceUserDetailsService userDetailsService;
 
     private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app_attest/challenge";
@@ -92,7 +92,7 @@ public class AppAttestSecurityConfigurer
         return this;
     }
 
-    public AppAttestSecurityConfigurer registrationService(DeviceAppAttestationRegistrationService registrationService) {
+    public AppAttestSecurityConfigurer registrationService(AppAttestAttestationRegistrationService registrationService) {
         this.registrationService = registrationService;
         return this;
     }
@@ -156,8 +156,8 @@ public class AppAttestSecurityConfigurer
 
     // ---- Dependency resolution ----
 
-    private DeviceAppAttestationRegistrationAuthenticationProvider createRegistrationProvider(HttpSecurity http) {
-        return new DeviceAppAttestationRegistrationAuthenticationProvider(
+    private AppAttestAttestationRegistrationAuthenticationProvider createRegistrationProvider(HttpSecurity http) {
+        return new AppAttestAttestationRegistrationAuthenticationProvider(
                 resolveChallengeService(http),
                 resolveValidationService(http),
                 resolveUserDetailsService(http));
@@ -187,12 +187,12 @@ public class AppAttestSecurityConfigurer
         return context.getBean(RegisteredAppRepository.class);
     }
 
-    private DeviceAppAttestationRegistrationService resolveRegistrationService(HttpSecurity http) {
+    private AppAttestAttestationRegistrationService resolveRegistrationService(HttpSecurity http) {
         if (this.registrationService != null) {
             return this.registrationService;
         }
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        return context.getBean(DeviceAppAttestationRegistrationService.class);
+        return context.getBean(AppAttestAttestationRegistrationService.class);
     }
 
     private EulerDeviceUserDetailsService resolveUserDetailsService(HttpSecurity http) {

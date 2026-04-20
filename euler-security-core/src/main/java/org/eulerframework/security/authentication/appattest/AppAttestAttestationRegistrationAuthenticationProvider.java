@@ -28,7 +28,6 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
 import javax.annotation.Nonnull;
@@ -44,17 +43,17 @@ import javax.annotation.Nonnull;
  *     <li>Loads or creates the user via {@link EulerDeviceUserDetailsService}</li>
  * </ol>
  *
- * @see DeviceAppAttestationRegistrationAuthenticationToken
+ * @see AppAttestAttestationRegistrationAuthenticationToken
  */
-public class DeviceAppAttestationRegistrationAuthenticationProvider implements AuthenticationProvider {
+public class AppAttestAttestationRegistrationAuthenticationProvider implements AuthenticationProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeviceAppAttestationRegistrationAuthenticationProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppAttestAttestationRegistrationAuthenticationProvider.class);
 
     private final ChallengeService challengeService;
     private final AppleAppAttestValidationService validationService;
     private final EulerDeviceUserDetailsService userDetailsService;
 
-    public DeviceAppAttestationRegistrationAuthenticationProvider(ChallengeService challengeService,
+    public AppAttestAttestationRegistrationAuthenticationProvider(ChallengeService challengeService,
                                                                   AppleAppAttestValidationService validationService,
                                                                   EulerDeviceUserDetailsService userDetailsService) {
         Assert.notNull(challengeService, "challengeService must not be null");
@@ -67,9 +66,9 @@ public class DeviceAppAttestationRegistrationAuthenticationProvider implements A
 
     @Override
     public Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException {
-        Assert.isInstanceOf(DeviceAppAttestationRegistrationAuthenticationToken.class, authentication,
+        Assert.isInstanceOf(AppAttestAttestationRegistrationAuthenticationToken.class, authentication,
                 () -> "Only DeviceAttestRegistrationAuthenticationToken is supported");
-        DeviceAppAttestationRegistrationAuthenticationToken token = (DeviceAppAttestationRegistrationAuthenticationToken) authentication;
+        AppAttestAttestationRegistrationAuthenticationToken token = (AppAttestAttestationRegistrationAuthenticationToken) authentication;
 
         String keyId = token.getKeyId();
         String attestation = token.getAttestation();
@@ -82,17 +81,17 @@ public class DeviceAppAttestationRegistrationAuthenticationProvider implements A
 
         try {
             // 2. Validate attestation and save registration via the delegated validation service
-            DeviceAppAttestationRegistration registration = this.validationService.validateAttestation(keyId, attestation, challenge);
+            AppAttestAttestationRegistration registration = this.validationService.validateAttestation(keyId, attestation, challenge);
 
             logger.debug("Device attestation registration succeeded for keyId: {}", keyId);
 
             // 3. Load or create the user
-            DeviceAppUser attestUser = new DeviceAppUser(
+            AppAttestUser attestUser = new AppAttestUser(
                     keyId, registration.getTeamId(), registration.getBundleId(), registration.getPublicKey());
             EulerUserDetails user = loadOrCreateUser(attestUser);
             user.eraseCredentials();
             // 4. Return authenticated token
-            return DeviceAppAttestationRegistrationAuthenticationToken.authenticated(user, keyId, user.getAuthorities());
+            return AppAttestAttestationRegistrationAuthenticationToken.authenticated(user, keyId, user.getAuthorities());
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
@@ -100,7 +99,7 @@ public class DeviceAppAttestationRegistrationAuthenticationProvider implements A
         }
     }
 
-    private EulerUserDetails loadOrCreateUser(DeviceAppUser attestUser) {
+    private EulerUserDetails loadOrCreateUser(AppAttestUser attestUser) {
         try {
             return this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFountException ex) {
@@ -111,6 +110,6 @@ public class DeviceAppAttestationRegistrationAuthenticationProvider implements A
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return DeviceAppAttestationRegistrationAuthenticationToken.class.isAssignableFrom(authentication);
+        return AppAttestAttestationRegistrationAuthenticationToken.class.isAssignableFrom(authentication);
     }
 }

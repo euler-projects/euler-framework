@@ -22,16 +22,16 @@ package org.eulerframework.security.authentication.appattest;
  * Registrations are created during the attestation (device registration) process
  * and used during assertion (device re-authentication) to verify the device's identity.
  *
- * @see DeviceAppAttestationRegistration
+ * @see AppAttestAttestationRegistration
  */
-public interface DeviceAppAttestationRegistrationService {
+public interface AppAttestAttestationRegistrationService {
 
     /**
      * Save a registration after successful attestation.
      *
      * @param registration the registration to save
      */
-    void saveRegistration(DeviceAppAttestationRegistration registration);
+    void saveRegistration(AppAttestAttestationRegistration registration);
 
     /**
      * Retrieve a registration by its key ID.
@@ -39,7 +39,7 @@ public interface DeviceAppAttestationRegistrationService {
      * @param keyId the key identifier
      * @return the registration, or {@code null} if not found
      */
-    DeviceAppAttestationRegistration findByKeyId(String keyId);
+    AppAttestAttestationRegistration findByKeyId(String keyId);
 
     /**
      * Update the sign count for a registration.

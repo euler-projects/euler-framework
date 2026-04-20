@@ -21,24 +21,24 @@ import java.security.PublicKey;
 import java.util.Objects;
 
 /**
- * Represents a validated device anonymous user identified by their key ID.
+ * Represents a validated app's anonymous user identified by their key ID.
  */
-public class DeviceAppUser implements Serializable {
+public class AppAttestUser implements Serializable {
 
     private final String keyId;
     private final String teamId;
     private final String bundleId;
     private final PublicKey publicKey;
 
-    public DeviceAppUser(String keyId) {
+    public AppAttestUser(String keyId) {
         this(keyId, null, null, null);
     }
 
-    public DeviceAppUser(String keyId, PublicKey publicKey) {
+    public AppAttestUser(String keyId, PublicKey publicKey) {
         this(keyId, null, null, publicKey);
     }
 
-    public DeviceAppUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
+    public AppAttestUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;
@@ -65,7 +65,7 @@ public class DeviceAppUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DeviceAppUser that = (DeviceAppUser) o;
+        AppAttestUser that = (AppAttestUser) o;
         return Objects.equals(keyId, that.keyId);
     }
 

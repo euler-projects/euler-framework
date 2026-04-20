@@ -37,7 +37,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
@@ -167,7 +167,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                 throw invalidClientAttestation(EulerOAuth2ParameterNames.CHALLENGE);
             }
 
-            DeviceAppAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
+            AppAttestAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
 
             resolvedKeyId = registration.getKeyId();
             resolvedClientId = registration.getTeamId() + "." + registration.getBundleId();

@@ -22,29 +22,29 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of {@link DeviceAppAttestationRegistrationService}.
+ * In-memory implementation of {@link AppAttestAttestationRegistrationService}.
  * <p>
  * Suitable for single-instance deployments or development/testing environments.
  */
-public class InMemoryDeviceAppAttestationRegistrationService implements DeviceAppAttestationRegistrationService {
+public class InMemoryAppAttestAttestationRegistrationService implements AppAttestAttestationRegistrationService {
 
-    private final Map<String, DeviceAppAttestationRegistration> registrations = new ConcurrentHashMap<>();
+    private final Map<String, AppAttestAttestationRegistration> registrations = new ConcurrentHashMap<>();
 
     @Override
-    public void saveRegistration(DeviceAppAttestationRegistration registration) {
+    public void saveRegistration(AppAttestAttestationRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
         Assert.hasText(registration.getKeyId(), "keyId must not be empty");
         this.registrations.put(registration.getKeyId(), registration);
     }
 
     @Override
-    public DeviceAppAttestationRegistration findByKeyId(String keyId) {
+    public AppAttestAttestationRegistration findByKeyId(String keyId) {
         return this.registrations.get(keyId);
     }
 
     @Override
     public void updateSignCount(String keyId, long newSignCount) {
-        DeviceAppAttestationRegistration registration = this.registrations.get(keyId);
+        AppAttestAttestationRegistration registration = this.registrations.get(keyId);
         if (registration != null && newSignCount > registration.getSignCount()) {
             registration.setSignCount(newSignCount);
         }

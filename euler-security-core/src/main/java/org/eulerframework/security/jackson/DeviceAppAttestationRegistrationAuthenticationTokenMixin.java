@@ -18,11 +18,11 @@ package org.eulerframework.security.jackson;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.eulerframework.security.authentication.appattest.DeviceAppAttestationRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationAuthenticationToken;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
- * Jackson mixin for {@link DeviceAppAttestationRegistrationAuthenticationToken}.
+ * Jackson mixin for {@link AppAttestAttestationRegistrationAuthenticationToken}.
  * <p>
  * Note: The registration endpoint currently does not persist this token to the
  * {@code SecurityContext}; it returns an HTTP JSON response directly. This mixin

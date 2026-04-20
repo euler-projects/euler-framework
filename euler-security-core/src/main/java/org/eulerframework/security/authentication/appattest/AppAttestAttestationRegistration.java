@@ -29,9 +29,9 @@ import java.security.PublicKey;
  * All attestation-specific fields are stored as primitive/JDK types for JDBC persistence
  * friendliness, avoiding direct coupling to any third-party validation library.
  *
- * @see DeviceAppAttestationRegistrationService
+ * @see AppAttestAttestationRegistrationService
  */
-public class DeviceAppAttestationRegistration implements Serializable {
+public class AppAttestAttestationRegistration implements Serializable {
 
     private final String keyId;
     private final String teamId;
@@ -49,7 +49,7 @@ public class DeviceAppAttestationRegistration implements Serializable {
     private final String jwks;
     private long signCount;
 
-    public DeviceAppAttestationRegistration(String keyId, String teamId, String bundleId,
+    public AppAttestAttestationRegistration(String keyId, String teamId, String bundleId,
                                             byte[] aaguid, byte[] credentialId,
                                             byte[] attestationCertificateChain, byte[] receipt,
                                             PublicKey publicKey, String jwks, long signCount) {

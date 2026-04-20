@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eulerframework.security.authentication.appattest.DeviceAppUser;
+import org.eulerframework.security.authentication.appattest.AppAttestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +128,7 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
 
         // Resolve anonymous user by keyId
         String keyId = assertionAuthenticationToken.getKeyId();
-        DeviceAppUser attestUser = new DeviceAppUser(keyId);
+        AppAttestUser attestUser = new AppAttestUser(keyId);
         UserDetails user;
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);
