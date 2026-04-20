@@ -59,7 +59,7 @@ import java.util.Map;
  *   <li><b>{@code attest_jwt_client_auth} clients</b>: Already fully authenticated by
  *       {@link EulerOAuth2ClientAttestationAuthenticationProvider
  *       ClientAttestationAuthenticationProvider}. This filter simply extracts the verified
- *       {@code key_id} from the authentication token and sets it as a request attribute
+ *       {@code kid} from the authentication token and sets it as a request attribute
  *       for downstream components.</li>
  *   <li><b>Standard clients with attestation headers</b> (Scenario A): The client was
  *       authenticated via standard methods (e.g., {@code client_secret_basic}, PKCE).
@@ -87,7 +87,7 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
      * Set by this filter after successful attestation verification; read by downstream
      * converters (e.g., {@link org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter}).
      */
-    public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "oauth2.client-attestation.verified.key_id";
+    public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "oauth2.client-attestation.verified.kid";
 
     private final RequestMatcher tokenEndpointMatcher;
 

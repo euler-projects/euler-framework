@@ -150,7 +150,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
 
             DeviceAppAttestationRegistration registration = this.deviceAppAttestationRegistrationService.findByKeyId(kid);
             if (registration == null) {
-                throw attestationError("Unknown key_id: " + kid);
+                throw attestationError("Unknown kid: " + kid);
             }
 
             PublicKey publicKey = registration.getPublicKey();

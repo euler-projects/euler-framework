@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
 
 /**
- * Extracts {@code key_id}, {@code attestation}, and {@code challenge} parameters from
+ * Extracts {@code kid}, {@code attestation}, and {@code challenge} parameters from
  * an HTTP request and constructs a {@link DeviceAppAttestationRegistrationAuthenticationToken}.
  * <p>
  * Returns {@code null} if any required parameter is missing, indicating the request
@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
  */
 public class AppAttestRegistrationAuthenticationConverter implements AuthenticationConverter {
 
-    private static final String PARAM_KEY_ID = "key_id";
+    private static final String PARAM_KEY_ID = "kid";
     private static final String PARAM_ATTESTATION = "attestation";
     private static final String PARAM_CHALLENGE = "challenge";
 

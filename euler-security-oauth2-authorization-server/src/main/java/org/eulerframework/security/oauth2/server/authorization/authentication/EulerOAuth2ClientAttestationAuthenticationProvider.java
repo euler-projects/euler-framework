@@ -72,7 +72,7 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
  *   <li>Validates RFC 6749 {@code client_id} consistency if the request carried one.</li>
  * </ol>
  * <p>
- * After successful authentication, the verified {@code key_id} is preserved as the
+ * After successful authentication, the verified {@code kid} is preserved as the
  * authenticated token's credentials for downstream components.
  *
  * @see EulerOAuth2ClientAttestationAuthenticationConverter

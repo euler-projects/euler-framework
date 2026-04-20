@@ -45,18 +45,18 @@ let attestation = try await DCAppAttestService.shared.attestKey(keyId, clientDat
 POST /app_attest/register
 Content-Type: application/x-www-form-urlencoded
 
-key_id={keyId}&attestation={Base64编码的Attestation Object}&challenge={challenge}
+kid={keyId}&attestation={Base64编码的Attestation Object}&challenge={challenge}
 ```
 
 |参数名|类型|说明|是否必填|
 |---|---|---|---|
-|key_id|string|`DCAppAttestService.generateKey()` 生成的 Key Identifier|是|
+|kid|string|`DCAppAttestService.generateKey()` 生成的 Key Identifier|是|
 |attestation|string|Base64 编码的 Attestation Object|是|
 |challenge|string|上一步获取的 challenge 原始值|是|
 
 **Success Response (200):**
 ```json
-{"key_id": "...", "username": "apple_app_..."}
+{"kid": "...", "username": "apple_app_..."}
 ```
 
 **Error Response (401):**
@@ -115,7 +115,7 @@ grant_type=urn:ietf:params:oauth:grant-type:app_assertion&kid={keyId}&assertion=
 |参数名|类型|说明|是否必填|
 |---|---|---|---|
 |grant_type|enum|固定为 `urn:ietf:params:oauth:grant-type:app_assertion`|是|
-|kid|string|设备 Key Identifier (与注册时的 `key_id` 相同)|是|
+|kid|string|设备 Key Identifier (与注册时的 `kid` 相同)|是|
 |assertion|string|Base64 编码的 Assertion Object|是|
 |challenge|string|步骤 2.1 获取的 challenge 原始值|是|
 |scope|string|申请的权限范围, 多个空格分隔|否|
@@ -158,11 +158,12 @@ sequenceDiagram
     Apple-->>App: Attestation Object (CBOR)
 
     App->>Server: POST /app_attest/register
-    Note right of App: key_id=...&attestation=Base64(...)&challenge=...
+    Note right of App: kid=...&attestation=Base64(...)&challenge=...
     Server->>Server: 消费 challenge
     Server->>Server: 验证 Attestation (证书链、Nonce、AAGUID等)
     Server->>Server: 存储设备公钥和 sign count
-    Server-->>App: {"key_id": "...", "username": "..."}
+    Server->>Server: 创建匿名用户
+    Server-->>App: {"kid": "...", "username": "..."}
 
     Note over App: 设备注册完成, 后续直接进入阶段二
 
@@ -178,7 +179,7 @@ sequenceDiagram
     Note right of App: OAuth-Client-Attestation-Type: apple_app_attest<br/>grant_type=urn:ietf:params:oauth:grant-type:app_assertion<br/>kid=...&assertion=Base64(...)&challenge=...
     Server->>Server: 消费 challenge
     Server->>Server: 验证 Assertion (签名验证、sign count 检查)
-    Server->>Server: 解析/创建匿名用户
+    Server->>Server: 查找对应的匿名用户 (阶段一创建)
     Server-->>App: {access_token, token_type, expires_in}
 
     Note over App: Token过期后, 重新执行阶段二 Assertion 流程

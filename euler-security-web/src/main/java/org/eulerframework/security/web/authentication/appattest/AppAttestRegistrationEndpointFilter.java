@@ -54,14 +54,14 @@ import java.util.Map;
  * <p>
  * Request parameters:
  * <ul>
- *     <li>{@code key_id} - the key identifier from DCAppAttestService</li>
+ *     <li>{@code kid} - the key identifier from DCAppAttestService</li>
  *     <li>{@code attestation} - the Base64-encoded attestation object</li>
  *     <li>{@code challenge} - the challenge value obtained from the challenge endpoint</li>
  * </ul>
  * <p>
  * Success response (HTTP 200):
  * <pre>
- * {"key_id": "...", "username": "apple_app_..."}
+ * {"kid": "...", "username": "apple_app_..."}
  * </pre>
  *
  * @see AppAttestRegistrationAuthenticationConverter
@@ -109,7 +109,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             Authentication authRequest = this.authenticationConverter.convert(request);
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
-                        "invalid_request", "Missing required parameters: key_id, attestation, challenge");
+                        "invalid_request", "Missing required parameters: kid, attestation, challenge");
                 return;
             }
 
@@ -129,7 +129,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         Map<String, Object> body = new HashMap<>();
-        body.put("key_id", result.getKeyId());
+        body.put("kid", result.getKeyId());
         UserDetails principal = (UserDetails) result.getPrincipal();
         if (principal != null) {
             body.put("username", principal.getUsername());
