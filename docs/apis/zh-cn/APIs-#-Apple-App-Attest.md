@@ -1,14 +1,10 @@
 # Apple App Attest 接入文档
 
-本文档描述 Apple Native App 如何利用 [Apple App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) 能力完成服务端的 App Attest 注册与 OAuth2 认证流程, 实现无账号登录并获取用户级 OAuth2 Token.
+本文档描述 Apple Native App 如何利用 [Apple App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) 能力完成服务端的设备注册与 OAuth2 认证流程, 实现无账号登录并获取用户级 OAuth2 Token.
 
 整个流程分为两个阶段:
-1. **设备注册 (App Attestation)**: 首次使用时, 将设备密钥注册到服务端
+1. **设备注册 (App Attestation)**: 首次使用时, 将设备公钥注册到服务端
 2. **获取/续期 Token (App Assertion)**: 通过设备私钥签名证明身份, 获取用户级 Token
-
-> 阶段一通过 `App Attest` 机制完成, `App Attest` 是一个跨平台的应用证明机制, 可以证明应用运行在一台真实的设备上, 并且可以让服务端安全地取应用在该设备上的唯一标识, 无需担心是否被篡改. 而在 Apple 平台上, 可以使用 Apple 官方提供的 `Apple App Attest` 能力完成服务端 `App Attest`.
-
-> 阶段二通过 `Attestation-Based Client Authentication` 完成客户端校验, 但在 Apple 平台上, 不使用标准的 `Attestation JWT` + `Attestation PoP JWT`, 而是使用 `Apple App Attest` 的 `Assertion` 代替, 因此需要在请求头 `OAuth-Client-Attestation-Type: apple_app_attest` 标识具体的应用证明方式.
 
 > **安全须知**: 所有敏感数据(Key ID、Token等)均应使用 Keychain 存储,
 > **切勿**使用 `UserDefaults`、`plist` 或其他明文方式存储任何敏感信息, 因为这些存储方式在越狱设备上可被轻易读取.
@@ -17,7 +13,9 @@
 
 ## 阶段一: 设备注册 (App Attestation)
 
-> 仅在首次使用时执行一次. 设备注册成功后, 后续直接进入阶段二获取Token.
+仅在首次使用时执行一次. 设备注册成功后, 后续直接进入阶段二获取Token, **切勿重新注册**, 因为重新注册会重新为该客户端创建用户, 原用户数据无法使用.
+
+> 设备注册使用标准的 `Apple App Attest` 的 `Attestation` 流程, 即客户端同时提供自身公钥以及公钥的合法性证明, 服务端验证公钥合法后记录公钥信息, 并为该客户端创建一个匿名用户.
 
 ### 1.1 获取 Challenge
 
@@ -70,10 +68,9 @@ key_id={keyId}&attestation={Base64编码的Attestation Object}&challenge={challe
 
 ## 阶段二: 获取 OAuth2 Token (App Assertion)
 
-> 设备注册成功后, 通过 App Assertion 获取 Access Token.
+设备注册成功后, 通过 App Assertion (`grant_type=urn:ietf:params:oauth:grant-type:app_assertion`) 获取 Access Token.
 
-> **续期策略**: 该 grant type 不签发 `refresh_token`. Token 过期后直接重新执行 App Assertion 流程获取新 Token. 
-> 原因: 每次请求 `/oauht2/token` 接口都需要跟初始获取一样携带 `Attestation-Based Client Authentication` 要求的请求头证明客户端身份, `refresh_token` 无法提供额外的安全价值, 反而增加存储和验证开销.
+> 获取 OAuth2 Token 使用 `OAuth 2.0 Attestation-Based Client Authentication` 草案规范, 结合 `Apple App Attest` 的 `Assertion` 流程验证客户端合法性, 并直接以客户端对应的匿名用户身份签发 Access Token.
 
 ### 2.1 获取 Challenge
 
@@ -137,7 +134,7 @@ grant_type=urn:ietf:params:oauth:grant-type:app_assertion&kid={keyId}&assertion=
 
 ## 2.4 续期 Token
 
-该 grant type 不签发 `refresh_token`. Token 过期后直接重新执行 2.1 到 2.3 的 Assertion 流程 (获取 challenge → 生成 Assertion → 请求 Token)
+该 Grant Type 不签发 `refresh_token`. Token 过期后直接重新执行 2.1 到 2.3 的 Assertion 流程申请新 Token (获取 challenge → 生成 Assertion → 请求 Token)
 
 > 原因: 每次请求 `/oauht2/token` 接口都需要跟初始获取一样携带 `Attestation-Based Client Authentication` 要求的请求头证明客户端身份, `refresh_token` 无法提供额外的安全价值, 反而增加存储和验证开销.
 
@@ -196,6 +193,7 @@ sequenceDiagram
 * `AccessToken` 过期后应重新执行阶段二 Assertion 流程获取新 Token
 * 阶段一的注册只需执行一次, App 应在 Keychain 中持久化 Key ID
 * 如果设备密钥丢失或需要重新注册, 需重新执行完整的阶段一流程
+* **重要!!** 设备重新注册后, 会创建新的用户, 无法使用原用户数据.
 
 ## 相关文档
 
