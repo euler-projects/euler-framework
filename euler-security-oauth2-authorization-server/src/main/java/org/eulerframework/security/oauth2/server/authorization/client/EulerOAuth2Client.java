@@ -1,26 +1,33 @@
 package org.eulerframework.security.oauth2.server.authorization.client;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerOAuth2ClientSettings;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerOAuth2TokenSettings;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 
 import java.time.Instant;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 
 /**
- * Represents an OAuth 2.0 client with a JSON-friendly flat structure aligned to
+ * Represents an OAuth 2.0 client aligned with
  * <a href="https://datatracker.ietf.org/doc/html/rfc7591">RFC 7591</a> client metadata.
  *
- * <p>Top-level getters correspond to standard claim names defined in
- * {@link org.springframework.security.oauth2.server.authorization.OAuth2ClientMetadataClaimNames}
- * and {@link org.eulerframework.security.oauth2.server.authorization.EulerOAuth2ClientMetadataClaimNames}.
- * Non-RFC extension settings are grouped under {@link #getClientSettings()} and {@link #getTokenSettings()}.
+ * <p>Top-level getters cover both RFC-defined properties and the Euler framework&apos;s
+ * standard extensions defined in
+ * {@link org.eulerframework.security.oauth2.server.authorization.EulerOAuth2ClientMetadataClaimNames}
+ * (e.g. {@link #getRegistrationId()}).
+ * Other settings are organized into
+ * {@link EulerOAuth2ClientSettings} and {@link EulerOAuth2TokenSettings}.
+ *
+ * @see org.eulerframework.security.oauth2.server.authorization.EulerOAuth2ClientMetadataClaimNames
+ * @see org.springframework.security.oauth2.server.authorization.OAuth2ClientMetadataClaimNames
+ * @see org.springframework.security.oauth2.server.authorization.oidc.OidcClientMetadataClaimNames
  */
 public interface EulerOAuth2Client extends CredentialsContainer {
 
-    // -- Euler extension (EulerOAuth2ClientMetadataClaimNames) --
+    // -- Euler extension --
 
     /**
      * Returns the Euler-specific internal registration identifier for this client.
@@ -29,7 +36,7 @@ public interface EulerOAuth2Client extends CredentialsContainer {
      */
     String getRegistrationId();
 
-    // -- RFC 7591 / OAuth2ClientMetadataClaimNames --
+    // -- RFC 7591 standard --
 
     /**
      * Returns the unique client identifier issued during registration.
@@ -73,13 +80,13 @@ public interface EulerOAuth2Client extends CredentialsContainer {
     String getClientName();
 
     /**
-     * Returns the set of redirection URIs for use in authorization code
+     * Returns the redirection URIs for use in authorization code
      * and implicit grant flows.
      *
      * @return the redirect URIs, or {@code null}
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7591#section-2">RFC 7591 §2</a>
      */
-    Set<String> getRedirectUris();
+    Collection<String> getRedirectUris();
 
     /**
      * Returns the authentication method for the token endpoint.
@@ -98,20 +105,20 @@ public interface EulerOAuth2Client extends CredentialsContainer {
     Set<String> getGrantTypes();
 
     /**
-     * Returns the set of OAuth 2.0 response types that the client may use.
+     * Returns the OAuth 2.0 response types that the client may use.
      *
      * @return the response type values (e.g. "code"), or {@code null}
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7591#section-2">RFC 7591 §2</a>
      */
-    Set<String> getResponseTypes();
+    Collection<String> getResponseTypes();
 
     /**
-     * Returns the set of scope values that the client may use.
+     * Returns the scope values that the client may use.
      *
      * @return the scope values, or {@code null}
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7591#section-2">RFC 7591 §2</a>
      */
-    Set<String> getScopes();
+    Collection<String> getScopes();
 
     /**
      * Returns the URL for the client's JSON Web Key Set.
@@ -126,23 +133,21 @@ public interface EulerOAuth2Client extends CredentialsContainer {
      * Returns the client's JSON Web Key Set document containing the client's public keys.
      * Mutually exclusive with {@link #getJwksUri()}.
      *
-     * @return the JWK Set as a JSON-friendly map, or {@code null}
+     * @return the JWK Set, or {@code null}
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7591#section-2">RFC 7591 §2</a>
      */
-    Map<String, Object> getJwks();
+    JWKSet getJwks();
 
     // -- OIDC extension --
 
     /**
-     * Returns the set of URIs to which the RP may request that the end-user's
-     * user agent be redirected after a logout.
+     * Returns URIs to which the RP may request that the end-user's
+     * user agent be redirected after logout.
      *
      * @return the post-logout redirect URIs, or {@code null}
      * @see <a href="https://openid.net/specs/openid-connect-rpinitiated-1_0.html">OIDC RP-Initiated Logout</a>
      */
-    Set<String> getPostLogoutRedirectUris();
-
-    // -- RFC 7591 / OIDC Dynamic Registration extension (OidcClientMetadataClaimNames) --
+    Collection<String> getPostLogoutRedirectUris();
 
     /**
      * Returns the JWS algorithm that must be used for signing the JWT used to
@@ -161,7 +166,7 @@ public interface EulerOAuth2Client extends CredentialsContainer {
      */
     String getIdTokenSignedResponseAlgorithm();
 
-    // -- RFC 8705 extension (EulerOAuth2ClientMetadataClaimNames) --
+    // -- RFC 8705 extension --
 
     /**
      * Returns the expected subject distinguished name of the client certificate
@@ -181,17 +186,17 @@ public interface EulerOAuth2Client extends CredentialsContainer {
      */
     Boolean getTlsClientCertificateBoundAccessTokens();
 
-    // -- Non-RFC settings (pure interfaces, not AbstractSettings) --
+    // -- Other settings --
 
     /**
-     * Returns the non-RFC client settings (e.g. proof key, authorization consent).
+     * Returns the extension client settings (e.g. proof key, authorization consent).
      *
      * @return the client settings, or {@code null}
      */
     EulerOAuth2ClientSettings getClientSettings();
 
     /**
-     * Returns the non-RFC token settings (e.g. TTL, format, refresh token reuse).
+     * Returns the extension token settings (e.g. TTL, format, refresh token reuse).
      *
      * @return the token settings, or {@code null}
      */
