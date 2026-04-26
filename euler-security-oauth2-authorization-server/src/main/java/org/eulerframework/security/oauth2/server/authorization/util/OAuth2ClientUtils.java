@@ -165,25 +165,22 @@ public final class OAuth2ClientUtils {
                     .ifPresent(csBuilder::requireAuthorizationConsent);
         }
 
-        // Stage 2 — merge any remaining extension entries from the underlying settings map
-        // together with the inline JWKS (which has no dedicated builder method). Keys
-        // already consumed in stage 1b are stripped so the values just assigned are
-        // preserved; the inline JWKS from the top-level field, when present, takes
-        // precedence over any homonymous map entry.
-        boolean hasExtensionMap = eulerClientSettings != null && !eulerClientSettings.getSettings().isEmpty();
-        boolean hasInlineJwks = client.getJwks() != null;
-        if (hasExtensionMap || hasInlineJwks) {
-            csBuilder.settings(s -> {
-                if (hasExtensionMap) {
-                    Map<String, Object> extra = new HashMap<>(eulerClientSettings.getSettings());
-                    extra.remove(ConfigurationSettingNames.Client.REQUIRE_PROOF_KEY);
-                    extra.remove(ConfigurationSettingNames.Client.REQUIRE_AUTHORIZATION_CONSENT);
-                    s.putAll(extra);
-                }
-                if (hasInlineJwks) {
-                    s.put(EulerConfigurationSettingNames.Client.JWKS, client.getJwks());
-                }
-            });
+        // Stage 2 — collect any remaining extension entries. The Stage 1b keys are stripped
+        // first so that the emptiness check reflects the presence of genuinely extensible
+        // content, and the inline JWKS (which has no dedicated builder method) is folded
+        // in last so that the top-level field takes precedence over any homonymous map
+        // entry inherited from the extension block.
+        Map<String, Object> extra = new HashMap<>();
+        if (eulerClientSettings != null) {
+            extra.putAll(eulerClientSettings.getSettings());
+            extra.remove(ConfigurationSettingNames.Client.REQUIRE_PROOF_KEY);
+            extra.remove(ConfigurationSettingNames.Client.REQUIRE_AUTHORIZATION_CONSENT);
+        }
+        if (client.getJwks() != null) {
+            extra.put(EulerConfigurationSettingNames.Client.JWKS, client.getJwks());
+        }
+        if (!extra.isEmpty()) {
+            csBuilder.settings(s -> s.putAll(extra));
         }
 
         return csBuilder.build();
@@ -235,20 +232,20 @@ public final class OAuth2ClientUtils {
                     .ifPresent(tsBuilder::refreshTokenTimeToLive);
 
             // Stage 2 — merge any remaining extension entries from the underlying settings
-            // map. Keys already consumed in stage 1b are stripped so that the type-coerced
-            // values (Duration, OAuth2TokenFormat) are not silently overwritten by their
-            // raw counterparts (Long seconds, String) retained in EulerOAuth2TokenSettings.
-            if (!eulerTokenSettings.getSettings().isEmpty()) {
-                tsBuilder.settings(s -> {
-                    Map<String, Object> extra = new HashMap<>(eulerTokenSettings.getSettings());
-                    extra.remove(ConfigurationSettingNames.Token.AUTHORIZATION_CODE_TIME_TO_LIVE);
-                    extra.remove(ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE);
-                    extra.remove(ConfigurationSettingNames.Token.ACCESS_TOKEN_FORMAT);
-                    extra.remove(ConfigurationSettingNames.Token.DEVICE_CODE_TIME_TO_LIVE);
-                    extra.remove(ConfigurationSettingNames.Token.REUSE_REFRESH_TOKENS);
-                    extra.remove(ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE);
-                    s.putAll(extra);
-                });
+            // map. The Stage 1b keys are stripped first so that the emptiness check reflects
+            // the presence of genuinely extensible content, and so that the type-coerced
+            // values (Duration, OAuth2TokenFormat) assigned in Stage 1b are not silently
+            // overwritten by their raw counterparts (Long seconds, String) retained in
+            // EulerOAuth2TokenSettings.
+            Map<String, Object> extra = new HashMap<>(eulerTokenSettings.getSettings());
+            extra.remove(ConfigurationSettingNames.Token.AUTHORIZATION_CODE_TIME_TO_LIVE);
+            extra.remove(ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE);
+            extra.remove(ConfigurationSettingNames.Token.ACCESS_TOKEN_FORMAT);
+            extra.remove(ConfigurationSettingNames.Token.DEVICE_CODE_TIME_TO_LIVE);
+            extra.remove(ConfigurationSettingNames.Token.REUSE_REFRESH_TOKENS);
+            extra.remove(ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE);
+            if (!extra.isEmpty()) {
+                tsBuilder.settings(s -> s.putAll(extra));
             }
         }
 
