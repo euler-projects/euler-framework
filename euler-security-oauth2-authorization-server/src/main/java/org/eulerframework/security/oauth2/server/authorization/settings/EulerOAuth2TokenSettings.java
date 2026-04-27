@@ -17,7 +17,9 @@
 package org.eulerframework.security.oauth2.server.authorization.settings;
 
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.springframework.security.oauth2.server.authorization.settings.AbstractSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ConfigurationSettingNames;
@@ -250,13 +252,13 @@ public final class EulerOAuth2TokenSettings extends AbstractSettings {
             if (settings.get(ConfigurationSettingNames.Token.AUTHORIZATION_CODE_TIME_TO_LIVE) == null) {
                 setting(ConfigurationSettingNames.Token.AUTHORIZATION_CODE_TIME_TO_LIVE, Duration.ofMinutes(5).getSeconds());
             } else {
-                convertDurationToSeconds(settings, ConfigurationSettingNames.Token.AUTHORIZATION_CODE_TIME_TO_LIVE);
+                normalizeToLongSeconds(settings, ConfigurationSettingNames.Token.AUTHORIZATION_CODE_TIME_TO_LIVE);
             }
 
             if (settings.get(ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE) == null) {
                 setting(ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE, Duration.ofMinutes(5).getSeconds());
             } else {
-                convertDurationToSeconds(settings, ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE);
+                normalizeToLongSeconds(settings, ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE);
             }
 
             if (settings.get(ConfigurationSettingNames.Token.ACCESS_TOKEN_FORMAT) == null) {
@@ -268,7 +270,7 @@ public final class EulerOAuth2TokenSettings extends AbstractSettings {
             if (settings.get(ConfigurationSettingNames.Token.DEVICE_CODE_TIME_TO_LIVE) == null) {
                 setting(ConfigurationSettingNames.Token.DEVICE_CODE_TIME_TO_LIVE, Duration.ofMinutes(5).getSeconds());
             } else {
-                convertDurationToSeconds(settings, ConfigurationSettingNames.Token.DEVICE_CODE_TIME_TO_LIVE);
+                normalizeToLongSeconds(settings, ConfigurationSettingNames.Token.DEVICE_CODE_TIME_TO_LIVE);
             }
 
             if (settings.get(ConfigurationSettingNames.Token.REUSE_REFRESH_TOKENS) == null) {
@@ -278,7 +280,7 @@ public final class EulerOAuth2TokenSettings extends AbstractSettings {
             if (settings.get(ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE) == null) {
                 setting(ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE, Duration.ofMinutes(60).getSeconds());
             } else {
-                convertDurationToSeconds(settings, ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE);
+                normalizeToLongSeconds(settings, ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE);
             }
 
 
@@ -291,10 +293,76 @@ public final class EulerOAuth2TokenSettings extends AbstractSettings {
 
     }
 
-    private static void convertDurationToSeconds(Map<String, Object> settings, String key) {
+    private static final Pattern INTEGRAL_NUMBER = Pattern.compile("^[+-]?\\d+$");
+
+    /**
+     * Normalizes the time-to-live entry at {@code key} to a {@link Long} number of seconds.
+     *
+     * <p>Time-to-live values may reach this builder through several equally legitimate paths:
+     * a {@link Duration} provided via a typed setter, a {@link Long} retained from an earlier
+     * round-trip, an {@link Integer} reconstituted by a JSON deserializer that cannot
+     * distinguish 32-bit integers from 64-bit longs when reading from a schemaless JSON
+     * column, or a {@link String} supplied by an externalized configuration source. The
+     * latter is interpreted in two flavors: a purely integral literal is read as a
+     * {@code long} count of seconds, whereas any alphanumeric form is delegated to
+     * {@link Duration#parse(CharSequence)} (ISO-8601, e.g. {@code PT5M}). In every case the
+     * entry is rewritten as a {@link Long} so that downstream consumers can rely on a
+     * single, canonical type.
+     *
+     * @param settings the underlying settings map, mutated in place
+     * @param key      the configuration key whose value is to be normalized
+     * @throws IllegalArgumentException if the value cannot be coerced to a {@code Long}
+     *                                  number of seconds
+     */
+    private static void normalizeToLongSeconds(Map<String, Object> settings, String key) {
         Object value = settings.get(key);
+        if (value == null || value instanceof Long) {
+            return;
+        }
         if (value instanceof Duration d) {
             settings.put(key, d.getSeconds());
+        } else if (value instanceof Number n) {
+            settings.put(key, n.longValue());
+        } else if (value instanceof String s) {
+            settings.put(key, parseStringToSeconds(key, s));
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported type for '" + key + "': " + value.getClass().getName()
+                            + "; expected Duration, Number or String");
+        }
+    }
+
+    /**
+     * Parses a string-encoded time-to-live into a {@link Long} number of seconds.
+     *
+     * <p>A purely integral literal — optionally signed, no decimal point and no suffix — is
+     * interpreted verbatim as a count of seconds. Any other form is passed to
+     * {@link Duration#parse(CharSequence)} and its resulting {@link Duration#getSeconds()}
+     * is returned. Both flavors share a single error channel: on malformed input an
+     * {@link IllegalArgumentException} is raised carrying the offending key and value.
+     *
+     * @param key   the configuration key, used only for diagnostic context
+     * @param value the raw string value, assumed non-null
+     * @return the equivalent number of seconds
+     * @throws IllegalArgumentException if {@code value} is neither a plain integer nor a
+     *                                  valid ISO-8601 duration
+     */
+    private static long parseStringToSeconds(String key, String value) {
+        String trimmed = value.trim();
+        if (INTEGRAL_NUMBER.matcher(trimmed).matches()) {
+            try {
+                return Long.parseLong(trimmed);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException(
+                        "Value for '" + key + "' is out of long range: " + value, ex);
+            }
+        }
+        try {
+            return Duration.parse(trimmed).getSeconds();
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException(
+                    "Value for '" + key + "' is neither a numeric literal nor a valid"
+                            + " ISO-8601 duration: " + value, ex);
         }
     }
 
