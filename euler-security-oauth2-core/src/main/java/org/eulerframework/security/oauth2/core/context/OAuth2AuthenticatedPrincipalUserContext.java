@@ -17,25 +17,18 @@ package org.eulerframework.security.oauth2.core.context;
 
 import org.eulerframework.security.core.context.UserContext;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.oauth2.core.userdetails.provider.OAuth2TokenUserDetailsProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.eulerframework.security.oauth2.core.EulerOAuth2TokenIntrospectionClaimNames;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.security.Principal;
 
 public class OAuth2AuthenticatedPrincipalUserContext implements UserContext {
-    private final List<OAuth2TokenUserDetailsProvider> tokenUserDetailsProviders = new ArrayList<>();
 
-    public OAuth2AuthenticatedPrincipalUserContext(List<? extends OAuth2TokenUserDetailsProvider> tokenUserDetailsProviders) {
-        Assert.notEmpty(tokenUserDetailsProviders, "at least one OAuth2TokenUserDetailsProvider is required");
-        this.tokenUserDetailsProviders.addAll(tokenUserDetailsProviders);
+    public OAuth2AuthenticatedPrincipalUserContext() {
     }
 
     @Override
@@ -56,25 +49,12 @@ public class OAuth2AuthenticatedPrincipalUserContext implements UserContext {
                 return eulerUserDetails;
             }
 
-            /*
-             * If application defined OAuth2TokenUserDetailsProvider,
-             * try to analyse the Subject of the OAuth 2.0 token,
-             * usually a machine-readable identifier of the resource owner who authorized the token.
-             * See reference: https://datatracker.ietf.org/doc/html/rfc7662#section-2.2
-             */
-            if (CollectionUtils.isEmpty(this.tokenUserDetailsProviders)) {
-                return null;
-            }
-            String tokenSubject = principal.getAttribute(OAuth2TokenIntrospectionClaimNames.SUB);
-            if (!StringUtils.hasText(tokenSubject)) {
-                return null;
-            }
-            EulerUserDetails userDetails;
-            for (OAuth2TokenUserDetailsProvider tokenUserDetailsProvider : tokenUserDetailsProviders) {
-                if ((userDetails = tokenUserDetailsProvider.provide(tokenSubject)) != null) {
-                    return userDetails;
-                }
-            }
+            // TODO: `UsernamePasswordAuthenticationToken` is unavailable in the Resource Server implementation.
+            //        Further investigation is needed to retrieve the original user ID.
+            //        Alternatively, the Resource Server should be designed around its own local user system
+            //        rather than relying on the Auth Server's user ID.
+            UsernamePasswordAuthenticationToken token = principal.getAttribute(Principal.class.getName());
+            return token == null ? null : (EulerUserDetails) token.getPrincipal();
         }
 
         return null;
