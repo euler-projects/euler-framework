@@ -23,24 +23,53 @@ import org.eulerframework.model.AbstractResourceModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.Optional;
 
+/**
+ * Helpers that copy auditing fields from a persistent entity or a raw
+ * {@link ResultSet} back into a service-layer model.
+ *
+ * <p>Entities store timestamps as {@link java.time.Instant}; models still
+ * expose them as {@link Date}. These helpers perform the null-safe
+ * conversion so that callers do not need to duplicate the boilerplate at
+ * every mapping site.
+ */
 public class AuditingModelUtils {
+
+    /**
+     * Copies the auditing timestamps from the entity to the model,
+     * converting {@link java.time.Instant} to {@link Date}. {@code null}
+     * values are propagated as-is.
+     */
     public static void updateModelAuditingFields(AuditingEntity entity, AbstractAuditingModel model) {
-        model.setCreatedDate(entity.getCreatedDate());
-        model.setLastModifiedDate(entity.getModifiedDate());
+        model.setCreatedDate(Optional.ofNullable(entity.getCreatedDate()).map(Date::from).orElse(null));
+        model.setLastModifiedDate(Optional.ofNullable(entity.getModifiedDate()).map(Date::from).orElse(null));
     }
 
+    /**
+     * Extends {@link #updateModelAuditingFields(AuditingEntity, AbstractAuditingModel)}
+     * with the {@code createdBy} and {@code lastModifiedBy} principal fields.
+     */
     public static void updateModelPrincipalAuditingFields(PrincipalAuditingEntity entity, AbstractPrincipalAuditingModel model) {
         updateModelAuditingFields(entity, model);
         model.setCreatedBy(entity.getCreatedBy());
         model.setLastModifiedBy(entity.getModifiedBy());
     }
 
+    /**
+     * Reads the auditing timestamps from a raw {@link ResultSet} into the
+     * model. Intended for JDBC-based readers that bypass the JPA layer.
+     */
     public static void updateModelAuditingFields(ResultSet rs, AbstractResourceModel model) throws SQLException {
         model.setCreatedDate(rs.getDate("created_date"));
         model.setLastModifiedDate(rs.getDate("modified_date"));
     }
 
+    /**
+     * Extends {@link #updateModelAuditingFields(ResultSet, AbstractResourceModel)}
+     * with the {@code createdBy} and {@code lastModifiedBy} principal fields.
+     */
     public static void updateModelPrincipalAuditingFields(ResultSet rs, AbstractResourceModel model) throws SQLException {
         updateModelAuditingFields(rs, model);
         model.setCreatedBy(rs.getString("created_by"));

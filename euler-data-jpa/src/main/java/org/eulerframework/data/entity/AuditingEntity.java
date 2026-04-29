@@ -22,33 +22,51 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.Instant;
 
+/**
+ * Base mapped superclass that adds JPA-managed auditing timestamps to every
+ * persistent entity.
+ *
+ * <p>Timestamps are captured as {@link Instant} so they carry explicit UTC
+ * semantics and are immune to JVM default time-zone drift. Values are
+ * populated automatically by Spring Data's {@link AuditingEntityListener}
+ * on {@code @PrePersist} / {@code @PreUpdate}; application code should not
+ * set them directly except when mirroring values from an external source.
+ */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditingEntity {
 
+    /**
+     * Instant at which the entity was first persisted. Populated once on
+     * insert and never updated afterwards.
+     */
     @CreatedDate
     @Column(name = "created_date")
-    private Date createdDate;
+    private Instant createdDate;
 
+    /**
+     * Instant of the most recent update. Refreshed on every persist and
+     * merge operation by the auditing listener.
+     */
     @LastModifiedDate
     @Column(name = "modified_date")
-    private Date modifiedDate;
+    private Instant modifiedDate;
 
-    public Date getCreatedDate() {
+    public Instant getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(Instant createdDate) {
         this.createdDate = createdDate;
     }
 
-    public Date getModifiedDate() {
+    public Instant getModifiedDate() {
         return modifiedDate;
     }
 
-    public void setModifiedDate(Date modifiedDate) {
+    public void setModifiedDate(Instant modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 }
