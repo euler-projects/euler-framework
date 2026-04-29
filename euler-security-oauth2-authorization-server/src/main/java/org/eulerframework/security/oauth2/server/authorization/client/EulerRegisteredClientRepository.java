@@ -28,14 +28,7 @@ public class EulerRegisteredClientRepository implements RegisteredClientReposito
         this.eulerOAuth2ClientService = eulerOAuth2ClientService;
         if (!CollectionUtils.isEmpty(registeredClients)) {
             for (RegisteredClient registeredClient : registeredClients) {
-                RegisteredClient exists = this.findByClientId(registeredClient.getClientId());
-
-                if (exists == null) {
-                    this.eulerOAuth2ClientService.createClient(registeredClient);
-                } else {
-                    this.logger.warn("Cannot initialize client (client id: {}) because a client with the same id already exists.",
-                            registeredClient.getClientId());
-                }
+                this.save(registeredClient);
             }
         }
     }
@@ -43,13 +36,14 @@ public class EulerRegisteredClientRepository implements RegisteredClientReposito
     @Override
     public void save(RegisteredClient registeredClient) {
         Assert.notNull(registeredClient, "RegisteredClient must not be null");
-        Assert.notNull(registeredClient.getId(), "RegisteredClient.id must not be null");
-        EulerOAuth2Client savedClient = this.eulerOAuth2ClientService.loadClientByRegistrationId(registeredClient.getId());
-        if (savedClient == null) {
+
+        // RegisteredClient.Builder guarantees a non-null id, so a single lookup
+        // by registrationId is sufficient to decide between insert and update.
+        EulerOAuth2Client exists = this.eulerOAuth2ClientService.loadClientByRegistrationId(registeredClient.getId());
+        if (exists == null) {
             this.eulerOAuth2ClientService.createClient(registeredClient);
         } else {
-            savedClient.reloadRegisteredClient(registeredClient);
-            this.eulerOAuth2ClientService.updateClient(savedClient);
+            this.eulerOAuth2ClientService.updateClient(registeredClient);
         }
     }
 

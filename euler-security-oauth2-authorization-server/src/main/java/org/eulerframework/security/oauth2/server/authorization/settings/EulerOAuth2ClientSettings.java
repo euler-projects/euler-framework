@@ -16,7 +16,6 @@
 
 package org.eulerframework.security.oauth2.server.authorization.settings;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.oauth2.server.authorization.settings.AbstractSettings;
@@ -158,7 +157,6 @@ public final class EulerOAuth2ClientSettings extends AbstractSettings {
 
             return new EulerOAuth2ClientSettings(settings);
         }
-
     }
 
 }
