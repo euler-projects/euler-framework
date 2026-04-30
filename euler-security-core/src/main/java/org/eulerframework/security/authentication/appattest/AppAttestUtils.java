@@ -28,7 +28,7 @@ import java.util.HexFormat;
  * Utility methods for the Apple App Attest / App Assertion protocol, covering both the
  * low-level SHA-256 digest primitive (used to compute {@code clientDataHash},
  * {@code expectedNonce}, etc.) and the higher-level identifiers derived from an app's
- * {@linkplain RegisteredApp#appId() App ID}:
+ * {@linkplain RegisteredApp#getAppId() App ID}:
  * <ul>
  *   <li>The <b>RP ID hash</b> (hex-encoded SHA-256 of the App ID), used as the lookup
  *       key for App Attest;</li>
@@ -40,7 +40,7 @@ import java.util.HexFormat;
  * Accepting {@link RegisteredApp} (rather than individual fields such as {@code teamId}
  * and {@code bundleId}) keeps this API stable as {@code RegisteredApp} evolves to support
  * non-Apple app sources: any change to the app-identifier composition is encapsulated in
- * {@link RegisteredApp#appId()}.
+ * {@link RegisteredApp#getAppId()}.
  *
  * @see RegisteredApp
  */
@@ -70,19 +70,42 @@ public final class AppAttestUtils {
     }
 
     /**
-     * Compute the SHA-256 hash of the given app's {@linkplain RegisteredApp#appId() App ID}.
+     * Compute the SHA-256 hash of the given App ID string.
+     *
+     * @param appId the fully qualified app ID (e.g. {@code teamId.bundleId})
+     * @return the raw 32-byte SHA-256 digest
+     */
+    public static byte[] appIdHash(String appId) {
+        Assert.hasText(appId, "appId must not be empty");
+        return sha256(appId.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Compute the hex-encoded SHA-256 hash of the given App ID string.
+     * <p>
+     * This is the RP ID hash representation used for App Attest lookup.
+     *
+     * @param appId the fully qualified app ID
+     * @return the lowercase hex string (64 characters)
+     */
+    public static String appIdHashHex(String appId) {
+        return HexFormat.of().formatHex(appIdHash(appId));
+    }
+
+    /**
+     * Compute the SHA-256 hash of the given app's {@linkplain RegisteredApp#getAppId() App ID}.
      *
      * @param app the registered app
      * @return the raw 32-byte SHA-256 digest
      */
     public static byte[] appIdHash(RegisteredApp app) {
         Assert.notNull(app, "app must not be null");
-        return sha256(app.appId().getBytes(StandardCharsets.UTF_8));
+        return appIdHash(app.getAppId());
     }
 
     /**
      * Compute the hex-encoded SHA-256 hash of the given app's
-     * {@linkplain RegisteredApp#appId() App ID}.
+     * {@linkplain RegisteredApp#getAppId() App ID}.
      * <p>
      * This is the RP ID hash representation used for App Attest lookup.
      *
@@ -90,14 +113,15 @@ public final class AppAttestUtils {
      * @return the lowercase hex string (64 characters)
      */
     public static String appIdHashHex(RegisteredApp app) {
-        return HexFormat.of().formatHex(appIdHash(app));
+        Assert.notNull(app, "app must not be null");
+        return appIdHashHex(app.getAppId());
     }
 
     /**
      * Compute the STATIC OAuth2 {@code client_id} for the given app.
      * <p>
      * The client ID is the base64url-encoded (no padding) SHA-256 hash of the
-     * {@linkplain RegisteredApp#appId() App ID}. This encoding is URL-safe and
+     * {@linkplain RegisteredApp#getAppId() App ID}. This encoding is URL-safe and
      * deterministic, suitable for use as an OAuth2 client identifier.
      *
      * @param app the registered app

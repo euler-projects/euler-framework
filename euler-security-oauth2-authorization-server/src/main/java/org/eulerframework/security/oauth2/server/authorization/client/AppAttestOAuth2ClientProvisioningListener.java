@@ -61,7 +61,7 @@ public class AppAttestOAuth2ClientProvisioningListener implements RegisteredAppC
 
     @Override
     public void onRegisteredAppSaved(RegisteredApp app) {
-        if (!app.oauth2Enabled() || app.oauth2ClientType() != RegisteredApp.OAuth2ClientType.STATIC) {
+        if (!app.isOauth2Enabled() || app.getOauth2ClientType() != RegisteredApp.OAuth2ClientType.STATIC) {
             return;
         }
 
@@ -69,22 +69,22 @@ public class AppAttestOAuth2ClientProvisioningListener implements RegisteredAppC
 
         // Provision-if-absent: do not overwrite existing clients (admin may have customized them)
         if (this.registeredClientRepository.findByClientId(clientId) != null) {
-            logger.debug("OAuth2 client already exists for app '{}', skipping provisioning", app.appId());
+            logger.debug("OAuth2 client already exists for app '{}', skipping provisioning", app.getAppId());
             return;
         }
 
         String registrationId = UUID.nameUUIDFromBytes(
-                ("app-attest:" + app.appId()).getBytes(StandardCharsets.UTF_8)).toString();
+                ("app-attest:" + app.getAppId()).getBytes(StandardCharsets.UTF_8)).toString();
 
         RegisteredClient registeredClient = RegisteredClient.withId(registrationId)
                 .clientId(clientId)
-                .clientName(app.appId())
+                .clientName(app.getAppId())
                 .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
                 .authorizationGrantType(EulerAuthorizationGrantType.APP_ASSERTION)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .build();
 
         this.registeredClientRepository.save(registeredClient);
-        logger.info("Provisioned OAuth2 client for app '{}' with client_id '{}'", app.appId(), clientId);
+        logger.info("Provisioned OAuth2 client for app '{}' with client_id '{}'", app.getAppId(), clientId);
     }
 }

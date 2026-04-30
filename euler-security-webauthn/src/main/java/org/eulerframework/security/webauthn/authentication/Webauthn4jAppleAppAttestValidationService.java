@@ -153,7 +153,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
 
             // 3. Construct server property with looked-up teamId + bundleId
             Challenge challengeObj = new DefaultChallenge(challenge.getBytes(StandardCharsets.UTF_8));
-            DCServerProperty serverProperty = new DCServerProperty(registeredApp.teamId(), registeredApp.bundleId(), challengeObj);
+            DCServerProperty serverProperty = new DCServerProperty(registeredApp.getTeamId(), registeredApp.getBundleId(), challengeObj);
             DCAttestationParameters params = new DCAttestationParameters(serverProperty);
 
             // 4. Validate (certificate chain, nonce, AAGUID, credentialId, etc.)
@@ -184,7 +184,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
 
             // 8. Save the registration with flattened data
             AppAttestAttestationRegistration registration = new AppAttestAttestationRegistration(
-                    keyId, registeredApp.teamId(), registeredApp.bundleId(), resolveClientId(registeredApp),
+                    keyId, registeredApp.getTeamId(), registeredApp.getBundleId(), resolveClientId(registeredApp),
                     aaguid, credentialId,
                     certChainBytes, receipt,
                     publicKey, jwksJson, 0);
@@ -291,7 +291,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
      * request-supplied {@code client_id}.
      */
     private static String resolveClientId(RegisteredApp app) {
-        if (app.oauth2Enabled() && app.oauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
+        if (app.isOauth2Enabled() && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
             return AppAttestUtils.staticClientId(app);
         }
         return null;

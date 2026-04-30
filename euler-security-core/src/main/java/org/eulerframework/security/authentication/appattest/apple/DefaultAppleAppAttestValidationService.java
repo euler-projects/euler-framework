@@ -256,8 +256,8 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
             }
             AppAttestAttestationRegistration registration = new AppAttestAttestationRegistration(
                     keyId,
-                    app.teamId(),
-                    app.bundleId(),
+                    app.getTeamId(),
+                    app.getBundleId(),
                     resolveClientId(app),
                     aaguid,
                     credentialId,
@@ -493,7 +493,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
      * request-supplied {@code client_id}.
      */
     private static String resolveClientId(RegisteredApp app) {
-        if (app.oauth2Enabled() && app.oauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
+        if (app.isOauth2Enabled() && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
             return AppAttestUtils.staticClientId(app);
         }
         return null;
