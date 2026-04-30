@@ -18,6 +18,7 @@ package org.eulerframework.security.authentication.appattest.apple;
 
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.AppAttestUtils;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.slf4j.Logger;
@@ -123,7 +124,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
     /**
      * Create a new instance with an {@link RegisteredAppRepository} for multi-app support.
      *
-     * @param registeredAppRepository                     the repository of registered Apple Apps
+     * @param registeredAppRepository                 the repository of registered Apple Apps
      * @param appAttestAttestationRegistrationService the service for storing and retrieving key credentials
      */
     public DefaultAppleAppAttestValidationService(RegisteredAppRepository registeredAppRepository,
@@ -197,13 +198,13 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
             // Step 3: Verify nonce
             // clientDataHash = SHA256(challenge)
-            byte[] clientDataHash = sha256(challenge.getBytes(StandardCharsets.UTF_8));
+            byte[] clientDataHash = AppAttestUtils.sha256(challenge.getBytes(StandardCharsets.UTF_8));
             // composite = authData || clientDataHash
             byte[] composite = new byte[authData.length + clientDataHash.length];
             System.arraycopy(authData, 0, composite, 0, authData.length);
             System.arraycopy(clientDataHash, 0, composite, authData.length, clientDataHash.length);
             // expectedNonce = SHA256(composite)
-            byte[] expectedNonce = sha256(composite);
+            byte[] expectedNonce = AppAttestUtils.sha256(composite);
             byte[] actualNonce = extractNonceFromCertificate(certificates.get(0));
 
             if (!MessageDigest.isEqual(expectedNonce, actualNonce)) {
@@ -254,10 +255,17 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                 logger.debug("Apple App Attest validation succeeded for keyId: {}", keyId);
             }
             AppAttestAttestationRegistration registration = new AppAttestAttestationRegistration(
-                    keyId, app.teamId(), app.bundleId(),
-                    aaguid, credentialId,
-                    certChainBytes, receipt,
-                    ecPublicKey, jwksJson, 0);
+                    keyId,
+                    app.getTeamId(),
+                    app.getBundleId(),
+                    resolveClientId(app),
+                    aaguid,
+                    credentialId,
+                    certChainBytes,
+                    receipt,
+                    ecPublicKey,
+                    jwksJson,
+                    0);
             this.appAttestAttestationRegistrationService.saveRegistration(registration);
 
             logger.debug("Apple App Attest attestation validation succeeded for keyId: {}", keyId);
@@ -312,11 +320,11 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
             // Step 5: Compute nonce and verify signature
             // nonce = SHA256(authenticatorData || SHA256(challenge))
-            byte[] clientDataHash = sha256(challenge.getBytes(StandardCharsets.UTF_8));
+            byte[] clientDataHash = AppAttestUtils.sha256(challenge.getBytes(StandardCharsets.UTF_8));
             byte[] composite = new byte[authenticatorData.length + clientDataHash.length];
             System.arraycopy(authenticatorData, 0, composite, 0, authenticatorData.length);
             System.arraycopy(clientDataHash, 0, composite, authenticatorData.length, clientDataHash.length);
-            byte[] nonce = sha256(composite);
+            byte[] nonce = AppAttestUtils.sha256(composite);
 
             // Verify the signature over the nonce using the stored public key
             Signature sig = Signature.getInstance("SHA256withECDSA");
@@ -476,12 +484,19 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
         return 1 + (firstByte & 0x7F);
     }
 
-    private byte[] sha256(byte[] data) {
-        try {
-            return MessageDigest.getInstance("SHA-256").digest(data);
-        } catch (Exception e) {
-            throw new AuthenticationServiceException("SHA-256 computation failed", e);
+    /**
+     * Resolve the OAuth2 {@code client_id} to bind to the attestation registration.
+     * <p>
+     * For STATIC OAuth2-enabled apps, this returns the deterministic
+     * {@code base64url(SHA-256(appId))}. For all other cases (DYNAMIC client type or
+     * OAuth2 disabled), {@code null} is returned so that callers fall back to the
+     * request-supplied {@code client_id}.
+     */
+    private static String resolveClientId(RegisteredApp app) {
+        if (app.isOauth2Enabled() && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
+            return AppAttestUtils.staticClientId(app);
         }
+        return null;
     }
 
     private X509Certificate loadRootCertificate() {

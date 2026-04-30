@@ -34,6 +34,7 @@ import java.security.spec.X509EncodedKeySpec;
  *     key_id                        VARCHAR(255)  NOT NULL PRIMARY KEY,
  *     team_id                       VARCHAR(255)  NOT NULL,
  *     bundle_id                     VARCHAR(255)  NOT NULL,
+ *     client_id                     VARCHAR(255)  NULL,
  *     aaguid                        BLOB          NOT NULL,
  *     credential_id                 BLOB          NOT NULL,
  *     attestation_certificate_chain BLOB          NOT NULL,
@@ -55,6 +56,7 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     private static final String COLUMN_KEY_ID                        = "key_id";
     private static final String COLUMN_TEAM_ID                       = "team_id";
     private static final String COLUMN_BUNDLE_ID                     = "bundle_id";
+    private static final String COLUMN_CLIENT_ID                     = "client_id";
     private static final String COLUMN_AAGUID                        = "aaguid";
     private static final String COLUMN_CREDENTIAL_ID                 = "credential_id";
     private static final String COLUMN_ATTESTATION_CERTIFICATE_CHAIN = "attestation_certificate_chain";
@@ -65,10 +67,10 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     // @formatter:on
 
     private static final String INSERT_REGISTRATION_SQL =
-            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_REGISTRATION_SQL =
-            "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?";
+            "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?";
 
     private static final String UPDATE_SIGN_COUNT_SQL =
             "UPDATE %s SET %s = ? WHERE %s = ? AND %s < ?";
@@ -98,12 +100,12 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
         Assert.hasText(tableName, "tableName must not be empty");
         this.jdbcOperations = jdbcOperations;
         this.insertSql = String.format(INSERT_REGISTRATION_SQL, tableName,
-                COLUMN_KEY_ID, COLUMN_TEAM_ID, COLUMN_BUNDLE_ID,
+                COLUMN_KEY_ID, COLUMN_TEAM_ID, COLUMN_BUNDLE_ID, COLUMN_CLIENT_ID,
                 COLUMN_AAGUID, COLUMN_CREDENTIAL_ID,
                 COLUMN_ATTESTATION_CERTIFICATE_CHAIN, COLUMN_RECEIPT,
                 COLUMN_PUBLIC_KEY, COLUMN_JWKS, COLUMN_SIGN_COUNT);
         this.selectSql = String.format(SELECT_REGISTRATION_SQL,
-                COLUMN_KEY_ID, COLUMN_TEAM_ID, COLUMN_BUNDLE_ID,
+                COLUMN_KEY_ID, COLUMN_TEAM_ID, COLUMN_BUNDLE_ID, COLUMN_CLIENT_ID,
                 COLUMN_AAGUID, COLUMN_CREDENTIAL_ID,
                 COLUMN_ATTESTATION_CERTIFICATE_CHAIN, COLUMN_RECEIPT,
                 COLUMN_PUBLIC_KEY, COLUMN_JWKS, COLUMN_SIGN_COUNT,
@@ -121,6 +123,7 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
             ps.setString(++index, registration.getKeyId());
             ps.setString(++index, registration.getTeamId());
             ps.setString(++index, registration.getBundleId());
+            ps.setString(++index, registration.getClientId());
             ps.setBytes(++index, registration.getAaguid());
             ps.setBytes(++index, registration.getCredentialId());
             ps.setBytes(++index, registration.getAttestationCertificateChain());
@@ -144,6 +147,7 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
                             rs.getString(COLUMN_KEY_ID),
                             rs.getString(COLUMN_TEAM_ID),
                             rs.getString(COLUMN_BUNDLE_ID),
+                            rs.getString(COLUMN_CLIENT_ID),
                             rs.getBytes(COLUMN_AAGUID),
                             rs.getBytes(COLUMN_CREDENTIAL_ID),
                             rs.getBytes(COLUMN_ATTESTATION_CERTIFICATE_CHAIN),
