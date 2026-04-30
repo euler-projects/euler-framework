@@ -171,12 +171,10 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
             resolvedKeyId = registration.getKeyId();
 
-            // Resolve client_id: for STATIC OAuth2-enabled apps, the validation service has
-            // already bound the deterministic base64url(SHA-256(appId)) to the registration;
-            // otherwise fall back to the request-supplied client_id.
-            resolvedClientId = registration.getClientId() != null
-                    ? registration.getClientId()
-                    : (String) additionalParams.get(OAuth2ParameterNames.CLIENT_ID);
+            // Resolve client_id directly from the attestation registration: it has been
+            // bound at registration time (deterministic base64url(SHA-256(appId)) for
+            // STATIC clients, or the dynamically issued identifier for DYNAMIC clients).
+            resolvedClientId = registration.getClientId();
         } else {
             throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }
@@ -187,7 +185,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
         // Draft Section 6.3: If the token request contains a client_id parameter as per [RFC6749],
         // the Authorization Server MUST verify that the value of this parameter is the same as
-        // the client_id value in the sub claim of the Client Attestation.
+        // the client_id value in the subclaim of the Client Attestation.
         String requestClientId = (String) additionalParams.get(OAuth2ParameterNames.CLIENT_ID);
         if (requestClientId != null && !requestClientId.equals(resolvedClientId)) {
             throw invalidClient("client_id mismatch");
