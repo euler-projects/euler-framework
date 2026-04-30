@@ -38,4 +38,15 @@ public interface RegisteredAppRepository {
      * @return the registered Apple App, or {@code null} if no matching app is found
      */
     RegisteredApp findByAppIdHash(byte[] appIdHash);
+
+    /**
+     * Save a registered app to this repository.
+     * <p>
+     * If an app with the same App ID already exists, it will be replaced.
+     * Implementations should notify any registered {@link RegisteredAppChangeListener}
+     * instances after the app has been persisted.
+     *
+     * @param app the registered app to save
+     */
+    void save(RegisteredApp app);
 }

@@ -38,6 +38,7 @@ import com.webauthn4j.data.client.challenge.Challenge;
 import com.webauthn4j.data.client.challenge.DefaultChallenge;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.AppAttestUtils;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
@@ -49,7 +50,6 @@ import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateFactory;
@@ -138,7 +138,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
         try {
             byte[] keyIdBytes = Base64.getDecoder().decode(keyId);
             byte[] attestationBytes = Base64.getDecoder().decode(attestation);
-            byte[] clientDataHash = sha256(challenge.getBytes(StandardCharsets.UTF_8));
+            byte[] clientDataHash = AppAttestUtils.sha256(challenge.getBytes(StandardCharsets.UTF_8));
 
             // 1. Construct the attestation request
             DCAttestationRequest request = new DCAttestationRequest(keyIdBytes, attestationBytes, clientDataHash);
@@ -184,7 +184,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
 
             // 8. Save the registration with flattened data
             AppAttestAttestationRegistration registration = new AppAttestAttestationRegistration(
-                    keyId, registeredApp.teamId(), registeredApp.bundleId(),
+                    keyId, registeredApp.teamId(), registeredApp.bundleId(), resolveClientId(registeredApp),
                     aaguid, credentialId,
                     certChainBytes, receipt,
                     publicKey, jwksJson, 0);
@@ -206,7 +206,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
         try {
             byte[] keyIdBytes = Base64.getDecoder().decode(keyId);
             byte[] assertionBytes = Base64.getDecoder().decode(assertion);
-            byte[] clientDataHash = sha256(challenge.getBytes(StandardCharsets.UTF_8));
+            byte[] clientDataHash = AppAttestUtils.sha256(challenge.getBytes(StandardCharsets.UTF_8));
 
             // 1. Load the stored registration
             AppAttestAttestationRegistration reg = this.registrationService.findByKeyId(keyId);
@@ -282,12 +282,19 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
         return jwkSet.toString();
     }
 
-    private static byte[] sha256(byte[] data) {
-        try {
-            return MessageDigest.getInstance("SHA-256").digest(data);
-        } catch (Exception e) {
-            throw new AuthenticationServiceException("SHA-256 computation failed", e);
+    /**
+     * Resolve the OAuth2 {@code client_id} to bind to the attestation registration.
+     * <p>
+     * For STATIC OAuth2-enabled apps, this returns the deterministic
+     * {@code base64url(SHA-256(appId))}. For all other cases (DYNAMIC client type or
+     * OAuth2 disabled), {@code null} is returned so that callers fall back to the
+     * request-supplied {@code client_id}.
+     */
+    private static String resolveClientId(RegisteredApp app) {
+        if (app.oauth2Enabled() && app.oauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
+            return AppAttestUtils.staticClientId(app);
         }
+        return null;
     }
 
     /**

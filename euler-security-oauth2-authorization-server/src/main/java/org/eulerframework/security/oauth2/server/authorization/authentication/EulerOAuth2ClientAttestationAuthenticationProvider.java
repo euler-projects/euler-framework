@@ -170,7 +170,13 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             AppAttestAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
 
             resolvedKeyId = registration.getKeyId();
-            resolvedClientId = registration.getTeamId() + "." + registration.getBundleId();
+
+            // Resolve client_id: for STATIC OAuth2-enabled apps, the validation service has
+            // already bound the deterministic base64url(SHA-256(appId)) to the registration;
+            // otherwise fall back to the request-supplied client_id.
+            resolvedClientId = registration.getClientId() != null
+                    ? registration.getClientId()
+                    : (String) additionalParams.get(OAuth2ParameterNames.CLIENT_ID);
         } else {
             throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }

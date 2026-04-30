@@ -36,6 +36,7 @@ public class AppAttestAttestationRegistration implements Serializable {
     private final String keyId;
     private final String teamId;
     private final String bundleId;
+    private final String clientId;
 
     // Flattened from AttestedCredentialData
     private final byte[] aaguid;
@@ -49,13 +50,15 @@ public class AppAttestAttestationRegistration implements Serializable {
     private final String jwks;
     private long signCount;
 
-    public AppAttestAttestationRegistration(String keyId, String teamId, String bundleId,
-                                            byte[] aaguid, byte[] credentialId,
-                                            byte[] attestationCertificateChain, byte[] receipt,
-                                            PublicKey publicKey, String jwks, long signCount) {
+    public AppAttestAttestationRegistration(
+            String keyId, String teamId, String bundleId, String clientId,
+            byte[] aaguid, byte[] credentialId,
+            byte[] attestationCertificateChain, byte[] receipt,
+            PublicKey publicKey, String jwks, long signCount) {
         this.keyId = keyId;
         this.teamId = teamId;
         this.bundleId = bundleId;
+        this.clientId = clientId;
         this.aaguid = aaguid;
         this.credentialId = credentialId;
         this.attestationCertificateChain = attestationCertificateChain;
@@ -75,6 +78,19 @@ public class AppAttestAttestationRegistration implements Serializable {
 
     public String getBundleId() {
         return bundleId;
+    }
+
+    /**
+     * Return the resolved OAuth2 {@code client_id} bound to this registration, or
+     * {@code null} if the underlying {@link RegisteredApp} is not OAuth2-enabled or
+     * does not use the {@link RegisteredApp.OAuth2ClientType#STATIC} client type.
+     * <p>
+     * For STATIC clients, this is the deterministic {@code base64url(SHA-256(appId))}
+     * derived at attestation time; for other cases the value is {@code null} and the
+     * caller must fall back to the request-supplied {@code client_id}.
+     */
+    public String getClientId() {
+        return clientId;
     }
 
     public byte[] getAaguid() {

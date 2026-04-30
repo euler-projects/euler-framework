@@ -156,7 +156,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
             PublicKey publicKey = registration.getPublicKey();
             verifyPopJwt(signedJWT, publicKey);
 
-            return new PopVerificationResult(kid, registration.getTeamId() + "." + registration.getBundleId(), registration);
+            return new PopVerificationResult(kid, registration.getClientId(), registration);
 
         } catch (ParseException e) {
             throw attestationError("Failed to parse PoP JWT: " + e.getMessage());
