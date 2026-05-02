@@ -16,9 +16,9 @@
 package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * {@link RegisteredAppRepository} implementation that delegates all storage to an
@@ -30,44 +30,55 @@ import java.util.List;
  * {@code RegisteredClientRepository} to {@code EulerOAuth2ClientService}.
  *
  * <p>{@link #save(RegisteredApp)} dispatches between
- * {@link AppAttestAppService#createApp(AppAttestApp) createApp} and
- * {@link AppAttestAppService#updateApp(AppAttestApp) updateApp} based on an
- * existence check against
- * {@link AppAttestAppService#findByRegistrationId(String) findByRegistrationId}.
- * The exists-then-write sequence is not transactional, so the race window between
- * the two service calls is accepted &mdash; matching the conventional
- * {@code RegisteredClientRepository.save} implementation. Callers should rely on
- * the underlying service's primary-key uniqueness constraint as the authoritative
+ * {@link AppAttestAppService#createApp(RegisteredApp) createApp(RegisteredApp)} and
+ * {@link AppAttestAppService#updateApp(RegisteredApp) updateApp(RegisteredApp)} based
+ * on an existence check against
+ * {@link AppAttestAppService#findByRegistrationId(String) findByRegistrationId}. The
+ * exists-then-write sequence is not transactional, so the race window between the two
+ * service calls is accepted &mdash; matching the conventional
+ * {@code RegisteredClientRepository.save} implementation. Callers should rely on the
+ * underlying service's primary-key uniqueness constraint as the authoritative
  * guarantee.
+ *
+ * <p>Listener notifications are not dispatched by this class. To wire listeners,
+ * wrap an instance in a {@link NotifyingRegisteredAppRepository}.
  */
 public class AppAttestServiceRegisteredAppRepository implements RegisteredAppRepository {
 
     private final AppAttestAppService appAttestAppService;
-    private final List<RegisteredAppChangeListener> listeners;
 
     /**
-     * Create a new repository backed by the given service, with no change
-     * listeners.
+     * Create a new repository backed by the given service.
      *
      * @param appAttestAppService the backing service; must not be {@code null}
      */
     public AppAttestServiceRegisteredAppRepository(AppAttestAppService appAttestAppService) {
-        this(appAttestAppService, Collections.emptyList());
+        Assert.notNull(appAttestAppService, "appAttestAppService must not be null");
+        this.appAttestAppService = appAttestAppService;
     }
 
     /**
-     * Create a new repository backed by the given service and change listeners.
+     * Create a new repository backed by the given service and preload it with the
+     * supplied apps.
+     *
+     * <p>Each app in {@code registeredApps} is persisted via {@link #save(RegisteredApp)},
+     * which routes through the service's specialized
+     * {@link AppAttestAppService#createApp(RegisteredApp) createApp} /
+     * {@link AppAttestAppService#updateApp(RegisteredApp) updateApp} overloads. This
+     * mirrors the preload contract exposed by
+     * {@code EulerRegisteredClientRepository(EulerOAuth2ClientService, Collection)}.
      *
      * @param appAttestAppService the backing service; must not be {@code null}
-     * @param listeners           the listeners to notify after each save; may be
-     *                            empty but not {@code null}
+     * @param registeredApps      the apps to preload; may be {@code null} or empty
      */
     public AppAttestServiceRegisteredAppRepository(AppAttestAppService appAttestAppService,
-                                                   List<RegisteredAppChangeListener> listeners) {
-        Assert.notNull(appAttestAppService, "appAttestAppService must not be null");
-        Assert.notNull(listeners, "listeners must not be null");
-        this.appAttestAppService = appAttestAppService;
-        this.listeners = List.copyOf(listeners);
+                                                   Collection<RegisteredApp> registeredApps) {
+        this(appAttestAppService);
+        if (!CollectionUtils.isEmpty(registeredApps)) {
+            for (RegisteredApp app : registeredApps) {
+                this.save(app);
+            }
+        }
     }
 
     @Override
@@ -80,17 +91,13 @@ public class AppAttestServiceRegisteredAppRepository implements RegisteredAppRep
     @Override
     public void save(RegisteredApp app) {
         Assert.notNull(app, "app must not be null");
-        DefaultAppAttestApp model = new DefaultAppAttestApp();
-        model.reloadRegisteredApp(app);
-
+        // RegisteredApp's Builder guarantees a non-null id, so a single lookup
+        // by registrationId is sufficient to decide between insert and update.
         AppAttestApp existing = this.appAttestAppService.findByRegistrationId(app.getId());
         if (existing == null) {
-            this.appAttestAppService.createApp(model);
+            this.appAttestAppService.createApp(app);
         } else {
-            this.appAttestAppService.updateApp(model);
-        }
-        for (RegisteredAppChangeListener listener : this.listeners) {
-            listener.onRegisteredAppSaved(app);
+            this.appAttestAppService.updateApp(app);
         }
     }
 
@@ -98,7 +105,7 @@ public class AppAttestServiceRegisteredAppRepository implements RegisteredAppRep
         return RegisteredApp.withId(m.getRegistrationId())
                 .teamId(m.getTeamId())
                 .bundleId(m.getBundleId())
-                .oauth2Enabled(m.isOauth2Enabled())
+                .oauth2Enabled(Boolean.TRUE.equals(m.getOauth2Enabled()))
                 .oauth2ClientType(m.getOauth2ClientType())
                 .build();
     }

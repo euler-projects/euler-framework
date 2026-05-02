@@ -18,7 +18,10 @@ package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// An in-memory implementation of [RegisteredAppRepository] that stores registered Apps
@@ -26,50 +29,38 @@ import java.util.concurrent.ConcurrentHashMap;
 ///
 /// This implementation is suitable for development, testing, or deployments where the
 /// set of registered Apps is known at startup and configured via application properties.
+///
+/// Listener notifications are not dispatched by this class. To wire listeners, wrap an
+/// instance in a [NotifyingRegisteredAppRepository].
 public class InMemoryRegisteredAppRepository implements RegisteredAppRepository {
 
     private final Map<String /* App ID Hash Hex */, RegisteredApp> registeredApps
             = new ConcurrentHashMap<>();
 
-    private final List<RegisteredAppChangeListener> listeners;
+    /**
+     * Create an empty {@code InMemoryRegisteredAppRepository}.
+     */
+    public InMemoryRegisteredAppRepository() {
+    }
 
     /**
-     * Create a new {@code InMemoryRegisteredAppRepository} with the specified registered apps
-     * and no change listeners.
+     * Create a new {@code InMemoryRegisteredAppRepository} preloaded with the given apps.
      *
      * @param registeredApps the registered apps
      */
     public InMemoryRegisteredAppRepository(RegisteredApp... registeredApps) {
-        this(Arrays.asList(registeredApps), Collections.emptyList());
+        this(Arrays.asList(registeredApps));
     }
 
     /**
-     * Create a new {@code InMemoryRegisteredAppRepository} with the specified registered apps
-     * and no change listeners.
+     * Create a new {@code InMemoryRegisteredAppRepository} preloaded with the given apps.
      *
-     * @param registeredApps the list of registered apps
+     * @param registeredApps the list of registered apps; must not be {@code null}
      */
     public InMemoryRegisteredAppRepository(List<RegisteredApp> registeredApps) {
-        this(registeredApps, Collections.emptyList());
-    }
-
-    /**
-     * Create a new {@code InMemoryRegisteredAppRepository} with the specified registered apps
-     * and change listeners.
-     * <p>
-     * Each app in the initial list is saved via {@link #save(RegisteredApp)}, which triggers
-     * listener notifications.
-     *
-     * @param registeredApps the list of registered apps
-     * @param listeners      the listeners to notify on save; may be empty but not {@code null}
-     */
-    public InMemoryRegisteredAppRepository(List<RegisteredApp> registeredApps,
-                                           List<RegisteredAppChangeListener> listeners) {
-        Assert.notEmpty(registeredApps, "registeredApps must not be empty");
-        Assert.notNull(listeners, "listeners must not be null");
-        this.listeners = List.copyOf(listeners);
+        Assert.notNull(registeredApps, "registeredApps must not be null");
         for (RegisteredApp app : registeredApps) {
-            save(app);
+            this.save(app);
         }
     }
 
@@ -84,8 +75,5 @@ public class InMemoryRegisteredAppRepository implements RegisteredAppRepository 
         Assert.notNull(app, "app must not be null");
         String hashHex = AppAttestUtils.appIdHashHex(app);
         this.registeredApps.put(hashHex, app);
-        for (RegisteredAppChangeListener listener : this.listeners) {
-            listener.onRegisteredAppSaved(app);
-        }
     }
 }

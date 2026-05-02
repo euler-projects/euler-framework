@@ -30,7 +30,7 @@ public class DefaultAppAttestApp implements AppAttestApp {
     private String registrationId;
     private String teamId;
     private String bundleId;
-    private boolean oauth2Enabled;
+    private Boolean oauth2Enabled;
     private RegisteredApp.OAuth2ClientType oauth2ClientType;
 
     @Override
@@ -61,11 +61,11 @@ public class DefaultAppAttestApp implements AppAttestApp {
     }
 
     @Override
-    public boolean isOauth2Enabled() {
+    public Boolean getOauth2Enabled() {
         return this.oauth2Enabled;
     }
 
-    public void setOauth2Enabled(boolean oauth2Enabled) {
+    public void setOauth2Enabled(Boolean oauth2Enabled) {
         this.oauth2Enabled = oauth2Enabled;
     }
 

@@ -43,8 +43,9 @@ public interface RegisteredAppRepository {
      * Save a registered app to this repository.
      * <p>
      * If an app with the same App ID already exists, it will be replaced.
-     * Implementations should notify any registered {@link RegisteredAppChangeListener}
-     * instances after the app has been persisted.
+     * Implementations focus solely on persistence; listener fan-out is handled
+     * by the {@link NotifyingRegisteredAppRepository} decorator and is therefore
+     * not a responsibility of concrete storage backends.
      *
      * @param app the registered app to save
      */

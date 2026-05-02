@@ -43,6 +43,20 @@ public interface AppAttestAppService {
     AppAttestApp createApp(AppAttestApp app);
 
     /**
+     * Creates a new App Attest app registration from a {@link RegisteredApp}
+     * instance.
+     * <p>
+     * {@code registeredApp} is assumed to be a fully-assembled registration:
+     * {@link RegisteredApp#getId() id} is persisted verbatim as the
+     * {@code registrationId} and must not collide with an existing entry.
+     * The server does not allocate identifiers on this path.
+     *
+     * @param registeredApp the {@link RegisteredApp} instance
+     * @return the created app
+     */
+    AppAttestApp createApp(RegisteredApp registeredApp);
+
+    /**
      * Loads an app by its {@link AppAttestApp#getRegistrationId() registrationId}.
      *
      * @param registrationId the registration identifier
@@ -72,8 +86,11 @@ public interface AppAttestAppService {
     AppAttestApp findByAppId(String appId);
 
     /**
-     * Updates an existing app using full-overwrite semantics on all non-audit,
-     * non-primary-key fields.
+     * Updates an existing app using full-overwrite (replace) semantics on all
+     * non-audit, non-primary-key fields. Mirrors HTTP {@code PUT}: fields
+     * omitted from {@code app} are reset to their default / cleared state
+     * rather than preserved. Use {@link #patchApp(AppAttestApp)} for partial
+     * updates.
      * <p>
      * Fails when no entry with the given
      * {@link AppAttestApp#getRegistrationId() registrationId} exists.
@@ -81,6 +98,38 @@ public interface AppAttestAppService {
      * @param app the app with updated state
      */
     void updateApp(AppAttestApp app);
+
+    /**
+     * Updates an existing app from a {@link RegisteredApp} instance using
+     * full-overwrite semantics, mirroring the contract of
+     * {@link RegisteredAppRepository#save(RegisteredApp) RegisteredAppRepository#save}.
+     * <p>
+     * The registration is located by {@link RegisteredApp#getId() id} and every
+     * mapped field is then replaced with the value carried by
+     * {@code registeredApp}. This is the repository-bridge counterpart to
+     * {@link #updateApp(AppAttestApp)}.
+     *
+     * @param registeredApp the {@link RegisteredApp} instance carrying the updated state
+     */
+    void updateApp(RegisteredApp registeredApp);
+
+    /**
+     * Updates an existing app using patch semantics: only fields carrying a
+     * non-{@code null} value on {@code app} are applied; {@code null} fields
+     * leave the persisted state unchanged. Mirrors HTTP {@code PATCH}.
+     * <p>
+     * {@link AppAttestApp#getTeamId() teamId} and
+     * {@link AppAttestApp#getBundleId() bundleId} must be patched together
+     * (both present or both absent) &mdash; see {@link AppAttestApp#getAppId()}
+     * for rationale; supplying exactly one raises
+     * {@link IllegalArgumentException}.
+     * <p>
+     * Fails when no entry with the given
+     * {@link AppAttestApp#getRegistrationId() registrationId} exists.
+     *
+     * @param app the app carrying the fields to patch
+     */
+    void patchApp(AppAttestApp app);
 
     /**
      * Deletes an app by its {@link AppAttestApp#getRegistrationId() registrationId}.

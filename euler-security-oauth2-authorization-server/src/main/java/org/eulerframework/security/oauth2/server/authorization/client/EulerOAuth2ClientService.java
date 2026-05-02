@@ -62,10 +62,15 @@ public interface EulerOAuth2ClientService {
     List<EulerOAuth2Client> listClients(int offset, int limit);
 
     /**
-     * Updates an existing client using patch semantics.
+     * Updates an existing client using full-overwrite (replace) semantics: the
+     * submitted payload fully overwrites mutable client metadata; fields
+     * omitted from {@code client} are cleared rather than preserved. Mirrors
+     * HTTP {@code PUT}. Use {@link #patchClient(EulerOAuth2Client)} for
+     * partial updates.
      * <p>
-     * Non-boolean properties are only updated when the incoming value is non-null.
-     * Boolean properties are always overwritten.
+     * {@code clientSecret} rotation is not handled by this method &mdash; use
+     * {@link #updateClientSecret(String, String)}; the secret column is left
+     * untouched when the incoming value is {@code null}.
      *
      * @param client the client with updated fields
      */
@@ -80,18 +85,32 @@ public interface EulerOAuth2ClientService {
      * The registration is located by {@link RegisteredClient#getId()} and every
      * mapped field is then replaced with the value carried by
      * {@code registeredClient} &mdash; including {@code null} values, which
-     * overwrite any previously persisted state. This is the deliberate
-     * counterpart to the patch semantics exposed by
-     * {@link #updateClient(EulerOAuth2Client)}.
+     * overwrite any previously persisted state. This is the repository-bridge
+     * counterpart to {@link #updateClient(EulerOAuth2Client)}.
      * <p>
-     * The sole exception is {@code clientIdIssuedAt}: it is a lifecycle audit
-     * field and is preserved when the incoming {@code registeredClient} does
-     * not carry a value, so the original registration timestamp is not wiped
-     * by a partially populated payload.
+     * Three fields are treated as non-overwritable by {@code null}:
+     * {@code clientIdIssuedAt} is a lifecycle audit field so the original
+     * registration timestamp is not wiped by a partially populated payload;
+     * {@code clientSecret} and {@code clientSecretExpiresAt} are credential
+     * state owned exclusively by the rotation pipeline (see
+     * {@link #updateClientSecret(String, String)}), so bulk replace paths
+     * deliberately do not touch the credential.
      *
      * @param registeredClient the {@link RegisteredClient} instance carrying the updated state
      */
     void updateClient(RegisteredClient registeredClient);
+
+    /**
+     * Updates an existing client using patch semantics: only fields carrying a
+     * non-{@code null} value on {@code client} are applied; {@code null}
+     * fields leave the persisted state unchanged. Mirrors HTTP {@code PATCH}.
+     * <p>
+     * Fails when no client with the given
+     * {@link EulerOAuth2Client#getRegistrationId() registrationId} exists.
+     *
+     * @param client the client carrying the fields to patch
+     */
+    void patchClient(EulerOAuth2Client client);
 
     /**
      * Deletes a client by its registration ID.

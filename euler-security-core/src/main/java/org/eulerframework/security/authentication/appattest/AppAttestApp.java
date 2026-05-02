@@ -34,10 +34,12 @@ package org.eulerframework.security.authentication.appattest;
  * </ul>
  *
  * <h2>OAuth2 integration</h2>
- * When {@link #isOauth2Enabled() oauth2Enabled} is {@code true}, the app is also
- * allowed to act as an OAuth2 client. The {@link #getOauth2ClientType()} determines
- * how its {@code client_id} is provisioned (see
- * {@link RegisteredApp.OAuth2ClientType}).
+ * When {@link #getOauth2Enabled() oauth2Enabled} is {@link Boolean#TRUE}, the app
+ * is also allowed to act as an OAuth2 client. The {@link #getOauth2ClientType()}
+ * determines how its {@code client_id} is provisioned (see
+ * {@link RegisteredApp.OAuth2ClientType}). A {@code null} value of
+ * {@code oauth2Enabled} is reserved for patch-style updates and means
+ * "unchanged".
  *
  * <p>Implementations are mutable so that state can be re-hydrated via
  * {@link #reloadRegisteredApp(RegisteredApp)}.
@@ -77,10 +79,29 @@ public interface AppAttestApp {
      * {@link #getBundleId() bundleId} with a dot separator, e.g.
      * {@code ABCDE12345.com.example.myapp}.
      *
-     * @return the fully qualified app ID
+     * <p>{@link #getTeamId() teamId} and {@link #getBundleId() bundleId} must be
+     * both present or both absent &mdash; mutating only one side would yield a
+     * malformed {@code appId} such as {@code null.com.example.myapp}. Under the
+     * patch-style {@code patchApp(AppAttestApp)} path, leaving both fields
+     * {@code null} signals "keep the persisted {@code appId} unchanged".
+     *
+     * @return the fully qualified app ID, or {@code null} if both
+     * {@link #getTeamId() teamId} and {@link #getBundleId() bundleId} are
+     * {@code null}
+     * @throws IllegalStateException if exactly one of {@link #getTeamId() teamId}
+     *                               and {@link #getBundleId() bundleId} is {@code null}
      */
     default String getAppId() {
-        return getTeamId() + "." + getBundleId();
+        String teamId = getTeamId();
+        String bundleId = getBundleId();
+        if (teamId == null && bundleId == null) {
+            return null;
+        }
+        if (teamId == null || bundleId == null) {
+            throw new IllegalStateException(
+                    "teamId and bundleId must both be null or both be non-null");
+        }
+        return teamId + "." + bundleId;
     }
 
     // -- OAuth2 extension --
@@ -89,15 +110,20 @@ public interface AppAttestApp {
      * Returns whether this app may act as an OAuth2 client and request access
      * tokens from the authorization server.
      *
-     * @return {@code true} if OAuth2 is enabled for this app
+     * <p>A {@code null} value carries patch semantics: it denotes
+     * "field unspecified; leave the persisted value unchanged" on the
+     * {@code patchApp(AppAttestApp)} path. Non-null values always overwrite.
+     *
+     * @return {@link Boolean#TRUE} / {@link Boolean#FALSE} if OAuth2 is
+     * enabled / disabled; {@code null} when the value is unspecified
      */
-    boolean isOauth2Enabled();
+    Boolean getOauth2Enabled();
 
     /**
      * Returns how the OAuth2 {@code client_id} of this app is provisioned.
      *
-     * @return the OAuth2 client type; {@code null} when {@link #isOauth2Enabled()}
-     * is {@code false}
+     * @return the OAuth2 client type; {@code null} when
+     * {@link #getOauth2Enabled() oauth2Enabled} is {@link Boolean#FALSE}
      */
     RegisteredApp.OAuth2ClientType getOauth2ClientType();
 

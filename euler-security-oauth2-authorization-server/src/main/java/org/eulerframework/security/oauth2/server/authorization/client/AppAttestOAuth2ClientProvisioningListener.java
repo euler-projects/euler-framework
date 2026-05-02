@@ -17,14 +17,17 @@
 package org.eulerframework.security.oauth2.server.authorization.client;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.util.Assert;
 
 import org.eulerframework.security.authentication.appattest.AppAttestUtils;
@@ -68,10 +71,10 @@ public class AppAttestOAuth2ClientProvisioningListener implements RegisteredAppC
         String clientId = AppAttestUtils.staticClientId(app);
 
         // Provision-if-absent: do not overwrite existing clients (admin may have customized them)
-        if (this.registeredClientRepository.findByClientId(clientId) != null) {
-            logger.debug("OAuth2 client already exists for app '{}', skipping provisioning", app.getAppId());
-            return;
-        }
+//        if (this.registeredClientRepository.findByClientId(clientId) != null) {
+//            logger.debug("OAuth2 client already exists for app '{}', skipping provisioning", app.getAppId());
+//            return;
+//        }
 
         String registrationId = UUID.nameUUIDFromBytes(
                 ("app-attest:" + app.getAppId()).getBytes(StandardCharsets.UTF_8)).toString();
@@ -81,7 +84,10 @@ public class AppAttestOAuth2ClientProvisioningListener implements RegisteredAppC
                 .clientName(app.getAppId())
                 .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
                 .authorizationGrantType(EulerAuthorizationGrantType.APP_ASSERTION)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .scope(OidcScopes.OPENID)
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofDays(7))
+                        .build())
                 .build();
 
         this.registeredClientRepository.save(registeredClient);
