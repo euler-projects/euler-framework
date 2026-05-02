@@ -40,8 +40,13 @@ import java.util.Collection;
  * underlying service's primary-key uniqueness constraint as the authoritative
  * guarantee.
  *
- * <p>Listener notifications are not dispatched by this class. To wire listeners,
- * wrap an instance in a {@link NotifyingRegisteredAppRepository}.
+ * <p>Listener notifications are not dispatched by this class. Because every write
+ * terminates in {@link AppAttestAppService}, it is the service implementation's
+ * responsibility to invoke {@link RegisteredAppChangeListener#onRegisteredAppSaved}
+ * after its own persistence transaction succeeds. This keeps the notification inside
+ * the same transactional boundary that owns the write, at the cost of each service
+ * implementation having to wire in the listener list itself. A cleaner scheme is
+ * pending; treat this contract as temporary.
  */
 public class AppAttestServiceRegisteredAppRepository implements RegisteredAppRepository {
 
