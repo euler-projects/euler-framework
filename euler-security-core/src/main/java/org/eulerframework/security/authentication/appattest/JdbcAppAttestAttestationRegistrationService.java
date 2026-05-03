@@ -22,6 +22,8 @@ import org.springframework.util.Assert;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 /**
  * JDBC implementation of {@link AppAttestAttestationRegistrationService} that persists
@@ -41,7 +43,9 @@ import java.security.spec.X509EncodedKeySpec;
  *     receipt                       BLOB          NOT NULL,
  *     public_key                    BLOB          NOT NULL,
  *     jwks                          TEXT          NOT NULL,
- *     sign_count                    BIGINT        NOT NULL
+ *     sign_count                    BIGINT        NOT NULL,
+ *     created_date                  DATETIME(3)   NOT NULL,
+ *     modified_date                 DATETIME(3)   NOT NULL
  * );
  * }</pre>
  *
@@ -64,16 +68,18 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     private static final String COLUMN_PUBLIC_KEY                    = "public_key";
     private static final String COLUMN_JWKS                          = "jwks";
     private static final String COLUMN_SIGN_COUNT                    = "sign_count";
+    private static final String COLUMN_CREATED_DATE                  = "created_date";
+    private static final String COLUMN_MODIFIED_DATE                 = "modified_date";
     // @formatter:on
 
     private static final String INSERT_REGISTRATION_SQL =
-            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_REGISTRATION_SQL =
             "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?";
 
     private static final String UPDATE_SIGN_COUNT_SQL =
-            "UPDATE %s SET %s = ? WHERE %s = ? AND %s < ?";
+            "UPDATE %s SET %s = ?, %s = ? WHERE %s = ? AND %s < ?";
 
     private final JdbcOperations jdbcOperations;
     private final String insertSql;
@@ -103,7 +109,8 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
                 COLUMN_KEY_ID, COLUMN_TEAM_ID, COLUMN_BUNDLE_ID, COLUMN_CLIENT_ID,
                 COLUMN_AAGUID, COLUMN_CREDENTIAL_ID,
                 COLUMN_ATTESTATION_CERTIFICATE_CHAIN, COLUMN_RECEIPT,
-                COLUMN_PUBLIC_KEY, COLUMN_JWKS, COLUMN_SIGN_COUNT);
+                COLUMN_PUBLIC_KEY, COLUMN_JWKS, COLUMN_SIGN_COUNT,
+                COLUMN_CREATED_DATE, COLUMN_MODIFIED_DATE);
         this.selectSql = String.format(SELECT_REGISTRATION_SQL,
                 COLUMN_KEY_ID, COLUMN_TEAM_ID, COLUMN_BUNDLE_ID, COLUMN_CLIENT_ID,
                 COLUMN_AAGUID, COLUMN_CREDENTIAL_ID,
@@ -111,13 +118,14 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
                 COLUMN_PUBLIC_KEY, COLUMN_JWKS, COLUMN_SIGN_COUNT,
                 tableName, COLUMN_KEY_ID);
         this.updateSignCountSql = String.format(UPDATE_SIGN_COUNT_SQL, tableName,
-                COLUMN_SIGN_COUNT, COLUMN_KEY_ID, COLUMN_SIGN_COUNT);
+                COLUMN_SIGN_COUNT, COLUMN_MODIFIED_DATE, COLUMN_KEY_ID, COLUMN_SIGN_COUNT);
     }
 
     @Override
     public void saveRegistration(AppAttestAttestationRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
         Assert.hasText(registration.getKeyId(), "keyId must not be empty");
+        Timestamp now = Timestamp.from(Instant.now());
         this.jdbcOperations.update(this.insertSql, ps -> {
             int index = 0;
             ps.setString(++index, registration.getKeyId());
@@ -131,6 +139,8 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
             ps.setBytes(++index, registration.getPublicKey().getEncoded());
             ps.setString(++index, registration.getJwks());
             ps.setLong(++index, registration.getSignCount());
+            ps.setTimestamp(++index, now);
+            ps.setTimestamp(++index, now);
         });
     }
 
@@ -161,7 +171,8 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
 
     @Override
     public void updateSignCount(String keyId, long newSignCount) {
-        this.jdbcOperations.update(this.updateSignCountSql, newSignCount, keyId, newSignCount);
+        Timestamp now = Timestamp.from(Instant.now());
+        this.jdbcOperations.update(this.updateSignCountSql, newSignCount, now, keyId, newSignCount);
     }
 
     /**
