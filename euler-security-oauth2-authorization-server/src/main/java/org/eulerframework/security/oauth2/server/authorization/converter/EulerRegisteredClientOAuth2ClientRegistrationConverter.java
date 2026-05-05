@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
  * A {@link Converter} that converts the provided {@link RegisteredClient} to an
  * {@link OAuth2ClientRegistration}.
  *
- * <h3>Extensions over Spring Security's default {@code RegisteredClientOAuth2ClientRegistrationConverter}:</h3>
+ * <h2>Extensions over Spring Security's default {@code RegisteredClientOAuth2ClientRegistrationConverter}:</h2>
  * <ul>
  *   <li><b>inline jwks</b> — when the client does not have a {@code jwk_set_url} configured but has
  *       a {@link JWKSet} stored in {@link ClientSettings} (under

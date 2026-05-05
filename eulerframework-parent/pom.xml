@@ -28,10 +28,6 @@
 
         <euler-common.version>2.0.0-SNAPSHOT</euler-common.version>
 
-        <commons-codec.version>1.17.0</commons-codec.version>
-        <commons-lang3.version>3.20.0</commons-lang3.version>
-        <commons-io.version>2.16.1</commons-io.version>
-        <guava.version>33.1.0-jre</guava.version>
 
         <jakarta-servlet-api.version>6.0.0</jakarta-servlet-api.version>
         <jakarta-jsp-api.version>3.1.1</jakarta-jsp-api.version>
@@ -40,33 +36,37 @@
         <jakarta-inject-api.version>2.0.1</jakarta-inject-api.version>
         <jakarta-validation-api.version>3.1.0</jakarta-validation-api.version>
 
-        <netty.version>4.1.115.Final</netty.version>
 
         <spring-framework.version>7.0.5</spring-framework.version>
         <spring-security.version>7.0.3</spring-security.version>
         <spring-data.version>4.0.3</spring-data.version>
 
-        <querydsl.version>5.1.0</querydsl.version>
 
         <!--        <aspectJ.version>1.8.9</aspectJ.version>-->
-        <jasig.version>3.2.2</jasig.version>
-
-        <lettuce.version>6.3.2.RELEASE</lettuce.version>
-        <jedis.version>5.1.2</jedis.version>
-        <hibernate.version>6.5.0.Final</hibernate.version>
-
-        <slf4j.version>2.0.16</slf4j.version>
-        <log4j2.version>2.24.2</log4j2.version>
-
-        <jackson.version>3.1.1</jackson.version>
-        <gson.version>2.11.0</gson.version>
+        <assertj.version>3.27.3</assertj.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
+        <commons-codec.version>1.17.0</commons-codec.version>
+        <commons-io.version>2.16.1</commons-io.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
         <fastjson2.version>2.0.61</fastjson2.version>
+        <gson.version>2.11.0</gson.version>
+        <guava.version>33.1.0-jre</guava.version>
+        <h2.version>2.3.232</h2.version>
+        <hibernate.version>6.5.0.Final</hibernate.version>
+        <jackson.version>3.1.1</jackson.version>
+        <jasig.version>3.2.2</jasig.version>
+        <jedis.version>5.1.2</jedis.version>
+        <lettuce.version>6.3.2.RELEASE</lettuce.version>
+        <log4j2.version>2.24.2</log4j2.version>
+        <mockito.version>5.15.2</mockito.version>
+        <netty.version>4.1.115.Final</netty.version>
+        <nimbus-jose-jwt.version>10.3</nimbus-jose-jwt.version>
+        <querydsl.version>5.1.0</querydsl.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <webauthn4j.version>0.31.2.RELEASE</webauthn4j.version>
 
         <junit.version>4.13.2</junit.version>
         <jupiter.version>6.0.3</jupiter.version>
-
-        <webauthn4j.version>0.31.2.RELEASE</webauthn4j.version>
-        <nimbus-jose-jwt.version>10.3</nimbus-jose-jwt.version>
 
         <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     </properties>
@@ -203,7 +203,7 @@
                 <version>${log4j2.version}</version>
             </dependency>
 
-            <!-- Jackson -->
+            <!-- Jackson 3.x (tools.jackson) -->
             <dependency>
                 <groupId>tools.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
@@ -298,6 +298,11 @@
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
@@ -309,6 +314,28 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- AssertJ -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- Mockito -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- H2 in-memory DB -->
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

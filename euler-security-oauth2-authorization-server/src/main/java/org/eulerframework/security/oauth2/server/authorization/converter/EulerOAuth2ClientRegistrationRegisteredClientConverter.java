@@ -49,7 +49,7 @@ import java.util.UUID;
  * A {@link Converter} that converts the provided {@link OAuth2ClientRegistration} to a
  * {@link RegisteredClient}.
  *
- * <h3>Extensions over Spring Security's default {@link OAuth2ClientRegistrationRegisteredClientConverter}:</h3>
+ * <h2>Extensions over Spring Security's default {@link OAuth2ClientRegistrationRegisteredClientConverter}:</h2>
  * <ul>
  *   <li><b>private_key_jwt</b> — full support for RFC 7591 §2 {@code private_key_jwt} authentication.
  *       Extracts client public keys from the {@code jwks} claim and sets
