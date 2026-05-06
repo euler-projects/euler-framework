@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.oauth2.server.authorization.jwk;
+package org.eulerframework.security.jwk;
 
 import java.util.List;
 
@@ -43,22 +43,7 @@ public interface JwkRepository {
      */
     List<JwkEntry> load();
 
-    /**
-     * Upsert an entry by its {@link JwkEntry#kid() kid}: if an entry with the
-     * same kid already exists it is replaced, otherwise the entry is inserted.
-     * Implementations MUST NOT constrain the incoming {@link JwkStatus} — any
-     * lifecycle value is acceptable (pre-configured bootstrap keys may land
-     * directly as {@link JwkStatus#ACTIVE}, while freshly generated keys
-     * typically land as {@link JwkStatus#PENDING}).
-     *
-     * <p>Upsert atomicity is NOT guaranteed at this layer: service-backed
-     * implementations perform an exists-then-write sequence against the
-     * backing {@code JwkManageService} and rely on the service's primary-key
-     * uniqueness constraint as the authoritative guarantee (mirrors
-     * {@code AppAttestServiceRegisteredAppRepository.save}).
-     *
-     * @param entry the entry to persist; must not be {@code null}
-     * @return the saved entry (implementations may return the argument verbatim)
-     */
-    JwkEntry save(JwkEntry entry);
+    void save(JwkEntry entry);
+
+    String fingerprint();
 }
