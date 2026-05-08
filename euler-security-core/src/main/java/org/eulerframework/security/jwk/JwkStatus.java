@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.oauth2.server.authorization.jwk;
+package org.eulerframework.security.jwk;
 
 /**
  * JWK lifecycle status tracked outside the key material itself.
