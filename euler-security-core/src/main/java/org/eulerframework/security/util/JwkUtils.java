@@ -21,6 +21,7 @@ import com.nimbusds.jose.jwk.JWK;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.security.jwk.JwkEntry;
 import org.eulerframework.security.jwk.JwkStatus;
+import org.springframework.util.Assert;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -61,19 +62,23 @@ public final class JwkUtils {
     }
 
     public static byte[] fingerprint(JWK jwk, JwkStatus status) {
+        Assert.notNull(jwk, "jwk can not be null");
+        Assert.notNull(status, "status can not be null");
+        // RFC 7638 thumbprint is computed over the key's required members only and is
+        // identical for public/private variants, so use the JWK directly to also cover oct keys.
         String thumbprint;
         try {
-            thumbprint = jwk.toPublicJWK().computeThumbprint().toString();
+            thumbprint = jwk.computeThumbprint().toString();
         } catch (JOSEException e) {
             throw ExceptionUtils.asRuntimeException(e);
         }
         String kid = (jwk.getKeyID() == null) ? "" : jwk.getKeyID();
         String alg = (jwk.getAlgorithm() == null) ? "" : jwk.getAlgorithm().getName();
         String use = (jwk.getKeyUse() == null) ? "" : jwk.getKeyUse().getValue();
-        String iat = (jwk.getIssueTime() == null) ? "" : String.valueOf(jwk.getIssueTime().getTime());
-        String raw = status + "|" + kid + "|" + alg + "|" + use + "|" + iat + "|" + thumbprint;
-        MessageDigest md = getDigest();
-        return md.digest(raw.getBytes(StandardCharsets.UTF_8));
+        // Align with RFC 7517 NumericDate (seconds) instead of Date#getTime (milliseconds).
+        String iat = (jwk.getIssueTime() == null) ? "" : String.valueOf(jwk.getIssueTime().getTime() / 1000L);
+        String raw = status.name() + "\n" + kid + "\n" + alg + "\n" + use + "\n" + iat + "\n" + thumbprint;
+        return getDigest().digest(raw.getBytes(StandardCharsets.UTF_8));
     }
 
     private static MessageDigest getDigest() {
