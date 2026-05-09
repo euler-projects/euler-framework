@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * actual mutation, so concurrent writers cannot leave two ACTIVE entries
  * under the same algorithm.
  */
-public class InMemoryJwkRepository implements org.eulerframework.security.jwk.JwkRepository {
+public class InMemoryJwkRepository implements JwkRepository {
 
     private final Object writeLock = new Object();
     private final ConcurrentHashMap<String, JwkEntry> store = new ConcurrentHashMap<>();

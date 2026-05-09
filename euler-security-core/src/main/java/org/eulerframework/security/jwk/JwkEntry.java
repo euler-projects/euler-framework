@@ -107,6 +107,29 @@ public record JwkEntry(@Nonnull JWK jwk, @Nonnull JwkStatus status, @Nonnull byt
                 jwk.getExpirationTime() != null && jwk.getExpirationTime().before(new Date());
     }
 
+    /**
+     * {@code true} when the entry is currently eligible to act as a signing
+     * candidate on the management plane, i.e. all three conditions hold:
+     * <ul>
+     *     <li>{@code status == }{@link JwkStatus#ACTIVE};</li>
+     *     <li>{@link #isPending()} is {@code false} &mdash; the JWK's
+     *         {@code nbf} (not-before) claim, if any, has already elapsed;</li>
+     *     <li>{@link #isExpired()} is {@code false} &mdash; the JWK's
+     *         {@code exp} (expiration) claim, if any, is still in the future.</li>
+     * </ul>
+     *
+     * <p>The private-key requirement is deliberately <b>not</b> folded in:
+     * {@code isActive()} tracks the lifecycle window, whereas
+     * {@link #hasPrivateKey()} tracks structural key material. Signing
+     * selectors compose the two explicitly so the two concerns stay
+     * independently testable.
+     */
+    public boolean isActive() {
+        return JwkStatus.ACTIVE.equals(this.status)
+                && !isPending()
+                && !isExpired();
+    }
+
     @Nonnull
     @Override
     public String toString() {

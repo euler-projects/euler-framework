@@ -24,6 +24,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.annotation.Nonnull;
 import org.eulerframework.security.jwk.JwkEntry;
 import org.eulerframework.security.jwk.JwkRepository;
+import org.eulerframework.security.jwk.JwkStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +45,30 @@ import java.util.concurrent.locks.ReentrantLock;
  * current snapshot, and a matching fingerprint short-circuits the rebuild.
  * Concurrent reloads are serialized through a {@link ReentrantLock}.
  *
- * <p>During a rebuild the entries are filtered and ordered so that:
+ * <h2>Two projections, one fingerprint</h2>
+ * Every reload produces two {@link JWKSet} projections that share the same
+ * fingerprint:
  * <ul>
- *     <li>only signature keys are kept (verification use);</li>
- *     <li>expired / RETIRED entries are dropped;</li>
- *     <li>entries carrying a private key come first (signing candidates),
- *         and within each group newer {@code iat} wins;</li>
- *     <li>PENDING entries are pushed to the tail so they are never picked
- *         for signing while still visible for verification warm-up.</li>
+ *     <li><b>publication</b> &mdash; served by this instance itself
+ *         (implements {@link JWKSource}); feeds the {@code /oauth2/jwks}
+ *         endpoint. Includes every {@link JwkStatus#PENDING},
+ *         {@link JwkStatus#ACTIVE}, {@link JwkStatus#DEPRECATED} and
+ *         {@link JwkStatus#VERIFY_ONLY} signature key so verifiers can warm up
+ *         their caches. Expired and {@link JwkStatus#RETIRED} entries are
+ *         dropped. Entries are sorted by {@code kid} for a stable response
+ *         body; the ordering has no signing semantics because the signing
+ *         path uses the separate {@link #signingJwkSource()} view.</li>
+ *     <li><b>signing</b> &mdash; served by {@link #signingJwkSource()}; feeds
+ *         the {@code JwtEncoder}. Restricted to
+ *         {@link JwkEntry#isActive() active} entries carrying a private key,
+ *         so the encoder can never pick up a PENDING / DEPRECATED /
+ *         VERIFY_ONLY key or one whose {@code nbf}/{@code exp} window is not
+ *         currently open. Bundled repositories enforce "at most one ACTIVE
+ *         key per algorithm", which keeps the projection unambiguous per
+ *         algorithm; the encoder additionally installs a deterministic
+ *         {@code JwkSelector} tie-breaker to stay safe against custom
+ *         {@code JwkManageService} implementations that may not carry that
+ *         guarantee.</li>
  * </ul>
  */
 public final class ManagedJwkSource implements JWKSource<SecurityContext> {
@@ -62,6 +79,13 @@ public final class ManagedJwkSource implements JWKSource<SecurityContext> {
 
     private volatile LiveState state;
 
+    private final JWKSource<SecurityContext> signingJwkSource = (jwkSelector, context) -> {
+        if (this.state == null) {
+            this.reload();
+        }
+        return jwkSelector.select(this.state.signingJwks());
+    };
+
     public ManagedJwkSource(JwkRepository repository) {
         this.repository = repository;
     }
@@ -71,7 +95,25 @@ public final class ManagedJwkSource implements JWKSource<SecurityContext> {
         if (this.state == null) {
             this.reload();
         }
-        return jwkSelector.select(this.state.jwks());
+        return jwkSelector.select(this.state.publicationJwks());
+    }
+
+    /**
+     * Signing-only view over the same live state, restricted to
+     * {@linkplain JwkEntry#isActive() active} entries with a private key.
+     * Intended to be injected into {@code NimbusJwtEncoder} so signing can
+     * never fall back onto a PENDING / DEPRECATED / VERIFY_ONLY key, nor onto
+     * an ACTIVE key whose {@code nbf} has not yet elapsed or whose
+     * {@code exp} has already passed.
+     *
+     * <p>The returned source is backed by the same {@link LiveState} as
+     * {@link #get(JWKSelector, SecurityContext)}; both views refresh together
+     * on {@link #reload()}.
+     *
+     * @return a {@link JWKSource} exposing only active signing candidates
+     */
+    public JWKSource<SecurityContext> signingJwkSource() {
+        return this.signingJwkSource;
     }
 
     public void reload() {
@@ -84,28 +126,43 @@ public final class ManagedJwkSource implements JWKSource<SecurityContext> {
                 return;
             }
 
-            List<JWK> jwks = this.repository.load().stream()
+            List<JwkEntry> publication = this.repository.load().stream()
                     .filter(JwkEntry::isSignatureKey)
                     .filter(entry -> !entry.isExpired()) // drop expired / RETIRED entries
-                    // Put private-key holders first; among them, newer iat first; PENDING tail.
-                    .sorted(Comparator
-                            .comparing(JwkEntry::hasPrivateKey) // private-key holders last (before reverse)
-                            .thenComparing(JwkEntry::iat) // newer iat last (before reverse)
-                            .reversed() // reverse: private-key holders first, newer iat first
-                            .thenComparing(JwkEntry::isPending) // PENDING pushed to the tail
-                    )
+                    // Stable response ordering by kid; the ordering carries no
+                    // signing semantics because signing is served by the
+                    // separate signingJwkSource view.
+                    .sorted(Comparator.comparing(JwkEntry::kid))
+                    .toList();
+
+            List<JWK> publicationJwks = publication.stream()
                     .map(JwkEntry::jwk)
                     .toList();
 
-            JWKSet jwkSet = new JWKSet(jwks);
+            // Signing view: strict lifecycle-based filter (status == ACTIVE and
+            // nbf/exp window currently open) plus the private-key requirement.
+            // Bundled repositories enforce "at most one ACTIVE key per algorithm",
+            // so per-algorithm this list is expected to contain at most one entry;
+            // NimbusJwtEncoder carries a deterministic tie-breaker as an extra
+            // line of defense against custom JwkManageService implementations.
+            List<JWK> signingJwks = publication.stream()
+                    .filter(JwkEntry::isActive)
+                    .filter(JwkEntry::hasPrivateKey)
+                    .map(JwkEntry::jwk)
+                    .toList();
 
-            LiveState next = new LiveState(jwkSet, nextFingerprint);
+            LiveState next = new LiveState(
+                    new JWKSet(publicationJwks),
+                    new JWKSet(signingJwks),
+                    nextFingerprint);
 
             this.state = next;
 
             if (LOGGER.isDebugEnabled()) {
-                List<String> kids = jwks.stream().map(JWK::getKeyID).toList();
-                LOGGER.debug("Jwk source reload: fingerprint: {}, sorted kids: {}", next.fingerprint, kids);
+                List<String> publicationKids = publicationJwks.stream().map(JWK::getKeyID).toList();
+                List<String> signingKids = signingJwks.stream().map(JWK::getKeyID).toList();
+                LOGGER.debug("Jwk source reload: fingerprint: {}, publication kids: {}, signing kids: {}",
+                        next.fingerprint, publicationKids, signingKids);
             }
         } finally {
             this.reloadLock.unlock();
@@ -113,6 +170,8 @@ public final class ManagedJwkSource implements JWKSource<SecurityContext> {
     }
 
 
-    record LiveState(@Nonnull JWKSet jwks, @Nonnull String fingerprint) {
+    record LiveState(@Nonnull JWKSet publicationJwks,
+                     @Nonnull JWKSet signingJwks,
+                     @Nonnull String fingerprint) {
     }
 }
