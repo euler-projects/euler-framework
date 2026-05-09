@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,10 +27,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
-import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,28 +43,18 @@ import java.util.Set;
  *   <li>{@link #loadFromKeyFile(Path)} — production-recommended. The file
  *       MUST contain exactly 32 random bytes and have POSIX permissions
  *       {@code 0600}.</li>
- *   <li>{@link #deriveFromPassphrase(char[], String, String)} — development
- *       only. Derives 32 bytes via PBKDF2-HMAC-SHA256 (600k iterations, salt
- *       derived from a caller-supplied namespace plus {@code kid}).</li>
+ *   <li>{@link #deriveFromPassphrase(char[])} — development only. Derives
+ *       32 bytes via SHA-256 hash of the passphrase.</li>
  * </ul>
  *
- * <p>{@link #load(String, String, String, String, String)} is a convenience
- * that selects between the two according to the supplied configuration inputs.
+ * <p>{@link #load(String, String, String, Map)} selects between the two
+ * according to the top-level {@code keyFile} and algorithm-specific properties.
  */
 public final class KeyMaterialLoader {
 
     private static final Logger log = LoggerFactory.getLogger(KeyMaterialLoader.class);
 
-    /**
-     * Default PBKDF2 salt namespace used when callers do not supply one.
-     * Applications that must remain bug-compatible with a pre-existing
-     * deployment SHOULD pass their historical namespace explicitly.
-     */
-    public static final String DEFAULT_SALT_NAMESPACE = "euler-data-key/";
-
     private static final int KEY_LENGTH_BYTES = 32;
-    private static final int PBKDF2_ITERATIONS = 600_000;
-    private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256";
 
     private static final Set<PosixFilePermission> ALLOWED_KEY_FILE_PERMS = EnumSet.of(
             PosixFilePermission.OWNER_READ,
@@ -75,24 +64,40 @@ public final class KeyMaterialLoader {
     }
 
     /**
-     * Select a source by configuration inputs. {@code keyFile} takes
-     * precedence; when blank, falls back to {@code passphrase}. Both blank is
-     * a fail-fast error. A blank {@code saltNamespace} falls back to
-     * {@link #DEFAULT_SALT_NAMESPACE}; only consulted for the passphrase path.
+     * Load key material using a top-level {@code keyFile} path (takes
+     * precedence) or algorithm-specific {@code properties}. Expected
+     * properties for the {@code AES-256-GCM} family:
+     * <ul>
+     *   <li>{@code passphrase} — derives 32 bytes via SHA-256. Development
+     *       only.</li>
+     * </ul>
+     *
+     * <p>If neither {@code keyFile} nor any recognised property is present
+     * the method throws {@link IllegalStateException} with guidance on which
+     * configuration to add.
+     *
+     * @param alg        algorithm name (for error messages)
+     * @param kid        key identifier (for error messages)
+     * @param keyFile    path to the key file; checked first if non-blank
+     * @param properties algorithm-specific configuration properties
+     * @return 32-byte key material
      */
-    public static byte[] load(String alg, String kid, String keyFile, String passphrase, String saltNamespace) {
+    public static byte[] load(String alg, String kid, String keyFile, Map<String, String> properties) {
         Assert.hasText(alg, "alg must not be blank");
         Assert.hasText(kid, "kid must not be blank");
+    
         if (StringUtils.hasText(keyFile)) {
             return loadFromKeyFile(Paths.get(keyFile));
         }
-        if (StringUtils.hasText(passphrase)) {
-            String effectiveNamespace = StringUtils.hasText(saltNamespace)
-                    ? saltNamespace : DEFAULT_SALT_NAMESPACE;
-            return deriveFromPassphrase(passphrase.toCharArray(), kid, effectiveNamespace);
+        if (properties != null) {
+            String passphrase = properties.get("passphrase");
+            if (StringUtils.hasText(passphrase)) {
+                return deriveFromPassphrase(passphrase.toCharArray());
+            }
         }
         throw new IllegalStateException("No key material source configured for alg '"
-                + alg + "', kid '" + kid + "' — provide either 'key-file' or 'passphrase'");
+                + alg + "', kid '" + kid + "' — provide 'key-file' or 'passphrase' "
+                + "in the key's properties");
     }
 
     /**
@@ -123,33 +128,23 @@ public final class KeyMaterialLoader {
     }
 
     /**
-     * Derive 32 bytes from a passphrase via PBKDF2-HMAC-SHA256 (600k
-     * iterations, salt derived from {@code saltNamespace + kid}). Development
-     * only; emits a {@code WARN} on every call.
+     * Derive 32 bytes from a passphrase via SHA-256. The derived key is solely
+     * a function of the passphrase — no external parameters are required.
+     * Development only; emits a {@code WARN} on every call.
      */
-    public static byte[] deriveFromPassphrase(char[] passphrase, String kid, String saltNamespace) {
+    public static byte[] deriveFromPassphrase(char[] passphrase) {
         Assert.notNull(passphrase, "passphrase must not be null");
-        Assert.hasText(kid, "kid must not be blank");
-        Assert.hasText(saltNamespace, "saltNamespace must not be blank");
         if (passphrase.length == 0) {
             throw new IllegalStateException("passphrase must not be empty");
         }
-        log.warn("KEY material is derived from a passphrase (kid={}, saltNamespace={}). " +
-                "Passphrase mode is for development only and MUST NOT be used in production.",
-                kid, saltNamespace);
-        byte[] salt = deriveSalt(saltNamespace, kid);
+        log.warn("KEY material is derived from a passphrase. " +
+                "Passphrase mode is for development only and MUST NOT be used in production.");
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
-            PBEKeySpec spec = new PBEKeySpec(passphrase, salt, PBKDF2_ITERATIONS, KEY_LENGTH_BYTES * 8);
-            try {
-                return factory.generateSecret(spec).getEncoded();
-            }
-            finally {
-                spec.clearPassword();
-            }
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            return sha256.digest(new String(passphrase).getBytes(StandardCharsets.UTF_8));
         }
-        catch (GeneralSecurityException ex) {
-            throw new IllegalStateException("Failed to derive KEY material from passphrase", ex);
+        catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 unavailable", ex);
         }
     }
 
@@ -175,14 +170,4 @@ public final class KeyMaterialLoader {
         }
     }
 
-    private static byte[] deriveSalt(String saltNamespace, String kid) {
-        try {
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            byte[] full = sha256.digest((saltNamespace + kid).getBytes(StandardCharsets.UTF_8));
-            return Arrays.copyOf(full, 16);
-        }
-        catch (GeneralSecurityException ex) {
-            throw new IllegalStateException("SHA-256 unavailable for PBKDF2 salt derivation", ex);
-        }
-    }
 }
