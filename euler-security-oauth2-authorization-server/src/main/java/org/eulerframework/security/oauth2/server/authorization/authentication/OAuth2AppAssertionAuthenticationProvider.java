@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,16 +127,17 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         this.validateScope(assertionAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(assertionAuthenticationToken.getScopes());
 
-        // Resolve anonymous user by keyId
-        String keyId = assertionAuthenticationToken.getKeyId();
-        AppAttestUser attestUser = new AppAttestUser(keyId);
+        // Resolve anonymous user by verified attestation registration
+        AppAttestAttestationRegistration verifiedAppRegistration = assertionAuthenticationToken.getVerifiedAppRegistration();
+        AppAttestUser attestUser = new AppAttestUser(
+                verifiedAppRegistration.getKeyId(), verifiedAppRegistration.getTeamId(), verifiedAppRegistration.getBundleId(), verifiedAppRegistration.getPublicKey());
         UserDetails user;
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFountException e) {
             // First-time use: auto-create anonymous user
             if (this.logger.isDebugEnabled()) {
-                this.logger.debug("User not found for keyId '{}', creating new anonymous user", keyId);
+                this.logger.debug("User not found for keyId '{}', creating new anonymous user", verifiedAppRegistration.getKeyId());
             }
             user = this.userDetailsService.createUser(attestUser);
         }
@@ -184,8 +186,8 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
 
         // ----- ID token -----
         // NOTE: No refresh token is generated for device-assertion grant.
-        // Each token request requires full attestation verification (kid + assertion + challenge),
-        // so a refresh token provides no additional security benefit.
+        // Each token request requires full attestation verification (kid + challenge +
+        // either attestation or assertion), so a refresh token provides no additional security benefit.
         OidcIdToken idToken;
         if (tokenContext.getAuthorizedScopes().contains(OidcScopes.OPENID)) {
             // @formatter:off

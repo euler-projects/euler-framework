@@ -16,6 +16,7 @@
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import jakarta.annotation.Nullable;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
@@ -27,24 +28,24 @@ import java.util.Set;
 
 
 public class OAuth2AppAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
-    private final String keyId;
+    private final AppAttestAttestationRegistration verifiedAppRegistration;
     private final Set<String> scopes;
 
     public OAuth2AppAssertionAuthenticationToken(
-            String keyId,
+            AppAttestAttestationRegistration verifiedAppRegistration,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
         super(EulerAuthorizationGrantType.APP_ASSERTION, clientPrincipal, additionalParameters);
-        this.keyId = keyId;
+        this.verifiedAppRegistration = verifiedAppRegistration;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
                         Collections.emptySet());
     }
 
-    public String getKeyId() {
-        return keyId;
+    public AppAttestAttestationRegistration getVerifiedAppRegistration() {
+        return verifiedAppRegistration;
     }
 
     public Set<String> getScopes() {

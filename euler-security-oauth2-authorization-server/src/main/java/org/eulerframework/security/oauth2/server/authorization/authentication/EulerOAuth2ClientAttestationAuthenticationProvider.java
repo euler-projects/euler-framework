@@ -72,8 +72,8 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
  *   <li>Validates RFC 6749 {@code client_id} consistency if the request carried one.</li>
  * </ol>
  * <p>
- * After successful authentication, the verified {@code kid} is preserved as the
- * authenticated token's credentials for downstream components.
+ * After successful authentication, the verified {@link AppAttestAttestationRegistration}
+ * is preserved as the authenticated token's credentials for downstream components.
  *
  * @see EulerOAuth2ClientAttestationAuthenticationConverter
  * @see EulerOAuth2ClientAttestationVerifier
@@ -91,7 +91,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             RegisteredClientRepository registeredClientRepository,
             EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier) {
         Assert.notNull(registeredClientRepository, "registeredClientRepository must not be null");
-        Assert.notNull(oauth2ClientAttestationVerifier, "clientAttestationVerifier must not be null");
+        Assert.notNull(oauth2ClientAttestationVerifier, "oauth2ClientAttestationVerifier must not be null");
         this.registeredClientRepository = registeredClientRepository;
         this.oauth2ClientAttestationVerifier = oauth2ClientAttestationVerifier;
     }
@@ -114,13 +114,13 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
         }
 
         Map<String, Object> additionalParams = clientAuthentication.getAdditionalParameters();
-        EulerOAuth2ClientAttestationType auth2ClientAttestationType = (EulerOAuth2ClientAttestationType) additionalParams
+        EulerOAuth2ClientAttestationType clientAttestationType = (EulerOAuth2ClientAttestationType) additionalParams
                 .get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
 
-        final String resolvedKeyId;
         final String resolvedClientId;
+        final AppAttestAttestationRegistration appRegistration;
 
-        if (EulerOAuth2ClientAttestationType.JWT.equals(auth2ClientAttestationType)) {
+        if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
             String attestationJwt = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION);
             String attestationPopJwt = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP);
 
@@ -132,9 +132,10 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                     ? this.oauth2ClientAttestationVerifier.verify(attestationPopJwt)
                     : this.oauth2ClientAttestationVerifier.verify(attestationJwt, attestationPopJwt);
 
-            resolvedKeyId = result.keyId();
+            appRegistration = result.registration();
+
             resolvedClientId = result.clientId();
-        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(auth2ClientAttestationType)) {
+        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)) {
             if (this.appleAppAttestValidationService == null) {
                 throw new OAuth2AuthenticationException(
                         new OAuth2Error(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,
@@ -143,38 +144,35 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             }
 
             String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.KEY_ID);
-            String attestation = (String) additionalParams.get(EulerOAuth2ParameterNames.ATTESTATION);
-            String assertion = (String) additionalParams.get(EulerOAuth2ParameterNames.ASSERTION);
             String challenge = (String) additionalParams.get(EulerOAuth2ParameterNames.CHALLENGE);
-
-            // TODO: Apple App Attest Attestation during OAuth2 Client Attestation is not yet supported
-            if (StringUtils.hasText(attestation)) {
-                throw new OAuth2AuthenticationException(
-                        new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
-                                "Passing Apple App Attest Attestation during OAuth2 Client Attestation is not yet supported", null)
-                );
-            }
 
             if (!StringUtils.hasText(keyId)) {
                 throw invalidClientAttestation(EulerOAuth2ParameterNames.KEY_ID);
-            }
-
-            if (!StringUtils.hasText(assertion)) {
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.ASSERTION);
             }
 
             if (!StringUtils.hasText(challenge)) {
                 throw invalidClientAttestation(EulerOAuth2ParameterNames.CHALLENGE);
             }
 
-            AppAttestAttestationRegistration registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
-
-            resolvedKeyId = registration.getKeyId();
+            String attestation = (String) additionalParams.get(EulerOAuth2ParameterNames.ATTESTATION);
+            if (StringUtils.hasText(attestation)) {
+                if (logger.isTraceEnabled()
+                        && StringUtils.hasText((String) additionalParams.get(EulerOAuth2ParameterNames.ASSERTION))) {
+                    logger.trace("attestation present, assertion ignored for keyId '{}'", keyId);
+                }
+                appRegistration = this.appleAppAttestValidationService.validateAttestation(keyId, attestation, challenge);
+            } else {
+                String assertion = (String) additionalParams.get(EulerOAuth2ParameterNames.ASSERTION);
+                if (!StringUtils.hasText(assertion)) {
+                    throw invalidClientAttestation(EulerOAuth2ParameterNames.ASSERTION);
+                }
+                appRegistration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
+            }
 
             // Resolve client_id directly from the attestation registration: it has been
             // bound at registration time (deterministic base64url(SHA-256(appId)) for
             // STATIC clients, or the dynamically issued identifier for DYNAMIC clients).
-            resolvedClientId = registration.getClientId();
+            resolvedClientId = appRegistration.getClientId();
         } else {
             throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }
@@ -206,9 +204,9 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             throw invalidClient("authentication_method");
         }
 
-        // Return authenticated token with keyId as credentials for downstream extraction
+        // Return authenticated token with the verified attestation registration as credentials for downstream extraction
         return new OAuth2ClientAuthenticationToken(registeredClient,
-                EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, resolvedKeyId);
+                EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, appRegistration);
     }
 
     @Override

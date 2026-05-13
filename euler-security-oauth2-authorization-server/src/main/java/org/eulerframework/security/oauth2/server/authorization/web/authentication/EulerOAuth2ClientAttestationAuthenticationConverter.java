@@ -68,30 +68,30 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
             return null;
         }
 
-        EulerOAuth2ClientAttestationType auth2ClientAttestationType = attestationType != null
+        EulerOAuth2ClientAttestationType clientAttestationType = attestationType != null
                 ? EulerOAuth2ClientAttestationType.parse(attestationType)
                 : EulerOAuth2ClientAttestationType.JWT;
 
         // 2. Collect all raw attestation data — no parsing, no DB lookup
         Map<String, Object> additionalParams = new LinkedHashMap<>();
-        additionalParams.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE, auth2ClientAttestationType);
+        additionalParams.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE, clientAttestationType);
 
-        if (EulerOAuth2ClientAttestationType.JWT.equals(auth2ClientAttestationType)) {
+        if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
             // Unlike the draft, we treat OAuth-Client-Attestation as an optional header.
             // As long as the public key has not changed, it can be omitted.
             // However, if OAuth-Client-Attestation is omitted, the PoP JWT header must carry a verified kid.
             copyOptional(attestationJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION, additionalParams);
             copyRequired(attestationPopJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParams);
-        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(auth2ClientAttestationType)) {
-            // Unless the App Attest key is regenerated (causing attestation data to change),
-            // attestation data is not required since it was already submitted and verified at device registration.
-            copyOptional(request, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
+        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)) {
 
             // Unlike standard JWT headers, Apple App Attest attestation and assertion data
             // cannot carry a kid, so it must be sent as a separate parameter.
             copyRequired(request, EulerOAuth2ParameterNames.KEY_ID, additionalParams);
 
             copyRequired(request, EulerOAuth2ParameterNames.CHALLENGE, additionalParams);
+            // Unless the App Attest key is regenerated (causing attestation data to change),
+            // attestation data is not required since it was already submitted and verified at device registration.
+            copyOptional(request, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
             copyRequired(request, EulerOAuth2ParameterNames.ASSERTION, additionalParams);
         }
 

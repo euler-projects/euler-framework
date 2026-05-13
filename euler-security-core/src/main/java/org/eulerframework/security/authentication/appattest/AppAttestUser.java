@@ -30,14 +30,6 @@ public class AppAttestUser implements Serializable {
     private final String bundleId;
     private final PublicKey publicKey;
 
-    public AppAttestUser(String keyId) {
-        this(keyId, null, null, null);
-    }
-
-    public AppAttestUser(String keyId, PublicKey publicKey) {
-        this(keyId, null, null, publicKey);
-    }
-
     public AppAttestUser(String keyId, String teamId, String bundleId, PublicKey publicKey) {
         this.keyId = keyId;
         this.teamId = teamId;

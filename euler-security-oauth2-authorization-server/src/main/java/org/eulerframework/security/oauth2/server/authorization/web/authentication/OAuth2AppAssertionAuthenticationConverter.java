@@ -24,6 +24,7 @@ import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -43,8 +44,8 @@ import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2At
  * Converts HTTP requests for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type into
  * {@link OAuth2AppAssertionAuthenticationToken} instances.
  * <p>
- * This converter reads the verified {@code keyId} from a request attribute
- * ({@link EulerOAuth2AttestationBasedClientAuthenticationFilter#ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE}) set by
+ * This converter reads the verified {@link AppAttestAttestationRegistration} from a request attribute
+ * ({@link EulerOAuth2AttestationBasedClientAuthenticationFilter#VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE}) set by
  * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter}. If the attribute is absent, the converter returns
  * {@code null} (indicating the request did not pass attestation verification).
  * <p>
@@ -65,10 +66,10 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
             return null;
         }
 
-        // keyId from request attribute (set by EulerOAuth2AttestationBasedClientAuthenticationFilter after successful verification)
-        String keyId = (String) request.getAttribute(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE);
-        if (keyId == null) {
+        // verified attestation registration from request attribute (set by EulerOAuth2AttestationBasedClientAuthenticationFilter after successful verification)
+        AppAttestAttestationRegistration verifiedAppRegistration = (AppAttestAttestationRegistration) request.getAttribute(
+                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE);
+        if (verifiedAppRegistration == null) {
             // Filter did not verify attestation → this request is not attestation-backed
             return null;
         }
@@ -97,7 +98,7 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
         });
 
         return new OAuth2AppAssertionAuthenticationToken(
-                keyId,
+                verifiedAppRegistration,
                 clientPrincipal,
                 scopes,
                 additionalParameters

@@ -20,6 +20,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
@@ -59,8 +60,8 @@ import java.util.Map;
  *   <li><b>{@code attest_jwt_client_auth} clients</b>: Already fully authenticated by
  *       {@link EulerOAuth2ClientAttestationAuthenticationProvider
  *       ClientAttestationAuthenticationProvider}. This filter simply extracts the verified
- *       {@code kid} from the authentication token and sets it as a request attribute
- *       for downstream components.</li>
+ *       {@link AppAttestAttestationRegistration} from the authentication token and sets it
+ *       as a request attribute for downstream components.</li>
  *   <li><b>Standard clients with attestation headers</b> (Scenario A): The client was
  *       authenticated via standard methods (e.g., {@code client_secret_basic}, PKCE).
  *       This filter verifies the attestation data as an additional security signal.</li>
@@ -70,8 +71,9 @@ import java.util.Map;
  * {@code OAuth-Client-Attestation-Type} header:
  * <ul>
  *   <li>{@code jwt} (default) — standard PoP JWT as defined in Section 5.2 of the draft.</li>
- *   <li>{@code apple_app_attest} — Apple App Attest Assertion used as PoP, with parameters
- *       ({@code kid}, {@code assertion}, {@code challenge}) in the request body.</li>
+ *   <li>{@code apple_app_attest} — Apple App Attest used as PoP, with parameters
+ *       ({@code kid}, {@code challenge}, and either {@code attestation} for first-time
+ *       registration or {@code assertion} for subsequent calls) in the request body.</li>
  * </ul>
  *
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
@@ -83,11 +85,11 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
     private final Logger logger = LoggerFactory.getLogger(EulerOAuth2AttestationBasedClientAuthenticationFilter.class);
 
     /**
-     * Request attribute name for the verified key ID.
+     * Request attribute name for the verified {@link AppAttestAttestationRegistration}.
      * Set by this filter after successful attestation verification; read by downstream
      * converters (e.g., {@link org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter}).
      */
-    public static final String ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE = "oauth2.client-attestation.verified.kid";
+    public static final String VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE = "oauth2.client-attestation.verified.attestation";
 
     private final RequestMatcher tokenEndpointMatcher;
 
@@ -124,41 +126,41 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!(auth instanceof OAuth2ClientAuthenticationToken clientAuthentication) || !clientAuthentication.isAuthenticated()) {
+        if (!(auth instanceof OAuth2ClientAuthenticationToken standardClientAuthentication) || !standardClientAuthentication.isAuthenticated()) {
             // Not authenticated via standard client authentication; pass through to downstream filters
             filterChain.doFilter(request, response);
             return;
         }
 
-        String kid = null;
+        AppAttestAttestationRegistration verifiedAppRegistration = null;
         // Standard authentication used a traditional OAuth client authentication method.
         // If the request also carries attestation data, enter enhanced verification logic
         // by reusing the standard attest_jwt_client_auth AuthenticationConverter and AuthenticationProvider.
         if (!EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH
-                .equals(clientAuthentication.getClientAuthenticationMethod())) {
+                .equals(standardClientAuthentication.getClientAuthenticationMethod())) {
 
             try {
                 OAuth2ClientAuthenticationToken convertedAuthentication =
                         (OAuth2ClientAuthenticationToken) this.clientAttestationAuthenticationConverter.convert(request);
                 if (convertedAuthentication != null) { // null means the request carries no attestation data
                     OAuth2ClientAuthenticationToken securitySignalToken = convertToSecuritySignalToken(convertedAuthentication);
-                    OAuth2ClientAuthenticationToken clientAttestationAuthentication =
+                    OAuth2ClientAuthenticationToken enhancedClientAuthentication =
                             (OAuth2ClientAuthenticationToken) this.clientAttestationAuthenticationProvider.authenticate(securitySignalToken);
-                    if (clientAttestationAuthentication == null || !clientAttestationAuthentication.isAuthenticated()) {
+                    if (enhancedClientAuthentication == null || !enhancedClientAuthentication.isAuthenticated()) {
                         throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT));
                     }
 
                     // Verify that the client_id resolved from attestation data matches the
                     // client already authenticated via the standard method (Section 6.4 consistency).
-                    RegisteredClient standardMethodAuthenticatedRegisteredClient = clientAuthentication.getRegisteredClient();
-                    RegisteredClient securitySignalRegisteredClient = clientAttestationAuthentication.getRegisteredClient();
-                    if (standardMethodAuthenticatedRegisteredClient != null &&
-                            securitySignalRegisteredClient != null &&
-                            !standardMethodAuthenticatedRegisteredClient.getClientId().equals(securitySignalRegisteredClient.getClientId())) {
+                    RegisteredClient standardAuthenticatedRegisteredClient = standardClientAuthentication.getRegisteredClient();
+                    RegisteredClient enhancedAuthenticatedRegisteredClient = enhancedClientAuthentication.getRegisteredClient();
+                    if (standardAuthenticatedRegisteredClient != null &&
+                            enhancedAuthenticatedRegisteredClient != null &&
+                            !standardAuthenticatedRegisteredClient.getClientId().equals(enhancedAuthenticatedRegisteredClient.getClientId())) {
                         throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT, "client_id mismatch", null));
                     }
 
-                    kid = getKid(clientAttestationAuthentication);
+                    verifiedAppRegistration = getVerifiedAppRegistration(enhancedClientAuthentication);
                 }
             } catch (OAuth2AuthenticationException ex) {
                 if (this.logger.isTraceEnabled()) {
@@ -168,11 +170,11 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
                 return;
             }
         } else {
-            kid = getKid(clientAuthentication);
+            verifiedAppRegistration = getVerifiedAppRegistration(standardClientAuthentication);
         }
 
-        if (kid != null) {
-            request.setAttribute(ATTESTATION_VERIFIED_KEY_ID_ATTRIBUTE, kid);
+        if (verifiedAppRegistration != null) {
+            request.setAttribute(VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE, verifiedAppRegistration);
         }
         filterChain.doFilter(request, response);
     }
@@ -189,8 +191,8 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
         );
     }
 
-    public static String getKid(Authentication authentication) {
-        return authentication.getCredentials() instanceof String k ? k : null;
+    public static AppAttestAttestationRegistration getVerifiedAppRegistration(Authentication authentication) {
+        return authentication.getCredentials() instanceof AppAttestAttestationRegistration registration ? registration : null;
     }
 
     private void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
