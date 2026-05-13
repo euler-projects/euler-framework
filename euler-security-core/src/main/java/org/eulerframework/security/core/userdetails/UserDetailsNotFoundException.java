@@ -15,8 +15,8 @@
  */
 package org.eulerframework.security.core.userdetails;
 
-public class UserDetailsNotFountException extends RuntimeException {
-    public UserDetailsNotFountException(String principal) {
+public class UserDetailsNotFoundException extends RuntimeException {
+    public UserDetailsNotFoundException(String principal) {
         super("User details match principal '" + principal + "' not found");
     }
 }

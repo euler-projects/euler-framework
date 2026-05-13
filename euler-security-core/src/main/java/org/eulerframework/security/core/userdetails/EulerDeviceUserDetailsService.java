@@ -32,9 +32,9 @@ public interface EulerDeviceUserDetailsService {
      *
      * @param appAttestUser the validated App Attest user containing the device key ID
      * @return the user details for the matching user
-     * @throws UserDetailsNotFountException if no user is found for the given key ID
+     * @throws UserDetailsNotFoundException if no user is found for the given key ID
      */
-    EulerUserDetails loadUserByDeviceUser(AppAttestUser appAttestUser) throws UserDetailsNotFountException;
+    EulerUserDetails loadUserByDeviceUser(AppAttestUser appAttestUser) throws UserDetailsNotFoundException;
 
     /**
      * Create a new user account associated with the given Apple App Attest identity.

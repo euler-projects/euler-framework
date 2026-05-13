@@ -3,7 +3,7 @@ package org.eulerframework.security.authentication.wechat;
 import org.eulerframework.common.http.*;
 import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
-import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
+import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -108,7 +108,7 @@ public class WechatAuthorizationCodeAuthenticationProvider
         UserDetails user;
         try {
             user = this.wechatUserDetailsService.loadUserByWechatUser(wechatUser);
-        } catch (UserDetailsNotFountException ex) {
+        } catch (UserDetailsNotFoundException ex) {
             this.logger.debug("Failed to find user with open ID '" + wechatUser.getOpenId() + "'");
             if (!this.autoCreateUserIfNotExists) {
                 throw ex;

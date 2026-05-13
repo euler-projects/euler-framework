@@ -20,7 +20,7 @@ import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
+import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -102,7 +102,7 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
     private EulerUserDetails loadOrCreateUser(AppAttestUser attestUser) {
         try {
             return this.userDetailsService.loadUserByDeviceUser(attestUser);
-        } catch (UserDetailsNotFountException ex) {
+        } catch (UserDetailsNotFoundException ex) {
             logger.debug("No existing user found for keyId '{}', creating new user", attestUser.getKeyId());
             return this.userDetailsService.createUser(attestUser);
         }

@@ -57,7 +57,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.util.Assert;
 
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
-import org.eulerframework.security.core.userdetails.UserDetailsNotFountException;
+import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 
 /**
@@ -134,7 +134,7 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         UserDetails user;
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);
-        } catch (UserDetailsNotFountException e) {
+        } catch (UserDetailsNotFoundException e) {
             // First-time use: auto-create anonymous user
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("User not found for keyId '{}', creating new anonymous user", verifiedAppRegistration.getKeyId());
