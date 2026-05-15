@@ -22,4 +22,5 @@ public class EulerAuthorizationGrantType {
     public static final AuthorizationGrantType PASSWORD = new AuthorizationGrantType("password");
     public static final AuthorizationGrantType WECHAT_AUTHORIZATION_CODE = new AuthorizationGrantType("wechat_authorization_code");
     public static final AuthorizationGrantType APP_ASSERTION = new AuthorizationGrantType("urn:ietf:params:oauth:grant-type:app_assertion");
+    public static final AuthorizationGrantType OTP = new AuthorizationGrantType("otp");
 }

@@ -41,4 +41,16 @@ public final class EulerOAuth2ParameterNames {
     public static final String OAUTH_CLIENT_ATTESTATION_TYPE = "OAuth-Client-Attestation-Type";
 
     public static final String ADDITIONAL_SECURITY_SIGNAL = "additional-security-signal";
+
+    /**
+     * Ticket id returned by {@code POST /otp/tickets}; used as the credential
+     * pointer in the {@code grant_type=otp} token request.
+     */
+    public static final String OTP_TICKET = "otp_ticket";
+
+    /**
+     * The one-time password value the end-user typed back from the chosen
+     * {@code OtpChannel} delivery (e.g. SMS).
+     */
+    public static final String OTP = "otp";
 }

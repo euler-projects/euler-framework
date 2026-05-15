@@ -16,7 +16,9 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.authentication.otp.OtpTicketService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
+import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.authentication.*;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
@@ -24,6 +26,7 @@ import org.eulerframework.security.oauth2.server.authorization.converter.EulerRe
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OtpAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -103,6 +106,47 @@ public class EulerAuthorizationServerConfiguration {
 
     private static OAuth2WechatAuthorizationCodeAuthenticationConverter getOAuth2WechatAuthenticationConverter() {
         return new OAuth2WechatAuthorizationCodeAuthenticationConverter();
+    }
+
+    /**
+     * Register the {@code grant_type=otp} converter + provider on the
+     * authorization server's token endpoint.
+     *
+     * @param http               the {@link HttpSecurity} being built
+     * @param otpTicketService   the OTP ticket store used to atomically
+     *                           consume tickets minted by
+     *                           {@code POST /otp/tickets}
+     * @param userDetailsService used to look up the {@code EulerUserDetails}
+     *                           bound to the OTP recipient (assumed to be a
+     *                           phone number under the current single-channel
+     *                           contract)
+     */
+    public static void configOtpAuthentication(HttpSecurity http,
+                                                OtpTicketService otpTicketService,
+                                                EulerUserDetailsService userDetailsService) {
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
+                .tokenEndpoint(configurer -> configurer
+                        .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService, userDetailsService))
+                        .accessTokenRequestConverter(getOAuth2OtpAuthenticationConverter())));
+    }
+
+    private static OAuth2OtpAuthenticationProvider getOAuth2OtpAuthenticationProvider(HttpSecurity http,
+                                                                                       OtpTicketService otpTicketService,
+                                                                                       EulerUserDetailsService userDetailsService) {
+        try {
+            return new OAuth2OtpAuthenticationProvider(
+                    otpTicketService,
+                    userDetailsService,
+                    OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
+                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http)
+            );
+        } catch (Exception e) {
+            throw ExceptionUtils.asRuntimeException(e);
+        }
+    }
+
+    private static OAuth2OtpAuthenticationConverter getOAuth2OtpAuthenticationConverter() {
+        return new OAuth2OtpAuthenticationConverter();
     }
 
     public static void configClientAttestationAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
