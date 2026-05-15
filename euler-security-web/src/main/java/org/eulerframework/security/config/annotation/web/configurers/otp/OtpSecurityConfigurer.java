@@ -73,6 +73,7 @@ public class OtpSecurityConfigurer
     private OtpGenerator otpGenerator;
     private OtpPolicyResolver policyResolver;
     private String issueEndpointUri = DEFAULT_ISSUE_ENDPOINT_URI;
+    private boolean pkceRequired = false;
 
     private RequestMatcher endpointsMatcher;
 
@@ -110,6 +111,18 @@ public class OtpSecurityConfigurer
     }
 
     /**
+     * Whether PKCE (RFC 7636) is required at the issue endpoint. When
+     * {@code false} (default), {@code code_challenge} /
+     * {@code code_challenge_method} are ignored on the request and not
+     * persisted on the ticket. The token endpoint counterpart
+     * ({@code grant_type=otp}) must be configured with the same value.
+     */
+    public OtpSecurityConfigurer pkceRequired(boolean pkceRequired) {
+        this.pkceRequired = pkceRequired;
+        return this;
+    }
+
+    /**
      * Returns a {@link RequestMatcher} that matches all OTP endpoints exposed
      * by this configurer. May be used externally to broaden security rules.
      */
@@ -120,7 +133,7 @@ public class OtpSecurityConfigurer
     @Override
     public void init(HttpSecurity http) {
         OtpTicketIssueEndpointFilter filter = new OtpTicketIssueEndpointFilter(
-                new OtpTicketIssueAuthenticationConverter(),
+                new OtpTicketIssueAuthenticationConverter(this.pkceRequired),
                 createProvider(http),
                 this.issueEndpointUri);
 

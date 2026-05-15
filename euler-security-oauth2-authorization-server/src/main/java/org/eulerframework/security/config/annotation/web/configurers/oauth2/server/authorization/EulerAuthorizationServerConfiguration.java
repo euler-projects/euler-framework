@@ -120,14 +120,19 @@ public class EulerAuthorizationServerConfiguration {
      *                           bound to the OTP recipient (assumed to be a
      *                           phone number under the current single-channel
      *                           contract)
+     * @param pkceRequired       whether the token endpoint must require
+     *                           {@code code_verifier} (RFC 7636 PKCE). Must
+     *                           match the issue endpoint's setting; controlled
+     *                           globally by {@code euler.security.otp.pkce.enabled}
      */
     public static void configOtpAuthentication(HttpSecurity http,
                                                 OtpTicketService otpTicketService,
-                                                EulerUserDetailsService userDetailsService) {
+                                                EulerUserDetailsService userDetailsService,
+                                                boolean pkceRequired) {
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService, userDetailsService))
-                        .accessTokenRequestConverter(getOAuth2OtpAuthenticationConverter())));
+                        .accessTokenRequestConverter(getOAuth2OtpAuthenticationConverter(pkceRequired))));
     }
 
     private static OAuth2OtpAuthenticationProvider getOAuth2OtpAuthenticationProvider(HttpSecurity http,
@@ -145,8 +150,8 @@ public class EulerAuthorizationServerConfiguration {
         }
     }
 
-    private static OAuth2OtpAuthenticationConverter getOAuth2OtpAuthenticationConverter() {
-        return new OAuth2OtpAuthenticationConverter();
+    private static OAuth2OtpAuthenticationConverter getOAuth2OtpAuthenticationConverter(boolean pkceRequired) {
+        return new OAuth2OtpAuthenticationConverter(pkceRequired);
     }
 
     public static void configClientAttestationAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {

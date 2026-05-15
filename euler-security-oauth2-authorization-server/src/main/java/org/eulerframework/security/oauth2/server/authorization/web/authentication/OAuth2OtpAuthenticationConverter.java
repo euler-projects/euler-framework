@@ -41,8 +41,10 @@ import java.util.Set;
  * Parses {@code POST /oauth2/token} form parameters when {@code grant_type=otp}
  * and builds an {@link OAuth2OtpAuthenticationToken}.
  * <p>
- * Required parameters: {@code otp_ticket}, {@code otp}, {@code code_verifier}.
- * Optional: {@code scope} (single, space-delimited).
+ * Required parameters: {@code otp_ticket}, {@code otp}; {@code code_verifier}
+ * is required only when PKCE is enabled
+ * ({@code euler.security.otp.pkce.enabled=true}). Optional: {@code scope}
+ * (single, space-delimited).
  * <p>
  * Sensitive parameters ({@code otp}, {@code code_verifier}) are stripped from
  * {@code additionalParameters} so they cannot leak through audit / logging.
@@ -50,6 +52,19 @@ import java.util.Set;
 public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter {
 
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
+
+    private final boolean pkceRequired;
+
+    /**
+     * Backwards-compatible constructor: PKCE required.
+     */
+    public OAuth2OtpAuthenticationConverter() {
+        this(true);
+    }
+
+    public OAuth2OtpAuthenticationConverter(boolean pkceRequired) {
+        this.pkceRequired = pkceRequired;
+    }
 
     @Override
     public Authentication convert(HttpServletRequest request) {
@@ -74,10 +89,17 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
         }
         parameters.remove(EulerOAuth2ParameterNames.OTP);
 
-        // code_verifier (REQUIRED, PKCE - RFC 7636)
+        // code_verifier (REQUIRED when PKCE is enabled, PKCE - RFC 7636).
+        // Strip from parameters either way so it never leaks through
+        // additionalParameters into audit / logging.
         String codeVerifier = parameters.getFirst(PkceParameterNames.CODE_VERIFIER);
-        if (!StringUtils.hasText(codeVerifier)) {
+        if (this.pkceRequired && !StringUtils.hasText(codeVerifier)) {
             throw invalidRequest(PkceParameterNames.CODE_VERIFIER);
+        }
+        if (!this.pkceRequired) {
+            // Don't carry a value the provider would forward to consume();
+            // null forces OtpPkceVerifier to skip the check.
+            codeVerifier = null;
         }
         parameters.remove(PkceParameterNames.CODE_VERIFIER);
 

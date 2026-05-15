@@ -35,7 +35,9 @@ import java.util.Set;
  *     <li>{@code otp}         - the one-time password value the end-user typed
  *         back from the chosen delivery channel.</li>
  *     <li>{@code code_verifier} - PKCE code verifier (RFC 7636) whose S256
- *         hash must equal the {@code code_challenge} stored on the ticket.</li>
+ *         hash must equal the {@code code_challenge} stored on the ticket.
+ *         May be {@code null} when PKCE is disabled (see
+ *         {@code euler.security.otp.pkce.enabled}).</li>
  * </ul>
  * Verified by {@code OAuth2OtpAuthenticationProvider}.
  */
@@ -49,14 +51,13 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
     public OAuth2OtpAuthenticationToken(
             String otpTicket,
             String otp,
-            String codeVerifier,
+            @Nullable String codeVerifier,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
         super(EulerAuthorizationGrantType.OTP, clientPrincipal, additionalParameters);
         Assert.hasText(otpTicket, "otpTicket must not be empty");
         Assert.hasText(otp, "otp must not be empty");
-        Assert.hasText(codeVerifier, "codeVerifier must not be empty");
         this.otpTicket = otpTicket;
         this.otp = otp;
         this.codeVerifier = codeVerifier;

@@ -29,9 +29,12 @@ import org.springframework.util.StringUtils;
  * Validation rules:
  * <ul>
  *     <li>{@code channel} must be present.</li>
- *     <li>{@code code_challenge} must be present.</li>
- *     <li>{@code code_challenge_method} must equal {@value #CODE_CHALLENGE_METHOD_S256}
- *         (PKCE only supports S256 in this module).</li>
+ *     <li>When PKCE is required (see
+ *         {@code euler.security.otp.pkce.enabled}): {@code code_challenge}
+ *         must be present and {@code code_challenge_method} must equal
+ *         {@value #CODE_CHALLENGE_METHOD_S256} (PKCE only supports S256 in
+ *         this module). When PKCE is disabled, both parameters are ignored
+ *         and stored as {@code null} on the resulting ticket.</li>
  *     <li>Exactly one of {@code recipient} or {@code identity_id} must be supplied.
  *         Supplying both, or neither, is treated as a bad request.</li>
  * </ul>
@@ -51,6 +54,19 @@ public class OtpTicketIssueAuthenticationConverter implements AuthenticationConv
 
     static final String CODE_CHALLENGE_METHOD_S256 = "S256";
 
+    private final boolean pkceRequired;
+
+    /**
+     * Backwards-compatible constructor: PKCE required.
+     */
+    public OtpTicketIssueAuthenticationConverter() {
+        this(true);
+    }
+
+    public OtpTicketIssueAuthenticationConverter(boolean pkceRequired) {
+        this.pkceRequired = pkceRequired;
+    }
+
     @Override
     public Authentication convert(HttpServletRequest request) {
         String channel = request.getParameter(PARAM_CHANNEL);
@@ -60,13 +76,22 @@ public class OtpTicketIssueAuthenticationConverter implements AuthenticationConv
         String codeChallenge = request.getParameter(PARAM_CODE_CHALLENGE);
         String codeChallengeMethod = request.getParameter(PARAM_CODE_CHALLENGE_METHOD);
 
-        if (!StringUtils.hasText(channel) || !StringUtils.hasText(codeChallenge)) {
+        if (!StringUtils.hasText(channel)) {
             return null;
         }
 
-        // PKCE method must be S256
-        if (!CODE_CHALLENGE_METHOD_S256.equals(codeChallengeMethod)) {
-            return null;
+        if (this.pkceRequired) {
+            if (!StringUtils.hasText(codeChallenge)) {
+                return null;
+            }
+            if (!CODE_CHALLENGE_METHOD_S256.equals(codeChallengeMethod)) {
+                return null;
+            }
+        } else {
+            // PKCE disabled: ignore client-supplied PKCE parameters
+            // entirely so they cannot end up bound to the ticket.
+            codeChallenge = null;
+            codeChallengeMethod = null;
         }
 
         // recipient / identity_id are mutually exclusive but at least one is required

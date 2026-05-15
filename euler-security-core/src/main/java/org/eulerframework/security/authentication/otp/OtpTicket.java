@@ -46,9 +46,12 @@ import java.time.Instant;
  *                            not interpret this value
  * @param otp                 the one-time password value as plain text
  * @param codeChallenge       PKCE code challenge bound to this ticket
- *                            (RFC 7636)
+ *                            (RFC 7636); may be {@code null} when PKCE is
+ *                            disabled (see
+ *                            {@code euler.security.otp.pkce.enabled})
  * @param codeChallengeMethod PKCE code challenge method, currently always
- *                            {@code S256}
+ *                            {@code S256} when present; may be {@code null}
+ *                            when {@code codeChallenge} is {@code null}
  * @param expiresAt           when this ticket becomes invalid
  * @param failureCount        number of failed consume attempts so far
  * @param consumed            whether this ticket has already been successfully
@@ -71,8 +74,6 @@ public record OtpTicket(
         Assert.hasText(channel, "channel must not be empty");
         Assert.hasText(recipient, "recipient must not be empty");
         Assert.hasText(otp, "otp must not be empty");
-        Assert.hasText(codeChallenge, "codeChallenge must not be empty");
-        Assert.hasText(codeChallengeMethod, "codeChallengeMethod must not be empty");
         Assert.notNull(expiresAt, "expiresAt must not be null");
         Assert.isTrue(failureCount >= 0, "failureCount must not be negative");
     }

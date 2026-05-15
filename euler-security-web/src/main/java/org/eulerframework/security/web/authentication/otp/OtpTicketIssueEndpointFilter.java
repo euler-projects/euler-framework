@@ -116,8 +116,9 @@ public class OtpTicketIssueEndpointFilter extends OncePerRequestFilter {
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
                         ERROR_INVALID_REQUEST,
-                        "Missing or invalid parameters: channel, code_challenge, code_challenge_method=S256, " +
-                                "and exactly one of recipient/identity_id are required");
+                        "Missing or invalid parameters: channel, exactly one of " +
+                                "recipient/identity_id, and (when PKCE is enabled) " +
+                                "code_challenge with code_challenge_method=S256 are required");
                 return;
             }
 

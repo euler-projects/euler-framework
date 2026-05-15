@@ -39,11 +39,21 @@ final class OtpPkceVerifier {
     /**
      * Verify that {@code codeVerifier}, when transformed using
      * {@code codeChallengeMethod}, equals {@code codeChallenge}.
+     * <p>
+     * When {@code codeChallenge} is {@code null} the ticket was issued in a
+     * PKCE-disabled flow (see {@code euler.security.otp.pkce.enabled}); in
+     * that case the verifier returns {@code true} regardless of the value of
+     * {@code codeVerifier}, so PKCE is effectively skipped.
      *
-     * @return {@code true} on a successful match, {@code false} otherwise
+     * @return {@code true} on a successful match (or when PKCE is not bound
+     *         to the ticket), {@code false} otherwise
      */
     static boolean verify(String codeVerifier, String codeChallenge, String codeChallengeMethod) {
-        if (codeVerifier == null || codeChallenge == null) {
+        if (codeChallenge == null) {
+            // PKCE was not bound to this ticket -> nothing to verify.
+            return true;
+        }
+        if (codeVerifier == null) {
             return false;
         }
         if (!METHOD_S256.equals(codeChallengeMethod)) {

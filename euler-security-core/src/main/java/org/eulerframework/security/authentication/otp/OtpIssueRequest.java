@@ -34,9 +34,12 @@ import org.springframework.util.Assert;
  *                            via {@link OtpRecipientResolver} - may be
  *                            {@code null} when {@code recipient} is supplied
  * @param purpose             optional business label, opaque to the framework
- * @param codeChallenge       PKCE code challenge (RFC 7636)
+ * @param codeChallenge       PKCE code challenge (RFC 7636); may be
+ *                            {@code null} when PKCE is disabled (see
+ *                            {@code euler.security.otp.pkce.enabled})
  * @param codeChallengeMethod PKCE code challenge method, currently must be
- *                            {@code S256}
+ *                            {@code S256} when present; may be {@code null}
+ *                            when {@code codeChallenge} is {@code null}
  */
 public record OtpIssueRequest(
         String channel,
@@ -48,7 +51,5 @@ public record OtpIssueRequest(
 
     public OtpIssueRequest {
         Assert.hasText(channel, "channel must not be empty");
-        Assert.hasText(codeChallenge, "codeChallenge must not be empty");
-        Assert.hasText(codeChallengeMethod, "codeChallengeMethod must not be empty");
     }
 }

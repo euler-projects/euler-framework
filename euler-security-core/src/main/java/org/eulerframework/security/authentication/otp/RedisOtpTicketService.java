@@ -84,8 +84,12 @@ public class RedisOtpTicketService implements OtpTicketService {
             fields.put(FIELD_PURPOSE, ticket.purpose());
         }
         fields.put(FIELD_OTP, ticket.otp());
-        fields.put(FIELD_CODE_CHALLENGE, ticket.codeChallenge());
-        fields.put(FIELD_CODE_CHALLENGE_METHOD, ticket.codeChallengeMethod());
+        if (ticket.codeChallenge() != null) {
+            fields.put(FIELD_CODE_CHALLENGE, ticket.codeChallenge());
+        }
+        if (ticket.codeChallengeMethod() != null) {
+            fields.put(FIELD_CODE_CHALLENGE_METHOD, ticket.codeChallengeMethod());
+        }
         fields.put(FIELD_EXPIRES_AT, Long.toString(ticket.expiresAt().toEpochMilli()));
         fields.put(FIELD_FAILURE_COUNT, Integer.toString(ticket.failureCount()));
         fields.put(FIELD_CONSUMED, ticket.consumed() ? "1" : "0");
