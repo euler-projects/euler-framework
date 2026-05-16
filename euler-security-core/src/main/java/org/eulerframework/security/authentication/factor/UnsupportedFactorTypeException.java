@@ -16,9 +16,9 @@
 package org.eulerframework.security.authentication.factor;
 
 /**
- * Thrown by {@link DelegatingUserAuthenticationService} when the requested
- * {@code factor_type} value does not match any registered
- * {@link UserAuthenticationService}.
+ * Thrown by a business-layer composite {@link UserAuthenticationFactorService}
+ * router when the requested {@code factor_type} value does not match any
+ * configured backend.
  * <p>
  * The {@code /user/identities} endpoint filter maps this exception to HTTP
  * {@code 400 Bad Request} with the {@code unsupported_factor_type} error
@@ -30,7 +30,7 @@ public class UnsupportedFactorTypeException extends RuntimeException {
 
     public UnsupportedFactorTypeException(String factorType) {
         super("Unsupported factor_type '" + factorType + "': "
-                + "no UserAuthenticationService bean is registered for it");
+                + "no backend is configured for it");
         this.factorType = factorType;
     }
 

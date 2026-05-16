@@ -21,35 +21,47 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * SPI exposing the lifecycle of a single <em>kind</em> of authentication
- * factor (phone, email, WeChat, passkey, ...).
+ * SPI exposing the lifecycle of a single authentication factor entry-point.
  * <p>
- * One bean per factor type. Each implementation is fully responsible for the
- * factor it owns — input validation, downstream verification (OTP, OAuth2
- * exchange, attestation, ...), persistence and read access. The framework
- * does not impose a repository abstraction on top of this SPI; persistence
- * is an implementation detail of each factor.
- * <p>
- * Naming and design follow Spring's
- * {@code DelegatingPasswordEncoder} pattern: the framework operates against
- * a single {@code UserAuthenticationService} entry-point, while business
- * code is free to register as many backing services as needed (one per
- * factor type). Routing from a logical factor name to the right
- * implementation is the job of {@link DelegatingUserAuthenticationService},
- * which is itself a {@code UserAuthenticationService}.
+ * The framework operates against exactly one {@code UserAuthenticationFactorService}
+ * bean wired into the {@code /user/identities} endpoint filter. How that
+ * single bean is implemented is entirely a business-layer decision:
+ * <ul>
+ *     <li>If the application supports a single factor type (e.g. {@code phone}),
+ *         a straightforward implementation suffices.</li>
+ *     <li>If the application supports multiple factor types (phone, email,
+ *         WeChat, passkey, ...), business code is free to expose a composite
+ *         router that dispatches per-{@code factor_type} to per-factor
+ *         backends. The framework intentionally does not ship such a
+ *         router so that the routing strategy (single {@code if-else}, query
+ *         the parent table first then dispatch, registry pattern, ...) is
+ *         picked by business code rather than imposed by the framework.</li>
+ * </ul>
+ * Each implementation is fully responsible for input validation, downstream
+ * verification (OTP, OAuth2 exchange, attestation, ...), persistence and
+ * read access. The framework does not impose a repository abstraction on
+ * top of this SPI; persistence is an implementation detail.
  *
- * @see DelegatingUserAuthenticationService
  * @see UserAuthenticationFactor
  */
-public interface UserAuthenticationService {
+public interface UserAuthenticationFactorService {
+
+    /**
+     * Form parameter name carrying the target factor type during
+     * {@code POST /user/identities}. Provided as a public contract for
+     * business-side composite routers that need to read the parameter from
+     * the bind {@link MultiValueMap}.
+     */
+    String FACTOR_TYPE_PARAMETER = "factor_type";
 
     /**
      * Logical name of the factor type this service handles, matching the
      * {@code factor_type} value submitted by the client when binding.
      * <p>
-     * Implementations registered with
-     * {@link DelegatingUserAuthenticationService} must return a stable,
-     * non-empty value that is unique across all registered implementations.
+     * Used by business-layer composite routers (if any) to dispatch the
+     * incoming request to the right per-factor backend; for a single-factor
+     * application the value is informational. Must return a stable,
+     * non-empty value.
      *
      * @return the factor type, never {@code null} or empty
      */
@@ -78,9 +90,10 @@ public interface UserAuthenticationService {
      * <p>
      * Implementations <strong>must</strong> scope the lookup to {@code userId}
      * — never return a factor belonging to a different user. When this
-     * service does not own the factor (typical when called via
-     * {@link DelegatingUserAuthenticationService}'s short-circuit fan-out),
-     * return {@link Optional#empty()}; do not throw.
+     * service does not own the factor (typical when called from a
+     * business-layer composite router that has already pre-selected the
+     * target backend by {@code factor_type}), return {@link Optional#empty()};
+     * do not throw.
      *
      * @param userId the id of the authenticated user; never {@code null}
      * @param id     the factor id; never {@code null}
@@ -107,14 +120,12 @@ public interface UserAuthenticationService {
      * and this service.
      * <p>
      * When the factor is not owned by this service, implementations
-     * <strong>must</strong> return silently rather than throw; this is the
-     * contract that lets {@link DelegatingUserAuthenticationService} fan
-     * delete requests out across all registered services and only raise
-     * {@link UserAuthenticationFactorNotFoundException} when none of them
-     * matched. When the factor is owned by this service but not by the
-     * given user, implementations <strong>must</strong> also return
-     * silently — exposing a 404 vs 403 distinction here would leak factor
-     * ownership.
+     * <strong>must</strong> return silently rather than throw; this lets a
+     * business-layer composite router fan a delete out to multiple backends
+     * without leaking ownership. When the factor is owned by this service
+     * but not by the given user, implementations <strong>must</strong> also
+     * return silently — exposing a 404 vs 403 distinction here would leak
+     * factor ownership.
      *
      * @param userId the id of the authenticated user; never {@code null}
      * @param id     the factor id to delete; never {@code null}

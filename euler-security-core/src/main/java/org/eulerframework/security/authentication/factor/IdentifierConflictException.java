@@ -16,7 +16,7 @@
 package org.eulerframework.security.authentication.factor;
 
 /**
- * Thrown by {@link UserAuthenticationService#bind} when the credential the
+ * Thrown by {@link UserAuthenticationFactorService#bind} when the credential the
  * caller is trying to bind is already taken — either by another user, or by
  * the same user under a different factor record.
  * <p>

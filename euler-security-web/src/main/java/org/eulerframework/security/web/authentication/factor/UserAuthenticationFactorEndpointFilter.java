@@ -26,7 +26,7 @@ import org.eulerframework.security.authentication.factor.InvalidAuthenticationFa
 import org.eulerframework.security.authentication.factor.UnsupportedFactorTypeException;
 import org.eulerframework.security.authentication.factor.UserAuthenticationFactor;
 import org.eulerframework.security.authentication.factor.UserAuthenticationFactorNotFoundException;
-import org.eulerframework.security.authentication.factor.UserAuthenticationService;
+import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.slf4j.Logger;
@@ -63,9 +63,9 @@ import java.util.Optional;
  * chain (typically the authorization-server chain's
  * {@code oauth2ResourceServer.jwt()}); this filter consumes the
  * already-authenticated request and delegates to a single
- * {@link UserAuthenticationService} entry-point — usually a
- * {@code DelegatingUserAuthenticationService} that fans out to per-factor
- * implementations.
+ * {@link UserAuthenticationFactorService} entry-point provided by business
+ * code (either a single-factor implementation or a business-side composite
+ * router that dispatches by {@code factor_type}).
  *
  * <h2>Endpoints</h2>
  * <ul>
@@ -124,7 +124,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private static final String ERROR_INVALID_TOKEN = "invalid_token";
     private static final String ERROR_SERVER_ERROR = "server_error";
 
-    private final UserAuthenticationService userAuthenticationService;
+    private final UserAuthenticationFactorService userAuthenticationFactorService;
     private final EulerUserDetailsService userDetailsService;
     private final String endpointBaseUri;
     private final RequestMatcher collectionMatcher;
@@ -133,14 +133,14 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private final RequestMatcher createMatcher;
     private final RequestMatcher requestMatcher;
 
-    public UserAuthenticationFactorEndpointFilter(UserAuthenticationService userAuthenticationService,
+    public UserAuthenticationFactorEndpointFilter(UserAuthenticationFactorService userAuthenticationFactorService,
                                                   EulerUserDetailsService userDetailsService,
                                                   String endpointBaseUri) {
-        Assert.notNull(userAuthenticationService, "userAuthenticationService must not be null");
+        Assert.notNull(userAuthenticationFactorService, "userAuthenticationService must not be null");
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
         Assert.hasText(endpointBaseUri, "endpointBaseUri must not be empty");
         Assert.isTrue(!endpointBaseUri.endsWith("/"), "endpointBaseUri must not end with '/'");
-        this.userAuthenticationService = userAuthenticationService;
+        this.userAuthenticationFactorService = userAuthenticationFactorService;
         this.userDetailsService = userDetailsService;
         this.endpointBaseUri = endpointBaseUri;
         String itemPattern = endpointBaseUri + "/{id}";
@@ -211,12 +211,12 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private void handleBind(HttpServletRequest request, HttpServletResponse response, String userId)
             throws IOException {
         MultiValueMap<String, String> params = readParameters(request);
-        UserAuthenticationFactor factor = this.userAuthenticationService.bind(userId, params);
+        UserAuthenticationFactor factor = this.userAuthenticationFactorService.bind(userId, params);
         sendJson(response, HttpStatus.OK, toJson(factor));
     }
 
     private void handleList(HttpServletResponse response, String userId) throws IOException {
-        List<UserAuthenticationFactor> factors = this.userAuthenticationService.findAllByUserId(userId);
+        List<UserAuthenticationFactor> factors = this.userAuthenticationFactorService.findAllByUserId(userId);
         // Stable ordering: most recently bound first.
         factors = factors.stream()
                 .sorted(Comparator.comparing(UserAuthenticationFactor::boundAt).reversed())
@@ -226,7 +226,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     }
 
     private void handleGet(HttpServletResponse response, String userId, String id) throws IOException {
-        Optional<UserAuthenticationFactor> factor = this.userAuthenticationService.findById(userId, id);
+        Optional<UserAuthenticationFactor> factor = this.userAuthenticationFactorService.findById(userId, id);
         if (factor.isEmpty()) {
             throw new UserAuthenticationFactorNotFoundException(id);
         }
@@ -234,7 +234,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     }
 
     private void handleDelete(HttpServletResponse response, String userId, String id) throws IOException {
-        this.userAuthenticationService.deleteById(userId, id);
+        this.userAuthenticationFactorService.deleteById(userId, id);
         response.setStatus(HttpStatus.NO_CONTENT.value());
     }
 

@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.config.annotation.web.configurers.factor;
 
-import org.eulerframework.security.authentication.factor.UserAuthenticationService;
+import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
 import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.eulerframework.security.web.authentication.factor.UserAuthenticationFactorEndpointFilter;
 import org.springframework.context.ApplicationContext;
@@ -49,14 +49,14 @@ import org.springframework.util.Assert;
  * <h2>Usage</h2>
  * <pre>
  * http.with(new UserAuthenticationFactorSecurityConfigurer(), factor -&gt; factor
- *     .userAuthenticationService(delegatingUserAuthenticationService));
+ *     .userAuthenticationService(userAuthenticationFactorService));
  * </pre>
- * The {@link UserAuthenticationService} and {@link EulerUserDetailsService}
+ * The {@link UserAuthenticationFactorService} and {@link EulerUserDetailsService}
  * dependencies, if not explicitly set, are resolved from the application
  * context as single beans.
  *
  * @see UserAuthenticationFactorEndpointFilter
- * @see UserAuthenticationService
+ * @see UserAuthenticationFactorService
  */
 public class UserAuthenticationFactorSecurityConfigurer
         extends AbstractHttpConfigurer<UserAuthenticationFactorSecurityConfigurer, HttpSecurity> {
@@ -67,7 +67,7 @@ public class UserAuthenticationFactorSecurityConfigurer
      */
     public static final String DEFAULT_ENDPOINT_BASE_URI = "/user/identities";
 
-    private UserAuthenticationService userAuthenticationService;
+    private UserAuthenticationFactorService userAuthenticationFactorService;
     private EulerUserDetailsService userDetailsService;
     private String endpointBaseUri = DEFAULT_ENDPOINT_BASE_URI;
 
@@ -76,8 +76,8 @@ public class UserAuthenticationFactorSecurityConfigurer
     // ---- Fluent API ----
 
     public UserAuthenticationFactorSecurityConfigurer userAuthenticationService(
-            UserAuthenticationService userAuthenticationService) {
-        this.userAuthenticationService = userAuthenticationService;
+            UserAuthenticationFactorService userAuthenticationFactorService) {
+        this.userAuthenticationFactorService = userAuthenticationFactorService;
         return this;
     }
 
@@ -129,11 +129,11 @@ public class UserAuthenticationFactorSecurityConfigurer
 
     // ---- Dependency resolution ----
 
-    private UserAuthenticationService resolveUserAuthenticationService(HttpSecurity http) {
-        if (this.userAuthenticationService != null) {
-            return this.userAuthenticationService;
+    private UserAuthenticationFactorService resolveUserAuthenticationService(HttpSecurity http) {
+        if (this.userAuthenticationFactorService != null) {
+            return this.userAuthenticationFactorService;
         }
-        return http.getSharedObject(ApplicationContext.class).getBean(UserAuthenticationService.class);
+        return http.getSharedObject(ApplicationContext.class).getBean(UserAuthenticationFactorService.class);
     }
 
     private EulerUserDetailsService resolveUserDetailsService(HttpSecurity http) {

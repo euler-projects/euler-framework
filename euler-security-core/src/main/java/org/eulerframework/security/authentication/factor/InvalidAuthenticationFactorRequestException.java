@@ -16,7 +16,7 @@
 package org.eulerframework.security.authentication.factor;
 
 /**
- * Thrown by {@link UserAuthenticationService#bind} when the supplied form
+ * Thrown by {@link UserAuthenticationFactorService#bind} when the supplied form
  * parameters cannot be processed: a required parameter is missing, malformed
  * or the underlying verification artefact (e.g. an OTP ticket, an OAuth2
  * authorization code) is invalid or expired.

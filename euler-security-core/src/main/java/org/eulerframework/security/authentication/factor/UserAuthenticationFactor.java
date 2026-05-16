@@ -34,7 +34,7 @@ import java.util.Map;
  * The framework intentionally exposes <em>only</em> what the
  * {@code /user/identities} REST surface needs to render — concrete state, such
  * as the encrypted phone number or the public key of a passkey, lives in the
- * factor-specific persistence owned by each {@link UserAuthenticationService}
+ * factor-specific persistence owned by each {@link UserAuthenticationFactorService}
  * implementation and is surfaced (if at all) through {@link #extensions()}.
  *
  * @param id              opaque, URL-safe identifier of this factor
@@ -42,7 +42,7 @@ import java.util.Map;
  *                        factors of all users
  * @param factorType      logical factor type (e.g. {@code phone},
  *                        {@code email}, {@code wechat}); routes
- *                        {@link UserAuthenticationService#bind} calls
+ *                        {@link UserAuthenticationFactorService#bind} calls
  * @param identifier      stable, factor-scoped identifier of the bound
  *                        credential (e.g. hash of the phone number or
  *                        OpenID); used internally for uniqueness checks and
