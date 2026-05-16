@@ -140,9 +140,6 @@ public interface UserAuthenticationFactorService {
      * dispatch on it; single-factor implementations validate it against
      * {@link #factorType()}) and intentionally has no business knowing the
      * transformation rule.
-     * <p>
-     * The default implementation returns {@link Optional#empty()}; concrete
-     * implementations override it as needed.
      *
      * @param factorType         the target factor type; never {@code null}
      *                           or empty. Implementations whose
@@ -157,10 +154,47 @@ public interface UserAuthenticationFactorService {
      * binding exists or this implementation does not handle the requested
      * {@code factorType}
      */
-    default Optional<UserAuthenticationFactor> findByOriginalIdentifier(
-            String factorType, String originalIdentifier) {
-        return Optional.empty();
-    }
+    Optional<UserAuthenticationFactor> findByOriginalIdentifier(
+            String factorType, String originalIdentifier);
+
+    /**
+     * Bind the given user to a factor identified by its original identifier
+     * &mdash; the dual write to {@link #findByOriginalIdentifier(String, String)}.
+     * <p>
+     * Unlike {@link #bind(String, MultiValueMap)} which receives the raw
+     * client-side bind form (typically including {@code otp_ticket} +
+     * {@code otp} to be consumed) this overload is for callers that have
+     * <strong>already</strong> verified ownership of the original identifier
+     * through another channel (notably the OAuth2 OTP token grant, which
+     * has just consumed the OTP ticket itself and now needs to bind the
+     * verified recipient to a freshly provisioned user). Implementations
+     * <strong>must not</strong> attempt to consume any OTP ticket, request
+     * additional verification, or read any other parameters; the caller
+     * carries that contract.
+     * <p>
+     * The transformation rule from {@code originalIdentifier} to the SPI
+     * {@code identifier} field is implementation-defined and intentionally
+     * opaque to the caller (see {@link #findByOriginalIdentifier(String, String)}).
+     * <p>
+     * Implementations <strong>must</strong> reject duplicate bindings on
+     * the same {@code (factorType, identifier)} tuple via
+     * {@link IdentifierConflictException}.
+     *
+     * @param userId             the id of the user the factor is being
+     *                           bound to; never {@code null} or empty
+     * @param factorType         the target factor type; never {@code null}
+     *                           or empty. Implementations whose
+     *                           {@link #factorType()} differs <strong>must</strong>
+     *                           throw rather than silently no-op (asymmetric
+     *                           with the {@code find} overload because this
+     *                           is a write path)
+     * @param originalIdentifier the un-transformed business value of the
+     *                           target factor's {@code identifier} field;
+     *                           never {@code null} or empty
+     * @return the freshly bound factor, never {@code null}
+     */
+    UserAuthenticationFactor bindOriginalIdentifier(
+            String userId, String factorType, String originalIdentifier);
 
     /**
      * Delete the factor with the given id, if it is owned by {@code userId}

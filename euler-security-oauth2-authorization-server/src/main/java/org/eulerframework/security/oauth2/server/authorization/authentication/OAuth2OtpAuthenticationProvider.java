@@ -24,6 +24,7 @@ import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.util.UserDetailsUtils;
+import org.eulerframework.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -57,6 +58,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.security.Principal;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,7 +89,12 @@ import java.util.Set;
  *         {@link EulerUserService#loadUserById(String)} and convert with
  *         {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}. The OTP
  *         provider does not assume any particular transformation scheme on
- *         the original identifier.</li>
+ *         the original identifier. If no user is bound to the recipient, a
+ *         new user is auto-provisioned (username {@code user_<base64url12>}
+ *         from 9 random bytes via the shared {@link SecureRandom}, random
+ *         {@code {noop}}-prefixed password, default {@code user} authority)
+ *         and the binding is created in the same flow before token issuance
+ *         proceeds.</li>
  *     <li>Issue access / refresh / id tokens using the shared
  *         {@link OAuth2TokenGenerator}, mirroring the password grant flow.</li>
  * </ol>
@@ -108,6 +116,12 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
             "sms", "phone",
             "email", "email"
     );
+
+    /**
+     * Shared {@link SecureRandom} used to generate random bytes for the
+     * auto-provisioned username suffix. {@link SecureRandom} is thread-safe.
+     */
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final Logger logger = LoggerFactory.getLogger(OAuth2OtpAuthenticationProvider.class);
 
@@ -181,14 +195,12 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         String originalIdentifier = verification.recipient();
         UserAuthenticationFactor factor = this.userAuthenticationFactorService
                 .findByOriginalIdentifier(factorType, originalIdentifier)
-                .orElseThrow(() -> new OAuth2AuthenticationException(new OAuth2Error(
-                        OAuth2ErrorCodes.INVALID_GRANT,
-                        "No user is bound to the OTP recipient", ERROR_URI)));
+                .orElseGet(() -> autoProvisionUser(factorType, originalIdentifier));
         EulerUser eulerUser = this.eulerUserService.loadUserById(factor.userId());
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);
         if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
-                    "No user is bound to the OTP recipient", ERROR_URI));
+                    "Failed to load user after auto-provision", ERROR_URI));
         }
 
         UsernamePasswordAuthenticationToken userPrincipal = UsernamePasswordAuthenticationToken.authenticated(
@@ -313,5 +325,37 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
                     ERROR_URI));
         }
         return factorType;
+    }
+
+    /**
+     * Auto-provision a brand-new user when the OTP recipient is not yet
+     * bound to any user, then bind the {@code (factorType, originalIdentifier)}
+     * tuple to it via
+     * {@link UserAuthenticationFactorService#bindOriginalIdentifier(String, String, String)}.
+     * <p>
+     * Behaviour is hard-coded as always-on: an OTP-grant request whose
+     * recipient is unknown is treated as an implicit signup. Username is
+     * generated as {@code user_<base64url12>} (9 random bytes from a shared
+     * {@link SecureRandom}, encoded as a fixed-length 12-character URL-safe
+     * Base64 string without padding; ~72-bit entropy, no recipient leakage).
+     * Password is a {@code {noop}}-prefixed random string (OTP-only login,
+     * no password authentication path); authorities default to {@code "user"}.
+     */
+    private UserAuthenticationFactor autoProvisionUser(String factorType, String originalIdentifier) {
+        byte[] usernameRandomBytes = new byte[9];
+        SECURE_RANDOM.nextBytes(usernameRandomBytes);
+        String shortId = Base64.getUrlEncoder().withoutPadding().encodeToString(usernameRandomBytes);
+        EulerUserDetails newUser = EulerUserDetails.builder()
+                .username("user_" + shortId)
+                .password("{noop}" + StringUtils.randomString(32))
+                .authorities("user")
+                .build();
+        EulerUser createdUser = this.eulerUserService.createUser(newUser);
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Auto-provisioned user '{}' for OTP factor_type='{}'",
+                    createdUser.getUserId(), factorType);
+        }
+        return this.userAuthenticationFactorService.bindOriginalIdentifier(
+                createdUser.getUserId(), factorType, originalIdentifier);
     }
 }
