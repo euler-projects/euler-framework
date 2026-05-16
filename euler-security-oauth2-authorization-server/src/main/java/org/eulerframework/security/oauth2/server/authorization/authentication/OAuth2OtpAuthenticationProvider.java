@@ -15,13 +15,17 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestUser;
 import org.eulerframework.security.authentication.factor.UserAuthenticationFactor;
 import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
 import org.eulerframework.security.authentication.otp.OtpVerification;
 import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
+import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.util.UserDetailsUtils;
 import org.eulerframework.common.util.StringUtils;
@@ -95,6 +99,16 @@ import java.util.Set;
  *         {@code {noop}}-prefixed password, default {@code user} authority)
  *         and the binding is created in the same flow before token issuance
  *         proceeds.</li>
+ *     <li>If the request was carried by a verified App Attest device (set by
+ *         {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}),
+ *         enforce device-to-user consistency: if the device is already bound
+ *         to a user that differs from the OTP-resolved user, fail with
+ *         {@code invalid_grant} (description {@code "device mismatch"}); if the
+ *         device has not been bound yet, auto-bind it to the OTP-resolved user
+ *         via {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)}
+ *         &mdash; deliberately distinct from
+ *         {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)} which
+ *         provisions a brand-new anonymous user.</li>
  *     <li>Issue access / refresh / id tokens using the shared
  *         {@link OAuth2TokenGenerator}, mirroring the password grant flow.</li>
  * </ol>
@@ -131,6 +145,14 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
+    /**
+     * Optional. When present, the provider enforces device-to-user consistency
+     * for OTP requests carried by a verified App Attest device. When absent,
+     * any verified attestation attached to the request is silently ignored
+     * (legacy / non-attestation deployments).
+     */
+    private EulerDeviceUserDetailsService deviceUserDetailsService;
+
     public OAuth2OtpAuthenticationProvider(OtpTicketService otpTicketService,
                                            UserAuthenticationFactorService userAuthenticationFactorService,
                                            EulerUserService eulerUserService,
@@ -146,6 +168,16 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         this.eulerUserService = eulerUserService;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
+    }
+
+    /**
+     * Configure the optional {@link EulerDeviceUserDetailsService} used to
+     * enforce device-to-user consistency for OTP requests carried by a
+     * verified App Attest device. When unset, any verified attestation
+     * attached to the request is ignored.
+     */
+    public void setDeviceUserDetailsService(EulerDeviceUserDetailsService deviceUserDetailsService) {
+        this.deviceUserDetailsService = deviceUserDetailsService;
     }
 
     @Override
@@ -196,6 +228,12 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         UserAuthenticationFactor factor = this.userAuthenticationFactorService
                 .findByOriginalIdentifier(factorType, originalIdentifier)
                 .orElseGet(() -> autoProvisionUser(factorType, originalIdentifier));
+
+        // 3. If the request carries a verified App Attest device (set by
+        //    EulerOAuth2AttestationBasedClientAuthenticationFilter), enforce
+        //    device-to-user consistency before token issuance.
+        enforceDeviceConsistency(otpAuthenticationToken.getVerifiedAppRegistration(), factor.userId());
+
         EulerUser eulerUser = this.eulerUserService.loadUserById(factor.userId());
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);
         if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
@@ -357,5 +395,62 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         }
         return this.userAuthenticationFactorService.bindOriginalIdentifier(
                 createdUser.getUserId(), factorType, originalIdentifier);
+    }
+
+    /**
+     * Enforce device-to-user consistency when the OTP request is backed by a
+     * verified App Attest device. The {@code verifiedAppRegistration} argument
+     * is set by
+     * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}
+     * and may be {@code null} when the request did not carry attestation data
+     * (legacy clients).
+     * <p>
+     * Behaviour:
+     * <ul>
+     *     <li>{@code verifiedAppRegistration == null} &rarr; no-op.</li>
+     *     <li>{@link #deviceUserDetailsService} not configured &rarr; no-op
+     *         (attestation is silently ignored in deployments that do not
+     *         opt in to device-to-user binding).</li>
+     *     <li>Device already bound to a user that differs from
+     *         {@code otpUserId} &rarr; reject with
+     *         {@code invalid_grant} / {@code description="device mismatch"}.</li>
+     *     <li>Device not yet bound &rarr; auto-bind to {@code otpUserId} via
+     *         {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)}.
+     *         This is deliberately distinct from
+     *         {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)},
+     *         which provisions a brand-new anonymous user.</li>
+     * </ul>
+     */
+    private void enforceDeviceConsistency(AppAttestAttestationRegistration verifiedAppRegistration, String otpUserId) {
+        if (verifiedAppRegistration == null || this.deviceUserDetailsService == null) {
+            return;
+        }
+
+        AppAttestUser attestUser = new AppAttestUser(
+                verifiedAppRegistration.getKeyId(),
+                verifiedAppRegistration.getTeamId(),
+                verifiedAppRegistration.getBundleId(),
+                verifiedAppRegistration.getPublicKey());
+        try {
+            EulerUserDetails deviceBoundUser = this.deviceUserDetailsService.loadUserByDeviceUser(attestUser);
+            if (!otpUserId.equals(deviceBoundUser.getUserId())) {
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Device mismatch: keyId='{}' is bound to user '{}', OTP resolved to user '{}'",
+                            verifiedAppRegistration.getKeyId(), deviceBoundUser.getUserId(), otpUserId);
+                }
+                throw new OAuth2AuthenticationException(new OAuth2Error(
+                        OAuth2ErrorCodes.INVALID_GRANT, "device mismatch", ERROR_URI));
+            }
+        } catch (UserDetailsNotFoundException ex) {
+            // First-time use of this device with the OTP-resolved user: bind
+            // the device to the existing user. Distinct from the
+            // AppAttest registration provider's auto-create flow, which
+            // creates a brand-new anonymous user instead.
+            this.deviceUserDetailsService.bindToUser(attestUser, otpUserId);
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Bound App Attest device keyId='{}' to OTP-resolved user '{}'",
+                        verifiedAppRegistration.getKeyId(), otpUserId);
+            }
+        }
     }
 }

@@ -46,4 +46,23 @@ public interface EulerDeviceUserDetailsService {
      * @return the newly created user details
      */
     EulerUserDetails createUser(AppAttestUser appAttestUser);
+
+    /**
+     * Bind the device identified by {@code appAttestUser} to an EXISTING user.
+     * <p>
+     * Unlike {@link #createUser(AppAttestUser)}, this method does NOT create a new
+     * user; it only persists the {@code device -> user} mapping. It is used by flows
+     * (notably the OTP token grant) where the user has already been resolved through
+     * a different channel (e.g. by a verified factor binding) and the request also
+     * carries a verified App Attest identity that must be associated with that user
+     * for future device-based assertions.
+     * <p>
+     * Implementations <strong>must</strong> reject the call if the {@code keyId} is
+     * already mapped to a different user.
+     *
+     * @param appAttestUser the validated App Attest user containing the device key ID
+     * @param userId        the existing user id to associate the device with; never
+     *                      {@code null} or empty
+     */
+    void bindToUser(AppAttestUser appAttestUser, String userId);
 }

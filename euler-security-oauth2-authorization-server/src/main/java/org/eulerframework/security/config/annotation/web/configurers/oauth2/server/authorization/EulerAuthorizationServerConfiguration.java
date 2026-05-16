@@ -143,25 +143,49 @@ public class EulerAuthorizationServerConfiguration {
                                                 UserAuthenticationFactorService userAuthenticationFactorService,
                                                 EulerUserService eulerUserService,
                                                 boolean pkceRequired) {
+        configOtpAuthentication(http, otpTicketService, userAuthenticationFactorService,
+                eulerUserService, null, pkceRequired);
+    }
+
+    /**
+     * Variant that wires an optional {@link EulerDeviceUserDetailsService}.
+     * When non-{@code null}, OTP token requests carrying a verified App
+     * Attest device (set by
+     * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter})
+     * are subject to device-to-user consistency enforcement and first-use
+     * device-to-user binding. When {@code null}, attestation attached to OTP
+     * requests is silently ignored.
+     */
+    public static void configOtpAuthentication(HttpSecurity http,
+                                                OtpTicketService otpTicketService,
+                                                UserAuthenticationFactorService userAuthenticationFactorService,
+                                                EulerUserService eulerUserService,
+                                                EulerDeviceUserDetailsService deviceUserDetailsService,
+                                                boolean pkceRequired) {
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService,
-                                userAuthenticationFactorService, eulerUserService))
+                                userAuthenticationFactorService, eulerUserService, deviceUserDetailsService))
                         .accessTokenRequestConverter(getOAuth2OtpAuthenticationConverter(pkceRequired))));
     }
 
     private static OAuth2OtpAuthenticationProvider getOAuth2OtpAuthenticationProvider(HttpSecurity http,
                                                                                        OtpTicketService otpTicketService,
                                                                                        UserAuthenticationFactorService userAuthenticationFactorService,
-                                                                                       EulerUserService eulerUserService) {
+                                                                                       EulerUserService eulerUserService,
+                                                                                       EulerDeviceUserDetailsService deviceUserDetailsService) {
         try {
-            return new OAuth2OtpAuthenticationProvider(
+            OAuth2OtpAuthenticationProvider provider = new OAuth2OtpAuthenticationProvider(
                     otpTicketService,
                     userAuthenticationFactorService,
                     eulerUserService,
                     OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
                     OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http)
             );
+            if (deviceUserDetailsService != null) {
+                provider.setDeviceUserDetailsService(deviceUserDetailsService);
+            }
+            return provider;
         } catch (Exception e) {
             throw ExceptionUtils.asRuntimeException(e);
         }

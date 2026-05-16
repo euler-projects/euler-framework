@@ -16,9 +16,11 @@
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2OtpAuthenticationToken;
+import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -118,6 +120,13 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
 
         Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
 
+        // Optional verified App Attest registration carried by
+        // EulerOAuth2AttestationBasedClientAuthenticationFilter. When present,
+        // the provider enforces device-to-user consistency and auto-binds the
+        // device to the OTP-resolved user on first use.
+        AppAttestAttestationRegistration verifiedAppRegistration = (AppAttestAttestationRegistration) request.getAttribute(
+                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE);
+
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
@@ -131,7 +140,7 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
 
         return new OAuth2OtpAuthenticationToken(
                 otpTicket, otp, codeVerifier,
-                clientPrincipal, scopes, additionalParameters);
+                clientPrincipal, scopes, additionalParameters, verifiedAppRegistration);
     }
 
     private static OAuth2AuthenticationException invalidRequest(String parameterName) {
