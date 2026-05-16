@@ -116,6 +116,53 @@ public interface UserAuthenticationFactorService {
     List<UserAuthenticationFactor> findAllByUserId(String userId);
 
     /**
+     * Reverse-resolve the {@link UserAuthenticationFactor} bound to the
+     * given factor's <em>original identifier</em> &mdash; i.e. the
+     * un-transformed business value out of which the SPI {@code identifier}
+     * field is computed by the implementation.
+     * <p>
+     * The transformation is implementation-defined and intentionally opaque
+     * to the caller:
+     * <ul>
+     *     <li>{@code phone} factor: {@code originalIdentifier} = the raw
+     *         E.164 phone number; SPI {@code identifier} = its SHA-256 hex.</li>
+     *     <li>{@code email} factor: {@code originalIdentifier} = the email
+     *         address; SPI {@code identifier} = SHA-256 hex of its lower-cased
+     *         normalized form.</li>
+     *     <li>{@code wechat} factor: {@code originalIdentifier} = the openid
+     *         value; SPI {@code identifier} = the same openid (identity
+     *         transformation, no hashing).</li>
+     *     <li>{@code passkey} factor: {@code originalIdentifier} = the
+     *         credentialId; SPI {@code identifier} = the same credentialId.</li>
+     * </ul>
+     * The caller (notably the OAuth2 OTP token grant) holds the original
+     * value, picks the correct {@code factorType} (composite implementations
+     * dispatch on it; single-factor implementations validate it against
+     * {@link #factorType()}) and intentionally has no business knowing the
+     * transformation rule.
+     * <p>
+     * The default implementation returns {@link Optional#empty()}; concrete
+     * implementations override it as needed.
+     *
+     * @param factorType         the target factor type; never {@code null}
+     *                           or empty. Implementations whose
+     *                           {@link #factorType()} differs <strong>must</strong>
+     *                           return {@link Optional#empty()} rather than
+     *                           throw
+     * @param originalIdentifier the un-transformed business value of the
+     *                           target factor's {@code identifier} field;
+     *                           never {@code null} or empty
+     * @return the factor (with {@link UserAuthenticationFactor#userId()}
+     * populated) bound to the value, or {@link Optional#empty()} when no
+     * binding exists or this implementation does not handle the requested
+     * {@code factorType}
+     */
+    default Optional<UserAuthenticationFactor> findByOriginalIdentifier(
+            String factorType, String originalIdentifier) {
+        return Optional.empty();
+    }
+
+    /**
      * Delete the factor with the given id, if it is owned by {@code userId}
      * and this service.
      * <p>

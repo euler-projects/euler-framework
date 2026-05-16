@@ -37,6 +37,14 @@ import java.util.Map;
  * factor-specific persistence owned by each {@link UserAuthenticationFactorService}
  * implementation and is surfaced (if at all) through {@link #extensions()}.
  *
+ * @param userId          id of the user this factor is bound to;
+ *                        intentionally <em>not</em> serialised back to the
+ *                        client by the {@code /user/identities} endpoint.
+ *                        It is an internal SPI field consumed by
+ *                        reverse-lookup callers (e.g. the OAuth2 OTP grant)
+ *                        which need to map an original identifier back to
+ *                        the owning user without first knowing the user's
+ *                        principal name
  * @param id              opaque, URL-safe identifier of this factor
  *                        (e.g. {@code idp_xxxxxxxx}); unique across all
  *                        factors of all users
@@ -56,6 +64,7 @@ import java.util.Map;
  *                        be empty
  */
 public record UserAuthenticationFactor(
+        String userId,
         String id,
         String factorType,
         String identifier,
@@ -64,6 +73,7 @@ public record UserAuthenticationFactor(
         Map<String, Object> extensions) {
 
     public UserAuthenticationFactor {
+        Assert.hasText(userId, "userId must not be empty");
         Assert.hasText(id, "id must not be empty");
         Assert.hasText(factorType, "factorType must not be empty");
         Assert.hasText(identifier, "identifier must not be empty");

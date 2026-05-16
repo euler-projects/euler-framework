@@ -15,11 +15,15 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.authentication.factor.UserAuthenticationFactor;
+import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
 import org.eulerframework.security.authentication.otp.OtpVerification;
+import org.eulerframework.security.core.EulerUser;
+import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.util.UserDetailsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -72,9 +76,17 @@ import java.util.Set;
  *         this performs OTP value match + PKCE {@code code_verifier} S256
  *         match. A {@code null} return is treated as a verification failure
  *         and surfaces as {@code invalid_grant}.</li>
- *     <li>Take {@link OtpVerification#recipient()} (a phone number under the
- *         current single-channel assumption) and load the user via
- *         {@link EulerUserDetailsService#loadUserByPrincipal(String)}.</li>
+ *     <li>Map {@link OtpVerification#channel()} to the target
+ *         {@code factor_type} via an internal hard-coded mapping (sms
+ *         &rarr; phone, email &rarr; email) &mdash; to be promoted to a
+ *         configurable SPI when more channels emerge. Reverse-resolve the
+ *         binding via
+ *         {@link UserAuthenticationFactorService#findByOriginalIdentifier(String, String)}
+ *         to obtain the {@code userId}; load the user via
+ *         {@link EulerUserService#loadUserById(String)} and convert with
+ *         {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}. The OTP
+ *         provider does not assume any particular transformation scheme on
+ *         the original identifier.</li>
  *     <li>Issue access / refresh / id tokens using the shared
  *         {@link OAuth2TokenGenerator}, mirroring the password grant flow.</li>
  * </ol>
@@ -85,23 +97,39 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
+    /**
+     * Hard-coded {@code OTP channel -> factor_type} mapping. Temporary
+     * shape: when more channels emerge or business needs custom routing,
+     * extract this into a configurable SPI (e.g. constructor-injected
+     * {@code Function<String, String>} or a dedicated
+     * {@code OtpChannelToFactorTypeResolver}).
+     */
+    private static final Map<String, String> CHANNEL_TO_FACTOR_TYPE = Map.of(
+            "sms", "phone",
+            "email", "email"
+    );
+
     private final Logger logger = LoggerFactory.getLogger(OAuth2OtpAuthenticationProvider.class);
 
     private final OtpTicketService otpTicketService;
-    private final EulerUserDetailsService userDetailsService;
+    private final UserAuthenticationFactorService userAuthenticationFactorService;
+    private final EulerUserService eulerUserService;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
     public OAuth2OtpAuthenticationProvider(OtpTicketService otpTicketService,
-                                           EulerUserDetailsService userDetailsService,
+                                           UserAuthenticationFactorService userAuthenticationFactorService,
+                                           EulerUserService eulerUserService,
                                            OAuth2AuthorizationService authorizationService,
                                            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
         Assert.notNull(otpTicketService, "otpTicketService must not be null");
-        Assert.notNull(userDetailsService, "userDetailsService must not be null");
+        Assert.notNull(userAuthenticationFactorService, "userAuthenticationFactorService must not be null");
+        Assert.notNull(eulerUserService, "eulerUserService must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
         this.otpTicketService = otpTicketService;
-        this.userDetailsService = userDetailsService;
+        this.userAuthenticationFactorService = userAuthenticationFactorService;
+        this.eulerUserService = eulerUserService;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
     }
@@ -143,13 +171,21 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
                     verification.ticketId(), verification.channel());
         }
 
-        // 2. recipient (assumed phone number under the current single-channel
-        //    contract) -> EulerUserDetails. We look up directly via the
-        //    UserDetailsService rather than going through the password
-        //    AuthenticationManager, because OTP grant has no password to
-        //    verify - the OTP+PKCE step above is the authenticator.
-        String recipient = verification.recipient();
-        EulerUserDetails userDetails = this.userDetailsService.loadUserByPrincipal(recipient);
+        // 2. (factor_type, recipient) -> userId via the factor SPI: the OTP
+        //    provider does NOT know how each factor backend transforms its
+        //    original identifier into the SPI `identifier` field (phone hash
+        //    / email normalize+hash / wechat identity / passkey identity /
+        //    ...). We just pick the correct factor_type and ask "who owns
+        //    this original value".
+        String factorType = resolveFactorType(verification.channel());
+        String originalIdentifier = verification.recipient();
+        UserAuthenticationFactor factor = this.userAuthenticationFactorService
+                .findByOriginalIdentifier(factorType, originalIdentifier)
+                .orElseThrow(() -> new OAuth2AuthenticationException(new OAuth2Error(
+                        OAuth2ErrorCodes.INVALID_GRANT,
+                        "No user is bound to the OTP recipient", ERROR_URI)));
+        EulerUser eulerUser = this.eulerUserService.loadUserById(factor.userId());
+        EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);
         if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
                     "No user is bound to the OTP recipient", ERROR_URI));
@@ -266,5 +302,16 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
             }
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));
         }
+    }
+
+    private static String resolveFactorType(String channel) {
+        String factorType = CHANNEL_TO_FACTOR_TYPE.get(channel);
+        if (factorType == null) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(
+                    OAuth2ErrorCodes.INVALID_GRANT,
+                    "Unsupported OTP channel: " + channel,
+                    ERROR_URI));
+        }
+        return factorType;
     }
 }

@@ -16,7 +16,10 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
+import org.eulerframework.security.core.EulerUser;
+import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
@@ -29,6 +32,7 @@ import org.eulerframework.security.oauth2.server.authorization.web.authenticatio
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OtpAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
+import org.eulerframework.security.util.UserDetailsUtils;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -112,36 +116,49 @@ public class EulerAuthorizationServerConfiguration {
      * Register the {@code grant_type=otp} converter + provider on the
      * authorization server's token endpoint.
      *
-     * @param http               the {@link HttpSecurity} being built
-     * @param otpTicketService   the OTP ticket store used to atomically
-     *                           consume tickets minted by
-     *                           {@code POST /otp/tickets}
-     * @param userDetailsService used to look up the {@code EulerUserDetails}
-     *                           bound to the OTP recipient (assumed to be a
-     *                           phone number under the current single-channel
-     *                           contract)
-     * @param pkceRequired       whether the token endpoint must require
-     *                           {@code code_verifier} (RFC 7636 PKCE). Must
-     *                           match the issue endpoint's setting; controlled
-     *                           globally by {@code euler.security.otp.pkce.enabled}
+     * @param http                            the {@link HttpSecurity} being
+     *                                        built
+     * @param otpTicketService                the OTP ticket store used to
+     *                                        atomically consume tickets minted
+     *                                        by {@code POST /otp/tickets}
+     * @param userAuthenticationFactorService the factor SPI used to
+     *                                        reverse-resolve the OTP
+     *                                        recipient (channel-mapped to a
+     *                                        target {@code factor_type}) into
+     *                                        the bound {@code userId}
+     * @param eulerUserService                the user service used to load
+     *                                        the {@link EulerUser} by
+     *                                        {@code userId}; the provider
+     *                                        converts it via
+     *                                        {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}
+     * @param pkceRequired                    whether the token endpoint must
+     *                                        require {@code code_verifier}
+     *                                        (RFC 7636 PKCE). Must match the
+     *                                        issue endpoint's setting;
+     *                                        controlled globally by
+     *                                        {@code euler.security.otp.pkce.enabled}
      */
     public static void configOtpAuthentication(HttpSecurity http,
                                                 OtpTicketService otpTicketService,
-                                                EulerUserDetailsService userDetailsService,
+                                                UserAuthenticationFactorService userAuthenticationFactorService,
+                                                EulerUserService eulerUserService,
                                                 boolean pkceRequired) {
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
-                        .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService, userDetailsService))
+                        .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService,
+                                userAuthenticationFactorService, eulerUserService))
                         .accessTokenRequestConverter(getOAuth2OtpAuthenticationConverter(pkceRequired))));
     }
 
     private static OAuth2OtpAuthenticationProvider getOAuth2OtpAuthenticationProvider(HttpSecurity http,
                                                                                        OtpTicketService otpTicketService,
-                                                                                       EulerUserDetailsService userDetailsService) {
+                                                                                       UserAuthenticationFactorService userAuthenticationFactorService,
+                                                                                       EulerUserService eulerUserService) {
         try {
             return new OAuth2OtpAuthenticationProvider(
                     otpTicketService,
-                    userDetailsService,
+                    userAuthenticationFactorService,
+                    eulerUserService,
                     OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
                     OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http)
             );

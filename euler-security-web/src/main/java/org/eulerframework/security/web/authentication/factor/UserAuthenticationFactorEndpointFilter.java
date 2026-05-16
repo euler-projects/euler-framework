@@ -294,6 +294,9 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         return params;
     }
 
+    // Hand-rolled serialisation that intentionally excludes `userId` and
+    // `identifier`: both are internal SPI fields and must not be exposed on
+    // the /user/identities surface.
     private Map<String, Object> toJson(UserAuthenticationFactor factor) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("id", factor.id());
