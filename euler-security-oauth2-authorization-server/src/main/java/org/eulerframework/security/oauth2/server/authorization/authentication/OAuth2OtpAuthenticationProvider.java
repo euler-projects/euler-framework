@@ -25,6 +25,7 @@ import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
+import org.eulerframework.security.core.userdetails.RandomUsernameGenerator;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.util.UserDetailsUtils;
@@ -62,8 +63,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.security.Principal;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,11 +93,11 @@ import java.util.Set;
  *         {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}. The OTP
  *         provider does not assume any particular transformation scheme on
  *         the original identifier. If no user is bound to the recipient, a
- *         new user is auto-provisioned (username {@code user_<base64url12>}
- *         from 9 random bytes via the shared {@link SecureRandom}, random
- *         {@code {noop}}-prefixed password, default {@code user} authority)
- *         and the binding is created in the same flow before token issuance
- *         proceeds.</li>
+ *         new user is auto-provisioned (username generated via
+ *         {@link RandomUsernameGenerator#generate()} as
+ *         {@code user_<base64url12>}, random {@code {noop}}-prefixed
+ *         password, default {@code user} authority) and the binding is
+ *         created in the same flow before token issuance proceeds.</li>
  *     <li>If the request was carried by a verified App Attest device (set by
  *         {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}),
  *         enforce device-to-user consistency: if the device is already bound
@@ -130,12 +129,6 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
             "sms", "phone",
             "email", "email"
     );
-
-    /**
-     * Shared {@link SecureRandom} used to generate random bytes for the
-     * auto-provisioned username suffix. {@link SecureRandom} is thread-safe.
-     */
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final Logger logger = LoggerFactory.getLogger(OAuth2OtpAuthenticationProvider.class);
 
@@ -373,18 +366,15 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
      * <p>
      * Behaviour is hard-coded as always-on: an OTP-grant request whose
      * recipient is unknown is treated as an implicit signup. Username is
-     * generated as {@code user_<base64url12>} (9 random bytes from a shared
-     * {@link SecureRandom}, encoded as a fixed-length 12-character URL-safe
-     * Base64 string without padding; ~72-bit entropy, no recipient leakage).
-     * Password is a {@code {noop}}-prefixed random string (OTP-only login,
-     * no password authentication path); authorities default to {@code "user"}.
+     * generated via {@link RandomUsernameGenerator#generate()} as
+     * {@code user_<base64url12>} so that the recipient never leaks into the
+     * local username. Password is a {@code {noop}}-prefixed random string
+     * (OTP-only login, no password authentication path); authorities default
+     * to {@code "user"}.
      */
     private UserAuthenticationFactor autoProvisionUser(String factorType, String originalIdentifier) {
-        byte[] usernameRandomBytes = new byte[9];
-        SECURE_RANDOM.nextBytes(usernameRandomBytes);
-        String shortId = Base64.getUrlEncoder().withoutPadding().encodeToString(usernameRandomBytes);
         EulerUserDetails newUser = EulerUserDetails.builder()
-                .username("user_" + shortId)
+                .username(RandomUsernameGenerator.generate())
                 .password("{noop}" + StringUtils.randomString(32))
                 .authorities("user")
                 .build();
