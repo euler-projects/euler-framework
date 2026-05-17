@@ -95,12 +95,12 @@ public interface UserAuthenticationFactorService {
      * target backend by {@code factor_type}), return {@link Optional#empty()};
      * do not throw.
      *
-     * @param userId the id of the authenticated user; never {@code null}
-     * @param id     the factor id; never {@code null}
+     * @param userId   the id of the authenticated user; never {@code null}
+     * @param factorId the factor id; never {@code null}
      * @return the factor if owned by this service and the user, otherwise
      * {@link Optional#empty()}
      */
-    Optional<UserAuthenticationFactor> findById(String userId, String id);
+    Optional<UserAuthenticationFactor> findById(String userId, String factorId);
 
     /**
      * List all factors of this service's type that are bound to
@@ -208,8 +208,8 @@ public interface UserAuthenticationFactorService {
      * return silently — exposing a 404 vs 403 distinction here would leak
      * factor ownership.
      *
-     * @param userId the id of the authenticated user; never {@code null}
-     * @param id     the factor id to delete; never {@code null}
+     * @param userId   the id of the authenticated user; never {@code null}
+     * @param factorId the factor id to delete; never {@code null}
      */
-    void deleteById(String userId, String id);
+    void deleteById(String userId, String factorId);
 }

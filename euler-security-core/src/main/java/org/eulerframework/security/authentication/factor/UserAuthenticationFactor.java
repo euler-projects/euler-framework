@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Immutable view of one authentication factor bound to a user.
  * <p>
- * An authentication factor (Chinese: <em>登录因素</em>) is a credential or
+ * An authentication factor (Chinese: <em>用户认证因素</em>) is a credential or
  * possession the user can present to authenticate, e.g. a phone number, an
  * email address, a WeChat openid, a passkey or a password. The same user may
  * own multiple factors, and future MFA flows will require the user to satisfy
@@ -45,16 +45,16 @@ import java.util.Map;
  *                        which need to map an original identifier back to
  *                        the owning user without first knowing the user's
  *                        principal name
- * @param id              opaque, URL-safe identifier of this factor
- *                        (e.g. {@code idp_xxxxxxxx}); unique across all
- *                        factors of all users
+ * @param factorId        opaque identifier of this factor (a UUID string);
+ *                        unique across all factors of all users; surfaced on
+ *                        the API as {@code factor_id}
  * @param factorType      logical factor type (e.g. {@code phone},
  *                        {@code email}, {@code wechat}); routes
  *                        {@link UserAuthenticationFactorService#bind} calls
  * @param identifier      stable, factor-scoped identifier of the bound
  *                        credential (e.g. hash of the phone number or
- *                        OpenID); used internally for uniqueness checks and
- *                        is <em>not</em> serialised back to the client
+ *                        OpenID); used for uniqueness checks and surfaced
+ *                        on the API as {@code identifier}
  * @param boundAt         when the factor was originally bound to the user
  * @param lastVerifiedAt  when the factor was last successfully verified;
  *                        equals {@code boundAt} immediately after binding
@@ -65,7 +65,7 @@ import java.util.Map;
  */
 public record UserAuthenticationFactor(
         String userId,
-        String id,
+        String factorId,
         String factorType,
         String identifier,
         Instant boundAt,
@@ -74,7 +74,7 @@ public record UserAuthenticationFactor(
 
     public UserAuthenticationFactor {
         Assert.hasText(userId, "userId must not be empty");
-        Assert.hasText(id, "id must not be empty");
+        Assert.hasText(factorId, "factorId must not be empty");
         Assert.hasText(factorType, "factorType must not be empty");
         Assert.hasText(identifier, "identifier must not be empty");
         Assert.notNull(boundAt, "boundAt must not be null");

@@ -37,14 +37,14 @@ import org.springframework.util.Assert;
  *
  * <h2>Endpoints</h2>
  * <ul>
- *     <li>{@code POST   <baseUri>}        - bind a new factor</li>
- *     <li>{@code GET    <baseUri>}        - list this user's factors</li>
- *     <li>{@code GET    <baseUri>/{id}}   - get one factor</li>
- *     <li>{@code DELETE <baseUri>/{id}}   - delete one factor</li>
+ *     <li>{@code POST   <baseUri>}              - bind a new factor</li>
+ *     <li>{@code GET    <baseUri>}              - list this user's factors</li>
+ *     <li>{@code GET    <baseUri>/{factorId}}   - get one factor</li>
+ *     <li>{@code DELETE <baseUri>/{factorId}}   - delete one factor</li>
  * </ul>
  * The base URI defaults to {@link #DEFAULT_ENDPOINT_BASE_URI} which is kept
- * intentionally aligned with the {@code Model-#-User-Identity} v2 client
- * contract; rename it via {@link #endpointBaseUri(String)}.
+ * intentionally aligned with the documented {@code /user/identities}
+ * client contract; rename it via {@link #endpointBaseUri(String)}.
  *
  * <h2>Usage</h2>
  * <pre>

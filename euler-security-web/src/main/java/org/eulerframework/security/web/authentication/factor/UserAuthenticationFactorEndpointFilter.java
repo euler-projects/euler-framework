@@ -69,10 +69,10 @@ import java.util.Optional;
  *
  * <h2>Endpoints</h2>
  * <ul>
- *     <li>{@code POST   <baseUri>}        - bind a new factor</li>
- *     <li>{@code GET    <baseUri>}        - list this user's factors</li>
- *     <li>{@code GET    <baseUri>/{id}}   - get one factor</li>
- *     <li>{@code DELETE <baseUri>/{id}}   - delete one factor</li>
+ *     <li>{@code POST   <baseUri>}              - bind a new factor</li>
+ *     <li>{@code GET    <baseUri>}              - list this user's factors</li>
+ *     <li>{@code GET    <baseUri>/{factorId}}   - get one factor</li>
+ *     <li>{@code DELETE <baseUri>/{factorId}}   - delete one factor</li>
  * </ul>
  *
  * <h2>Authentication</h2>
@@ -101,7 +101,7 @@ import java.util.Optional;
  * filter chain.
  *
  * <h2>Response shape</h2>
- * Every factor is rendered as the {@code id} / {@code factor_type} /
+ * Every factor is rendered as the {@code factor_id} / {@code factor_type} /
  * {@code identifier} / {@code bound_at} / {@code last_verified_at} envelope
  * plus per-factor {@link UserAuthenticationFactor#extensions()} flattened
  * into the top-level object. Timestamps are emitted as epoch-millis.
@@ -143,7 +143,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         this.userAuthenticationFactorService = userAuthenticationFactorService;
         this.userDetailsService = userDetailsService;
         this.endpointBaseUri = endpointBaseUri;
-        String itemPattern = endpointBaseUri + "/{id}";
+        String itemPattern = endpointBaseUri + "/{factorId}";
         this.createMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.POST, endpointBaseUri);
         this.collectionMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET, endpointBaseUri);
         this.itemGetMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET, itemPattern);
@@ -184,9 +184,9 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
             } else if (this.collectionMatcher.matches(request)) {
                 handleList(response, userId);
             } else if (this.itemGetMatcher.matches(request)) {
-                handleGet(response, userId, extractId(request));
+                handleGet(response, userId, extractFactorId(request));
             } else if (this.itemDeleteMatcher.matches(request)) {
-                handleDelete(response, userId, extractId(request));
+                handleDelete(response, userId, extractFactorId(request));
             }
         } catch (InvalidAuthenticationFactorRequestException ex) {
             logger.debug("user-identities rejected (invalid_request): {}", ex.getMessage());
@@ -225,16 +225,16 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         sendJson(response, HttpStatus.OK, body);
     }
 
-    private void handleGet(HttpServletResponse response, String userId, String id) throws IOException {
-        Optional<UserAuthenticationFactor> factor = this.userAuthenticationFactorService.findById(userId, id);
+    private void handleGet(HttpServletResponse response, String userId, String factorId) throws IOException {
+        Optional<UserAuthenticationFactor> factor = this.userAuthenticationFactorService.findById(userId, factorId);
         if (factor.isEmpty()) {
-            throw new UserAuthenticationFactorNotFoundException(id);
+            throw new UserAuthenticationFactorNotFoundException(factorId);
         }
         sendJson(response, HttpStatus.OK, toJson(factor.get()));
     }
 
-    private void handleDelete(HttpServletResponse response, String userId, String id) throws IOException {
-        this.userAuthenticationFactorService.deleteById(userId, id);
+    private void handleDelete(HttpServletResponse response, String userId, String factorId) throws IOException {
+        this.userAuthenticationFactorService.deleteById(userId, factorId);
         response.setStatus(HttpStatus.NO_CONTENT.value());
     }
 
@@ -266,7 +266,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         }
     }
 
-    private String extractId(HttpServletRequest request) {
+    private String extractFactorId(HttpServletRequest request) {
         String path = request.getRequestURI();
         String contextPath = request.getContextPath();
         if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
@@ -275,13 +275,13 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         String prefix = this.endpointBaseUri + "/";
         int idx = path.indexOf(prefix);
         if (idx < 0) {
-            throw new InvalidAuthenticationFactorRequestException("Cannot extract id from path: " + path);
+            throw new InvalidAuthenticationFactorRequestException("Cannot extract factor id from path: " + path);
         }
-        String id = path.substring(idx + prefix.length());
-        if (id.isEmpty()) {
+        String factorId = path.substring(idx + prefix.length());
+        if (factorId.isEmpty()) {
             throw new InvalidAuthenticationFactorRequestException("Missing factor id in path");
         }
-        return id;
+        return factorId;
     }
 
     private MultiValueMap<String, String> readParameters(HttpServletRequest request) {
@@ -294,12 +294,14 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         return params;
     }
 
-    // Hand-rolled serialisation that intentionally excludes `userId` and
-    // `identifier`: both are internal SPI fields and must not be exposed on
-    // the /user/identities surface.
+    // Hand-rolled serialisation that intentionally excludes the internal
+    // {@code userId} SPI field. The {@code identifier} field is part of the
+    // public response: business documentation explicitly surfaces it on the
+    // /user/identities API (e.g. as the SHA-256 hash of phone/email or the
+    // raw openid for wechat).
     private Map<String, Object> toJson(UserAuthenticationFactor factor) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("id", factor.id());
+        body.put("factor_id", factor.factorId());
         body.put("factor_type", factor.factorType());
         body.put("identifier", factor.identifier());
         body.put("bound_at", toEpochMilli(factor.boundAt()));
