@@ -47,7 +47,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -304,16 +303,19 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         body.put("factor_id", factor.factorId());
         body.put("factor_type", factor.factorType());
         body.put("identifier", factor.identifier());
-        body.put("bound_at", toEpochMilli(factor.boundAt()));
-        body.put("last_verified_at", toEpochMilli(factor.lastVerifiedAt()));
+        // Hand the Instant directly to Jackson rather than pre-converting to Long. The global
+        // ObjectMapper has WRITE_DATES_AS_TIMESTAMPS enabled and WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS
+        // disabled, so jsr310's InstantSerializer emits a JSON number whose value is the epoch
+        // milliseconds via gen.writeNumber(long). Going through the dedicated date serializer
+        // bypasses the JsSafeModule policy that turns Long into JSON string for JavaScript
+        // precision safety - we don't need that protection here because epoch-millis stays well
+        // below Number.MAX_SAFE_INTEGER (~year 287396) and clients expect a numeric timestamp.
+        body.put("bound_at", factor.boundAt());
+        body.put("last_verified_at", factor.lastVerifiedAt());
         if (factor.extensions() != null) {
             body.putAll(factor.extensions());
         }
         return body;
-    }
-
-    private Long toEpochMilli(Instant instant) {
-        return instant == null ? null : instant.toEpochMilli();
     }
 
     private void sendJson(HttpServletResponse response, HttpStatus status, Object body) throws IOException {

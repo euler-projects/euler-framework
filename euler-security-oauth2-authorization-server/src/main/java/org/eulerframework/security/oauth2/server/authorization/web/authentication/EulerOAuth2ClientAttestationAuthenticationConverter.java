@@ -92,7 +92,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
             // Unless the App Attest key is regenerated (causing attestation data to change),
             // attestation data is not required since it was already submitted and verified at device registration.
             copyOptional(request, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
-            copyRequired(request, EulerOAuth2ParameterNames.ASSERTION, additionalParams);
+            copyOptional(request, EulerOAuth2ParameterNames.ASSERTION, additionalParams);
         }
 
         // Optional request client_id (for RFC6749 consistency check in Provider)

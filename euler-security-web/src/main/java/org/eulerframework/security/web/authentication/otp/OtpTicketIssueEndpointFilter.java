@@ -151,10 +151,14 @@ public class OtpTicketIssueEndpointFilter extends OncePerRequestFilter {
         Map<String, Object> body = new HashMap<>();
         body.put("otp_ticket", result.otpTicket());
         if (result.expiresIn() != null) {
-            body.put("expires_in", result.expiresIn().toSeconds());
+            // Emit as int (not long) so the value survives the global JsSafeModule policy that
+            // serialises Long as JSON string for JavaScript precision safety. expires_in /
+            // retry_after are bounded by the OTP TTL (minutes), so int has ample headroom; we
+            // use Math.toIntExact to fail loudly if a future config ever overflows.
+            body.put("expires_in", Math.toIntExact(result.expiresIn().toSeconds()));
         }
         if (result.retryAfter() != null) {
-            body.put("retry_after", result.retryAfter().toSeconds());
+            body.put("retry_after", Math.toIntExact(result.retryAfter().toSeconds()));
         }
 
         response.getWriter().write(JacksonUtils.writeValueAsString(body));
