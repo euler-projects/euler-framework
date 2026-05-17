@@ -51,12 +51,17 @@ public interface UserAuthenticationFactorService {
      * {@code POST /user/identities}. Provided as a public contract for
      * business-side composite routers that need to read the parameter from
      * the bind {@link MultiValueMap}.
+     * <p>
+     * The wire value is {@code identity_type} (the public "User Identity"
+     * naming surfaced on the API). Internally this SPI keeps the
+     * {@code factor} terminology; only the form parameter name is exposed
+     * to clients under the {@code identity_*} convention.
      */
-    String FACTOR_TYPE_PARAMETER = "factor_type";
+    String FACTOR_TYPE_PARAMETER = "identity_type";
 
     /**
      * Logical name of the factor type this service handles, matching the
-     * {@code factor_type} value submitted by the client when binding.
+     * {@code identity_type} value submitted by the client when binding.
      * <p>
      * Used by business-layer composite routers (if any) to dispatch the
      * incoming request to the right per-factor backend; for a single-factor

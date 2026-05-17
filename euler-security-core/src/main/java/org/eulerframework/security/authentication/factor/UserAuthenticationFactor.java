@@ -47,17 +47,24 @@ import java.util.Map;
  *                        principal name
  * @param factorId        opaque identifier of this factor (a UUID string);
  *                        unique across all factors of all users; surfaced on
- *                        the API as {@code factor_id}
+ *                        the {@code /user/identities} API as
+ *                        {@code identity_id}
  * @param factorType      logical factor type (e.g. {@code phone},
  *                        {@code email}, {@code wechat}); routes
- *                        {@link UserAuthenticationFactorService#bind} calls
+ *                        {@link UserAuthenticationFactorService#bind} calls;
+ *                        surfaced on the {@code /user/identities} API as
+ *                        {@code identity_type}
  * @param identifier      stable, factor-scoped identifier of the bound
  *                        credential (e.g. hash of the phone number or
  *                        OpenID); used for uniqueness checks and surfaced
  *                        on the API as {@code identifier}
- * @param boundAt         when the factor was originally bound to the user
+ * @param boundAt         when the factor was originally bound to the user;
+ *                        surfaced on the API as {@code bound_at}
  * @param lastVerifiedAt  when the factor was last successfully verified;
- *                        equals {@code boundAt} immediately after binding
+ *                        equals {@code boundAt} immediately after binding;
+ *                        kept as an internal SPI field and intentionally
+ *                        <em>not</em> surfaced on the
+ *                        {@code /user/identities} API
  * @param extensions      free-form, factor-specific attributes returned to
  *                        the API caller (e.g. {@code {"phone": "+8613*****00"}}
  *                        for the phone factor); never {@code null}, but may

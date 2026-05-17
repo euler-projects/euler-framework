@@ -17,11 +17,11 @@ package org.eulerframework.security.authentication.factor;
 
 /**
  * Thrown by a business-layer composite {@link UserAuthenticationFactorService}
- * router when the requested {@code factor_type} value does not match any
- * configured backend.
+ * router when the requested factor type value (carried over the wire as
+ * {@code identity_type}) does not match any configured backend.
  * <p>
  * The {@code /user/identities} endpoint filter maps this exception to HTTP
- * {@code 400 Bad Request} with the {@code unsupported_factor_type} error
+ * {@code 400 Bad Request} with the {@code unsupported_identity_type} error
  * code.
  */
 public class UnsupportedFactorTypeException extends RuntimeException {

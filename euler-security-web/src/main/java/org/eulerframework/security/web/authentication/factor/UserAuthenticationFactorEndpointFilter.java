@@ -100,10 +100,12 @@ import java.util.Optional;
  * filter chain.
  *
  * <h2>Response shape</h2>
- * Every factor is rendered as the {@code factor_id} / {@code factor_type} /
- * {@code identifier} / {@code bound_at} / {@code last_verified_at} envelope
- * plus per-factor {@link UserAuthenticationFactor#extensions()} flattened
- * into the top-level object. Timestamps are emitted as epoch-millis.
+ * Every factor is rendered as the {@code identity_id} / {@code identity_type} /
+ * {@code identifier} / {@code bound_at} envelope plus per-factor
+ * {@link UserAuthenticationFactor#extensions()} flattened into the top-level
+ * object. Timestamps are emitted as epoch-millis. The internal
+ * {@link UserAuthenticationFactor} concept is intentionally surfaced to API
+ * consumers under the public "User Identity" terminology.
  * <p>
  * Note: unlike {@code OidcUserInfoEndpointFilter} this filter does not go
  * through {@code AuthenticationManager}/{@code AuthenticationProvider} — the
@@ -117,8 +119,8 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private static final Logger logger = LoggerFactory.getLogger(UserAuthenticationFactorEndpointFilter.class);
 
     private static final String ERROR_INVALID_REQUEST = "invalid_request";
-    private static final String ERROR_UNSUPPORTED_FACTOR_TYPE = "unsupported_factor_type";
-    private static final String ERROR_IDENTIFIER_CONFLICT = "identifier_conflict";
+    private static final String ERROR_UNSUPPORTED_FACTOR_TYPE = "unsupported_identity_type";
+    private static final String ERROR_IDENTIFIER_CONFLICT = "identity_occupied";
     private static final String ERROR_NOT_FOUND = "not_found";
     private static final String ERROR_INVALID_TOKEN = "invalid_token";
     private static final String ERROR_SERVER_ERROR = "server_error";
@@ -191,10 +193,10 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
             logger.debug("user-identities rejected (invalid_request): {}", ex.getMessage());
             sendError(response, HttpStatus.BAD_REQUEST, ERROR_INVALID_REQUEST, ex.getMessage());
         } catch (UnsupportedFactorTypeException ex) {
-            logger.debug("user-identities rejected (unsupported_factor_type): {}", ex.getMessage());
+            logger.debug("user-identities rejected (unsupported_identity_type): {}", ex.getMessage());
             sendError(response, HttpStatus.BAD_REQUEST, ERROR_UNSUPPORTED_FACTOR_TYPE, ex.getMessage());
         } catch (IdentifierConflictException ex) {
-            logger.debug("user-identities rejected (identifier_conflict): {}", ex.getMessage());
+            logger.debug("user-identities rejected (identity_occupied): {}", ex.getMessage());
             sendError(response, HttpStatus.CONFLICT, ERROR_IDENTIFIER_CONFLICT, ex.getMessage());
         } catch (UserAuthenticationFactorNotFoundException ex) {
             logger.debug("user-identities rejected (not_found): {}", ex.getMessage());
@@ -294,14 +296,16 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     }
 
     // Hand-rolled serialisation that intentionally excludes the internal
-    // {@code userId} SPI field. The {@code identifier} field is part of the
-    // public response: business documentation explicitly surfaces it on the
-    // /user/identities API (e.g. as the SHA-256 hash of phone/email or the
+    // {@code userId} SPI field. The internal {@code factorId} / {@code factorType}
+    // are surfaced to clients as {@code identity_id} / {@code identity_type}
+    // (the public "User Identity" naming). The {@code identifier} field is part
+    // of the public response: business documentation explicitly surfaces it on
+    // the /user/identities API (e.g. as the SHA-256 hash of phone/email or the
     // raw openid for wechat).
     private Map<String, Object> toJson(UserAuthenticationFactor factor) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("factor_id", factor.factorId());
-        body.put("factor_type", factor.factorType());
+        body.put("identity_id", factor.factorId());
+        body.put("identity_type", factor.factorType());
         body.put("identifier", factor.identifier());
         // Hand the Instant directly to Jackson rather than pre-converting to Long. The global
         // ObjectMapper has WRITE_DATES_AS_TIMESTAMPS enabled and WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS
@@ -311,7 +315,6 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         // precision safety - we don't need that protection here because epoch-millis stays well
         // below Number.MAX_SAFE_INTEGER (~year 287396) and clients expect a numeric timestamp.
         body.put("bound_at", factor.boundAt());
-        body.put("last_verified_at", factor.lastVerifiedAt());
         if (factor.extensions() != null) {
             body.putAll(factor.extensions());
         }
