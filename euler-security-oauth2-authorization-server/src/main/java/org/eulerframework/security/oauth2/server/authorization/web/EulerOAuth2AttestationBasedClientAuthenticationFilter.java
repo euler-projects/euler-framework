@@ -91,6 +91,20 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
      */
     public static final String VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE = "oauth2.client-attestation.verified.attestation";
 
+    /**
+     * Key under which the verified {@link AppAttestAttestationRegistration} is
+     * propagated through {@link org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters()}
+     * after the converter stage. Generic carrier so that any grant type (OTP,
+     * app_assertion, and future built-in grants such as password / refresh_token)
+     * can opt in to attestation context without adding a dedicated field per
+     * grant token class.
+     * <p>
+     * In-process only: this map entry is never serialized into any issued token
+     * and is consumed by downstream {@code AuthenticationProvider}s and
+     * {@code OAuth2TokenCustomizer}s.
+     */
+    public static final String VERIFIED_CLIENT_ATTESTATION_PARAMETER = "verified_client_attestation";
+
     private final RequestMatcher tokenEndpointMatcher;
 
 

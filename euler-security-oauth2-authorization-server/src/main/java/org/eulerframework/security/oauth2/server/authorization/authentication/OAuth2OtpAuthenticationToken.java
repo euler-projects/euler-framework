@@ -15,7 +15,6 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
-import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
@@ -39,12 +38,17 @@ import java.util.Set;
  *         hash must equal the {@code code_challenge} stored on the ticket.
  *         May be {@code null} when PKCE is disabled (see
  *         {@code euler.security.otp.pkce.enabled}).</li>
- *     <li>{@code verifiedAppRegistration} - optional verified App Attest
- *         registration carried in via
- *         {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}.
- *         When present, the provider enforces device-to-user consistency and
- *         auto-binds the device to the OTP-resolved user on first use.</li>
  * </ul>
+ * <p>
+ * The optional verified App Attest registration (carried in by
+ * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter})
+ * is propagated through the parent
+ * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters() additionalParameters}
+ * map under the key
+ * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter#VERIFIED_CLIENT_ATTESTATION_PARAMETER}.
+ * When present, the provider enforces device-to-user consistency and
+ * auto-binds the device to the OTP-resolved user on first use.
+ * <p>
  * Verified by {@code OAuth2OtpAuthenticationProvider}.
  */
 public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
@@ -53,7 +57,6 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
     private final String otp;
     private final String codeVerifier;
     private final Set<String> scopes;
-    private final AppAttestAttestationRegistration verifiedAppRegistration;
 
     public OAuth2OtpAuthenticationToken(
             String otpTicket,
@@ -62,17 +65,6 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
-        this(otpTicket, otp, codeVerifier, clientPrincipal, scopes, additionalParameters, null);
-    }
-
-    public OAuth2OtpAuthenticationToken(
-            String otpTicket,
-            String otp,
-            @Nullable String codeVerifier,
-            Authentication clientPrincipal,
-            @Nullable Set<String> scopes,
-            @Nullable Map<String, Object> additionalParameters,
-            @Nullable AppAttestAttestationRegistration verifiedAppRegistration) {
         super(EulerAuthorizationGrantType.OTP, clientPrincipal, additionalParameters);
         Assert.hasText(otpTicket, "otpTicket must not be empty");
         Assert.hasText(otp, "otp must not be empty");
@@ -83,7 +75,6 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
                 scopes != null ?
                         new HashSet<>(scopes) :
                         Collections.emptySet());
-        this.verifiedAppRegistration = verifiedAppRegistration;
     }
 
     public String getOtpTicket() {
@@ -100,10 +91,5 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
 
     public Set<String> getScopes() {
         return scopes;
-    }
-
-    @Nullable
-    public AppAttestAttestationRegistration getVerifiedAppRegistration() {
-        return verifiedAppRegistration;
     }
 }

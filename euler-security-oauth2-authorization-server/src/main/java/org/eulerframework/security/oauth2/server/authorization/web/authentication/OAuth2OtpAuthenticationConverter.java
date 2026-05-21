@@ -137,10 +137,20 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
+        // Propagate the verified attestation as a generic additionalParameters
+        // entry so any grant type (current OTP / app_assertion, future
+        // password / refresh_token / ...) can opt in without adding a
+        // dedicated field per grant token class. In-process only; never
+        // serialized into any issued token.
+        if (verifiedAppRegistration != null) {
+            additionalParameters.put(
+                    EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
+                    verifiedAppRegistration);
+        }
 
         return new OAuth2OtpAuthenticationToken(
                 otpTicket, otp, codeVerifier,
-                clientPrincipal, scopes, additionalParameters, verifiedAppRegistration);
+                clientPrincipal, scopes, additionalParameters);
     }
 
     private static OAuth2AuthenticationException invalidRequest(String parameterName) {

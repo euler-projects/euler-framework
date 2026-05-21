@@ -16,7 +16,6 @@
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import jakarta.annotation.Nullable;
-import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
@@ -27,25 +26,29 @@ import java.util.Map;
 import java.util.Set;
 
 
+/**
+ * Unauthenticated grant token for {@code grant_type=urn:ietf:params:oauth:grant-type:app_assertion}.
+ * <p>
+ * The verified App Attest registration is propagated through the parent
+ * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters() additionalParameters}
+ * map under the key
+ * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter#VERIFIED_CLIENT_ATTESTATION_PARAMETER}.
+ * For this grant the entry is mandatory: the converter rejects requests that
+ * have not been verified by
+ * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}.
+ */
 public class OAuth2AppAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
-    private final AppAttestAttestationRegistration verifiedAppRegistration;
     private final Set<String> scopes;
 
     public OAuth2AppAssertionAuthenticationToken(
-            AppAttestAttestationRegistration verifiedAppRegistration,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
         super(EulerAuthorizationGrantType.APP_ASSERTION, clientPrincipal, additionalParameters);
-        this.verifiedAppRegistration = verifiedAppRegistration;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
                         Collections.emptySet());
-    }
-
-    public AppAttestAttestationRegistration getVerifiedAppRegistration() {
-        return verifiedAppRegistration;
     }
 
     public Set<String> getScopes() {

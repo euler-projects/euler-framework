@@ -28,6 +28,7 @@ import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.RandomUsernameGenerator;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.util.UserDetailsUtils;
 import org.eulerframework.common.util.StringUtils;
 import org.slf4j.Logger;
@@ -225,7 +226,10 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         // 3. If the request carries a verified App Attest device (set by
         //    EulerOAuth2AttestationBasedClientAuthenticationFilter), enforce
         //    device-to-user consistency before token issuance.
-        enforceDeviceConsistency(otpAuthenticationToken.getVerifiedAppRegistration(), factor.userId());
+        AppAttestAttestationRegistration verifiedAppRegistration =
+                (AppAttestAttestationRegistration) otpAuthenticationToken.getAdditionalParameters()
+                        .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
+        enforceDeviceConsistency(verifiedAppRegistration, factor.userId());
 
         EulerUser eulerUser = this.eulerUserService.loadUserById(factor.userId());
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);

@@ -59,6 +59,7 @@ import org.springframework.util.Assert;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 
 /**
  * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type.
@@ -127,8 +128,18 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         this.validateScope(assertionAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(assertionAuthenticationToken.getScopes());
 
-        // Resolve anonymous user by verified attestation registration
-        AppAttestAttestationRegistration verifiedAppRegistration = assertionAuthenticationToken.getVerifiedAppRegistration();
+        // Resolve anonymous user by verified attestation registration. The
+        // verified registration is propagated by
+        // OAuth2AppAssertionAuthenticationConverter through the parent
+        // additionalParameters map under VERIFIED_CLIENT_ATTESTATION_PARAMETER.
+        AppAttestAttestationRegistration verifiedAppRegistration =
+                (AppAttestAttestationRegistration) assertionAuthenticationToken.getAdditionalParameters()
+                        .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
+        if (verifiedAppRegistration == null) {
+            // Should not happen: the converter rejects requests that have not
+            // been verified by the attestation filter. Defensive guard only.
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT);
+        }
         AppAttestUser attestUser = new AppAttestUser(
                 verifiedAppRegistration.getKeyId(), verifiedAppRegistration.getTeamId(), verifiedAppRegistration.getBundleId(), verifiedAppRegistration.getPublicKey());
         UserDetails user;

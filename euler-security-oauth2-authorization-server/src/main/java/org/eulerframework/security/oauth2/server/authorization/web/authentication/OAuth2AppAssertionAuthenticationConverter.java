@@ -96,9 +96,13 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
+        // Propagate the verified attestation as a generic additionalParameters
+        // entry. In-process only; never serialized into any issued token.
+        additionalParameters.put(
+                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
+                verifiedAppRegistration);
 
         return new OAuth2AppAssertionAuthenticationToken(
-                verifiedAppRegistration,
                 clientPrincipal,
                 scopes,
                 additionalParameters
