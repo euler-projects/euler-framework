@@ -23,5 +23,7 @@ public class EulerOidcClaimNames {
     public static final String OS_NAME = "os";
     public static final String OS_VERSION = "osv";
     public static final String TEAM_ID = "tid";
-    public static final String BUNDLE_ID = "bid";
+    public static final String VERIFIED_APP_METADATA = "vapp";
+    public static final String VERIFIED_APP_METADATA_BUNDLE_ID = "bid";
+    public static final String VERIFIED_APP_METADATA_ENVIRONMENT = "env";
 }
