@@ -202,6 +202,32 @@ public interface UserAuthenticationFactorService {
             String userId, String factorType, String originalIdentifier);
 
     /**
+     * Update (rebind) an existing authentication factor owned by the given
+     * user. The factor type cannot be changed &mdash; only the credentials
+     * within the same type are replaced (e.g. change phone number).
+     * <p>
+     * {@code params} carries the same raw form parameters as
+     * {@link #bind(String, MultiValueMap)} <strong>excluding</strong>
+     * {@code identity_type}; each implementation defines which keys it
+     * requires. The implementation must verify that the addressed factor
+     * exists, belongs to the requesting user, and matches this service's
+     * {@link #factorType()}.
+     *
+     * @param userId   the id of the authenticated user; never {@code null}
+     * @param factorId the factor id to update; never {@code null}
+     * @param params   the raw update parameters (same as bind, minus
+     *                 {@code identity_type}); never {@code null}
+     * @return the updated factor, never {@code null}
+     * @throws UserAuthenticationFactorNotFoundException if the factor does
+     *         not exist or is not owned by this user/service
+     * @throws InvalidAuthenticationFactorRequestException if parameters are
+     *         missing or invalid
+     * @throws IdentifierConflictException if the new credential is already
+     *         taken by another account
+     */
+    UserAuthenticationFactor update(String userId, String factorId, MultiValueMap<String, String> params);
+
+    /**
      * Delete the factor with the given id, if it is owned by {@code userId}
      * and this service.
      * <p>

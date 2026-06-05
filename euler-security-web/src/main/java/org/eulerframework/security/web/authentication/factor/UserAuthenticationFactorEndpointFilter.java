@@ -69,6 +69,7 @@ import java.util.Optional;
  * <h2>Endpoints</h2>
  * <ul>
  *     <li>{@code POST   <baseUri>}              - bind a new factor</li>
+ *     <li>{@code PUT    <baseUri>/{factorId}}   - update (rebind) an existing factor</li>
  *     <li>{@code GET    <baseUri>}              - list this user's factors</li>
  *     <li>{@code GET    <baseUri>/{factorId}}   - get one factor</li>
  *     <li>{@code DELETE <baseUri>/{factorId}}   - delete one factor</li>
@@ -131,6 +132,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private final RequestMatcher collectionMatcher;
     private final RequestMatcher itemGetMatcher;
     private final RequestMatcher itemDeleteMatcher;
+    private final RequestMatcher itemUpdateMatcher;
     private final RequestMatcher createMatcher;
     private final RequestMatcher requestMatcher;
 
@@ -148,14 +150,16 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         this.createMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.POST, endpointBaseUri);
         this.collectionMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET, endpointBaseUri);
         this.itemGetMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET, itemPattern);
+        this.itemUpdateMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.PUT, itemPattern);
         this.itemDeleteMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.DELETE, itemPattern);
         this.requestMatcher = new OrRequestMatcher(
                 this.createMatcher, this.collectionMatcher,
-                this.itemGetMatcher, this.itemDeleteMatcher);
+                this.itemGetMatcher, this.itemUpdateMatcher,
+                this.itemDeleteMatcher);
     }
 
     /**
-     * Returns the union {@link RequestMatcher} matching all four endpoints.
+     * Returns the union {@link RequestMatcher} matching all five endpoints.
      * Useful for combining with {@code http.securityMatcher(...)} to attach
      * this filter chain to the same chain that performs AT validation.
      */
@@ -182,6 +186,8 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
 
             if (this.createMatcher.matches(request)) {
                 handleBind(request, response, userId);
+            } else if (this.itemUpdateMatcher.matches(request)) {
+                handleUpdate(request, response, userId, extractFactorId(request));
             } else if (this.collectionMatcher.matches(request)) {
                 handleList(response, userId);
             } else if (this.itemGetMatcher.matches(request)) {
@@ -213,6 +219,13 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
             throws IOException {
         MultiValueMap<String, String> params = readParameters(request);
         UserAuthenticationFactor factor = this.userAuthenticationFactorService.bind(userId, params);
+        sendJson(response, HttpStatus.OK, toJson(factor));
+    }
+
+    private void handleUpdate(HttpServletRequest request, HttpServletResponse response,
+                              String userId, String factorId) throws IOException {
+        MultiValueMap<String, String> params = readParameters(request);
+        UserAuthenticationFactor factor = this.userAuthenticationFactorService.update(userId, factorId, params);
         sendJson(response, HttpStatus.OK, toJson(factor));
     }
 
