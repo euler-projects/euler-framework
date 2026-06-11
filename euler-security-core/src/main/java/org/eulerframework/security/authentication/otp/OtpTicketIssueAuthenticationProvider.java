@@ -42,8 +42,17 @@ import java.util.Collections;
  *     <li>Delegates delivery to the configured {@link OtpChannel} (typically
  *         {@link DelegatingOtpChannel}).</li>
  * </ol>
+ * <p>
+ * When an {@link OtpTestAccountSupport} is configured and the resolved
+ * recipient matches a test account, the OTP value is replaced by the configured
+ * fixed value, real channel delivery is skipped, and a single {@code WARN}
+ * line is emitted. Verification is unaffected - the ticket persisted with the
+ * fixed OTP is matched by
+ * {@link OtpTicketService#consume(String, String, String, String)} via the
+ * usual plaintext compare path.
  *
  * @see OtpTicketIssueAuthenticationToken
+ * @see OtpTestAccountSupport
  */
 public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvider {
 
@@ -57,6 +66,8 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
     private final OtpChannel otpChannel;
     private final OtpTicketService ticketService;
     private final OtpRecipientResolver recipientResolver;
+
+    private OtpTestAccountSupport testAccountSupport;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -86,6 +97,16 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
         this.recipientResolver = recipientResolver;
     }
 
+    /**
+     * Configure the optional test-account whitelist. When set, requests whose
+     * resolved recipient matches one of its entries receive the configured
+     * fixed OTP and skip real delivery. Pass {@code null} to disable
+     * (default).
+     */
+    public void setTestAccountSupport(OtpTestAccountSupport testAccountSupport) {
+        this.testAccountSupport = testAccountSupport;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Assert.isInstanceOf(OtpTicketIssueAuthenticationToken.class, authentication,
@@ -103,8 +124,12 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
         // 2. Resolve recipient
         String recipient = resolveRecipient(token);
 
-        // 3. Generate the OTP value
-        String otp = this.otpGenerator.generate(policy.otpLength());
+        // 3. Generate the OTP value (or use the fixed value for test accounts)
+        boolean testAccount = this.testAccountSupport != null
+                && this.testAccountSupport.isTestAccount(recipient);
+        String otp = testAccount
+                ? this.testAccountSupport.getFixedOtp()
+                : this.otpGenerator.generate(policy.otpLength());
 
         // 4. Mint a ticket id and persist the ticket
         String ticketId = generateTicketId();
@@ -126,17 +151,22 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
             throw new AuthenticationServiceException("Failed to persist OTP ticket", e);
         }
 
-        // 5. Deliver
-        OtpDelivering delivering = new OtpDelivering(
-                token.getChannel(), recipient, token.getPurpose(), otp, policy.expiresIn());
-        try {
-            this.otpChannel.send(delivering);
-        } catch (OtpChannelNotFoundException e) {
-            throw new OtpUnsupportedChannelException(e.getMessage(), e);
-        } catch (OtpDeliveryException e) {
-            throw new OtpDeliveryFailedException("OTP delivery failed", e);
-        } catch (RuntimeException e) {
-            throw new AuthenticationServiceException("OTP delivery failed", e);
+        // 5. Deliver - skipped for test accounts; only a single WARN line is emitted
+        if (testAccount) {
+            logger.warn("OTP test account hit: channel='{}' recipient='{}' purpose='{}' fixed-otp='{}' - real delivery skipped",
+                    token.getChannel(), recipient, token.getPurpose(), otp);
+        } else {
+            OtpDelivering delivering = new OtpDelivering(
+                    token.getChannel(), recipient, token.getPurpose(), otp, policy.expiresIn());
+            try {
+                this.otpChannel.send(delivering);
+            } catch (OtpChannelNotFoundException e) {
+                throw new OtpUnsupportedChannelException(e.getMessage(), e);
+            } catch (OtpDeliveryException e) {
+                throw new OtpDeliveryFailedException("OTP delivery failed", e);
+            } catch (RuntimeException e) {
+                throw new AuthenticationServiceException("OTP delivery failed", e);
+            }
         }
 
         logger.debug("Issued OTP ticket id='{}' channel='{}' purpose='{}'",

@@ -20,6 +20,7 @@ import org.eulerframework.security.authentication.otp.OtpChannel;
 import org.eulerframework.security.authentication.otp.OtpGenerator;
 import org.eulerframework.security.authentication.otp.OtpPolicyResolver;
 import org.eulerframework.security.authentication.otp.OtpRecipientResolver;
+import org.eulerframework.security.authentication.otp.OtpTestAccountSupport;
 import org.eulerframework.security.authentication.otp.OtpTicketIssueAuthenticationProvider;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
 import org.eulerframework.security.web.authentication.otp.OtpTicketIssueAuthenticationConverter;
@@ -72,6 +73,7 @@ public class OtpSecurityConfigurer
     private OtpTicketService ticketService;
     private OtpGenerator otpGenerator;
     private OtpPolicyResolver policyResolver;
+    private OtpTestAccountSupport testAccountSupport;
     private String issueEndpointUri = DEFAULT_ISSUE_ENDPOINT_URI;
     private boolean pkceRequired = false;
 
@@ -101,6 +103,17 @@ public class OtpSecurityConfigurer
 
     public OtpSecurityConfigurer policyResolver(OtpPolicyResolver policyResolver) {
         this.policyResolver = policyResolver;
+        return this;
+    }
+
+    /**
+     * Configure the optional test-account whitelist. When set, requests whose
+     * resolved recipient matches one of its entries receive the configured
+     * fixed OTP and skip real delivery; a single {@code WARN} line is logged.
+     * Pass {@code null} to disable (default).
+     */
+    public OtpSecurityConfigurer testAccountSupport(OtpTestAccountSupport testAccountSupport) {
+        this.testAccountSupport = testAccountSupport;
         return this;
     }
 
@@ -155,12 +168,14 @@ public class OtpSecurityConfigurer
     // ---- Dependency resolution ----
 
     private OtpTicketIssueAuthenticationProvider createProvider(HttpSecurity http) {
-        return new OtpTicketIssueAuthenticationProvider(
+        OtpTicketIssueAuthenticationProvider provider = new OtpTicketIssueAuthenticationProvider(
                 resolvePolicyResolver(http),
                 resolveOtpGenerator(http),
                 resolveOtpChannel(http),
                 resolveTicketService(http),
                 resolveRecipientResolver(http));
+        provider.setTestAccountSupport(this.testAccountSupport);
+        return provider;
     }
 
     private OtpChannel resolveOtpChannel(HttpSecurity http) {
