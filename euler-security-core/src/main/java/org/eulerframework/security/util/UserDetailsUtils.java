@@ -16,6 +16,7 @@
 
 package org.eulerframework.security.util;
 
+import org.eulerframework.resource.Tag;
 import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerGrantedAuthority;
@@ -44,6 +45,11 @@ public abstract class UserDetailsUtils {
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(UserDetailsUtils::toGrantedAuthority)
+                        .collect(Collectors.toList()))
+                .tags(Optional.ofNullable(eulerUser.getTags())
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(tag -> new Tag(tag.key(), tag.value())) // copy
                         .collect(Collectors.toList()))
                 .build();
     }

@@ -28,7 +28,7 @@ public class EulerSecurityJackson2ModuleTest {
     public static void main(String[] args) {
         JsonMapper mapper = EulerSecurityJsonMapperFactory.getInstance();
         List<Object> rawList = new ArrayList<>();
-        rawList.add(new EulerUserDetails(EulerUserDetails.DEFAULT_TENANT_ID, "1", "1", "1", new ArrayList<>()));
+        rawList.add(new EulerUserDetails(EulerUserDetails.DEFAULT_TENANT_ID, "1", "1", "1", new ArrayList<>(), new ArrayList<>()));
         String json = mapper.writeValueAsString(rawList);
         System.out.println(json);
         List<?> readList = mapper.readValue(json, List.class);

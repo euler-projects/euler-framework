@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.core.userdetails;
 
+import org.eulerframework.resource.Tag;
 import org.eulerframework.security.util.UserDetailsUtils;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,11 +48,13 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
 
     private final boolean enabled;
 
+    private final List<Tag> tags;
+
     /**
      * Calls the more complex constructor with all boolean arguments set to {@code true}.
      */
-    public EulerUserDetails(String tenantId, String userId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        this(tenantId, userId, username, password, true, true, true, true, authorities);
+    public EulerUserDetails(String tenantId, String userId, String username, String password, Collection<? extends GrantedAuthority> authorities, Collection<Tag> tags) {
+        this(tenantId, userId, username, password, true, true, true, true, authorities, tags);
     }
 
     /**
@@ -69,12 +72,14 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
      * @param accountNonLocked      set to <code>true</code> if the account is not locked
      * @param authorities           the authorities that should be granted to the caller if they
      *                              presented the correct username and password and the user is enabled. Not null.
+     * @param tags                  the tags of the user.
      * @throws IllegalArgumentException if a <code>null</code> value was passed either as
      *                                  a parameter or as an element in the <code>GrantedAuthority</code> collection
      */
     public EulerUserDetails(String tenantId, String userId, String username, String password, boolean enabled, boolean accountNonExpired,
                             boolean credentialsNonExpired, boolean accountNonLocked,
-                            Collection<? extends GrantedAuthority> authorities) {
+                            Collection<? extends GrantedAuthority> authorities,
+                            Collection<Tag> tags) {
         Assert.isTrue(username != null && !username.isEmpty() && password != null,
                 "Cannot pass null or empty values to constructor");
 
@@ -87,6 +92,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
         this.authorities = Collections.unmodifiableSet(UserDetailsUtils.sortGrantedAuthorities(authorities));
+        this.tags = List.copyOf(tags);
     }
 
     public String getTenantId() {
@@ -138,6 +144,10 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
     }
 
     @Override
@@ -207,6 +217,8 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         private boolean credentialsExpired;
 
         private boolean disabled;
+
+        private List<Tag> tags = new ArrayList<>();
 
         private Function<String, String> passwordEncoder = (password) -> password;
 
@@ -353,6 +365,17 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
             return authorities(AuthorityUtils.createAuthorityList(authorities));
         }
 
+        public UserBuilder tags(Tag... tags) {
+            Assert.notNull(tags, "tags cannot be null");
+            return tags(Arrays.asList(tags));
+        }
+
+        public UserBuilder tags(Collection<? extends Tag> tags) {
+            Assert.notNull(tags, "tags cannot be null");
+            this.tags = new ArrayList<>(tags);
+            return this;
+        }
+
         /**
          * Defines if the account is expired or not. Default is false.
          *
@@ -404,7 +427,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         public EulerUserDetails build() {
             String encodedPassword = this.passwordEncoder.apply(this.password);
             return new EulerUserDetails(this.tenantId, this.userId, this.username, encodedPassword, !this.disabled, !this.accountExpired,
-                    !this.credentialsExpired, !this.accountLocked, this.authorities);
+                    !this.credentialsExpired, !this.accountLocked, this.authorities, this.tags);
         }
     }
 }

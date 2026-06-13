@@ -16,6 +16,7 @@
 
 package org.eulerframework.security.jackson;
 
+import org.eulerframework.resource.Tag;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -33,6 +34,8 @@ import java.util.Collection;
 class EulerUserDetailsDeserializer extends ValueDeserializer<EulerUserDetails> {
 
     private static final TypeReference<Collection<GrantedAuthority>> GRANTED_AUTHORITY_COLLECTION = new TypeReference<>() {
+    };
+    private static final TypeReference<Collection<Tag>> TAG_COLLECTION = new TypeReference<>() {
     };
 
     /**
@@ -52,6 +55,9 @@ class EulerUserDetailsDeserializer extends ValueDeserializer<EulerUserDetails> {
         JsonNode authoritiesNode = readJsonNode(jsonNode, "authorities");
         Collection<? extends GrantedAuthority> authorities = ctxt.readTreeAsValue(authoritiesNode,
                 ctxt.getTypeFactory().constructType(GRANTED_AUTHORITY_COLLECTION));
+        JsonNode tagsNode = readJsonNode(jsonNode, "tags");
+        Collection<Tag> tags = ctxt.readTreeAsValue(tagsNode,
+                ctxt.getTypeFactory().constructType(TAG_COLLECTION));
         JsonNode passwordNode = readJsonNode(jsonNode, "password");
         String tenantId = readJsonNode(jsonNode, "tenantId").asString(EulerUserDetails.DEFAULT_TENANT_ID);
         String userId = readJsonNode(jsonNode, "userId").asString();
@@ -61,7 +67,7 @@ class EulerUserDetailsDeserializer extends ValueDeserializer<EulerUserDetails> {
         boolean accountNonExpired = readJsonNode(jsonNode, "accountNonExpired").asBoolean();
         boolean credentialsNonExpired = readJsonNode(jsonNode, "credentialsNonExpired").asBoolean();
         boolean accountNonLocked = readJsonNode(jsonNode, "accountNonLocked").asBoolean();
-        EulerUserDetails result = new EulerUserDetails(tenantId, userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
+        EulerUserDetails result = new EulerUserDetails(tenantId, userId, username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities, tags);
         if (passwordNode.asString(null) == null) {
             result.eraseCredentials();
         }
