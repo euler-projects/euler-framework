@@ -16,6 +16,7 @@
 
 package org.eulerframework.security.jackson;
 
+import org.eulerframework.resource.Tag;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 class EulerSecurityJsonMapperFactoryTest {
@@ -35,6 +35,7 @@ class EulerSecurityJsonMapperFactoryTest {
                 .username("euler")
                 .password("password")
                 .authorities("user", "admin")
+                .tags(new Tag("key", "value"))
                 .build();
         String json = jsonMapper.writeValueAsString(eulerUserDetails);
         EulerUserDetails deserializedObject = jsonMapper.readValue(json, EulerUserDetails.class);

@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.jackson;
 
+import org.eulerframework.resource.Tag;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationAuthenticationToken;
 import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
@@ -34,8 +35,10 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         builder.allowIfSubType(EulerUserDetails.class)
                 .allowIfSubType(EulerGrantedAuthority.class)
                 .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class)
-                .allowIfSubType(AppAttestAttestationRegistrationAuthenticationToken.class);
-
+                .allowIfSubType(AppAttestAttestationRegistrationAuthenticationToken.class)
+                .allowIfSubType(Tag.class)
+                .allowIfSubType("java.util.ImmutableCollections$List12")
+                .allowIfSubType("java.util.ImmutableCollections$ListN");
     }
 
     @Override
