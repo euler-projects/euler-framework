@@ -92,7 +92,7 @@ public final class EulerUserDetails implements UserDetails, CredentialsContainer
         this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
         this.authorities = Collections.unmodifiableSet(UserDetailsUtils.sortGrantedAuthorities(authorities));
-        this.tags = tags == null || tags.isEmpty() ? Collections.emptyList() : List.copyOf(tags);
+        this.tags = tags == null ? List.of() : List.copyOf(tags);
     }
 
     public String getTenantId() {
