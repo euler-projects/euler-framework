@@ -1,5 +1,6 @@
 package org.eulerframework.security.oauth2.server.authorization.oidc.authentication;
 
+import org.eulerframework.security.oauth2.core.oidc.EulerOidcClaimNames;
 import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
@@ -57,6 +58,7 @@ public class UserDetailsOidcUserInfoMapper implements Function<OidcUserInfoAuthe
                                                                  OAuth2Authorization authorization) {
         Set<String> scopeRequestedClaimNames = new HashSet<>(32);
         scopeRequestedClaimNames.add(StandardClaimNames.SUB);
+        scopeRequestedClaimNames.add(EulerOidcClaimNames.TAGS);
 
         if (requestedScopes.contains(OidcScopes.ADDRESS)) {
             scopeRequestedClaimNames.add(StandardClaimNames.ADDRESS);
@@ -71,7 +73,7 @@ public class UserDetailsOidcUserInfoMapper implements Function<OidcUserInfoAuthe
             scopeRequestedClaimNames.addAll(PROFILE_CLAIMS);
         }
         if (requestedScopes.contains(EulerOidcScopes.AUTHORITIES)) {
-            scopeRequestedClaimNames.add(EulerOidcScopes.AUTHORITIES);
+            scopeRequestedClaimNames.add(EulerOidcClaimNames.AUTHORITIES);
         }
 
         Map<String, Object> requestedClaims = new HashMap<>(claims);
