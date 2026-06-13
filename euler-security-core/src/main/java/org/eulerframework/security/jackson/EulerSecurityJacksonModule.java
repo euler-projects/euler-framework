@@ -38,7 +38,11 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
                 .allowIfSubType(AppAttestAttestationRegistrationAuthenticationToken.class)
                 .allowIfSubType(Tag.class)
                 .allowIfSubType("java.util.ImmutableCollections$List12")
-                .allowIfSubType("java.util.ImmutableCollections$ListN");
+                .allowIfSubType("java.util.ImmutableCollections$ListN")
+                .allowIfSubType("java.util.ImmutableCollections$Set12")
+                .allowIfSubType("java.util.ImmutableCollections$SetN")
+                .allowIfSubType("java.util.ImmutableCollections$Map1")
+                .allowIfSubType("java.util.ImmutableCollections$MapN");
     }
 
     @Override
