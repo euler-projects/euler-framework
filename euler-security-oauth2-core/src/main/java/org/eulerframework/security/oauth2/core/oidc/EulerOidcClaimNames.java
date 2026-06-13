@@ -18,6 +18,9 @@ package org.eulerframework.security.oauth2.core.oidc;
 
 public class EulerOidcClaimNames {
     public static final String AUTHORITIES = "authorities";
+    public static final String TAGS = "tag";
+    public static final String TAGS_KEY = "k";
+    public static final String TAGS_VALUE = "v";
     public static final String APPID = "aid";
     public static final String OS_FAMILY = "osf";
     public static final String OS_NAME = "os";

@@ -16,5 +16,18 @@
 
 package org.eulerframework.resource;
 
+import org.springframework.util.Assert;
+
+/**
+ * Generic key-value tag.
+ *
+ * <p>{@code key} must be a non-null, non-blank string; {@code value} is allowed to be
+ * {@code null}, indicating a key-only tag without a concrete value (e.g. a boolean-like
+ * presence marker).</p>
+ */
 public record Tag(String key, String value) {
+
+    public Tag {
+        Assert.hasText(key, "Tag key must not be null or blank");
+    }
 }
