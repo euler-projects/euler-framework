@@ -1,177 +1,195 @@
 /*
- * Vanilla DOM helpers for euler-security-web form pages (signup,
- * change-password). Replaces the previous jQuery-based eulerForm helper.
+ * euler-form.js
  *
- * Public API exposed on window.eulerForm:
- *   setLoadStatus(input)
- *   setSuccessStatus(input)
- *   setErrorStatus(input, msg)
- *   clearStatus(input)
- *   validForm(formEl)
- *   bindBlurValidator(input, url, paramName, extraParams?)
- *   bindConfirmPassword(confirmInput, sourceInput, errMsg)
- *   refreshCaptcha(imgEl, baseUrl)
+ * Drop this script into a Thymeleaf page rendered by euler-security-web
+ * and the form interactions are wired up automatically based on data-*
+ * attributes. No inline scripts in the templates are required.
+ *
+ * Wiring contract (set on input/img/form elements in the template):
+ *
+ *   data-validate-url        Async blur-time validator endpoint (already
+ *                            context-resolved via Thymeleaf @{...}).
+ *   data-validate-param      Query parameter name carrying the input
+ *                            value (defaults to the input's name).
+ *   data-validate-extra      Optional extra query string merged into the
+ *                            request, e.g. "scope=signup".
+ *
+ *   data-confirm-source      Id of the source input whose value the
+ *                            current input must match on blur.
+ *   data-mismatch-message    Localized error message displayed when the
+ *                            two values differ.
+ *
+ *   data-refresh-url         Set on an <img>; clicking the image reloads
+ *                            it from this URL with a cache-busting param.
+ *
+ *   data-prevalidate         Set on a <form>; submission is blocked when
+ *                            any .form-group inside it has .has-error.
+ *
+ * Public API (window.eulerForm) exposes the low-level status helpers for
+ * advanced custom logic; in normal use the DOM-driven wiring above is
+ * sufficient.
  */
-(function (global) {
+(() => {
     'use strict';
 
-    function getFormGroup(element) {
-        // The original markup keeps the input directly inside .form-group.
-        return element.parentElement;
-    }
+    const getFormGroup = (el) => el.parentElement;
 
-    function clearStatus(element) {
-        var group = getFormGroup(element);
+    const clearStatus = (el) => {
+        const group = getFormGroup(el);
         if (!group) return;
-        group.classList.remove('has-error');
-        group.classList.remove('has-success');
-        var nodes = Array.prototype.slice.call(group.children);
-        var seen = false;
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            if (node === element) { seen = true; continue; }
-            if (!seen) continue;
-            if (node.classList &&
-                (node.classList.contains('form-control-feedback') ||
-                 node.classList.contains('form-control-feedback-msg'))) {
-                group.removeChild(node);
+        group.classList.remove('has-error', 'has-success');
+        let next = el.nextElementSibling;
+        while (next) {
+            const after = next.nextElementSibling;
+            if (next.classList && (
+                    next.classList.contains('form-control-feedback') ||
+                    next.classList.contains('form-control-feedback-msg'))) {
+                next.remove();
             }
+            next = after;
         }
-    }
+    };
 
-    function setLoadStatus(element) {
-        clearStatus(element);
-        var group = getFormGroup(element);
+    const setLoadStatus = (el) => {
+        clearStatus(el);
+        const group = getFormGroup(el);
         if (!group) return;
-        var span = document.createElement('span');
+        const span = document.createElement('span');
         span.className = 'form-control-feedback';
-        var spinner = document.createElement('div');
+        const spinner = document.createElement('div');
         spinner.className = 'loading';
         span.appendChild(spinner);
         group.appendChild(span);
-    }
+    };
 
-    function setSuccessStatus(element) {
-        clearStatus(element);
-        var group = getFormGroup(element);
+    const setSuccessStatus = (el) => {
+        clearStatus(el);
+        const group = getFormGroup(el);
         if (!group) return;
         group.classList.add('has-success');
-        var span = document.createElement('span');
+        const span = document.createElement('span');
         span.className = 'icon-ok form-control-feedback';
         group.appendChild(span);
-    }
+    };
 
-    function setErrorStatus(element, msg) {
-        clearStatus(element);
-        var group = getFormGroup(element);
+    const setErrorStatus = (el, msg) => {
+        clearStatus(el);
+        const group = getFormGroup(el);
         if (!group) return;
         group.classList.add('has-error');
-        var icon = document.createElement('span');
+        const icon = document.createElement('span');
         icon.className = 'icon-remove form-control-feedback';
         group.appendChild(icon);
-        var note = document.createElement('span');
+        const note = document.createElement('span');
         note.className = 'form-control-feedback-msg';
         note.textContent = msg == null ? '' : String(msg);
         group.appendChild(note);
-    }
+    };
 
-    function validForm(formEl) {
+    const validForm = (formEl) => {
         if (!formEl) return true;
-        var bad = formEl.querySelectorAll('.form-group.has-error');
-        return !bad || bad.length === 0;
-    }
-
-    function buildQuery(params) {
-        var pairs = [];
-        Object.keys(params).forEach(function (k) {
-            var v = params[k];
-            if (v === undefined || v === null) return;
-            pairs.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
-        });
-        return pairs.join('&');
-    }
+        return formEl.querySelectorAll('.form-group.has-error').length === 0;
+    };
 
     /**
-     * Bind a blur-time async validator that posts the input value to the
-     * given URL as a query parameter.
-     *
-     * @param input        the input element being validated
-     * @param url          absolute URL (caller is expected to prefix the
-     *                     servlet context path)
-     * @param paramName    the query parameter name carrying the value
-     * @param extraParams  optional flat object merged into the query
+     * Fire a GET request that posts the input value as a single query
+     * parameter and translate the response into a feedback state.
      */
-    function bindBlurValidator(input, url, paramName, extraParams) {
-        if (!input) return;
-        input.addEventListener('blur', function () {
-            setLoadStatus(input);
-            var params = {};
-            params[paramName] = input.value;
-            if (extraParams) {
-                Object.keys(extraParams).forEach(function (k) {
-                    params[k] = extraParams[k];
-                });
-            }
-            var query = buildQuery(params);
-            var fullUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + query;
-            fetch(fullUrl, {
+    const runBlurValidator = async (input, url, paramName, extraQuery) => {
+        setLoadStatus(input);
+        const params = new URLSearchParams();
+        params.set(paramName, input.value);
+        if (extraQuery) {
+            new URLSearchParams(extraQuery).forEach((value, key) => {
+                params.set(key, value);
+            });
+        }
+        const sep = url.includes('?') ? '&' : '?';
+        try {
+            const response = await fetch(url + sep + params.toString(), {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers: { 'Accept': 'application/json' }
-            }).then(function (response) {
-                if (response.ok) {
-                    setSuccessStatus(input);
-                    return;
-                }
-                return response.text().then(function (body) {
-                    var msg = response.statusText || 'invalid';
-                    if (body) {
-                        try {
-                            var json = JSON.parse(body);
-                            if (json && json.error_description) {
-                                msg = json.error_description;
-                            }
-                        } catch (e) { /* keep default */ }
-                    }
-                    setErrorStatus(input, msg);
-                });
-            }).catch(function (err) {
-                setErrorStatus(input, (err && err.message) || 'network error');
             });
-        });
-    }
-
-    function bindConfirmPassword(confirmInput, sourceInput, errMsg) {
-        if (!confirmInput || !sourceInput) return;
-        confirmInput.addEventListener('blur', function () {
-            var v = confirmInput.value;
-            if (v == null || v === '') {
+            if (response.ok) {
+                setSuccessStatus(input);
                 return;
             }
-            if (v === sourceInput.value) {
-                setSuccessStatus(confirmInput);
-            } else {
-                setErrorStatus(confirmInput, errMsg);
+            const body = await response.text();
+            let msg = response.statusText || 'invalid';
+            if (body) {
+                try {
+                    const json = JSON.parse(body);
+                    if (json && json.error_description) {
+                        msg = json.error_description;
+                    }
+                } catch (_) { /* keep default */ }
             }
-        });
-    }
-
-    function refreshCaptcha(imgEl, baseUrl) {
-        if (!imgEl) return;
-        imgEl.addEventListener('click', function () {
-            var sep = baseUrl.indexOf('?') >= 0 ? '&' : '?';
-            imgEl.src = baseUrl + sep + '_r=' + Date.now();
-        });
-    }
-
-    global.eulerForm = {
-        setLoadStatus: setLoadStatus,
-        setSuccessStatus: setSuccessStatus,
-        setErrorStatus: setErrorStatus,
-        clearStatus: clearStatus,
-        validForm: validForm,
-        bindBlurValidator: bindBlurValidator,
-        bindConfirmPassword: bindConfirmPassword,
-        refreshCaptcha: refreshCaptcha
+            setErrorStatus(input, msg);
+        } catch (err) {
+            setErrorStatus(input, err?.message || 'network error');
+        }
     };
-})(window);
+
+    const init = () => {
+        // Async blur validators
+        document.querySelectorAll('[data-validate-url]').forEach((input) => {
+            const url = input.dataset.validateUrl;
+            const paramName = input.dataset.validateParam || input.name || 'value';
+            const extra = input.dataset.validateExtra;
+            input.addEventListener('blur', () => {
+                runBlurValidator(input, url, paramName, extra);
+            });
+        });
+
+        // Confirm-password matchers
+        document.querySelectorAll('[data-confirm-source]').forEach((confirmInput) => {
+            const sourceId = confirmInput.dataset.confirmSource;
+            const source = document.getElementById(sourceId);
+            const message = confirmInput.dataset.mismatchMessage || '';
+            if (!source) return;
+            confirmInput.addEventListener('blur', () => {
+                const value = confirmInput.value;
+                if (!value) return;
+                if (value === source.value) {
+                    setSuccessStatus(confirmInput);
+                } else {
+                    setErrorStatus(confirmInput, message);
+                }
+            });
+        });
+
+        // Captcha refreshers
+        document.querySelectorAll('[data-refresh-url]').forEach((img) => {
+            const baseUrl = img.dataset.refreshUrl;
+            img.addEventListener('click', () => {
+                const sep = baseUrl.includes('?') ? '&' : '?';
+                img.src = `${baseUrl}${sep}_r=${Date.now()}`;
+            });
+        });
+
+        // Pre-submit validation gate
+        document.querySelectorAll('form[data-prevalidate]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                if (!validForm(form)) {
+                    event.preventDefault();
+                }
+            });
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    // Public API for advanced custom logic.
+    window.eulerForm = {
+        setLoadStatus,
+        setSuccessStatus,
+        setErrorStatus,
+        clearStatus,
+        validForm
+    };
+})();

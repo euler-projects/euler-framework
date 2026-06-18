@@ -2,47 +2,59 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" th:href="@{/assets/euler/security/css/single-form.css}">
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
+
 <body>
 <div class="wrapper">
     <div class="wrapper-inner">
         <div class="title-wrapper">
-            <span class="" th:text="#{_CREATE_YOUR_ACCOUNT}">Create your account</span>
+            <span th:text="#{_CREATE_YOUR_ACCOUNT}">Create your account</span>
         </div>
         <div class="form-wrapper">
-            <form th:action="@{${signupProcessingUrl}}" id="main-form"
+            <form id="main-form" th:action="@{${signupProcessingUrl}}"
                   class="full-line-form" method="post">
                 <div class="form-group has-feedback">
-                    <label class="control-label" for="username" th:text="#{_USERNAME}">Username</label><input
-                        class="form-control" type="text" id="username" name="username"/>
+                    <label class="control-label" for="username" th:text="#{_USERNAME}">Username</label>
+                    <input id="username" name="username" type="text"
+                           class="form-control"
+                           autocomplete="username"
+                           th:data-validate-url="@{/ajax/validUsername}"/>
                 </div>
                 <div class="form-group has-feedback">
-                    <label class="control-label" for="password" th:text="#{_PASSWORD}">Password</label><input
-                        class="form-control" type="password" id="password" name="password"/>
+                    <label class="control-label" for="password" th:text="#{_PASSWORD}">Password</label>
+                    <input id="password" name="password" type="password"
+                           class="form-control"
+                           autocomplete="new-password"
+                           th:data-validate-url="@{/ajax/validPassword}"/>
                 </div>
                 <div class="form-group has-feedback">
-                    <label class="control-label" for="confirm-password" th:text="#{_CONFIRM_PASSWORD}">Confirm
-                        Password</label><input
-                        class="form-control" type="password" id="confirm-password"/>
+                    <label class="control-label" for="confirm-password" th:text="#{_CONFIRM_PASSWORD}">Confirm Password</label>
+                    <input id="confirm-password" type="password"
+                           class="form-control"
+                           autocomplete="new-password"
+                           data-confirm-source="password"
+                           th:data-mismatch-message="#{_CONFIRM_PASSWORD_NOT_MATCH}"/>
                 </div>
                 <div class="form-group captcha-group has-feedback">
-                    <label class="control-label" for="captcha" th:text="#{_CAPTCHA}">Type the characters in the
-                        image</label><input
-                        class="form-control" type="text" id="captcha" name="captcha"/><span class="captcha"><a
-                        href="javascript:void(0)"><img id="captcha-img"
-                                                       th:src="@{/captcha(scope='signup')}"
-                                                       alt="Captcha"></a></span>
+                    <label class="control-label" for="captcha" th:text="#{_CAPTCHA}">Type the characters in the image</label>
+                    <input id="captcha" name="captcha" type="text"
+                           class="form-control"
+                           autocomplete="off"
+                           th:data-validate-url="@{/captcha/validCaptcha}"
+                           data-validate-extra="scope=signup"/>
+                    <span class="captcha">
+                        <img id="captcha-img" alt="Captcha"
+                             th:src="@{/captcha(scope='signup')}"
+                             th:data-refresh-url="@{/captcha(scope='signup')}">
+                    </span>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-success" onclick="signup()" th:text="#{_SIGN_UP}">Sign Up
-                    </button>
+                    <button type="submit" class="btn btn-success" th:text="#{_SIGN_UP}">Sign Up</button>
                 </div>
             </form>
         </div>
@@ -57,35 +69,6 @@
     </footer>
 </div>
 
-<div style="display: none">
-    <span id="attr_context-path" th:text="${euler.ctx.__CONTEXT_PATH}">/</span>
-    <span id="attr_confirm-password-not-match" th:text="#{_CONFIRM_PASSWORD_NOT_MATCH}">The passwords you entered do not match.</span>
-</div>
 <script th:src="@{/assets/euler/security/js/euler-form.js}"></script>
-<script>
-    (function () {
-        var ctx = document.getElementById('attr_context-path').innerText;
-        var confirmNotMatch = document.getElementById('attr_confirm-password-not-match').innerText;
-
-        var usernameInput = document.getElementById('username');
-        var passwordInput = document.getElementById('password');
-        var confirmInput = document.getElementById('confirm-password');
-        var captchaInput = document.getElementById('captcha');
-        var captchaImg = document.getElementById('captcha-img');
-
-        eulerForm.bindBlurValidator(usernameInput, ctx + '/ajax/validUsername', 'username');
-        eulerForm.bindBlurValidator(passwordInput, ctx + '/ajax/validPassword', 'password');
-        eulerForm.bindConfirmPassword(confirmInput, passwordInput, confirmNotMatch);
-        eulerForm.bindBlurValidator(captchaInput, ctx + '/captcha/validCaptcha', 'captcha', { scope: 'signup' });
-        eulerForm.refreshCaptcha(captchaImg, ctx + '/captcha?scope=signup');
-
-        window.signup = function () {
-            // if (!eulerForm.validForm(document.getElementById('main-form'))) {
-            //     return;
-            // }
-            document.getElementById('main-form').submit();
-        };
-    })();
-</script>
 </body>
 </html>

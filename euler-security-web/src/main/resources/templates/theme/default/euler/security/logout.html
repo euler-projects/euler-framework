@@ -2,21 +2,18 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" th:href="@{/assets/euler/security/css/single-form.css}">
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
-
 </head>
 
 <body>
 <div class="wrapper">
     <div class="wrapper-inner">
         <div class="title-wrapper">
-            <span class="" th:text="#{_SIGN_OUT_CONFIRM}">Are you sure you want to sign out?</span>
+            <span th:text="#{_SIGN_OUT_CONFIRM}">Are you sure you want to sign out?</span>
         </div>
         <div class="form-wrapper">
             <form th:action="@{${logoutProcessingUrl}}"

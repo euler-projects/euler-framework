@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/assets/euler/core/css/info-page.css}">
 
@@ -11,10 +10,10 @@
 </head>
 <body>
 <div class="container">
-    <div class="title " th:text="#{${__message}}">Message</div>
+    <div class="title" th:text="#{${__message}}">Message</div>
     <div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
     <div class="actions">
-        <div class="action"><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
+        <div class="action"><a id="target" th:href="${__target.href}" href="/#" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
         <div class="action"><a th:href="@{/}" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
     </div>
 </div>
@@ -27,15 +26,17 @@
             th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
 </footer>
 
-<script type="text/javascript">
-    (function () {
-        var wait = document.getElementById('wait');
-        var href = document.getElementById('target').href;
-        var interval = setInterval(function () {
-            var time = --wait.innerHTML;
-            if (time <= 0) {
-                location.href = href;
+<script>
+    (() => {
+        const waitEl = document.getElementById('wait');
+        const targetHref = document.getElementById('target').href;
+        let remaining = parseInt(waitEl.textContent, 10);
+        const interval = setInterval(() => {
+            remaining -= 1;
+            waitEl.textContent = remaining;
+            if (remaining <= 0) {
                 clearInterval(interval);
+                location.href = targetHref;
             }
         }, 1000);
     })();
