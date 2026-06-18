@@ -15,13 +15,13 @@
     <div class="info"><span th:text="#{_ERROR_MESSAGE} + ':'">Error Message:</span><span>&nbsp;</span><span th:text="${__error.error_description}">Unknown Error</span></div>
     <div class="info"><span th:text="#{_ERROR_CODE} + ':'">Error Code:</span><span>&nbsp;</span><span th:text="${__error.error}">unknown_error </span><span>&nbsp;(</span><span th:text="${__error.error_code}">500</span><span>)</span></div>
     <div class="actions">
-        <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
+        <div class="action"><a th:href="@{/}" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
     </div>
 </div>
 <footer>
-    <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+    <span><a href="/static" th:href="@{/}"
              th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
-    <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+    <span>&copy; <span class="js-current-year">2026</span><script>document.querySelector('.js-current-year').textContent = new Date().getFullYear();</script> <a
             href="https://www.eulerproject.io"
             th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
             th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>

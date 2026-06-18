@@ -18,9 +18,9 @@
     </div>
 </div>
 <footer>
-    <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+    <span><a href="/static" th:href="@{/}"
              th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
-    <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+    <span>&copy; <span class="js-current-year">2026</span><script>document.querySelector('.js-current-year').textContent = new Date().getFullYear();</script> <a
             href="https://www.eulerproject.io"
             th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
             th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>

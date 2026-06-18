@@ -17,7 +17,7 @@
             <span class="" th:text="#{_CREATE_YOUR_ACCOUNT}">Create your account</span>
         </div>
         <div class="form-wrapper">
-            <form th:action="${euler.ctx.__CONTEXT_PATH} + ${signupProcessingUrl}" id="main-form"
+            <form th:action="@{${signupProcessingUrl}}" id="main-form"
                   class="full-line-form" method="post">
                 <div class="form-group has-feedback">
                     <label class="control-label" for="username" th:text="#{_USERNAME}">Username</label><input
@@ -37,7 +37,7 @@
                         image</label><input
                         class="form-control" type="text" id="captcha" name="captcha"/><span class="captcha"><a
                         href="javascript:void(0)"><img id="captcha-img"
-                                                       th:src="${euler.ctx.__CONTEXT_PATH} + '/captcha?scope=signup'"
+                                                       th:src="@{/captcha(scope='signup')}"
                                                        alt="Captcha"></a></span>
                 </div>
                 <div class="form-group">
@@ -48,9 +48,9 @@
         </div>
     </div>
     <footer class="footer-wrapper">
-        <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
+        <span><a href="/static" th:href="@{/}"
                  th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
-        <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
+        <span>&copy; <span class="js-current-year">2026</span><script>document.querySelector('.js-current-year').textContent = new Date().getFullYear();</script> <a
                 href="https://www.eulerproject.io"
                 th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
                 th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
