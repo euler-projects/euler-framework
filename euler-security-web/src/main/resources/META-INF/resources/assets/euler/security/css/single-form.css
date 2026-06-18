@@ -1,0 +1,362 @@
+/*
+ * Single-form layout for euler-security-web pages (login / logout / signup /
+ * change-password). Self-contained: no Bootstrap, no jQuery dependency.
+ */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: #333;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    background-color: #fff;
+}
+
+* { box-sizing: border-box; }
+
+a { color: #337ab7; text-decoration: none; }
+a:focus,
+a:hover { color: #23527c; text-decoration: underline; }
+
+/*
+ * Inherit body's font properties for form controls and buttons. Replaces
+ * Bootstrap 3's normalize rule:
+ *     input, button, select, textarea {
+ *         font-family: inherit; font-size: inherit; line-height: inherit;
+ *     }
+ * Without this, browsers use their native widget font (Arial / system)
+ * instead of the body's "Helvetica Neue", producing visibly inconsistent
+ * typography between labels and inputs.
+ */
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+/* ===== Page layout (matches original .wrapper / .wrapper-inner table layout) ===== */
+
+.wrapper {
+    display: table;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+}
+
+.wrapper-inner {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.title-wrapper {
+    width: 100%;
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 30px;
+}
+
+.form-wrapper {
+    width: 100%;
+}
+
+.form-wrapper form {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-wrapper .full-line-form {
+    width: 300px;
+}
+
+.form-wrapper .lable-from {
+    width: 260px;
+}
+
+.lable-from label {
+    display: inline-block;
+    margin-left: -100px;
+    width: 100px;
+    text-align: right;
+    padding: 0 6px;
+}
+
+.lable-from .form-control {
+    display: inline-block;
+}
+
+.info-wrapper {
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    margin-bottom: -20px;
+}
+
+.info-wrapper .failure-info { color: #a94442; }
+
+/*
+ * Footer is fixed to the bottom of the viewport, replacing the
+ * Bootstrap 3 .navbar + .navbar-fixed-bottom utilities that the previous
+ * templates combined with .footer-wrapper. The 50px min-height comes from
+ * .navbar, the position/z-index from .navbar-fixed-bottom, and the
+ * transparent background / 6px top padding / centered 12px #666 text from
+ * the original .footer-wrapper rules.
+ */
+.footer-wrapper {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1030;
+    min-height: 50px;
+    background-color: transparent;
+    border: 0;
+    padding-top: 6px;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+}
+
+.footer-wrapper a,
+.footer-wrapper a:hover,
+.footer-wrapper a:visited { color: #666; }
+
+/* ===== Form controls (Bootstrap 3 subset) ===== */
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.has-feedback {
+    position: relative;
+}
+
+/*
+ * Reserve space on the right side of inputs that carry a feedback icon
+ * (the 34x34 .form-control-feedback). Matches Bootstrap 3 exactly.
+ */
+.has-feedback .form-control {
+    padding-right: 42.5px;
+}
+
+.control-label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.form-control:focus {
+    border-color: #66afe9;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+        0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+/* Placeholder color matches Bootstrap 3 default (#999). */
+.form-control::placeholder { color: #999; opacity: 1; }
+.form-control::-webkit-input-placeholder { color: #999; }
+.form-control::-moz-placeholder { color: #999; opacity: 1; }
+.form-control:-ms-input-placeholder { color: #999; }
+
+.form-control[disabled],
+.form-control[readonly] {
+    cursor: not-allowed;
+    background-color: #eee;
+    opacity: 1;
+}
+
+.has-error .control-label { color: #a94442; }
+.has-error .form-control {
+    border-color: #a94442;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.has-error .form-control:focus {
+    border-color: #843534;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+        0 0 6px #ce8483;
+}
+
+.has-success .control-label { color: #3c763d; }
+.has-success .form-control {
+    border-color: #3c763d;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.has-success .form-control:focus {
+    border-color: #2b542c;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+        0 0 6px #67b168;
+}
+
+.form-control-feedback {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    display: block;
+    width: 34px;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    pointer-events: none;
+}
+
+/*
+ * When the form-group has a label (.has-feedback label ~ .form-control-feedback),
+ * the feedback icon is pushed down by the label height (25px), matching the
+ * Bootstrap 3 selector exactly.
+ */
+.has-feedback label ~ .form-control-feedback {
+    top: 25px;
+}
+
+.form-control-feedback-msg {
+    display: block;
+    margin-bottom: -15px;
+    line-height: 15px;
+    font-size: 0.6em;
+}
+
+.has-error .form-control-feedback-msg { color: #a94442; }
+.has-success .form-control-feedback-msg { color: #3c763d; }
+
+/* ===== Status icons (replaces Bootstrap glyphicon-ok / glyphicon-remove) ===== */
+
+.icon-ok,
+.icon-remove {
+    display: inline-block;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.icon-ok::before {
+    content: "\2713"; /* ✓ */
+    color: #3c763d;
+}
+
+.icon-remove::before {
+    content: "\2715"; /* ✕ */
+    color: #a94442;
+}
+
+/* ===== Buttons ===== */
+
+.btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out;
+}
+
+.btn:focus,
+.btn:hover { text-decoration: none; }
+
+.btn:active {
+    background-image: none;
+    outline: 0;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.btn[disabled],
+.btn.disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    box-shadow: none;
+}
+
+.btn-success {
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+.btn-success:hover,
+.btn-success:focus {
+    color: #fff;
+    background-color: #449d44;
+    border-color: #398439;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
+}
+.btn-danger:hover,
+.btn-danger:focus {
+    color: #fff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+}
+
+/* ===== Captcha group (extracted from inline styles) ===== */
+
+.captcha-group .form-control {
+    width: 60%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.captcha-group label { display: block; }
+
+.captcha-group .captcha {
+    display: inline-block;
+    width: 40%;
+    text-align: right;
+    vertical-align: middle;
+}
+
+.captcha-group .captcha img { cursor: pointer; vertical-align: middle; }
+
+.captcha-group .form-control-feedback { right: 120px; }
+
+/* ===== Loading spinner ===== */
+
+@keyframes circle {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading {
+    border: 2px solid #666;
+    border-top-color: transparent;
+    border-radius: 100%;
+    width: 14px;
+    height: 14px;
+    margin: 10px;
+    animation: circle infinite 1s linear;
+}

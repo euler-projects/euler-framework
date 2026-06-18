@@ -6,8 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <link href="https://cdn.eulerframework.net/assets/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.eulerframework.net/assets/css/themes/default/demo/single-form.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/euler/security/css/single-form.css}">
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 
@@ -29,8 +28,7 @@
             </form>
         </div>
     </div>
-    <footer
-            class="navbar navbar-inverse navbar-fixed-bottom footer-wrapper">
+    <footer class="footer-wrapper">
         <span><a href="/static" th:href="${euler.ctx.__CONTEXT_PATH} + '/'"
                  th:text="${euler.ctx.__SITE_NAME}">Euler Framework</a></span>
         <span>&copy; <script>document.write(new Date().getFullYear())</script> <a
@@ -39,8 +37,5 @@
                 th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
     </footer>
 </div>
-
-<script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
-<script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html>

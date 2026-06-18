@@ -5,12 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.eulerframework.net/assets/lib/bootstrap/css/bootstrap.min.css"
-          rel="stylesheet">
-    <link href="https://cdn.eulerframework.net/assets/lib/loader/loaders.min.css"
-          rel="stylesheet">
-    <link href="https://cdn.eulerframework.net/assets/css/themes/default/demo/info-page.css"
-          rel="stylesheet" >
+    <link rel="stylesheet" th:href="@{/assets/euler/core/css/info-page.css}">
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
 </head>
@@ -18,7 +13,7 @@
 <div class="container">
     <div class="title " th:text="#{${__message}}">Message</div>
     <div class="info"><span th:text="#{_PAGE_WILL_REDIRECT}">Page Will Redirect</span><span>&nbsp;</span><span id="wait" th:text="${__wait}">5</span><span>s</span></div>
-    <div class="actions row">
+    <div class="actions">
         <div class="action"><a th:href="${__target.href}"  href="/#" id="target" th:text="#{_REDIRECT_NOW}">Redirect Now</a></div>
         <div class="action"><a th:href="${euler.ctx.__CONTEXT_PATH} + '/'" href="/" th:text="#{_GO_HOME}">Go Home</a></div>
     </div>
@@ -31,18 +26,14 @@
             th:href="${euler.ctx.__COPYRIGHT_HOLDER_WEBSITE}"
             th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
 </footer>
-<script src="https://cdn.eulerframework.net/assets/lib/jquery/jquery-1.12.4.min.js"></script>
-<script src="https://cdn.eulerframework.net/assets/lib/bootstrap/js/bootstrap.min.js"></script>
-<script src="https://cdn.eulerframework.net/assets/js/info-page.js"></script>
 
 <script type="text/javascript">
-    (function(){
-        cleanUpActions($('.actions'))
-
-        let wait = document.getElementById('wait'),href = document.getElementById('target').href;
-        let interval = setInterval(function(){
-            let time = --wait.innerHTML;
-            if(time <= 0) {
+    (function () {
+        var wait = document.getElementById('wait');
+        var href = document.getElementById('target').href;
+        var interval = setInterval(function () {
+            var time = --wait.innerHTML;
+            if (time <= 0) {
                 location.href = href;
                 clearInterval(interval);
             }

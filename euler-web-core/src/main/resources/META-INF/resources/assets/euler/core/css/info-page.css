@@ -1,0 +1,126 @@
+/*
+ * Info-page layout for euler-web-core pages (common/error, common/jump,
+ * common/success, error/403, error/404, error/default). Self-contained: no
+ * Bootstrap, no jQuery dependency.
+ *
+ * Replaces the previous cleanUpActions JS-driven Bootstrap grid layout with
+ * a pure CSS flex row that auto-centers any number of action items.
+ */
+
+html, body {
+    font-size: 14px;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: #333;
+    text-align: center;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.42857143;
+    background-color: #fff;
+}
+
+* { box-sizing: border-box; }
+
+.container {
+    width: 100%;
+    min-height: 100dvh;
+    padding: 20px 20px 50px;
+    box-sizing: border-box;
+}
+
+.container > div {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+footer,
+.footer {
+    background-color: transparent;
+    position: relative;
+    height: 50px;
+    border: 0;
+    padding-top: 6px;
+    text-align: center;
+    font-size: 12px;
+    margin-top: -50px;
+    margin-bottom: 0;
+}
+
+footer,
+footer a,
+footer a:hover,
+footer a:visited,
+.footer,
+.footer a,
+.footer a:hover,
+.footer a:visited { color: #666; }
+
+a, a:hover, a:visited { color: #333; }
+a, a:visited { text-decoration: none; }
+a:focus,
+a:hover { text-decoration: underline; }
+
+pre {
+    color: #333;
+    font-size: unset;
+    line-height: 20px;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
+        monospace;
+    background-color: transparent;
+    border: none;
+    border-radius: unset;
+}
+
+.title { font-size: 1.5em; }
+.title.success { color: #5cb85c; }
+.title.error   { color: #d9534f; }
+
+.info { font-size: 1em; }
+
+.exception { text-align: left; font-size: 0.8em; }
+.exception > div { margin-top: 10px; margin-bottom: 10px; }
+.exception label { font-weight: 700; padding-right: 6px; }
+
+/*
+ * Actions: replaces Bootstrap 3 .row > .col-md-2 grid + cleanUpActions JS.
+ * Below the md breakpoint (< 992px) each action takes a full row (vertical
+ * stack), matching the original behavior where col-md-* classes did not
+ * apply and each .action div fell back to its native block layout. At >=
+ * 992px each action becomes a 16.6667% wide column with 15px horizontal
+ * padding, reproducing col-md-2 + col-md-offset-* (the latter is replaced
+ * by justify-content: center on the flex container).
+ */
+.actions {
+    font-size: 1em;
+    max-width: 952px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.actions > .action {
+    flex: 0 0 100%;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+@media (min-width: 992px) {
+    /*
+     * 16.6667% width + 15px horizontal padding matches Bootstrap 3
+     * .col-md-2. Combined with the parent .actions max-width: 952px this
+     * yields ~158.67px per column and 30px text-to-text spacing, identical
+     * to the previous CDN layout.
+     */
+    .actions > .action {
+        flex: 0 0 16.6666667%;
+        max-width: 16.6666667%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
