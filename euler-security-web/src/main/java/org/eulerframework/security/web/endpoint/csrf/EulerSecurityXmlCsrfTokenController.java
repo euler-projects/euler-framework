@@ -23,6 +23,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * XML/HTML {@code /_csrf} endpoint. See
+ * {@link EulerSecurityJsonCsrfTokenController} for the security contract.
+ */
 @Controller
 public class EulerSecurityXmlCsrfTokenController extends PageSupportWebController implements EulerSecurityCsrfTokenEndpoint {
     private boolean csrfEnabled;
@@ -37,6 +41,10 @@ public class EulerSecurityXmlCsrfTokenController extends PageSupportWebControlle
         if(!this.csrfEnabled) {
             return this.notfound();
         }
+        if (!CsrfEndpointGuards.isSameOriginRequest(this.getRequest())) {
+            return this.notfound();
+        }
+        CsrfEndpointGuards.applyNoStoreHeaders(this.getResponse());
         return this.display("euler/security/csrf", false);
     }
 

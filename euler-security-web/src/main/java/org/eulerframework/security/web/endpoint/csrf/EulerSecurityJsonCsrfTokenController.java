@@ -26,6 +26,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * JSON {@code /_csrf} endpoint. Returns the current session's CSRF token for
+ * same-origin SPA submissions.
+ *
+ * <p>This endpoint must not be exposed via any CORS configuration that sets
+ * {@code Access-Control-Allow-Credentials: true}. {@link CsrfEndpointGuards}
+ * enforces same-origin access and disables intermediate caching as defence in
+ * depth.</p>
+ */
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class EulerSecurityJsonCsrfTokenController extends ApiSupportWebController implements EulerSecurityCsrfTokenEndpoint {
@@ -36,6 +45,11 @@ public class EulerSecurityJsonCsrfTokenController extends ApiSupportWebControlle
         if (!this.csrfEnabled) {
             throw new ResourceNotFoundException();
         }
+        if (!CsrfEndpointGuards.isSameOriginRequest(this.getRequest())) {
+            throw new ResourceNotFoundException();
+        }
+        CsrfEndpointGuards.applyNoStoreHeaders(this.getResponse());
+
         CsrfToken csrfToken = (CsrfToken) this.getRequest().getAttribute(CsrfToken.class.getName());
         if (csrfToken == null) {
             throw new ResourceNotFoundException("CSRF token not found");
