@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.authentication.factor;
+package org.eulerframework.security.web.authentication.identity;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
@@ -21,12 +21,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.common.util.jackson.JacksonUtils;
-import org.eulerframework.security.authentication.factor.IdentifierConflictException;
-import org.eulerframework.security.authentication.factor.InvalidAuthenticationFactorRequestException;
-import org.eulerframework.security.authentication.factor.UnsupportedFactorTypeException;
-import org.eulerframework.security.authentication.factor.UserAuthenticationFactor;
-import org.eulerframework.security.authentication.factor.UserAuthenticationFactorNotFoundException;
-import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
+import org.eulerframework.security.core.identity.IdentityOccupiedException;
+import org.eulerframework.security.core.identity.InvalidUserIdentityException;
+import org.eulerframework.security.core.identity.UnsupportedIdentityTypeException;
+import org.eulerframework.security.core.identity.UserIdentity;
+import org.eulerframework.security.core.identity.UserIdentityNotFoundException;
+import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.EulerUserDetailsService;
 import org.slf4j.Logger;
@@ -47,86 +47,96 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * Filter exposing the {@code /user/identities} REST surface (CRUD for
- * {@link UserAuthenticationFactor}).
- * <p>
- * The endpoint family is intentionally <em>not</em> an OAuth2 protocol
- * endpoint. AT validation is performed by the surrounding security filter
- * chain (typically the authorization-server chain's
+ * Servlet filter serving the {@code /user/identities} REST surface.
+ *
+ * <p>The endpoints are not OAuth2 protocol endpoints. Access-token
+ * validation is performed by the surrounding security filter chain
+ * (typically the authorization-server chain's
  * {@code oauth2ResourceServer.jwt()}); this filter consumes the
  * already-authenticated request and delegates to a single
- * {@link UserAuthenticationFactorService} entry-point provided by business
- * code (either a single-factor implementation or a business-side composite
- * router that dispatches by {@code factor_type}).
+ * {@link UserIdentityService} bean.
  *
  * <h2>Endpoints</h2>
  * <ul>
- *     <li>{@code POST   <baseUri>}              - bind a new factor</li>
- *     <li>{@code PUT    <baseUri>/{factorId}}   - update (rebind) an existing factor</li>
- *     <li>{@code GET    <baseUri>}              - list this user's factors</li>
- *     <li>{@code GET    <baseUri>/{factorId}}   - get one factor</li>
- *     <li>{@code DELETE <baseUri>/{factorId}}   - delete one factor</li>
+ *   <li>{@code POST   <baseUri>}              &mdash; bind a new identity</li>
+ *   <li>{@code GET    <baseUri>}              &mdash; list identities owned by the caller</li>
+ *   <li>{@code GET    <baseUri>/{identityId}} &mdash; read a single identity</li>
+ *   <li>{@code PUT    <baseUri>/{identityId}} &mdash; replace an identity</li>
+ *   <li>{@code DELETE <baseUri>/{identityId}} &mdash; delete an identity</li>
  * </ul>
  *
  * <h2>Authentication</h2>
- * The user id is resolved via the standard Spring Security pipeline:
- * {@link SecurityContextHolder} -&gt; {@link Authentication#getName()} (the
- * JWT {@code sub} / OAuth2 {@code principalName} — i.e. the username) -&gt;
- * {@link EulerUserDetailsService#loadUserByPrincipal(String)} -&gt;
- * {@link EulerUserDetails#getUserId()}.
- * <p>
- * We deliberately do <strong>not</strong> consult
- * {@code UserContextHolder} here: in a Resource Server chain the only
- * principal available on the {@link Authentication} is an
- * {@code OAuth2AuthenticatedPrincipal} that carries no {@code userId} (the
- * {@code sub_details} extension claim and the {@code Principal.class}
- * attribute are populated only on the Authorization Server side), so
- * {@code UserContext#getUserId()} returns {@code null} for these requests.
- * Reverse-resolving via {@link EulerUserDetailsService} mirrors the pattern
- * used by {@code OAuth2OtpAuthenticationProvider} and works uniformly
- * regardless of whether the surrounding chain is Resource Server or
- * Authorization Server.
- * <p>
- * When no authenticated user is bound to the current request, or the
- * principal cannot be reverse-resolved into an {@link EulerUserDetails},
- * the filter responds with {@code 401 invalid_token}. The filter itself
- * does not inspect the JWT — that is the job of the upstream resource-server
- * filter chain.
+ * <p>The user id is resolved through the standard Spring Security
+ * pipeline: {@link SecurityContextHolder} &rarr;
+ * {@link Authentication#getName()} (the JWT {@code sub} / OAuth2
+ * {@code principalName}) &rarr;
+ * {@link EulerUserDetailsService#loadUserByPrincipal(String)} &rarr;
+ * {@link EulerUserDetails#getUserId()}. Requests without a bound
+ * principal, or whose principal cannot be resolved, are rejected with
+ * {@code 401 invalid_token}. JWT decoding itself is the responsibility
+ * of the upstream resource-server filter chain.
  *
- * <h2>Response shape</h2>
- * Every factor is rendered as the {@code identity_id} / {@code identity_type} /
- * {@code identifier} / {@code bound_at} envelope plus per-factor
- * {@link UserAuthenticationFactor#extensions()} flattened into the top-level
- * object. Timestamps are emitted as epoch-millis. The internal
- * {@link UserAuthenticationFactor} concept is intentionally surfaced to API
- * consumers under the public "User Identity" terminology.
- * <p>
- * Note: unlike {@code OidcUserInfoEndpointFilter} this filter does not go
- * through {@code AuthenticationManager}/{@code AuthenticationProvider} — the
- * operations are post-authentication resource CRUD, not an authentication
- * exchange. Should we ever need to inject explicit authorization decisions,
- * we will rely on Spring Security's standard
- * {@code AuthorizationFilter} / {@code @PreAuthorize} machinery.
+ * <h2>Wire format</h2>
+ * <p>Each identity is rendered as:
+ * <pre>{@code
+ * {
+ *   "identity_id":   "...",
+ *   "identity_type": "phone",
+ *   "subject":       "9c1b8e2a3f6d...",
+ *   "identifier":    "",
+ *   "bound_at":      1778899139687,
+ *   "phone":         "+8613*****00"
+ * }
+ * }</pre>
+ * Per-type attributes from {@link UserIdentity#extensions()} are
+ * flattened onto the envelope (e.g. {@code phone} for the phone
+ * identity; {@code openid} / {@code nickname} / {@code unionid} for
+ * WeChat). Timestamps are emitted as epoch milliseconds.
+ *
+ * <p>{@code subject} is the deterministic per-type unique key: SHA-256
+ * hex of the normalised original for {@code phone} and {@code email};
+ * the IdP-issued {@code openid} or {@code sub} for federated types.
+ *
+ * <p>{@code identifier} is a fixed empty-string placeholder retained
+ * for clients whose parsing logic expects the key to be present; new
+ * clients should consume {@code subject} and the per-type attributes
+ * instead.
+ *
+ * <h2>Error mapping</h2>
+ * <p>Exceptions raised by the {@link UserIdentityService} are
+ * translated to OAuth2-style error envelopes:
+ * <ul>
+ *   <li>{@link org.eulerframework.security.core.identity.InvalidUserIdentityException
+ *       InvalidUserIdentityException} &rarr;
+ *       {@code 400 invalid_request}</li>
+ *   <li>{@link org.eulerframework.security.core.identity.UnsupportedIdentityTypeException
+ *       UnsupportedIdentityTypeException} &rarr;
+ *       {@code 400 unsupported_identity_type}</li>
+ *   <li>{@link org.eulerframework.security.core.identity.IdentityOccupiedException
+ *       IdentityOccupiedException} &rarr;
+ *       {@code 409 identity_occupied}</li>
+ *   <li>{@link org.eulerframework.security.core.identity.UserIdentityNotFoundException
+ *       UserIdentityNotFoundException} &rarr; {@code 404 not_found}</li>
+ * </ul>
  */
-public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter {
+public class UserIdentityEndpointFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserAuthenticationFactorEndpointFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserIdentityEndpointFilter.class);
 
     private static final String ERROR_INVALID_REQUEST = "invalid_request";
-    private static final String ERROR_UNSUPPORTED_FACTOR_TYPE = "unsupported_identity_type";
-    private static final String ERROR_IDENTIFIER_CONFLICT = "identity_occupied";
+    private static final String ERROR_UNSUPPORTED_IDENTITY_TYPE = "unsupported_identity_type";
+    private static final String ERROR_IDENTITY_OCCUPIED = "identity_occupied";
     private static final String ERROR_NOT_FOUND = "not_found";
     private static final String ERROR_INVALID_TOKEN = "invalid_token";
     private static final String ERROR_SERVER_ERROR = "server_error";
 
-    private final UserAuthenticationFactorService userAuthenticationFactorService;
+    private final UserIdentityService userIdentityService;
     private final EulerUserDetailsService userDetailsService;
     private final String endpointBaseUri;
     private final RequestMatcher collectionMatcher;
@@ -136,17 +146,17 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private final RequestMatcher createMatcher;
     private final RequestMatcher requestMatcher;
 
-    public UserAuthenticationFactorEndpointFilter(UserAuthenticationFactorService userAuthenticationFactorService,
-                                                  EulerUserDetailsService userDetailsService,
-                                                  String endpointBaseUri) {
-        Assert.notNull(userAuthenticationFactorService, "userAuthenticationService must not be null");
+    public UserIdentityEndpointFilter(UserIdentityService userIdentityService,
+                                      EulerUserDetailsService userDetailsService,
+                                      String endpointBaseUri) {
+        Assert.notNull(userIdentityService, "userIdentityService must not be null");
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
         Assert.hasText(endpointBaseUri, "endpointBaseUri must not be empty");
         Assert.isTrue(!endpointBaseUri.endsWith("/"), "endpointBaseUri must not end with '/'");
-        this.userAuthenticationFactorService = userAuthenticationFactorService;
+        this.userIdentityService = userIdentityService;
         this.userDetailsService = userDetailsService;
         this.endpointBaseUri = endpointBaseUri;
-        String itemPattern = endpointBaseUri + "/{factorId}";
+        String itemPattern = endpointBaseUri + "/{identityId}";
         this.createMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.POST, endpointBaseUri);
         this.collectionMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET, endpointBaseUri);
         this.itemGetMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET, itemPattern);
@@ -159,9 +169,11 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     }
 
     /**
-     * Returns the union {@link RequestMatcher} matching all five endpoints.
-     * Useful for combining with {@code http.securityMatcher(...)} to attach
-     * this filter chain to the same chain that performs AT validation.
+     * Returns a {@link RequestMatcher} that matches every endpoint
+     * served by this filter. Compose with
+     * {@code http.securityMatcher(...)} via an {@code OrRequestMatcher}
+     * so that the surrounding chain's authentication rules cover this
+     * filter as well.
      */
     public RequestMatcher getRequestMatcher() {
         return this.requestMatcher;
@@ -187,24 +199,24 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
             if (this.createMatcher.matches(request)) {
                 handleBind(request, response, userId);
             } else if (this.itemUpdateMatcher.matches(request)) {
-                handleUpdate(request, response, userId, extractFactorId(request));
+                handleUpdate(request, response, userId, extractIdentityId(request));
             } else if (this.collectionMatcher.matches(request)) {
                 handleList(response, userId);
             } else if (this.itemGetMatcher.matches(request)) {
-                handleGet(response, userId, extractFactorId(request));
+                handleGet(response, userId, extractIdentityId(request));
             } else if (this.itemDeleteMatcher.matches(request)) {
-                handleDelete(response, userId, extractFactorId(request));
+                handleDelete(response, userId, extractIdentityId(request));
             }
-        } catch (InvalidAuthenticationFactorRequestException ex) {
+        } catch (InvalidUserIdentityException ex) {
             logger.debug("user-identities rejected (invalid_request): {}", ex.getMessage());
             sendError(response, HttpStatus.BAD_REQUEST, ERROR_INVALID_REQUEST, ex.getMessage());
-        } catch (UnsupportedFactorTypeException ex) {
+        } catch (UnsupportedIdentityTypeException ex) {
             logger.debug("user-identities rejected (unsupported_identity_type): {}", ex.getMessage());
-            sendError(response, HttpStatus.BAD_REQUEST, ERROR_UNSUPPORTED_FACTOR_TYPE, ex.getMessage());
-        } catch (IdentifierConflictException ex) {
+            sendError(response, HttpStatus.BAD_REQUEST, ERROR_UNSUPPORTED_IDENTITY_TYPE, ex.getMessage());
+        } catch (IdentityOccupiedException ex) {
             logger.debug("user-identities rejected (identity_occupied): {}", ex.getMessage());
-            sendError(response, HttpStatus.CONFLICT, ERROR_IDENTIFIER_CONFLICT, ex.getMessage());
-        } catch (UserAuthenticationFactorNotFoundException ex) {
+            sendError(response, HttpStatus.CONFLICT, ERROR_IDENTITY_OCCUPIED, ex.getMessage());
+        } catch (UserIdentityNotFoundException ex) {
             logger.debug("user-identities rejected (not_found): {}", ex.getMessage());
             sendError(response, HttpStatus.NOT_FOUND, ERROR_NOT_FOUND, ex.getMessage());
         } catch (RuntimeException ex) {
@@ -218,37 +230,33 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
     private void handleBind(HttpServletRequest request, HttpServletResponse response, String userId)
             throws IOException {
         MultiValueMap<String, String> params = readParameters(request);
-        UserAuthenticationFactor factor = this.userAuthenticationFactorService.bind(userId, params);
-        sendJson(response, HttpStatus.OK, toJson(factor));
+        UserIdentity identity = this.userIdentityService.createUserIdentity(userId, params);
+        sendJson(response, HttpStatus.OK, toJson(identity));
     }
 
     private void handleUpdate(HttpServletRequest request, HttpServletResponse response,
-                              String userId, String factorId) throws IOException {
+                              String userId, String identityId) throws IOException {
         MultiValueMap<String, String> params = readParameters(request);
-        UserAuthenticationFactor factor = this.userAuthenticationFactorService.update(userId, factorId, params);
-        sendJson(response, HttpStatus.OK, toJson(factor));
+        UserIdentity identity = this.userIdentityService.updateUserIdentity(userId, identityId, params);
+        sendJson(response, HttpStatus.OK, toJson(identity));
     }
 
     private void handleList(HttpServletResponse response, String userId) throws IOException {
-        List<UserAuthenticationFactor> factors = this.userAuthenticationFactorService.findAllByUserId(userId);
-        // Stable ordering: most recently bound first.
-        factors = factors.stream()
-                .sorted(Comparator.comparing(UserAuthenticationFactor::boundAt).reversed())
-                .toList();
-        List<Map<String, Object>> body = factors.stream().map(this::toJson).toList();
+        List<UserIdentity> identities = this.userIdentityService.listUserIdentities(userId);
+        List<Map<String, Object>> body = identities.stream().map(this::toJson).toList();
         sendJson(response, HttpStatus.OK, body);
     }
 
-    private void handleGet(HttpServletResponse response, String userId, String factorId) throws IOException {
-        Optional<UserAuthenticationFactor> factor = this.userAuthenticationFactorService.findById(userId, factorId);
-        if (factor.isEmpty()) {
-            throw new UserAuthenticationFactorNotFoundException(factorId);
+    private void handleGet(HttpServletResponse response, String userId, String identityId) throws IOException {
+        Optional<UserIdentity> identity = this.userIdentityService.getUserIdentity(userId, identityId);
+        if (identity.isEmpty()) {
+            throw new UserIdentityNotFoundException(identityId);
         }
-        sendJson(response, HttpStatus.OK, toJson(factor.get()));
+        sendJson(response, HttpStatus.OK, toJson(identity.get()));
     }
 
-    private void handleDelete(HttpServletResponse response, String userId, String factorId) throws IOException {
-        this.userAuthenticationFactorService.deleteById(userId, factorId);
+    private void handleDelete(HttpServletResponse response, String userId, String identityId) throws IOException {
+        this.userIdentityService.deleteUserIdentity(userId, identityId);
         response.setStatus(HttpStatus.NO_CONTENT.value());
     }
 
@@ -280,7 +288,7 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         }
     }
 
-    private String extractFactorId(HttpServletRequest request) {
+    private String extractIdentityId(HttpServletRequest request) {
         String path = request.getRequestURI();
         String contextPath = request.getContextPath();
         if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
@@ -289,13 +297,13 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         String prefix = this.endpointBaseUri + "/";
         int idx = path.indexOf(prefix);
         if (idx < 0) {
-            throw new InvalidAuthenticationFactorRequestException("Cannot extract factor id from path: " + path);
+            throw new InvalidUserIdentityException("Cannot extract identity id from path: " + path);
         }
-        String factorId = path.substring(idx + prefix.length());
-        if (factorId.isEmpty()) {
-            throw new InvalidAuthenticationFactorRequestException("Missing factor id in path");
+        String identityId = path.substring(idx + prefix.length());
+        if (identityId.isEmpty()) {
+            throw new InvalidUserIdentityException("Missing identity id in path");
         }
-        return factorId;
+        return identityId;
     }
 
     private MultiValueMap<String, String> readParameters(HttpServletRequest request) {
@@ -308,28 +316,30 @@ public class UserAuthenticationFactorEndpointFilter extends OncePerRequestFilter
         return params;
     }
 
-    // Hand-rolled serialisation that intentionally excludes the internal
-    // {@code userId} SPI field. The internal {@code factorId} / {@code factorType}
-    // are surfaced to clients as {@code identity_id} / {@code identity_type}
-    // (the public "User Identity" naming). The {@code identifier} field is part
-    // of the public response: business documentation explicitly surfaces it on
-    // the /user/identities API (e.g. as the SHA-256 hash of phone/email or the
-    // raw openid for wechat).
-    private Map<String, Object> toJson(UserAuthenticationFactor factor) {
+    /**
+     * Hand-rolled serialisation that intentionally excludes the SPI's
+     * internal {@code userId} field. {@code identifier} is emitted as a
+     * fixed empty string for clients whose parsing logic expects the
+     * key to be present; new clients should consume {@code subject} and
+     * the per-type attributes flattened from {@link UserIdentity#extensions()}.
+     */
+    private Map<String, Object> toJson(UserIdentity identity) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("identity_id", factor.factorId());
-        body.put("identity_type", factor.factorType());
-        body.put("identifier", factor.identifier());
-        // Hand the Instant directly to Jackson rather than pre-converting to Long. The global
-        // ObjectMapper has WRITE_DATES_AS_TIMESTAMPS enabled and WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS
-        // disabled, so jsr310's InstantSerializer emits a JSON number whose value is the epoch
-        // milliseconds via gen.writeNumber(long). Going through the dedicated date serializer
-        // bypasses the JsSafeModule policy that turns Long into JSON string for JavaScript
-        // precision safety - we don't need that protection here because epoch-millis stays well
-        // below Number.MAX_SAFE_INTEGER (~year 287396) and clients expect a numeric timestamp.
-        body.put("bound_at", factor.boundAt());
-        if (factor.extensions() != null) {
-            body.putAll(factor.extensions());
+        body.put("identity_id", identity.identityId());
+        body.put("identity_type", identity.identityType());
+        body.put("subject", identity.subject());
+        body.put("identifier", "");
+        // Hand the Instant directly to Jackson rather than pre-converting to
+        // a Long. The shared ObjectMapper enables WRITE_DATES_AS_TIMESTAMPS
+        // with WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS disabled, so jsr310's
+        // InstantSerializer emits epoch milliseconds via writeNumber(long).
+        // Going through the dedicated serializer bypasses the JsSafeModule
+        // policy that turns Long into JSON string for JavaScript precision
+        // safety, which is not needed here: epoch-millis stays well below
+        // Number.MAX_SAFE_INTEGER and clients expect a numeric timestamp.
+        body.put("bound_at", identity.boundAt());
+        if (identity.extensions() != null) {
+            body.putAll(identity.extensions());
         }
         return body;
     }

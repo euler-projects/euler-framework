@@ -17,8 +17,8 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
-import org.eulerframework.security.authentication.factor.UserAuthenticationFactor;
-import org.eulerframework.security.authentication.factor.UserAuthenticationFactorService;
+import org.eulerframework.security.core.identity.UserIdentity;
+import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
 import org.eulerframework.security.authentication.otp.OtpVerification;
 import org.eulerframework.security.core.EulerUser;
@@ -71,46 +71,45 @@ import java.util.Set;
 
 /**
  * {@link AuthenticationProvider} for {@code grant_type=otp}.
- * <p>
- * Flow:
+ *
+ * <p>Token issuance proceeds as follows:
  * <ol>
- *     <li>Resolve and verify the authenticated client (standard OAuth2 client
- *         authentication step).</li>
- *     <li>Validate the requested scopes are a subset of those registered on
- *         the client.</li>
- *     <li>Atomically consume the {@code otp_ticket} via
- *         {@link OtpTicketService#consume(String, String, String, String)} -
- *         this performs OTP value match + PKCE {@code code_verifier} S256
- *         match. A {@code null} return is treated as a verification failure
- *         and surfaces as {@code invalid_grant}.</li>
- *     <li>Map {@link OtpVerification#channel()} to the target
- *         {@code factor_type} via an internal hard-coded mapping (sms
- *         &rarr; phone, email &rarr; email) &mdash; to be promoted to a
- *         configurable SPI when more channels emerge. Reverse-resolve the
- *         binding via
- *         {@link UserAuthenticationFactorService#findByOriginalIdentifier(String, String)}
- *         to obtain the {@code userId}; load the user via
- *         {@link EulerUserService#loadUserById(String)} and convert with
- *         {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}. The OTP
- *         provider does not assume any particular transformation scheme on
- *         the original identifier. If no user is bound to the recipient, a
- *         new user is auto-provisioned (username generated via
- *         {@link RandomUsernameGenerator#generate()} as
- *         {@code user_<base64url12>}, random {@code {noop}}-prefixed
- *         password, default {@code user} authority) and the binding is
- *         created in the same flow before token issuance proceeds.</li>
- *     <li>If the request was carried by a verified App Attest device (set by
- *         {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}),
- *         enforce device-to-user consistency: if the device is already bound
- *         to a user that differs from the OTP-resolved user, fail with
- *         {@code invalid_grant} (description {@code "device mismatch"}); if the
- *         device has not been bound yet, auto-bind it to the OTP-resolved user
- *         via {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)}
- *         &mdash; deliberately distinct from
- *         {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)} which
- *         provisions a brand-new anonymous user.</li>
- *     <li>Issue access / refresh / id tokens using the shared
- *         {@link OAuth2TokenGenerator}, mirroring the password grant flow.</li>
+ *   <li>Resolve and verify the authenticated client (standard OAuth2
+ *       client authentication step).</li>
+ *   <li>Validate that requested scopes are a subset of those registered
+ *       on the client.</li>
+ *   <li>Atomically consume the {@code otp_ticket} via
+ *       {@link OtpTicketService#consume(String, String, String, String)},
+ *       performing OTP value match and PKCE {@code code_verifier} S256
+ *       match. A {@code null} return surfaces as {@code invalid_grant}.</li>
+ *   <li>Map {@link OtpVerification#channel()} to the target
+ *       {@code identity_type} (sms &rarr; phone, email &rarr; email) and
+ *       reverse-resolve the binding via
+ *       {@link UserIdentityService#findUserIdentityByRawSubject(String, String)}.
+ *       The grant does not assume any particular transform from the raw
+ *       subject to the persisted {@code subject} &mdash; per-type
+ *       backends decide whether to hash, normalise, or pass through.
+ *       When the recipient is unknown, auto-provision a fresh user
+ *       (username from {@link RandomUsernameGenerator#generate()},
+ *       {@code {noop}}-prefixed random password, {@code "user"}
+ *       authority) and bind the identity through the pre-verified
+ *       prototype entry
+ *       {@link UserIdentityService#createUserIdentity(String, UserIdentity)}.</li>
+ *   <li>Load the resolved user via
+ *       {@link EulerUserService#loadUserById(String)} and convert it
+ *       with {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}.</li>
+ *   <li>When the request carries a verified App Attest device (set by
+ *       {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}),
+ *       enforce device-to-user consistency: a device already bound to a
+ *       different user fails with {@code invalid_grant}
+ *       ({@code "device mismatch"}); an unbound device is bound to the
+ *       OTP-resolved user via
+ *       {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)}
+ *       &mdash; distinct from
+ *       {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)},
+ *       which provisions a brand-new anonymous user.</li>
+ *   <li>Issue access, refresh and id tokens via the shared
+ *       {@link OAuth2TokenGenerator}, mirroring the password grant.</li>
  * </ol>
  */
 public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
@@ -120,13 +119,17 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
     /**
-     * Hard-coded {@code OTP channel -> factor_type} mapping. Temporary
-     * shape: when more channels emerge or business needs custom routing,
-     * extract this into a configurable SPI (e.g. constructor-injected
-     * {@code Function<String, String>} or a dedicated
-     * {@code OtpChannelToFactorTypeResolver}).
+     * Hard-coded {@code OTP channel -> identity_type} mapping. Values
+     * use the public {@code identity_type} namespace surfaced on the
+     * {@code /user/identities} REST surface; the identity SPI keys on
+     * the same namespace.
      */
-    private static final Map<String, String> CHANNEL_TO_FACTOR_TYPE = Map.of(
+    private static final Map<String, String> CHANNEL_TO_IDENTITY_TYPE = Map.of(
+            "sms", "phone",
+            "email", "email"
+    );
+
+    private static final Map<String, String> CHANNEL_TO_RAW_SUB_PARAM_NAME = Map.of(
             "sms", "phone",
             "email", "email"
     );
@@ -134,41 +137,46 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
     private final Logger logger = LoggerFactory.getLogger(OAuth2OtpAuthenticationProvider.class);
 
     private final OtpTicketService otpTicketService;
-    private final UserAuthenticationFactorService userAuthenticationFactorService;
+    /**
+     * Identity SPI used to reverse-resolve the OTP recipient back to a
+     * user and to auto-provision a binding when the recipient is
+     * unknown.
+     */
+    private final UserIdentityService userIdentityService;
     private final EulerUserService eulerUserService;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
     /**
-     * Optional. When present, the provider enforces device-to-user consistency
-     * for OTP requests carried by a verified App Attest device. When absent,
-     * any verified attestation attached to the request is silently ignored
-     * (legacy / non-attestation deployments).
+     * Optional. When set, the provider enforces device-to-user
+     * consistency for OTP requests carrying a verified App Attest
+     * device; when {@code null}, attestation attached to OTP requests
+     * is silently ignored.
      */
     private EulerDeviceUserDetailsService deviceUserDetailsService;
 
     public OAuth2OtpAuthenticationProvider(OtpTicketService otpTicketService,
-                                           UserAuthenticationFactorService userAuthenticationFactorService,
+                                           UserIdentityService userIdentityService,
                                            EulerUserService eulerUserService,
                                            OAuth2AuthorizationService authorizationService,
                                            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
         Assert.notNull(otpTicketService, "otpTicketService must not be null");
-        Assert.notNull(userAuthenticationFactorService, "userAuthenticationFactorService must not be null");
+        Assert.notNull(userIdentityService, "userIdentityService must not be null");
         Assert.notNull(eulerUserService, "eulerUserService must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
         this.otpTicketService = otpTicketService;
-        this.userAuthenticationFactorService = userAuthenticationFactorService;
+        this.userIdentityService = userIdentityService;
         this.eulerUserService = eulerUserService;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
     }
 
     /**
-     * Configure the optional {@link EulerDeviceUserDetailsService} used to
-     * enforce device-to-user consistency for OTP requests carried by a
-     * verified App Attest device. When unset, any verified attestation
-     * attached to the request is ignored.
+     * Configure the optional {@link EulerDeviceUserDetailsService} used
+     * to enforce device-to-user consistency for OTP requests carrying a
+     * verified App Attest device. When unset, attestation attached to
+     * the request is ignored.
      */
     public void setDeviceUserDetailsService(EulerDeviceUserDetailsService deviceUserDetailsService) {
         this.deviceUserDetailsService = deviceUserDetailsService;
@@ -188,8 +196,9 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         validateScope(otpAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(otpAuthenticationToken.getScopes());
 
-        // 1. Atomically consume the OTP ticket. consume() performs OTP value
-        //    match + PKCE S256 (code_verifier vs stored code_challenge).
+        // 1. Atomically consume the OTP ticket. consume() performs OTP
+        //    value match plus PKCE S256 (code_verifier vs stored
+        //    code_challenge).
         OtpVerification verification;
         try {
             verification = this.otpTicketService.consume(
@@ -211,17 +220,18 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
                     verification.ticketId(), verification.channel());
         }
 
-        // 2. (factor_type, recipient) -> userId via the factor SPI: the OTP
-        //    provider does NOT know how each factor backend transforms its
-        //    original identifier into the SPI `identifier` field (phone hash
-        //    / email normalize+hash / wechat identity / passkey identity /
-        //    ...). We just pick the correct factor_type and ask "who owns
-        //    this original value".
-        String factorType = resolveFactorType(verification.channel());
-        String originalIdentifier = verification.recipient();
-        UserAuthenticationFactor factor = this.userAuthenticationFactorService
-                .findByOriginalIdentifier(factorType, originalIdentifier)
-                .orElseGet(() -> autoProvisionUser(factorType, originalIdentifier));
+        // 2. Reverse-resolve (identity_type, recipient) -> userId via
+        //    the identity SPI. The grant does not know how a per-type
+        //    backend derives its persisted `subject` field (phone hash /
+        //    email normalize+hash / wechat openid pass-through / ...);
+        //    it merely picks the identity_type and asks who owns the
+        //    raw value.
+        String identityType = resolveIdentityType(verification.channel());
+        String rawSubjectParamName = resolveRawSubjectParamName(verification.channel());
+        String rawSubject = verification.recipient();
+        UserIdentity identity = this.userIdentityService
+                .findUserIdentityByRawSubject(identityType, rawSubject)
+                .orElseGet(() -> autoProvisionUser(identityType, rawSubjectParamName, rawSubject));
 
         // 3. If the request carries a verified App Attest device (set by
         //    EulerOAuth2AttestationBasedClientAuthenticationFilter), enforce
@@ -229,9 +239,9 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         AppAttestAttestationRegistration verifiedAppRegistration =
                 (AppAttestAttestationRegistration) otpAuthenticationToken.getAdditionalParameters()
                         .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
-        enforceDeviceConsistency(verifiedAppRegistration, factor.userId());
+        enforceDeviceConsistency(verifiedAppRegistration, identity.userId());
 
-        EulerUser eulerUser = this.eulerUserService.loadUserById(factor.userId());
+        EulerUser eulerUser = this.eulerUserService.loadUserById(identity.userId());
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);
         if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
@@ -351,32 +361,49 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         }
     }
 
-    private static String resolveFactorType(String channel) {
-        String factorType = CHANNEL_TO_FACTOR_TYPE.get(channel);
-        if (factorType == null) {
+    private static String resolveIdentityType(String channel) {
+        String identityType = CHANNEL_TO_IDENTITY_TYPE.get(channel);
+        if (identityType == null) {
             throw new OAuth2AuthenticationException(new OAuth2Error(
                     OAuth2ErrorCodes.INVALID_GRANT,
                     "Unsupported OTP channel: " + channel,
                     ERROR_URI));
         }
-        return factorType;
+        return identityType;
+    }
+
+    private static String resolveRawSubjectParamName(String channel) {
+        String attributeName = CHANNEL_TO_RAW_SUB_PARAM_NAME.get(channel);
+        if (attributeName == null) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(
+                    OAuth2ErrorCodes.INVALID_GRANT,
+                    "Unsupported OTP channel: " + channel,
+                    ERROR_URI));
+        }
+        return attributeName;
     }
 
     /**
-     * Auto-provision a brand-new user when the OTP recipient is not yet
-     * bound to any user, then bind the {@code (factorType, originalIdentifier)}
-     * tuple to it via
-     * {@link UserAuthenticationFactorService#bindOriginalIdentifier(String, String, String)}.
-     * <p>
-     * Behaviour is hard-coded as always-on: an OTP-grant request whose
-     * recipient is unknown is treated as an implicit signup. Username is
-     * generated via {@link RandomUsernameGenerator#generate()} as
-     * {@code user_<base64url12>} so that the recipient never leaks into the
-     * local username. Password is a {@code {noop}}-prefixed random string
-     * (OTP-only login, no password authentication path); authorities default
-     * to {@code "user"}.
+     * Auto-provision a fresh user and bind {@code (identityType, rawSubject)}
+     * to it via the pre-verified prototype entry
+     * {@link UserIdentityService#createUserIdentity(String, UserIdentity)}.
+     *
+     * <p>An OTP-grant request whose recipient is unknown is treated as
+     * an implicit signup. The username is generated through
+     * {@link RandomUsernameGenerator#generate()} (form
+     * {@code user_<base64url12>}) so that the recipient never leaks
+     * into the local username; the password is a
+     * {@code {noop}}-prefixed random string (OTP-only login, no
+     * password authentication path); authorities default to
+     * {@code "user"}.
+     *
+     * <p>This grant handles only {@code identity_type ∈ {phone, email}}.
+     * For both, the prototype's {@code extensions} key carrying the raw
+     * subject equals the {@code identity_type} string itself
+     * (e.g. {@code extensions["phone"]} for the phone backend); the
+     * backend reads the value back under the same key.
      */
-    private UserAuthenticationFactor autoProvisionUser(String factorType, String originalIdentifier) {
+    private UserIdentity autoProvisionUser(String identityType, String rawSubjectParamName, String rawSubject) {
         EulerUserDetails newUser = EulerUserDetails.builder()
                 .username(RandomUsernameGenerator.generate())
                 .password("{noop}" + StringUtils.randomString(32))
@@ -384,35 +411,42 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
                 .build();
         EulerUser createdUser = this.eulerUserService.createUser(newUser);
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Auto-provisioned user '{}' for OTP factor_type='{}'",
-                    createdUser.getUserId(), factorType);
+            this.logger.debug("Auto-provisioned user '{}' for OTP identity_type='{}'",
+                    createdUser.getUserId(), identityType);
         }
-        return this.userAuthenticationFactorService.bindOriginalIdentifier(
-                createdUser.getUserId(), factorType, originalIdentifier);
+        // Carry the verified raw subject in the prototype's extensions;
+        // identityId / subject / userId / boundAt are left null for the
+        // backend to populate on the persisted return value.
+        UserIdentity prototype = new UserIdentity(
+                null,
+                identityType,
+                null,
+                null,
+                null,
+                Map.of(rawSubjectParamName, rawSubject));
+        return this.userIdentityService.createUserIdentity(createdUser.getUserId(), prototype);
     }
 
     /**
-     * Enforce device-to-user consistency when the OTP request is backed by a
-     * verified App Attest device. The {@code verifiedAppRegistration} argument
-     * is set by
+     * Enforce device-to-user consistency when an OTP request carries a
+     * verified App Attest device. {@code verifiedAppRegistration} is
+     * set by
      * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}
-     * and may be {@code null} when the request did not carry attestation data
-     * (legacy clients).
-     * <p>
-     * Behaviour:
+     * and may be {@code null} for legacy clients.
+     *
+     * <p>Behaviour:
      * <ul>
-     *     <li>{@code verifiedAppRegistration == null} &rarr; no-op.</li>
-     *     <li>{@link #deviceUserDetailsService} not configured &rarr; no-op
-     *         (attestation is silently ignored in deployments that do not
-     *         opt in to device-to-user binding).</li>
-     *     <li>Device already bound to a user that differs from
-     *         {@code otpUserId} &rarr; reject with
-     *         {@code invalid_grant} / {@code description="device mismatch"}.</li>
-     *     <li>Device not yet bound &rarr; auto-bind to {@code otpUserId} via
-     *         {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)}.
-     *         This is deliberately distinct from
-     *         {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)},
-     *         which provisions a brand-new anonymous user.</li>
+     *   <li>{@code verifiedAppRegistration == null} &rarr; no-op.</li>
+     *   <li>{@link #deviceUserDetailsService} not set &rarr; no-op
+     *       (attestation is silently ignored).</li>
+     *   <li>Device already bound to a user other than {@code otpUserId}
+     *       &rarr; reject with {@code invalid_grant} /
+     *       {@code description="device mismatch"}.</li>
+     *   <li>Device not yet bound &rarr; bind it to {@code otpUserId} via
+     *       {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)},
+     *       distinct from
+     *       {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)},
+     *       which would provision a brand-new anonymous user.</li>
      * </ul>
      */
     private void enforceDeviceConsistency(AppAttestAttestationRegistration verifiedAppRegistration, String otpUserId) {
@@ -436,10 +470,10 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
                         OAuth2ErrorCodes.INVALID_GRANT, "device mismatch", ERROR_URI));
             }
         } catch (UserDetailsNotFoundException ex) {
-            // First-time use of this device with the OTP-resolved user: bind
-            // the device to the existing user. Distinct from the
+            // First sighting of this device with the OTP-resolved user:
+            // bind the device to the existing user. Distinct from the
             // AppAttest registration provider's auto-create flow, which
-            // creates a brand-new anonymous user instead.
+            // would provision a brand-new anonymous user instead.
             this.deviceUserDetailsService.bindToUser(attestUser, otpUserId);
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Bound App Attest device keyId='{}' to OTP-resolved user '{}'",
