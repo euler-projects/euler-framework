@@ -15,14 +15,15 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
-import org.eulerframework.security.core.identity.UserIdentity;
-import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
 import org.eulerframework.security.authentication.otp.OtpVerification;
 import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
+import org.eulerframework.security.core.identity.UserIdentity;
+import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.RandomUsernameGenerator;
@@ -30,21 +31,13 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.util.UserDetailsUtils;
-import org.eulerframework.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClaimAccessor;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
-import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
@@ -239,9 +232,9 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         AppAttestAttestationRegistration verifiedAppRegistration =
                 (AppAttestAttestationRegistration) otpAuthenticationToken.getAdditionalParameters()
                         .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
-        enforceDeviceConsistency(verifiedAppRegistration, identity.userId());
+        enforceDeviceConsistency(verifiedAppRegistration, identity.getUserId());
 
-        EulerUser eulerUser = this.eulerUserService.loadUserById(identity.userId());
+        EulerUser eulerUser = this.eulerUserService.loadUserById(identity.getUserId());
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);
         if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
@@ -391,17 +384,16 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
      * <p>An OTP-grant request whose recipient is unknown is treated as
      * an implicit signup. The username is generated through
      * {@link RandomUsernameGenerator#generate()} (form
-     * {@code user_<base64url12>}) so that the recipient never leaks
-     * into the local username; the password is a
-     * {@code {noop}}-prefixed random string (OTP-only login, no
-     * password authentication path); authorities default to
-     * {@code "user"}.
+     * {@code user_<base64url12>}) so the recipient never leaks into
+     * the local username; the password is a {@code {noop}}-prefixed
+     * random string (OTP-only login, no password authentication path);
+     * authorities default to {@code "user"}.
      *
-     * <p>This grant handles only {@code identity_type ∈ {phone, email}}.
-     * For both, the prototype's {@code extensions} key carrying the raw
-     * subject equals the {@code identity_type} string itself
-     * (e.g. {@code extensions["phone"]} for the phone backend); the
-     * backend reads the value back under the same key.
+     * <p>This grant handles {@code identity_type ∈ {phone, email}}.
+     * For both, the raw subject is attached to the prototype as an
+     * extension attribute whose key equals the {@code identity_type}
+     * string itself (e.g. {@code "phone"} for the phone backend); the
+     * backend reads it back under the same key.
      */
     private UserIdentity autoProvisionUser(String identityType, String rawSubjectParamName, String rawSubject) {
         EulerUserDetails newUser = EulerUserDetails.builder()
@@ -414,16 +406,10 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
             this.logger.debug("Auto-provisioned user '{}' for OTP identity_type='{}'",
                     createdUser.getUserId(), identityType);
         }
-        // Carry the verified raw subject in the prototype's extensions;
-        // identityId / subject / userId / boundAt are left null for the
-        // backend to populate on the persisted return value.
-        UserIdentity prototype = new UserIdentity(
-                null,
-                identityType,
-                null,
-                null,
-                null,
-                Map.of(rawSubjectParamName, rawSubject));
+        UserIdentity prototype = UserIdentity.builder()
+                .identityType(identityType)
+                .property(rawSubjectParamName, rawSubject)
+                .build();
         return this.userIdentityService.createUserIdentity(createdUser.getUserId(), prototype);
     }
 

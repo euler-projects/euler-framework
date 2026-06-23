@@ -47,6 +47,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,19 +95,19 @@ import java.util.Optional;
  *   "phone":         "+8613*****00"
  * }
  * }</pre>
- * Per-type attributes from {@link UserIdentity#extensions()} are
- * flattened onto the envelope (e.g. {@code phone} for the phone
+ * Per-type extension attributes carried on the {@link UserIdentity}
+ * are flattened onto the envelope (e.g. {@code phone} for the phone
  * identity; {@code openid} / {@code nickname} / {@code unionid} for
  * WeChat). Timestamps are emitted as epoch milliseconds.
  *
- * <p>{@code subject} is the deterministic per-type unique key: SHA-256
- * hex of the normalised original for {@code phone} and {@code email};
- * the IdP-issued {@code openid} or {@code sub} for federated types.
+ * <p>{@code subject} is the deterministic per-type unique key derived
+ * by the owning backend from the raw value; the derivation function is
+ * implementation defined and opaque to this filter.
  *
  * <p>{@code identifier} is a fixed empty-string placeholder retained
  * for clients whose parsing logic expects the key to be present; new
- * clients should consume {@code subject} and the per-type attributes
- * instead.
+ * clients should consume {@code subject} and the per-type extension
+ * attributes instead.
  *
  * <h2>Error mapping</h2>
  * <p>Exceptions raised by the {@link UserIdentityService} are
@@ -317,17 +318,19 @@ public class UserIdentityEndpointFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Hand-rolled serialisation that intentionally excludes the SPI's
-     * internal {@code userId} field. {@code identifier} is emitted as a
-     * fixed empty string for clients whose parsing logic expects the
-     * key to be present; new clients should consume {@code subject} and
-     * the per-type attributes flattened from {@link UserIdentity#extensions()}.
+     * Hand-rolled serialisation that emits the envelope fields
+     * explicitly (omitting the SPI-internal {@code userId}) and then
+     * appends the per-type extension attributes returned by
+     * {@link UserIdentity#getExtensions()}. {@code identifier} is
+     * emitted as a fixed empty string for clients whose parsing logic
+     * expects the key to be present; new clients should consume
+     * {@code subject} and the per-type extension attributes instead.
      */
     private Map<String, Object> toJson(UserIdentity identity) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("identity_id", identity.identityId());
-        body.put("identity_type", identity.identityType());
-        body.put("subject", identity.subject());
+        body.put("identity_id", identity.getIdentityId());
+        body.put("identity_type", identity.getIdentityType());
+        body.put("subject", identity.getSubject());
         body.put("identifier", "");
         // Hand the Instant directly to Jackson rather than pre-converting to
         // a Long. The shared ObjectMapper enables WRITE_DATES_AS_TIMESTAMPS
@@ -337,10 +340,10 @@ public class UserIdentityEndpointFilter extends OncePerRequestFilter {
         // policy that turns Long into JSON string for JavaScript precision
         // safety, which is not needed here: epoch-millis stays well below
         // Number.MAX_SAFE_INTEGER and clients expect a numeric timestamp.
-        body.put("bound_at", identity.boundAt());
-        if (identity.extensions() != null) {
-            body.putAll(identity.extensions());
-        }
+        body.put("bound_at", identity.getBoundAt());
+        identity.getExtensions().forEach((k, v) ->
+                body.put(org.eulerframework.common.util.StringUtils
+                        .camelStyleToUnderLineLowerCase(k), v));
         return body;
     }
 

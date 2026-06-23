@@ -89,26 +89,28 @@ public interface UserIdentityService {
     /**
      * Create an identity from a <em>pre-verified prototype</em>.
      *
-     * <p>For callers that have already verified ownership through
-     * another channel. Backends must not perform additional
-     * verification.
+     * <p>Intended for callers that have already verified ownership of
+     * the underlying value through another channel. Backends must not
+     * perform additional verification.
      *
      * <p>Prototype contract:
      * <ul>
-     *   <li>{@link UserIdentity#identityType()} must equal
-     *       {@link #identityType()}; backends whose type differs throw
+     *   <li>{@link UserIdentity#getIdentityType()} must equal
+     *       {@link #identityType()}; otherwise the backend throws
      *       {@link InvalidUserIdentityException}.</li>
      *   <li>{@code identityId}, {@code subject}, {@code userId} and
-     *       {@code boundAt} must be {@code null}; the backend mints,
-     *       derives, stamps and pairs them.</li>
-     *   <li>{@code extensions} must carry the per-type raw value under
-     *       the key the backend uses for its persisted projection
-     *       (e.g. {@code extensions["phone"]} for the phone backend).</li>
+     *       {@code boundAt} must be unset; the backend mints, derives,
+     *       stamps and pairs them.</li>
+     *   <li>The raw business value is carried as an extension attribute
+     *       under the key the backend uses for its persisted projection
+     *       (e.g. {@code "phone"} for the phone backend), attached via
+     *       {@link UserIdentity.Builder#property(String, Object)}.</li>
      * </ul>
      *
      * @param userId    id of the user the identity is being bound to;
      *                  never {@code null} or empty
-     * @param prototype prototype identity; never {@code null}
+     * @param prototype pre-verified identity prototype; never
+     *                  {@code null}
      * @return the freshly persisted identity, never {@code null}
      * @throws InvalidUserIdentityException when the prototype violates
      *         the contract
