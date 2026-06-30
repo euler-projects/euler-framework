@@ -147,6 +147,25 @@ public interface UserIdentityService {
     List<UserIdentity> listUserIdentities(String userId);
 
     /**
+     * List identities owned by {@code userId}, optionally restricted to
+     * a single {@code identityType}.
+     *
+     * <p>When {@code identityType} is {@code null} or empty, this
+     * behaves identically to {@link #listUserIdentities(String)}.
+     * When specified, only identities matching that type are returned.
+     *
+     * <p>Implementations must apply the filter at the persistence
+     * layer rather than filtering in memory.
+     *
+     * @param userId       id of the user; never {@code null}
+     * @param identityType optional type filter; {@code null} or empty
+     *                     means all types
+     * @return a possibly empty list of persisted identities, never
+     *         {@code null}
+     */
+    List<UserIdentity> listUserIdentities(String userId, String identityType);
+
+    /**
      * Replace an existing identity in place.
      *
      * <p>The identity type is preserved; only the per-type business
@@ -168,6 +187,39 @@ public interface UserIdentityService {
      *         already bound to another account
      */
     UserIdentity updateUserIdentity(String userId, String identityId, MultiValueMap<String, String> params);
+
+    /**
+     * Update an existing identity from a <em>pre-verified prototype</em>
+     * without additional verification.
+     *
+     * <p>Intended for administrative callers that bypass per-type
+     * verification. Only the per-type business value is updated; the
+     * backend derives the new {@code subject} from the prototype's
+     * extension attributes exactly as in
+     * {@link #createUserIdentity(String, UserIdentity)}.
+     *
+     * <p>Prototype contract:
+     * <ul>
+     *   <li>The prototype carries the new raw business value under the
+     *       extension key the backend uses (e.g. {@code "phone"}).</li>
+     *   <li>{@code identityId}, {@code subject}, {@code userId} and
+     *       {@code boundAt} in the prototype are ignored; the backend
+     *       preserves the existing values.</li>
+     * </ul>
+     *
+     * @param userId     id of the user; never {@code null} or empty
+     * @param identityId identity to update; never {@code null} or empty
+     * @param prototype  pre-verified identity prototype carrying the
+     *                   new business value; never {@code null}
+     * @return the updated persisted identity, never {@code null}
+     * @throws UserIdentityNotFoundException when the identity does not
+     *         exist or is not owned by this user / backend
+     * @throws InvalidUserIdentityException  when the prototype violates
+     *         the contract
+     * @throws IdentityOccupiedException     when the derived
+     *         {@code subject} is already bound to another account
+     */
+    UserIdentity updateUserIdentity(String userId, String identityId, UserIdentity prototype);
 
     /**
      * Delete the identity with the given id, if it is owned by
@@ -206,4 +258,25 @@ public interface UserIdentityService {
      *         {@link Optional#empty()}
      */
     Optional<UserIdentity> findUserIdentityByRawSubject(String identityType, String rawSubject);
+
+    /**
+     * Retrieve the raw (unmasked) value of a specific field for an
+     * identity owned by {@code userId}.
+     *
+     * <p>Intended for administrative callers that need to inspect the
+     * original sensitive value (e.g. full phone number, full email).
+     * Backends return {@link Optional#empty()} when:
+     * <ul>
+     *   <li>The identity is not owned by this backend or user.</li>
+     *   <li>The requested field does not exist or is not a masked
+     *       field.</li>
+     * </ul>
+     *
+     * @param userId     id of the user; never {@code null}
+     * @param identityId identity id; never {@code null}
+     * @param fieldName  name of the masked field (e.g. {@code "phone"},
+     *                   {@code "email"}); never {@code null}
+     * @return the raw value, or {@link Optional#empty()}
+     */
+    Optional<String> getRawFieldValue(String userId, String identityId, String fieldName);
 }
