@@ -330,7 +330,6 @@ public class UserIdentityEndpointFilter extends OncePerRequestFilter {
         body.put("identity_id", identity.getIdentityId());
         body.put("identity_type", identity.getIdentityType());
         body.put("subject", identity.getSubject());
-        body.put("identifier", "");
         // Hand the Instant directly to Jackson rather than pre-converting to
         // a Long. The shared ObjectMapper enables WRITE_DATES_AS_TIMESTAMPS
         // with WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS disabled, so jsr310's
