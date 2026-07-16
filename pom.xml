@@ -32,6 +32,7 @@
         <module>euler-security-oauth2-core</module>
         <module>euler-security-oauth2-authorization-server</module>
         <module>euler-security-oauth2-resource-server</module>
+        <module>euler-security-oauth2-client</module>
         <module>euler-data-file</module>
         <module>euler-data-jpa</module>
         <module>euler-socket</module>

@@ -360,3 +360,114 @@ textarea {
     margin: 10px;
     animation: circle infinite 1s linear;
 }
+
+/* ===== Alternate login methods (OAuth2, WebAuthn, OTP, ...) ===== */
+
+/*
+ * Match the form's width so the alternate-method buttons line up with
+ * the username/password inputs directly above. The form itself is
+ * fixed at 300px via `.form-wrapper .full-line-form`; this wrapper
+ * sits outside the <form> element so we replicate the same width +
+ * horizontal auto-centering here.
+ */
+.login-methods-wrapper {
+    width: 300px;
+    margin: 15px auto 0;
+}
+
+.login-methods-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin: 15px 0;
+}
+
+.login-methods-divider::before,
+.login-methods-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.login-methods-divider span {
+    padding: 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/*
+ * Generic OAuth2 provider button. Icon and label sit next to each
+ * other as a flex group and the group is horizontally centred, so
+ * the brand mark visually anchors the label rather than floating on
+ * the far left edge of the button.
+ *
+ * Padding and line-height inherit from `.btn` so the button ends up
+ * at the same 34px height as the green sign-in button and the input
+ * fields above it - visual regularity trumps the taller 40px that
+ * Google's standalone brand button recommends.
+ */
+.btn-oauth2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 8px;
+    color: #3c4043;
+    background-color: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.btn-oauth2:hover,
+.btn-oauth2:focus {
+    background-color: #f8f9fa;
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+    text-decoration: none;
+}
+
+/*
+ * Icon slot placed adjacent to the label via the parent's `gap`.
+ * Individual providers fill the slot with their brand mark through
+ * a `background-image` on their own selector.
+ */
+.btn-oauth2-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.btn-oauth2-label {
+    line-height: 1.42857143;
+}
+
+/*
+ * Google brand button. The four-colour "G" logo is embedded as an
+ * inline SVG data URI so the button works offline and requires no
+ * additional HTTP request. Colours match Google's brand palette
+ * (Red #EA4335, Blue #4285F4, Yellow #FBBC05, Green #34A853) as
+ * documented in the Google Identity brand guidelines.
+ */
+.btn-oauth2-google {
+    border-color: #dadce0;
+    color: #3c4043;
+}
+
+.btn-oauth2-google:hover,
+.btn-oauth2-google:focus {
+    border-color: #4285f4;
+    color: #202124;
+}
+
+.btn-oauth2-google .btn-oauth2-icon {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><path fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/><path fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/><path fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/><path fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/></svg>");
+}

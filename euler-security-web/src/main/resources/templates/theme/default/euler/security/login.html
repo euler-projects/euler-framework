@@ -36,6 +36,24 @@
                     <button type="submit" class="btn btn-success" th:text="#{_SIGN_IN}">Sign In</button>
                 </div>
             </form>
+            <div class="login-methods-wrapper"
+                 th:if="${loginMethods != null and !loginMethods.isEmpty()}">
+                <div class="login-methods-divider"><span th:text="#{_OR}">or</span></div>
+                <th:block th:each="method : ${loginMethods}" th:switch="${method.type}">
+                    <!--/* OAuth2 / OIDC redirect: anchor button with provider icon + label */-->
+                    <a th:case="'oauth2'"
+                       th:href="@{${method.href}}"
+                       th:classappend="|btn-oauth2 ${method.iconClass}|"
+                       class="btn">
+                        <span class="btn-oauth2-icon" aria-hidden="true"></span>
+                        <span class="btn-oauth2-label"
+                              th:text="#{_SIGN_IN_WITH(${method.displayName})}">Sign in with Google</span>
+                    </a>
+                    <!--/* Unknown types are silently ignored so a new
+                          contributor can ship without breaking this
+                          page until a matching case is added. */-->
+                </th:block>
+            </div>
         </div>
         <div class="info-wrapper" th:if="${param.error} != null">
             <div class="failure-info">Invalid username or password.</div>

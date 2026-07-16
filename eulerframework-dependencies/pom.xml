@@ -65,6 +65,11 @@
                 <artifactId>euler-security-oauth2-resource-server</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eulerframework</groupId>
+                <artifactId>euler-security-oauth2-client</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.eulerframework</groupId>
