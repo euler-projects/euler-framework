@@ -34,6 +34,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -96,13 +97,6 @@ import java.util.Map;
 public class OAuth2LoginPrincipalPromotingSuccessHandler
         implements AuthenticationSuccessHandler {
 
-    /** Standard OIDC / OAuth2 attribute keys copied into the identity prototype. */
-    public static final String ATTR_SUB = "sub";
-    public static final String ATTR_EMAIL = "email";
-    public static final String ATTR_NAME = "name";
-    public static final String ATTR_PICTURE = "picture";
-    public static final String ATTR_LOCALE = "locale";
-
     private static final int RANDOM_PASSWORD_LENGTH = 32;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -146,8 +140,12 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
 
         EulerUser localUser = this.userIdentityService
                 .findUserIdentityByRawSubject(policy.getIdentityType(), rawSubject)
-                .map(UserIdentity::getUserId)
-                .map(this.userService::loadUserById)
+                .map(existingIdentity -> {
+                    // Refresh the profile snapshot on every successful login
+                    // so local data stays eventually consistent with the IdP.
+                    updateIdentityProfile(existingIdentity, principal);
+                    return this.userService.loadUserById(existingIdentity.getUserId());
+                })
                 .orElseGet(() -> autoProvisionOrThrow(policy, principal));
 
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(localUser);
@@ -200,17 +198,7 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         String userId = createdUser.getUserId();
         Assert.hasText(userId, "userService.createUser must return a persisted user carrying a userId");
 
-        Map<String, Object> extensions = new LinkedHashMap<>();
-        // Preserve the raw IdP-issued subject on the prototype so that
-        // per-type backends whose subject derivation is non-trivial can
-        // still recover it; for identity types whose subject is the
-        // identity function (google / apple / wechat) the extension is
-        // redundant but harmless.
-        extensions.put(ATTR_SUB, principal.getName());
-        copyStringAttribute(attributes, ATTR_EMAIL, extensions);
-        copyStringAttribute(attributes, ATTR_NAME, extensions);
-        copyStringAttribute(attributes, ATTR_PICTURE, extensions);
-        copyStringAttribute(attributes, ATTR_LOCALE, extensions);
+        Map<String, Object> extensions = buildProfileExtensions(principal);
 
         UserIdentity prototype = UserIdentity.withExtensions(extensions)
                 .identityType(policy.getIdentityType())
@@ -219,16 +207,62 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         return this.userService.loadUserById(userId);
     }
 
-    private static void copyStringAttribute(Map<String, Object> attributes,
-                                            String key,
-                                            Map<String, Object> target) {
-        if (attributes == null) {
-            return;
+    /**
+     * Refresh the persisted profile snapshot for an existing identity
+     * using the fresh attributes from the upstream IdP. Called on every
+     * successful login so that display-name / avatar / email changes on
+     * the IdP side propagate to the local store.
+     */
+    private void updateIdentityProfile(UserIdentity existingIdentity, OAuth2User principal) {
+        try {
+            Map<String, Object> extensions = buildProfileExtensions(principal);
+
+            UserIdentity prototype = UserIdentity.withExtensions(extensions)
+                    .identityType(existingIdentity.getIdentityType())
+                    .build();
+            this.userIdentityService.updateUserIdentity(
+                    existingIdentity.getUserId(),
+                    existingIdentity.getIdentityId(),
+                    prototype);
+        } catch (Exception e) {
+            // Profile update is best-effort; a failure here must not
+            // block the user from logging in.
+            this.logger.warn("Failed to refresh identity profile for userId={}, identityId={}: {}",
+                    existingIdentity.getUserId(), existingIdentity.getIdentityId(), e.getMessage(), e);
         }
-        Object value = attributes.get(key);
-        if (value instanceof String stringValue && !stringValue.isEmpty()) {
-            target.put(key, stringValue);
+    }
+
+    /**
+     * Build the extensions map from the upstream principal's attributes.
+     * Keys are converted from OIDC standard snake_case to camelCase so
+     * that the identity SPI's extension namespace follows Java naming
+     * conventions. Values are copied as-is (original types preserved);
+     * type coercion is the responsibility of the per-type identity
+     * backend at persist time.
+     */
+    private static Map<String, Object> buildProfileExtensions(OAuth2User principal) {
+        Map<String, Object> attributes = principal.getAttributes();
+        Map<String, Object> extensions = new LinkedHashMap<>();
+        extensions.put(StandardClaimNames.SUB, principal.getName());
+        putIfPresent(attributes, StandardClaimNames.EMAIL, extensions);
+        putIfPresent(attributes, StandardClaimNames.EMAIL_VERIFIED, extensions);
+        putIfPresent(attributes, StandardClaimNames.NAME, extensions);
+        putIfPresent(attributes, StandardClaimNames.GIVEN_NAME, extensions);
+        putIfPresent(attributes, StandardClaimNames.FAMILY_NAME, extensions);
+        putIfPresent(attributes, StandardClaimNames.PICTURE, extensions);
+        putIfPresent(attributes, StandardClaimNames.LOCALE, extensions);
+        return extensions;
+    }
+
+    private static void putIfPresent(Map<String, Object> source, String key, Map<String, Object> target) {
+        Object value = source.get(key);
+        if (value != null) {
+            target.put(toCamelCase(key), value);
         }
+    }
+
+    private static String toCamelCase(String key) {
+        return StringUtils.toLowerCaseCamelStyle(key, "_");
     }
 
     /** Configure the {@code targetUrlParameter} used to honour original {@code returnUrl} parameters. */
