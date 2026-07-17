@@ -197,6 +197,8 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         String userId = createdUser.getUserId();
         Assert.hasText(userId, "userService.createUser must return a persisted user carrying a userId");
 
+        logger.debug("{}'s all attributes: {}", userId, attributes);
+
         Map<String, Object> extensions = new LinkedHashMap<>();
         // Preserve the raw IdP-issued subject on the prototype so that
         // per-type backends whose subject derivation is non-trivial can
