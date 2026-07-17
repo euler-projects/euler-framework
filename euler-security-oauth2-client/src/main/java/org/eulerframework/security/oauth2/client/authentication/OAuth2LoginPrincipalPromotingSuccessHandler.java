@@ -141,6 +141,9 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         String rawSubject = principal.getName();
         Assert.hasText(rawSubject, "OAuth2User#getName() must not be empty");
 
+
+        logger.debug("{}'s all attributes: {}", policy.getIdentityType(), principal.getAttributes());
+
         EulerUser localUser = this.userIdentityService
                 .findUserIdentityByRawSubject(policy.getIdentityType(), rawSubject)
                 .map(UserIdentity::getUserId)
@@ -196,8 +199,6 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         EulerUser createdUser = this.userService.createUser(seed);
         String userId = createdUser.getUserId();
         Assert.hasText(userId, "userService.createUser must return a persisted user carrying a userId");
-
-        logger.debug("{}'s all attributes: {}", userId, attributes);
 
         Map<String, Object> extensions = new LinkedHashMap<>();
         // Preserve the raw IdP-issued subject on the prototype so that
