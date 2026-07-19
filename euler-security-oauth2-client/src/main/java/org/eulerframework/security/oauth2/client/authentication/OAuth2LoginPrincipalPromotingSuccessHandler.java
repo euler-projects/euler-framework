@@ -188,7 +188,6 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         if (!policy.isAutoCreateUser()) {
             throw new UserDetailsNotFoundException(principal.getName());
         }
-        Map<String, Object> attributes = principal.getAttributes();
         EulerUserDetails seed = EulerUserDetails.builder()
                 .username(RandomUsernameGenerator.generate())
                 .password("{noop}" + StringUtils.randomString(RANDOM_PASSWORD_LENGTH))

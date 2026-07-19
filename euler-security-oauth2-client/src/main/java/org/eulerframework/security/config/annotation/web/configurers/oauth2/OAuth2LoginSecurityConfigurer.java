@@ -18,10 +18,13 @@ package org.eulerframework.security.config.annotation.web.configurers.oauth2;
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.oauth2.client.authentication.OAuth2LoginPrincipalPromotingSuccessHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.Assert;
 
 /**
@@ -49,9 +52,24 @@ import org.springframework.util.Assert;
 public class OAuth2LoginSecurityConfigurer
         extends AbstractHttpConfigurer<OAuth2LoginSecurityConfigurer, HttpSecurity> {
 
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2LoginSecurityConfigurer.class);
+
     private String loginPage;
     private String targetUrlParameter;
     private String defaultTargetUrl;
+    /**
+     * The effective success handler. Two-phase field:
+     * <ul>
+     *   <li>Before {@link #init(HttpSecurity)}: caller-supplied override
+     *       via {@link #successHandler(AuthenticationSuccessHandler)},
+     *       or {@code null} if the caller wants the default resolution.</li>
+     *   <li>After {@link #init(HttpSecurity)}: the resolved handler that
+     *       has actually been wired into {@code oauth2Login()}. Never
+     *       {@code null}.</li>
+     * </ul>
+     * {@link #configure(HttpSecurity)} relies on the post-init
+     * invariant to skip null-checking.
+     */
     private AuthenticationSuccessHandler successHandler;
 
     // ---- Fluent API ----
@@ -79,44 +97,73 @@ public class OAuth2LoginSecurityConfigurer
 
     @Override
     public void init(HttpSecurity http) {
-        AuthenticationSuccessHandler handler = resolveSuccessHandler(http);
+        resolveSuccessHandler(http);
         String loginPage = this.loginPage;
-        try {
-            http.oauth2Login(oauth2 -> {
-                if (loginPage != null) {
-                    oauth2.loginPage(loginPage);
-                }
-                oauth2.successHandler(handler);
-            });
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed to configure oauth2Login()", ex);
-        }
+        AuthenticationSuccessHandler handler = this.successHandler;
+        http.oauth2Login(oauth2 -> {
+            if (loginPage != null) {
+                oauth2.loginPage(loginPage);
+            }
+            oauth2.successHandler(handler);
+        });
     }
 
     @Override
     public void configure(HttpSecurity http) {
-        // Nothing to add beyond the init-time oauth2Login() wiring; the
-        // OAuth2LoginConfigurer configures its own filters.
+        // Wire the chain-scoped SecurityContextRepository into the
+        // promoting success handler so the promoted principal is
+        // persisted through the same pipeline the OAuth2 login filter
+        // used to write the original OidcUser. Without this the handler
+        // falls back to a fresh HttpSessionSecurityContextRepository,
+        // which drops any RequestAttribute mirror and bypasses any
+        // custom repository the deployment might have installed (Redis,
+        // JDBC, delegating chains, etc.).
+        //
+        // Runs in configure() rather than init() because
+        // SecurityContextConfigurer registers its repository as a
+        // shared object during its own configure() phase, so init() may
+        // still see null here.
+        //
+        // successHandler is guaranteed non-null here (init() always
+        // resolves it), so we only need to guard the promoting-type
+        // narrowing for the case where the caller supplied a fully
+        // custom handler.
+        if (this.successHandler instanceof OAuth2LoginPrincipalPromotingSuccessHandler promoting) {
+            SecurityContextRepository shared = http.getSharedObject(SecurityContextRepository.class);
+            if (shared != null) {
+                promoting.setSecurityContextRepository(shared);
+            } else {
+                logger.warn("No shared SecurityContextRepository on HttpSecurity; " +
+                        "OAuth2LoginPrincipalPromotingSuccessHandler will keep its default " +
+                        "HttpSessionSecurityContextRepository, which may not match the " +
+                        "repository used by other filters in this chain.");
+            }
+        }
     }
 
     // ---- Dependency resolution ----
 
-    private AuthenticationSuccessHandler resolveSuccessHandler(HttpSecurity http) {
-        if (this.successHandler != null) {
-            applyRedirectOverrides(this.successHandler);
-            return this.successHandler;
+    /**
+     * Ensure {@link #successHandler} is populated. If the caller
+     * already supplied one via the fluent {@code successHandler(...)}
+     * setter, keep it; otherwise look one up in the application context
+     * (falling back to a freshly constructed default).
+     *
+     * <p>After this method returns, {@link #successHandler} is
+     * guaranteed non-null.
+     */
+    private void resolveSuccessHandler(HttpSecurity http) {
+        if (this.successHandler == null) {
+            ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+            try {
+                this.successHandler = context.getBean(OAuth2LoginPrincipalPromotingSuccessHandler.class);
+            } catch (org.springframework.beans.factory.NoSuchBeanDefinitionException notFound) {
+                this.successHandler = new OAuth2LoginPrincipalPromotingSuccessHandler(
+                        context.getBean(EulerUserService.class),
+                        context.getBean(UserIdentityService.class));
+            }
         }
-        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        OAuth2LoginPrincipalPromotingSuccessHandler handler;
-        try {
-            handler = context.getBean(OAuth2LoginPrincipalPromotingSuccessHandler.class);
-        } catch (org.springframework.beans.factory.NoSuchBeanDefinitionException notFound) {
-            handler = new OAuth2LoginPrincipalPromotingSuccessHandler(
-                    context.getBean(EulerUserService.class),
-                    context.getBean(UserIdentityService.class));
-        }
-        applyRedirectOverrides(handler);
-        return handler;
+        applyRedirectOverrides(this.successHandler);
     }
 
     private void applyRedirectOverrides(AuthenticationSuccessHandler handler) {
