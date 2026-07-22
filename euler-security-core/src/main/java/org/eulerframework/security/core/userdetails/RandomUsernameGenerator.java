@@ -24,12 +24,6 @@ import java.util.Base64;
  * login signup) where the upstream identifier (phone number, device key id,
  * WeChat openId, ...) must not leak into the local username.
  * <p>
- * The output format is hard-coded as
- * {@code user_<base64url12>}: 9 random bytes drawn from a shared
- * {@link SecureRandom}, encoded as a fixed-length 12-character URL-safe
- * Base64 string without padding. This yields ~72 bits of entropy and makes
- * the username opaque, recipient-free and safe to embed in URLs.
- * <p>
  * All call sites that need to populate
  * {@link EulerUserDetails.UserBuilder#username(String)} with a randomly
  * generated value MUST use this generator to keep the username scheme
@@ -38,10 +32,10 @@ import java.util.Base64;
 public final class RandomUsernameGenerator {
 
     /** Prefix that flags an auto-provisioned, opaque username. */
-    public static final String USERNAME_PREFIX = "user_";
+    public static final String USERNAME_PREFIX = "u-";
 
-    /** 9 random bytes -> exactly 12 base64url characters without padding (~72-bit entropy). */
-    private static final int RANDOM_BYTES = 9;
+    /** 12 random bytes -> exactly 16 base64url characters without padding (~96-bit entropy). */
+    private static final int RANDOM_BYTES = 12;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
@@ -51,14 +45,24 @@ public final class RandomUsernameGenerator {
     }
 
     /**
-     * Mints a fresh random username as
-     * {@code user_<url-safe base64 of 9 random bytes>}.
+     * Mints a fresh random username of the form {@code u-<base64url16>}:
+     * 12 random bytes encoded as 16 URL-safe Base64 characters without
+     * padding (~96 bits of entropy), opaque and safe to embed in URLs. The
+     * body is guaranteed to start with a base64url alphanumeric character,
+     * never {@code '-'} or {@code '_'}.
      *
      * @return the freshly generated username
      */
     public static String generate() {
         byte[] random = new byte[RANDOM_BYTES];
-        SECURE_RANDOM.nextBytes(random);
+        // The first character encodes the top 6 bits of random[0]
+        // ((random[0] & 0xFF) >>> 2); indices 62 and 63 map to '-' and '_'.
+        // Reject those draws so the body never starts with a separator-like
+        // symbol. Only 2 of 64 leading symbols are excluded (~3%), so the
+        // loop terminates almost immediately.
+        do {
+            SECURE_RANDOM.nextBytes(random);
+        } while (((random[0] & 0xFF) >>> 2) >= 62);
         return USERNAME_PREFIX + ENCODER.encodeToString(random);
     }
 }
