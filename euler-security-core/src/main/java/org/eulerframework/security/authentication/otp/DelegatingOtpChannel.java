@@ -17,28 +17,37 @@ package org.eulerframework.security.authentication.otp;
 
 import org.springframework.util.Assert;
 
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Composite {@link OtpChannel} that routes an {@link OtpDelivering} to one of
- * a set of registered channels, looked up by
- * {@link OtpDelivering#channel()} bean name.
+ * a set of registered channels, looked up case-insensitively by
+ * {@link OtpDelivering#channel()}.
  * <p>
  * Naming and design follow Spring's
  * {@code DelegatingFilterProxy} / {@code DelegatingPasswordEncoder} pattern:
  * the framework operates against a single {@code OtpChannel} entry-point,
- * while business code is free to register as many backing channels as needed
- * (one per Spring bean, where the bean name is the channel name).
+ * while business code is free to register as many backing channels as needed.
+ * As a channel-name-keyed composite it implements the channel-agnostic
+ * {@link OtpChannel} contract directly and exposes no single channel name.
  * <p>
  * If no entry matches the requested channel:
  * <ul>
  *     <li>and a {@code fallback} channel was supplied at construction time,
  *         delivery is delegated to it (e.g. the bundled
  *         {@link StdoutOtpChannel} during development);</li>
- *     <li>otherwise an {@link OtpChannelNotFoundException} is thrown, which
- *         the issue endpoint surfaces as the {@code unsupported_channel}
- *         error.</li>
+ *     <li>otherwise an {@link OtpChannelNotFoundException} is thrown
+ *         synchronously, which the issue endpoint surfaces as the
+ *         {@code unsupported_channel} error.</li>
  * </ul>
+ * {@link #supports(String)} reflects the same routing decision, and the
+ * delivery future returned by the matched channel is passed through as-is.
+ * Route keys are normalized to lower case at construction time and lookups
+ * are normalized likewise, matching the case-insensitive semantics of
+ * {@link SingleOtpChannel#supports(String)}.
  */
 public class DelegatingOtpChannel implements OtpChannel {
 
@@ -58,27 +67,46 @@ public class DelegatingOtpChannel implements OtpChannel {
     /**
      * Create a delegator with an explicit fallback channel.
      *
-     * @param routes   the routing table from channel name to channel
+     * @param routes   the routing table from channel name to channel; keys
+     *                 are normalized to lower case, so entries that only
+     *                 differ in case are rejected
      * @param fallback the channel to use when no route matches; may be
      *                 {@code null}
      */
     public DelegatingOtpChannel(Map<String, OtpChannel> routes, OtpChannel fallback) {
         Assert.notNull(routes, "routes must not be null");
-        this.routes = Map.copyOf(routes);
+        Map<String, OtpChannel> normalized = new LinkedHashMap<>();
+        routes.forEach((channel, target) -> {
+            Assert.hasText(channel, "route channel name must not be empty");
+            Assert.notNull(target, "route target must not be null");
+            OtpChannel previous = normalized.putIfAbsent(normalizeChannel(channel), target);
+            Assert.isNull(previous,
+                    () -> "Duplicate route for channel '" + channel + "' after case normalization");
+        });
+        this.routes = Map.copyOf(normalized);
         this.fallback = fallback;
     }
 
     @Override
-    public void send(OtpDelivering delivering) throws OtpDeliveryException {
+    public CompletableFuture<Void> send(OtpDelivering delivering) {
         Assert.notNull(delivering, "delivering must not be null");
-        OtpChannel target = this.routes.get(delivering.channel());
+        OtpChannel target = this.routes.get(normalizeChannel(delivering.channel()));
         if (target == null) {
             if (this.fallback != null) {
-                this.fallback.send(delivering);
-                return;
+                return this.fallback.send(delivering);
             }
             throw new OtpChannelNotFoundException(delivering.channel());
         }
-        target.send(delivering);
+        return target.send(delivering);
+    }
+
+    @Override
+    public boolean supports(String channel) {
+        return (channel != null && this.routes.containsKey(normalizeChannel(channel)))
+                || (this.fallback != null && this.fallback.supports(channel));
+    }
+
+    private static String normalizeChannel(String channel) {
+        return channel.toLowerCase(Locale.ROOT);
     }
 }

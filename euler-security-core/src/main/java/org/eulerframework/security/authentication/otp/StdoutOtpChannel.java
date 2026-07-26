@@ -18,9 +18,15 @@ package org.eulerframework.security.authentication.otp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * {@link OtpChannel} that prints the OTP to the application log instead of
- * delivering it to a real recipient.
+ * delivering it to a real recipient. Executes synchronously and returns an
+ * already-completed future - as a log-only development tool it has no
+ * provider round-trip to hide. It accepts any channel name
+ * ({@link #supports(String)} always returns {@code true}), so it implements
+ * the channel-agnostic {@link OtpChannel} contract directly.
  * <p>
  * Intended as a {@code DelegatingOtpChannel#fallback} during development /
  * integration testing - never ship an unconditional registration of this bean
@@ -31,7 +37,7 @@ public class StdoutOtpChannel implements OtpChannel {
     private static final Logger logger = LoggerFactory.getLogger(StdoutOtpChannel.class);
 
     @Override
-    public void send(OtpDelivering delivering) {
+    public CompletableFuture<Void> send(OtpDelivering delivering) {
         String message = String.format(
                 "[OTP] channel=%s recipient=%s purpose=%s otp=%s expires-in=%s",
                 delivering.channel(),
@@ -42,5 +48,11 @@ public class StdoutOtpChannel implements OtpChannel {
         logger.info(message);
         // Also write to stdout so demos without a configured logger still see it.
         System.out.println(message);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public boolean supports(String channel) {
+        return true;
     }
 }

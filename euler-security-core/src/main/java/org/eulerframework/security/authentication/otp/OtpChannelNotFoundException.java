@@ -16,15 +16,18 @@
 package org.eulerframework.security.authentication.otp;
 
 /**
- * Thrown by {@link DelegatingOtpChannel} when the requested channel is not
- * registered in its routing table and no fallback channel is configured.
+ * Thrown synchronously by an {@link OtpChannel} when the requested logical
+ * channel name cannot be handled - by {@link DelegatingOtpChannel} when the
+ * name is not in its routing table and no fallback channel is configured, or
+ * by {@link AbstractAsyncOtpChannel} when {@link OtpChannel#supports(String)}
+ * rejects the name before asynchronous dispatch.
  * <p>
  * Maps to the {@code unsupported_channel} HTTP error in
  * {@code OtpTicketIssueEndpointFilter}.
  */
-public class OtpChannelNotFoundException extends OtpDeliveryException {
+public class OtpChannelNotFoundException extends RuntimeException {
 
     public OtpChannelNotFoundException(String channel) {
-        super("No OtpChannel registered for name '" + channel + "' and no fallback configured");
+        super("No OtpChannel supports channel '" + channel + "'");
     }
 }

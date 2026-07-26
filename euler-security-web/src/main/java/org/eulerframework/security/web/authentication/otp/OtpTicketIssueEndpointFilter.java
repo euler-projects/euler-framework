@@ -22,7 +22,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.common.util.jackson.JacksonUtils;
-import org.eulerframework.security.authentication.otp.OtpDeliveryFailedException;
 import org.eulerframework.security.authentication.otp.OtpInvalidIdentityIdException;
 import org.eulerframework.security.authentication.otp.OtpIssueResult;
 import org.eulerframework.security.authentication.otp.OtpTicketIssueAuthenticationToken;
@@ -72,7 +71,10 @@ import java.util.Map;
  *
  * <h2>Error responses</h2>
  * Each non-success outcome maps to a {@code error} / {@code error_description}
- * envelope; refer to the constants in this class for the mapping.
+ * envelope; refer to the constants in this class for the mapping. OTP delivery
+ * is dispatched asynchronously by the provider, so provider-side delivery
+ * failures never surface here - the endpoint responds {@code 200} once the
+ * ticket is persisted and the delivery has been handed off.
  */
 public class OtpTicketIssueEndpointFilter extends OncePerRequestFilter {
 
@@ -132,10 +134,6 @@ public class OtpTicketIssueEndpointFilter extends OncePerRequestFilter {
             logger.debug("OTP issue rejected (invalid_identity_id): {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.BAD_REQUEST,
                     ERROR_INVALID_IDENTITY_ID, ex.getMessage());
-        } catch (OtpDeliveryFailedException ex) {
-            logger.debug("OTP issue failed (delivery_failed): {}", ex.getMessage());
-            sendErrorResponse(response, HttpStatus.BAD_GATEWAY,
-                    ERROR_DELIVERY_FAILED, ex.getMessage());
         } catch (AuthenticationException ex) {
             logger.debug("OTP issue failed: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR,

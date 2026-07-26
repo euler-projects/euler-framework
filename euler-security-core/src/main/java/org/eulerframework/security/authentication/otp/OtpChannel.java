@@ -15,28 +15,64 @@
  */
 package org.eulerframework.security.authentication.otp;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
- * Strategy that delivers an OTP value to a recipient via a specific channel
- * (SMS, email, push notification, ...).
+ * Strategy that delivers an OTP value to a recipient.
  * <p>
- * The framework treats the <em>channel name</em> as a side-effect of bean
- * registration rather than a property of the channel itself: implementations
- * are expected to be registered as Spring beans whose <em>bean name</em> serves
- * as the channel identifier (e.g. {@code @Bean("sms") OtpChannel sms()}).
- * Routing from a logical channel name to the right implementation is the job
- * of {@link DelegatingOtpChannel}.
+ * This base contract only knows how to deliver
+ * ({@link #send(OtpDelivering)}) and whether a logical channel name can be
+ * handled ({@link #supports(String)}); both are mandatory. Concrete gateway
+ * implementations bound to exactly one logical channel should implement
+ * {@link SingleOtpChannel}, which adds the self-declared channel name and
+ * derives {@code supports} from it. Channel-agnostic implementations - the
+ * {@link DelegatingOtpChannel} composite and the {@link StdoutOtpChannel}
+ * development fallback - implement this interface directly. Routing from a
+ * logical channel name to the right implementation is the job of
+ * {@link DelegatingOtpChannel}.
  *
+ * <h2>Asynchronous contract</h2>
+ * {@link #send(OtpDelivering)} returns a {@link CompletableFuture} tracking
+ * the delivery outcome. Synchronous exceptions are reserved for routing and
+ * argument errors (e.g. {@link OtpChannelNotFoundException} when
+ * {@link #supports(String)} rejects the channel name); delivery failures must
+ * complete the future exceptionally - typically with
+ * {@link OtpDeliveryException} - and must not be thrown from {@code send}.
+ * <p>
+ * Implementations are free to perform the delivery on the calling thread and
+ * return an already-completed future. Such implementations block the caller
+ * and expose the provider round-trip in the issue-endpoint response time;
+ * {@link AbstractAsyncOtpChannel} is the ready-made template for
+ * implementations that want proper asynchronous dispatch without writing any
+ * threading code.
+ *
+ * @see SingleOtpChannel
+ * @see AbstractAsyncOtpChannel
  * @see DelegatingOtpChannel
  * @see StdoutOtpChannel
  */
-@FunctionalInterface
 public interface OtpChannel {
 
     /**
      * Deliver the OTP described by {@code delivering} to its recipient.
      *
      * @param delivering the delivery instruction
-     * @throws OtpDeliveryException if delivery cannot be performed
+     * @return a future that completes when delivery finishes, or completes
+     * exceptionally (typically with {@link OtpDeliveryException}) when
+     * delivery fails
+     * @throws OtpChannelNotFoundException if the requested channel cannot be
+     *                                     handled by this instance
      */
-    void send(OtpDelivering delivering) throws OtpDeliveryException;
+    CompletableFuture<Void> send(OtpDelivering delivering);
+
+    /**
+     * Whether this instance can handle deliveries for the given logical
+     * channel name. Consulted synchronously before any asynchronous dispatch
+     * so that unsupported channels are rejected on the calling thread.
+     *
+     * @param channel the logical channel name from the issue request
+     * @return {@code true} if {@link #send(OtpDelivering)} can handle the
+     * channel
+     */
+    boolean supports(String channel);
 }

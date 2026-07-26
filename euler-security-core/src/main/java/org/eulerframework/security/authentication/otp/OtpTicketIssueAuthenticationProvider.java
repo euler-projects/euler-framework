@@ -39,8 +39,12 @@ import java.util.Collections;
  *     <li>Generates a numeric OTP via {@link OtpGenerator}.</li>
  *     <li>Mints a ticket id ({@code ot_} + 22-char URL-safe random) and persists
  *         the resulting {@link OtpTicket} via {@link OtpTicketService}.</li>
- *     <li>Delegates delivery to the configured {@link OtpChannel} (typically
- *         {@link DelegatingOtpChannel}).</li>
+ *     <li>Dispatches delivery to the configured {@link OtpChannel} (typically
+ *         {@link DelegatingOtpChannel}) in fire-and-forget fashion: the
+ *         returned future is only observed to log delivery failures, so the
+ *         issue response never waits for - nor reveals the outcome or
+ *         duration of - the provider round-trip. Clients recover from a lost
+ *         delivery by re-requesting after {@code retry_after}.</li>
  * </ol>
  * <p>
  * When an {@link OtpTestAccountSupport} is configured and the resolved
@@ -159,13 +163,20 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
             OtpDelivering delivering = new OtpDelivering(
                     token.getChannel(), recipient, token.getPurpose(), otp, policy.expiresIn());
             try {
-                this.otpChannel.send(delivering);
+                this.otpChannel.send(delivering)
+                        // Fire-and-forget: the response is written before delivery completes, so
+                        // failures can only be recorded here; clients recover by re-requesting
+                        // after retry_after.
+                        .whenComplete((_, failure) -> {
+                            if (failure != null) {
+                                logger.error("OTP delivery failed: ticket='{}' channel='{}' recipient='{}' purpose='{}'",
+                                        ticketId, token.getChannel(), recipient, token.getPurpose(), failure);
+                            }
+                        });
             } catch (OtpChannelNotFoundException e) {
                 throw new OtpUnsupportedChannelException(e.getMessage(), e);
-            } catch (OtpDeliveryException e) {
-                throw new OtpDeliveryFailedException("OTP delivery failed", e);
             } catch (RuntimeException e) {
-                throw new AuthenticationServiceException("OTP delivery failed", e);
+                throw new AuthenticationServiceException("OTP delivery dispatch failed", e);
             }
         }
 

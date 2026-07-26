@@ -16,10 +16,13 @@
 package org.eulerframework.security.authentication.otp;
 
 /**
- * Thrown by an {@link OtpChannel} when delivery of an OTP value fails.
+ * Indicates that delivery of an OTP value failed.
  * <p>
- * Maps to the {@code delivery_failed} HTTP error in
- * {@code OtpTicketIssueEndpointFilter}.
+ * Under the asynchronous {@link OtpChannel} contract this exception is not
+ * thrown from {@link OtpChannel#send(OtpDelivering)}; it completes the
+ * returned future exceptionally (blocking implementations such as
+ * {@link AbstractAsyncOtpChannel} subclasses throw it from their
+ * {@code doSend} hook and the template wraps it into the future).
  */
 public class OtpDeliveryException extends Exception {
 
