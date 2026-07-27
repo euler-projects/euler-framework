@@ -19,22 +19,39 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Single entry under
- * {@code euler.security.web.login-methods.<name>}: a discriminator
- * ({@link #getType() type}) plus a free-form
- * {@link #getProperties() properties} bag whose keys are meaningful to
- * the {@link LoginMethodTypeHandler} registered for that type.
+ * A single login-method declaration bound from
+ * {@code euler.security.web.login-methods.<name>}.
  *
- * <p>Kept in the framework layer (not {@code euler-boot-autoconfigure})
- * so that {@link LoginMethodTypeHandler} implementations shipped in
- * feature modules can reference the same type without pulling in the
- * autoconfigure jar. {@code EulerBootSecurityWebProperties} in the
- * boot layer holds the {@code Map<String, LoginMethod>} and binds
- * against Spring Boot's config property machinery.
+ * <p>Top-level fields carry the {@code type} discriminator and the
+ * cross-type login policy; the {@code properties} bag carries optional
+ * type-specific settings interpreted by the
+ * {@link LoginMethodTypeHandler} registered for the declared type.
  */
 public class LoginMethod {
 
     private String type;
+
+    /**
+     * Identity type established by this login method, stored as
+     * {@code t_user_identity.identity_type}. Defaults to the
+     * login-method key.
+     */
+    private String identityType;
+
+    /**
+     * Whether to provision a local user on first successful login when
+     * no matching local identity exists. Defaults to {@code true};
+     * when {@code false}, only already-known users can sign in.
+     */
+    private boolean autoCreateUser = true;
+
+    /**
+     * Authorities granted to an auto-provisioned user. Defaults to
+     * {@code user}; configured values replace the default. Must not be
+     * empty when {@code autoCreateUser} is {@code true}.
+     */
+    private String[] defaultAuthorities = {"user"};
+
     private final Map<String, Object> properties = new LinkedHashMap<>();
 
     public String getType() {
@@ -43,6 +60,30 @@ public class LoginMethod {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getIdentityType() {
+        return identityType;
+    }
+
+    public void setIdentityType(String identityType) {
+        this.identityType = identityType;
+    }
+
+    public boolean isAutoCreateUser() {
+        return autoCreateUser;
+    }
+
+    public void setAutoCreateUser(boolean autoCreateUser) {
+        this.autoCreateUser = autoCreateUser;
+    }
+
+    public String[] getDefaultAuthorities() {
+        return defaultAuthorities;
+    }
+
+    public void setDefaultAuthorities(String[] defaultAuthorities) {
+        this.defaultAuthorities = defaultAuthorities;
     }
 
     public Map<String, Object> getProperties() {

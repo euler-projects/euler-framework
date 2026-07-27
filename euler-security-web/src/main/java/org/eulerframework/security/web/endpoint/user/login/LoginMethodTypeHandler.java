@@ -18,26 +18,18 @@ package org.eulerframework.security.web.endpoint.user.login;
 import java.util.Map;
 
 /**
- * SPI implemented per {@code type} value under
- * {@code euler.security.web.login-methods.<name>.type}. Each handler
- * knows how to translate a single login-method declaration (the raw
- * {@code Map<String, Object> properties} bag) into a {@link LoginMethodView}
- * for the shared login page.
+ * SPI that translates a login-method declaration under
+ * {@code euler.security.web.login-methods.<name>} into a
+ * {@link LoginMethodView} for the shared login page.
  *
- * <p>Registered as a Spring {@code @Bean}. Multiple handlers may
- * coexist &mdash; one per well-known {@code type} (e.g. {@code oauth2},
- * {@code otp}, {@code passkey}). Dispatch happens in the generic
- * {@code LoginMethodConfigDrivenContributor}, which iterates the
- * {@code login-methods} map and delegates each entry to the handler
- * whose {@link #type()} matches.
+ * <p>Implementations are registered as Spring beans, one per
+ * {@code type} value (e.g. {@code oauth2}, {@code otp},
+ * {@code passkey}); a generic dispatcher delegates each declared entry
+ * to the handler whose {@link #type()} matches.
  *
- * <h2>Scope</h2>
- * View production only. Filter-chain wiring, success handlers,
- * repositories and any other runtime beans are the responsibility of
- * each type's own {@code SecurityConfigurer} / autoconfigure &mdash; the
- * SPI stays intentionally narrow so that a new type can be a "just
- * publish two beans (a handler + a configurer)" affair without
- * expanding this interface.
+ * <p>This SPI covers view production only. Filter-chain wiring,
+ * success handlers and other runtime beans are configured by each
+ * type's own module.
  */
 public interface LoginMethodTypeHandler {
 
@@ -50,23 +42,19 @@ public interface LoginMethodTypeHandler {
     String type();
 
     /**
-     * Produce a view model for the login method named {@code name} with
-     * the raw {@code properties} bag as declared in configuration.
+     * Produces the view model for the login method named {@code name}.
      *
-     * <p>May return {@code null} to signal "the declaration is
-     * syntactically well-formed but presently unresolvable" (e.g. an
-     * OAuth2 method whose {@code oauth-client-registration-id} does not
-     * resolve to an existing {@code ClientRegistration}). The dispatcher
-     * treats {@code null} as "skip &mdash; do not render" and logs at
-     * {@code WARN}. This is preferred over throwing so a single
-     * misconfigured entry does not break the whole login page.
+     * <p>Returns {@code null} when the declaration cannot currently be
+     * resolved (e.g. it references an unknown OAuth2 client
+     * registration); the dispatcher skips such entries without
+     * rendering them.
      *
-     * @param name       the login-method key (map key under
-     *                   {@code euler.security.web.login-methods}); useful
-     *                   as a default for id / display-name / identity-type
-     *                   when the {@code properties} bag omits them.
-     * @param properties the raw properties map as bound by Spring Boot;
-     *                   never {@code null}, may be empty.
+     * @param name       the login-method key under
+     *                   {@code euler.security.web.login-methods};
+     *                   serves as the default for omitted properties
+     *                   such as {@code display-name}.
+     * @param properties the type-specific properties bag; never
+     *                   {@code null}, may be empty.
      * @return the view to render, or {@code null} to skip this entry.
      */
     LoginMethodView toView(String name, Map<String, Object> properties);

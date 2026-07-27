@@ -34,11 +34,10 @@ import java.util.Map;
  * {@link ClientRegistration} from
  * {@link ClientRegistrationRepository}.
  *
- * <p>The other well-known properties ({@code auto-create-user},
- * {@code default-authorities}, {@code identity-type}) are login-side
- * policy and are consumed by
- * {@code OAuth2LoginPrincipalPromotingSuccessHandler} rather than by
- * this handler.
+ * <p>The top-level policy fields ({@code identity-type},
+ * {@code auto-create-user}, {@code default-authorities}) are consumed
+ * by {@code OAuth2LoginPrincipalPromotingSuccessHandler}, not by this
+ * handler.
  */
 public class OAuth2LoginMethodTypeHandler implements LoginMethodTypeHandler {
 
