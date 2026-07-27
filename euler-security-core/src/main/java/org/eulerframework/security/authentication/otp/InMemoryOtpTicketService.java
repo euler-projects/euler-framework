@@ -24,12 +24,10 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory {@link OtpTicketService} backed by a {@link ConcurrentHashMap}.
- * Expired entries are cleaned up lazily on each {@link #save(OtpTicket)} call.
- * <p>
- * Suitable for single-instance deployments and development / testing. For
- * clustered deployments use {@link RedisOtpTicketService} or
- * {@link JdbcOtpTicketService} instead.
+ * In-memory {@link OtpTicketService} for single-instance deployments and
+ * development / testing; expired entries are evicted lazily. For clustered
+ * deployments use {@link RedisOtpTicketService} or {@link JdbcOtpTicketService}
+ * instead.
  */
 public class InMemoryOtpTicketService implements OtpTicketService {
 
@@ -63,7 +61,7 @@ public class InMemoryOtpTicketService implements OtpTicketService {
     }
 
     @Override
-    public OtpVerification consume(String ticketId, String codeVerifier, String otp, String expectedPurpose) {
+    public OtpVerification consume(String ticketId, String otp, String expectedPurpose) {
         if (ticketId == null) {
             return null;
         }
@@ -74,11 +72,10 @@ public class InMemoryOtpTicketService implements OtpTicketService {
         }
 
         boolean otpMatches = Objects.equals(ticket.otp(), otp);
-        boolean pkceMatches = OtpPkceVerifier.verify(codeVerifier, ticket.codeChallenge(), ticket.codeChallengeMethod());
         boolean purposeMatches = expectedPurpose == null
                 || Objects.equals(expectedPurpose, ticket.purpose());
 
-        if (otpMatches && pkceMatches && purposeMatches) {
+        if (otpMatches && purposeMatches) {
             // Atomic remove on success: a one-time ticket is gone after consumption.
             if (this.tickets.remove(ticketId, ticket)) {
                 return new OtpVerification(ticket.ticketId(), ticket.channel(), ticket.recipient(),

@@ -35,17 +35,12 @@ import java.util.Objects;
  *     recipient              VARCHAR(255)  NOT NULL,
  *     purpose                VARCHAR(64)   NULL,
  *     otp                    VARCHAR(32)   NOT NULL,
- *     code_challenge         VARCHAR(255)  NOT NULL,
- *     code_challenge_method  VARCHAR(16)   NOT NULL,
  *     expires_at             TIMESTAMP(3)  NOT NULL,
  *     failure_count          INT           NOT NULL DEFAULT 0,
  *     consumed_at            TIMESTAMP(3)  NULL,
  *     created_at             TIMESTAMP(3)  NOT NULL
  * );
  * }</pre>
- * <p>
- * The column names {@code code_challenge} / {@code code_challenge_method}
- * follow PKCE (RFC 7636) standard naming.
  *
  * @see InMemoryOtpTicketService
  * @see RedisOtpTicketService
@@ -62,8 +57,6 @@ public class JdbcOtpTicketService implements OtpTicketService {
     private static final String COLUMN_RECIPIENT             = "recipient";
     private static final String COLUMN_PURPOSE               = "purpose";
     private static final String COLUMN_OTP                   = "otp";
-    private static final String COLUMN_CODE_CHALLENGE        = "code_challenge";
-    private static final String COLUMN_CODE_CHALLENGE_METHOD = "code_challenge_method";
     private static final String COLUMN_EXPIRES_AT            = "expires_at";
     private static final String COLUMN_FAILURE_COUNT         = "failure_count";
     private static final String COLUMN_CONSUMED_AT           = "consumed_at";
@@ -71,10 +64,10 @@ public class JdbcOtpTicketService implements OtpTicketService {
     // @formatter:on
 
     private static final String INSERT_TICKET_SQL =
-            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_TICKET_SQL =
-            "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?";
+            "SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?";
 
     private static final String DELETE_TICKET_SQL =
             "DELETE FROM %s WHERE %s = ?";
@@ -105,11 +98,11 @@ public class JdbcOtpTicketService implements OtpTicketService {
         this.maxFailures = maxFailures;
         this.insertSql = String.format(INSERT_TICKET_SQL, tableName,
                 COLUMN_TICKET_ID, COLUMN_CHANNEL, COLUMN_RECIPIENT, COLUMN_PURPOSE,
-                COLUMN_OTP, COLUMN_CODE_CHALLENGE, COLUMN_CODE_CHALLENGE_METHOD,
+                COLUMN_OTP,
                 COLUMN_EXPIRES_AT, COLUMN_FAILURE_COUNT, COLUMN_CONSUMED_AT, COLUMN_CREATED_AT);
         this.selectSql = String.format(SELECT_TICKET_SQL,
                 COLUMN_TICKET_ID, COLUMN_CHANNEL, COLUMN_RECIPIENT, COLUMN_PURPOSE,
-                COLUMN_OTP, COLUMN_CODE_CHALLENGE, COLUMN_CODE_CHALLENGE_METHOD,
+                COLUMN_OTP,
                 COLUMN_EXPIRES_AT, COLUMN_FAILURE_COUNT, COLUMN_CONSUMED_AT,
                 tableName, COLUMN_TICKET_ID);
         this.deleteSql = String.format(DELETE_TICKET_SQL, tableName, COLUMN_TICKET_ID);
@@ -132,8 +125,6 @@ public class JdbcOtpTicketService implements OtpTicketService {
             ps.setString(++i, ticket.recipient());
             ps.setString(++i, ticket.purpose());
             ps.setString(++i, ticket.otp());
-            ps.setString(++i, ticket.codeChallenge());
-            ps.setString(++i, ticket.codeChallengeMethod());
             ps.setTimestamp(++i, expiresAt);
             ps.setInt(++i, ticket.failureCount());
             if (ticket.consumed()) {
@@ -146,7 +137,7 @@ public class JdbcOtpTicketService implements OtpTicketService {
     }
 
     @Override
-    public OtpVerification consume(String ticketId, String codeVerifier, String otp, String expectedPurpose) {
+    public OtpVerification consume(String ticketId, String otp, String expectedPurpose) {
         if (ticketId == null) {
             return null;
         }
@@ -163,8 +154,6 @@ public class JdbcOtpTicketService implements OtpTicketService {
                             rs.getString(COLUMN_RECIPIENT),
                             rs.getString(COLUMN_PURPOSE),
                             rs.getString(COLUMN_OTP),
-                            rs.getString(COLUMN_CODE_CHALLENGE),
-                            rs.getString(COLUMN_CODE_CHALLENGE_METHOD),
                             rs.getTimestamp(COLUMN_EXPIRES_AT).toInstant(),
                             rs.getInt(COLUMN_FAILURE_COUNT),
                             consumedAt != null);
@@ -176,11 +165,10 @@ public class JdbcOtpTicketService implements OtpTicketService {
         }
 
         boolean otpMatches = Objects.equals(ticket.otp(), otp);
-        boolean pkceMatches = OtpPkceVerifier.verify(codeVerifier, ticket.codeChallenge(), ticket.codeChallengeMethod());
         boolean purposeMatches = expectedPurpose == null
                 || Objects.equals(expectedPurpose, ticket.purpose());
 
-        if (otpMatches && pkceMatches && purposeMatches) {
+        if (otpMatches && purposeMatches) {
             Timestamp now = Timestamp.from(Instant.now());
             int updated = this.jdbcOperations.update(this.consumeSql, now, ticketId);
             if (updated == 1) {

@@ -64,46 +64,16 @@ import java.util.Set;
 
 /**
  * {@link AuthenticationProvider} for {@code grant_type=otp}.
- *
- * <p>Token issuance proceeds as follows:
- * <ol>
- *   <li>Resolve and verify the authenticated client (standard OAuth2
- *       client authentication step).</li>
- *   <li>Validate that requested scopes are a subset of those registered
- *       on the client.</li>
- *   <li>Atomically consume the {@code otp_ticket} via
- *       {@link OtpTicketService#consume(String, String, String, String)},
- *       performing OTP value match and PKCE {@code code_verifier} S256
- *       match. A {@code null} return surfaces as {@code invalid_grant}.</li>
- *   <li>Map {@link OtpVerification#channel()} to the target
- *       {@code identity_type} (sms &rarr; phone, email &rarr; email) and
- *       reverse-resolve the binding via
- *       {@link UserIdentityService#findUserIdentityByRawSubject(String, String)}.
- *       The grant does not assume any particular transform from the raw
- *       subject to the persisted {@code subject} &mdash; per-type
- *       backends decide whether to hash, normalise, or pass through.
- *       When the recipient is unknown, auto-provision a fresh user
- *       (username from {@link RandomUsernameGenerator#generate()},
- *       {@code {noop}}-prefixed random password, {@code "user"}
- *       authority) and bind the identity through the pre-verified
- *       prototype entry
- *       {@link UserIdentityService#createUserIdentity(String, UserIdentity)}.</li>
- *   <li>Load the resolved user via
- *       {@link EulerUserService#loadUserById(String)} and convert it
- *       with {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}.</li>
- *   <li>When the request carries a verified App Attest device (set by
- *       {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}),
- *       enforce device-to-user consistency: a device already bound to a
- *       different user fails with {@code invalid_grant}
- *       ({@code "device mismatch"}); an unbound device is bound to the
- *       OTP-resolved user via
- *       {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)}
- *       &mdash; distinct from
- *       {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)},
- *       which provisions a brand-new anonymous user.</li>
- *   <li>Issue access, refresh and id tokens via the shared
- *       {@link OAuth2TokenGenerator}, mirroring the password grant.</li>
- * </ol>
+ * <p>
+ * Atomically consumes the submitted {@code otp_ticket}, resolves the verified
+ * recipient to a user through the identity SPI - auto-provisioning a fresh
+ * user when the recipient is unknown - and issues access, refresh and id
+ * tokens. A failed OTP verification surfaces as {@code invalid_grant}.
+ * <p>
+ * When the request carries a verified App Attest device, device-to-user
+ * consistency is enforced: a device bound to a different user is rejected
+ * with {@code invalid_grant}, and an unbound device is bound to the resolved
+ * user on first use.
  */
 public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
 
@@ -189,14 +159,12 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         validateScope(otpAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(otpAuthenticationToken.getScopes());
 
-        // 1. Atomically consume the OTP ticket. consume() performs OTP
-        //    value match plus PKCE S256 (code_verifier vs stored
-        //    code_challenge).
+        // 1. Atomically consume the OTP ticket. consume() performs the OTP
+        //    value match.
         OtpVerification verification;
         try {
             verification = this.otpTicketService.consume(
                     otpAuthenticationToken.getOtpTicket(),
-                    otpAuthenticationToken.getCodeVerifier(),
                     otpAuthenticationToken.getOtp(),
                     null);
         } catch (RuntimeException e) {

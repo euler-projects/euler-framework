@@ -29,12 +29,6 @@ import org.springframework.util.StringUtils;
  * Validation rules:
  * <ul>
  *     <li>{@code channel} must be present.</li>
- *     <li>When PKCE is required (see
- *         {@code euler.security.otp.pkce.enabled}): {@code code_challenge}
- *         must be present and {@code code_challenge_method} must equal
- *         {@value #CODE_CHALLENGE_METHOD_S256} (PKCE only supports S256 in
- *         this module). When PKCE is disabled, both parameters are ignored
- *         and stored as {@code null} on the resulting ticket.</li>
  *     <li>Exactly one of {@code recipient} or {@code identity_id} must be supplied.
  *         Supplying both, or neither, is treated as a bad request.</li>
  * </ul>
@@ -49,23 +43,6 @@ public class OtpTicketIssueAuthenticationConverter implements AuthenticationConv
     static final String PARAM_RECIPIENT = "recipient";
     static final String PARAM_IDENTITY_ID = "identity_id";
     static final String PARAM_PURPOSE = "purpose";
-    static final String PARAM_CODE_CHALLENGE = "code_challenge";
-    static final String PARAM_CODE_CHALLENGE_METHOD = "code_challenge_method";
-
-    static final String CODE_CHALLENGE_METHOD_S256 = "S256";
-
-    private final boolean pkceRequired;
-
-    /**
-     * Backwards-compatible constructor: PKCE required.
-     */
-    public OtpTicketIssueAuthenticationConverter() {
-        this(true);
-    }
-
-    public OtpTicketIssueAuthenticationConverter(boolean pkceRequired) {
-        this.pkceRequired = pkceRequired;
-    }
 
     @Override
     public Authentication convert(HttpServletRequest request) {
@@ -73,25 +50,9 @@ public class OtpTicketIssueAuthenticationConverter implements AuthenticationConv
         String recipient = request.getParameter(PARAM_RECIPIENT);
         String identityId = request.getParameter(PARAM_IDENTITY_ID);
         String purpose = request.getParameter(PARAM_PURPOSE);
-        String codeChallenge = request.getParameter(PARAM_CODE_CHALLENGE);
-        String codeChallengeMethod = request.getParameter(PARAM_CODE_CHALLENGE_METHOD);
 
         if (!StringUtils.hasText(channel)) {
             return null;
-        }
-
-        if (this.pkceRequired) {
-            if (!StringUtils.hasText(codeChallenge)) {
-                return null;
-            }
-            if (!CODE_CHALLENGE_METHOD_S256.equals(codeChallengeMethod)) {
-                return null;
-            }
-        } else {
-            // PKCE disabled: ignore client-supplied PKCE parameters
-            // entirely so they cannot end up bound to the ticket.
-            codeChallenge = null;
-            codeChallengeMethod = null;
         }
 
         // recipient / identity_id are mutually exclusive but at least one is required
@@ -105,8 +66,6 @@ public class OtpTicketIssueAuthenticationConverter implements AuthenticationConv
                 channel,
                 hasRecipient ? recipient : null,
                 hasIdentityId ? identityId : null,
-                StringUtils.hasText(purpose) ? purpose : null,
-                codeChallenge,
-                codeChallengeMethod);
+                StringUtils.hasText(purpose) ? purpose : null);
     }
 }

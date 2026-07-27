@@ -27,41 +27,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Unauthenticated grant token carrying the credentials submitted at the
- * {@code POST /oauth2/token} endpoint when {@code grant_type=otp}:
- * <ul>
- *     <li>{@code otp_ticket}  - the ticket id previously returned by
- *         {@code POST /otp/tickets}.</li>
- *     <li>{@code otp}         - the one-time password value the end-user typed
- *         back from the chosen delivery channel.</li>
- *     <li>{@code code_verifier} - PKCE code verifier (RFC 7636) whose S256
- *         hash must equal the {@code code_challenge} stored on the ticket.
- *         May be {@code null} when PKCE is disabled (see
- *         {@code euler.security.otp.pkce.enabled}).</li>
- * </ul>
+ * Unauthenticated grant token for {@code grant_type=otp}, carrying the
+ * {@code otp_ticket} id and the {@code otp} value submitted at the token
+ * endpoint.
  * <p>
- * The optional verified App Attest registration (carried in by
- * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter})
- * is propagated through the parent
- * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters() additionalParameters}
- * map under the key
- * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter#VERIFIED_CLIENT_ATTESTATION_PARAMETER}.
- * When present, the provider enforces device-to-user consistency and
- * auto-binds the device to the OTP-resolved user on first use.
- * <p>
- * Verified by {@code OAuth2OtpAuthenticationProvider}.
+ * A verified App Attest registration, when present, is propagated through
+ * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters()
+ * additionalParameters} and handled by {@code OAuth2OtpAuthenticationProvider}.
  */
 public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
     private final String otpTicket;
     private final String otp;
-    private final String codeVerifier;
     private final Set<String> scopes;
 
     public OAuth2OtpAuthenticationToken(
             String otpTicket,
             String otp,
-            @Nullable String codeVerifier,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
@@ -70,7 +52,6 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
         Assert.hasText(otp, "otp must not be empty");
         this.otpTicket = otpTicket;
         this.otp = otp;
-        this.codeVerifier = codeVerifier;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
@@ -83,10 +64,6 @@ public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthen
 
     public String getOtp() {
         return otp;
-    }
-
-    public String getCodeVerifier() {
-        return codeVerifier;
     }
 
     public Set<String> getScopes() {

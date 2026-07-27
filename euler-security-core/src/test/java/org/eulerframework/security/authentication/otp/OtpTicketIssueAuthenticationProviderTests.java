@@ -43,7 +43,7 @@ class OtpTicketIssueAuthenticationProviderTests {
         });
 
         Authentication result = provider.authenticate(OtpTicketIssueAuthenticationToken.unauthenticated(
-                "sms", "+8613800138000", null, "login", null, null));
+                "sms", "+8613800138000", null, "login"));
 
         Assertions.assertTrue(result.isAuthenticated());
         OtpIssueResult issueResult = ((OtpTicketIssueAuthenticationToken) result).getIssueResult();
@@ -58,7 +58,7 @@ class OtpTicketIssueAuthenticationProviderTests {
 
         Assertions.assertThrows(OtpUnsupportedChannelException.class,
                 () -> provider.authenticate(OtpTicketIssueAuthenticationToken.unauthenticated(
-                        "sms", "+8613800138000", null, "login", null, null)));
+                        "sms", "+8613800138000", null, "login")));
     }
 
     private OtpTicketIssueAuthenticationProvider createProvider(OtpChannel otpChannel) {

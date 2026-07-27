@@ -75,7 +75,6 @@ public class OtpSecurityConfigurer
     private OtpPolicyResolver policyResolver;
     private OtpTestAccountSupport testAccountSupport;
     private String issueEndpointUri = DEFAULT_ISSUE_ENDPOINT_URI;
-    private boolean pkceRequired = false;
 
     private RequestMatcher endpointsMatcher;
 
@@ -109,8 +108,7 @@ public class OtpSecurityConfigurer
     /**
      * Configure the optional test-account whitelist. When set, requests whose
      * resolved recipient matches one of its entries receive the configured
-     * fixed OTP and skip real delivery; a single {@code WARN} line is logged.
-     * Pass {@code null} to disable (default).
+     * fixed OTP and skip real delivery. Pass {@code null} to disable (default).
      */
     public OtpSecurityConfigurer testAccountSupport(OtpTestAccountSupport testAccountSupport) {
         this.testAccountSupport = testAccountSupport;
@@ -120,18 +118,6 @@ public class OtpSecurityConfigurer
     public OtpSecurityConfigurer issueEndpointUri(String issueEndpointUri) {
         Assert.hasText(issueEndpointUri, "issueEndpointUri must not be empty");
         this.issueEndpointUri = issueEndpointUri;
-        return this;
-    }
-
-    /**
-     * Whether PKCE (RFC 7636) is required at the issue endpoint. When
-     * {@code false} (default), {@code code_challenge} /
-     * {@code code_challenge_method} are ignored on the request and not
-     * persisted on the ticket. The token endpoint counterpart
-     * ({@code grant_type=otp}) must be configured with the same value.
-     */
-    public OtpSecurityConfigurer pkceRequired(boolean pkceRequired) {
-        this.pkceRequired = pkceRequired;
         return this;
     }
 
@@ -146,7 +132,7 @@ public class OtpSecurityConfigurer
     @Override
     public void init(HttpSecurity http) {
         OtpTicketIssueEndpointFilter filter = new OtpTicketIssueEndpointFilter(
-                new OtpTicketIssueAuthenticationConverter(this.pkceRequired),
+                new OtpTicketIssueAuthenticationConverter(),
                 createProvider(http),
                 this.issueEndpointUri);
 

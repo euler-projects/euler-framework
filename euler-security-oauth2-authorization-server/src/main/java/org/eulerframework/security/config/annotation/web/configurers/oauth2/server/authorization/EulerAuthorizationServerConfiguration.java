@@ -18,7 +18,6 @@ package org.eulerframework.security.config.annotation.web.configurers.oauth2.ser
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
-import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
@@ -31,7 +30,6 @@ import org.eulerframework.security.oauth2.server.authorization.web.authenticatio
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OtpAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
-import org.eulerframework.security.util.UserDetailsUtils;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -116,51 +114,37 @@ public class EulerAuthorizationServerConfiguration {
      * authorization server's token endpoint.
      *
      * @param http                the {@link HttpSecurity} being built
-     * @param otpTicketService    OTP ticket store; tickets are minted by
-     *                            {@code POST /otp/tickets} and consumed
-     *                            atomically by the grant
-     * @param userIdentityService identity SPI used to reverse-resolve the
-     *                            OTP recipient into the bound
-     *                            {@code userId}
-     * @param eulerUserService    user service used to load the
-     *                            {@link EulerUser} by {@code userId};
-     *                            the grant converts it via
-     *                            {@link UserDetailsUtils#toEulerUserDetails(EulerUser)}
-     * @param pkceRequired        whether the token endpoint requires
-     *                            {@code code_verifier} (RFC 7636 PKCE);
-     *                            must match the issue endpoint's
-     *                            setting, controlled globally by
-     *                            {@code euler.security.otp.pkce.enabled}
+     * @param otpTicketService    store from which submitted OTP tickets are
+     *                            consumed
+     * @param userIdentityService identity SPI used to resolve the OTP
+     *                            recipient to a user
+     * @param eulerUserService    user service used to load the resolved user
      */
     public static void configOtpAuthentication(HttpSecurity http,
                                                 OtpTicketService otpTicketService,
                                                 UserIdentityService userIdentityService,
-                                                EulerUserService eulerUserService,
-                                                boolean pkceRequired) {
+                                                EulerUserService eulerUserService) {
         configOtpAuthentication(http, otpTicketService, userIdentityService,
-                eulerUserService, null, pkceRequired);
+                eulerUserService, null);
     }
 
     /**
      * Variant accepting an optional {@link EulerDeviceUserDetailsService}.
      * When non-{@code null}, OTP token requests carrying a verified App
-     * Attest device (set by
-     * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter})
-     * are subject to device-to-user consistency enforcement and
-     * first-sighting device-to-user binding. When {@code null},
-     * attestation attached to OTP requests is silently ignored.
+     * Attest device are subject to device-to-user consistency enforcement
+     * and first-sighting binding; when {@code null}, attestation attached
+     * to OTP requests is ignored.
      */
     public static void configOtpAuthentication(HttpSecurity http,
                                                 OtpTicketService otpTicketService,
                                                 UserIdentityService userIdentityService,
                                                 EulerUserService eulerUserService,
-                                                EulerDeviceUserDetailsService deviceUserDetailsService,
-                                                boolean pkceRequired) {
+                                                EulerDeviceUserDetailsService deviceUserDetailsService) {
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
                         .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService,
                                 userIdentityService, eulerUserService, deviceUserDetailsService))
-                        .accessTokenRequestConverter(getOAuth2OtpAuthenticationConverter(pkceRequired))));
+                        .accessTokenRequestConverter(new OAuth2OtpAuthenticationConverter())));
     }
 
     private static OAuth2OtpAuthenticationProvider getOAuth2OtpAuthenticationProvider(HttpSecurity http,
@@ -183,10 +167,6 @@ public class EulerAuthorizationServerConfiguration {
         } catch (Exception e) {
             throw ExceptionUtils.asRuntimeException(e);
         }
-    }
-
-    private static OAuth2OtpAuthenticationConverter getOAuth2OtpAuthenticationConverter(boolean pkceRequired) {
-        return new OAuth2OtpAuthenticationConverter(pkceRequired);
     }
 
     public static void configClientAttestationAuthentication(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {

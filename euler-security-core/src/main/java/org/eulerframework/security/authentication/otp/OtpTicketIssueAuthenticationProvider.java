@@ -30,33 +30,20 @@ import java.util.Base64;
 import java.util.Collections;
 
 /**
- * {@link AuthenticationProvider} that drives the OTP issue flow:
- * <ol>
- *     <li>Resolves the {@link OtpPolicy} via {@link OtpPolicyResolver}.</li>
- *     <li>Resolves the recipient: either the explicit {@code recipient} from
- *         the request or, when only {@code identity_id} was supplied, the
- *         output of {@link OtpRecipientResolver}.</li>
- *     <li>Generates a numeric OTP via {@link OtpGenerator}.</li>
- *     <li>Mints a ticket id ({@code ot_} + 22-char URL-safe random) and persists
- *         the resulting {@link OtpTicket} via {@link OtpTicketService}.</li>
- *     <li>Dispatches delivery to the configured {@link OtpChannel} (typically
- *         {@link DelegatingOtpChannel}) in fire-and-forget fashion: the
- *         returned future is only observed to log delivery failures, so the
- *         issue response never waits for - nor reveals the outcome or
- *         duration of - the provider round-trip. Clients recover from a lost
- *         delivery by re-requesting after {@code retry_after}.</li>
- * </ol>
+ * {@link AuthenticationProvider} that handles OTP ticket issue requests:
+ * resolves the applicable {@link OtpPolicy} and the recipient, generates the
+ * OTP value, persists the ticket and dispatches delivery to the configured
+ * {@link OtpChannel}.
  * <p>
- * When an {@link OtpTestAccountSupport} is configured and the resolved
- * recipient matches a test account, the OTP value is replaced by the configured
- * fixed value, real channel delivery is skipped, and a single {@code WARN}
- * line is emitted. Verification is unaffected - the ticket persisted with the
- * fixed OTP is matched by
- * {@link OtpTicketService#consume(String, String, String, String)} via the
- * usual plaintext compare path.
+ * Delivery is asynchronous: the issue response is written once the ticket is
+ * persisted and never reflects the delivery outcome. Clients recover from a
+ * lost delivery by re-requesting after {@code retry_after}.
+ * <p>
+ * When an {@link OtpTestAccountSupport} is configured, recipients on its
+ * whitelist receive the configured fixed OTP and real delivery is skipped;
+ * verification is unaffected.
  *
  * @see OtpTicketIssueAuthenticationToken
- * @see OtpTestAccountSupport
  */
 public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvider {
 
@@ -78,12 +65,11 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
     /**
      * @param policyResolver    must not be {@code null}
      * @param otpGenerator      must not be {@code null}
-     * @param otpChannel        must not be {@code null} (typically a
-     *                          {@link DelegatingOtpChannel})
+     * @param otpChannel        must not be {@code null}
      * @param ticketService     must not be {@code null}
-     * @param recipientResolver may be {@code null} - when {@code null},
-     *                          requests carrying an {@code identity_id} are
-     *                          rejected with {@link OtpInvalidIdentityIdException}
+     * @param recipientResolver may be {@code null}; when absent, requests
+     *                          carrying an {@code identity_id} are rejected
+     *                          with {@link OtpInvalidIdentityIdException}
      */
     public OtpTicketIssueAuthenticationProvider(OtpPolicyResolver policyResolver,
                                                 OtpGenerator otpGenerator,
@@ -119,7 +105,7 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
 
         OtpIssueRequest request = new OtpIssueRequest(
                 token.getChannel(), token.getRecipient(), token.getIdentityId(),
-                token.getPurpose(), token.getCodeChallenge(), token.getCodeChallengeMethod());
+                token.getPurpose());
 
         // 1. Resolve policy
         OtpPolicy policy = this.policyResolver.resolve(request);
@@ -144,8 +130,6 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
                 recipient,
                 token.getPurpose(),
                 otp,
-                token.getCodeChallenge(),
-                token.getCodeChallengeMethod(),
                 now.plus(policy.expiresIn()),
                 0,
                 false);
@@ -186,7 +170,7 @@ public class OtpTicketIssueAuthenticationProvider implements AuthenticationProvi
         OtpIssueResult result = new OtpIssueResult(ticketId, policy.expiresIn(), policy.retryAfter());
         return OtpTicketIssueAuthenticationToken.authenticated(
                 token.getChannel(), recipient, token.getIdentityId(),
-                token.getPurpose(), token.getCodeChallenge(), token.getCodeChallengeMethod(),
+                token.getPurpose(),
                 result, Collections.emptyList());
     }
 

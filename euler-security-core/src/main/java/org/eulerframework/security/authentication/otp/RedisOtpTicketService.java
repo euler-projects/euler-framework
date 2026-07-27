@@ -46,8 +46,6 @@ public class RedisOtpTicketService implements OtpTicketService {
     private static final String FIELD_RECIPIENT             = "recipient";
     private static final String FIELD_PURPOSE               = "purpose";
     private static final String FIELD_OTP                   = "otp";
-    private static final String FIELD_CODE_CHALLENGE        = "code_challenge";
-    private static final String FIELD_CODE_CHALLENGE_METHOD = "code_challenge_method";
     private static final String FIELD_EXPIRES_AT            = "expires_at";
     private static final String FIELD_FAILURE_COUNT         = "failure_count";
     private static final String FIELD_CONSUMED              = "consumed";
@@ -84,12 +82,6 @@ public class RedisOtpTicketService implements OtpTicketService {
             fields.put(FIELD_PURPOSE, ticket.purpose());
         }
         fields.put(FIELD_OTP, ticket.otp());
-        if (ticket.codeChallenge() != null) {
-            fields.put(FIELD_CODE_CHALLENGE, ticket.codeChallenge());
-        }
-        if (ticket.codeChallengeMethod() != null) {
-            fields.put(FIELD_CODE_CHALLENGE_METHOD, ticket.codeChallengeMethod());
-        }
         fields.put(FIELD_EXPIRES_AT, Long.toString(ticket.expiresAt().toEpochMilli()));
         fields.put(FIELD_FAILURE_COUNT, Integer.toString(ticket.failureCount()));
         fields.put(FIELD_CONSUMED, ticket.consumed() ? "1" : "0");
@@ -102,7 +94,7 @@ public class RedisOtpTicketService implements OtpTicketService {
     }
 
     @Override
-    public OtpVerification consume(String ticketId, String codeVerifier, String otp, String expectedPurpose) {
+    public OtpVerification consume(String ticketId, String otp, String expectedPurpose) {
         if (ticketId == null) {
             return null;
         }
@@ -120,11 +112,10 @@ public class RedisOtpTicketService implements OtpTicketService {
         }
 
         boolean otpMatches = Objects.equals(ticket.otp(), otp);
-        boolean pkceMatches = OtpPkceVerifier.verify(codeVerifier, ticket.codeChallenge(), ticket.codeChallengeMethod());
         boolean purposeMatches = expectedPurpose == null
                 || Objects.equals(expectedPurpose, ticket.purpose());
 
-        if (otpMatches && pkceMatches && purposeMatches) {
+        if (otpMatches && purposeMatches) {
             Boolean deleted = this.redisTemplate.delete(key);
             if (Boolean.TRUE.equals(deleted)) {
                 return new OtpVerification(ticket.ticketId(), ticket.channel(), ticket.recipient(),
@@ -151,8 +142,6 @@ public class RedisOtpTicketService implements OtpTicketService {
                 stringValue(raw.get(FIELD_RECIPIENT)),
                 purpose,
                 stringValue(raw.get(FIELD_OTP)),
-                stringValue(raw.get(FIELD_CODE_CHALLENGE)),
-                stringValue(raw.get(FIELD_CODE_CHALLENGE_METHOD)),
                 expiresAt,
                 failureCount,
                 consumed);

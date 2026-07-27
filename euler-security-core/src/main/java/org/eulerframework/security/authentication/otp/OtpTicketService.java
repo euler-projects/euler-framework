@@ -18,16 +18,9 @@ package org.eulerframework.security.authentication.otp;
 /**
  * Persistence SPI for {@link OtpTicket}s.
  * <p>
- * An implementation is expected to:
- * <ol>
- *     <li>{@link #save(OtpTicket) Persist} a freshly-issued ticket so that it
- *         can be looked up later during verification.</li>
- *     <li>{@link #consume(String, String, String, String) Consume} a ticket
- *         when its holder presents the OTP value back. A correctly verified
- *         ticket must be removed (or marked as consumed) atomically so it
- *         cannot be reused; failed attempts must increment {@code failureCount}
- *         and discard the ticket once {@code maxFailures} is exceeded.</li>
- * </ol>
+ * Implementations persist issued tickets and later verify and consume them:
+ * a successfully verified ticket must never be reusable, and failed attempts
+ * must count towards the failure ceiling.
  *
  * @see InMemoryOtpTicketService
  * @see JdbcOtpTicketService
@@ -46,29 +39,19 @@ public interface OtpTicketService {
     /**
      * Atomically verify and consume a ticket.
      * <p>
-     * The verification must check, in this order:
-     * <ol>
-     *     <li>The ticket exists and has not expired or been previously
-     *         consumed.</li>
-     *     <li>The supplied {@code otp} matches the stored OTP value.</li>
-     *     <li>The supplied {@code codeVerifier}, when transformed using the
-     *         ticket's {@code codeChallengeMethod} (currently {@code S256}),
-     *         matches the stored {@code codeChallenge} (PKCE, RFC 7636).</li>
-     *     <li>If {@code expectedPurpose} is non-{@code null} it must equal the
-     *         ticket's stored purpose. A {@code null} value means "do not
-     *         enforce".</li>
-     * </ol>
-     * On any failure the implementation must increment the failure counter
-     * and, once {@link OtpPolicy#maxFailures()} is reached, invalidate the
-     * ticket. On success the ticket must be marked consumed atomically.
+     * Verification succeeds only when the ticket exists, has neither expired
+     * nor been consumed, the supplied {@code otp} matches the stored value,
+     * and - when {@code expectedPurpose} is non-{@code null} - the stored
+     * purpose equals it. On success the ticket must be invalidated atomically;
+     * on failure the failure counter must be incremented and the ticket
+     * discarded once the failure ceiling is reached.
      *
      * @param ticketId        the ticket id presented by the caller
-     * @param codeVerifier    PKCE {@code code_verifier} value
      * @param otp             the one-time password value submitted by the user
-     * @param expectedPurpose optional purpose that must match the ticket's
-     *                        stored purpose; pass {@code null} to skip the check
-     * @return an {@link OtpVerification} on success, or {@code null} if the
-     *         ticket is unknown / expired / mismatched
+     * @param expectedPurpose purpose that must match the stored purpose;
+     *                        {@code null} skips the check
+     * @return an {@link OtpVerification} on success, or {@code null} when the
+     *         ticket is unknown, expired or mismatched
      */
-    OtpVerification consume(String ticketId, String codeVerifier, String otp, String expectedPurpose);
+    OtpVerification consume(String ticketId, String otp, String expectedPurpose);
 }

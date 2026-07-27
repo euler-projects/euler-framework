@@ -23,13 +23,11 @@ import java.util.Collections;
 
 /**
  * {@link org.springframework.security.core.Authentication Authentication} token
- * representing an {@code POST /otp/tickets} request and its outcome.
+ * for an OTP ticket issue request.
  * <p>
- * In its <em>unauthenticated</em> form it carries the request parameters
- * extracted by {@code OtpTicketIssueAuthenticationConverter}. After
- * {@link OtpTicketIssueAuthenticationProvider} successfully issues a ticket,
- * the authenticated form additionally exposes the {@link OtpIssueResult} so
- * the endpoint filter can write the response body.
+ * The unauthenticated form carries the extracted request parameters; the
+ * authenticated form additionally exposes the {@link OtpIssueResult} used to
+ * build the response body.
  */
 public class OtpTicketIssueAuthenticationToken extends AbstractAuthenticationToken {
 
@@ -37,25 +35,21 @@ public class OtpTicketIssueAuthenticationToken extends AbstractAuthenticationTok
     private final String recipient;
     private final String identityId;
     private final String purpose;
-    private final String codeChallenge;
-    private final String codeChallengeMethod;
     private final OtpIssueResult issueResult;
 
     private OtpTicketIssueAuthenticationToken(String channel, String recipient, String identityId,
-                                              String purpose, String codeChallenge, String codeChallengeMethod) {
+                                              String purpose) {
         super(Collections.emptyList());
         this.channel = channel;
         this.recipient = recipient;
         this.identityId = identityId;
         this.purpose = purpose;
-        this.codeChallenge = codeChallenge;
-        this.codeChallengeMethod = codeChallengeMethod;
         this.issueResult = null;
         setAuthenticated(false);
     }
 
     private OtpTicketIssueAuthenticationToken(String channel, String recipient, String identityId,
-                                              String purpose, String codeChallenge, String codeChallengeMethod,
+                                              String purpose,
                                               OtpIssueResult issueResult,
                                               Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
@@ -63,8 +57,6 @@ public class OtpTicketIssueAuthenticationToken extends AbstractAuthenticationTok
         this.recipient = recipient;
         this.identityId = identityId;
         this.purpose = purpose;
-        this.codeChallenge = codeChallenge;
-        this.codeChallengeMethod = codeChallengeMethod;
         this.issueResult = issueResult;
         super.setAuthenticated(true);
     }
@@ -74,9 +66,8 @@ public class OtpTicketIssueAuthenticationToken extends AbstractAuthenticationTok
      */
     public static OtpTicketIssueAuthenticationToken unauthenticated(
             String channel, String recipient, String identityId,
-            String purpose, String codeChallenge, String codeChallengeMethod) {
-        return new OtpTicketIssueAuthenticationToken(channel, recipient, identityId,
-                purpose, codeChallenge, codeChallengeMethod);
+            String purpose) {
+        return new OtpTicketIssueAuthenticationToken(channel, recipient, identityId, purpose);
     }
 
     /**
@@ -84,11 +75,11 @@ public class OtpTicketIssueAuthenticationToken extends AbstractAuthenticationTok
      */
     public static OtpTicketIssueAuthenticationToken authenticated(
             String channel, String recipient, String identityId,
-            String purpose, String codeChallenge, String codeChallengeMethod,
+            String purpose,
             OtpIssueResult issueResult,
             Collection<? extends GrantedAuthority> authorities) {
         return new OtpTicketIssueAuthenticationToken(channel, recipient, identityId,
-                purpose, codeChallenge, codeChallengeMethod, issueResult, authorities);
+                purpose, issueResult, authorities);
     }
 
     @Override
@@ -116,14 +107,6 @@ public class OtpTicketIssueAuthenticationToken extends AbstractAuthenticationTok
 
     public String getPurpose() {
         return purpose;
-    }
-
-    public String getCodeChallenge() {
-        return codeChallenge;
-    }
-
-    public String getCodeChallengeMethod() {
-        return codeChallengeMethod;
     }
 
     public OtpIssueResult getIssueResult() {

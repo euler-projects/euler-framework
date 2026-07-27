@@ -27,7 +27,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
-import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,30 +42,15 @@ import java.util.Set;
  * Parses {@code POST /oauth2/token} form parameters when {@code grant_type=otp}
  * and builds an {@link OAuth2OtpAuthenticationToken}.
  * <p>
- * Required parameters: {@code otp_ticket}, {@code otp}; {@code code_verifier}
- * is required only when PKCE is enabled
- * ({@code euler.security.otp.pkce.enabled=true}). Optional: {@code scope}
+ * Required parameters: {@code otp_ticket}, {@code otp}. Optional: {@code scope}
  * (single, space-delimited).
  * <p>
- * Sensitive parameters ({@code otp}, {@code code_verifier}) are stripped from
- * {@code additionalParameters} so they cannot leak through audit / logging.
+ * The sensitive {@code otp} parameter is stripped from
+ * {@code additionalParameters} so it cannot leak through audit / logging.
  */
 public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter {
 
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
-
-    private final boolean pkceRequired;
-
-    /**
-     * Backwards-compatible constructor: PKCE required.
-     */
-    public OAuth2OtpAuthenticationConverter() {
-        this(true);
-    }
-
-    public OAuth2OtpAuthenticationConverter(boolean pkceRequired) {
-        this.pkceRequired = pkceRequired;
-    }
 
     @Override
     public Authentication convert(HttpServletRequest request) {
@@ -90,20 +74,6 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
             throw invalidRequest(EulerOAuth2ParameterNames.OTP);
         }
         parameters.remove(EulerOAuth2ParameterNames.OTP);
-
-        // code_verifier (REQUIRED when PKCE is enabled, PKCE - RFC 7636).
-        // Strip from parameters either way so it never leaks through
-        // additionalParameters into audit / logging.
-        String codeVerifier = parameters.getFirst(PkceParameterNames.CODE_VERIFIER);
-        if (this.pkceRequired && !StringUtils.hasText(codeVerifier)) {
-            throw invalidRequest(PkceParameterNames.CODE_VERIFIER);
-        }
-        if (!this.pkceRequired) {
-            // Don't carry a value the provider would forward to consume();
-            // null forces OtpPkceVerifier to skip the check.
-            codeVerifier = null;
-        }
-        parameters.remove(PkceParameterNames.CODE_VERIFIER);
 
         // scope (OPTIONAL)
         Set<String> scopes = null;
@@ -132,7 +102,6 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
                     !key.equals(EulerOAuth2ParameterNames.OTP_TICKET) &&
                     !key.equals(EulerOAuth2ParameterNames.OTP) &&
-                    !key.equals(PkceParameterNames.CODE_VERIFIER) &&
                     !key.equals(OAuth2ParameterNames.SCOPE)) {
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
@@ -149,7 +118,7 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
         }
 
         return new OAuth2OtpAuthenticationToken(
-                otpTicket, otp, codeVerifier,
+                otpTicket, otp,
                 clientPrincipal, scopes, additionalParameters);
     }
 

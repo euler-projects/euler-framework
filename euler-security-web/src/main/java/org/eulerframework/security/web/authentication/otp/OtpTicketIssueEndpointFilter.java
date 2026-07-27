@@ -46,13 +46,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Filter exposing the {@code POST /otp/tickets} endpoint that issues OTP tickets.
- * <p>
- * The endpoint is anonymous and CSRF-exempt. Requests are converted into an
- * {@link OtpTicketIssueAuthenticationToken} via the supplied
- * {@link AuthenticationConverter} and dispatched to an
- * {@link AuthenticationProvider}; the authenticated token's
- * {@link OtpIssueResult} populates the success body.
+ * Filter exposing the OTP ticket issue endpoint ({@code POST /otp/tickets} by
+ * default). The endpoint is anonymous and CSRF-exempt.
  *
  * <h2>Request parameters</h2>
  * <ul>
@@ -60,8 +55,6 @@ import java.util.Map;
  *     <li>{@code recipient} or {@code identity_id} (exactly one) - delivery target or
  *         the abstract identity to be resolved server-side</li>
  *     <li>{@code purpose} (optional) - opaque tag forwarded to the channel</li>
- *     <li>{@code code_challenge} (required) - PKCE code challenge</li>
- *     <li>{@code code_challenge_method} (required) - must be {@code S256}</li>
  * </ul>
  *
  * <h2>Success response (HTTP 200)</h2>
@@ -70,11 +63,10 @@ import java.util.Map;
  * </pre>
  *
  * <h2>Error responses</h2>
- * Each non-success outcome maps to a {@code error} / {@code error_description}
- * envelope; refer to the constants in this class for the mapping. OTP delivery
- * is dispatched asynchronously by the provider, so provider-side delivery
- * failures never surface here - the endpoint responds {@code 200} once the
- * ticket is persisted and the delivery has been handed off.
+ * Non-success outcomes map to an {@code error} / {@code error_description}
+ * envelope. Delivery is dispatched asynchronously, so the endpoint responds
+ * {@code 200} once the ticket is persisted; delivery failures never surface
+ * here.
  */
 public class OtpTicketIssueEndpointFilter extends OncePerRequestFilter {
 
@@ -118,9 +110,8 @@ public class OtpTicketIssueEndpointFilter extends OncePerRequestFilter {
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
                         ERROR_INVALID_REQUEST,
-                        "Missing or invalid parameters: channel, exactly one of " +
-                                "recipient/identity_id, and (when PKCE is enabled) " +
-                                "code_challenge with code_challenge_method=S256 are required");
+                        "Missing or invalid parameters: channel and exactly one of " +
+                                "recipient/identity_id are required");
                 return;
             }
 
