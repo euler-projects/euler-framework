@@ -75,13 +75,13 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
      * Aggregates every {@link LoginMethodContributor} bean in the
      * application context into a single flat list, exposed to the
      * shared login template as {@code loginMethods}. The template
-     * dispatches on {@link LoginMethodView#type()} to render each
+     * dispatches on {@link LoginMethodView#getType()} to render each
      * entry.
      *
      * <p>Ordering: contributor beans are iterated in Spring
      * {@link org.springframework.core.Ordered} order (via
      * {@link ObjectProvider#orderedStream()}); the flattened list is
-     * then stably sorted by {@link LoginMethodView#order()} so a
+     * then stably sorted by {@link LoginMethodView#getOrder()} so a
      * single contributor emitting multiple methods (e.g. several
      * OAuth2 IdPs) can control their relative position via the view's
      * own order field.
@@ -103,7 +103,7 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
             }
         });
         if (aggregated.size() > 1) {
-            aggregated.sort(Comparator.comparingInt(LoginMethodView::order));
+            aggregated.sort(Comparator.comparingInt(LoginMethodView::getOrder));
         }
         return Collections.unmodifiableList(aggregated);
     }

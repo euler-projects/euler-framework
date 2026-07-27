@@ -44,8 +44,8 @@ class LoginMethodConfigDrivenContributorTests {
 
         assertAll("both handlers invoked in map order",
                 () -> assertEquals(2, views.size()),
-                () -> assertEquals("google", views.get(0).id()),
-                () -> assertEquals("sms", views.get(1).id()),
+                () -> assertEquals("google", views.get(0).getId()),
+                () -> assertEquals("sms", views.get(1).getId()),
                 () -> assertEquals(List.of("google"), oauth2Handler.namesSeen),
                 () -> assertEquals(List.of("sms"), otpHandler.namesSeen));
     }
@@ -63,7 +63,7 @@ class LoginMethodConfigDrivenContributorTests {
         List<LoginMethodView> views = contributor.contribute();
 
         assertEquals(1, views.size());
-        assertEquals("google", views.get(0).id());
+        assertEquals("google", views.get(0).getId());
     }
 
     @Test

@@ -26,7 +26,7 @@ import java.util.List;
  * every {@code LoginMethodContributor} bean in the application context,
  * concatenates their contributions, and exposes the flattened list to
  * the login template as {@code loginMethods}. The template dispatches
- * per {@link LoginMethodView#type()} to render each entry.
+ * per {@link LoginMethodView#getType()} to render each entry.
  *
  * <p>Design notes:
  * <ul>
@@ -41,7 +41,7 @@ import java.util.List;
  *   <li>Ordering across contributors is controlled by Spring's
  *       {@code @Order} / {@code Ordered}. Ordering <em>within</em> a
  *       contributor's returned list is preserved verbatim, then broken
- *       by {@link LoginMethodView#order()} across the flattened list.</li>
+ *       by {@link LoginMethodView#getOrder()} across the flattened list.</li>
  *   <li>Password / username form is <strong>not</strong> a contribution;
  *       it is the login page's primary content and always renders (the
  *       form itself is disabled by omitting the module).</li>

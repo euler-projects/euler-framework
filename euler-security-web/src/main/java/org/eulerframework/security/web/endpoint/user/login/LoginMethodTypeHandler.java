@@ -38,34 +38,28 @@ import java.util.Map;
  * SPI stays intentionally narrow so that a new type can be a "just
  * publish two beans (a handler + a configurer)" affair without
  * expanding this interface.
- *
- * <h2>Contract</h2>
- * <ul>
- *   <li>{@link #type()} returns the stable, lower-case identifier used
- *       as the {@code type} value in the YAML (e.g. {@code "oauth2"}).
- *       Never {@code null} nor empty.</li>
- *   <li>{@link #toView(String, Map)} may return {@code null} to signal
- *       "the declaration is syntactically well-formed but presently
- *       unresolvable" (e.g. an OAuth2 method whose
- *       {@code oauth-client-registration-id} does not resolve to an
- *       existing {@code ClientRegistration}). The dispatcher treats
- *       {@code null} as "skip &mdash; do not render" and logs at
- *       {@code WARN}. This is preferred over throwing so a single
- *       misconfigured entry does not break the whole login page.</li>
- * </ul>
  */
 public interface LoginMethodTypeHandler {
 
     /**
-     * The {@code type} value this handler responds to (case-sensitive,
-     * matched against
-     * {@code euler.security.web.login-methods.<name>.type}).
+     * The stable identifier used as the {@code type} value in the YAML
+     * (e.g. {@code "oauth2"}), matched case-sensitively against
+     * {@code euler.security.web.login-methods.<name>.type}.
+     * Never {@code null} nor empty.
      */
     String type();
 
     /**
      * Produce a view model for the login method named {@code name} with
      * the raw {@code properties} bag as declared in configuration.
+     *
+     * <p>May return {@code null} to signal "the declaration is
+     * syntactically well-formed but presently unresolvable" (e.g. an
+     * OAuth2 method whose {@code oauth-client-registration-id} does not
+     * resolve to an existing {@code ClientRegistration}). The dispatcher
+     * treats {@code null} as "skip &mdash; do not render" and logs at
+     * {@code WARN}. This is preferred over throwing so a single
+     * misconfigured entry does not break the whole login page.
      *
      * @param name       the login-method key (map key under
      *                   {@code euler.security.web.login-methods}); useful

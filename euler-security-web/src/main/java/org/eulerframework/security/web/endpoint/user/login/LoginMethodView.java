@@ -25,48 +25,22 @@ import java.util.Objects;
  * login method (e.g. {@code oauth2:google}, {@code webauthn},
  * {@code otp:sms}). Produced by {@link LoginMethodContributor}s.
  *
- * <p>The template dispatches on {@link #type()}; unknown types are
+ * <p>The template dispatches on {@link #getType()}; unknown types are
  * silently ignored so that a project can ship an experimental method
  * without breaking the login page when the corresponding
  * template branch is missing.
  *
  * <p>Instances are immutable. Use {@link Builder} to construct.
- *
- * <h2>Field conventions</h2>
- * <ul>
- *   <li>{@link #type()} &mdash; a short stable identifier for the
- *       login-method family. Well-known values:
- *       {@code "oauth2"}, {@code "webauthn"}, {@code "otp"}.</li>
- *   <li>{@link #id()} &mdash; a stable identifier within the type
- *       (e.g. {@code "google"} for {@code oauth2:google}, or the OTP
- *       channel name for {@code otp:sms}). May be {@code null} for
- *       method families with a single entry (e.g. {@code webauthn}).</li>
- *   <li>{@link #href()} &mdash; absolute-path URL the anchor should
- *       point to. Nullable when the method is not link-based (e.g. a
- *       JS-driven Passkey button, in which case the template renders a
- *       {@code <button>} instead).</li>
- *   <li>{@link #displayName()} &mdash; short human-readable name of the
- *       provider (e.g. {@code "Google"}). Rendered as the {@code {0}}
- *       argument of the {@code _SIGN_IN_WITH} i18n message by
- *       convention.</li>
- *   <li>{@link #iconClass()} &mdash; optional CSS class that swaps the
- *       icon on the button (e.g. {@code "btn-oauth2-google"}).</li>
- *   <li>{@link #order()} &mdash; sort key across all contributions;
- *       lower values render first. Defaults to {@code 0}.</li>
- *   <li>{@link #attributes()} &mdash; free-form extension bag for
- *       template-specific data (e.g. {@code data-*} attributes a JS
- *       widget needs to bootstrap). Never {@code null}.</li>
- * </ul>
  */
 public final class LoginMethodView {
 
-    /** Well-known value for {@link #type()}: OAuth2 / OIDC redirect flow. */
+    /** Well-known value for {@link #getType()}: OAuth2 / OIDC redirect flow. */
     public static final String TYPE_OAUTH2 = "oauth2";
 
-    /** Well-known value for {@link #type()}: WebAuthn / Passkey. */
+    /** Well-known value for {@link #getType()}: WebAuthn / Passkey. */
     public static final String TYPE_WEBAUTHN = "webauthn";
 
-    /** Well-known value for {@link #type()}: OTP (SMS, email, TOTP, ...). */
+    /** Well-known value for {@link #getType()}: OTP (SMS, email, TOTP, ...). */
     public static final String TYPE_OTP = "otp";
 
     private final String type;
@@ -89,64 +63,63 @@ public final class LoginMethodView {
                 : Collections.unmodifiableMap(new LinkedHashMap<>(builder.attributes));
     }
 
-    public String type() {
-        return this.type;
-    }
-
-    public String id() {
-        return this.id;
-    }
-
-    public String href() {
-        return this.href;
-    }
-
-    public String displayName() {
-        return this.displayName;
-    }
-
-    public String iconClass() {
-        return this.iconClass;
-    }
-
-    public int order() {
-        return this.order;
-    }
-
-    public Map<String, String> attributes() {
-        return this.attributes;
-    }
-
-    /*
-     * Thymeleaf's default OGNL / Spring EL access uses JavaBean
-     * getters, not record-style accessors, so mirror both. The record
-     * shape stays available for programmatic use.
+    /**
+     * A short stable identifier for the login-method family. Well-known
+     * values: {@code "oauth2"}, {@code "webauthn"}, {@code "otp"}.
      */
-
     public String getType() {
         return this.type;
     }
 
+    /**
+     * A stable identifier within the type (e.g. {@code "google"} for
+     * {@code oauth2:google}, or the OTP channel name for {@code otp:sms}).
+     * May be {@code null} for method families with a single entry
+     * (e.g. {@code webauthn}).
+     */
     public String getId() {
         return this.id;
     }
 
+    /**
+     * Absolute-path URL the anchor should point to. Nullable when the
+     * method is not link-based (e.g. a JS-driven Passkey button, in which
+     * case the template renders a {@code <button>} instead).
+     */
     public String getHref() {
         return this.href;
     }
 
+    /**
+     * Short human-readable name of the provider (e.g. {@code "Google"}).
+     * Rendered as the {@code {0}} argument of the {@code _SIGN_IN_WITH}
+     * i18n message by convention.
+     */
     public String getDisplayName() {
         return this.displayName;
     }
 
+    /**
+     * Optional CSS class that swaps the icon on the button
+     * (e.g. {@code "btn-oauth2-google"}).
+     */
     public String getIconClass() {
         return this.iconClass;
     }
 
+    /**
+     * Sort key across all contributions; lower values render first.
+     * Defaults to {@code 0}.
+     */
     public int getOrder() {
         return this.order;
     }
 
+    /**
+     * Free-form extension bag for template-specific data (e.g.
+     * {@code data-*} attributes a JS widget needs to bootstrap).
+     * Never {@code null}.
+     */
     public Map<String, String> getAttributes() {
         return this.attributes;
     }

@@ -58,11 +58,11 @@ class OAuth2LoginMethodTypeHandlerTests {
                 "oauth-client-registration-id", "google"));
 
         assertThat(view).isNotNull();
-        assertThat(view.type()).isEqualTo("oauth2");
-        assertThat(view.id()).isEqualTo("google");
-        assertThat(view.href()).isEqualTo("/oauth2/authorization/google");
-        assertThat(view.displayName()).isEqualTo("Google");
-        assertThat(view.iconClass()).isEqualTo("btn-oauth2-google");
+        assertThat(view.getType()).isEqualTo("oauth2");
+        assertThat(view.getId()).isEqualTo("google");
+        assertThat(view.getHref()).isEqualTo("/oauth2/authorization/google");
+        assertThat(view.getDisplayName()).isEqualTo("Google");
+        assertThat(view.getIconClass()).isEqualTo("btn-oauth2-google");
     }
 
     @Test
@@ -73,8 +73,8 @@ class OAuth2LoginMethodTypeHandlerTests {
         LoginMethodView view = this.handler.toView("google", Map.of());
 
         assertThat(view).isNotNull();
-        assertThat(view.id()).isEqualTo("google");
-        assertThat(view.href()).isEqualTo("/oauth2/authorization/google");
+        assertThat(view.getId()).isEqualTo("google");
+        assertThat(view.getHref()).isEqualTo("/oauth2/authorization/google");
     }
 
     @Test
@@ -96,8 +96,8 @@ class OAuth2LoginMethodTypeHandlerTests {
                 "icon-class", "btn-oauth2-corp"));
 
         assertThat(view).isNotNull();
-        assertThat(view.displayName()).isEqualTo("Corp SSO");
-        assertThat(view.iconClass()).isEqualTo("btn-oauth2-corp");
+        assertThat(view.getDisplayName()).isEqualTo("Corp SSO");
+        assertThat(view.getIconClass()).isEqualTo("btn-oauth2-corp");
     }
 
     @Test

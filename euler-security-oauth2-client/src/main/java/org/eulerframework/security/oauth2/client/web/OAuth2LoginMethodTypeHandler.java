@@ -34,21 +34,7 @@ import java.util.Map;
  * {@link ClientRegistration} from
  * {@link ClientRegistrationRepository}.
  *
- * <h2>Supported {@code properties}</h2>
- * <ul>
- *   <li>{@link #PROP_OAUTH_CLIENT_REGISTRATION_ID}
- *       (default: the login-method key) &mdash; must equal the
- *       {@code registrationId} of an entry under
- *       {@code spring.security.oauth2.client.registration.<key>}. No
- *       field overriding &mdash; this is a pure reference.</li>
- *   <li>{@link #PROP_DISPLAY_NAME} (default:
- *       {@link ClientRegistration#getClientName()}) &mdash; label
- *       rendered next to the {@code _SIGN_IN_WITH} i18n message.</li>
- *   <li>{@link #PROP_ICON_CLASS} (default:
- *       {@code btn-oauth2-<oauthClientRegistrationId>}) &mdash; CSS
- *       class hook for provider artwork.</li>
- * </ul>
- * The other well-known properties ({@code auto-create-user},
+ * <p>The other well-known properties ({@code auto-create-user},
  * {@code default-authorities}, {@code identity-type}) are login-side
  * policy and are consumed by
  * {@code OAuth2LoginPrincipalPromotingSuccessHandler} rather than by
@@ -60,16 +46,25 @@ public class OAuth2LoginMethodTypeHandler implements LoginMethodTypeHandler {
     public static final String TYPE = LoginMethodView.TYPE_OAUTH2;
 
     /**
-     * Property key whose value equals the
-     * {@code registrationId} of the referenced
-     * {@code spring.security.oauth2.client.registration.<key>} entry.
+     * Property key whose value must equal the {@code registrationId} of
+     * an entry under
+     * {@code spring.security.oauth2.client.registration.<key>}. No field
+     * overriding &mdash; this is a pure reference. Defaults to the
+     * login-method key.
      */
     public static final String PROP_OAUTH_CLIENT_REGISTRATION_ID = "oauth-client-registration-id";
 
-    /** Property key for the login-page display label override. */
+    /**
+     * Property key for the label rendered next to the
+     * {@code _SIGN_IN_WITH} i18n message. Defaults to
+     * {@link ClientRegistration#getClientName()}.
+     */
     public static final String PROP_DISPLAY_NAME = "display-name";
 
-    /** Property key for the login-page icon CSS class override. */
+    /**
+     * Property key for the CSS class hook for provider artwork.
+     * Defaults to {@code btn-oauth2-<oauthClientRegistrationId>}.
+     */
     public static final String PROP_ICON_CLASS = "icon-class";
 
     /** Base URI for authorization requests, matches Spring Security's default. */
