@@ -15,78 +15,131 @@
  */
 package org.eulerframework.security.web.endpoint.user.login;
 
+import org.springframework.util.Assert;
+
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A single login-method declaration bound from
- * {@code euler.security.web.login-methods.<name>}.
+ * A login method offered to the client: the publishable projection of a
+ * {@link RegisteredLoginMethod}, produced by {@link LoginMethodHandler}s
+ * and aggregated by {@link LoginMethodContributor}s.
  *
- * <p>Top-level fields carry the {@code type} discriminator and the
- * cross-type login policy; the {@code properties} bag carries optional
- * type-specific settings interpreted by the
- * {@link LoginMethodTypeHandler} registered for the declared type.
+ * <p>Only resolved, publishable data appears here; server-side policy
+ * carried by the registration is never exposed. A registration that
+ * cannot currently be served (e.g. an OAuth2 client registration that
+ * is not defined) yields no instance at all.
+ *
+ * <p>Fields are purely semantic: they state what the method is, leaving
+ * every presentation and routing decision to the client. Submission
+ * targets are not published &mdash; clients either post to the
+ * login-method dispatch endpoint using {@link #getName() name}, or
+ * route to the underlying endpoints on their own. Type-specific
+ * semantics (e.g. the OAuth2 provider, the OTP channel) are published
+ * through {@link #getAttributes() attributes}.
+ *
+ * <p>Instances are immutable. Obtain a builder via
+ * {@link #withType(String)}.
  */
-public class LoginMethod {
+public final class LoginMethod {
 
-    private String type;
+    private final String type;
+    private final String name;
+    private final boolean primary;
+    private final Map<String, String> attributes;
 
-    /**
-     * Identity type established by this login method, stored as
-     * {@code t_user_identity.identity_type}. Defaults to the
-     * login-method key.
-     */
-    private String identityType;
-
-    /**
-     * Whether to provision a local user on first successful login when
-     * no matching local identity exists. Defaults to {@code true};
-     * when {@code false}, only already-known users can sign in.
-     */
-    private boolean autoCreateUser = true;
+    private LoginMethod(Builder builder) {
+        this.type = builder.type;
+        this.name = builder.name;
+        this.primary = builder.primary;
+        this.attributes = builder.attributes.isEmpty()
+                ? Collections.emptyMap()
+                : Collections.unmodifiableMap(new LinkedHashMap<>(builder.attributes));
+    }
 
     /**
-     * Authorities granted to an auto-provisioned user. Defaults to
-     * {@code user}; configured values replace the default. Must not be
-     * empty when {@code autoCreateUser} is {@code true}.
+     * Login-method family identifier, matching the {@code type()} of
+     * the {@link LoginMethodHandler} that produced this instance (e.g.
+     * {@code "password"}, {@code "oauth2"}, {@code "otp"}). Never
+     * {@code null}.
      */
-    private String[] defaultAuthorities = {"user"};
-
-    private final Map<String, Object> properties = new LinkedHashMap<>();
-
     public String getType() {
-        return type;
+        return this.type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    /**
+     * Unique name identifying this method towards clients: the
+     * declared {@code method-name}, or a handler-derived default (e.g.
+     * the OAuth2 provider, the OTP channel). Used as the method
+     * parameter value at the login-method dispatch endpoint.
+     */
+    public String getName() {
+        return this.name;
     }
 
-    public String getIdentityType() {
-        return identityType;
+    /**
+     * Whether this method belongs to the expanded (primary) group
+     * rather than the secondary group.
+     */
+    public boolean isPrimary() {
+        return this.primary;
     }
 
-    public void setIdentityType(String identityType) {
-        this.identityType = identityType;
+    /**
+     * Type-specific semantics resolved by the producing
+     * {@link LoginMethodHandler} (e.g. {@code provider} for oauth2,
+     * {@code channel} for otp). Values are curated, publishable
+     * results &mdash; never a passthrough of the registration's
+     * {@code properties}. Never {@code null}.
+     */
+    public Map<String, String> getAttributes() {
+        return this.attributes;
     }
 
-    public boolean isAutoCreateUser() {
-        return autoCreateUser;
+    /**
+     * Returns a builder with the mandatory {@code type} already set.
+     *
+     * @param type the login-method family identifier; must not be empty
+     */
+    public static Builder withType(String type) {
+        Assert.hasText(type, "type must not be empty");
+        return new Builder(type);
     }
 
-    public void setAutoCreateUser(boolean autoCreateUser) {
-        this.autoCreateUser = autoCreateUser;
-    }
+    /**
+     * A builder for {@link LoginMethod}. Obtain an instance via
+     * {@link LoginMethod#withType(String)}.
+     */
+    public static final class Builder {
 
-    public String[] getDefaultAuthorities() {
-        return defaultAuthorities;
-    }
+        private final String type;
+        private String name;
+        private boolean primary;
+        private final Map<String, String> attributes = new LinkedHashMap<>();
 
-    public void setDefaultAuthorities(String[] defaultAuthorities) {
-        this.defaultAuthorities = defaultAuthorities;
-    }
+        private Builder(String type) {
+            this.type = type;
+        }
 
-    public Map<String, Object> getProperties() {
-        return properties;
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder primary(boolean primary) {
+            this.primary = primary;
+            return this;
+        }
+
+        public Builder attribute(String key, String value) {
+            Assert.hasText(key, "key must not be empty");
+            this.attributes.put(key, value);
+            return this;
+        }
+
+        public LoginMethod build() {
+            return new LoginMethod(this);
+        }
     }
 }

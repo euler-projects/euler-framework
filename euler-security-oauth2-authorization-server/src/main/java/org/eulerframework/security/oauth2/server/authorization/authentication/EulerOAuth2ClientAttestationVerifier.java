@@ -136,7 +136,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
         if (this.appAttestAttestationRegistrationService == null) {
             throw attestationError(
                     "Single PoP JWT verification mode requires App Attest registration service; "
-                            + "enable euler.security.app-attest or provide both OAuth-Client-Attestation and OAuth-Client-Attestation-PoP headers");
+                            + "enable euler.security.authentication.app-attest or provide both OAuth-Client-Attestation and OAuth-Client-Attestation-PoP headers");
         }
 
         try {

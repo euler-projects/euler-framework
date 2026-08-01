@@ -270,7 +270,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
             }
             throw new AuthenticationServiceException(
                     "Attestation from development environment is not allowed; "
-                            + "set euler.security.app-attest.allow-development-environment=true to allow");
+                            + "set euler.security.authentication.app-attest.development-environment=true to allow");
         }
         throw new AuthenticationServiceException("Unrecognized AAGUID in attestation data");
     }

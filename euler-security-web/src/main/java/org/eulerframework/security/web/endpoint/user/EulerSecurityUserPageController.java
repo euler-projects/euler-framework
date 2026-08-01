@@ -15,9 +15,10 @@
  */
 package org.eulerframework.security.web.endpoint.user;
 
+import org.eulerframework.security.config.annotation.web.configurers.otp.OtpSecurityConfigurer;
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
+import org.eulerframework.security.web.endpoint.user.login.LoginMethod;
 import org.eulerframework.security.web.endpoint.user.login.LoginMethodContributor;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodView;
 import org.eulerframework.web.core.base.controller.PageRender;
 import org.eulerframework.web.core.base.controller.PageSupportWebController;
 import org.springframework.beans.factory.ObjectProvider;
@@ -27,9 +28,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -37,6 +38,10 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
     private String loginProcessingUrl;
     private String logoutProcessingUrl;
     private String loginSuccessRedirectParameter;
+    private String loginPageUrl;
+    private String loginMethodParameter;
+    private String loginMethodProcessingUrl;
+    private String otpIssueEndpointUri;
 
     private ObjectProvider<LoginMethodContributor> loginMethodContributorProvider;
 
@@ -71,41 +76,90 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
         return loginSuccessRedirectParameter;
     }
 
+    @ModelAttribute("loginPageUrl")
+    public String getLoginPageUrl() {
+        return loginPageUrl;
+    }
+
+    @ModelAttribute("loginMethodParameter")
+    public String getLoginMethodParameter() {
+        return loginMethodParameter;
+    }
+
+    @ModelAttribute("loginMethodProcessingUrl")
+    public String getLoginMethodProcessingUrl() {
+        return loginMethodProcessingUrl;
+    }
+
     /**
-     * Aggregates every {@link LoginMethodContributor} bean in the
-     * application context into a single flat list, exposed to the
-     * shared login template as {@code loginMethods}. The template
-     * dispatches on {@link LoginMethodView#getType()} to render each
-     * entry.
-     *
-     * <p>Ordering: contributor beans are iterated in Spring
-     * {@link org.springframework.core.Ordered} order (via
-     * {@link ObjectProvider#orderedStream()}); the flattened list is
-     * then stably sorted by {@link LoginMethodView#getOrder()} so a
-     * single contributor emitting multiple methods (e.g. several
-     * OAuth2 IdPs) can control their relative position via the view's
-     * own order field.
-     *
-     * <p>When no contributor bean is registered the model attribute
-     * is an empty list, so the template can call
-     * {@code loginMethods.isEmpty()} without null guards.
+     * The OTP issue endpoint, where a client asks for an
+     * {@code otp_ticket} before it can submit an OTP login. Exposed to
+     * the page because obtaining a ticket is a plain API call, not a
+     * login-method submission.
      */
-    @ModelAttribute("loginMethods")
-    public List<LoginMethodView> getLoginMethods() {
+    @ModelAttribute("otpIssueEndpointUri")
+    public String getOtpIssueEndpointUri() {
+        return otpIssueEndpointUri;
+    }
+
+    /**
+     * Aggregates every {@link LoginMethodContributor} bean into a
+     * single flat list, then splits into primary (expanded) and
+     * secondary (button) groups for the login template.
+     *
+     * <p>Split rule: if the request carries {@code _m=<name>}, only
+     * that method is rendered as primary (enabling the user to switch
+     * expanded method via GET); otherwise all methods declaring
+     * {@code primary=true} are primary. When no method declares
+     * primary, the first entry is promoted.
+     */
+    @ModelAttribute("primaryLoginMethods")
+    public List<LoginMethod> getPrimaryLoginMethods(HttpServletRequest request) {
+        List<LoginMethod> all = aggregateLoginMethods();
+        String selectedMethod = request.getParameter(this.loginMethodParameter);
+        return splitPrimary(all, selectedMethod);
+    }
+
+    @ModelAttribute("secondaryLoginMethods")
+    public List<LoginMethod> getSecondaryLoginMethods(HttpServletRequest request) {
+        List<LoginMethod> all = aggregateLoginMethods();
+        String selectedMethod = request.getParameter(this.loginMethodParameter);
+        return splitSecondary(all, selectedMethod);
+    }
+
+    private List<LoginMethod> aggregateLoginMethods() {
         if (this.loginMethodContributorProvider == null) {
             return Collections.emptyList();
         }
-        List<LoginMethodView> aggregated = new ArrayList<>();
+        List<LoginMethod> aggregated = new ArrayList<>();
         this.loginMethodContributorProvider.orderedStream().forEach(contributor -> {
-            List<LoginMethodView> views = contributor.contribute();
-            if (views != null && !views.isEmpty()) {
-                aggregated.addAll(views);
+            List<LoginMethod> contributed = contributor.contribute();
+            if (contributed != null && !contributed.isEmpty()) {
+                aggregated.addAll(contributed);
             }
         });
-        if (aggregated.size() > 1) {
-            aggregated.sort(Comparator.comparingInt(LoginMethodView::getOrder));
+        return aggregated;
+    }
+
+    private List<LoginMethod> splitPrimary(List<LoginMethod> all, String selectedMethod) {
+        if (all.isEmpty()) return Collections.emptyList();
+        if (selectedMethod != null && !selectedMethod.isEmpty()) {
+            return all.stream()
+                    .filter(v -> selectedMethod.equals(v.getName()))
+                    .toList();
         }
-        return Collections.unmodifiableList(aggregated);
+        List<LoginMethod> declared = all.stream().filter(LoginMethod::isPrimary).toList();
+        if (!declared.isEmpty()) return declared;
+        // No primary declared: first entry is promoted.
+        return List.of(all.get(0));
+    }
+
+    private List<LoginMethod> splitSecondary(List<LoginMethod> all, String selectedMethod) {
+        if (all.isEmpty()) return Collections.emptyList();
+        List<LoginMethod> primary = splitPrimary(all, selectedMethod);
+        return all.stream()
+                .filter(v -> !primary.contains(v))
+                .toList();
     }
 
     @Value("${" + EulerSecurityEndpoints.USER_LOGIN_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PROCESSING_URL + "}")
@@ -121,6 +175,31 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
     @Value("${" + EulerSecurityEndpoints.USER_LOGIN_SUCCESS_REDIRECT_PARAMETER_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_SUCCESS_REDIRECT_PARAMETER + "}")
     public void setLoginSuccessRedirectParameter(String loginSuccessRedirectParameter) {
         this.loginSuccessRedirectParameter = loginSuccessRedirectParameter;
+    }
+
+    @Value("${" + EulerSecurityEndpoints.USER_LOGIN_PAGE_PROP_NAME + ":" + EulerSecurityEndpoints.USER_LOGIN_PAGE + "}")
+    public void setLoginPageUrl(String loginPageUrl) {
+        this.loginPageUrl = loginPageUrl;
+    }
+
+    @Value("${" + EulerSecurityEndpoints.LOGIN_METHOD_DISPATCH_METHOD_PARAMETER_PROP_NAME + ":" + EulerSecurityEndpoints.LOGIN_METHOD_DISPATCH_METHOD_PARAMETER + "}")
+    public void setLoginMethodParameter(String loginMethodParameter) {
+        this.loginMethodParameter = loginMethodParameter;
+    }
+
+    @Value("${" + EulerSecurityEndpoints.LOGIN_METHOD_DISPATCH_PROCESSING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.LOGIN_METHOD_DISPATCH_PROCESSING_URL + "}")
+    public void setLoginMethodProcessingUrl(String loginMethodProcessingUrl) {
+        this.loginMethodProcessingUrl = loginMethodProcessingUrl;
+    }
+
+    /**
+     * Bound to the same key the OTP module reads, so the page always
+     * points at the endpoint actually serving tickets.
+     */
+    @Value("${euler.security.authentication.otp.issue-endpoint-uri:"
+            + OtpSecurityConfigurer.DEFAULT_ISSUE_ENDPOINT_URI + "}")
+    public void setOtpIssueEndpointUri(String otpIssueEndpointUri) {
+        this.otpIssueEndpointUri = otpIssueEndpointUri;
     }
 
     @Autowired(required = false)

@@ -398,6 +398,16 @@ textarea {
 }
 
 /*
+ * Wrapper for login methods that submit through the login-method
+ * dispatch endpoint: the form exists only to carry the POST (and its
+ * CSRF token), so it must not add vertical rhythm of its own - the
+ * button inside owns the spacing.
+ */
+.login-method-form {
+    margin: 0;
+}
+
+/*
  * Generic OAuth2 provider button. Icon and label sit next to each
  * other as a flex group and the group is horizontally centred, so
  * the brand mark visually anchors the label rather than floating on

@@ -35,6 +35,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -87,8 +88,7 @@ class OAuth2LoginPrincipalPromotingSuccessHandlerTests {
 
     @Test
     void hitsExistingIdentityAndPromotesToLocalUser() throws Exception {
-        this.handler.setPoliciesByRegistrationId(Map.of(
-                "google", new PerRegistrationLoginPolicy(true, List.of("user"), "google")));
+        configure("google", "google", JitProvisioningPolicy.enabled(List.of("user")));
         UserIdentity existing = UserIdentity.builder()
                 .identityId("i-1")
                 .identityType("google")
@@ -110,8 +110,7 @@ class OAuth2LoginPrincipalPromotingSuccessHandlerTests {
 
     @Test
     void autoProvisionsOnMissAndBindsIdentity() throws Exception {
-        this.handler.setPoliciesByRegistrationId(Map.of(
-                "google", new PerRegistrationLoginPolicy(true, List.of("user"), "google")));
+        configure("google", "google", JitProvisioningPolicy.enabled(List.of("user")));
         when(this.userIdentityService.findUserIdentityByRawSubject("google", "sub-new"))
                 .thenReturn(Optional.empty());
         when(this.userService.createUser(any(EulerUserDetails.class)))
@@ -138,8 +137,7 @@ class OAuth2LoginPrincipalPromotingSuccessHandlerTests {
 
     @Test
     void rejectsMissWhenPolicyDisablesAutoCreate() {
-        this.handler.setPoliciesByRegistrationId(Map.of(
-                "google", new PerRegistrationLoginPolicy(false, List.of(), "google")));
+        configure("google", "google", JitProvisioningPolicy.disabled());
         when(this.userIdentityService.findUserIdentityByRawSubject("google", "sub-x"))
                 .thenReturn(Optional.empty());
 
@@ -150,8 +148,7 @@ class OAuth2LoginPrincipalPromotingSuccessHandlerTests {
 
     @Test
     void policyIdentityTypeOverridesRegistrationId() throws Exception {
-        this.handler.setPoliciesByRegistrationId(Map.of(
-                "google", new PerRegistrationLoginPolicy(true, List.of("user"), "corp_google")));
+        configure("google", "corp_google", JitProvisioningPolicy.enabled(List.of("user")));
         UserIdentity existing = UserIdentity.builder()
                 .identityId("i-1")
                 .identityType("corp_google")
@@ -177,6 +174,17 @@ class OAuth2LoginPrincipalPromotingSuccessHandlerTests {
         assertThatThrownBy(() -> invoke(this.handler, "sub-y", Map.of("sub", "sub-y")))
                 .isInstanceOf(UserDetailsNotFoundException.class);
         verify(this.userService, never()).createUser(any(EulerUserDetails.class));
+    }
+
+    /**
+     * Wires the handler with a single registration-to-identity-type
+     * mapping and a resolver returning {@code policy} for that identity
+     * type.
+     */
+    private void configure(String registrationId, String identityType, JitProvisioningPolicy policy) {
+        this.handler.setIdentityTypesByRegistrationId(Map.of(registrationId, identityType));
+        this.handler.setJitProvisioningPolicyResolver(
+                requested -> identityType.equals(requested) ? policy : JitProvisioningPolicy.disabled());
     }
 
     private Authentication invoke(OAuth2LoginPrincipalPromotingSuccessHandler handler,

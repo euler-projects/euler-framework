@@ -26,6 +26,8 @@ import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.RandomUsernameGenerator;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
+import org.eulerframework.security.provisioning.JitProvisioningPolicyResolver;
 import org.eulerframework.security.util.UserDetailsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,6 @@ import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,18 +63,18 @@ import java.util.Map;
  * <h2>Flow</h2>
  * <ol>
  *   <li>Extract {@code registrationId} from the incoming
- *       {@link OAuth2AuthenticationToken} and look up its
- *       {@link PerRegistrationLoginPolicy}. Registrations without a
- *       policy fall back to the injected {@link #fallbackPolicy}
- *       (identity-type = registrationId, auto-create disabled).</li>
+ *       {@link OAuth2AuthenticationToken} and resolve its identity type
+ *       from the configured registration-to-identity-type mapping.
+ *       Unmapped registrations fall back to
+ *       {@code identityType=registrationId} with JIT provisioning
+ *       rejected, so a stray registration only signs in known users.</li>
  *   <li>Look the local user up via
  *       {@link UserIdentityService#findUserIdentityByRawSubject(String, String)}
- *       using the policy's {@code identityType} and the OAuth2
- *       principal's {@link OAuth2User#getName() name} (equals the
- *       IdP-issued {@code sub} for standard providers).</li>
- *   <li>On miss and when the policy's
- *       {@link PerRegistrationLoginPolicy#isAutoCreateUser()} is
- *       {@code true}: mint an opaque local username via
+ *       using the identity type and the OAuth2 principal's
+ *       {@link OAuth2User#getName() name} (equals the IdP-issued
+ *       {@code sub} for standard providers).</li>
+ *   <li>On miss and when the {@link JitProvisioningPolicy} resolved for
+ *       the identity type is enabled: mint an opaque local username via
  *       {@link RandomUsernameGenerator}, persist the user with the
  *       policy's {@code defaultAuthorities} and an unusable
  *       {@code {noop}} password, then persist the identity binding
@@ -109,7 +110,10 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
     private SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
 
-    private Map<String, PerRegistrationLoginPolicy> policiesByRegistrationId = Map.of();
+    private Map<String, String> identityTypesByRegistrationId = Map.of();
+
+    private JitProvisioningPolicyResolver jitProvisioningPolicyResolver =
+            identityType -> JitProvisioningPolicy.disabled();
 
     public OAuth2LoginPrincipalPromotingSuccessHandler(
             EulerUserService userService,
@@ -130,23 +134,34 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
                         + authentication.getClass().getName());
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
         String registrationId = token.getAuthorizedClientRegistrationId();
-        PerRegistrationLoginPolicy policy = resolvePolicy(registrationId);
+        String identityType = this.identityTypesByRegistrationId.get(registrationId);
+        boolean knownRegistration = identityType != null;
+        if (!knownRegistration) {
+            this.logger.debug("No identity type mapped for registrationId='{}'; "
+                    + "falling back to identityType={} with JIT provisioning rejected.",
+                    registrationId, registrationId);
+            identityType = registrationId;
+        }
+        JitProvisioningPolicy policy = knownRegistration
+                ? this.jitProvisioningPolicyResolver.resolve(identityType)
+                : JitProvisioningPolicy.disabled();
         OAuth2User principal = token.getPrincipal();
         String rawSubject = principal.getName();
         Assert.hasText(rawSubject, "OAuth2User#getName() must not be empty");
 
 
-        logger.debug("{}'s all attributes: {}", policy.getIdentityType(), principal.getAttributes());
+        logger.debug("{}'s all attributes: {}", identityType, principal.getAttributes());
 
+        String finalIdentityType = identityType;
         EulerUser localUser = this.userIdentityService
-                .findUserIdentityByRawSubject(policy.getIdentityType(), rawSubject)
+                .findUserIdentityByRawSubject(identityType, rawSubject)
                 .map(existingIdentity -> {
                     // Refresh the profile snapshot on every successful login
                     // so local data stays eventually consistent with the IdP.
                     updateIdentityProfile(existingIdentity, principal);
                     return this.userService.loadUserById(existingIdentity.getUserId());
                 })
-                .orElseGet(() -> autoProvisionOrThrow(policy, principal));
+                .orElseGet(() -> jitProvisionOrThrow(finalIdentityType, policy, principal));
 
         EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(localUser);
 
@@ -165,33 +180,14 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         this.delegate.onAuthenticationSuccess(request, response, promoted);
     }
 
-    /**
-     * Resolve the policy applied to {@code registrationId}. When no
-     * explicit entry is configured, synthesize a permissive fallback
-     * with {@code autoCreateUser=false} and
-     * {@code identityType=registrationId} so that missing configuration
-     * degrades to "recognise known users, reject unknown ones" rather
-     * than to a NullPointerException.
-     */
-    private PerRegistrationLoginPolicy resolvePolicy(String registrationId) {
-        PerRegistrationLoginPolicy policy = this.policiesByRegistrationId.get(registrationId);
-        if (policy != null) {
-            return policy;
-        }
-        this.logger.debug("No PerRegistrationLoginPolicy configured for registrationId='{}'; "
-                + "falling back to identityType={} with autoCreateUser=false.",
-                registrationId, registrationId);
-        return new PerRegistrationLoginPolicy(false, List.of(), registrationId);
-    }
-
-    private EulerUser autoProvisionOrThrow(PerRegistrationLoginPolicy policy, OAuth2User principal) {
-        if (!policy.isAutoCreateUser()) {
+    private EulerUser jitProvisionOrThrow(String identityType, JitProvisioningPolicy policy, OAuth2User principal) {
+        if (!policy.isEnabled()) {
             throw new UserDetailsNotFoundException(principal.getName());
         }
         EulerUserDetails seed = EulerUserDetails.builder()
                 .username(RandomUsernameGenerator.generate())
                 .password("{noop}" + StringUtils.randomString(RANDOM_PASSWORD_LENGTH))
-                .authorities(policy.getDefaultAuthorities().toArray(new String[0]))
+                .authorities(policy.defaultAuthoritiesArray())
                 .build();
         EulerUser createdUser = this.userService.createUser(seed);
         String userId = createdUser.getUserId();
@@ -200,7 +196,7 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
         Map<String, Object> extensions = buildProfileExtensions(principal);
 
         UserIdentity prototype = UserIdentity.withExtensions(extensions)
-                .identityType(policy.getIdentityType())
+                .identityType(identityType)
                 .build();
         this.userIdentityService.createUserIdentity(userId, prototype);
         return this.userService.loadUserById(userId);
@@ -275,15 +271,25 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
     }
 
     /**
-     * Configure the per-{@code registrationId} policy map. Typically
-     * assembled from
-     * {@code euler.security.web.login-methods.*} entries of {@code type=oauth2}
-     * by the autoconfigure layer.
+     * Configure the {@code registrationId -> identityType} mapping.
+     * Typically assembled from
+     * {@code euler.security.login-method.*} entries of
+     * {@code method-type=oauth2} by the autoconfigure layer. Unmapped
+     * registrations only sign in already-known users.
      */
-    public void setPoliciesByRegistrationId(
-            Map<String, PerRegistrationLoginPolicy> policiesByRegistrationId) {
-        this.policiesByRegistrationId = policiesByRegistrationId == null
-                ? Map.of() : Map.copyOf(policiesByRegistrationId);
+    public void setIdentityTypesByRegistrationId(Map<String, String> identityTypesByRegistrationId) {
+        this.identityTypesByRegistrationId = identityTypesByRegistrationId == null
+                ? Map.of() : Map.copyOf(identityTypesByRegistrationId);
+    }
+
+    /**
+     * Configure the resolver supplying the {@link JitProvisioningPolicy}
+     * for the identity type about to be provisioned. Defaults to
+     * rejecting every unknown subject.
+     */
+    public void setJitProvisioningPolicyResolver(JitProvisioningPolicyResolver jitProvisioningPolicyResolver) {
+        Assert.notNull(jitProvisioningPolicyResolver, "jitProvisioningPolicyResolver is required");
+        this.jitProvisioningPolicyResolver = jitProvisioningPolicyResolver;
     }
 
     /**

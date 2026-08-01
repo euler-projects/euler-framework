@@ -15,61 +15,99 @@
  */
 package org.eulerframework.security.web.endpoint.user.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LoginMethodConfigDrivenContributorTests {
 
     @Test
-    void dispatchesEachEntryToMatchingHandler() {
+    void dispatchesEachEntryToMatchingType() {
         RecordingHandler oauth2Handler = new RecordingHandler("oauth2");
         RecordingHandler otpHandler = new RecordingHandler("otp");
 
-        Map<String, LoginMethod> methods = new LinkedHashMap<>();
-        methods.put("google", method("oauth2", Map.of("k", "v1")));
-        methods.put("sms", method("otp", Map.of("channel", "sms")));
+        List<RegisteredLoginMethod> methods = List.of(
+                method("key-1", "oauth2", Map.of("k", "v1")),
+                method("key-2", "otp", Map.of("channel", "sms")));
 
         LoginMethodConfigDrivenContributor contributor =
                 new LoginMethodConfigDrivenContributor(List.of(oauth2Handler, otpHandler), () -> methods);
 
-        List<LoginMethodView> views = contributor.contribute();
+        List<LoginMethod> contributed = contributor.contribute();
 
-        assertAll("both handlers invoked in map order",
-                () -> assertEquals(2, views.size()),
-                () -> assertEquals("google", views.get(0).getId()),
-                () -> assertEquals("sms", views.get(1).getId()),
-                () -> assertEquals(List.of("google"), oauth2Handler.namesSeen),
-                () -> assertEquals(List.of("sms"), otpHandler.namesSeen));
+        assertAll("both types invoked in declaration order under derived names",
+                () -> assertEquals(2, contributed.size()),
+                () -> assertEquals("oauth2", contributed.get(0).getName()),
+                () -> assertEquals("otp", contributed.get(1).getName()),
+                () -> assertEquals(List.of("oauth2"), oauth2Handler.namesSeen),
+                () -> assertEquals(List.of("otp"), otpHandler.namesSeen));
+    }
+
+    @Test
+    void declaredMethodNameTakesPrecedenceOverDerivation() {
+        RecordingHandler oauth2Handler = new RecordingHandler("oauth2");
+        List<RegisteredLoginMethod> methods = List.of(
+                RegisteredLoginMethod.withId("some-uuid").type("oauth2").name("corp-sso").build());
+
+        LoginMethodConfigDrivenContributor contributor =
+                new LoginMethodConfigDrivenContributor(List.of(oauth2Handler), () -> methods);
+
+        List<LoginMethod> contributed = contributor.contribute();
+
+        assertEquals(1, contributed.size());
+        assertEquals("corp-sso", contributed.get(0).getName());
+        assertNotNull(contributor.resolve("corp-sso"));
+        assertNull(contributor.resolve("some-uuid"));
+    }
+
+    @Test
+    void duplicateEffectiveNameFailsFast() {
+        RecordingHandler oauth2Handler = new RecordingHandler("oauth2");
+        List<RegisteredLoginMethod> methods = List.of(
+                method("key-1", "oauth2", Map.of()),
+                method("key-2", "oauth2", Map.of()));
+
+        LoginMethodConfigDrivenContributor contributor =
+                new LoginMethodConfigDrivenContributor(List.of(oauth2Handler), () -> methods);
+
+        assertThrows(IllegalStateException.class, contributor::contribute);
+    }
+
+    @Test
+    void underivableNameIsSkipped() {
+        NamelessHandler namelessHandler = new NamelessHandler("oauth2");
+        List<RegisteredLoginMethod> methods = List.of(method("key-1", "oauth2", Map.of()));
+
+        LoginMethodConfigDrivenContributor contributor =
+                new LoginMethodConfigDrivenContributor(List.of(namelessHandler), () -> methods);
+
+        assertTrue(contributor.contribute().isEmpty());
     }
 
     @Test
     void unknownTypeIsSkippedWithoutFailing() {
         RecordingHandler oauth2Handler = new RecordingHandler("oauth2");
-        Map<String, LoginMethod> methods = new LinkedHashMap<>();
-        methods.put("google", method("oauth2", Map.of()));
-        methods.put("mystery", method("mystery-type", Map.of()));
+        List<RegisteredLoginMethod> methods = List.of(
+                method("key-1", "oauth2", Map.of()),
+                method("key-2", "mystery-type", Map.of()));
 
         LoginMethodConfigDrivenContributor contributor =
                 new LoginMethodConfigDrivenContributor(List.of(oauth2Handler), () -> methods);
 
-        List<LoginMethodView> views = contributor.contribute();
+        List<LoginMethod> contributed = contributor.contribute();
 
-        assertEquals(1, views.size());
-        assertEquals("google", views.get(0).getId());
+        assertEquals(1, contributed.size());
+        assertEquals("oauth2", contributed.get(0).getName());
     }
 
     @Test
     void handlerReturningNullIsSkipped() {
         NullReturningHandler nullHandler = new NullReturningHandler("oauth2");
-        Map<String, LoginMethod> methods = Map.of("google", method("oauth2", Map.of()));
+        List<RegisteredLoginMethod> methods = List.of(method("key-1", "oauth2", Map.of()));
 
         LoginMethodConfigDrivenContributor contributor =
                 new LoginMethodConfigDrivenContributor(List.of(nullHandler), () -> methods);
@@ -78,47 +116,67 @@ class LoginMethodConfigDrivenContributorTests {
     }
 
     @Test
-    void emptyMapProducesEmptyList() {
+    void emptyConfigSynthesizesDefaultPassword() {
+        RecordingHandler passwordHandler = new RecordingHandler("password");
         LoginMethodConfigDrivenContributor contributor =
-                new LoginMethodConfigDrivenContributor(List.of(), Map::of);
-        assertTrue(contributor.contribute().isEmpty());
+                new LoginMethodConfigDrivenContributor(List.of(passwordHandler), List::of);
+
+        List<LoginMethod> contributed = contributor.contribute();
+
+        assertEquals(1, contributed.size());
+        assertEquals("password", contributed.get(0).getName());
+        assertEquals(List.of("password"), passwordHandler.namesSeen);
     }
 
     @Test
-    void entryWithoutTypeIsSkipped() {
-        Map<String, LoginMethod> methods = new LinkedHashMap<>();
-        LoginMethod incomplete = new LoginMethod();
-        // no type set
-        methods.put("bad", incomplete);
-        LoginMethodConfigDrivenContributor contributor =
-                new LoginMethodConfigDrivenContributor(List.of(), () -> methods);
-
-        assertTrue(contributor.contribute().isEmpty());
+    void registrationWithoutIdOrTypeIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> RegisteredLoginMethod.withId(""));
+        assertThrows(IllegalArgumentException.class, () -> RegisteredLoginMethod.withId("key-1").build());
     }
 
     @Test
-    void duplicateHandlerForSameTypeFailsFast() {
+    void duplicateTypeFailsFast() {
         RecordingHandler a = new RecordingHandler("oauth2");
         RecordingHandler b = new RecordingHandler("oauth2");
         assertThrows(IllegalStateException.class,
-                () -> new LoginMethodConfigDrivenContributor(List.of(a, b), Map::of));
+                () -> new LoginMethodConfigDrivenContributor(List.of(a, b), List::of));
+    }
+
+    @Test
+    void resolveReturnsNullForUnknownName() {
+        RecordingHandler passwordHandler = new RecordingHandler("password");
+        LoginMethodConfigDrivenContributor contributor =
+                new LoginMethodConfigDrivenContributor(List.of(passwordHandler), List::of);
+
+        assertNull(contributor.resolve("nonexistent"));
+    }
+
+    @Test
+    void resolveReturnsEntryForKnownName() {
+        RecordingHandler oauth2Handler = new RecordingHandler("oauth2");
+        List<RegisteredLoginMethod> methods = List.of(method("some-uuid", "oauth2", Map.of()));
+
+        LoginMethodConfigDrivenContributor contributor =
+                new LoginMethodConfigDrivenContributor(List.of(oauth2Handler), () -> methods);
+
+        LoginMethodConfigDrivenContributor.ResolvedLoginMethod resolved = contributor.resolve("oauth2");
+        assertNotNull(resolved);
+        assertEquals("oauth2", resolved.name());
+        assertEquals("some-uuid", resolved.method().getId());
+        assertEquals("oauth2", resolved.method().getType());
+        assertSame(oauth2Handler, resolved.handler());
     }
 
     // ---- helpers ----
 
-    private static LoginMethod method(String type, Map<String, Object> properties) {
-        LoginMethod method = new LoginMethod();
-        method.setType(type);
-        method.getProperties().putAll(properties);
-        return method;
+    private static RegisteredLoginMethod method(String id, String type, Map<String, Object> properties) {
+        return RegisteredLoginMethod.withId(id)
+                .type(type)
+                .properties(properties)
+                .build();
     }
 
-    /**
-     * A {@link LoginMethodTypeHandler} that emits a minimal view whose
-     * {@code id} equals the login-method name, so the dispatcher's
-     * invocation order can be asserted from the returned list.
-     */
-    private static final class RecordingHandler implements LoginMethodTypeHandler {
+    private static final class RecordingHandler implements LoginMethodHandler {
         private final String type;
         final List<String> namesSeen = new java.util.ArrayList<>();
 
@@ -132,13 +190,18 @@ class LoginMethodConfigDrivenContributorTests {
         }
 
         @Override
-        public LoginMethodView toView(String name, Map<String, Object> properties) {
+        public LoginMethod describe(String name, RegisteredLoginMethod method) {
             namesSeen.add(name);
-            return LoginMethodView.builder(this.type).id(name).build();
+            return LoginMethod.withType(this.type).name(name).build();
+        }
+
+        @Override
+        public LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request) {
+            return LoginMethodDispatch.notImplemented();
         }
     }
 
-    private static final class NullReturningHandler implements LoginMethodTypeHandler {
+    private static final class NullReturningHandler implements LoginMethodHandler {
         private final String type;
 
         NullReturningHandler(String type) {
@@ -151,8 +214,41 @@ class LoginMethodConfigDrivenContributorTests {
         }
 
         @Override
-        public LoginMethodView toView(String name, Map<String, Object> properties) {
+        public LoginMethod describe(String name, RegisteredLoginMethod method) {
             return null;
+        }
+
+        @Override
+        public LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request) {
+            return LoginMethodDispatch.notImplemented();
+        }
+    }
+
+    private static final class NamelessHandler implements LoginMethodHandler {
+        private final String type;
+
+        NamelessHandler(String type) {
+            this.type = type;
+        }
+
+        @Override
+        public String type() {
+            return type;
+        }
+
+        @Override
+        public String resolveName(RegisteredLoginMethod method) {
+            return null;
+        }
+
+        @Override
+        public LoginMethod describe(String name, RegisteredLoginMethod method) {
+            return LoginMethod.withType(this.type).name(name).build();
+        }
+
+        @Override
+        public LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request) {
+            return LoginMethodDispatch.notImplemented();
         }
     }
 }

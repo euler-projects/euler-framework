@@ -60,6 +60,7 @@ import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsServic
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
 
 /**
  * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type.
@@ -88,19 +89,23 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
     private final EulerDeviceUserDetailsService userDetailsService;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
+    private final JitProvisioningPolicy jitProvisioning;
 
     private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
     public OAuth2AppAssertionAuthenticationProvider(
             EulerDeviceUserDetailsService userDetailsService,
             OAuth2AuthorizationService authorizationService,
-            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
+            JitProvisioningPolicy jitProvisioning) {
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
+        Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
         this.userDetailsService = userDetailsService;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
+        this.jitProvisioning = jitProvisioning;
     }
 
     public void setUserDetailsChecker(UserDetailsChecker userDetailsChecker) {
@@ -146,11 +151,17 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFoundException e) {
-            // First-time use: auto-create anonymous user
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("User not found for keyId '{}', creating new anonymous user", verifiedAppRegistration.getKeyId());
+            if (!this.jitProvisioning.isEnabled()) {
+                throw new OAuth2AuthenticationException(new OAuth2Error(
+                        OAuth2ErrorCodes.INVALID_GRANT,
+                        "unknown device and JIT provisioning is disabled", ERROR_URI));
             }
-            user = this.userDetailsService.createUser(attestUser);
+            // First-time use: JIT-provision an anonymous user
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("User not found for keyId '{}', provisioning new anonymous user", verifiedAppRegistration.getKeyId());
+            }
+            user = this.userDetailsService.createUser(attestUser,
+                    this.jitProvisioning.getDefaultAuthorities());
         }
 
         this.userDetailsChecker.check(user);

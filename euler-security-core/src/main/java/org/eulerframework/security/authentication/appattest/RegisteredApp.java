@@ -29,7 +29,7 @@ import java.util.Objects;
  * <ul>
  *   <li>{@link #getId() id} &mdash; the internal registration identifier ({@code
  *       registrationId}); the business-side primary key and also the key of the
- *       {@code euler.security.app-attest.apps} configuration map.</li>
+ *       {@code euler.security.authentication.app-attest.apps} configuration map.</li>
  *   <li>{@link #getAppId() appId} &mdash; the external identity formed by concatenating
  *       {@link #getTeamId() teamId} and {@link #getBundleId() bundleId} with a dot
  *       separator ({@code teamId.bundleId}); aligned with an OAuth2 client's

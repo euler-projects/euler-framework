@@ -19,53 +19,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * Generic {@link LoginMethodContributor} that iterates the declared
- * {@code euler.security.web.login-methods} map, dispatches each entry
- * to the {@link LoginMethodTypeHandler} matching its {@code type}, and
- * returns the resulting flat list of {@link LoginMethodView}s.
+ * Generic {@link LoginMethodContributor} that iterates the supplied
+ * {@link RegisteredLoginMethod}s, delegates each one to the
+ * {@link LoginMethodHandler} matching its {@code type}, and returns the
+ * resulting flat list of {@link LoginMethod}s.
  *
- * <p>Handlers are indexed by {@link LoginMethodTypeHandler#type()} on
- * construction. Entries whose {@code type} has no matching handler are
- * logged at {@code WARN} and skipped (typical when a feature module is
- * not on the classpath, e.g. {@code type: passkey} without the
- * WebAuthn module). Entries whose handler returns {@code null} are
- * also silently skipped &mdash; the handler is expected to have logged
- * the reason.
+ * <p>When no registration is supplied, a default {@code password}
+ * registration is synthesized so at least one login method is always
+ * available.
  *
- * <p>The login-methods map is supplied through a {@link Supplier} so
- * that this bean can be created before the properties object is fully
- * populated (in practice Spring resolves the supplier at first
- * contribute() call).
+ * <p>Each registration is exposed under its effective name: the
+ * declared {@code method-name}, or the handler-derived default
+ * ({@link LoginMethodHandler#resolveName}). The registry key is a
+ * storage concern (it may be an opaque id) and is never published.
+ * Effective names must be unique; duplicates fail fast.
+ *
+ * <p>Also exposes a {@link #resolve(String)} method for the routing
+ * filter to look up a registered method by its effective name.
  */
 public class LoginMethodConfigDrivenContributor implements LoginMethodContributor {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final Map<String, LoginMethodTypeHandler> handlersByType;
-    private final Supplier<Map<String, LoginMethod>> loginMethodsSupplier;
+    private final Map<String, LoginMethodHandler> handlersByType;
+    private final Supplier<Collection<RegisteredLoginMethod>> loginMethodsSupplier;
 
     public LoginMethodConfigDrivenContributor(
-            List<LoginMethodTypeHandler> handlers,
-            Supplier<Map<String, LoginMethod>> loginMethodsSupplier) {
+            List<LoginMethodHandler> handlers,
+            Supplier<Collection<RegisteredLoginMethod>> loginMethodsSupplier) {
         Assert.notNull(handlers, "handlers is required");
         Assert.notNull(loginMethodsSupplier, "loginMethodsSupplier is required");
-        Map<String, LoginMethodTypeHandler> index = new HashMap<>(handlers.size());
-        for (LoginMethodTypeHandler handler : handlers) {
-            String type = handler.type();
-            Assert.hasText(type, () -> "LoginMethodTypeHandler#type() returned blank on "
+        Map<String, LoginMethodHandler> index = new HashMap<>(handlers.size());
+        for (LoginMethodHandler handler : handlers) {
+            String typeName = handler.type();
+            Assert.hasText(typeName, () -> "LoginMethodHandler#type() returned blank on "
                     + handler.getClass().getName());
-            LoginMethodTypeHandler previous = index.put(type, handler);
+            LoginMethodHandler previous = index.put(typeName, handler);
             if (previous != null) {
-                throw new IllegalStateException("Duplicate LoginMethodTypeHandler for type='"
-                        + type + "': " + previous.getClass().getName() + " and "
+                throw new IllegalStateException("Duplicate LoginMethodHandler for type='"
+                        + typeName + "': " + previous.getClass().getName() + " and "
                         + handler.getClass().getName());
             }
         }
@@ -74,34 +70,84 @@ public class LoginMethodConfigDrivenContributor implements LoginMethodContributo
     }
 
     @Override
-    public List<LoginMethodView> contribute() {
-        Map<String, LoginMethod> loginMethods = this.loginMethodsSupplier.get();
-        if (loginMethods == null || loginMethods.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<LoginMethodView> views = new ArrayList<>(loginMethods.size());
-        for (Map.Entry<String, LoginMethod> entry : loginMethods.entrySet()) {
-            String name = entry.getKey();
-            LoginMethod method = entry.getValue();
-            if (method == null || method.getType() == null || method.getType().isEmpty()) {
-                this.logger.warn("Login method '{}' has no 'type' declared; skipping.", name);
+    public List<LoginMethod> contribute() {
+        Map<String, ResolvedLoginMethod> byName = indexByName();
+        List<LoginMethod> methods = new ArrayList<>(byName.size());
+        for (ResolvedLoginMethod resolved : byName.values()) {
+            LoginMethod described = resolved.handler().describe(resolved.name(), resolved.method());
+            if (described == null) {
                 continue;
             }
-            LoginMethodTypeHandler handler = this.handlersByType.get(method.getType());
+            methods.add(described);
+        }
+        return Collections.unmodifiableList(methods);
+    }
+
+    /**
+     * Resolves a login method by its effective name for use by the
+     * routing filter. Returns {@code null} if the name is unknown.
+     */
+    public ResolvedLoginMethod resolve(String name) {
+        return indexByName().get(name);
+    }
+
+    /**
+     * Indexes every usable registration by its effective name.
+     *
+     * @throws IllegalStateException if two registrations resolve to the
+     *                               same name
+     */
+    private Map<String, ResolvedLoginMethod> indexByName() {
+        Collection<RegisteredLoginMethod> loginMethods = resolveLoginMethods();
+        Map<String, ResolvedLoginMethod> index = new LinkedHashMap<>(loginMethods.size());
+        for (RegisteredLoginMethod method : loginMethods) {
+            if (method == null) {
+                continue;
+            }
+            LoginMethodHandler handler = this.handlersByType.get(method.getType());
             if (handler == null) {
-                this.logger.warn("Login method '{}' declares type='{}' but no LoginMethodTypeHandler "
+                this.logger.warn("Login method '{}' declares type='{}' but no LoginMethodHandler "
                         + "is registered for that type; skipping. Registered types: {}",
-                        name, method.getType(), this.handlersByType.keySet());
+                        method.getId(), method.getType(), this.handlersByType.keySet());
                 continue;
             }
-            LoginMethodView view = handler.toView(name, method.getProperties());
-            if (view == null) {
-                // Handler already logged the reason; suppress here to
-                // avoid duplicate log lines.
+            String name = method.getName();
+            if (name == null || name.isEmpty()) {
+                name = handler.resolveName(method);
+            }
+            if (name == null || name.isEmpty()) {
+                this.logger.warn("Login method '{}' declares no method-name and none could be "
+                        + "derived; skipping.", method.getId());
                 continue;
             }
-            views.add(view);
+            ResolvedLoginMethod previous = index.put(name, new ResolvedLoginMethod(name, method, handler));
+            if (previous != null) {
+                throw new IllegalStateException("Duplicate login method name '" + name
+                        + "' (registrations '" + previous.method().getId() + "' and '"
+                        + method.getId() + "'): declare a distinct method-name on one of them.");
+            }
         }
-        return Collections.unmodifiableList(views);
+        return index;
+    }
+
+    private Collection<RegisteredLoginMethod> resolveLoginMethods() {
+        Collection<RegisteredLoginMethod> loginMethods = this.loginMethodsSupplier.get();
+        if (loginMethods == null || loginMethods.isEmpty()) {
+            // Synthesize a default password method so the login page
+            // always renders at least the password form.
+            return List.of(RegisteredLoginMethod
+                    .withId(PasswordLoginMethodHandler.TYPE)
+                    .type(PasswordLoginMethodHandler.TYPE)
+                    .primary(true)
+                    .build());
+        }
+        return loginMethods;
+    }
+
+    /**
+     * A registration resolved to its effective name and handler, used
+     * by the routing filter to perform dispatch.
+     */
+    public record ResolvedLoginMethod(String name, RegisteredLoginMethod method, LoginMethodHandler handler) {
     }
 }

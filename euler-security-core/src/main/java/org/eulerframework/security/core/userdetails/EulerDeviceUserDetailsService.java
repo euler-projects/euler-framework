@@ -19,6 +19,8 @@ package org.eulerframework.security.core.userdetails;
 
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
 
+import java.util.List;
+
 /**
  * Service interface for loading and creating user details based on Apple App Attest identities.
  * <p>
@@ -39,19 +41,23 @@ public interface EulerDeviceUserDetailsService {
     /**
      * Create a new user account associated with the given Apple App Attest identity.
      * <p>
-     * This method is called when auto-user-creation is enabled during the attestation
-     * (device registration) flow and no existing user is found.
+     * This method is called during the attestation (device registration) flow when
+     * just-in-time provisioning is enabled and no existing user is found.
      *
      * @param appAttestUser the validated App Attest user containing the device key ID
+     * @param authorities   authorities to grant, supplied by the caller's just-in-time
+     *                      provisioning policy; never empty. Implementations must
+     *                      persist these verbatim rather than choosing authorities
+     *                      themselves.
      * @return the newly created user details
      */
-    EulerUserDetails createUser(AppAttestUser appAttestUser);
+    EulerUserDetails createUser(AppAttestUser appAttestUser, List<String> authorities);
 
     /**
      * Bind the device identified by {@code appAttestUser} to an EXISTING user.
      * <p>
-     * Unlike {@link #createUser(AppAttestUser)}, this method does NOT create a new
-     * user; it only persists the {@code device -> user} mapping. It is used by flows
+     * Unlike {@link #createUser(AppAttestUser, List)}, this method does NOT create a
+     * new user; it only persists the {@code device -> user} mapping. It is used by flows
      * (notably the OTP token grant) where the user has already been resolved through
      * a different channel (e.g. by a verified factor binding) and the request also
      * carries a verified App Attest identity that must be associated with that user

@@ -4,6 +4,7 @@ import org.eulerframework.common.http.*;
 import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -34,7 +35,7 @@ public class WechatAuthorizationCodeAuthenticationProvider
 
     private boolean forcePrincipalAsString = false;
 
-    protected boolean autoCreateUserIfNotExists = false;
+    protected JitProvisioningPolicy jitProvisioning = JitProvisioningPolicy.disabled();
 
     private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
 
@@ -110,11 +111,12 @@ public class WechatAuthorizationCodeAuthenticationProvider
             user = this.wechatUserDetailsService.loadUserByWechatUser(wechatUser);
         } catch (UserDetailsNotFoundException ex) {
             this.logger.debug("Failed to find user with open ID '" + wechatUser.getOpenId() + "'");
-            if (!this.autoCreateUserIfNotExists) {
+            if (!this.jitProvisioning.isEnabled()) {
                 throw ex;
             }
 
-            user = this.wechatUserDetailsService.createUser(wechatUser);
+            user = this.wechatUserDetailsService.createUser(wechatUser,
+                    this.jitProvisioning.getDefaultAuthorities());
         }
 
         this.postAuthenticationChecks.check(user);
@@ -140,16 +142,21 @@ public class WechatAuthorizationCodeAuthenticationProvider
         return this.forcePrincipalAsString;
     }
 
-    public boolean isAutoCreateUserIfNotExists() {
-        return autoCreateUserIfNotExists;
+    /**
+     * The just-in-time provisioning policy applied when the WeChat open
+     * ID resolves to no existing user.
+     */
+    public JitProvisioningPolicy getJitProvisioning() {
+        return jitProvisioning;
     }
 
     public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
         this.forcePrincipalAsString = forcePrincipalAsString;
     }
 
-    public void setAutoCreateUserIfNotExists(boolean autoCreateUserIfNotExists) {
-        this.autoCreateUserIfNotExists = autoCreateUserIfNotExists;
+    public void setJitProvisioning(JitProvisioningPolicy jitProvisioning) {
+        Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
+        this.jitProvisioning = jitProvisioning;
     }
 
     public void setWechatUserDetailsService(EulerWechatUserDetailsService wechatUserDetailsService) {

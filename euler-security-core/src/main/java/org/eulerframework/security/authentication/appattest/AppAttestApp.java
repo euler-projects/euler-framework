@@ -23,7 +23,7 @@ package org.eulerframework.security.authentication.appattest;
  * <ul>
  *   <li>{@link #getRegistrationId() registrationId} &mdash; the internal business
  *       primary key; also aligned with the map key of
- *       {@code euler.security.app-attest.apps} configuration.</li>
+ *       {@code euler.security.authentication.app-attest.apps} configuration.</li>
  *   <li>{@link #getAppId() appId} &mdash; the external identity derived from
  *       {@code teamId + "." + bundleId}; aligned with an OAuth2 client's
  *       {@code clientId}. Its SHA-256 digest is used as the RP ID hash in the
@@ -51,7 +51,7 @@ public interface AppAttestApp {
     /**
      * Returns the internal registration identifier for this app.
      * <p>
-     * Aligned with the map key of the {@code euler.security.app-attest.apps}
+     * Aligned with the map key of the {@code euler.security.authentication.app-attest.apps}
      * configuration.
      *
      * @return the registration id

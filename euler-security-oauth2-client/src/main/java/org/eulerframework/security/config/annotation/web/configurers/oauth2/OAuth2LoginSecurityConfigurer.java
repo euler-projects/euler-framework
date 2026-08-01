@@ -44,10 +44,10 @@ import org.springframework.util.Assert;
  * the application context; when neither is available a fresh instance
  * is built using the {@link EulerUserService} / {@link UserIdentityService}
  * beans without any per-registration policy (unknown users are
- * rejected). Per-registration login policies (auto-create-user,
- * default-authorities, identity-type) are configured on the handler
- * bean itself by the autoconfigure layer based on
- * {@code euler.security.web.login-methods.<name>.properties}.
+ * rejected). Per-registration login policies (jit-provisioning,
+ * identity-type) are configured on the handler bean itself by the
+ * autoconfigure layer based on
+ * {@code euler.security.login-method.<key>}.
  */
 public class OAuth2LoginSecurityConfigurer
         extends AbstractHttpConfigurer<OAuth2LoginSecurityConfigurer, HttpSecurity> {

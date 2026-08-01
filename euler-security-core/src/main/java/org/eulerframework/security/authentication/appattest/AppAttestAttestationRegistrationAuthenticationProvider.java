@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2013-present the original author or authors.
  *
@@ -21,6 +22,7 @@ import org.eulerframework.security.authentication.appattest.apple.AppleAppAttest
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -40,7 +42,8 @@ import javax.annotation.Nonnull;
  * <ol>
  *     <li>Consumes the one-time challenge via {@link ChallengeService}</li>
  *     <li>Delegates attestation validation to {@link AppleAppAttestValidationService#validateAttestation}</li>
- *     <li>Loads or creates the user via {@link EulerDeviceUserDetailsService}</li>
+ *     <li>Loads or creates the user via {@link EulerDeviceUserDetailsService}, subject
+ *         to the configured {@link JitProvisioningPolicy}</li>
  * </ol>
  *
  * @see AppAttestAttestationRegistrationAuthenticationToken
@@ -52,16 +55,20 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
     private final ChallengeService challengeService;
     private final AppleAppAttestValidationService validationService;
     private final EulerDeviceUserDetailsService userDetailsService;
+    private final JitProvisioningPolicy jitProvisioning;
 
     public AppAttestAttestationRegistrationAuthenticationProvider(ChallengeService challengeService,
                                                                   AppleAppAttestValidationService validationService,
-                                                                  EulerDeviceUserDetailsService userDetailsService) {
+                                                                  EulerDeviceUserDetailsService userDetailsService,
+                                                                  JitProvisioningPolicy jitProvisioning) {
         Assert.notNull(challengeService, "challengeService must not be null");
         Assert.notNull(validationService, "validationService must not be null");
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
+        Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
         this.challengeService = challengeService;
         this.validationService = validationService;
         this.userDetailsService = userDetailsService;
+        this.jitProvisioning = jitProvisioning;
     }
 
     @Override
@@ -103,9 +110,21 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
         try {
             return this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFoundException ex) {
-            logger.debug("No existing user found for keyId '{}', creating new user", attestUser.getKeyId());
-            return this.userDetailsService.createUser(attestUser);
+            if (!this.jitProvisioning.isEnabled()) {
+                throw ex;
+            }
+            logger.debug("No existing user found for keyId '{}', provisioning new user", attestUser.getKeyId());
+            return this.userDetailsService.createUser(attestUser,
+                    this.jitProvisioning.getDefaultAuthorities());
         }
+    }
+
+    /**
+     * The just-in-time provisioning policy applied when the attested
+     * device maps to no existing user.
+     */
+    public JitProvisioningPolicy getJitProvisioning() {
+        return this.jitProvisioning;
     }
 
     @Override

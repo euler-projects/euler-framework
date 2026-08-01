@@ -30,6 +30,8 @@ import org.eulerframework.security.core.userdetails.RandomUsernameGenerator;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
+import org.eulerframework.security.provisioning.JitProvisioningPolicyResolver;
 import org.eulerframework.security.util.UserDetailsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +111,7 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
     private final EulerUserService eulerUserService;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
+    private final JitProvisioningPolicyResolver jitProvisioningPolicyResolver;
 
     /**
      * Optional. When set, the provider enforces device-to-user
@@ -122,17 +125,20 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
                                            UserIdentityService userIdentityService,
                                            EulerUserService eulerUserService,
                                            OAuth2AuthorizationService authorizationService,
-                                           OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+                                           OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
+                                           JitProvisioningPolicyResolver jitProvisioningPolicyResolver) {
         Assert.notNull(otpTicketService, "otpTicketService must not be null");
         Assert.notNull(userIdentityService, "userIdentityService must not be null");
         Assert.notNull(eulerUserService, "eulerUserService must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
+        Assert.notNull(jitProvisioningPolicyResolver, "jitProvisioningPolicyResolver must not be null");
         this.otpTicketService = otpTicketService;
         this.userIdentityService = userIdentityService;
         this.eulerUserService = eulerUserService;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
+        this.jitProvisioningPolicyResolver = jitProvisioningPolicyResolver;
     }
 
     /**
@@ -350,12 +356,13 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
      * {@link UserIdentityService#createUserIdentity(String, UserIdentity)}.
      *
      * <p>An OTP-grant request whose recipient is unknown is treated as
-     * an implicit signup. The username is generated through
+     * an implicit signup, subject to the {@link JitProvisioningPolicy}
+     * resolved for the identity type. The username is generated through
      * {@link RandomUsernameGenerator#generate()} (form
      * {@code user_<base64url12>}) so the recipient never leaks into
      * the local username; the password is a {@code {noop}}-prefixed
      * random string (OTP-only login, no password authentication path);
-     * authorities default to {@code "user"}.
+     * authorities come from the policy.
      *
      * <p>This grant handles {@code identity_type ∈ {phone, email}}.
      * For both, the raw subject is attached to the prototype as an
@@ -364,14 +371,20 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
      * backend reads it back under the same key.
      */
     private UserIdentity autoProvisionUser(String identityType, String rawSubjectParamName, String rawSubject) {
+        JitProvisioningPolicy jitProvisioning = this.jitProvisioningPolicyResolver.resolve(identityType);
+        if (!jitProvisioning.isEnabled()) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(
+                    OAuth2ErrorCodes.INVALID_GRANT,
+                    "unknown recipient and JIT provisioning is disabled", ERROR_URI));
+        }
         EulerUserDetails newUser = EulerUserDetails.builder()
                 .username(RandomUsernameGenerator.generate())
                 .password("{noop}" + StringUtils.randomString(32))
-                .authorities("user")
+                .authorities(jitProvisioning.defaultAuthoritiesArray())
                 .build();
         EulerUser createdUser = this.eulerUserService.createUser(newUser);
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Auto-provisioned user '{}' for OTP identity_type='{}'",
+            this.logger.debug("JIT-provisioned user '{}' for OTP identity_type='{}'",
                     createdUser.getUserId(), identityType);
         }
         UserIdentity prototype = UserIdentity.builder()
@@ -426,8 +439,8 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         } catch (UserDetailsNotFoundException ex) {
             // First sighting of this device with the OTP-resolved user:
             // bind the device to the existing user. Distinct from the
-            // AppAttest registration provider's auto-create flow, which
-            // would provision a brand-new anonymous user instead.
+            // AppAttest registration provider's JIT provisioning flow,
+            // which would provision a brand-new anonymous user instead.
             this.deviceUserDetailsService.bindToUser(attestUser, otpUserId);
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Bound App Attest device keyId='{}' to OTP-resolved user '{}'",

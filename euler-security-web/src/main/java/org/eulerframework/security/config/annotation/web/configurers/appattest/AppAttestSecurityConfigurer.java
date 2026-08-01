@@ -22,6 +22,7 @@ import org.eulerframework.security.authentication.appattest.AppAttestAttestation
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
+import org.eulerframework.security.provisioning.JitProvisioningPolicy;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationAuthenticationConverter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationEndpointFilter;
@@ -31,6 +32,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.Assert;
 
 /**
  * An {@link AbstractHttpConfigurer} for device attestation registration.
@@ -66,6 +68,7 @@ public class AppAttestSecurityConfigurer
     private RegisteredAppRepository registeredAppRepository;
     private AppAttestAttestationRegistrationService registrationService;
     private EulerDeviceUserDetailsService userDetailsService;
+    private JitProvisioningPolicy jitProvisioning = JitProvisioningPolicy.disabled();
 
     private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app_attest/challenge";
     public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app_attest/register";
@@ -99,6 +102,17 @@ public class AppAttestSecurityConfigurer
 
     public AppAttestSecurityConfigurer userDetailsService(EulerDeviceUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
+        return this;
+    }
+
+    /**
+     * Sets the just-in-time provisioning policy applied when an attested
+     * device maps to no existing user. Defaults to disabled, in which
+     * case registration of an unknown device is rejected.
+     */
+    public AppAttestSecurityConfigurer jitProvisioning(JitProvisioningPolicy jitProvisioning) {
+        Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
+        this.jitProvisioning = jitProvisioning;
         return this;
     }
 
@@ -160,7 +174,8 @@ public class AppAttestSecurityConfigurer
         return new AppAttestAttestationRegistrationAuthenticationProvider(
                 resolveChallengeService(http),
                 resolveValidationService(http),
-                resolveUserDetailsService(http));
+                resolveUserDetailsService(http),
+                this.jitProvisioning);
     }
 
     private ChallengeService resolveChallengeService(HttpSecurity http) {

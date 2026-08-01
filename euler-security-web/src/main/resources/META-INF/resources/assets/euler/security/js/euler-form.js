@@ -25,6 +25,19 @@
  *   data-prevalidate         Set on a <form>; submission is blocked when
  *                            any .form-group inside it has .has-error.
  *
+ *   data-otp-issue-url       Set on a button; requesting an OTP posts
+ *                            channel + recipient here (already
+ *                            context-resolved via Thymeleaf @{...}) and
+ *                            the returned otp_ticket is stashed for the
+ *                            login submission. CSRF and any other hidden
+ *                            fields of the enclosing form ride along.
+ *   data-otp-channel         Delivery channel to request, e.g. "sms".
+ *   data-otp-recipient       Id of the input holding the recipient.
+ *   data-otp-ticket          Id of the hidden input receiving the ticket.
+ *   data-otp-sent-message    Localized confirmation shown on success.
+ *   data-otp-failed-message  Localized fallback used when the endpoint
+ *                            reports no error_description of its own.
+ *
  * Public API (window.eulerForm) exposes the low-level status helpers for
  * advanced custom logic; in normal use the DOM-driven wiring above is
  * sufficient.
@@ -115,20 +128,96 @@
                 setSuccessStatus(input);
                 return;
             }
-            const body = await response.text();
-            let msg = response.statusText || 'invalid';
-            if (body) {
-                try {
-                    const json = JSON.parse(body);
-                    if (json && json.error_description) {
-                        msg = json.error_description;
-                    }
-                } catch (_) { /* keep default */ }
-            }
-            setErrorStatus(input, msg);
+            setErrorStatus(input, await readErrorMessage(response, response.statusText || 'invalid'));
         } catch (err) {
             setErrorStatus(input, err?.message || 'network error');
         }
+    };
+
+    /**
+     * Read the error description an endpoint reported, falling back to
+     * the caller's localized message.
+     */
+    const readErrorMessage = async (response, fallback) => {
+        const body = await response.text();
+        if (body) {
+            try {
+                const json = JSON.parse(body);
+                if (json && json.error_description) {
+                    return json.error_description;
+                }
+            } catch (_) { /* keep fallback */ }
+        }
+        return fallback || response.statusText || 'error';
+    };
+
+    /**
+     * Ask the OTP issue endpoint for a ticket and stash it for the login
+     * submission. Only the ticket comes back over the wire - the code
+     * itself reaches the user out of band - so the recipient is never
+     * part of the login form.
+     *
+     * Hidden fields of the enclosing form (the CSRF token above all) are
+     * copied into the request, while the login fields are dropped: this
+     * call issues a ticket, it does not sign anyone in.
+     */
+    const requestOtpTicket = async (button, recipientInput, ticketInput) => {
+        const form = button.form;
+        const params = form ? new URLSearchParams(new FormData(form)) : new URLSearchParams();
+        params.delete('otp_ticket');
+        params.delete('otp');
+        params.set('channel', button.dataset.otpChannel || '');
+        params.set('recipient', recipientInput.value);
+
+        setLoadStatus(recipientInput);
+        try {
+            const response = await fetch(button.dataset.otpIssueUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' },
+                body: params
+            });
+            if (!response.ok) {
+                ticketInput.value = '';
+                setErrorStatus(recipientInput,
+                        await readErrorMessage(response, button.dataset.otpFailedMessage));
+                return;
+            }
+            const ticket = await response.json();
+            ticketInput.value = ticket?.otp_ticket || '';
+            setSuccessStatus(recipientInput);
+            const note = document.createElement('span');
+            note.className = 'form-control-feedback-msg';
+            note.textContent = button.dataset.otpSentMessage || '';
+            getFormGroup(recipientInput)?.appendChild(note);
+            startRetryCountdown(button, Number(ticket?.retry_after) || 0);
+        } catch (err) {
+            ticketInput.value = '';
+            setErrorStatus(recipientInput,
+                    err?.message || button.dataset.otpFailedMessage || 'network error');
+        }
+    };
+
+    /**
+     * Hold the button down for the interval the server asked for, so a
+     * user cannot hammer the issue endpoint into its own rate limit.
+     */
+    const startRetryCountdown = (button, seconds) => {
+        if (seconds <= 0) return;
+        const label = button.textContent;
+        let left = seconds;
+        button.disabled = true;
+        button.textContent = `${label} (${left})`;
+        const timer = setInterval(() => {
+            left -= 1;
+            if (left <= 0) {
+                clearInterval(timer);
+                button.disabled = false;
+                button.textContent = label;
+                return;
+            }
+            button.textContent = `${label} (${left})`;
+        }, 1000);
     };
 
     const init = () => {
@@ -165,6 +254,25 @@
             img.addEventListener('click', () => {
                 const sep = baseUrl.includes('?') ? '&' : '?';
                 img.src = `${baseUrl}${sep}_r=${Date.now()}`;
+            });
+        });
+
+        // OTP ticket requests
+        document.querySelectorAll('[data-otp-issue-url]').forEach((button) => {
+            const recipientInput = document.getElementById(button.dataset.otpRecipient);
+            const ticketInput = document.getElementById(button.dataset.otpTicket);
+            if (!recipientInput || !ticketInput) return;
+            button.addEventListener('click', () => {
+                if (!recipientInput.value) {
+                    recipientInput.focus();
+                    return;
+                }
+                requestOtpTicket(button, recipientInput, ticketInput);
+            });
+            // A ticket belongs to the recipient it was issued for, so
+            // editing the recipient invalidates it.
+            recipientInput.addEventListener('input', () => {
+                ticketInput.value = '';
             });
         });
 

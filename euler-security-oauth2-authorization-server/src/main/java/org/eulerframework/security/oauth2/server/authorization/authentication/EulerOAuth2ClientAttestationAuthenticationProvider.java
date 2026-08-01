@@ -140,7 +140,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                 throw new OAuth2AuthenticationException(
                         new OAuth2Error(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,
                                 "APP_ATTEST attestation type is not supported; "
-                                        + "enable euler.security.app-attest to use this attestation type", null));
+                                        + "enable euler.security.authentication.app-attest to use this attestation type", null));
             }
 
             String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.KEY_ID);
