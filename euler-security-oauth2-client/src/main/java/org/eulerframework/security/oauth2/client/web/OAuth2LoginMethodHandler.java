@@ -16,49 +16,47 @@
 package org.eulerframework.security.oauth2.client.web;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethod;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodDispatch;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodHandler;
-import org.eulerframework.security.web.endpoint.user.login.RegisteredLoginMethod;
+import org.eulerframework.security.web.login.LoginMethod;
+import org.eulerframework.security.web.login.LoginMethodDispatch;
+import org.eulerframework.security.web.login.LoginMethodHandler;
+import org.eulerframework.security.web.login.RegisteredLoginMethod;
+import org.eulerframework.security.web.login.RegisteredOAuth2LoginMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.util.Assert;
-
-import java.util.Map;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link LoginMethodHandler} for {@code type: oauth2}: offers a
  * registered login method as a "Sign in with IdP" option, provided the
  * referenced {@code ClientRegistration} resolves.
  *
- * <p>Provider resolution: {@code properties.provider} explicit value,
- * else {@code identity-type}. Registration ID resolution:
- * {@code properties.oauth-client-registration-id} explicit value, else
- * provider (no fallback to key).
+ * <p>Provider resolution: the registration's declared
+ * {@link RegisteredOAuth2LoginMethod#getProvider() provider}, else its
+ * {@code identity-type}. Registration ID resolution: the declared
+ * {@link RegisteredOAuth2LoginMethod#getOauthClientRegistrationId()
+ * registration id}, else the provider (no fallback to the declaration
+ * key).
  *
  * <p>Dispatch redirects to the authorization endpoint of the resolved
  * registration. The endpoint URL is not published to clients; a client
  * either posts to the login-method dispatch endpoint or initiates the
  * flow on its own.
  *
- * <p>The top-level policy fields ({@code identity-type},
- * {@code jit-provisioning}) are consumed by
+ * <p>The cross-type policy fields ({@code identity-type},
+ * just-in-time provisioning) are consumed by
  * {@code OAuth2LoginPrincipalPromotingSuccessHandler}, not here.
  */
 public class OAuth2LoginMethodHandler implements LoginMethodHandler {
 
-    /** The {@code type} value served by this handler. */
-    public static final String TYPE = "oauth2";
-
-    public static final String PROP_OAUTH_CLIENT_REGISTRATION_ID = "oauth-client-registration-id";
+    private static final String TYPE = RegisteredOAuth2LoginMethod.TYPE;
 
     /**
-     * Property key overriding the provider, and the attribute key it is
-     * published under.
+     * Attribute key the resolved provider is published under.
      */
-    public static final String PROP_PROVIDER = "provider";
+    public static final String ATTR_PROVIDER = "provider";
 
     public static final String DEFAULT_AUTHORIZATION_REQUEST_BASE_URI =
             OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
@@ -87,70 +85,62 @@ public class OAuth2LoginMethodHandler implements LoginMethodHandler {
         return TYPE;
     }
 
-    /**
-     * Derives the default name from the resolved provider, allowing
-     * several oauth2 registrations (one per provider) without declared
-     * names.
-     */
     @Override
-    public String resolveName(RegisteredLoginMethod method) {
-        return resolveProvider(method);
-    }
-
-    @Override
-    public LoginMethod describe(String name, RegisteredLoginMethod method) {
+    public LoginMethod describe(RegisteredLoginMethod method) {
         String identityType = method.getIdentityType();
         if (identityType == null || identityType.isEmpty()) {
-            this.logger.warn("Login method '{}' (type=oauth2) has no identity-type; skipping.", name);
+            this.logger.warn("Login method '{}' (type=oauth2) has no identity-type; skipping.",
+                    method.getName());
             return null;
         }
 
-        String provider = resolveProvider(method);
-        String registrationId = resolveRegistrationId(method, provider);
+        RegisteredOAuth2LoginMethod oauth2Method = (RegisteredOAuth2LoginMethod) method;
+        String provider = resolveProvider(oauth2Method);
+        String registrationId = resolveRegistrationId(oauth2Method, provider);
 
         if (this.clientRegistrationRepository.findByRegistrationId(registrationId) == null) {
             this.logger.warn("Login method '{}' references OAuth client registration '{}' "
                     + "which is not defined under "
                     + "spring.security.oauth2.client.registration.*; skipping.",
-                    name, registrationId);
+                    method.getName(), registrationId);
             return null;
         }
 
         return LoginMethod.withType(TYPE)
-                .name(name)
+                .name(method.getName())
                 .primary(method.isPrimary())
-                .attribute(PROP_PROVIDER, provider)
+                .attribute(ATTR_PROVIDER, provider)
                 .build();
     }
 
     @Override
-    public LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request) {
-        String provider = resolveProvider(method);
-        String registrationId = resolveRegistrationId(method, provider);
+    public LoginMethodDispatch dispatch(RegisteredLoginMethod method, HttpServletRequest request) {
+        RegisteredOAuth2LoginMethod oauth2Method = (RegisteredOAuth2LoginMethod) method;
+        String provider = resolveProvider(oauth2Method);
+        String registrationId = resolveRegistrationId(oauth2Method, provider);
         return LoginMethodDispatch.redirect(this.authorizationRequestBaseUri + "/" + registrationId);
     }
 
-    private String resolveProvider(RegisteredLoginMethod method) {
-        String explicit = asString(method.getProperties(), PROP_PROVIDER);
-        if (explicit != null && !explicit.isEmpty()) {
-            return explicit;
+    /**
+     * Resolves the provider a registration federates to: its declared
+     * value, else the identity type.
+     */
+    public static String resolveProvider(RegisteredOAuth2LoginMethod method) {
+        if (StringUtils.hasText(method.getProvider())) {
+            return method.getProvider();
         }
         return method.getIdentityType();
     }
 
-    private String resolveRegistrationId(RegisteredLoginMethod method, String provider) {
-        String explicit = asString(method.getProperties(), PROP_OAUTH_CLIENT_REGISTRATION_ID);
-        if (explicit != null && !explicit.isEmpty()) {
-            return explicit;
+    /**
+     * Resolves the {@code ClientRegistration} a registration uses: its
+     * declared value, else the provider. Never falls back to the
+     * declaration key.
+     */
+    public static String resolveRegistrationId(RegisteredOAuth2LoginMethod method, String provider) {
+        if (StringUtils.hasText(method.getOauthClientRegistrationId())) {
+            return method.getOauthClientRegistrationId();
         }
         return provider;
-    }
-
-    private static String asString(Map<String, Object> properties, String key) {
-        if (properties == null) {
-            return null;
-        }
-        Object value = properties.get(key);
-        return value == null ? null : value.toString();
     }
 }

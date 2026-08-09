@@ -15,9 +15,9 @@
  */
 package org.eulerframework.security.oauth2.client.web;
 
-import org.eulerframework.security.web.endpoint.user.login.LoginMethod;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodDispatch;
-import org.eulerframework.security.web.endpoint.user.login.RegisteredLoginMethod;
+import org.eulerframework.security.web.login.LoginMethod;
+import org.eulerframework.security.web.login.LoginMethodDispatch;
+import org.eulerframework.security.web.login.RegisteredOAuth2LoginMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -57,9 +55,9 @@ class OAuth2LoginMethodHandlerTests {
         when(this.repository.findByRegistrationId("google"))
                 .thenReturn(googleRegistration());
 
-        RegisteredLoginMethod method = method("google", Map.of(
-                "oauth-client-registration-id", "google"));
-        LoginMethod described = this.handler.describe("google-eu", method);
+        RegisteredOAuth2LoginMethod method = new RegisteredOAuth2LoginMethod(
+                "test-registration", "google-eu", "google", false, null, "google");
+        LoginMethod described = this.handler.describe(method);
 
         assertThat(described).isNotNull();
         assertThat(described.getType()).isEqualTo("oauth2");
@@ -72,8 +70,8 @@ class OAuth2LoginMethodHandlerTests {
         when(this.repository.findByRegistrationId("google"))
                 .thenReturn(googleRegistration());
 
-        RegisteredLoginMethod method = method("google", Map.of());
-        LoginMethod described = this.handler.describe("corp-sso", method);
+        RegisteredOAuth2LoginMethod method = method("corp-sso", "google");
+        LoginMethod described = this.handler.describe(method);
 
         assertThat(described).isNotNull();
         assertThat(described.getName()).isEqualTo("corp-sso");
@@ -85,12 +83,9 @@ class OAuth2LoginMethodHandlerTests {
         when(this.repository.findByRegistrationId("google"))
                 .thenReturn(googleRegistration());
 
-        RegisteredLoginMethod method = RegisteredLoginMethod.withId("corp-sso")
-                .type("oauth2")
-                .identityType("corp-account")
-                .property("provider", "google")
-                .build();
-        LoginMethod described = this.handler.describe("corp-sso", method);
+        RegisteredOAuth2LoginMethod method = new RegisteredOAuth2LoginMethod(
+                "corp-sso", "corp-sso", "corp-account", false, "google", null);
+        LoginMethod described = this.handler.describe(method);
 
         assertThat(described).isNotNull();
         assertThat(described.getAttributes().get("provider")).isEqualTo("google");
@@ -98,39 +93,43 @@ class OAuth2LoginMethodHandlerTests {
 
     @Test
     void returnsNullWhenIdentityTypeMissing() {
-        RegisteredLoginMethod method = RegisteredLoginMethod.withId("missing").type("oauth2").build();
+        RegisteredOAuth2LoginMethod method = new RegisteredOAuth2LoginMethod(
+                "missing", "missing", null, false, null, null);
 
-        assertThat(this.handler.describe("missing", method)).isNull();
+        assertThat(this.handler.describe(method)).isNull();
     }
 
     @Test
     void returnsNullWhenRegistrationNotFound() {
         when(this.repository.findByRegistrationId("google")).thenReturn(null);
 
-        RegisteredLoginMethod method = method("google", Map.of());
+        RegisteredOAuth2LoginMethod method = method("google", "google");
 
-        assertThat(this.handler.describe("google", method)).isNull();
+        assertThat(this.handler.describe(method)).isNull();
     }
 
     @Test
     void dispatchReturnsRedirectToAuthorizationEndpoint() {
-        RegisteredLoginMethod method = method("google", Map.of());
+        RegisteredOAuth2LoginMethod method = method("google", "google");
         MockHttpServletRequest request = new MockHttpServletRequest();
 
-        LoginMethodDispatch dispatch = this.handler.dispatch("google", method, request);
+        LoginMethodDispatch dispatch = this.handler.dispatch(method, request);
 
         assertThat(dispatch.getAction()).isEqualTo(LoginMethodDispatch.Action.REDIRECT_302);
         assertThat(dispatch.getLocation()).isEqualTo("/oauth2/authorization/google");
     }
 
+    /**
+     * The provider is what the option is branded by, so it falls back on
+     * the identity type when not declared.
+     */
     @Test
-    void resolveNameDerivesFromProvider() {
-        assertThat(this.handler.resolveName(method("google", Map.of()))).isEqualTo("google");
-        assertThat(this.handler.resolveName(RegisteredLoginMethod.withId("corp-sso")
-                .type("oauth2")
-                .identityType("corp-account")
-                .property("provider", "google")
-                .build())).isEqualTo("google");
+    void providerFallsBackToIdentityType() {
+        assertThat(OAuth2LoginMethodHandler.resolveProvider(method("google", "google")))
+                .isEqualTo("google");
+        assertThat(OAuth2LoginMethodHandler.resolveProvider(new RegisteredOAuth2LoginMethod(
+                "corp-sso", "corp-sso", "corp-account", false, "google", null)))
+                .isEqualTo("google");
     }
 
     @Test
@@ -138,12 +137,10 @@ class OAuth2LoginMethodHandlerTests {
         assertThat(this.handler.type()).isEqualTo("oauth2");
     }
 
-    private static RegisteredLoginMethod method(String identityType, Map<String, Object> properties) {
-        return RegisteredLoginMethod.withId("test-registration")
-                .type("oauth2")
-                .identityType(identityType)
-                .properties(properties)
-                .build();
+    /** A registration as the contributor hands it to the handler. */
+    private static RegisteredOAuth2LoginMethod method(String name, String identityType) {
+        return new RegisteredOAuth2LoginMethod(
+                "test-registration", name, identityType, false, null, null);
     }
 
     private static ClientRegistration googleRegistration() {

@@ -19,9 +19,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodConfigDrivenContributor;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodConfigDrivenContributor.ResolvedLoginMethod;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodDispatch;
+import org.eulerframework.security.web.login.DefaultLoginMethodService;
+import org.eulerframework.security.web.login.DefaultLoginMethodService.ResolvedLoginMethod;
+import org.eulerframework.security.web.login.LoginMethodDispatch;
+import org.eulerframework.security.web.login.LoginMethodHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ import java.io.IOException;
  * Security filter that intercepts
  * {@code POST {login-method-processing-url}} requests carrying the
  * configured method parameter and delegates to the corresponding
- * {@link org.eulerframework.security.web.endpoint.user.login.LoginMethodHandler#dispatch}
+ * {@link LoginMethodHandler#dispatch}
  * method.
  *
  * <p>Requests without the method parameter are passed through
@@ -51,19 +52,19 @@ public class LoginMethodRoutingFilter extends OncePerRequestFilter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final RequestMatcher requestMatcher;
-    private final LoginMethodConfigDrivenContributor contributor;
+    private final DefaultLoginMethodService loginMethodService;
     private final String loginPageUrl;
     private final String methodParameter;
 
     public LoginMethodRoutingFilter(String loginMethodProcessingUrl,
                                     String loginPageUrl,
                                     String methodParameter,
-                                    LoginMethodConfigDrivenContributor contributor) {
+                                    DefaultLoginMethodService loginMethodService) {
         this.requestMatcher = PathPatternRequestMatcher.withDefaults().matcher(
                 org.springframework.http.HttpMethod.POST, loginMethodProcessingUrl);
         this.loginPageUrl = loginPageUrl;
         this.methodParameter = methodParameter;
-        this.contributor = contributor;
+        this.loginMethodService = loginMethodService;
     }
 
     @Override
@@ -83,14 +84,14 @@ public class LoginMethodRoutingFilter extends OncePerRequestFilter {
             return;
         }
 
-        ResolvedLoginMethod resolved = this.contributor.resolve(methodName);
+        ResolvedLoginMethod resolved = this.loginMethodService.resolve(methodName);
         if (resolved == null) {
             this.logger.warn("Unknown login method '{}' requested; redirecting to login page.", methodName);
             response.sendRedirect(this.loginPageUrl + "?error");
             return;
         }
 
-        LoginMethodDispatch dispatch = resolved.handler().dispatch(methodName, resolved.method(), request);
+        LoginMethodDispatch dispatch = resolved.handler().dispatch(resolved.method(), request);
         executeDispatch(dispatch, response);
     }
 

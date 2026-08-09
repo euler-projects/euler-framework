@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user.login;
+package org.eulerframework.security.web.login;
 
 import org.springframework.util.Assert;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * A login method offered to the client: the publishable projection of a
  * {@link RegisteredLoginMethod}, produced by {@link LoginMethodHandler}s
- * and aggregated by {@link LoginMethodContributor}s.
+ * and aggregated by {@link LoginMethodService}s.
  *
  * <p>Only resolved, publishable data appears here; server-side policy
  * carried by the registration is never exposed. A registration that

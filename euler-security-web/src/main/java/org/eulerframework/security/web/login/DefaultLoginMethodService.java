@@ -13,46 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user.login;
+package org.eulerframework.security.web.login;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
- * Generic {@link LoginMethodContributor} that iterates the supplied
- * {@link RegisteredLoginMethod}s, delegates each one to the
- * {@link LoginMethodHandler} matching its {@code type}, and returns the
- * resulting flat list of {@link LoginMethod}s.
+ * {@link LoginMethodService} that reads the registrations held by a
+ * {@link RegisteredLoginMethodRepository} and delegates each one to the
+ * {@link LoginMethodHandler} matching its {@code type}.
  *
- * <p>When no registration is supplied, a default {@code password}
- * registration is synthesized so at least one login method is always
- * available.
+ * <p>Type-agnostic by construction: it indexes the handlers it is given
+ * by {@link LoginMethodHandler#type() type} and knows nothing about any
+ * particular one, so a type the framework never shipped is served as
+ * soon as its handler and its registrations are present. A registration
+ * whose type no handler serves is skipped with a WARN log rather than
+ * failing the application.
  *
- * <p>Each registration is exposed under its effective name: the
- * declared {@code method-name}, or the handler-derived default
- * ({@link LoginMethodHandler#resolveName}). The registry key is a
- * storage concern (it may be an opaque id) and is never published.
- * Effective names must be unique; duplicates fail fast.
+ * <p>When the repository holds nothing, a default {@code password}
+ * registration is synthesized so the login page always renders at least
+ * the password form.
  *
- * <p>Also exposes a {@link #resolve(String)} method for the routing
- * filter to look up a registered method by its effective name.
+ * <p>Each registration is exposed under its
+ * {@link RegisteredLoginMethod#getName() name}; its id is a storage
+ * concern (it may be an opaque key) and is never published. Names must
+ * be unique, and a collision that reached this point is rejected rather
+ * than silently served.
+ *
+ * <p>Beyond the {@link LoginMethodService} contract this also exposes
+ * {@link #resolve(String)}, which the routing filter needs to find the
+ * registration and handler a submitted method name selects.
  */
-public class LoginMethodConfigDrivenContributor implements LoginMethodContributor {
+public class DefaultLoginMethodService implements LoginMethodService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Map<String, LoginMethodHandler> handlersByType;
-    private final Supplier<Collection<RegisteredLoginMethod>> loginMethodsSupplier;
+    private final RegisteredLoginMethodRepository registeredLoginMethodRepository;
 
-    public LoginMethodConfigDrivenContributor(
+    public DefaultLoginMethodService(
             List<LoginMethodHandler> handlers,
-            Supplier<Collection<RegisteredLoginMethod>> loginMethodsSupplier) {
+            RegisteredLoginMethodRepository registeredLoginMethodRepository) {
         Assert.notNull(handlers, "handlers is required");
-        Assert.notNull(loginMethodsSupplier, "loginMethodsSupplier is required");
+        Assert.notNull(registeredLoginMethodRepository, "registeredLoginMethodRepository is required");
         Map<String, LoginMethodHandler> index = new HashMap<>(handlers.size());
         for (LoginMethodHandler handler : handlers) {
             String typeName = handler.type();
@@ -66,15 +72,15 @@ public class LoginMethodConfigDrivenContributor implements LoginMethodContributo
             }
         }
         this.handlersByType = Collections.unmodifiableMap(index);
-        this.loginMethodsSupplier = loginMethodsSupplier;
+        this.registeredLoginMethodRepository = registeredLoginMethodRepository;
     }
 
     @Override
-    public List<LoginMethod> contribute() {
+    public List<LoginMethod> listAll() {
         Map<String, ResolvedLoginMethod> byName = indexByName();
         List<LoginMethod> methods = new ArrayList<>(byName.size());
         for (ResolvedLoginMethod resolved : byName.values()) {
-            LoginMethod described = resolved.handler().describe(resolved.name(), resolved.method());
+            LoginMethod described = resolved.handler().describe(resolved.method());
             if (described == null) {
                 continue;
             }
@@ -84,18 +90,20 @@ public class LoginMethodConfigDrivenContributor implements LoginMethodContributo
     }
 
     /**
-     * Resolves a login method by its effective name for use by the
-     * routing filter. Returns {@code null} if the name is unknown.
+     * Resolves the registration and handler the given method name
+     * selects, for the routing filter to dispatch with. Returns
+     * {@code null} if no method is offered under that name.
      */
     public ResolvedLoginMethod resolve(String name) {
         return indexByName().get(name);
     }
 
     /**
-     * Indexes every usable registration by its effective name.
+     * Indexes every servable registration by its name.
      *
-     * @throws IllegalStateException if two registrations resolve to the
-     *                               same name
+     * @throws IllegalStateException if two registrations share a name,
+     *                               leaving the name ambiguous to
+     *                               dispatch
      */
     private Map<String, ResolvedLoginMethod> indexByName() {
         Collection<RegisteredLoginMethod> loginMethods = resolveLoginMethods();
@@ -111,18 +119,10 @@ public class LoginMethodConfigDrivenContributor implements LoginMethodContributo
                         method.getId(), method.getType(), this.handlersByType.keySet());
                 continue;
             }
-            String name = method.getName();
-            if (name == null || name.isEmpty()) {
-                name = handler.resolveName(method);
-            }
-            if (name == null || name.isEmpty()) {
-                this.logger.warn("Login method '{}' declares no method-name and none could be "
-                        + "derived; skipping.", method.getId());
-                continue;
-            }
-            ResolvedLoginMethod previous = index.put(name, new ResolvedLoginMethod(name, method, handler));
+            ResolvedLoginMethod previous = index.put(method.getName(),
+                    new ResolvedLoginMethod(method, handler));
             if (previous != null) {
-                throw new IllegalStateException("Duplicate login method name '" + name
+                throw new IllegalStateException("Duplicate login method name '" + method.getName()
                         + "' (registrations '" + previous.method().getId() + "' and '"
                         + method.getId() + "'): declare a distinct method-name on one of them.");
             }
@@ -131,23 +131,21 @@ public class LoginMethodConfigDrivenContributor implements LoginMethodContributo
     }
 
     private Collection<RegisteredLoginMethod> resolveLoginMethods() {
-        Collection<RegisteredLoginMethod> loginMethods = this.loginMethodsSupplier.get();
+        Collection<RegisteredLoginMethod> loginMethods = this.registeredLoginMethodRepository.findAll();
         if (loginMethods == null || loginMethods.isEmpty()) {
             // Synthesize a default password method so the login page
             // always renders at least the password form.
-            return List.of(RegisteredLoginMethod
-                    .withId(PasswordLoginMethodHandler.TYPE)
-                    .type(PasswordLoginMethodHandler.TYPE)
-                    .primary(true)
-                    .build());
+            return List.of(new RegisteredPasswordLoginMethod(
+                    RegisteredPasswordLoginMethod.TYPE, RegisteredPasswordLoginMethod.TYPE, true));
         }
         return loginMethods;
     }
 
     /**
-     * A registration resolved to its effective name and handler, used
-     * by the routing filter to perform dispatch.
+     * A registration paired with the handler serving it, as dispatch
+     * needs both: the handler decides the action, the registration tells
+     * it which method it is acting for.
      */
-    public record ResolvedLoginMethod(String name, RegisteredLoginMethod method, LoginMethodHandler handler) {
+    public record ResolvedLoginMethod(RegisteredLoginMethod method, LoginMethodHandler handler) {
     }
 }

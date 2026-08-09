@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user.login;
+package org.eulerframework.security.web.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -53,8 +53,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class PasswordLoginMethodHandler implements LoginMethodHandler {
 
-    /** The {@code type} value served by this handler. */
-    public static final String TYPE = "password";
+    private static final String TYPE = RegisteredPasswordLoginMethod.TYPE;
 
     private final String loginProcessingUrl;
     private final String loginPageUrl;
@@ -83,15 +82,15 @@ public class PasswordLoginMethodHandler implements LoginMethodHandler {
     }
 
     @Override
-    public LoginMethod describe(String name, RegisteredLoginMethod method) {
+    public LoginMethod describe(RegisteredLoginMethod method) {
         return LoginMethod.withType(TYPE)
-                .name(name)
+                .name(method.getName())
                 .primary(method.isPrimary())
                 .build();
     }
 
     @Override
-    public LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request) {
+    public LoginMethodDispatch dispatch(RegisteredLoginMethod method, HttpServletRequest request) {
         if (request.getParameter(
                 UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY) != null) {
             // The credentials rode along, so hand this very POST over to
@@ -102,6 +101,6 @@ public class PasswordLoginMethodHandler implements LoginMethodHandler {
         // Nothing to forward: this is a bare selection of the method, so
         // send the caller to the screen that collects the credentials.
         return LoginMethodDispatch.redirect(this.loginPageUrl + "?" + this.methodParameter
-                + "=" + URLEncoder.encode(name, StandardCharsets.UTF_8));
+                + "=" + URLEncoder.encode(method.getName(), StandardCharsets.UTF_8));
     }
 }

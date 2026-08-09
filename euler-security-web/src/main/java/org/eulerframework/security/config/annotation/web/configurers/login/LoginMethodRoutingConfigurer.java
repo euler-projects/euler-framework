@@ -16,7 +16,7 @@
 package org.eulerframework.security.config.annotation.web.configurers.login;
 
 import org.eulerframework.security.web.authentication.login.LoginMethodRoutingFilter;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodConfigDrivenContributor;
+import org.eulerframework.security.web.login.DefaultLoginMethodService;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,7 +38,7 @@ public class LoginMethodRoutingConfigurer
     private String loginMethodProcessingUrl;
     private String loginPageUrl;
     private String methodParameter;
-    private LoginMethodConfigDrivenContributor contributor;
+    private DefaultLoginMethodService loginMethodService;
 
     public LoginMethodRoutingConfigurer loginMethodProcessingUrl(String url) {
         Assert.hasText(url, "loginMethodProcessingUrl must not be empty");
@@ -58,9 +58,9 @@ public class LoginMethodRoutingConfigurer
         return this;
     }
 
-    public LoginMethodRoutingConfigurer contributor(LoginMethodConfigDrivenContributor contributor) {
-        Assert.notNull(contributor, "contributor is required");
-        this.contributor = contributor;
+    public LoginMethodRoutingConfigurer loginMethodService(DefaultLoginMethodService loginMethodService) {
+        Assert.notNull(loginMethodService, "loginMethodService is required");
+        this.loginMethodService = loginMethodService;
         return this;
     }
 
@@ -69,13 +69,13 @@ public class LoginMethodRoutingConfigurer
         Assert.hasText(this.loginMethodProcessingUrl, "loginMethodProcessingUrl not set");
         Assert.hasText(this.loginPageUrl, "loginPageUrl not set");
         Assert.hasText(this.methodParameter, "methodParameter not set");
-        Assert.notNull(this.contributor, "contributor not set");
+        Assert.notNull(this.loginMethodService, "loginMethodService not set");
 
         LoginMethodRoutingFilter filter = new LoginMethodRoutingFilter(
                 this.loginMethodProcessingUrl,
                 this.loginPageUrl,
                 this.methodParameter,
-                this.contributor);
+                this.loginMethodService);
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
     }
 }

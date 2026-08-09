@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user.login;
+package org.eulerframework.security.web.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -35,48 +35,27 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface LoginMethodHandler {
 
     /**
-     * The stable identifier used as the {@code method-type} value in
+     * The stable identifier used as the {@code method-type} node in
      * YAML (e.g. {@code "password"}, {@code "oauth2"}), matched
-     * case-sensitively.
+     * case-sensitively. Declared by the matching
+     * {@link RegisteredLoginMethod} subclass, which the registrations
+     * passed to this handler are instances of.
      */
     String type();
 
     /**
-     * Derives the default name for a registration that does not declare
-     * {@code method-name}. Names identify a method towards clients (the
-     * dispatch method parameter) and must be unique across all
-     * registrations; duplicates are rejected at aggregation time.
-     *
-     * <p>The default derivation is the {@link #type()} value, which is
-     * only unique while a type has a single registration.
-     * Implementations supporting several registrations per type should
-     * derive from their distinguishing semantics (e.g. the OAuth2
-     * provider, the OTP channel). Returns {@code null} when nothing can
-     * be derived; such registrations are skipped.
-     *
-     * @param method the registration to name
-     * @return the derived name, or {@code null} if underivable
-     */
-    default String resolveName(RegisteredLoginMethod method) {
-        return type();
-    }
-
-    /**
-     * Projects the registration named {@code name} into a publishable
-     * login method.
+     * Projects a registration into a publishable login method.
      *
      * <p>Returns {@code null} when the registration cannot currently be
      * served (e.g. it references an unknown OAuth2 client
      * registration); such entries are skipped and never offered to
      * clients.
      *
-     * @param name   the effective method name (declared
-     *               {@code method-name}, or the value of
-     *               {@link #resolveName})
-     * @param method the registration to project
+     * @param method the registration to project, an instance of the
+     *               subclass declaring {@link #type()}
      * @return the publishable login method, or {@code null} to skip
      */
-    LoginMethod describe(String name, RegisteredLoginMethod method);
+    LoginMethod describe(RegisteredLoginMethod method);
 
     /**
      * Determines the dispatch action when a POST arrives at the
@@ -113,11 +92,11 @@ public interface LoginMethodHandler {
      * instead return a {@link LoginMethodDispatch} that the routing
      * filter will execute.
      *
-     * @param name    the effective method name (from the method
-     *                parameter)
-     * @param method  the registration
+     * @param method  the registration selected by the method parameter,
+     *                an instance of the subclass declaring
+     *                {@link #type()}
      * @param request the current servlet request (carries form params)
      * @return the dispatch action
      */
-    LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request);
+    LoginMethodDispatch dispatch(RegisteredLoginMethod method, HttpServletRequest request);
 }

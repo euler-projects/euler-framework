@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user.login;
+package org.eulerframework.security.web.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -49,21 +49,20 @@ import java.util.Map;
  * does not work out which half is missing or resume a partly filled
  * flow; driving the user through the fields is the client's job.
  *
- * <p>Channel resolution: {@code properties.channel} explicit value,
- * else canonical mapping from {@code identity-type}
+ * <p>Channel resolution: the registration's explicit
+ * {@link RegisteredOtpLoginMethod#getChannel() channel}, else a
+ * canonical mapping from {@code identity-type}
  * ({@code phone → sms}, {@code email → email}). If neither resolves,
  * the method is skipped with a WARN log.
  */
 public class OtpLoginMethodHandler implements LoginMethodHandler {
 
-    /** The {@code type} value served by this handler. */
-    public static final String TYPE = "otp";
+    private static final String TYPE = RegisteredOtpLoginMethod.TYPE;
 
     /**
-     * Property key overriding the delivery channel, and the attribute
-     * key it is published under.
+     * Attribute key the resolved delivery channel is published under.
      */
-    public static final String PROP_CHANNEL = "channel";
+    public static final String ATTR_CHANNEL = "channel";
 
     /** Ticket handle issued by the OTP issue endpoint. */
     private static final String PARAM_OTP_TICKET = "otp_ticket";
@@ -106,34 +105,24 @@ public class OtpLoginMethodHandler implements LoginMethodHandler {
         return TYPE;
     }
 
-    /**
-     * Derives the default name from the resolved delivery channel,
-     * allowing several otp registrations (one per channel) without
-     * declared names.
-     */
     @Override
-    public String resolveName(RegisteredLoginMethod method) {
-        return resolveChannel(method);
-    }
-
-    @Override
-    public LoginMethod describe(String name, RegisteredLoginMethod method) {
-        String channel = resolveChannel(method);
+    public LoginMethod describe(RegisteredLoginMethod method) {
+        String channel = resolveChannel((RegisteredOtpLoginMethod) method);
         if (channel == null) {
             this.logger.warn("Login method '{}' (type=otp) has no resolvable channel: "
-                    + "neither properties.channel nor a canonical mapping for identity-type='{}' exists; skipping.",
-                    name, method.getIdentityType());
+                    + "neither an explicit channel nor a canonical mapping for identity-type='{}' exists; skipping.",
+                    method.getName(), method.getIdentityType());
             return null;
         }
         return LoginMethod.withType(TYPE)
-                .name(name)
+                .name(method.getName())
                 .primary(method.isPrimary())
-                .attribute(PROP_CHANNEL, channel)
+                .attribute(ATTR_CHANNEL, channel)
                 .build();
     }
 
     @Override
-    public LoginMethodDispatch dispatch(String name, RegisteredLoginMethod method, HttpServletRequest request) {
+    public LoginMethodDispatch dispatch(RegisteredLoginMethod method, HttpServletRequest request) {
         if (StringUtils.hasText(request.getParameter(PARAM_OTP_TICKET))
                 && StringUtils.hasText(request.getParameter(PARAM_OTP))) {
             // Ticket and code both rode along, so hand this very POST to
@@ -144,24 +133,17 @@ public class OtpLoginMethodHandler implements LoginMethodHandler {
         // client obtain a ticket and gather the code. Which half is
         // missing is the client's business, not the dispatcher's.
         return LoginMethodDispatch.redirect(this.loginPageUrl + "?" + this.methodParameter
-                + "=" + URLEncoder.encode(name, StandardCharsets.UTF_8));
+                + "=" + URLEncoder.encode(method.getName(), StandardCharsets.UTF_8));
     }
 
-    private String resolveChannel(RegisteredLoginMethod method) {
-        String explicit = asString(method.getProperties(), PROP_CHANNEL);
-        if (explicit != null && !explicit.isEmpty()) {
-            return explicit;
+    private String resolveChannel(RegisteredOtpLoginMethod method) {
+        if (StringUtils.hasText(method.getChannel())) {
+            return method.getChannel();
         }
         String identityType = method.getIdentityType();
         if (identityType != null) {
             return CANONICAL_CHANNEL_MAP.get(identityType.toLowerCase());
         }
         return null;
-    }
-
-    private static String asString(Map<String, Object> properties, String key) {
-        if (properties == null) return null;
-        Object value = properties.get(key);
-        return value == null ? null : value.toString();
     }
 }

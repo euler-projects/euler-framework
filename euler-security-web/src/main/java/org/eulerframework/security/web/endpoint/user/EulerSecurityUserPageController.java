@@ -17,8 +17,8 @@ package org.eulerframework.security.web.endpoint.user;
 
 import org.eulerframework.security.config.annotation.web.configurers.otp.OtpSecurityConfigurer;
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethod;
-import org.eulerframework.security.web.endpoint.user.login.LoginMethodContributor;
+import org.eulerframework.security.web.login.LoginMethod;
+import org.eulerframework.security.web.login.LoginMethodService;
 import org.eulerframework.web.core.base.controller.PageRender;
 import org.eulerframework.web.core.base.controller.PageSupportWebController;
 import org.springframework.beans.factory.ObjectProvider;
@@ -43,10 +43,11 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
     private String loginMethodProcessingUrl;
     private String otpIssueEndpointUri;
 
-    private ObjectProvider<LoginMethodContributor> loginMethodContributorProvider;
+    private final LoginMethodService loginMethodService;
 
-    public EulerSecurityUserPageController(PageRender pageRender) {
+    public EulerSecurityUserPageController(PageRender pageRender, LoginMethodService loginMethodService) {
         super(pageRender);
+        this.loginMethodService = loginMethodService;
     }
 
     @Override
@@ -103,9 +104,8 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
     }
 
     /**
-     * Aggregates every {@link LoginMethodContributor} bean into a
-     * single flat list, then splits into primary (expanded) and
-     * secondary (button) groups for the login template.
+     * Splits the offered login methods into the primary (expanded) and
+     * secondary (button) groups the login template renders.
      *
      * <p>Split rule: if the request carries {@code _m=<name>}, only
      * that method is rendered as primary (enabling the user to switch
@@ -115,30 +115,16 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
      */
     @ModelAttribute("primaryLoginMethods")
     public List<LoginMethod> getPrimaryLoginMethods(HttpServletRequest request) {
-        List<LoginMethod> all = aggregateLoginMethods();
+        List<LoginMethod> all = this.loginMethodService.listAll();
         String selectedMethod = request.getParameter(this.loginMethodParameter);
         return splitPrimary(all, selectedMethod);
     }
 
     @ModelAttribute("secondaryLoginMethods")
     public List<LoginMethod> getSecondaryLoginMethods(HttpServletRequest request) {
-        List<LoginMethod> all = aggregateLoginMethods();
+        List<LoginMethod> all = this.loginMethodService.listAll();
         String selectedMethod = request.getParameter(this.loginMethodParameter);
         return splitSecondary(all, selectedMethod);
-    }
-
-    private List<LoginMethod> aggregateLoginMethods() {
-        if (this.loginMethodContributorProvider == null) {
-            return Collections.emptyList();
-        }
-        List<LoginMethod> aggregated = new ArrayList<>();
-        this.loginMethodContributorProvider.orderedStream().forEach(contributor -> {
-            List<LoginMethod> contributed = contributor.contribute();
-            if (contributed != null && !contributed.isEmpty()) {
-                aggregated.addAll(contributed);
-            }
-        });
-        return aggregated;
     }
 
     private List<LoginMethod> splitPrimary(List<LoginMethod> all, String selectedMethod) {
@@ -202,9 +188,5 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
         this.otpIssueEndpointUri = otpIssueEndpointUri;
     }
 
-    @Autowired(required = false)
-    public void setLoginMethodContributorProvider(
-            ObjectProvider<LoginMethodContributor> loginMethodContributorProvider) {
-        this.loginMethodContributorProvider = loginMethodContributorProvider;
-    }
+
 }

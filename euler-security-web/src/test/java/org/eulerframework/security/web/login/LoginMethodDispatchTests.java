@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.web.endpoint.user.login;
+package org.eulerframework.security.web.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class LoginMethodDispatchTests {
     @Test
     void passwordSubmissionIsReplayedToFormLoginPreservingMethod() {
         LoginMethodDispatch dispatch = passwordHandler().dispatch(
-                "password", registration("password"),
+                passwordRegistration("password"),
                 request(Map.of("username", "alice", "password", "s3cret")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_307, dispatch.getAction());
@@ -50,7 +50,7 @@ class LoginMethodDispatchTests {
     @Test
     void passwordSelectionWithoutCredentialsReturnsItsOwnScreen() {
         LoginMethodDispatch dispatch = passwordHandler().dispatch(
-                "password", registration("password"), request(Map.of()));
+                passwordRegistration("password"), request(Map.of()));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_302, dispatch.getAction());
         assertEquals("/signin?_m=password", dispatch.getLocation());
@@ -64,7 +64,7 @@ class LoginMethodDispatchTests {
     @Test
     void passwordBlankCredentialsStillCountAsSubmission() {
         LoginMethodDispatch dispatch = passwordHandler().dispatch(
-                "password", registration("password"),
+                passwordRegistration("password"),
                 request(Map.of("username", "", "password", "")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_307, dispatch.getAction());
@@ -76,7 +76,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpSelectionWithoutInputReturnsItsCollectionScreen() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "sms", registration("otp"), request(Map.of()));
+                otpRegistration("sms"), request(Map.of()));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_302, dispatch.getAction());
         assertEquals("/signin?_m=sms", dispatch.getLocation());
@@ -90,7 +90,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpTicketWithoutCodeReturnsTheSamePlainScreen() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "sms", registration("otp"), request(Map.of("otp_ticket", "ot_2b8f4e")));
+                otpRegistration("sms"), request(Map.of("otp_ticket", "ot_2b8f4e")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_302, dispatch.getAction());
         assertEquals("/signin?_m=sms", dispatch.getLocation());
@@ -99,7 +99,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpCodeWithoutTicketReturnsTheSamePlainScreen() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "email", registration("otp"), request(Map.of("otp", "123456")));
+                otpRegistration("email"), request(Map.of("otp", "123456")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_302, dispatch.getAction());
         assertEquals("/signin?_m=email", dispatch.getLocation());
@@ -108,7 +108,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpBlankInputIsTreatedAsIncomplete() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "sms", registration("otp"), request(Map.of("otp_ticket", "  ", "otp", "")));
+                otpRegistration("sms"), request(Map.of("otp_ticket", "  ", "otp", "")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_302, dispatch.getAction());
         assertEquals("/signin?_m=sms", dispatch.getLocation());
@@ -121,7 +121,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpCompleteSubmissionIsReplayedPreservingMethod() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "sms", registration("otp"),
+                otpRegistration("sms"),
                 request(Map.of("otp_ticket", "ot_2b8f4e", "otp", "123456")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_307, dispatch.getAction());
@@ -135,7 +135,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpRecipientAloneIsNotACredential() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "sms", registration("otp"),
+                otpRegistration("sms"),
                 request(Map.of("recipient", "+8613800000000", "otp", "123456")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_302, dispatch.getAction());
@@ -149,7 +149,7 @@ class LoginMethodDispatchTests {
     @Test
     void otpRedirectEncodesTheMethodName() {
         LoginMethodDispatch dispatch = otpHandler().dispatch(
-                "sms channel+1", registration("otp"), request(Map.of()));
+                otpRegistration("sms channel+1"), request(Map.of()));
 
         assertEquals("/signin?_m=sms+channel%2B1", dispatch.getLocation());
     }
@@ -164,8 +164,16 @@ class LoginMethodDispatchTests {
         return new OtpLoginMethodHandler(LOGIN_PAGE, METHOD_PARAMETER);
     }
 
-    private static RegisteredLoginMethod registration(String type) {
-        return RegisteredLoginMethod.withId(type).type(type).build();
+    /**
+     * A registration as the contributor hands it to a handler: named,
+     * and of the type that handler serves.
+     */
+    private static RegisteredPasswordLoginMethod passwordRegistration(String name) {
+        return new RegisteredPasswordLoginMethod("password", name, false);
+    }
+
+    private static RegisteredOtpLoginMethod otpRegistration(String name) {
+        return new RegisteredOtpLoginMethod("otp", name, "phone", false, "sms");
     }
 
     /**

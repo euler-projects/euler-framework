@@ -272,10 +272,10 @@ public class OAuth2LoginPrincipalPromotingSuccessHandler
 
     /**
      * Configure the {@code registrationId -> identityType} mapping.
-     * Typically assembled from
-     * {@code euler.security.login-method.*} entries of
-     * {@code method-type=oauth2} by the autoconfigure layer. Unmapped
-     * registrations only sign in already-known users.
+     * Typically assembled from the
+     * {@code euler.security.login-method.oauth2.*} entries by the
+     * autoconfigure layer. Unmapped registrations only sign in
+     * already-known users.
      */
     public void setIdentityTypesByRegistrationId(Map<String, String> identityTypesByRegistrationId) {
         this.identityTypesByRegistrationId = identityTypesByRegistrationId == null
