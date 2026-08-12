@@ -4,7 +4,7 @@ import org.eulerframework.common.http.*;
 import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.core.userdetails.EulerWechatUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
-import org.eulerframework.security.provisioning.JitProvisioningPolicy;
+import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;

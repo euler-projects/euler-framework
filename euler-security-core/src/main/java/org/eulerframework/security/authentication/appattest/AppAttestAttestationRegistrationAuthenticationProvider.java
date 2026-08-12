@@ -22,7 +22,7 @@ import org.eulerframework.security.authentication.appattest.apple.AppleAppAttest
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
-import org.eulerframework.security.provisioning.JitProvisioningPolicy;
+import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;

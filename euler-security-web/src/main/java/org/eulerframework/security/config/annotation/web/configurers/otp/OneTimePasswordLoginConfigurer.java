@@ -23,31 +23,46 @@ import org.eulerframework.security.authentication.otp.OtpRecipientResolver;
 import org.eulerframework.security.authentication.otp.OtpTestAccountSupport;
 import org.eulerframework.security.authentication.otp.OtpTicketIssueAuthenticationProvider;
 import org.eulerframework.security.authentication.otp.OtpTicketService;
+import org.eulerframework.security.web.authentication.otp.OneTimePasswordAuthenticationFilter;
 import org.eulerframework.security.web.authentication.otp.OtpTicketIssueAuthenticationConverter;
 import org.eulerframework.security.web.authentication.otp.OtpTicketIssueEndpointFilter;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.FilterOrderRegistrationAccessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.ott.OneTimeTokenAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 /**
- * An {@link AbstractHttpConfigurer} for the OTP ticket issue endpoint.
+ * An {@link AbstractAuthenticationFilterConfigurer} for one-time-password
+ * (verification-code) login.
  * <p>
- * Registers an {@link OtpTicketIssueEndpointFilter} into the security filter
- * chain. The endpoint is anonymous and CSRF-exempt.
+ * Applying this configurer activates both halves of the two-step OTP flow:
  *
- * <h2>Endpoint</h2>
+ * <h2>Ticket issue endpoint</h2>
  * <ul>
  *     <li>{@code POST /otp/tickets} (default, configurable via
- *         {@link #issueEndpointUri(String)})</li>
+ *         {@link #issueEndpointUri(String)}), anonymous and CSRF-exempt,
+ *         served by {@link OtpTicketIssueEndpointFilter}</li>
+ * </ul>
+ *
+ * <h2>Login endpoint</h2>
+ * <ul>
+ *     <li>{@code POST /login/otp} (default, configurable via
+ *         {@link #loginProcessingUrl(String)}), served by
+ *         {@link OneTimePasswordAuthenticationFilter}; the submission
+ *         carries {@code otp_ticket} + {@code otp}</li>
  * </ul>
  *
  * <h2>Usage</h2>
  * <pre>
- * http.with(new OtpSecurityConfigurer(), otp -&gt; otp
+ * http.with(new OneTimePasswordLoginConfigurer(), otp -&gt; otp
+ *     .loginPage("/login")
  *     .otpChannel(otpChannel)
  *     .recipientResolver(recipientResolver)
  *     .ticketService(ticketService)
@@ -55,16 +70,17 @@ import org.springframework.util.Assert;
  *     .policyResolver(policyResolver)
  * );
  * </pre>
- * Any dependency that is not explicitly set is resolved from the application
- * context as a single bean of the corresponding type, except for
- * {@link OtpRecipientResolver}, which is optional - when absent, requests
+ * Any issue-endpoint dependency that is not explicitly set is resolved from
+ * the application context as a single bean of the corresponding type, except
+ * for {@link OtpRecipientResolver}, which is optional - when absent, requests
  * carrying {@code identity_id} are rejected with {@code invalid_identity_id}.
  *
+ * @see OneTimePasswordAuthenticationFilter
  * @see OtpTicketIssueEndpointFilter
  * @see OtpTicketIssueAuthenticationProvider
  */
-public class OtpSecurityConfigurer
-        extends AbstractHttpConfigurer<OtpSecurityConfigurer, HttpSecurity> {
+public class OneTimePasswordLoginConfigurer
+        extends AbstractAuthenticationFilterConfigurer<HttpSecurity, OneTimePasswordLoginConfigurer, OneTimePasswordAuthenticationFilter> {
 
     public static final String DEFAULT_ISSUE_ENDPOINT_URI = "/otp/tickets";
 
@@ -76,31 +92,36 @@ public class OtpSecurityConfigurer
     private OtpTestAccountSupport testAccountSupport;
     private String issueEndpointUri = DEFAULT_ISSUE_ENDPOINT_URI;
 
-    private RequestMatcher endpointsMatcher;
+    private OtpTicketIssueEndpointFilter issueEndpointFilter;
 
-    // ---- Fluent API ----
+    public OneTimePasswordLoginConfigurer() {
+        super(new OneTimePasswordAuthenticationFilter(),
+                OneTimePasswordAuthenticationFilter.DEFAULT_LOGIN_PROCESSING_URL);
+    }
 
-    public OtpSecurityConfigurer otpChannel(OtpChannel otpChannel) {
+    // ---- Fluent API: issue endpoint dependencies ----
+
+    public OneTimePasswordLoginConfigurer otpChannel(OtpChannel otpChannel) {
         this.otpChannel = otpChannel;
         return this;
     }
 
-    public OtpSecurityConfigurer recipientResolver(OtpRecipientResolver recipientResolver) {
+    public OneTimePasswordLoginConfigurer recipientResolver(OtpRecipientResolver recipientResolver) {
         this.recipientResolver = recipientResolver;
         return this;
     }
 
-    public OtpSecurityConfigurer ticketService(OtpTicketService ticketService) {
+    public OneTimePasswordLoginConfigurer ticketService(OtpTicketService ticketService) {
         this.ticketService = ticketService;
         return this;
     }
 
-    public OtpSecurityConfigurer otpGenerator(OtpGenerator otpGenerator) {
+    public OneTimePasswordLoginConfigurer otpGenerator(OtpGenerator otpGenerator) {
         this.otpGenerator = otpGenerator;
         return this;
     }
 
-    public OtpSecurityConfigurer policyResolver(OtpPolicyResolver policyResolver) {
+    public OneTimePasswordLoginConfigurer policyResolver(OtpPolicyResolver policyResolver) {
         this.policyResolver = policyResolver;
         return this;
     }
@@ -110,50 +131,77 @@ public class OtpSecurityConfigurer
      * resolved recipient matches one of its entries receive the configured
      * fixed OTP and skip real delivery. Pass {@code null} to disable (default).
      */
-    public OtpSecurityConfigurer testAccountSupport(OtpTestAccountSupport testAccountSupport) {
+    public OneTimePasswordLoginConfigurer testAccountSupport(OtpTestAccountSupport testAccountSupport) {
         this.testAccountSupport = testAccountSupport;
         return this;
     }
 
-    public OtpSecurityConfigurer issueEndpointUri(String issueEndpointUri) {
+    public OneTimePasswordLoginConfigurer issueEndpointUri(String issueEndpointUri) {
         Assert.hasText(issueEndpointUri, "issueEndpointUri must not be empty");
         this.issueEndpointUri = issueEndpointUri;
         return this;
     }
 
+    // ---- Fluent API: login ----
+
     /**
-     * Returns a {@link RequestMatcher} that matches all OTP endpoints exposed
-     * by this configurer. May be used externally to broaden security rules.
+     * Specifies the URL to render the login page.
      */
-    public RequestMatcher getEndpointsMatcher() {
-        return (request) -> this.endpointsMatcher != null && this.endpointsMatcher.matches(request);
+    @Override
+    public OneTimePasswordLoginConfigurer loginPage(String loginPage) {
+        return (OneTimePasswordLoginConfigurer) super.loginPage(loginPage);
     }
+
+    // ---- Lifecycle ----
 
     @Override
     public void init(HttpSecurity http) {
-        OtpTicketIssueEndpointFilter filter = new OtpTicketIssueEndpointFilter(
+        this.issueEndpointFilter = new OtpTicketIssueEndpointFilter(
                 new OtpTicketIssueAuthenticationConverter(),
-                createProvider(http),
+                createIssueProvider(http),
                 this.issueEndpointUri);
 
-        this.endpointsMatcher = filter.getRequestMatcher();
+        // The issue endpoint is anonymous and CSRF-exempt; the login
+        // endpoint itself keeps standard CSRF protection like formLogin.
+        http.csrf(csrf -> csrf.ignoringRequestMatchers(this.issueEndpointFilter.getRequestMatcher()));
 
-        // Anonymous + CSRF-exempt
-        http.csrf(csrf -> csrf.ignoringRequestMatchers(this.endpointsMatcher));
-
-        http.setSharedObject(OtpTicketIssueEndpointFilter.class, filter);
+        super.init(http);
     }
 
     @Override
     public void configure(HttpSecurity http) {
-        OtpTicketIssueEndpointFilter filter =
-                http.getSharedObject(OtpTicketIssueEndpointFilter.class);
-        http.addFilterBefore(postProcess(filter), AuthorizationFilter.class);
+        // OneTimePasswordAuthenticationFilter is not part of Spring
+        // Security's built-in filter order registry; register it right
+        // after OneTimeTokenAuthenticationFilter so both one-time
+        // credential filters sit adjacent, before super adds it through
+        // addFilter.
+        FilterOrderRegistrationAccessor.register(http,
+                OneTimePasswordAuthenticationFilter.class,
+                OneTimeTokenAuthenticationFilter.class, 1);
+        super.configure(http);
+        http.addFilterBefore(postProcess(this.issueEndpointFilter), AuthorizationFilter.class);
+    }
+
+    @Override
+    protected RequestMatcher createLoginProcessingUrlMatcher(String loginProcessingUrl) {
+        return PathPatternRequestMatcher.pathPattern(HttpMethod.POST, loginProcessingUrl);
+    }
+
+    /**
+     * Returns a {@link RequestMatcher} that matches all endpoints exposed by
+     * this configurer - the login processing URL and the ticket issue
+     * endpoint. May be used externally to broaden security rules.
+     */
+    public RequestMatcher getEndpointsMatcher() {
+        RequestMatcher loginMatcher = createLoginProcessingUrlMatcher(getLoginProcessingUrl());
+        return (request) -> loginMatcher.matches(request)
+                || (this.issueEndpointFilter != null
+                        && this.issueEndpointFilter.getRequestMatcher().matches(request));
     }
 
     // ---- Dependency resolution ----
 
-    private OtpTicketIssueAuthenticationProvider createProvider(HttpSecurity http) {
+    private OtpTicketIssueAuthenticationProvider createIssueProvider(HttpSecurity http) {
         OtpTicketIssueAuthenticationProvider provider = new OtpTicketIssueAuthenticationProvider(
                 resolvePolicyResolver(http),
                 resolveOtpGenerator(http),

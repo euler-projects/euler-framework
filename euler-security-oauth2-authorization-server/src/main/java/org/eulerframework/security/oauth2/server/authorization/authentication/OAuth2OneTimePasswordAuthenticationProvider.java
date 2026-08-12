@@ -15,28 +15,18 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
-import org.eulerframework.common.util.StringUtils;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
-import org.eulerframework.security.authentication.otp.OtpTicketService;
-import org.eulerframework.security.authentication.otp.OtpVerification;
-import org.eulerframework.security.core.EulerUser;
-import org.eulerframework.security.core.EulerUserService;
-import org.eulerframework.security.core.identity.UserIdentity;
-import org.eulerframework.security.core.identity.UserIdentityService;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.core.userdetails.RandomUsernameGenerator;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
-import org.eulerframework.security.provisioning.JitProvisioningPolicy;
-import org.eulerframework.security.provisioning.JitProvisioningPolicyResolver;
-import org.eulerframework.security.util.UserDetailsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.*;
@@ -56,7 +46,6 @@ import org.springframework.security.oauth2.server.authorization.token.DefaultOAu
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -65,53 +54,27 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * {@link AuthenticationProvider} for {@code grant_type=otp}.
- * <p>
- * Atomically consumes the submitted {@code otp_ticket}, resolves the verified
- * recipient to a user through the identity SPI - auto-provisioning a fresh
- * user when the recipient is unknown - and issues access, refresh and id
- * tokens. A failed OTP verification surfaces as {@code invalid_grant}.
+ * {@link AuthenticationProvider} for {@code grant_type=otp} on the token
+ * endpoint. Issues access, refresh and id tokens once the submitted
+ * one-time password is authenticated; a failed verification surfaces as
+ * {@code invalid_grant}.
  * <p>
  * When the request carries a verified App Attest device, device-to-user
  * consistency is enforced: a device bound to a different user is rejected
  * with {@code invalid_grant}, and an unbound device is bound to the resolved
  * user on first use.
  */
-public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
+public class OAuth2OneTimePasswordAuthenticationProvider implements AuthenticationProvider {
 
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE =
             new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
 
-    /**
-     * Hard-coded {@code OTP channel -> identity_type} mapping. Values
-     * use the public {@code identity_type} namespace surfaced on the
-     * {@code /user/identities} REST surface; the identity SPI keys on
-     * the same namespace.
-     */
-    private static final Map<String, String> CHANNEL_TO_IDENTITY_TYPE = Map.of(
-            "sms", "phone",
-            "email", "email"
-    );
+    private final Logger logger = LoggerFactory.getLogger(OAuth2OneTimePasswordAuthenticationProvider.class);
 
-    private static final Map<String, String> CHANNEL_TO_RAW_SUB_PARAM_NAME = Map.of(
-            "sms", "phone",
-            "email", "email"
-    );
-
-    private final Logger logger = LoggerFactory.getLogger(OAuth2OtpAuthenticationProvider.class);
-
-    private final OtpTicketService otpTicketService;
-    /**
-     * Identity SPI used to reverse-resolve the OTP recipient back to a
-     * user and to auto-provision a binding when the recipient is
-     * unknown.
-     */
-    private final UserIdentityService userIdentityService;
-    private final EulerUserService eulerUserService;
+    private final AuthenticationManager authenticationManager;
     private final OAuth2AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
-    private final JitProvisioningPolicyResolver jitProvisioningPolicyResolver;
 
     /**
      * Optional. When set, the provider enforces device-to-user
@@ -121,24 +84,15 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
      */
     private EulerDeviceUserDetailsService deviceUserDetailsService;
 
-    public OAuth2OtpAuthenticationProvider(OtpTicketService otpTicketService,
-                                           UserIdentityService userIdentityService,
-                                           EulerUserService eulerUserService,
-                                           OAuth2AuthorizationService authorizationService,
-                                           OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
-                                           JitProvisioningPolicyResolver jitProvisioningPolicyResolver) {
-        Assert.notNull(otpTicketService, "otpTicketService must not be null");
-        Assert.notNull(userIdentityService, "userIdentityService must not be null");
-        Assert.notNull(eulerUserService, "eulerUserService must not be null");
+    public OAuth2OneTimePasswordAuthenticationProvider(AuthenticationManager authenticationManager,
+                                                       OAuth2AuthorizationService authorizationService,
+                                                       OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+        Assert.notNull(authenticationManager, "authenticationManager must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
-        Assert.notNull(jitProvisioningPolicyResolver, "jitProvisioningPolicyResolver must not be null");
-        this.otpTicketService = otpTicketService;
-        this.userIdentityService = userIdentityService;
-        this.eulerUserService = eulerUserService;
+        this.authenticationManager = authenticationManager;
         this.authorizationService = authorizationService;
         this.tokenGenerator = tokenGenerator;
-        this.jitProvisioningPolicyResolver = jitProvisioningPolicyResolver;
     }
 
     /**
@@ -153,7 +107,7 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2OtpAuthenticationToken otpAuthenticationToken = (OAuth2OtpAuthenticationToken) authentication;
+        OAuth2OneTimePasswordAuthenticationToken otpAuthenticationToken = (OAuth2OneTimePasswordAuthenticationToken) authentication;
 
         OAuth2ClientAuthenticationToken clientPrincipal =
                 OAuth2AuthenticationProviderUtilsAccessor.getAuthenticatedClientElseThrowInvalidClient(otpAuthenticationToken);
@@ -165,58 +119,27 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
         validateScope(otpAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(otpAuthenticationToken.getScopes());
 
-        // 1. Atomically consume the OTP ticket. consume() performs the OTP
-        //    value match.
-        OtpVerification verification;
+        // Complete the user-level one-time-password authentication through
+        // the shared AuthenticationManager.
+        Authentication userPrincipal;
         try {
-            verification = this.otpTicketService.consume(
-                    otpAuthenticationToken.getOtpTicket(),
-                    otpAuthenticationToken.getOtp(),
-                    null);
-        } catch (RuntimeException e) {
+            userPrincipal = this.authenticationManager.authenticate(otpAuthenticationToken.getUserPrincipal());
+        } catch (AuthenticationException e) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
                     "OTP verification failed", ERROR_URI), e);
         }
-        if (verification == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
-                    "OTP verification failed", ERROR_URI));
+        if (!userPrincipal.isAuthenticated()) {
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
         }
 
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace("Consumed OTP ticket id='{}' channel='{}'",
-                    verification.ticketId(), verification.channel());
-        }
-
-        // 2. Reverse-resolve (identity_type, recipient) -> userId via
-        //    the identity SPI. The grant does not know how a per-type
-        //    backend derives its persisted `subject` field (phone hash /
-        //    email normalize+hash / wechat openid pass-through / ...);
-        //    it merely picks the identity_type and asks who owns the
-        //    raw value.
-        String identityType = resolveIdentityType(verification.channel());
-        String rawSubjectParamName = resolveRawSubjectParamName(verification.channel());
-        String rawSubject = verification.recipient();
-        UserIdentity identity = this.userIdentityService
-                .findUserIdentityByRawSubject(identityType, rawSubject)
-                .orElseGet(() -> autoProvisionUser(identityType, rawSubjectParamName, rawSubject));
-
-        // 3. If the request carries a verified App Attest device (set by
-        //    EulerOAuth2AttestationBasedClientAuthenticationFilter), enforce
-        //    device-to-user consistency before token issuance.
+        // If the request carries a verified App Attest device (set by
+        // EulerOAuth2AttestationBasedClientAuthenticationFilter), enforce
+        // device-to-user consistency before token issuance.
         AppAttestAttestationRegistration verifiedAppRegistration =
                 (AppAttestAttestationRegistration) otpAuthenticationToken.getAdditionalParameters()
                         .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
-        enforceDeviceConsistency(verifiedAppRegistration, identity.getUserId());
-
-        EulerUser eulerUser = this.eulerUserService.loadUserById(identity.getUserId());
-        EulerUserDetails userDetails = UserDetailsUtils.toEulerUserDetails(eulerUser);
-        if (userDetails == null || CollectionUtils.isEmpty(userDetails.getAuthorities())) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT,
-                    "Failed to load user after auto-provision", ERROR_URI));
-        }
-
-        UsernamePasswordAuthenticationToken userPrincipal = UsernamePasswordAuthenticationToken.authenticated(
-                userDetails, null, userDetails.getAuthorities());
+        OneTimePasswordAuthenticationToken otpResult = (OneTimePasswordAuthenticationToken) userPrincipal;
+        enforceDeviceConsistency(verifiedAppRegistration, otpResult.getUserIdentity().getUserId());
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userPrincipal.getName())
@@ -314,10 +237,10 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return OAuth2OtpAuthenticationToken.class.isAssignableFrom(authentication);
+        return OAuth2OneTimePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateScope(OAuth2OtpAuthenticationToken token, RegisteredClient registeredClient) {
+    private void validateScope(OAuth2OneTimePasswordAuthenticationToken token, RegisteredClient registeredClient) {
         Set<String> requestedScopes = token.getScopes();
         Set<String> allowedScopes = registeredClient.getScopes();
         if (!requestedScopes.isEmpty() && !allowedScopes.containsAll(requestedScopes)) {
@@ -326,72 +249,6 @@ public class OAuth2OtpAuthenticationProvider implements AuthenticationProvider {
             }
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));
         }
-    }
-
-    private static String resolveIdentityType(String channel) {
-        String identityType = CHANNEL_TO_IDENTITY_TYPE.get(channel);
-        if (identityType == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(
-                    OAuth2ErrorCodes.INVALID_GRANT,
-                    "Unsupported OTP channel: " + channel,
-                    ERROR_URI));
-        }
-        return identityType;
-    }
-
-    private static String resolveRawSubjectParamName(String channel) {
-        String attributeName = CHANNEL_TO_RAW_SUB_PARAM_NAME.get(channel);
-        if (attributeName == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(
-                    OAuth2ErrorCodes.INVALID_GRANT,
-                    "Unsupported OTP channel: " + channel,
-                    ERROR_URI));
-        }
-        return attributeName;
-    }
-
-    /**
-     * Auto-provision a fresh user and bind {@code (identityType, rawSubject)}
-     * to it via the pre-verified prototype entry
-     * {@link UserIdentityService#createUserIdentity(String, UserIdentity)}.
-     *
-     * <p>An OTP-grant request whose recipient is unknown is treated as
-     * an implicit signup, subject to the {@link JitProvisioningPolicy}
-     * resolved for the identity type. The username is generated through
-     * {@link RandomUsernameGenerator#generate()} (form
-     * {@code user_<base64url12>}) so the recipient never leaks into
-     * the local username; the password is a {@code {noop}}-prefixed
-     * random string (OTP-only login, no password authentication path);
-     * authorities come from the policy.
-     *
-     * <p>This grant handles {@code identity_type ∈ {phone, email}}.
-     * For both, the raw subject is attached to the prototype as an
-     * extension attribute whose key equals the {@code identity_type}
-     * string itself (e.g. {@code "phone"} for the phone backend); the
-     * backend reads it back under the same key.
-     */
-    private UserIdentity autoProvisionUser(String identityType, String rawSubjectParamName, String rawSubject) {
-        JitProvisioningPolicy jitProvisioning = this.jitProvisioningPolicyResolver.resolve(identityType);
-        if (!jitProvisioning.isEnabled()) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(
-                    OAuth2ErrorCodes.INVALID_GRANT,
-                    "unknown recipient and JIT provisioning is disabled", ERROR_URI));
-        }
-        EulerUserDetails newUser = EulerUserDetails.builder()
-                .username(RandomUsernameGenerator.generate())
-                .password("{noop}" + StringUtils.randomString(32))
-                .authorities(jitProvisioning.defaultAuthoritiesArray())
-                .build();
-        EulerUser createdUser = this.eulerUserService.createUser(newUser);
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug("JIT-provisioned user '{}' for OTP identity_type='{}'",
-                    createdUser.getUserId(), identityType);
-        }
-        UserIdentity prototype = UserIdentity.builder()
-                .identityType(identityType)
-                .property(rawSubjectParamName, rawSubject)
-                .build();
-        return this.userIdentityService.createUserIdentity(createdUser.getUserId(), prototype);
     }
 
     /**

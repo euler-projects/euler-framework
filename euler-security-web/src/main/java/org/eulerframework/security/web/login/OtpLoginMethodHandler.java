@@ -71,13 +71,11 @@ public class OtpLoginMethodHandler implements LoginMethodHandler {
     private static final String PARAM_OTP = "otp";
 
     /**
-     * Where a complete submission is replayed.
-     *
-     * <p>TODO placeholder: the OTP login endpoint does not exist yet.
-     * Once it does, this should become a configurable endpoint, the way
-     * the formLogin processing URL already is.
+     * Where a complete submission is replayed: the one-time-password login
+     * processing URL registered by the oneTimePasswordLogin configurer
+     * ({@code OneTimePasswordAuthenticationFilter}).
      */
-    private static final String OTP_LOGIN_PROCESSING_URL = "/otp/login";
+    private final String loginProcessingUrl;
 
     private static final Map<String, String> CANONICAL_CHANNEL_MAP = Map.of(
             "phone", "sms",
@@ -90,14 +88,18 @@ public class OtpLoginMethodHandler implements LoginMethodHandler {
     private final String methodParameter;
 
     /**
-     * @param loginPageUrl    the login page GET URL
-     * @param methodParameter the dispatch method parameter name
+     * @param loginPageUrl      the login page GET URL
+     * @param methodParameter   the dispatch method parameter name
+     * @param loginProcessingUrl the one-time-password login processing URL
+     *                           ({@code POST {login-processing-url}})
      */
-    public OtpLoginMethodHandler(String loginPageUrl, String methodParameter) {
+    public OtpLoginMethodHandler(String loginPageUrl, String methodParameter, String loginProcessingUrl) {
         Assert.hasText(loginPageUrl, "loginPageUrl is required");
         Assert.hasText(methodParameter, "methodParameter is required");
+        Assert.hasText(loginProcessingUrl, "loginProcessingUrl is required");
         this.loginPageUrl = loginPageUrl;
         this.methodParameter = methodParameter;
+        this.loginProcessingUrl = loginProcessingUrl;
     }
 
     @Override
@@ -127,7 +129,7 @@ public class OtpLoginMethodHandler implements LoginMethodHandler {
                 && StringUtils.hasText(request.getParameter(PARAM_OTP))) {
             // Ticket and code both rode along, so hand this very POST to
             // the endpoint that verifies them.
-            return LoginMethodDispatch.redirectPreservingMethod(OTP_LOGIN_PROCESSING_URL);
+            return LoginMethodDispatch.redirectPreservingMethod(this.loginProcessingUrl);
         }
         // Incomplete: return this method's collection screen and let the
         // client obtain a ticket and gather the code. Which half is

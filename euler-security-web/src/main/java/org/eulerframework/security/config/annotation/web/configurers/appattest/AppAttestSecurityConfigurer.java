@@ -22,7 +22,7 @@ import org.eulerframework.security.authentication.appattest.AppAttestAttestation
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
-import org.eulerframework.security.provisioning.JitProvisioningPolicy;
+import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationAuthenticationConverter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationEndpointFilter;

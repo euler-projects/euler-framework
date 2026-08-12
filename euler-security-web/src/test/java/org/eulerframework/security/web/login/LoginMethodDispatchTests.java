@@ -33,6 +33,7 @@ class LoginMethodDispatchTests {
 
     private static final String LOGIN_PAGE = "/signin";
     private static final String LOGIN_PROCESSING_URL = "/doLogin";
+    private static final String OTP_LOGIN_PROCESSING_URL = "/login/otp";
     private static final String METHOD_PARAMETER = "_m";
 
     // ---------- password ----------
@@ -125,7 +126,7 @@ class LoginMethodDispatchTests {
                 request(Map.of("otp_ticket", "ot_2b8f4e", "otp", "123456")));
 
         assertEquals(LoginMethodDispatch.Action.REDIRECT_307, dispatch.getAction());
-        assertEquals("/otp/login", dispatch.getLocation());
+        assertEquals(OTP_LOGIN_PROCESSING_URL, dispatch.getLocation());
     }
 
     /**
@@ -161,7 +162,7 @@ class LoginMethodDispatchTests {
     }
 
     private static OtpLoginMethodHandler otpHandler() {
-        return new OtpLoginMethodHandler(LOGIN_PAGE, METHOD_PARAMETER);
+        return new OtpLoginMethodHandler(LOGIN_PAGE, METHOD_PARAMETER, OTP_LOGIN_PROCESSING_URL);
     }
 
     /**

@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.web.endpoint.user;
 
-import org.eulerframework.security.config.annotation.web.configurers.otp.OtpSecurityConfigurer;
+import org.eulerframework.security.config.annotation.web.configurers.otp.OneTimePasswordLoginConfigurer;
 import org.eulerframework.security.web.endpoint.EulerSecurityEndpoints;
 import org.eulerframework.security.web.login.LoginMethod;
 import org.eulerframework.security.web.login.LoginMethodService;
@@ -183,7 +183,7 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
      * points at the endpoint actually serving tickets.
      */
     @Value("${euler.security.authentication.otp.issue-endpoint-uri:"
-            + OtpSecurityConfigurer.DEFAULT_ISSUE_ENDPOINT_URI + "}")
+            + OneTimePasswordLoginConfigurer.DEFAULT_ISSUE_ENDPOINT_URI + "}")
     public void setOtpIssueEndpointUri(String otpIssueEndpointUri) {
         this.otpIssueEndpointUri = otpIssueEndpointUri;
     }

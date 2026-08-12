@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eulerframework.security.provisioning;
+package org.eulerframework.security.provisioning.jit;
 
 /**
  * Resolves the {@link JitProvisioningPolicy} applied to a given identity

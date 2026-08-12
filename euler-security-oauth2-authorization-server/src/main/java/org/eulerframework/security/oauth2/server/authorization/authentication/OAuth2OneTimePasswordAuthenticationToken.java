@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
@@ -28,42 +29,34 @@ import java.util.Set;
 
 /**
  * Unauthenticated grant token for {@code grant_type=otp}, carrying the
- * {@code otp_ticket} id and the {@code otp} value submitted at the token
- * endpoint.
+ * user-level {@link OneTimePasswordAuthenticationToken} built from the
+ * submitted {@code otp_ticket} id and {@code otp} value.
  * <p>
  * A verified App Attest registration, when present, is propagated through
  * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters()
- * additionalParameters} and handled by {@code OAuth2OtpAuthenticationProvider}.
+ * additionalParameters} and handled by {@code OAuth2OneTimePasswordAuthenticationProvider}.
  */
-public class OAuth2OtpAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+public class OAuth2OneTimePasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
-    private final String otpTicket;
-    private final String otp;
+    private final OneTimePasswordAuthenticationToken userPrincipal;
     private final Set<String> scopes;
 
-    public OAuth2OtpAuthenticationToken(
-            String otpTicket,
-            String otp,
+    public OAuth2OneTimePasswordAuthenticationToken(
+            OneTimePasswordAuthenticationToken userPrincipal,
             Authentication clientPrincipal,
             @Nullable Set<String> scopes,
             @Nullable Map<String, Object> additionalParameters) {
         super(EulerAuthorizationGrantType.OTP, clientPrincipal, additionalParameters);
-        Assert.hasText(otpTicket, "otpTicket must not be empty");
-        Assert.hasText(otp, "otp must not be empty");
-        this.otpTicket = otpTicket;
-        this.otp = otp;
+        Assert.notNull(userPrincipal, "userPrincipal must not be null");
+        this.userPrincipal = userPrincipal;
         this.scopes = Collections.unmodifiableSet(
                 scopes != null ?
                         new HashSet<>(scopes) :
                         Collections.emptySet());
     }
 
-    public String getOtpTicket() {
-        return otpTicket;
-    }
-
-    public String getOtp() {
-        return otp;
+    public OneTimePasswordAuthenticationToken getUserPrincipal() {
+        return userPrincipal;
     }
 
     public Set<String> getScopes() {

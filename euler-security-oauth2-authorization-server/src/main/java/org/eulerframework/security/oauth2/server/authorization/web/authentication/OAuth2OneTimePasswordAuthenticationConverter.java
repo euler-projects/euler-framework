@@ -17,9 +17,10 @@ package org.eulerframework.security.oauth2.server.authorization.web.authenticati
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
-import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2OtpAuthenticationToken;
+import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,7 +41,7 @@ import java.util.Set;
 
 /**
  * Parses {@code POST /oauth2/token} form parameters when {@code grant_type=otp}
- * and builds an {@link OAuth2OtpAuthenticationToken}.
+ * and builds an {@link OAuth2OneTimePasswordAuthenticationToken}.
  * <p>
  * Required parameters: {@code otp_ticket}, {@code otp}. Optional: {@code scope}
  * (single, space-delimited).
@@ -48,7 +49,7 @@ import java.util.Set;
  * The sensitive {@code otp} parameter is stripped from
  * {@code additionalParameters} so it cannot leak through audit / logging.
  */
-public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter {
+public class OAuth2OneTimePasswordAuthenticationConverter implements AuthenticationConverter {
 
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
@@ -117,8 +118,8 @@ public class OAuth2OtpAuthenticationConverter implements AuthenticationConverter
                     verifiedAppRegistration);
         }
 
-        return new OAuth2OtpAuthenticationToken(
-                otpTicket, otp,
+        return new OAuth2OneTimePasswordAuthenticationToken(
+                OneTimePasswordAuthenticationToken.unauthenticated(otpTicket, otp),
                 clientPrincipal, scopes, additionalParameters);
     }
 

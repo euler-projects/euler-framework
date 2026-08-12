@@ -16,12 +16,8 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.eulerframework.security.core.identity.UserIdentityService;
-import org.eulerframework.security.authentication.otp.OtpTicketService;
-import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
-import org.eulerframework.security.provisioning.JitProvisioningPolicy;
-import org.eulerframework.security.provisioning.JitProvisioningPolicyResolver;
+import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.authentication.*;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
@@ -29,7 +25,7 @@ import org.eulerframework.security.oauth2.server.authorization.converter.EulerRe
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OtpAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OneTimePasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -115,23 +111,13 @@ public class EulerAuthorizationServerConfiguration {
      * Register the {@code grant_type=otp} converter and provider on the
      * authorization server's token endpoint.
      *
-     * @param http                the {@link HttpSecurity} being built
-     * @param otpTicketService    store from which submitted OTP tickets are
-     *                            consumed
-     * @param userIdentityService identity SPI used to resolve the OTP
-     *                            recipient to a user
-     * @param eulerUserService    user service used to load the resolved user
-     * @param jitProvisioningPolicyResolver resolver supplying the JIT
-     *                            provisioning policy for the identity
-     *                            type of an unknown OTP recipient
+     * @param http                      the {@link HttpSecurity} being built
+     * @param authenticationConfiguration access point to the shared
+     *                                  {@link org.springframework.security.authentication.AuthenticationManager}
      */
     public static void configOtpAuthentication(HttpSecurity http,
-                                                OtpTicketService otpTicketService,
-                                                UserIdentityService userIdentityService,
-                                                EulerUserService eulerUserService,
-                                                JitProvisioningPolicyResolver jitProvisioningPolicyResolver) {
-        configOtpAuthentication(http, otpTicketService, userIdentityService,
-                eulerUserService, jitProvisioningPolicyResolver, null);
+                                                AuthenticationConfiguration authenticationConfiguration) {
+        configOtpAuthentication(http, authenticationConfiguration, null);
     }
 
     /**
@@ -142,32 +128,22 @@ public class EulerAuthorizationServerConfiguration {
      * to OTP requests is ignored.
      */
     public static void configOtpAuthentication(HttpSecurity http,
-                                                OtpTicketService otpTicketService,
-                                                UserIdentityService userIdentityService,
-                                                EulerUserService eulerUserService,
-                                                JitProvisioningPolicyResolver jitProvisioningPolicyResolver,
+                                                AuthenticationConfiguration authenticationConfiguration,
                                                 EulerDeviceUserDetailsService deviceUserDetailsService) {
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
                 .tokenEndpoint(configurer -> configurer
-                        .authenticationProvider(getOAuth2OtpAuthenticationProvider(http, otpTicketService,
-                                userIdentityService, eulerUserService, jitProvisioningPolicyResolver, deviceUserDetailsService))
-                        .accessTokenRequestConverter(new OAuth2OtpAuthenticationConverter())));
+                        .authenticationProvider(getOAuth2OneTimePasswordAuthenticationProvider(http, authenticationConfiguration, deviceUserDetailsService))
+                        .accessTokenRequestConverter(new OAuth2OneTimePasswordAuthenticationConverter())));
     }
 
-    private static OAuth2OtpAuthenticationProvider getOAuth2OtpAuthenticationProvider(HttpSecurity http,
-                                                                                       OtpTicketService otpTicketService,
-                                                                                       UserIdentityService userIdentityService,
-                                                                                       EulerUserService eulerUserService,
-                                                                                       JitProvisioningPolicyResolver jitProvisioningPolicyResolver,
+    private static OAuth2OneTimePasswordAuthenticationProvider getOAuth2OneTimePasswordAuthenticationProvider(HttpSecurity http,
+                                                                                       AuthenticationConfiguration authenticationConfiguration,
                                                                                        EulerDeviceUserDetailsService deviceUserDetailsService) {
         try {
-            OAuth2OtpAuthenticationProvider provider = new OAuth2OtpAuthenticationProvider(
-                    otpTicketService,
-                    userIdentityService,
-                    eulerUserService,
+            OAuth2OneTimePasswordAuthenticationProvider provider = new OAuth2OneTimePasswordAuthenticationProvider(
+                    authenticationConfiguration.getAuthenticationManager(),
                     OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
-                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http),
-                    jitProvisioningPolicyResolver
+                    OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http)
             );
             if (deviceUserDetailsService != null) {
                 provider.setDeviceUserDetailsService(deviceUserDetailsService);

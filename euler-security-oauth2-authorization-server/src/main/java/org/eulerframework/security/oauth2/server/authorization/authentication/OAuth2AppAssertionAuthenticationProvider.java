@@ -60,7 +60,7 @@ import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsServic
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
-import org.eulerframework.security.provisioning.JitProvisioningPolicy;
+import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 
 /**
  * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type.
