@@ -1,0 +1,97 @@
+/*
+ * tokens.css
+ *
+ * Design tokens for the euler-security-web reference pages (login /
+ * logout / signup / change-password).
+ *
+ * The variable names and values are the shadcn/ui "neutral" palette,
+ * copied verbatim from what the shadcn CLI generates. Deliberately so:
+ * an application that replaces these reference pages with its own
+ * shadcn-based build inherits the same token names, and redefining a
+ * variable here rebrands both at once. Nothing in this file depends on
+ * Tailwind, React or any build step - it is plain CSS custom properties.
+ *
+ * This is the only file an integrator needs to override to retheme the
+ * reference pages. Place a copy at the same path in the application's
+ * own src/main/resources/META-INF/resources/ and it shadows this one,
+ * exactly like a template under src/main/resources/templates/ shadows
+ * the packaged default.
+ *
+ * Browser floor: oklch() and color-mix() - Chrome/Edge 111+, Safari
+ * 16.2+, Firefox 113+. No sRGB fallback is provided on purpose; keeping
+ * a second copy of every colour in sync costs more than the reach it
+ * buys. Override this file if an integrator needs one.
+ */
+
+:root {
+    /* ---- Radius scale (shadcn) ---- */
+    --radius: 0.625rem;
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+
+    /* ---- Colour (shadcn neutral, light) ---- */
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+
+    /*
+     * Reference-page metrics. Not part of the shadcn set; exposed as
+     * tokens because they are the two values an integrator most often
+     * wants to change without touching component rules. Heights match
+     * shadcn's default `h-9` control size.
+     */
+    --single-form-width: 20rem;
+    --control-height: 2.25rem;
+
+    color-scheme: light;
+}
+
+/*
+ * Opt-in dark theme, activated by a `dark` class on <html> - the same
+ * convention shadcn uses (`@custom-variant dark (&:is(.dark *))`), so an
+ * integrator can flip both surfaces from one place. Not wired to
+ * prefers-color-scheme automatically: the reference pages have no theme
+ * toggle to persist a choice, and guessing wrong on a login screen is
+ * worse than staying light.
+ */
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.205 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+
+    color-scheme: dark;
+}

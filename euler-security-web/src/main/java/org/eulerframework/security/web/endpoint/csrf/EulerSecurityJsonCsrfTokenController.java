@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EulerSecurityJsonCsrfTokenController extends ApiSupportWebController implements EulerSecurityCsrfTokenEndpoint {
     private boolean csrfEnabled;
 
-    @GetMapping("${" + EulerSecurityEndpoints.CSRF_PATH_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_PATH + "}")
+    @GetMapping("${" + EulerSecurityEndpoints.CSRF_FETCHING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_FETCHING_URL + "}")
     public DefaultCsrfToken csrf() {
         if (!this.csrfEnabled) {
             throw new ResourceNotFoundException();

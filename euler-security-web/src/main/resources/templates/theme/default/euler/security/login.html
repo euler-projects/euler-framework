@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/assets/euler/security/css/tokens.css}">
     <link rel="stylesheet" th:href="@{/assets/euler/security/css/single-form.css}">
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
@@ -60,8 +61,15 @@
               * uniform route so the dispatch contract is visible end to
               * end.
               *
-              * Wording: labels resolve from _PROVIDER_* / _CHANNEL_*
-              * messages and fall back to the raw attribute token.
+              * Wording: labels resolve from _PROVIDER_* / _CHANNEL_* /
+              * _<TYPE> messages and fall back to the raw token that
+              * identifies the method.
+              *
+              * Styling: a method is not a kind of button. The classes
+              * here name what an element is - a login-method button, its
+              * label, its mark slot - never which type the backend
+              * classified it as, so the only name-bearing class in the
+              * stylesheet is the one painting a brand's logo.
               */-->
             <!--/* ======== PRIMARY LOGIN METHODS (expanded) ======== */-->
             <th:block th:each="method : ${primaryLoginMethods}" th:switch="${method.type}">
@@ -83,68 +91,117 @@
                     </div>
                     <input type="hidden" th:name="${loginSuccessRedirectParameter}" th:if="${param.get(loginSuccessRedirectParameter)}" th:value="${param.get(loginSuccessRedirectParameter)[0]}"/>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-success" th:text="#{_SIGN_IN}">Sign In</button>
+                        <button type="submit" class="btn btn-primary btn-block" th:text="#{_SIGN_IN}">Sign In</button>
                     </div>
                 </form>
 
                 <!--/*
-                  * OTP: the user fills in two things - recipient and
-                  * code - but the login submission carries the pair
-                  * otp_ticket + otp, and nothing else.
+                  * OTP: a two-step flow over a single <form>.
                   *
-                  * The recipient never reaches this form: it is the input
-                  * to a separate call that is not a login submission at
-                  * all. Pressing the send button POSTs channel +
-                  * recipient to the OTP issue endpoint, which answers
-                  * with an otp_ticket while the code travels out of band
-                  * to the recipient; euler-form.js drops that ticket into
-                  * the hidden field below. Hence the recipient input has
-                  * an id but no name.
+                  * Step one collects the recipient and step two collects
+                  * the code, but the login submission carries the pair
+                  * otp_ticket + otp and nothing else - exactly what
+                  * dispatch judges complete and replays (307) to the OTP
+                  * login endpoint.
                   *
-                  * TODO OTP web login is unfinished: the endpoint the
-                  * completed pair is forwarded to does not exist yet, so
-                  * submitting here cannot sign in.
+                  * The recipient never reaches that submission: it is the
+                  * input to a separate call that is not a login submission
+                  * at all. Pressing continue POSTs channel + recipient to
+                  * the OTP issue endpoint, which answers with an
+                  * otp_ticket while the code travels out of band to the
+                  * recipient; euler-form.js drops that ticket into the
+                  * hidden field below and moves to step two. Hence the
+                  * recipient input carries an id and markers but no name -
+                  * a control without a name is not submitted.
+                  *
+                  * Nothing here routes between the steps. The panels are
+                  * rendered stacked and the script makes them mutually
+                  * exclusive, so a visitor with scripting off still gets a
+                  * working single form: recipient, continue (which still
+                  * issues the ticket), code, sign in.
+                  *
+                  * The issue configuration sits on the <form> rather than
+                  * on a button because two triggers share it - continue on
+                  * step one, resend on step two.
                   */-->
                 <form th:case="'otp'"
                       th:action="@{${loginMethodProcessingUrl}(__${loginMethodParameter}__=${method.name})}"
                       class="full-line-form"
-                      method="post">
-                    <div class="form-group">
-                        <input type="text" id="otp-recipient" class="form-control"
-                               autocomplete="tel email"
-                               placeholder="Phone or Email" th:placeholder="#{_PHONE_OR_EMAIL}">
+                      method="post"
+                      data-otp-flow
+                      th:data-otp-channel="${method.attributes['channel']}"
+                      th:data-otp-issue-url="@{${otpIssueEndpointUri}}"
+                      th:data-otp-sent-message="#{_ENTER_CODE_SENT_TO}"
+                      th:data-otp-failed-message="#{_SEND_CODE_FAILED}">
+
+                    <!--/* ---- Step one: where to send the code ---- */-->
+                    <div class="otp-step" data-otp-step="recipient">
+                        <label class="form-heading" for="otp-recipient"
+                               th:text="${method.attributes['channel'] == 'email'} ? #{_ENTER_YOUR_EMAIL} : #{_ENTER_YOUR_PHONE}">Enter your email</label>
+                        <p class="field-description" th:text="#{_WE_WILL_SEND_YOU_A_CODE}">We will send you a verification code</p>
+                        <div class="form-group">
+                            <input type="text" id="otp-recipient" class="form-control" data-otp-recipient
+                                   th:autocomplete="${method.attributes['channel'] == 'email'} ? 'email' : 'tel'"
+                                   placeholder="Email"
+                                   th:placeholder="${method.attributes['channel'] == 'email'} ? #{_EMAIL} : #{_PHONE_OR_EMAIL}">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary btn-block" data-otp-issue
+                                    th:text="#{_CONTINUE}">Continue</button>
+                        </div>
                     </div>
-                    <input type="hidden" name="otp_ticket" id="otp-ticket"/>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-secondary"
-                                th:attr="data-otp-issue-url=@{${otpIssueEndpointUri}},
-                                         data-otp-channel=${method.attributes['channel']},
-                                         data-otp-recipient='otp-recipient',
-                                         data-otp-ticket='otp-ticket',
-                                         data-otp-sent-message=#{_CODE_SENT},
-                                         data-otp-failed-message=#{_SEND_CODE_FAILED}"
-                                th:text="#{_SEND_CODE}">Send Code</button>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" name="otp" class="form-control"
-                               autocomplete="one-time-code"
-                               placeholder="Verification code" th:placeholder="#{_VERIFICATION_CODE}">
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary" th:text="#{_SIGN_IN}">Sign In</button>
+
+                    <!--/* ---- Step two: the code itself ---- */-->
+                    <div class="otp-step" data-otp-step="code">
+                        <label class="form-heading" for="otp-code" th:text="#{_VERIFICATION_CODE}">Verification code</label>
+                        <p class="field-description" data-otp-sent hidden th:text="#{_CODE_SENT}">Verification code sent</p>
+                        <input type="hidden" name="otp_ticket" id="otp-ticket"/>
+                        <input type="hidden" th:name="${loginSuccessRedirectParameter}"
+                               th:if="${param.get(loginSuccessRedirectParameter)}"
+                               th:value="${param.get(loginSuccessRedirectParameter)[0]}"/>
+                        <div class="form-group">
+                            <!--/*
+                              * One real control; euler-form.js mirrors it into
+                              * one presentational slot per digit. The count comes
+                              * from the OTP policy rather than being hard-coded
+                              * here, so a deployment issuing 8-digit codes gets
+                              * 8 slots and no truncated submission.
+                              */-->
+                            <input type="text" name="otp" id="otp-code" class="form-control"
+                                   data-otp-code th:data-otp-length="${otpLength}"
+                                   autocomplete="one-time-code" inputmode="numeric"
+                                   placeholder="Verification code" th:placeholder="#{_VERIFICATION_CODE}">
+                        </div>
+                        <p class="form-control-feedback-msg" data-otp-error hidden
+                           th:text="#{_INVALID_OTP}">Incorrect verification code. Try again.</p>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block" th:text="#{_SIGN_IN}">Sign In</button>
+                        </div>
+                        <div class="otp-flow-actions">
+                            <button type="button" class="btn btn-link" data-otp-back th:text="#{_BACK}">Back</button>
+                            <button type="button" class="btn btn-link" data-otp-issue th:text="#{_RESEND_CODE}">Resend code</button>
+                        </div>
                     </div>
                 </form>
 
-                <!--/* OAUTH2: single button (even when primary) */-->
+                <!--/*
+                  * OAUTH2: single button (even when primary). Wording and
+                  * mark are resolved exactly as in the secondary group
+                  * below, which documents the two-step lookup.
+                  */-->
                 <form th:case="'oauth2'"
                       th:action="@{${loginMethodProcessingUrl}(__${loginMethodParameter}__=${method.name})}"
                       class="full-line-form login-method-form"
-                      method="post">
-                    <button type="submit" class="btn"
-                            th:classappend="|btn-oauth2 btn-oauth2-${method.attributes['provider']}|">
-                        <span class="btn-oauth2-icon" aria-hidden="true"></span>
-                        <span class="btn-oauth2-label"
-                              th:text="#{_SIGN_IN_WITH(${#messages.msgOrNull('_PROVIDER_' + method.attributes['provider']) ?: method.attributes['provider']})}">Sign in with Google</span>
+                      method="post"
+                      th:with="mark=${method.attributes['provider']},
+                               nameKey=${'_PROVIDER_' + method.attributes['provider']},
+                               resolved=${#messages.msgOrNull(nameKey)},
+                               name=${resolved == null or resolved == nameKey ? mark : resolved}">
+                    <button type="submit" class="btn btn-login-method">
+                        <span class="btn-login-method-mark" aria-hidden="true"
+                              th:classappend="|btn-login-method-mark-${mark}|"></span>
+                        <span class="btn-login-method-label"
+                              th:text="${euler.text.autospace(#messages.msg('_SIGN_IN_WITH', name))}">Sign in with Google</span>
                     </button>
                 </form>
 
@@ -155,31 +212,61 @@
                  th:if="${secondaryLoginMethods != null and !secondaryLoginMethods.isEmpty()}">
                 <div class="login-methods-divider"><span th:text="#{_OR}">or</span></div>
                 <!--/*
-                  * Uniform submission, type-specific presentation: the
-                  * form carries nothing but the POST (and its CSRF
-                  * token), the button inside owns label and branding.
+                  * Uniform submission, uniform presentation: the form
+                  * carries nothing but the POST (and its CSRF token), and
+                  * the button inside is the same button for every method.
                   * Picking a method that still needs input is answered
                   * with 302 to that method's own screen; a method that
                   * needs none (oauth2) starts its flow immediately.
+                  *
+                  * One button serves them all because nothing about its
+                  * markup depends on the type. What a method contributes
+                  * is a name to address it by and, optionally, a mark to
+                  * recognise it by; both are read off the method here, so
+                  * a type this page has never heard of renders correctly
+                  * the moment the backend offers it.
+                  *
+                  * Both are keyed by the same token, whichever of the
+                  * method's own words identifies it - a provider, a
+                  * channel, else the type itself. Exactly one message key
+                  * is built from that token, and it is built from the
+                  * token that exists: a key assembled out of an absent
+                  * attribute would read _PROVIDER_null, and a deployment
+                  * running with spring.messages.use-code-as-default-
+                  * message would then print it. For the same reason a
+                  * resolved value equal to its own key counts as absent,
+                  * so the fall back to the raw token holds whichever way
+                  * that setting is left.
+                  *
+                  * Adding an IdP, a channel or a whole type therefore
+                  * needs no change here; the mark slot stays invisible
+                  * until the stylesheet ships an image for that token,
+                  * which is why the unbranded methods are plain centred
+                  * labels.
+                  *
+                  * Labels run through euler.text.autospace, which
+                  * separates a Latin name from the ideographs around it
+                  * and leaves a name written in the page's own script
+                  * alone.
                   */-->
                 <form th:each="method : ${secondaryLoginMethods}"
                       th:action="@{${loginMethodProcessingUrl}(__${loginMethodParameter}__=${method.name})}"
-                      th:switch="${method.type}"
                       class="login-method-form"
-                      method="post">
-                    <button th:case="'oauth2'" type="submit" class="btn"
-                            th:classappend="|btn-oauth2 btn-oauth2-${method.attributes['provider']}|">
-                        <span class="btn-oauth2-icon" aria-hidden="true"></span>
-                        <span class="btn-oauth2-label"
-                              th:text="#{_SIGN_IN_WITH(${#messages.msgOrNull('_PROVIDER_' + method.attributes['provider']) ?: method.attributes['provider']})}">Sign in with Google</span>
+                      method="post"
+                      th:with="provider=${method.attributes['provider']},
+                               channel=${method.attributes['channel']},
+                               mark=${provider ?: channel ?: method.type},
+                               nameKey=${provider != null ? '_PROVIDER_' + provider
+                                         : (channel != null ? '_CHANNEL_' + channel
+                                         : '_' + #strings.toUpperCase(method.type))},
+                               resolved=${#messages.msgOrNull(nameKey)},
+                               name=${resolved == null or resolved == nameKey ? mark : resolved}">
+                    <button type="submit" class="btn btn-login-method">
+                        <span class="btn-login-method-mark" aria-hidden="true"
+                              th:classappend="|btn-login-method-mark-${mark}|"></span>
+                        <span class="btn-login-method-label"
+                              th:text="${euler.text.autospace(#messages.msg('_SIGN_IN_WITH', name))}">Sign in with Google</span>
                     </button>
-                    <button th:case="'password'" type="submit"
-                            class="btn btn-secondary btn-login-method"
-                            th:text="#{_SIGN_IN_WITH(${#messages.msg('_PASSWORD')})}">Sign in with Password</button>
-                    <button th:case="'otp'" type="submit"
-                            class="btn btn-secondary btn-login-method"
-                            th:classappend="|btn-otp btn-otp-${method.attributes['channel']}|"
-                            th:text="#{_SIGN_IN_WITH(${#messages.msgOrNull('_CHANNEL_' + method.attributes['channel']) ?: method.attributes['channel']})}">Sign in with SMS</button>
                 </form>
             </div>
         </div>

@@ -21,11 +21,27 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.eulerframework.security.web.authentication.SecurityJsonResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
+import org.springframework.security.web.csrf.MissingCsrfTokenException;
 
+/**
+ * {@link AccessDeniedHandlerImpl} that keeps the conventional redirect /
+ * {@code sendError} behaviour for browser navigations, but answers a
+ * JSON-preferring request (one sending {@code Accept: application/json}) with
+ * the shared error envelope from {@link SecurityJsonResponses} instead of
+ * routing through {@code sendError -> /error}.
+ *
+ * <p>This gives a fetch client one consistent JSON contract across login
+ * failures and access denials &mdash; notably CSRF failures, which surface
+ * here as {@link InvalidCsrfTokenException} / {@link MissingCsrfTokenException}
+ * &mdash; rather than the global HTML / error-controller shape.
+ */
 public class EulerAccessDeniedHandler extends AccessDeniedHandlerImpl {
     private final Logger logger = LoggerFactory.getLogger(EulerAccessDeniedHandler.class);
     
@@ -34,7 +50,23 @@ public class EulerAccessDeniedHandler extends AccessDeniedHandlerImpl {
             AccessDeniedException accessDeniedException) throws IOException,
             ServletException {
         this.logger.warn("Access denied: {}", accessDeniedException.getMessage());
+        if (!response.isCommitted() && SecurityJsonResponses.prefersJson(request)) {
+            SecurityJsonResponses.writeError(response, HttpStatus.FORBIDDEN, resolveError(accessDeniedException));
+            return;
+        }
         super.handle(request, response, accessDeniedException);
     }
 
+    /**
+     * Map an access denial to the machine-readable {@code error} code carried
+     * in the JSON envelope. CSRF failures get a distinct code so a client can
+     * re-fetch a token and retry; everything else is a generic denial.
+     */
+    static String resolveError(AccessDeniedException accessDeniedException) {
+        if (accessDeniedException instanceof InvalidCsrfTokenException
+                || accessDeniedException instanceof MissingCsrfTokenException) {
+            return "invalid_csrf_token";
+        }
+        return "access_denied";
+    }
 }

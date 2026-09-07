@@ -36,7 +36,7 @@ public class EulerSecurityXmlCsrfTokenController extends PageSupportWebControlle
     }
 
     @Override
-    @GetMapping("${" + EulerSecurityEndpoints.CSRF_PATH_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_PATH + "}")
+    @GetMapping("${" + EulerSecurityEndpoints.CSRF_FETCHING_URL_PROP_NAME + ":" + EulerSecurityEndpoints.CSRF_FETCHING_URL + "}")
     public ModelAndView csrf() {
         if(!this.csrfEnabled) {
             return this.notfound();

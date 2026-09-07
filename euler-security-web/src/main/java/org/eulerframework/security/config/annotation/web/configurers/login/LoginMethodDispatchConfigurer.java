@@ -15,7 +15,7 @@
  */
 package org.eulerframework.security.config.annotation.web.configurers.login;
 
-import org.eulerframework.security.web.authentication.login.LoginMethodRoutingFilter;
+import org.eulerframework.security.web.authentication.login.LoginMethodDispatchFilter;
 import org.eulerframework.security.web.login.DefaultLoginMethodService;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,41 +24,41 @@ import org.springframework.util.Assert;
 
 /**
  * {@link AbstractHttpConfigurer} that registers a
- * {@link LoginMethodRoutingFilter} into the security filter chain,
+ * {@link LoginMethodDispatchFilter} into the security filter chain,
  * positioned before {@link UsernamePasswordAuthenticationFilter}.
  *
  * <p>Gated by the
- * {@code euler.security.web.endpoint.login-method-dispatch.enabled}
+ * {@code euler.security.web.endpoint.login-methods.dispatch.enabled}
  * property; when disabled, the autoconfigure layer simply does not
  * apply this configurer and no filter is registered.
  */
-public class LoginMethodRoutingConfigurer
-        extends AbstractHttpConfigurer<LoginMethodRoutingConfigurer, HttpSecurity> {
+public class LoginMethodDispatchConfigurer
+        extends AbstractHttpConfigurer<LoginMethodDispatchConfigurer, HttpSecurity> {
 
     private String loginMethodProcessingUrl;
     private String loginPageUrl;
     private String methodParameter;
     private DefaultLoginMethodService loginMethodService;
 
-    public LoginMethodRoutingConfigurer loginMethodProcessingUrl(String url) {
+    public LoginMethodDispatchConfigurer loginMethodProcessingUrl(String url) {
         Assert.hasText(url, "loginMethodProcessingUrl must not be empty");
         this.loginMethodProcessingUrl = url;
         return this;
     }
 
-    public LoginMethodRoutingConfigurer loginPageUrl(String url) {
+    public LoginMethodDispatchConfigurer loginPageUrl(String url) {
         Assert.hasText(url, "loginPageUrl must not be empty");
         this.loginPageUrl = url;
         return this;
     }
 
-    public LoginMethodRoutingConfigurer methodParameter(String methodParameter) {
+    public LoginMethodDispatchConfigurer methodParameter(String methodParameter) {
         Assert.hasText(methodParameter, "methodParameter must not be empty");
         this.methodParameter = methodParameter;
         return this;
     }
 
-    public LoginMethodRoutingConfigurer loginMethodService(DefaultLoginMethodService loginMethodService) {
+    public LoginMethodDispatchConfigurer loginMethodService(DefaultLoginMethodService loginMethodService) {
         Assert.notNull(loginMethodService, "loginMethodService is required");
         this.loginMethodService = loginMethodService;
         return this;
@@ -71,7 +71,7 @@ public class LoginMethodRoutingConfigurer
         Assert.hasText(this.methodParameter, "methodParameter not set");
         Assert.notNull(this.loginMethodService, "loginMethodService not set");
 
-        LoginMethodRoutingFilter filter = new LoginMethodRoutingFilter(
+        LoginMethodDispatchFilter filter = new LoginMethodDispatchFilter(
                 this.loginMethodProcessingUrl,
                 this.loginPageUrl,
                 this.methodParameter,

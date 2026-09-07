@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/assets/euler/security/css/tokens.css}">
     <link rel="stylesheet" th:href="@{/assets/euler/security/css/single-form.css}">
 
     <title th:text="${euler.ctx.__SITE_NAME}">Euler Framework</title>
@@ -19,8 +20,8 @@
             <form th:action="@{${logoutProcessingUrl}}"
                   class="full-line-form"
                   method="post">
-                <div class="form-group" style="text-align: center">
-                    <button type="submit" class="btn btn-danger" th:text="#{_SIGN_OUT}">Sign Out</button>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger btn-block" th:text="#{_SIGN_OUT}">Sign Out</button>
                 </div>
             </form>
         </div>
@@ -34,5 +35,12 @@
                 th:text="${euler.ctx.__COPYRIGHT_HOLDER}">Euler Project</a></span>
     </footer>
 </div>
+<!--/*
+  * Loaded only so that signing out drops a pending one-time-password
+  * ticket; the page has no other scripting. Without it, logging out
+  * inside a ticket's lifetime could land the next login screen on the
+  * code step holding a credential from the previous session.
+  */-->
+<script th:src="@{/assets/euler/security/js/euler-form.js}"></script>
 </body>
 </html>

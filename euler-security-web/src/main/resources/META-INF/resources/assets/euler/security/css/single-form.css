@@ -1,6 +1,17 @@
 /*
- * Single-form layout for euler-security-web pages (login / logout / signup /
- * change-password). Self-contained: no Bootstrap, no jQuery dependency.
+ * single-form.css
+ *
+ * Single-form layout for the euler-security-web reference pages (login /
+ * logout / signup / change-password). Self-contained: no Bootstrap, no
+ * jQuery, no Tailwind, no build step.
+ *
+ * Every colour and radius comes from tokens.css. This file only lays
+ * those tokens onto controls, so an integrator rethemes the pages by
+ * overriding tokens.css and never has to touch the rules below.
+ *
+ * Class names are the published contract: templates shipped with the
+ * framework and templates written by integrators both address them.
+ * Renaming one is a breaking change.
  */
 
 html, body {
@@ -8,28 +19,38 @@ html, body {
     margin: 0;
     padding: 0;
     border: 0;
-    color: #333;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
-    background-color: #fff;
+    color: var(--foreground);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+        "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background-color: var(--background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 * { box-sizing: border-box; }
 
-a { color: #337ab7; text-decoration: none; }
-a:focus,
-a:hover { color: #23527c; text-decoration: underline; }
+/*
+ * The templates hide things with the hidden attribute - the OTP flow's
+ * message elements, the resend link before scripting takes over. Several
+ * rules below set `display` explicitly, which would otherwise win over
+ * the attribute's UA style and reveal content that should stay hidden.
+ */
+[hidden] { display: none !important; }
+
+a { color: var(--foreground); text-decoration: underline; text-underline-offset: 0.2em; }
+a:hover { color: var(--muted-foreground); }
+a:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+    border-radius: var(--radius-sm);
+}
 
 /*
- * Inherit body's font properties for form controls and buttons. Replaces
- * Bootstrap 3's normalize rule:
- *     input, button, select, textarea {
- *         font-family: inherit; font-size: inherit; line-height: inherit;
- *     }
- * Without this, browsers use their native widget font (Arial / system)
- * instead of the body's "Helvetica Neue", producing visibly inconsistent
- * typography between labels and inputs.
+ * Inherit body's font properties for form controls and buttons. Without
+ * this, browsers use their native widget font instead of the body's,
+ * producing visibly inconsistent typography between labels and inputs.
  */
 input,
 button,
@@ -40,7 +61,7 @@ textarea {
     line-height: inherit;
 }
 
-/* ===== Page layout (matches original .wrapper / .wrapper-inner table layout) ===== */
+/* ===== Page layout ===== */
 
 .wrapper {
     display: table;
@@ -52,13 +73,16 @@ textarea {
 .wrapper-inner {
     display: table-cell;
     vertical-align: middle;
+    padding: 2rem 1rem 5rem;
 }
 
 .title-wrapper {
     width: 100%;
     text-align: center;
-    font-size: 30px;
-    margin-bottom: 30px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    margin-bottom: 1.5rem;
 }
 
 .form-wrapper {
@@ -71,278 +95,383 @@ textarea {
 }
 
 .form-wrapper .full-line-form {
-    width: 300px;
+    width: var(--single-form-width);
+    max-width: 100%;
 }
 
 .form-wrapper .lable-from {
-    width: 260px;
+    width: 16.25rem;
+    max-width: 100%;
 }
 
 .lable-from label {
     display: inline-block;
-    margin-left: -100px;
-    width: 100px;
+    margin-left: -6.25rem;
+    width: 6.25rem;
     text-align: right;
-    padding: 0 6px;
+    padding: 0 0.375rem;
 }
 
 .lable-from .form-control {
     display: inline-block;
 }
 
+/*
+ * Page-level banner, rendered by the templates outside any <form> when
+ * the request carries ?error. Kept clear of the footer's fixed band.
+ */
 .info-wrapper {
     width: 100%;
-    height: 20px;
-    line-height: 20px;
+    min-height: 1.25rem;
+    line-height: 1.25rem;
     text-align: center;
-    margin-bottom: -20px;
+    margin-top: 1rem;
 }
 
-.info-wrapper .failure-info { color: #a94442; }
+.info-wrapper .failure-info {
+    color: var(--destructive);
+    font-size: 0.8125rem;
+}
 
 /*
- * Footer is fixed to the bottom of the viewport, replacing the
- * Bootstrap 3 .navbar + .navbar-fixed-bottom utilities that the previous
- * templates combined with .footer-wrapper. The 50px min-height comes from
- * .navbar, the position/z-index from .navbar-fixed-bottom, and the
- * transparent background / 6px top padding / centered 12px #666 text from
- * the original .footer-wrapper rules.
+ * Footer is fixed to the bottom of the viewport. Small and quiet so it
+ * never competes with the form above it.
  */
 .footer-wrapper {
     position: fixed;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 1030;
-    min-height: 50px;
+    z-index: 10;
+    min-height: 3.125rem;
     background-color: transparent;
     border: 0;
-    padding-top: 6px;
+    padding: 0.75rem 1rem;
     text-align: center;
-    font-size: 12px;
-    color: #666;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
 }
 
 .footer-wrapper a,
 .footer-wrapper a:hover,
-.footer-wrapper a:visited { color: #666; }
+.footer-wrapper a:visited {
+    color: var(--muted-foreground);
+    text-decoration: underline;
+}
 
-/* ===== Form controls (Bootstrap 3 subset) ===== */
+/* ===== Form controls ===== */
 
 .form-group {
-    margin-bottom: 15px;
-}
-
-.has-feedback {
-    position: relative;
-}
-
-/*
- * Reserve space on the right side of inputs that carry a feedback icon
- * (the 34x34 .form-control-feedback). Matches Bootstrap 3 exactly.
- */
-.has-feedback .form-control {
-    padding-right: 42.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-bottom: 1rem;
 }
 
 .control-label {
     display: inline-block;
     max-width: 100%;
-    margin-bottom: 5px;
-    font-weight: 700;
+    font-weight: 500;
+    color: var(--foreground);
 }
 
 .form-control {
     display: block;
     width: 100%;
-    height: 34px;
-    padding: 6px 12px;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: #555;
-    background-color: #fff;
+    height: var(--control-height);
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--foreground);
+    background-color: transparent;
     background-image: none;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.form-control::placeholder { color: var(--muted-foreground); opacity: 0.7; }
+
+.form-control:hover { border-color: color-mix(in oklab, var(--input) 70%, var(--foreground)); }
+
+/*
+ * Focus paints a 3px ring at 50% of --ring plus a solid --ring border,
+ * which is shadcn's `ring-[3px] ring-ring/50 border-ring`. The default
+ * outline is suppressed because the ring replaces it.
+ */
 .form-control:focus {
-    border-color: #66afe9;
+    border-color: var(--ring);
     outline: 0;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
-        0 0 8px rgba(102, 175, 233, 0.6);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
 }
-
-/* Placeholder color matches Bootstrap 3 default (#999). */
-.form-control::placeholder { color: #999; opacity: 1; }
-.form-control::-webkit-input-placeholder { color: #999; }
-.form-control::-moz-placeholder { color: #999; opacity: 1; }
-.form-control:-ms-input-placeholder { color: #999; }
 
 .form-control[disabled],
 .form-control[readonly] {
     cursor: not-allowed;
-    background-color: #eee;
+    background-color: var(--muted);
+    color: var(--muted-foreground);
     opacity: 1;
 }
 
-.has-error .control-label { color: #a94442; }
-.has-error .form-control {
-    border-color: #a94442;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+/*
+ * Validation states. `has-error` / `has-success` sit on the .form-group
+ * and are toggled by euler-form.js, which also appends the feedback icon
+ * and message. The template additionally sets aria-invalid on the
+ * control itself so assistive technology learns the state without having
+ * to interpret our class names.
+ */
+.has-error .control-label { color: var(--destructive); }
+.has-error .form-control,
+.form-control[aria-invalid="true"] {
+    border-color: var(--destructive);
 }
-.has-error .form-control:focus {
-    border-color: #843534;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
-        0 0 6px #ce8483;
+.has-error .form-control:focus,
+.form-control[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 30%, transparent);
 }
 
-.has-success .control-label { color: #3c763d; }
 .has-success .form-control {
-    border-color: #3c763d;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    border-color: color-mix(in oklab, var(--foreground) 45%, var(--background));
 }
-.has-success .form-control:focus {
-    border-color: #2b542c;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
-        0 0 6px #67b168;
-}
+
+/* Reserve room on the right for the absolutely positioned feedback icon. */
+.has-feedback { position: relative; }
+.has-feedback .form-control { padding-right: 2.5rem; }
 
 .form-control-feedback {
     position: absolute;
     top: 0;
     right: 0;
     z-index: 2;
-    display: block;
-    width: 34px;
-    height: 34px;
-    line-height: 34px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-height);
+    height: var(--control-height);
     pointer-events: none;
 }
 
 /*
- * When the form-group has a label (.has-feedback label ~ .form-control-feedback),
- * the feedback icon is pushed down by the label height (25px), matching the
- * Bootstrap 3 selector exactly.
+ * When the group carries a label, the icon has to clear it: the label is
+ * 0.375rem of gap plus roughly 1.3125rem of line box.
  */
-.has-feedback label ~ .form-control-feedback {
-    top: 25px;
+.has-feedback .control-label ~ .form-control-feedback {
+    top: 1.6875rem;
 }
 
 .form-control-feedback-msg {
     display: block;
-    margin-bottom: -15px;
-    line-height: 15px;
-    font-size: 0.6em;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
 }
 
-.has-error .form-control-feedback-msg { color: #a94442; }
-.has-success .form-control-feedback-msg { color: #3c763d; }
+.has-error .form-control-feedback-msg { color: var(--destructive); }
+.has-success .form-control-feedback-msg { color: var(--muted-foreground); }
 
-/* ===== Status icons (replaces Bootstrap glyphicon-ok / glyphicon-remove) ===== */
+/* Supplementary copy under a control - shadcn's FieldDescription. */
+.field-description {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+/*
+ * Heading above a step - shadcn's CardTitle. The templates render it as
+ * a <label> so the control it introduces has a real accessible name
+ * rather than leaning on a placeholder or an aria-label.
+ */
+.form-heading {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--foreground);
+}
+
+/* ===== Status icons ===== */
 
 .icon-ok,
 .icon-remove {
     display: inline-block;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
 }
 
 .icon-ok::before {
-    content: "\2713"; /* ✓ */
-    color: #3c763d;
+    content: "\2713"; /* check mark */
+    color: var(--foreground);
 }
 
 .icon-remove::before {
-    content: "\2715"; /* ✕ */
-    color: #a94442;
+    content: "\2715"; /* multiplication x */
+    color: var(--destructive);
 }
 
 /* ===== Buttons ===== */
 
 .btn {
-    display: inline-block;
-    padding: 6px 12px;
-    margin-bottom: 0;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.42857143;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: var(--control-height);
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
     white-space: nowrap;
     vertical-align: middle;
     cursor: pointer;
     user-select: none;
     background-image: none;
+    background-color: transparent;
+    color: var(--foreground);
     border: 1px solid transparent;
-    border-radius: 4px;
-    transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out;
+    border-radius: var(--radius-md);
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+        color 0.15s ease, opacity 0.15s ease;
 }
 
-.btn:focus,
 .btn:hover { text-decoration: none; }
 
-.btn:active {
-    background-image: none;
+.btn:focus-visible {
     outline: 0;
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
 }
+
+.btn:active { background-image: none; outline: 0; }
 
 .btn[disabled],
 .btn.disabled {
     cursor: not-allowed;
-    opacity: 0.65;
+    opacity: 0.5;
     box-shadow: none;
+    pointer-events: none;
 }
 
+/* Full-width button, the default inside a single-form column. */
+.btn-block { display: flex; width: 100%; }
+
+.btn-primary {
+    color: var(--primary-foreground);
+    background-color: var(--primary);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+    color: var(--primary-foreground);
+    background-color: color-mix(in oklab, var(--primary) 90%, transparent);
+}
+
+.btn-secondary {
+    color: var(--secondary-foreground);
+    background-color: var(--secondary);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+.btn-secondary:hover,
+.btn-secondary:focus {
+    color: var(--secondary-foreground);
+    background-color: color-mix(in oklab, var(--secondary) 80%, transparent);
+}
+
+.btn-outline {
+    color: var(--foreground);
+    background-color: var(--background);
+    border-color: var(--input);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+.btn-outline:hover,
+.btn-outline:focus {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/*
+ * Legacy aliases. Templates written against the Bootstrap-flavoured
+ * version of these pages still say btn-success / btn-danger; both now
+ * resolve onto the token system rather than a hard-coded green or red.
+ * Prefer btn-primary and btn-danger in new templates.
+ */
 .btn-success {
-    color: #fff;
-    background-color: #5cb85c;
-    border-color: #4cae4c;
+    color: var(--primary-foreground);
+    background-color: var(--primary);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 .btn-success:hover,
 .btn-success:focus {
-    color: #fff;
-    background-color: #449d44;
-    border-color: #398439;
+    color: var(--primary-foreground);
+    background-color: color-mix(in oklab, var(--primary) 90%, transparent);
 }
 
 .btn-danger {
-    color: #fff;
-    background-color: #d9534f;
-    border-color: #d43f3a;
+    color: var(--destructive-foreground);
+    background-color: var(--destructive);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 .btn-danger:hover,
 .btn-danger:focus {
-    color: #fff;
-    background-color: #c9302c;
-    border-color: #ac2925;
+    color: var(--destructive-foreground);
+    background-color: color-mix(in oklab, var(--destructive) 90%, transparent);
 }
 
-/* ===== Captcha group (extracted from inline styles) ===== */
+/* Text button for secondary actions (resend, switch method, go back). */
+.btn-link {
+    height: auto;
+    padding: 0.25rem 0.5rem;
+    color: var(--muted-foreground);
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: 400;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+.btn-link:hover,
+.btn-link:focus {
+    color: var(--foreground);
+    background-color: transparent;
+}
+
+/* ===== Captcha group ===== */
+
+/*
+ * Label on its own line, then input and image side by side. The split is
+ * percentage based so the absolutely positioned feedback icon can be
+ * placed against a known edge - the image's own size is up to the
+ * deployment, which configures the captcha's width and height.
+ */
+.captcha-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.captcha-group .control-label { flex: 1 0 100%; }
 
 .captcha-group .form-control {
-    width: 60%;
-    display: inline-block;
-    vertical-align: middle;
+    flex: 0 0 calc(60% - 0.25rem);
+    width: auto;
+    min-width: 0;
 }
-
-.captcha-group label { display: block; }
 
 .captcha-group .captcha {
-    display: inline-block;
-    width: 40%;
+    flex: 0 0 calc(40% - 0.25rem);
     text-align: right;
-    vertical-align: middle;
+    line-height: 0;
 }
 
-.captcha-group .captcha img { cursor: pointer; vertical-align: middle; }
+.captcha-group .captcha img {
+    cursor: pointer;
+    vertical-align: middle;
+    max-width: 100%;
+    max-height: calc(var(--control-height) * 1.5);
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+}
 
-.captcha-group .form-control-feedback { right: 120px; }
+/* Inside the input's right edge, clear of the image beside it. */
+.captcha-group .form-control-feedback { right: auto; left: calc(60% - 2.5rem); }
 
 /* ===== Loading spinner ===== */
 
@@ -352,132 +481,323 @@ textarea {
 }
 
 .loading {
-    border: 2px solid #666;
+    border: 2px solid color-mix(in oklab, var(--foreground) 60%, transparent);
     border-top-color: transparent;
     border-radius: 100%;
-    width: 14px;
-    height: 14px;
-    margin: 10px;
+    width: 0.875rem;
+    height: 0.875rem;
     animation: circle infinite 1s linear;
 }
 
-/* ===== Alternate login methods (OAuth2, WebAuthn, OTP, ...) ===== */
+/* ===== Login methods ===== */
 
 /*
- * Match the form's width so the alternate-method buttons line up with
- * the username/password inputs directly above. The form itself is
- * fixed at 300px via `.form-wrapper .full-line-form`; this wrapper
- * sits outside the <form> element so we replicate the same width +
- * horizontal auto-centering here.
+ * Sits outside any <form>, so it replicates the form's width and
+ * centring to line the alternate-method buttons up with the inputs
+ * above them.
  */
 .login-methods-wrapper {
-    width: 300px;
-    margin: 15px auto 0;
+    width: var(--single-form-width);
+    max-width: 100%;
+    margin: 0.5rem auto 0;
 }
 
 .login-methods-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    color: #999;
-    font-size: 12px;
-    margin: 15px 0;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    margin: 1rem 0;
 }
 
 .login-methods-divider::before,
 .login-methods-divider::after {
     content: "";
     flex: 1;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--border);
 }
 
 .login-methods-divider span {
-    padding: 0 10px;
+    padding: 0 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 /*
- * Wrapper for login methods that submit through the login-method
- * dispatch endpoint: the form exists only to carry the POST (and its
- * CSRF token), so it must not add vertical rhythm of its own - the
- * button inside owns the spacing.
+ * The form exists only to carry the POST and its CSRF token, so it must
+ * not add vertical rhythm of its own - the button inside owns the
+ * spacing. That button is the form's whole visible content, so it spans
+ * the column like every other action on the page; without this a button
+ * would shrink to its label and its right edge would stop lining up with
+ * the ones above and below it.
  */
 .login-method-form {
-    margin: 0;
+    margin: 0 0 0.5rem;
 }
+.login-method-form:last-child { margin-bottom: 0; }
+.login-method-form .btn { width: 100%; }
 
 /*
- * Generic OAuth2 provider button. Icon and label sit next to each
- * other as a flex group and the group is horizontally centred, so
- * the brand mark visually anchors the label rather than floating on
- * the far left edge of the button.
- *
- * Padding and line-height inherit from `.btn` so the button ends up
- * at the same 34px height as the green sign-in button and the input
- * fields above it - visual regularity trumps the taller 40px that
- * Google's standalone brand button recommends.
+ * One appearance for every alternate login method, whatever its type.
+ * Nothing here, and nothing below, is keyed to a login method type: a
+ * method is not a kind of button, and the classes a template writes do
+ * not spell out how the backend classifies it. Only the expanded method
+ * above these gets the filled `btn-primary`, so the eye has exactly one
+ * call to action to land on.
  */
-.btn-oauth2 {
+.btn-login-method {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 0.625rem;
     width: 100%;
-    margin-bottom: 8px;
-    color: #3c4043;
-    background-color: #fff;
-    border: 1px solid #dadce0;
-    border-radius: 4px;
+    margin-bottom: 0;
+    color: var(--foreground);
+    background-color: var(--background);
+    border: 1px solid var(--input);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     text-align: center;
     text-decoration: none;
-    transition: background-color 0.15s ease, box-shadow 0.15s ease,
-        border-color 0.15s ease;
 }
 
-.btn-oauth2:hover,
-.btn-oauth2:focus {
-    background-color: #f8f9fa;
-    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+.btn-login-method:hover,
+.btn-login-method:focus {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
     text-decoration: none;
+}
+
+.btn-login-method-label {
+    line-height: 1.5;
 }
 
 /*
- * Icon slot placed adjacent to the label via the parent's `gap`.
- * Individual providers fill the slot with their brand mark through
- * a `background-image` on their own selector.
+ * The mark slot, which any method may carry - a federated provider's
+ * logo, a channel's glyph - and which stays out of the way until a mark
+ * is actually shipped for that method. Hidden rather than empty: an
+ * unbranded button is then a plain centred label, with no gap held open
+ * for an image that does not exist.
+ *
+ * The slot is keyed by whatever names the mark, which the template reads
+ * off the method - a provider, a channel - never by the method's type.
+ * Shipping a mark therefore takes two declarations and no new markup,
+ * the Google rule below being the whole of the example.
  */
-.btn-oauth2-icon {
+.btn-login-method-mark {
+    display: none;
     flex: 0 0 auto;
-    width: 18px;
-    height: 18px;
+    width: 1.125rem;
+    height: 1.125rem;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
 }
 
-.btn-oauth2-label {
-    line-height: 1.42857143;
+/*
+ * The one name-bearing rule in this stylesheet, and it earns the name by
+ * painting a specific brand: Google's four-colour "G", embedded as an
+ * inline SVG data URI so the button works offline and costs no extra
+ * request. Colours match Google's brand palette as documented in the
+ * Google Identity brand guidelines.
+ */
+.btn-login-method-mark-google {
+    display: block;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><path fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/><path fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/><path fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/><path fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/></svg>");
+}
+
+/* ===== One-time-password input ===== */
+
+/*
+ * One real <input>, N presentational slots.
+ *
+ * The tempting alternative - six real inputs with focus forwarded
+ * between them - breaks three things that only work on a single control:
+ * iOS and Safari offer `autocomplete="one-time-code"` autofill to one
+ * focused input, pasting "123456" lands in one place, and the field is
+ * one tab stop instead of six. So the input stays the only editable
+ * element and the slots are pure decoration that mirrors its value.
+ *
+ * Progressive enhancement: until euler-form.js adds `.is-enhanced` the
+ * slots are hidden and the input renders as an ordinary text control.
+ * A visitor with scripting off fills in a plain box and the form still
+ * posts otp_ticket + otp.
+ */
+.otp-wrapper {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.otp-slots {
+    display: none;
+    flex: 1 1 auto;
+    gap: 0.5rem;
+}
+
+.otp-slot {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--foreground);
+    background-color: transparent;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 /*
- * Google brand button. The four-colour "G" logo is embedded as an
- * inline SVG data URI so the button works offline and requires no
- * additional HTTP request. Colours match Google's brand palette
- * (Red #EA4335, Blue #4285F4, Yellow #FBBC05, Green #34A853) as
- * documented in the Google Identity brand guidelines.
+ * The real control. Unenhanced it is an ordinary full-width input;
+ * enhanced it is stretched over the slot row and made invisible so that
+ * clicks anywhere on the row focus it, while the slots show the digits.
  */
-.btn-oauth2-google {
-    border-color: #dadce0;
-    color: #3c4043;
+.otp-input {
+    display: block;
+    width: 100%;
+    height: 3rem;
+    padding: 0 0.75rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.5em;
+    text-align: center;
+    color: var(--foreground);
+    background-color: transparent;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-.btn-oauth2-google:hover,
-.btn-oauth2-google:focus {
-    border-color: #4285f4;
-    color: #202124;
+.otp-input::placeholder { color: var(--muted-foreground); opacity: 0.7; letter-spacing: normal; }
+
+.otp-input:focus {
+    border-color: var(--ring);
+    outline: 0;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
 }
 
-.btn-oauth2-google .btn-oauth2-icon {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><path fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/><path fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/><path fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/><path fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/></svg>");
+.otp-wrapper.is-enhanced .otp-slots { display: flex; }
+
+.otp-wrapper.is-enhanced .otp-input {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    border: 0;
+    box-shadow: none;
+    letter-spacing: normal;
+}
+
+/* Slot states, driven from the input's value and selectionStart. */
+.otp-slot.is-filled { border-color: color-mix(in oklab, var(--foreground) 35%, var(--background)); }
+
+.otp-slot.is-active {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+/*
+ * Blinking caret for the active slot while it is still empty - the real
+ * caret is invisible along with the input, so this stands in for it.
+ */
+.otp-slot.is-active:not(.is-filled)::after {
+    content: "";
+    width: 1px;
+    height: 1.25rem;
+    background-color: var(--foreground);
+    animation: otp-caret 1.1s step-end infinite;
+}
+
+@keyframes otp-caret {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+}
+
+/* Wrong-code feedback: shake the row rather than only colouring it. */
+.otp-wrapper.is-invalid .otp-slot {
+    border-color: var(--destructive);
+}
+
+/*
+ * The stepped flow reports a rejected code through its own message
+ * element rather than through a .has-error group, so it has to claim the
+ * destructive colour itself - .form-control-feedback-msg is muted by
+ * default, being the style used for supplementary copy.
+ */
+.form-control-feedback-msg[data-otp-error] {
+    color: var(--destructive);
+}
+
+.otp-wrapper.is-shaking { animation: otp-shake 0.32s ease-in-out; }
+
+@keyframes otp-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-0.375rem); }
+    40%      { transform: translateX(0.375rem); }
+    60%      { transform: translateX(-0.25rem); }
+    80%      { transform: translateX(0.25rem); }
+}
+
+/* ===== Two-step flow ===== */
+
+/*
+ * Unenhanced, every step renders stacked and the page behaves exactly
+ * like a single long form: recipient, send, code, sign in. Once
+ * euler-form.js takes control it adds `.otp-flow-active` and the steps
+ * become mutually exclusive. Gating on a JS-applied class means there is
+ * nothing to undo if scripting never runs.
+ *
+ * The step owns its vertical rhythm, so the groups inside it drop their
+ * own bottom margin instead of doubling up with the gap.
+ */
+.otp-step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.otp-step + .otp-step { margin-top: 1.5rem; }
+
+.otp-step .form-group { margin-bottom: 0; }
+
+.otp-flow-active .otp-step { display: none; }
+.otp-flow-active .otp-step.is-current { display: flex; }
+.otp-flow-active .otp-step + .otp-step { margin-top: 0; }
+
+/* Actions only make sense once the steps are exclusive. */
+.otp-flow-actions {
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.otp-flow-active .otp-flow-actions { display: flex; }
+
+/* Countdown on the resend button while the server's retry_after runs. */
+.otp-flow-actions .btn-link[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+/* ===== Reduced motion ===== */
+
+@media (prefers-reduced-motion: reduce) {
+    .otp-wrapper.is-shaking { animation: none; }
+    .otp-slot.is-active:not(.is-filled)::after { animation: none; opacity: 1; }
+    .loading { animation-duration: 2s; }
+    .btn,
+    .form-control,
+    .otp-slot { transition-duration: 0.01ms; }
 }

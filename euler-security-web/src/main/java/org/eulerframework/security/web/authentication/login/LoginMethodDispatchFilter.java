@@ -19,6 +19,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eulerframework.security.web.authentication.SecurityJsonResponses;
 import org.eulerframework.security.web.login.DefaultLoginMethodService;
 import org.eulerframework.security.web.login.DefaultLoginMethodService.ResolvedLoginMethod;
 import org.eulerframework.security.web.login.LoginMethodDispatch;
@@ -45,18 +46,29 @@ import java.io.IOException;
  *
  * <p>This filter is a backend convenience for the reference login
  * page. SPAs that route submissions independently may disable it via
- * {@code euler.security.web.endpoint.login-method-dispatch.enabled=false}.
+ * {@code euler.security.web.endpoint.login-methods.dispatch.enabled=false}.
+ *
+ * <p>Redirect outcomes honour the same content negotiation as the login
+ * processing endpoints: a client sending {@code Accept: application/json}
+ * receives the incomplete-submission redirect as {@code 200} with a
+ * {@code redirect_url} body (fetch cannot read a {@code 302} Location),
+ * and an unknown method name as the {@code invalid_request} error
+ * envelope. The {@code 307} replay stays a real redirect even for JSON
+ * clients: fetch follows it and resubmits the body verbatim, landing on
+ * the processing endpoint's own JSON envelope.
  */
-public class LoginMethodRoutingFilter extends OncePerRequestFilter {
+public class LoginMethodDispatchFilter extends OncePerRequestFilter {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private static final String ERROR_INVALID_REQUEST = "invalid_request";
 
     private final RequestMatcher requestMatcher;
     private final DefaultLoginMethodService loginMethodService;
     private final String loginPageUrl;
     private final String methodParameter;
 
-    public LoginMethodRoutingFilter(String loginMethodProcessingUrl,
+    public LoginMethodDispatchFilter(String loginMethodProcessingUrl,
                                     String loginPageUrl,
                                     String methodParameter,
                                     DefaultLoginMethodService loginMethodService) {
@@ -86,18 +98,29 @@ public class LoginMethodRoutingFilter extends OncePerRequestFilter {
 
         ResolvedLoginMethod resolved = this.loginMethodService.resolve(methodName);
         if (resolved == null) {
-            this.logger.warn("Unknown login method '{}' requested; redirecting to login page.", methodName);
-            response.sendRedirect(this.loginPageUrl + "?error");
+            this.logger.warn("Unknown login method '{}' requested; rejecting.", methodName);
+            if (SecurityJsonResponses.prefersJson(request)) {
+                SecurityJsonResponses.writeError(response, HttpStatus.BAD_REQUEST, ERROR_INVALID_REQUEST);
+            } else {
+                response.sendRedirect(this.loginPageUrl + "?error");
+            }
             return;
         }
 
         LoginMethodDispatch dispatch = resolved.handler().dispatch(resolved.method(), request);
-        executeDispatch(dispatch, response);
+        executeDispatch(request, dispatch, response);
     }
 
-    private void executeDispatch(LoginMethodDispatch dispatch, HttpServletResponse response) throws IOException {
+    private void executeDispatch(HttpServletRequest request, LoginMethodDispatch dispatch,
+                                 HttpServletResponse response) throws IOException {
         switch (dispatch.getAction()) {
-            case REDIRECT_302 -> response.sendRedirect(dispatch.getLocation());
+            case REDIRECT_302 -> {
+                if (SecurityJsonResponses.prefersJson(request)) {
+                    SecurityJsonResponses.writeSuccess(response, dispatch.getLocation());
+                } else {
+                    response.sendRedirect(dispatch.getLocation());
+                }
+            }
             case REDIRECT_307 -> {
                 response.setStatus(HttpStatus.TEMPORARY_REDIRECT.value());
                 response.setHeader("Location", dispatch.getLocation());
