@@ -60,8 +60,8 @@ public abstract class WebConfig {
 
         // Euler Boot 模式不加载默认配置文件
         try {
-            Class.forName("org.eulerframework.boot.autoconfigure.support.web.core.EulerBootPropertySource");
-            LOGGER.info("EulerBootPropertySource was found, The Euler Boot auto configurator will initialize propertyReader");
+            Class.forName("org.eulerframework.boot.autoconfigure.support.web.core.EulerPropertySource");
+            LOGGER.info("EulerPropertySource was found, The Euler Boot auto configurator will initialize propertyReader");
         } catch (ClassNotFoundException classNotFoundException) {
             try {
                 propertyReader = new PropertyReader(new FilePropertySource(DEFAULT_CONFIG_FILE));
