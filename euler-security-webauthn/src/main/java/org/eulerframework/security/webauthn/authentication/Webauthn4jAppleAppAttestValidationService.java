@@ -134,32 +134,40 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
     }
 
     @Override
-    public AppAttestAttestationRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException {
+    public AppAttestAttestationRegistration validateAttestation(String attestation, String challenge) throws AuthenticationException {
         try {
-            byte[] keyIdBytes = Base64.getDecoder().decode(keyId);
             byte[] attestationBytes = Base64.getDecoder().decode(attestation);
             byte[] clientDataHash = AppAttestUtils.sha256(challenge.getBytes(StandardCharsets.UTF_8));
 
-            // 1. Construct the attestation request
-            DCAttestationRequest request = new DCAttestationRequest(keyIdBytes, attestationBytes, clientDataHash);
-
-            // 2. Parse to extract rpIdHash, then look up the registered device
-            DCAttestationData parsed = this.deviceCheckManager.parse(request);
+            // 1. Parse first to extract the rpIdHash and the credentialId. The keyId is
+            // @Nullable for parsing and is derived from the attestation itself (Apple sets
+            // credentialId == keyId), so it is authoritative and not supplied by the caller.
+            DCAttestationData parsed = this.deviceCheckManager.parse(
+                    new DCAttestationRequest(null, attestationBytes, clientDataHash));
             byte[] rpIdHash = parsed.getAttestationObject().getAuthenticatorData().getRpIdHash();
             RegisteredApp registeredApp = this.registeredAppRepository.findByAppIdHash(rpIdHash);
             if (registeredApp == null) {
                 throw new AuthenticationServiceException("RP ID hash does not match any registered Apple App");
             }
+            AttestedCredentialData parsedCredentialData =
+                    parsed.getAttestationObject().getAuthenticatorData().getAttestedCredentialData();
+            if (parsedCredentialData == null) {
+                throw new AuthenticationServiceException("No attested credential data in attestation response");
+            }
+            byte[] credentialId = parsedCredentialData.getCredentialId();
+            String keyId = Base64.getEncoder().encodeToString(credentialId);
 
-            // 3. Construct server property with looked-up teamId + bundleId
+            // 2. Construct server property with looked-up teamId + bundleId
             Challenge challengeObj = new DefaultChallenge(challenge.getBytes(StandardCharsets.UTF_8));
             DCServerProperty serverProperty = new DCServerProperty(registeredApp.getTeamId(), registeredApp.getBundleId(), challengeObj);
             DCAttestationParameters params = new DCAttestationParameters(serverProperty);
 
-            // 4. Validate (certificate chain, nonce, AAGUID, credentialId, etc.)
+            // 3. Validate (certificate chain, nonce, AAGUID, credentialId, etc.) using the
+            // derived credentialId as the request keyId.
+            DCAttestationRequest request = new DCAttestationRequest(credentialId, attestationBytes, clientDataHash);
             DCAttestationData data = this.deviceCheckManager.validate(request, params);
 
-            // 5. Extract attested credential data and flatten
+            // 4. Extract attested credential data and flatten
             AttestedCredentialData attestedCredentialData =
                     data.getAttestationObject().getAuthenticatorData().getAttestedCredentialData();
             if (attestedCredentialData == null) {
@@ -167,22 +175,32 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
             }
             byte[] aaguid = attestedCredentialData.getAaguid().getBytes();
 
-            // 5.1 Validate AAGUID (development vs production environment)
+            // 4.1 Validate AAGUID (development vs production environment)
             validateAaguid(aaguid);
 
-            byte[] credentialId = attestedCredentialData.getCredentialId();
+            // 4.2 Idempotent re-registration: the attestation has now been fully validated
+            // against a fresh one-time challenge, so if this KEY is already registered,
+            // return the existing registration rather than re-registering it. A captured
+            // attestation cannot be replayed here (its nonce is bound to the consumed
+            // challenge); only a genuinely re-attested KEY reaches this point.
+            AppAttestAttestationRegistration existing = this.registrationService.findByKeyId(keyId);
+            if (existing != null) {
+                logger.debug("Apple App Attest keyId '{}' already registered; returning existing registration", keyId);
+                return existing;
+            }
+
             PublicKey publicKey = attestedCredentialData.getCOSEKey().getPublicKey();
 
-            // 6. Extract attestation statement data (certificate chain + receipt)
+            // 5. Extract attestation statement data (certificate chain + receipt)
             AppleAppAttestAttestationStatement attestationStatement =
                     (AppleAppAttestAttestationStatement) data.getAttestationObject().getAttestationStatement();
             byte[] certChainBytes = encodeCertificateChain(attestationStatement.getX5c());
             byte[] receipt = attestationStatement.getReceipt();
 
-            // 7. Generate JWKSet from the public key
+            // 6. Generate JWKSet from the public key
             String jwksJson = generateJwksJson(publicKey);
 
-            // 8. Save the registration with flattened data
+            // 7. Save the registration with flattened data
             AppAttestAttestationRegistration registration = new AppAttestAttestationRegistration(
                     keyId, registeredApp.getTeamId(), registeredApp.getBundleId(), resolveClientId(registeredApp),
                     aaguid, credentialId,
@@ -286,9 +304,11 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
      * Resolve the OAuth2 {@code client_id} to bind to the attestation registration.
      * <p>
      * For STATIC OAuth2-enabled apps, this returns the deterministic
-     * {@code base64url(SHA-256(appId))}. For all other cases (DYNAMIC client type or
-     * OAuth2 disabled), {@code null} is returned so that callers fall back to the
-     * request-supplied {@code client_id}.
+     * {@code base64url(SHA-256(appId))}, whose client is pre-provisioned when the app is
+     * saved and therefore already exists before any device registers. For all other cases
+     * (DYNAMIC client type or OAuth2 disabled), {@code null} is returned: a DYNAMIC app has
+     * no shared client, and its per-key {@code client_id} is only minted and bound back
+     * during dynamic client registration, so nothing can be resolved at attestation time.
      */
     private static String resolveClientId(RegisteredApp app) {
         if (app.isOauth2Enabled() && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {

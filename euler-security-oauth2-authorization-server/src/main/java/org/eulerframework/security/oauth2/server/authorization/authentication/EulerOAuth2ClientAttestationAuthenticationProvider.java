@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
@@ -60,9 +61,32 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
  *       <ul>
  *         <li>{@code jwt}: delegates to {@link EulerOAuth2ClientAttestationVerifier} which handles
  *             kid extraction, key lookup, and PoP JWT verification.</li>
- *         <li>{@code apple_app_attest}: looks up the registration by {@code kid} and
- *             validates the assertion via {@link AppleAppAttestValidationService}.
- *             Only available when Apple App Attest is enabled (requires a non-null
+ *         <li>{@code apple_app_attest}: consumes the one-time challenge via
+ *             {@link ChallengeService}, then validates the App Attest data via
+ *             {@link AppleAppAttestValidationService}. The {@code attestation} and
+ *             {@code assertion} parameters are not mutually exclusive:
+ *             <ul>
+ *               <li>{@code attestation} only &mdash; registers the device KEY (idempotently)
+ *                   and authenticates the client, with the key ID derived from the
+ *                   attestation's credential ID. This only authenticates a client that
+ *                   already exists, i.e. a STATIC client pre-provisioned for the app; a
+ *                   DYNAMIC app has no {@code client_id} until its per-key client is
+ *                   dynamically registered, so it is rejected with
+ *                   {@code unauthorized_client}. The KEY registration is kept either way:
+ *                   it is valid and is what the client needs next, so it can proceed
+ *                   straight to dynamic client registration without re-attesting.</li>
+ *               <li>{@code assertion} only &mdash; fast path for an already-registered device;
+ *                   requires {@code kid}, since an assertion carries no credential ID.</li>
+ *               <li>both &mdash; registers the device KEY first, then validates the assertion
+ *                   against the derived key ID, completing registration and device
+ *                   verification in a single request.</li>
+ *             </ul>
+ *             Challenge consumption is decoupled from verification (both verifications only
+ *             use the challenge as nonce input), so the challenge is consumed exactly once
+ *             and a single challenge may back both an attestation and an assertion derived
+ *             from it. The two combinations involving an attestation are compatibility paths;
+ *             see {@link EulerOAuth2ParameterNames#ATTESTATION}. Only available when Apple App
+ *             Attest is enabled (requires a non-null
  *             {@link AppleAppAttestValidationService}).</li>
  *       </ul>
  *   </li>
@@ -85,15 +109,19 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
     private final RegisteredClientRepository registeredClientRepository;
     private final EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier;
+    private final ChallengeService challengeService;
     private AppleAppAttestValidationService appleAppAttestValidationService;
 
     public EulerOAuth2ClientAttestationAuthenticationProvider(
             RegisteredClientRepository registeredClientRepository,
-            EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier) {
+            EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier,
+            ChallengeService challengeService) {
         Assert.notNull(registeredClientRepository, "registeredClientRepository must not be null");
         Assert.notNull(oauth2ClientAttestationVerifier, "oauth2ClientAttestationVerifier must not be null");
+        Assert.notNull(challengeService, "challengeService must not be null");
         this.registeredClientRepository = registeredClientRepository;
         this.oauth2ClientAttestationVerifier = oauth2ClientAttestationVerifier;
+        this.challengeService = challengeService;
     }
 
     public void setAppleAppAttestValidationService(AppleAppAttestValidationService appleAppAttestValidationService) {
@@ -143,30 +171,66 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                                         + "enable euler.security.authentication.app-attest to use this attestation type", null));
             }
 
-            String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.KEY_ID);
-            String challenge = (String) additionalParams.get(EulerOAuth2ParameterNames.CHALLENGE);
-
-            if (!StringUtils.hasText(keyId)) {
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.KEY_ID);
-            }
+            // The converter normalizes both carriages onto the canonical header keys, so this
+            // provider is transport-agnostic; only the deprecated attestation has no header analog.
+            String challenge = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
 
             if (!StringUtils.hasText(challenge)) {
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.CHALLENGE);
+                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
             }
 
             String attestation = (String) additionalParams.get(EulerOAuth2ParameterNames.ATTESTATION);
+            String assertion = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+
+            if (!StringUtils.hasText(attestation) && !StringUtils.hasText(assertion)) {
+                // Defensive: the converter already rejects this. Reject before consuming, so a
+                // malformed request does not burn an otherwise valid one-time challenge.
+                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+            }
+
+            // Consume the one-time challenge exactly once, before any verification. Consumption
+            // is decoupled from verification (both only use the challenge as nonce input), so a
+            // single challenge may legitimately back both an attestation and an assertion
+            // generated from it, which is what makes the combined request below possible.
+            if (!this.challengeService.consumeChallenge(challenge)) {
+                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+            }
+
             if (StringUtils.hasText(attestation)) {
-                if (logger.isTraceEnabled()
-                        && StringUtils.hasText((String) additionalParams.get(EulerOAuth2ParameterNames.ASSERTION))) {
-                    logger.trace("attestation present, assertion ignored for keyId '{}'", keyId);
+                // Compatibility path; see EulerOAuth2ParameterNames#ATTESTATION.
+                // Register the device KEY (idempotent). The key ID is derived from the
+                // attestation's credentialId, so it is not read from the request here.
+                AppAttestAttestationRegistration registered =
+                        this.appleAppAttestValidationService.validateAttestation(attestation, challenge);
+
+                // Fail fast, before verifying any accompanying assertion.
+                requireBoundClientId(registered);
+
+                if (StringUtils.hasText(assertion)) {
+                    // attestation + assertion in one request: the device KEY is registered
+                    // first and the assertion is then verified against the derived key ID,
+                    // so a single request completes both registration and device
+                    // verification. Redundant in strict terms, but supported.
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Both attestation and assertion supplied; verifying the assertion "
+                                + "against the keyId '{}' derived from the attestation", registered.getKeyId());
+                    }
+                    appRegistration = this.appleAppAttestValidationService.validateAssertion(
+                            registered.getKeyId(), assertion, challenge);
+                } else {
+                    appRegistration = registered;
                 }
-                appRegistration = this.appleAppAttestValidationService.validateAttestation(keyId, attestation, challenge);
             } else {
-                String assertion = (String) additionalParams.get(EulerOAuth2ParameterNames.ASSERTION);
-                if (!StringUtils.hasText(assertion)) {
-                    throw invalidClientAttestation(EulerOAuth2ParameterNames.ASSERTION);
+                // Assertion-only fast path for an already-registered device; the assertion is
+                // guaranteed present by the guard above. An assertion's authenticator data
+                // carries no credentialId, so the key ID must be supplied to locate the
+                // registered device.
+                String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
+                if (!StringUtils.hasText(keyId)) {
+                    throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
                 }
                 appRegistration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
+                requireBoundClientId(appRegistration);
             }
 
             // Resolve client_id directly from the attestation registration: it has been
@@ -219,6 +283,30 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
         OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT,
                 "Client authentication failed: " + parameterName, null);
         return new OAuth2AuthenticationException(error);
+    }
+
+    /**
+     * Require that a verified App Attest registration is bound to an OAuth2 client.
+     * <p>
+     * Only a STATIC app has an app-level client, pre-provisioned when the app is saved, so
+     * its {@code client_id} is bound at attestation time. A DYNAMIC app has no shared
+     * client: its per-key {@code client_id} is minted and bound back during dynamic client
+     * registration, so until then nothing can be resolved. The same holds for an app that is
+     * not OAuth2-enabled.
+     * <p>
+     * Reported as {@code unauthorized_client} rather than an attestation failure, because the
+     * App Attest proof itself was valid; the app is simply not allowed to authenticate this
+     * way yet. The device KEY registration is deliberately kept: it was fully verified and is
+     * exactly what the client needs for its next step, so rejecting the request does not force
+     * it to re-attest.
+     */
+    private static void requireBoundClientId(AppAttestAttestationRegistration registration) {
+        if (StringUtils.hasText(registration.getClientId())) {
+            return;
+        }
+        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT,
+                "No OAuth2 client is bound to this app; the device KEY is registered, "
+                        + "complete dynamic client registration first", null));
     }
 
     private static OAuth2AuthenticationException invalidClientAttestation(String parameterName) {

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
+import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,8 @@ import org.springframework.util.Assert;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
+import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 
@@ -69,16 +72,24 @@ import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
  * token issuance. Assertion/challenge cryptographic verification is performed
  * upstream by {@code ClientAttestationFilter}.
  * <p>
+ * Applies to <b>STATIC</b> App Attest clients only; DYNAMIC per-key clients are decoupled
+ * from users and are rejected here. Any login factor the request may also carry is
+ * <b>ignored</b>: the user is resolved solely from the device-to-user association.
+ * <p>
  * Flow:
  * <ol>
  *   <li>Retrieve the already-authenticated {@code RegisteredClient}.</li>
  *   <li>Validate the grant type and requested scopes.</li>
- *   <li>Load or create an anonymous user via {@link EulerDeviceUserDetailsService}.</li>
+ *   <li>Load the user associated with the device, provisioning an anonymous one only for an
+ *       attestation request.</li>
  *   <li>Generate Access Token and ID Token (if openid scope). No Refresh Token is issued
  *       because every token request already requires full device attestation, making
  *       refresh tokens redundant.</li>
  * </ol>
+ *
+ * @deprecated see {@link EulerAuthorizationGrantType#APP_ASSERTION}.
  */
+@Deprecated
 public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationProvider {
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
@@ -130,6 +141,17 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
         }
 
+        // Assertion-only renewal is a STATIC-client compatibility path. DYNAMIC per-key
+        // clients are decoupled from users and must not resolve a user from the assertion
+        // alone (they renew via refresh_token). The grant-type check above already excludes
+        // them; this marker check is defense in depth against a client misconfigured with
+        // the app_assertion grant.
+        Object clientTypeMarker = registeredClient.getClientSettings()
+                .getSetting(EulerConfigurationSettingNames.Client.APP_ATTEST_CLIENT_TYPE);
+        if (RegisteredApp.OAuth2ClientType.DYNAMIC.name().equals(clientTypeMarker)) {
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+        }
+
         this.validateScope(assertionAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(assertionAuthenticationToken.getScopes());
 
@@ -147,16 +169,33 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         }
         AppAttestUser attestUser = new AppAttestUser(
                 verifiedAppRegistration.getKeyId(), verifiedAppRegistration.getTeamId(), verifiedAppRegistration.getBundleId(), verifiedAppRegistration.getPublicKey());
+        EulerClientAttestationProof proof = (EulerClientAttestationProof) assertionAuthenticationToken
+                .getAdditionalParameters()
+                .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER);
         UserDetails user;
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);
         } catch (UserDetailsNotFoundException e) {
+            // Only an attestation request may establish the device-to-user association; see
+            // EulerAuthorizationGrantType#APP_ASSERTION. A missing proof is treated as
+            // assertion-only (fail-safe: never write).
+            if (proof != EulerClientAttestationProof.ATTESTATION) {
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("KeyId '{}' is not associated with a user and the request carried no "
+                            + "attestation; refusing to provision one", verifiedAppRegistration.getKeyId());
+                }
+                throw new OAuth2AuthenticationException(new OAuth2Error(
+                        OAuth2ErrorCodes.INVALID_GRANT,
+                        "device is not associated with a user; an attestation request is required first",
+                        ERROR_URI));
+            }
             if (!this.jitProvisioning.isEnabled()) {
                 throw new OAuth2AuthenticationException(new OAuth2Error(
                         OAuth2ErrorCodes.INVALID_GRANT,
                         "unknown device and JIT provisioning is disabled", ERROR_URI));
             }
-            // First-time use: JIT-provision an anonymous user
+            // First-time use via attestation: JIT-provision an anonymous user and associate it
+            // with the key, so that later assertion-only renewals can resolve it.
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("User not found for keyId '{}', provisioning new anonymous user", verifiedAppRegistration.getKeyId());
             }

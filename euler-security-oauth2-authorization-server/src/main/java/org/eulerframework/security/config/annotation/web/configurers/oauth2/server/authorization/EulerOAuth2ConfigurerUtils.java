@@ -22,6 +22,7 @@ import org.eulerframework.security.authentication.InMemoryChallengeService;
 import org.eulerframework.security.authentication.InMemoryNonceService;
 import org.eulerframework.security.authentication.NonceService;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
@@ -76,7 +77,8 @@ final class EulerOAuth2ConfigurerUtils {
                     new EulerOAuth2ClientAttestationVerifier(challengeService, nonceService);
             RegisteredClientRepository registeredClientRepository =
                     OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
-            provider = new EulerOAuth2ClientAttestationAuthenticationProvider(registeredClientRepository, oauth2ClientAttestationVerifier);
+            provider = new EulerOAuth2ClientAttestationAuthenticationProvider(registeredClientRepository,
+                    oauth2ClientAttestationVerifier, challengeService);
         }
         http.setSharedObject(EulerOAuth2ClientAttestationAuthenticationProvider.class, provider);
         return provider;
@@ -184,6 +186,22 @@ final class EulerOAuth2ConfigurerUtils {
         ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
         if (ctx.getBeanNamesForType(EulerDeviceUserDetailsService.class).length > 0) {
             return ctx.getBean(EulerDeviceUserDetailsService.class);
+        }
+        return null;
+    }
+
+    /**
+     * Resolve a {@link RegisteredAppRepository} bean from the {@link ApplicationContext},
+     * or return {@code null} if no such bean is available.
+     *
+     * @param http the {@link HttpSecurity} to resolve from
+     * @return the resolved repository, or {@code null} if not available
+     */
+    @Nullable
+    static RegisteredAppRepository getRegisteredAppRepositoryIfAvailable(HttpSecurity http) {
+        ApplicationContext ctx = http.getSharedObject(ApplicationContext.class);
+        if (ctx.getBeanNamesForType(RegisteredAppRepository.class).length > 0) {
+            return ctx.getBean(RegisteredAppRepository.class);
         }
         return null;
     }

@@ -23,4 +23,8 @@ public class OAuth2ConfigurerUtilsAccessor {
     public static AuthorizationServerSettings getAuthorizationServerSettings(HttpSecurity http) {
         return OAuth2ConfigurerUtils.getAuthorizationServerSettings(http);
     }
+
+    public static String withMultipleIssuersPattern(String endpointUri) {
+        return OAuth2ConfigurerUtils.withMultipleIssuersPattern(endpointUri);
+    }
 }

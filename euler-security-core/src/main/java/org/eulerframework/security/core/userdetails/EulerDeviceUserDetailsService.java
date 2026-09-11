@@ -25,8 +25,32 @@ import java.util.List;
  * Service interface for loading and creating user details based on Apple App Attest identities.
  * <p>
  * Implementations are responsible for mapping an {@link AppAttestUser} (identified by
- * a device key ID) to the application's user model.
+ * a device key ID) to the application's user model, and persist that mapping (conventionally
+ * in an {@code app_attest_attestation_user_mapping} table).
+ * <p>
+ * <b>This is the single place describing the deprecation of the device-to-user association.</b>
+ * Members, implementations and the call sites that keep them alive carry only a pointer here.
+ * <p>
+ * The entire interface exists to maintain a <em>fixed</em> association between a device key and
+ * a user. That association is pure compatibility support for clients released before App Attest
+ * was reduced to a device-level proof, and it is retired in two stages:
+ * <ul>
+ *   <li>{@link #createUser} serves only the deprecated {@code app_assertion} grant, which
+ *       JIT-provisions an anonymous user; it goes first, with that grant.</li>
+ *   <li>{@link #bindToUser} and {@link #loadUserByDeviceUser} serve the OTP grant, which binds
+ *       the device to the OTP-resolved user on an attestation request and rejects a mismatch
+ *       afterwards.</li>
+ * </ul>
+ * Going forward App Attest is a <b>device and client proof only</b>: it authenticates the OAuth
+ * client, never the user. A token request must therefore layer a factor that identifies a user
+ * (a user grant such as OTP, or {@code refresh_token}); the device key contributes no user
+ * identity and is never bound to one.
+ *
+ * @deprecated compatibility support for released clients that rely on a device key identifying a
+ * user. Removed, together with the mapping table, once those clients are retired; from then on a
+ * key is never associated with a user.
  */
+@Deprecated
 public interface EulerDeviceUserDetailsService {
 
     /**
@@ -41,8 +65,10 @@ public interface EulerDeviceUserDetailsService {
     /**
      * Create a new user account associated with the given Apple App Attest identity.
      * <p>
-     * This method is called during the attestation (device registration) flow when
-     * just-in-time provisioning is enabled and no existing user is found.
+     * This method is called by the {@code app_assertion} grant when just-in-time provisioning
+     * is enabled and no existing user is found for the key. It is only reached for a token
+     * request that presented an <b>attestation</b>, which registers the device key; the
+     * device registration endpoint itself creates no user.
      *
      * @param appAttestUser the validated App Attest user containing the device key ID
      * @param authorities   authorities to grant, supplied by the caller's just-in-time
@@ -65,6 +91,11 @@ public interface EulerDeviceUserDetailsService {
      * <p>
      * Implementations <strong>must</strong> reject the call if the {@code keyId} is
      * already mapped to a different user.
+     * <p>
+     * Callers <strong>must</strong> only invoke this for a request that presented an
+     * <b>attestation</b>. A request carrying only an <b>assertion</b> proves possession of an
+     * already-registered key but does not fix that key to a user, so it neither binds nor
+     * creates; it may only read an association established earlier.
      *
      * @param appAttestUser the validated App Attest user containing the device key ID
      * @param userId        the existing user id to associate the device with; never

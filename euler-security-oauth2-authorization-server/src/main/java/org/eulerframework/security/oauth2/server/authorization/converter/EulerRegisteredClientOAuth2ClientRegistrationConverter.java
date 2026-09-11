@@ -19,8 +19,11 @@ package org.eulerframework.security.oauth2.server.authorization.converter;
 import com.nimbusds.jose.jwk.JWKSet;
 import org.eulerframework.security.oauth2.server.authorization.EulerOAuth2ClientMetadataClaimNames;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -30,6 +33,10 @@ import org.springframework.security.oauth2.server.authorization.oidc.OidcClientM
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.util.CollectionUtils;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A {@link Converter} that converts the provided {@link RegisteredClient} to an
@@ -62,16 +69,25 @@ import org.springframework.util.CollectionUtils;
 public final class EulerRegisteredClientOAuth2ClientRegistrationConverter
         implements Converter<RegisteredClient, OAuth2ClientRegistration> {
 
+    private final Logger logger =
+            LoggerFactory.getLogger(EulerRegisteredClientOAuth2ClientRegistrationConverter.class);
+
     @Override
     public OAuth2ClientRegistration convert(RegisteredClient registeredClient) {
         // @formatter:off
 		OAuth2ClientRegistration.Builder builder = OAuth2ClientRegistration.builder()
 				.clientId(registeredClient.getClientId())
-				.clientIdIssuedAt(registeredClient.getClientIdIssuedAt())
 				.clientName(registeredClient.getClientName());
 
+		// Optional on RegisteredClient and rejected as a null claim value by the builder, so a
+		// client provisioned outside dynamic registration simply omits client_id_issued_at.
+		Instant clientIdIssuedAt = registeredClient.getClientIdIssuedAt();
+		if (clientIdIssuedAt != null) {
+			builder.clientIdIssuedAt(clientIdIssuedAt);
+		}
+
 		builder
-				.tokenEndpointAuthenticationMethod(registeredClient.getClientAuthenticationMethods().iterator().next().getValue());
+				.tokenEndpointAuthenticationMethod(resolveTokenEndpointAuthenticationMethod(registeredClient));
 
 		if (registeredClient.getClientSecret() != null) {
 			builder.clientSecret(registeredClient.getClientSecret());
@@ -136,6 +152,23 @@ public final class EulerRegisteredClientOAuth2ClientRegistrationConverter
 
 		return builder.build();
 		// @formatter:on
+    }
+
+    private String resolveTokenEndpointAuthenticationMethod(RegisteredClient registeredClient) {
+        Set<ClientAuthenticationMethod> methods = registeredClient.getClientAuthenticationMethods();
+        if (methods.size() <= 1) {
+            return methods.iterator().next().getValue();
+        }
+        List<String> values = methods.stream()
+                .map(ClientAuthenticationMethod::getValue)
+                .sorted()
+                .toList();
+        this.logger.warn("Registered client '{}' carries {} client authentication methods {} while RFC 7591 defines "
+                        + "'token_endpoint_auth_method' as a single string, so a dynamically registered client must be "
+                        + "built with exactly one. Reporting '{}' and discarding the rest, keeping the response "
+                        + "deterministic rather than dependent on HashSet iteration order.",
+                registeredClient.getClientId(), values.size(), values, values.get(0));
+        return values.get(0);
     }
 
 }

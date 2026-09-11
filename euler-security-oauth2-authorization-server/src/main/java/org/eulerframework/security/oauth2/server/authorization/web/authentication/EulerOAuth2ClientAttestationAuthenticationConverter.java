@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.web.authentication.AuthenticationConverter;
 
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
+import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.springframework.util.StringUtils;
 
@@ -83,16 +84,11 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
             copyOptional(attestationJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION, additionalParams);
             copyRequired(attestationPopJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParams);
         } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)) {
-
-            // Unlike standard JWT headers, Apple App Attest attestation and assertion data
-            // cannot carry a kid, so it must be sent as a separate parameter.
-            copyRequired(request, EulerOAuth2ParameterNames.KEY_ID, additionalParams);
-
-            copyRequired(request, EulerOAuth2ParameterNames.CHALLENGE, additionalParams);
-            // Unless the App Attest key is regenerated (causing attestation data to change),
-            // attestation data is not required since it was already submitted and verified at device registration.
-            copyOptional(request, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
-            copyOptional(request, EulerOAuth2ParameterNames.ASSERTION, additionalParams);
+            if (isHeaderCarried(request)) {
+                convertAppleAppAttestHeaders(request, additionalParams);
+            } else {
+                convertAppleAppAttestFormParameters(request, additionalParams);
+            }
         }
 
         // Optional request client_id (for RFC6749 consistency check in Provider)
@@ -102,6 +98,107 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
                 ATTESTATION_PRINCIPAL_PLACEHOLDER,
                 EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH,
                 null, additionalParams);
+    }
+
+    /**
+     * Whether the Apple App Attest data is carried in headers rather than in form parameters.
+     * <p>
+     * The {@code OAuth-Client-Attestation-Assertion} header is the switch. The two carriages are
+     * never mixed: a request presenting that header is read entirely from headers, and any App
+     * Attest form parameter it may also carry is ignored.
+     *
+     * @param request the token endpoint request
+     * @return {@code true} if the header carriage applies
+     */
+    public static boolean isHeaderCarried(HttpServletRequest request) {
+        return StringUtils.hasText(
+                request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
+    }
+
+    /**
+     * Header carriage, the only non-deprecated one: assertion-only, since device registration
+     * happens at the dedicated registration endpoint and no attestation header exists.
+     */
+    private static void convertAppleAppAttestHeaders(HttpServletRequest request,
+                                                     Map<String, Object> additionalParams) {
+        copyRequiredHeader(request, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, additionalParams);
+        copyRequiredHeader(request, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, additionalParams);
+        copyRequiredHeader(request, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, additionalParams);
+    }
+
+    /**
+     * Deprecated form-parameter carriage, retained for released clients; see
+     * {@link EulerOAuth2ParameterNames#ATTESTATION}.
+     * <p>
+     * Unlike the header carriage this one may also carry an attestation, so {@code attestation}
+     * and {@code assertion} are not mutually exclusive and the three combinations remain valid:
+     * attestation only (registers the device KEY and authenticates the client), assertion only
+     * (fast path for an already-registered KEY, which is the sole case requiring {@code kid}),
+     * or both. Values are stored under the canonical header keys so that downstream components
+     * stay transport-agnostic; only {@code attestation} keeps its own key, having no header
+     * analog.
+     */
+    private static void convertAppleAppAttestFormParameters(HttpServletRequest request,
+                                                            Map<String, Object> additionalParams) {
+        copyRequiredFormParameter(request, EulerOAuth2ParameterNames.CHALLENGE,
+                EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, additionalParams);
+
+        String attestation = request.getParameter(EulerOAuth2ParameterNames.ATTESTATION);
+        if (!StringUtils.hasText(attestation)
+                && !StringUtils.hasText(request.getParameter(EulerOAuth2ParameterNames.ASSERTION))) {
+            throw newError(OAuth2ErrorCodes.INVALID_REQUEST,
+                    EulerOAuth2ParameterNames.ATTESTATION + " or " + EulerOAuth2ParameterNames.ASSERTION, null);
+        }
+        copyOptional(attestation, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
+        copyOptionalFormParameter(request, EulerOAuth2ParameterNames.ASSERTION,
+                EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, additionalParams);
+
+        // The kid is derivable from an attestation (its credentialId), so it is required only
+        // for the assertion-only request, whose authenticator data carries no credentialId.
+        if (!StringUtils.hasText(attestation)) {
+            copyRequiredFormParameter(request, EulerOAuth2ParameterNames.KEY_ID,
+                    EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, additionalParams);
+        }
+    }
+
+    /**
+     * Resolve which proof the request presents, mirroring the branch {@link #convert} takes.
+     * <p>
+     * Both an attestation and a proof of possession resolve to the same verified device
+     * registration, so the registration alone cannot tell device registration apart from
+     * device verification. Downstream components that may establish persistent state (notably
+     * the device-to-user association) need this discriminator, and the token endpoint filter
+     * publishes it alongside the verified registration.
+     * <p>
+     * Where the attestation is looked for depends on the variant: the {@code OAuth-Client-Attestation}
+     * header for {@link EulerOAuth2ClientAttestationType#JWT}, the deprecated {@code attestation}
+     * form parameter for {@link EulerOAuth2ClientAttestationType#APPLE_APP_ATTEST}. The Apple
+     * header carriage has no attestation analog and is therefore always
+     * {@link EulerClientAttestationProof#ASSERTION}. A request carrying both an attestation and a
+     * proof of possession is reported as {@link EulerClientAttestationProof#ATTESTATION}, because
+     * that is the branch the provider acts on first.
+     *
+     * @param request the token endpoint request
+     * @return the proof the server will act on for this request
+     */
+    public static EulerClientAttestationProof resolveProof(HttpServletRequest request) {
+        String attestationType = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+        EulerOAuth2ClientAttestationType clientAttestationType = attestationType != null
+                ? EulerOAuth2ClientAttestationType.parse(attestationType)
+                : EulerOAuth2ClientAttestationType.JWT;
+
+        boolean attestationPresent;
+        if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
+            attestationPresent = StringUtils.hasText(
+                    request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION));
+        } else {
+            attestationPresent = !isHeaderCarried(request)
+                    && StringUtils.hasText(request.getParameter(EulerOAuth2ParameterNames.ATTESTATION));
+        }
+
+        return attestationPresent
+                ? EulerClientAttestationProof.ATTESTATION
+                : EulerClientAttestationProof.ASSERTION;
     }
 
     private static void copyOptional(Object value, String paramName,
@@ -119,18 +216,39 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
         }
     }
 
+    private static void copyRequiredHeader(HttpServletRequest request, String headerName,
+                                           Map<String, Object> target) {
+        String value = request.getHeader(headerName);
+        if (!StringUtils.hasText(value)) {
+            throw newError(OAuth2ErrorCodes.INVALID_REQUEST, headerName, null);
+        }
+        target.put(headerName, value);
+    }
+
+    /**
+     * Copy a deprecated form parameter under its canonical header key, so that downstream
+     * components stay transport-agnostic.
+     */
+    private static void copyRequiredFormParameter(HttpServletRequest request, String paramName, String targetKey,
+                                                  Map<String, Object> target) {
+        String value = request.getParameter(paramName);
+        if (!StringUtils.hasText(value)) {
+            throw newError(OAuth2ErrorCodes.INVALID_REQUEST, paramName, null);
+        }
+        target.put(targetKey, value);
+    }
+
+    private static void copyOptionalFormParameter(HttpServletRequest request, String paramName, String targetKey,
+                                                  Map<String, Object> target) {
+        String value = request.getParameter(paramName);
+        if (StringUtils.hasText(value)) {
+            target.put(targetKey, value);
+        }
+    }
+
     private static void copyRequired(Object value, String paramName,
                                      Map<String, Object> target) {
         if (value == null) {
-            throw newError(OAuth2ErrorCodes.INVALID_REQUEST, paramName, null);
-        }
-        target.put(paramName, value);
-    }
-
-    private static void copyRequired(HttpServletRequest request, String paramName,
-                                     Map<String, Object> target) {
-        String value = request.getParameter(paramName);
-        if (!StringUtils.hasText(value)) {
             throw newError(OAuth2ErrorCodes.INVALID_REQUEST, paramName, null);
         }
         target.put(paramName, value);

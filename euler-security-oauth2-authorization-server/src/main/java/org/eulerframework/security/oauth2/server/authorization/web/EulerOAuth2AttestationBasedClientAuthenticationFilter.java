@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
+import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
@@ -72,8 +73,10 @@ import java.util.Map;
  * <ul>
  *   <li>{@code jwt} (default) — standard PoP JWT as defined in Section 5.2 of the draft.</li>
  *   <li>{@code apple_app_attest} — Apple App Attest used as PoP, with parameters
- *       ({@code kid}, {@code challenge}, and either {@code attestation} for first-time
- *       registration or {@code assertion} for subsequent calls) in the request body.</li>
+ *       ({@code challenge} plus {@code attestation} and/or {@code assertion}, and {@code kid}
+ *       when only an {@code assertion} is supplied) in the request body. The two are not
+ *       mutually exclusive: supplying both registers the device KEY and then verifies the
+ *       assertion against the derived key ID in a single request.</li>
  * </ul>
  *
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
@@ -104,6 +107,26 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
      * {@code OAuth2TokenCustomizer}s.
      */
     public static final String VERIFIED_CLIENT_ATTESTATION_PARAMETER = "verified_client_attestation";
+
+    /**
+     * Request attribute name for the {@link EulerClientAttestationProof} this request
+     * presented. Set together with {@link #VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE} and read by
+     * downstream converters.
+     * <p>
+     * The verified registration alone cannot tell device registration apart from device
+     * verification, because an attestation and an assertion both resolve to the same
+     * registration. Components that may establish persistent state need this discriminator.
+     */
+    public static final String CLIENT_ATTESTATION_PROOF_ATTRIBUTE = "oauth2.client-attestation.proof";
+
+    /**
+     * Key under which the {@link EulerClientAttestationProof} is propagated through
+     * {@link org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters()}
+     * after the converter stage, alongside {@link #VERIFIED_CLIENT_ATTESTATION_PARAMETER}.
+     * <p>
+     * In-process only: this map entry is never serialized into any issued token.
+     */
+    public static final String CLIENT_ATTESTATION_PROOF_PARAMETER = "client_attestation_proof";
 
     private final RequestMatcher tokenEndpointMatcher;
 
@@ -189,6 +212,8 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
 
         if (verifiedAppRegistration != null) {
             request.setAttribute(VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE, verifiedAppRegistration);
+            request.setAttribute(CLIENT_ATTESTATION_PROOF_ATTRIBUTE,
+                    EulerOAuth2ClientAttestationAuthenticationConverter.resolveProof(request));
         }
         filterChain.doFilter(request, response);
     }

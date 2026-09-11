@@ -53,7 +53,6 @@ import org.springframework.util.Assert;
  *     .challengeService(challengeService)
  *     .appleAppRepository(appleAppRepository)
  *     .registrationService(registrationService)
- *     .userDetailsService(userDetailsService)
  * );
  * </pre>
  *
@@ -67,8 +66,6 @@ public class AppAttestSecurityConfigurer
     private AppleAppAttestValidationService validationService;
     private RegisteredAppRepository registeredAppRepository;
     private AppAttestAttestationRegistrationService registrationService;
-    private EulerDeviceUserDetailsService userDetailsService;
-    private JitProvisioningPolicy jitProvisioning = JitProvisioningPolicy.disabled();
 
     private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app_attest/challenge";
     public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app_attest/register";
@@ -100,19 +97,28 @@ public class AppAttestSecurityConfigurer
         return this;
     }
 
+    /**
+     * No-op. Device registration no longer resolves or creates users, so a user
+     * details service is not used. Retained for API compatibility.
+     *
+     * @deprecated the registration endpoint registers the device KEY only and
+     * creates no user
+     */
+    @Deprecated
     public AppAttestSecurityConfigurer userDetailsService(EulerDeviceUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
         return this;
     }
 
     /**
-     * Sets the just-in-time provisioning policy applied when an attested
-     * device maps to no existing user. Defaults to disabled, in which
-     * case registration of an unknown device is rejected.
+     * No-op. Device registration no longer provisions users, so a JIT provisioning
+     * policy is not used. Retained for API compatibility.
+     *
+     * @deprecated the registration endpoint registers the device KEY only and
+     * creates no user
      */
+    @Deprecated
     public AppAttestSecurityConfigurer jitProvisioning(JitProvisioningPolicy jitProvisioning) {
         Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
-        this.jitProvisioning = jitProvisioning;
         return this;
     }
 
@@ -173,9 +179,7 @@ public class AppAttestSecurityConfigurer
     private AppAttestAttestationRegistrationAuthenticationProvider createRegistrationProvider(HttpSecurity http) {
         return new AppAttestAttestationRegistrationAuthenticationProvider(
                 resolveChallengeService(http),
-                resolveValidationService(http),
-                resolveUserDetailsService(http),
-                this.jitProvisioning);
+                resolveValidationService(http));
     }
 
     private ChallengeService resolveChallengeService(HttpSecurity http) {
@@ -208,13 +212,5 @@ public class AppAttestSecurityConfigurer
         }
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
         return context.getBean(AppAttestAttestationRegistrationService.class);
-    }
-
-    private EulerDeviceUserDetailsService resolveUserDetailsService(HttpSecurity http) {
-        if (this.userDetailsService != null) {
-            return this.userDetailsService;
-        }
-        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        return context.getBean(EulerDeviceUserDetailsService.class);
     }
 }

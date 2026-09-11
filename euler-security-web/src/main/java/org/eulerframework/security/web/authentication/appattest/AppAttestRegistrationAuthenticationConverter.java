@@ -23,28 +23,29 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
 
 /**
- * Extracts {@code kid}, {@code attestation}, and {@code challenge} parameters from
- * an HTTP request and constructs a {@link AppAttestAttestationRegistrationAuthenticationToken}.
+ * Extracts the {@code attestation} and {@code challenge} parameters from an HTTP request
+ * and constructs a {@link AppAttestAttestationRegistrationAuthenticationToken}.
  * <p>
- * Returns {@code null} if any required parameter is missing, indicating the request
+ * The key ID is not read from the request: it is derived from the attestation's
+ * credential ID during validation, so the client does not need to send it.
+ * <p>
+ * Returns {@code null} if a required parameter is missing, indicating the request
  * is not a device attestation registration request.
  */
 public class AppAttestRegistrationAuthenticationConverter implements AuthenticationConverter {
 
-    private static final String PARAM_KEY_ID = "kid";
     private static final String PARAM_ATTESTATION = "attestation";
     private static final String PARAM_CHALLENGE = "challenge";
 
     @Override
     public Authentication convert(HttpServletRequest request) {
-        String keyId = request.getParameter(PARAM_KEY_ID);
         String attestation = request.getParameter(PARAM_ATTESTATION);
         String challenge = request.getParameter(PARAM_CHALLENGE);
 
-        if (!StringUtils.hasText(keyId) || !StringUtils.hasText(attestation) || !StringUtils.hasText(challenge)) {
+        if (!StringUtils.hasText(attestation) || !StringUtils.hasText(challenge)) {
             return null;
         }
 
-        return AppAttestAttestationRegistrationAuthenticationToken.unauthenticated(keyId, attestation, challenge);
+        return AppAttestAttestationRegistrationAuthenticationToken.unauthenticated(attestation, challenge);
     }
 }

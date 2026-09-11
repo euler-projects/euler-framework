@@ -37,6 +37,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppAssertionAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 
@@ -52,7 +53,10 @@ import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2At
  * Assertion and challenge parameters ({@code kid}, {@code assertion},
  * {@code challenge}) are no longer extracted here — they are consumed by
  * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter} during PoP verification.
+ *
+ * @deprecated see {@link EulerAuthorizationGrantType#APP_ASSERTION}.
  */
+@Deprecated
 public class OAuth2AppAssertionAuthenticationConverter implements AuthenticationConverter {
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
@@ -101,6 +105,16 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
         additionalParameters.put(
                 EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
                 verifiedAppRegistration);
+        // Propagate which proof this request presented: the provider may only establish the
+        // device-to-user association for an attestation request, never for an assertion-only
+        // renewal.
+        EulerClientAttestationProof proof = (EulerClientAttestationProof) request.getAttribute(
+                EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_ATTRIBUTE);
+        if (proof != null) {
+            additionalParameters.put(
+                    EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER,
+                    proof);
+        }
 
         return new OAuth2AppAssertionAuthenticationToken(
                 clientPrincipal,

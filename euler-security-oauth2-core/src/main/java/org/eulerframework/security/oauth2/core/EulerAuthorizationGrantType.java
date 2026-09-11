@@ -21,6 +21,25 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 public class EulerAuthorizationGrantType {
     public static final AuthorizationGrantType PASSWORD = new AuthorizationGrantType("password");
     public static final AuthorizationGrantType WECHAT_AUTHORIZATION_CODE = new AuthorizationGrantType("wechat_authorization_code");
+
+    /**
+     * The {@code app_assertion} grant: renews a token from an App Attest assertion alone,
+     * resolving the user from the device-to-user association that an earlier attestation
+     * request established.
+     * <p>
+     * An assertion proves possession of a registered device key, which authenticates the
+     * client but does not identify a user. The grant survives only so that already-released
+     * STATIC clients keep working: an attestation request JIT-provisions an anonymous user and
+     * records the association, later assertion-only renewals read it, and a key that never went
+     * through such an attestation request is rejected with {@code invalid_grant}.
+     *
+     * @deprecated compatibility path for released STATIC clients. Layer a user grant (e.g.
+     * {@link #OTP}) or {@code refresh_token} on the assertion instead; those never write the
+     * device-to-user association. Removable once no released client depends on assertion-only
+     * renewal.
+     */
+    @Deprecated
     public static final AuthorizationGrantType APP_ASSERTION = new AuthorizationGrantType("urn:ietf:params:oauth:grant-type:app_assertion");
+
     public static final AuthorizationGrantType OTP = new AuthorizationGrantType("otp");
 }

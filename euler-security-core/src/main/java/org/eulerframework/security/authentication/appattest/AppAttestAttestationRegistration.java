@@ -86,8 +86,9 @@ public class AppAttestAttestationRegistration implements Serializable {
      * does not use the {@link RegisteredApp.OAuth2ClientType#STATIC} client type.
      * <p>
      * For STATIC clients, this is the deterministic {@code base64url(SHA-256(appId))}
-     * derived at attestation time; for other cases the value is {@code null} and the
-     * caller must fall back to the request-supplied {@code client_id}.
+     * derived at attestation time. For a DYNAMIC client the value stays {@code null} until
+     * the per-key client is dynamically registered and bound back via
+     * {@link AppAttestAttestationRegistrationService#bindClientId(String, String)}.
      */
     public String getClientId() {
         return clientId;

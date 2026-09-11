@@ -16,6 +16,10 @@
 package org.eulerframework.security.config.annotation.web.configurers.oauth2.server.authorization;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eulerframework.security.authentication.ChallengeService;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
+import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
@@ -23,6 +27,7 @@ import org.eulerframework.security.oauth2.server.authorization.authentication.*;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OneTimePasswordAuthenticationConverter;
@@ -32,32 +37,85 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.List;
 
 
 public class EulerAuthorizationServerConfiguration {
     public static void configClientRegistrationEndpoint(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) {
+        AppleAppAttestValidationService validationService =
+                EulerOAuth2ConfigurerUtils.getAppleAppAttestValidationServiceIfAvailable(http);
+        AppAttestAttestationRegistrationService registrationService =
+                EulerOAuth2ConfigurerUtils.getDeviceAttestRegistrationServiceIfAvailable(http);
+        RegisteredAppRepository registeredAppRepository =
+                EulerOAuth2ConfigurerUtils.getRegisteredAppRepositoryIfAvailable(http);
+        final boolean appAttestAvailable =
+                validationService != null && registrationService != null && registeredAppRepository != null;
+
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
-                .clientRegistrationEndpoint(configurer -> configurer
-                        .openRegistrationAllowed(true)
-                        .authenticationProviders(authenticationProviders -> {
-                            for (AuthenticationProvider authenticationProvider : authenticationProviders) {
-                                if (authenticationProvider instanceof OAuth2ClientRegistrationAuthenticationProvider oauth2ClientRegistrationAuthenticationProvider) {
-                                    oauth2ClientRegistrationAuthenticationProvider.setRegisteredClientConverter(new EulerOAuth2ClientRegistrationRegisteredClientConverter());
-                                    oauth2ClientRegistrationAuthenticationProvider.setClientRegistrationConverter(new EulerRegisteredClientOAuth2ClientRegistrationConverter());
+                .clientRegistrationEndpoint(configurer -> {
+                    configurer
+                            .openRegistrationAllowed(false)
+                            .authenticationProviders(authenticationProviders -> {
+                                for (AuthenticationProvider authenticationProvider : authenticationProviders) {
+                                    if (authenticationProvider instanceof OAuth2ClientRegistrationAuthenticationProvider oauth2ClientRegistrationAuthenticationProvider) {
+                                        oauth2ClientRegistrationAuthenticationProvider.setRegisteredClientConverter(new EulerOAuth2ClientRegistrationRegisteredClientConverter());
+                                        oauth2ClientRegistrationAuthenticationProvider.setClientRegistrationConverter(new EulerRegisteredClientOAuth2ClientRegistrationConverter());
+                                    }
                                 }
-                            }
-                        })));
-//        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
-//                .clientRegistrationEndpoint(configurer ->
-//                        http.authorizeHttpRequests((authorize) -> authorize
-//                                .requestMatchers(ConfigurerAccessor.getDeferredRequestMatcher(configurer))
-//                                .permitAll())));
+                            });
+
+                    // App Attest DYNAMIC registration: assertion-based client authentication as an
+                    // alternative credential for the RFC 7591 endpoint, minting a per-KEY client.
+                    // Spring's own converter and provider keep handling the initial access token
+                    // path; both additions are registered ahead of the defaults, so the converter
+                    // routes each request by credential and the provider is selected by supports().
+                    if (appAttestAvailable) {
+                        ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
+                        RegisteredClientRepository registeredClientRepository =
+                                OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
+                        configurer
+                                .clientRegistrationRequestConverter(
+                                        new EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverter())
+                                .authenticationProvider(
+                                        new EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider(
+                                                challengeService, validationService, registeredAppRepository,
+                                                registrationService, registeredClientRepository));
+                    }
+                }));
+
+        // App Attest requests carry no bearer token, so the endpoint cannot require an already
+        // authenticated request; enforcement moves into the converter and the providers above,
+        // which reject a request carrying neither credential before its body is read. Registered
+        // under the same condition as those components so the two can never diverge, and added
+        // ahead of the chain's catch-all authenticated() rule so that it takes precedence.
+        if (appAttestAvailable) {
+            http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(clientRegistrationEndpointMatcher(http)).permitAll());
+        }
+    }
+
+    /**
+     * Match {@code POST} on the client registration endpoint, mirroring the matcher Spring's
+     * {@code OAuth2ClientRegistrationEndpointConfigurer} builds for its own endpoint filter,
+     * including the URI pattern used when multiple issuers are allowed.
+     */
+    private static RequestMatcher clientRegistrationEndpointMatcher(HttpSecurity http) {
+        AuthorizationServerSettings authorizationServerSettings =
+                OAuth2ConfigurerUtilsAccessor.getAuthorizationServerSettings(http);
+        String clientRegistrationEndpoint = authorizationServerSettings.isMultipleIssuersAllowed()
+                ? OAuth2ConfigurerUtilsAccessor.withMultipleIssuersPattern(
+                        authorizationServerSettings.getClientRegistrationEndpoint())
+                : authorizationServerSettings.getClientRegistrationEndpoint();
+        return PathPatternRequestMatcher.pathPattern(HttpMethod.POST, clientRegistrationEndpoint);
     }
 
 
@@ -202,6 +260,8 @@ public class EulerAuthorizationServerConfiguration {
                 )
         );
 
+        // Compatibility wiring for the deprecated app_assertion grant; see
+        // EulerAuthorizationGrantType#APP_ASSERTION.
         EulerDeviceUserDetailsService userDetailsService =
                 EulerOAuth2ConfigurerUtils.getAppleAppAttestUserDetailsServiceIfAvailable(http);
         if (userDetailsService != null) {

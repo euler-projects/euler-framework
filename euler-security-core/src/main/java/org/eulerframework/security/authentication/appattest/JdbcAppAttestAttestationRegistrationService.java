@@ -81,10 +81,14 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     private static final String UPDATE_SIGN_COUNT_SQL =
             "UPDATE %s SET %s = ?, %s = ? WHERE %s = ? AND %s < ?";
 
+    private static final String UPDATE_BIND_CLIENT_ID_SQL =
+            "UPDATE %s SET %s = ?, %s = ? WHERE %s = ? AND %s IS NULL";
+
     private final JdbcOperations jdbcOperations;
     private final String insertSql;
     private final String selectSql;
     private final String updateSignCountSql;
+    private final String updateBindClientIdSql;
 
     /**
      * Create a new {@code JdbcDeviceAttestRegistrationService} with the default table name.
@@ -119,6 +123,8 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
                 tableName, COLUMN_KEY_ID);
         this.updateSignCountSql = String.format(UPDATE_SIGN_COUNT_SQL, tableName,
                 COLUMN_SIGN_COUNT, COLUMN_MODIFIED_DATE, COLUMN_KEY_ID, COLUMN_SIGN_COUNT);
+        this.updateBindClientIdSql = String.format(UPDATE_BIND_CLIENT_ID_SQL, tableName,
+                COLUMN_CLIENT_ID, COLUMN_MODIFIED_DATE, COLUMN_KEY_ID, COLUMN_CLIENT_ID);
     }
 
     @Override
@@ -173,6 +179,12 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     public void updateSignCount(String keyId, long newSignCount) {
         Timestamp now = Timestamp.from(Instant.now());
         this.jdbcOperations.update(this.updateSignCountSql, newSignCount, now, keyId, newSignCount);
+    }
+
+    @Override
+    public void bindClientId(String keyId, String clientId) {
+        Timestamp now = Timestamp.from(Instant.now());
+        this.jdbcOperations.update(this.updateBindClientIdSql, clientId, now, keyId);
     }
 
     /**

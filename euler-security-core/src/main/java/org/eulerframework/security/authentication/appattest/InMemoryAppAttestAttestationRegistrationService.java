@@ -49,4 +49,27 @@ public class InMemoryAppAttestAttestationRegistrationService implements AppAttes
             registration.setSignCount(newSignCount);
         }
     }
+
+    @Override
+    public void bindClientId(String keyId, String clientId) {
+        this.registrations.computeIfPresent(keyId, (k, existing) ->
+                existing.getClientId() == null ? bindClientId(existing, clientId) : existing);
+    }
+
+    /**
+     * Rebuild a registration with {@code clientId} bound, leaving the original untouched.
+     * <p>
+     * A registration is immutable apart from its sign count, and the domain model
+     * deliberately exposes no copy factory for this in-memory concern (the JDBC
+     * implementation binds with a single {@code UPDATE}), so the copy is assembled here
+     * from the public constructor.
+     */
+    private static AppAttestAttestationRegistration bindClientId(AppAttestAttestationRegistration source,
+                                                                String clientId) {
+        return new AppAttestAttestationRegistration(
+                source.getKeyId(), source.getTeamId(), source.getBundleId(), clientId,
+                source.getAaguid(), source.getCredentialId(),
+                source.getAttestationCertificateChain(), source.getReceipt(),
+                source.getPublicKey(), source.getJwks(), source.getSignCount());
+    }
 }

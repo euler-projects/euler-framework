@@ -22,7 +22,11 @@ import java.util.Objects;
 
 /**
  * Represents a validated app's anonymous user identified by their key ID.
+ *
+ * @deprecated parameter type of {@code EulerDeviceUserDetailsService}, which carries the
+ * authoritative notice for the device-to-user association this type identifies.
  */
+@Deprecated
 public class AppAttestUser implements Serializable {
 
     private final String keyId;

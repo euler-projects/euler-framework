@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.util.Assert;
 
@@ -35,6 +36,7 @@ import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.eulerframework.security.authentication.appattest.RegisteredAppChangeListener;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
+import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
 
 /**
  * A {@link RegisteredAppChangeListener} that provisions an OAuth2 {@link RegisteredClient}
@@ -70,21 +72,33 @@ public class AppAttestOAuth2ClientProvisioningListener implements RegisteredAppC
 
         String clientId = AppAttestUtils.staticClientId(app);
 
-        // Provision-if-absent: do not overwrite existing clients (admin may have customized them)
-//        if (this.registeredClientRepository.findByClientId(clientId) != null) {
-//            logger.debug("OAuth2 client already exists for app '{}', skipping provisioning", app.getAppId());
-//            return;
-//        }
+        // Provision-if-absent: never overwrite an existing client. This listener fires on
+        // every app save (including startup preload), and RegisteredClientRepository.save
+        // performs a full replace when the registrationId already exists; without this
+        // guard each restart would reset administrator customizations back to the baseline
+        // below. The client_id is deterministic, so an administrator-customized client
+        // (which keeps its id and client_id) is always found here and skipped.
+        if (this.registeredClientRepository.findByClientId(clientId) != null) {
+            logger.debug("OAuth2 client already exists for app '{}' (client_id '{}'), skipping provisioning",
+                    app.getAppId(), clientId);
+            return;
+        }
 
         String registrationId = UUID.nameUUIDFromBytes(
                 ("app-attest:" + app.getAppId()).getBytes(StandardCharsets.UTF_8)).toString();
 
+        // The app_assertion grant is deprecated but is still provisioned here: released STATIC
+        // clients renew their tokens with it. See EulerAuthorizationGrantType#APP_ASSERTION.
         RegisteredClient registeredClient = RegisteredClient.withId(registrationId)
                 .clientId(clientId)
                 .clientName(app.getAppId())
                 .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
                 .authorizationGrantType(EulerAuthorizationGrantType.APP_ASSERTION)
                 .scope(OidcScopes.OPENID)
+                .clientSettings(ClientSettings.builder()
+                        .setting(EulerConfigurationSettingNames.Client.APP_ATTEST_CLIENT_TYPE,
+                                RegisteredApp.OAuth2ClientType.STATIC.name())
+                        .build())
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofDays(7))
                         .build())

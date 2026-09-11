@@ -32,7 +32,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -45,24 +44,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A filter that exposes a {@code POST /app_attest/register} endpoint for device attestation
- * device registration (attestation).
+ * A filter that exposes a {@code POST /app_attest/register} endpoint for device KEY
+ * registration via Apple App Attest attestation.
  * <p>
- * This endpoint is anonymous (no authentication required). The filter uses an
+ * This endpoint is anonymous (no authentication required) and performs <b>device
+ * registration only</b>: it validates the attestation and records the KEY, but
+ * establishes no login state and creates no user. The filter uses an
  * {@link AuthenticationConverter} to extract registration parameters from the request
- * and delegates to an {@link AuthenticationProvider} for attestation validation,
- * device registration, and user creation.
+ * and delegates to an {@link AuthenticationProvider} for attestation validation and
+ * KEY registration.
+ * <p>
+ * The attestation is single-use: a {@code kid} is attested exactly once here; all
+ * subsequent flows use assertions.
  * <p>
  * Request parameters:
  * <ul>
- *     <li>{@code kid} - the key identifier from DCAppAttestService</li>
  *     <li>{@code attestation} - the Base64-encoded attestation object</li>
  *     <li>{@code challenge} - the challenge value obtained from the challenge endpoint</li>
  * </ul>
  * <p>
+ * The key ID is derived from the attestation's credential ID and returned in the
+ * response; the client does not send it.
+ * <p>
  * Success response (HTTP 200):
  * <pre>
- * {"kid": "...", "username": "apple_app_..."}
+ * {"kid": "..."}
  * </pre>
  *
  * @see AppAttestRegistrationAuthenticationConverter
@@ -105,7 +111,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             Authentication authRequest = this.authenticationConverter.convert(request);
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
-                        "invalid_request", "Missing required parameters: kid, attestation, challenge");
+                        "invalid_request", "Missing required parameters: attestation, challenge");
                 return;
             }
 
@@ -126,10 +132,6 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
 
         Map<String, Object> body = new HashMap<>();
         body.put("kid", result.getKeyId());
-        UserDetails principal = (UserDetails) result.getPrincipal();
-        if (principal != null) {
-            body.put("sub", principal.getUsername());
-        }
 
         response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }

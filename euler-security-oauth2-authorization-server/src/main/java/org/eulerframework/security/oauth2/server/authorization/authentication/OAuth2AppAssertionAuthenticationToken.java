@@ -36,7 +36,10 @@ import java.util.Set;
  * For this grant the entry is mandatory: the converter rejects requests that
  * have not been verified by
  * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}.
+ *
+ * @deprecated see {@link EulerAuthorizationGrantType#APP_ASSERTION}.
  */
+@Deprecated
 public class OAuth2AppAssertionAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
     private final Set<String> scopes;
 

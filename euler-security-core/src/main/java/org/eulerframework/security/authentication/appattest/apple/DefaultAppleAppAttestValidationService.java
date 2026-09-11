@@ -162,7 +162,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
 
     @Override
     @SuppressWarnings("unchecked")
-    public AppAttestAttestationRegistration validateAttestation(String keyId, String attestation, String challenge) throws AuthenticationException {
+    public AppAttestAttestationRegistration validateAttestation(String attestation, String challenge) throws AuthenticationException {
         try {
             // Step 1: Base64-decode and CBOR-decode the attestation object
             byte[] attestationBytes = Base64.getDecoder().decode(attestation);
@@ -211,12 +211,11 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                 throw new AuthenticationServiceException("Nonce verification failed");
             }
 
-            // Step 4: Verify the credential ID matches the key ID
+            // Step 4: Derive the key ID from the credential ID embedded in the attestation.
+            // Apple sets credentialId == keyId, so the key ID is authoritative from the
+            // attestation itself and is not taken from (or trusted from) the caller.
             byte[] credentialId = extractCredentialId(authData);
-            if (!Base64.getEncoder().encodeToString(credentialId).equals(keyId)) {
-                throw new AuthenticationServiceException(
-                        "Key ID mismatch: credential ID does not match the provided key ID");
-            }
+            String keyId = Base64.getEncoder().encodeToString(credentialId);
 
             // Step 5: Look up the registered Apple App by RP ID hash
             byte[] rpIdHash = Arrays.copyOfRange(authData, 0, 32);
@@ -239,6 +238,20 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
             if (counter != 0) {
                 throw new AuthenticationServiceException(
                         "Sign count must be 0 for attestation");
+            }
+
+            // Idempotent re-registration: the attestation above has now been fully
+            // validated against a fresh one-time challenge, so if this KEY is already
+            // registered, return the existing registration rather than re-registering it
+            // (which would also collide with the INSERT-only primary key). A captured
+            // attestation cannot be replayed here because its nonce is bound to the
+            // already-consumed challenge; only a genuinely re-attested KEY, which Apple
+            // permits when the first attestation response was lost, reaches this point.
+            AppAttestAttestationRegistration existing =
+                    this.appAttestAttestationRegistrationService.findByKeyId(keyId);
+            if (existing != null) {
+                logger.debug("Apple App Attest keyId '{}' already registered; returning existing registration", keyId);
+                return existing;
             }
 
             // Step 8: Encode the certificate chain as PkiPath
@@ -488,9 +501,11 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
      * Resolve the OAuth2 {@code client_id} to bind to the attestation registration.
      * <p>
      * For STATIC OAuth2-enabled apps, this returns the deterministic
-     * {@code base64url(SHA-256(appId))}. For all other cases (DYNAMIC client type or
-     * OAuth2 disabled), {@code null} is returned so that callers fall back to the
-     * request-supplied {@code client_id}.
+     * {@code base64url(SHA-256(appId))}, whose client is pre-provisioned when the app is
+     * saved and therefore already exists before any device registers. For all other cases
+     * (DYNAMIC client type or OAuth2 disabled), {@code null} is returned: a DYNAMIC app has
+     * no shared client, and its per-key {@code client_id} is only minted and bound back
+     * during dynamic client registration, so nothing can be resolved at attestation time.
      */
     private static String resolveClientId(RegisteredApp app) {
         if (app.isOauth2Enabled() && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {

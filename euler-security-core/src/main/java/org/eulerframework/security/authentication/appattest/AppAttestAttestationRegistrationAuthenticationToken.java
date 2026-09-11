@@ -17,28 +17,31 @@
 package org.eulerframework.security.authentication.appattest;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Authentication token for device attestation registration requests.
- * Contains keyId, attestation data, and challenge.
+ * Authentication token for the device attestation registration endpoint.
+ * <p>
+ * This token represents a <b>device/KEY</b> subject, not a user. The
+ * unauthenticated form carries the raw registration request ({@code attestation},
+ * {@code challenge}); the authenticated form carries the verified
+ * {@link AppAttestAttestationRegistration} as its principal and holds no authorities,
+ * because device registration establishes no user login state. The key ID is derived
+ * from the attestation, so it is not carried on the unauthenticated form.
  */
 public class AppAttestAttestationRegistrationAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final String keyId;
     private final String attestation;
     private final String challenge;
     private final Object principal;
 
     /**
-     * Create an unauthenticated token.
+     * Create an unauthenticated token from the registration request. The key ID is not
+     * carried here; it is derived from the attestation during validation.
      */
-    AppAttestAttestationRegistrationAuthenticationToken(String keyId, String attestation, String challenge) {
+    AppAttestAttestationRegistrationAuthenticationToken(String attestation, String challenge) {
         super(Collections.emptyList());
-        this.keyId = keyId;
         this.attestation = attestation;
         this.challenge = challenge;
         this.principal = null;
@@ -46,13 +49,12 @@ public class AppAttestAttestationRegistrationAuthenticationToken extends Abstrac
     }
 
     /**
-     * Create an authenticated token.
+     * Create an authenticated token whose principal is the verified device
+     * registration. Carries no authorities.
      */
-    AppAttestAttestationRegistrationAuthenticationToken(Object principal, String keyId,
-                                                        Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principal = principal;
-        this.keyId = keyId;
+    AppAttestAttestationRegistrationAuthenticationToken(AppAttestAttestationRegistration registration) {
+        super(Collections.emptyList());
+        this.principal = registration;
         this.attestation = null;
         this.challenge = null;
         super.setAuthenticated(true);
@@ -61,16 +63,18 @@ public class AppAttestAttestationRegistrationAuthenticationToken extends Abstrac
     /**
      * Creates an unauthenticated token containing the attestation data.
      */
-    public static AppAttestAttestationRegistrationAuthenticationToken unauthenticated(String keyId, String attestation, String challenge) {
-        return new AppAttestAttestationRegistrationAuthenticationToken(keyId, attestation, challenge);
+    public static AppAttestAttestationRegistrationAuthenticationToken unauthenticated(String attestation, String challenge) {
+        return new AppAttestAttestationRegistrationAuthenticationToken(attestation, challenge);
     }
 
     /**
-     * Creates an authenticated token with the resolved principal and authorities.
+     * Creates an authenticated token carrying the verified device registration.
+     *
+     * @param registration the verified attestation registration (device subject)
+     * @return an authenticated token with no authorities
      */
-    public static AppAttestAttestationRegistrationAuthenticationToken authenticated(Object principal, String keyId,
-                                                                                    Collection<? extends GrantedAuthority> authorities) {
-        return new AppAttestAttestationRegistrationAuthenticationToken(principal, keyId, authorities);
+    public static AppAttestAttestationRegistrationAuthenticationToken registered(AppAttestAttestationRegistration registration) {
+        return new AppAttestAttestationRegistrationAuthenticationToken(registration);
     }
 
     @Override
@@ -83,8 +87,13 @@ public class AppAttestAttestationRegistrationAuthenticationToken extends Abstrac
         return this.principal;
     }
 
+    /**
+     * Returns the registered key ID derived from the verified registration, or
+     * {@code null} for an unauthenticated token.
+     */
     public String getKeyId() {
-        return keyId;
+        return this.principal instanceof AppAttestAttestationRegistration registration
+                ? registration.getKeyId() : null;
     }
 
     public String getAttestation() {

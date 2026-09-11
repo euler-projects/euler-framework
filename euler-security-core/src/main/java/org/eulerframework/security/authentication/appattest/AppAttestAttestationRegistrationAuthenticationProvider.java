@@ -19,10 +19,6 @@ package org.eulerframework.security.authentication.appattest;
 
 import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
-import org.eulerframework.security.core.userdetails.EulerUserDetails;
-import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
-import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -35,15 +31,17 @@ import org.springframework.util.Assert;
 import javax.annotation.Nonnull;
 
 /**
- * {@link AuthenticationProvider} that handles device attestation registration requests.
+ * {@link AuthenticationProvider} that verifies a device attestation and registers
+ * the device KEY.
  * <p>
- * This provider performs the attestation validation flow by delegating to
- * {@link AppleAppAttestValidationService}, then handles user creation/lookup:
+ * This is a <b>device registration</b> operation, not a user authentication: it
+ * establishes no {@code SecurityContext} / login state and creates no user. Flow:
  * <ol>
  *     <li>Consumes the one-time challenge via {@link ChallengeService}</li>
- *     <li>Delegates attestation validation to {@link AppleAppAttestValidationService#validateAttestation}</li>
- *     <li>Loads or creates the user via {@link EulerDeviceUserDetailsService}, subject
- *         to the configured {@link JitProvisioningPolicy}</li>
+ *     <li>Delegates attestation validation and KEY persistence to
+ *         {@link AppleAppAttestValidationService#validateAttestation}</li>
+ *     <li>Returns an authenticated token whose principal is the verified
+ *         {@link AppAttestAttestationRegistration} and which carries no authorities</li>
  * </ol>
  *
  * @see AppAttestAttestationRegistrationAuthenticationToken
@@ -54,21 +52,13 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
 
     private final ChallengeService challengeService;
     private final AppleAppAttestValidationService validationService;
-    private final EulerDeviceUserDetailsService userDetailsService;
-    private final JitProvisioningPolicy jitProvisioning;
 
     public AppAttestAttestationRegistrationAuthenticationProvider(ChallengeService challengeService,
-                                                                  AppleAppAttestValidationService validationService,
-                                                                  EulerDeviceUserDetailsService userDetailsService,
-                                                                  JitProvisioningPolicy jitProvisioning) {
+                                                                  AppleAppAttestValidationService validationService) {
         Assert.notNull(challengeService, "challengeService must not be null");
         Assert.notNull(validationService, "validationService must not be null");
-        Assert.notNull(userDetailsService, "userDetailsService must not be null");
-        Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
         this.challengeService = challengeService;
         this.validationService = validationService;
-        this.userDetailsService = userDetailsService;
-        this.jitProvisioning = jitProvisioning;
     }
 
     @Override
@@ -77,7 +67,6 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
                 () -> "Only DeviceAttestRegistrationAuthenticationToken is supported");
         AppAttestAttestationRegistrationAuthenticationToken token = (AppAttestAttestationRegistrationAuthenticationToken) authentication;
 
-        String keyId = token.getKeyId();
         String attestation = token.getAttestation();
         String challenge = token.getChallenge();
 
@@ -87,44 +76,20 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
         }
 
         try {
-            // 2. Validate attestation and save registration via the delegated validation service
-            AppAttestAttestationRegistration registration = this.validationService.validateAttestation(keyId, attestation, challenge);
+            // 2. Validate attestation and save the KEY registration via the delegated
+            // validation service. The key ID is derived from the attestation. No user is
+            // created: this endpoint only registers the device KEY.
+            AppAttestAttestationRegistration registration = this.validationService.validateAttestation(attestation, challenge);
 
-            logger.debug("Device attestation registration succeeded for keyId: {}", keyId);
+            logger.debug("Device attestation registration succeeded for keyId: {}", registration.getKeyId());
 
-            // 3. Load or create the user
-            AppAttestUser attestUser = new AppAttestUser(
-                    keyId, registration.getTeamId(), registration.getBundleId(), registration.getPublicKey());
-            EulerUserDetails user = loadOrCreateUser(attestUser);
-            user.eraseCredentials();
-            // 4. Return authenticated token
-            return AppAttestAttestationRegistrationAuthenticationToken.authenticated(user, keyId, user.getAuthorities());
+            // 3. Return an authenticated token carrying the verified device registration.
+            return AppAttestAttestationRegistrationAuthenticationToken.registered(registration);
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
             throw new AuthenticationServiceException("Device attestation registration failed", e);
         }
-    }
-
-    private EulerUserDetails loadOrCreateUser(AppAttestUser attestUser) {
-        try {
-            return this.userDetailsService.loadUserByDeviceUser(attestUser);
-        } catch (UserDetailsNotFoundException ex) {
-            if (!this.jitProvisioning.isEnabled()) {
-                throw ex;
-            }
-            logger.debug("No existing user found for keyId '{}', provisioning new user", attestUser.getKeyId());
-            return this.userDetailsService.createUser(attestUser,
-                    this.jitProvisioning.getDefaultAuthorities());
-        }
-    }
-
-    /**
-     * The just-in-time provisioning policy applied when the attested
-     * device maps to no existing user.
-     */
-    public JitProvisioningPolicy getJitProvisioning() {
-        return this.jitProvisioning;
     }
 
     @Override

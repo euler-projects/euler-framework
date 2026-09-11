@@ -42,6 +42,20 @@ public interface AppAttestAttestationRegistrationService {
     AppAttestAttestationRegistration findByKeyId(String keyId);
 
     /**
+     * Bind an OAuth2 {@code client_id} to an existing registration if and only if
+     * the registration currently has no bound client (bind-if-absent).
+     * <p>
+     * Used by the DYNAMIC App Attest flow: the device KEY is registered first
+     * (attestation), then a per-key OAuth2 client is dynamically registered and
+     * its {@code client_id} is bound back to the KEY, so that subsequent
+     * assertion-based client authentication can resolve the client from the KEY.
+     *
+     * @param keyId    the key identifier
+     * @param clientId the OAuth2 client identifier to bind
+     */
+    void bindClientId(String keyId, String clientId);
+
+    /**
      * Update the sign count for a registration.
      * <p>
      * Implementations should ensure atomicity and verify that the new sign count

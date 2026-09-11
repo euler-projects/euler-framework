@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
+import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
@@ -93,10 +94,13 @@ public class OAuth2OneTimePasswordAuthenticationConverter implements Authenticat
 
         // Optional verified App Attest registration carried by
         // EulerOAuth2AttestationBasedClientAuthenticationFilter. When present,
-        // the provider enforces device-to-user consistency and auto-binds the
-        // device to the OTP-resolved user on first use.
+        // the provider enforces device-to-user consistency, and binds the device
+        // to the OTP-resolved user on first use only if this request presented an
+        // attestation (never for an assertion-only request).
         AppAttestAttestationRegistration verifiedAppRegistration = (AppAttestAttestationRegistration) request.getAttribute(
                 EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE);
+        EulerClientAttestationProof clientAttestationProof = (EulerClientAttestationProof) request.getAttribute(
+                EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_ATTRIBUTE);
 
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
@@ -116,6 +120,11 @@ public class OAuth2OneTimePasswordAuthenticationConverter implements Authenticat
             additionalParameters.put(
                     EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
                     verifiedAppRegistration);
+            if (clientAttestationProof != null) {
+                additionalParameters.put(
+                        EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER,
+                        clientAttestationProof);
+            }
         }
 
         return new OAuth2OneTimePasswordAuthenticationToken(
