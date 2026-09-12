@@ -18,7 +18,7 @@ package org.eulerframework.security.oauth2.server.authorization.web.authenticati
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -93,25 +93,25 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationCo
         // Checked for presence before parsing: parse rejects an unknown value on its own, and
         // without this an absent header would be reported as an unsupported type of "null"
         // rather than as the missing header it is.
-        String type = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+        String type = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         if (!StringUtils.hasText(type)
                 || !EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(EulerOAuth2ClientAttestationType.parse(type))) {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }
 
-        String keyId = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
+        String keyId = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
         if (!StringUtils.hasText(keyId)) {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
+            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
         }
 
-        String challenge = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+        String challenge = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
         if (!StringUtils.hasText(challenge)) {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
         }
 
-        String assertion = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+        String assertion = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
         if (!StringUtils.hasText(assertion)) {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
         }
 
         return new EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken(
@@ -124,10 +124,10 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationCo
      * specific missing header instead of as an uncredentialed registration.
      */
     private static boolean carriesClientAttestation(HttpServletRequest request) {
-        return StringUtils.hasText(request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE))
-                || StringUtils.hasText(request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID))
-                || StringUtils.hasText(request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE))
-                || StringUtils.hasText(request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
+        return StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE))
+                || StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID))
+                || StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE))
+                || StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
     }
 
     /**

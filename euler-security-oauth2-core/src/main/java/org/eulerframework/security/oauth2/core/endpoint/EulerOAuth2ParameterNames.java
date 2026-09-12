@@ -16,6 +16,15 @@
 
 package org.eulerframework.security.oauth2.core.endpoint;
 
+/**
+ * Names of the OAuth 2.0 request parameters this framework adds to those in Spring Security's
+ * {@code OAuth2ParameterNames}: values carried in the request URI query component or in the
+ * {@code application/x-www-form-urlencoded} body, and therefore read with {@code getParameter}.
+ * <p>
+ * Values carried in HTTP header fields live in {@link EulerOAuth2HeaderNames} instead.
+ *
+ * @see EulerOAuth2HeaderNames
+ */
 public final class EulerOAuth2ParameterNames {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
@@ -23,8 +32,8 @@ public final class EulerOAuth2ParameterNames {
     /**
      * Apple App Attest key identifier, submitted as a token endpoint form parameter.
      *
-     * @deprecated use the {@link #OAUTH_CLIENT_ATTESTATION_KID} header; see {@link #ATTESTATION}
-     * for the retirement of the whole form parameter vocabulary.
+     * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_KID} header; see
+     * {@link #ATTESTATION} for the retirement of the whole form parameter vocabulary.
      */
     @Deprecated
     public static final String KEY_ID = "kid";
@@ -38,7 +47,7 @@ public final class EulerOAuth2ParameterNames {
      * {@link #KEY_ID}, {@link #ASSERTION} and {@link #CHALLENGE}. The concepts do not go away:
      * an assertion remains the only accepted proof and a challenge remains its required nonce.
      * What is retired is carrying them as form parameters, in favour of the
-     * {@code OAuth-Client-Attestation-*} headers.
+     * {@code OAuth-Client-Attestation-*} headers named by {@link EulerOAuth2HeaderNames}.
      *
      * @deprecated device registration belongs to the dedicated registration endpoint
      * ({@code POST /app_attest/register}) and the OAuth2 flow is assertion-only, so no header
@@ -53,8 +62,8 @@ public final class EulerOAuth2ParameterNames {
      * Base64-encoded Apple App Attest assertion object, submitted as a token endpoint form
      * parameter to prove possession of an already-registered device key.
      *
-     * @deprecated use the {@link #OAUTH_CLIENT_ATTESTATION_ASSERTION} header; see
-     * {@link #ATTESTATION}.
+     * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_ASSERTION} header;
+     * see {@link #ATTESTATION}.
      */
     @Deprecated
     public static final String ASSERTION = "assertion";
@@ -64,54 +73,11 @@ public final class EulerOAuth2ParameterNames {
      * form parameter in its raw form. It is the nonce input to {@code attestKey} and
      * {@code generateAssertion}, which take its SHA-256 digest.
      *
-     * @deprecated use the {@link #OAUTH_CLIENT_ATTESTATION_CHALLENGE} header; see
-     * {@link #ATTESTATION}.
+     * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_CHALLENGE} header;
+     * see {@link #ATTESTATION}.
      */
     @Deprecated
     public static final String CHALLENGE = "challenge";
-
-    /**
-     * Client Attestation JWT header.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION = "OAuth-Client-Attestation";
-
-    /**
-     * Client Attestation Proof-of-Possession data header.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_POP = "OAuth-Client-Attestation-PoP";
-
-    /**
-     * Custom extension: Client Attestation type identifier.
-     * Defaults to {@link org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType#JWT} when absent.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_TYPE = "OAuth-Client-Attestation-Type";
-
-    /**
-     * Apple App Attest variant: the key identifier carried in an HTTP header. Required, since an
-     * assertion carries no key identifier of its own.
-     * <p>
-     * Used by the token endpoint and by the dynamic client registration endpoint, whose JSON body
-     * leaves no room for these values.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_KID = "OAuth-Client-Attestation-Kid";
-
-    /**
-     * Apple App Attest variant: the one-time challenge carried in an HTTP header, in its raw form.
-     * It is the nonce input to {@code attestKey} and {@code generateAssertion}, which take its
-     * SHA-256 digest.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_CHALLENGE = "OAuth-Client-Attestation-Challenge";
-
-    /**
-     * Apple App Attest variant: the Base64-encoded assertion, proving possession of an
-     * already-registered device key, carried in an HTTP header.
-     * <p>
-     * Its presence also selects the header carriage at the token endpoint: a request carrying it
-     * is read entirely from headers and never from the deprecated form parameters.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_ASSERTION = "OAuth-Client-Attestation-Assertion";
-
-    public static final String ADDITIONAL_SECURITY_SIGNAL = "additional-security-signal";
 
     /**
      * Ticket id returned by {@code POST /otp/tickets}; used as the credential

@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
@@ -47,8 +47,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Post-authentication filter that handles Client Attestation on token endpoint requests,
@@ -81,7 +79,7 @@ import java.util.Map;
  *
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
  * @see EulerOAuth2ClientAttestationVerifier
- * @see EulerOAuth2ParameterNames
+ * @see EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken
  */
 public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OncePerRequestFilter {
 
@@ -173,14 +171,19 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
         // Standard authentication used a traditional OAuth client authentication method.
         // If the request also carries attestation data, enter enhanced verification logic
         // by reusing the standard attest_jwt_client_auth AuthenticationConverter and AuthenticationProvider.
-        if (!EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH
-                .equals(standardClientAuthentication.getClientAuthenticationMethod())) {
+        // The instanceof guard keeps this branch idempotent: were an additional-signal result ever
+        // placed in the security context, the traditional method it carries would otherwise
+        // re-enter here and have its attestation verified a second time.
+        if (!(standardClientAuthentication instanceof EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken)
+                && !EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH
+                        .equals(standardClientAuthentication.getClientAuthenticationMethod())) {
 
             try {
                 OAuth2ClientAuthenticationToken convertedAuthentication =
                         (OAuth2ClientAuthenticationToken) this.clientAttestationAuthenticationConverter.convert(request);
                 if (convertedAuthentication != null) { // null means the request carries no attestation data
-                    OAuth2ClientAuthenticationToken securitySignalToken = convertToSecuritySignalToken(convertedAuthentication);
+                    OAuth2ClientAuthenticationToken securitySignalToken =
+                            convertToSecuritySignalToken(convertedAuthentication, standardClientAuthentication);
                     OAuth2ClientAuthenticationToken enhancedClientAuthentication =
                             (OAuth2ClientAuthenticationToken) this.clientAttestationAuthenticationProvider.authenticate(securitySignalToken);
                     if (enhancedClientAuthentication == null || !enhancedClientAuthentication.isAuthenticated()) {
@@ -218,15 +221,21 @@ public class EulerOAuth2AttestationBasedClientAuthenticationFilter extends OnceP
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Re-label an attestation request as an additional security signal. The converter always
+     * stamps {@code attest_jwt_client_auth}, which would hide the fact that the client has already
+     * authenticated traditionally, so the standard authentication's method is carried over instead
+     * and the subtype itself becomes the marker.
+     */
     @Nonnull
-    private static OAuth2ClientAuthenticationToken convertToSecuritySignalToken(OAuth2ClientAuthenticationToken convertedAuthentication) {
-        Map<String, Object> additionalParameters = new HashMap<>(convertedAuthentication.getAdditionalParameters());
-        additionalParameters.put(EulerOAuth2ParameterNames.ADDITIONAL_SECURITY_SIGNAL, true);
-        return new OAuth2ClientAuthenticationToken(
+    private static OAuth2ClientAuthenticationToken convertToSecuritySignalToken(
+            OAuth2ClientAuthenticationToken convertedAuthentication,
+            OAuth2ClientAuthenticationToken standardClientAuthentication) {
+        return new EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken(
                 (String) convertedAuthentication.getPrincipal(),
-                convertedAuthentication.getClientAuthenticationMethod(),
+                standardClientAuthentication.getClientAuthenticationMethod(),
                 convertedAuthentication.getCredentials(),
-                additionalParameters
+                convertedAuthentication.getAdditionalParameters()
         );
     }
 

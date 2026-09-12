@@ -21,7 +21,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -55,10 +55,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverterTest {
 
-    private static final String TYPE = EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE;
-    private static final String KID = EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID;
-    private static final String CHALLENGE = EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE;
-    private static final String ASSERTION = EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION;
+    private static final String TYPE = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE;
+    private static final String KID = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID;
+    private static final String CHALLENGE = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE;
+    private static final String ASSERTION = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION;
 
     private static final String APPLE_APP_ATTEST = EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.value();
     private static final String KID_VALUE = "key-id-1";

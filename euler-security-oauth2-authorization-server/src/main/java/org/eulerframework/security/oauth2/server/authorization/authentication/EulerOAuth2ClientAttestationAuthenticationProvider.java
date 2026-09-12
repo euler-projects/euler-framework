@@ -16,7 +16,6 @@
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.annotation.Nonnull;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -42,6 +42,7 @@ import org.eulerframework.security.authentication.appattest.AppAttestAttestation
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 
 /**
@@ -136,24 +137,30 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
     public Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException {
         OAuth2ClientAuthenticationToken clientAuthentication = (OAuth2ClientAuthenticationToken) authentication;
 
-        if (!EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH
-                .equals(clientAuthentication.getClientAuthenticationMethod())) {
+        // An additional-signal request carries the traditional method the client authenticated
+        // with, so the subtype rather than the method is what identifies it here.
+        boolean additionalSecuritySignal =
+                clientAuthentication instanceof EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken;
+
+        if (!additionalSecuritySignal
+                && !EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH
+                        .equals(clientAuthentication.getClientAuthenticationMethod())) {
             return null;
         }
 
         Map<String, Object> additionalParams = clientAuthentication.getAdditionalParameters();
         EulerOAuth2ClientAttestationType clientAttestationType = (EulerOAuth2ClientAttestationType) additionalParams
-                .get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+                .get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
 
         final String resolvedClientId;
         final AppAttestAttestationRegistration appRegistration;
 
         if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
-            String attestationJwt = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION);
-            String attestationPopJwt = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP);
+            String attestationJwt = (String) additionalParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION);
+            String attestationPopJwt = (String) additionalParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
 
             if (attestationPopJwt == null) {
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP);
+                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
             }
 
             EulerOAuth2ClientAttestationVerifier.PopVerificationResult result = attestationJwt == null
@@ -173,19 +180,19 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
             // The converter normalizes both carriages onto the canonical header keys, so this
             // provider is transport-agnostic; only the deprecated attestation has no header analog.
-            String challenge = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+            String challenge = (String) additionalParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
 
             if (!StringUtils.hasText(challenge)) {
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
             }
 
             String attestation = (String) additionalParams.get(EulerOAuth2ParameterNames.ATTESTATION);
-            String assertion = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+            String assertion = (String) additionalParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
 
             if (!StringUtils.hasText(attestation) && !StringUtils.hasText(assertion)) {
                 // Defensive: the converter already rejects this. Reject before consuming, so a
                 // malformed request does not burn an otherwise valid one-time challenge.
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
             }
 
             // Consume the one-time challenge exactly once, before any verification. Consumption
@@ -193,7 +200,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             // single challenge may legitimately back both an attestation and an assertion
             // generated from it, which is what makes the combined request below possible.
             if (!this.challengeService.consumeChallenge(challenge)) {
-                throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
             }
 
             if (StringUtils.hasText(attestation)) {
@@ -225,9 +232,9 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
                 // guaranteed present by the guard above. An assertion's authenticator data
                 // carries no credentialId, so the key ID must be supplied to locate the
                 // registered device.
-                String keyId = (String) additionalParams.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
+                String keyId = (String) additionalParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
                 if (!StringUtils.hasText(keyId)) {
-                    throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
+                    throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
                 }
                 appRegistration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
                 requireBoundClientId(appRegistration);
@@ -238,7 +245,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             // STATIC clients, or the dynamically issued identifier for DYNAMIC clients).
             resolvedClientId = appRegistration.getClientId();
         } else {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         }
 
         if (resolvedClientId == null) {
@@ -258,19 +265,21 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
-        boolean additionalSecuritySignal = Optional.ofNullable(additionalParams.get(EulerOAuth2ParameterNames.ADDITIONAL_SECURITY_SIGNAL))
-                .map(Boolean.class::cast)
-                .orElse(false);
-
         if (!registeredClient.getClientAuthenticationMethods()
                 .contains(clientAuthentication.getClientAuthenticationMethod())
                 && !additionalSecuritySignal) {
             throw invalidClient("authentication_method");
         }
 
-        // Return authenticated token with the verified attestation registration as credentials for downstream extraction
-        return new OAuth2ClientAuthenticationToken(registeredClient,
-                EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, appRegistration);
+        // Return authenticated token with the verified attestation registration as credentials for
+        // downstream extraction. The method is passed through as received: the entry gate above
+        // guarantees it is attest_jwt_client_auth unless this is an additional-signal request, in
+        // which case it is the traditional method the client actually authenticated with.
+        ClientAuthenticationMethod clientAuthenticationMethod = clientAuthentication.getClientAuthenticationMethod();
+        return additionalSecuritySignal
+                ? new EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken(
+                        registeredClient, clientAuthenticationMethod, appRegistration)
+                : new OAuth2ClientAuthenticationToken(registeredClient, clientAuthenticationMethod, appRegistration);
     }
 
     @Override

@@ -25,7 +25,7 @@ import org.eulerframework.security.authentication.appattest.apple.AppleAppAttest
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
@@ -121,7 +121,7 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
 
         String challenge = clientRegistrationAuthentication.getChallenge();
         if (!this.challengeService.consumeChallenge(challenge)) {
-            throw invalidClientAttestation(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
         }
 
         AppAttestAttestationRegistration registration = this.validationService.validateAssertion(

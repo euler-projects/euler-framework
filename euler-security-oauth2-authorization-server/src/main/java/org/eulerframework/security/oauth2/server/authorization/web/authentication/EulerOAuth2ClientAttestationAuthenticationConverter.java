@@ -32,6 +32,7 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.springframework.util.StringUtils;
 
@@ -61,9 +62,9 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
     @Override
     public Authentication convert(HttpServletRequest request) {
         // 1. Check for attestation signal
-        String attestationJwt = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION);
-        String attestationPopJwt = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP);
-        String attestationType = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+        String attestationJwt = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION);
+        String attestationPopJwt = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
+        String attestationType = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
 
         if (attestationJwt == null && attestationPopJwt == null && attestationType == null) {
             return null;
@@ -75,14 +76,14 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
 
         // 2. Collect all raw attestation data — no parsing, no DB lookup
         Map<String, Object> additionalParams = new LinkedHashMap<>();
-        additionalParams.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE, clientAttestationType);
+        additionalParams.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE, clientAttestationType);
 
         if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
             // Unlike the draft, we treat OAuth-Client-Attestation as an optional header.
             // As long as the public key has not changed, it can be omitted.
             // However, if OAuth-Client-Attestation is omitted, the PoP JWT header must carry a verified kid.
-            copyOptional(attestationJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION, additionalParams);
-            copyRequired(attestationPopJwt, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParams);
+            copyOptional(attestationJwt, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION, additionalParams);
+            copyRequired(attestationPopJwt, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParams);
         } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)) {
             if (isHeaderCarried(request)) {
                 convertAppleAppAttestHeaders(request, additionalParams);
@@ -112,7 +113,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
      */
     public static boolean isHeaderCarried(HttpServletRequest request) {
         return StringUtils.hasText(
-                request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
+                request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
     }
 
     /**
@@ -121,9 +122,9 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
      */
     private static void convertAppleAppAttestHeaders(HttpServletRequest request,
                                                      Map<String, Object> additionalParams) {
-        copyRequiredHeader(request, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, additionalParams);
-        copyRequiredHeader(request, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, additionalParams);
-        copyRequiredHeader(request, EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, additionalParams);
+        copyRequiredHeader(request, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, additionalParams);
+        copyRequiredHeader(request, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, additionalParams);
+        copyRequiredHeader(request, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, additionalParams);
     }
 
     /**
@@ -141,7 +142,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
     private static void convertAppleAppAttestFormParameters(HttpServletRequest request,
                                                             Map<String, Object> additionalParams) {
         copyRequiredFormParameter(request, EulerOAuth2ParameterNames.CHALLENGE,
-                EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, additionalParams);
+                EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, additionalParams);
 
         String attestation = request.getParameter(EulerOAuth2ParameterNames.ATTESTATION);
         if (!StringUtils.hasText(attestation)
@@ -151,13 +152,13 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
         }
         copyOptional(attestation, EulerOAuth2ParameterNames.ATTESTATION, additionalParams);
         copyOptionalFormParameter(request, EulerOAuth2ParameterNames.ASSERTION,
-                EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, additionalParams);
+                EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, additionalParams);
 
         // The kid is derivable from an attestation (its credentialId), so it is required only
         // for the assertion-only request, whose authenticator data carries no credentialId.
         if (!StringUtils.hasText(attestation)) {
             copyRequiredFormParameter(request, EulerOAuth2ParameterNames.KEY_ID,
-                    EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, additionalParams);
+                    EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, additionalParams);
         }
     }
 
@@ -182,7 +183,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
      * @return the proof the server will act on for this request
      */
     public static EulerClientAttestationProof resolveProof(HttpServletRequest request) {
-        String attestationType = request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+        String attestationType = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
         EulerOAuth2ClientAttestationType clientAttestationType = attestationType != null
                 ? EulerOAuth2ClientAttestationType.parse(attestationType)
                 : EulerOAuth2ClientAttestationType.JWT;
@@ -190,7 +191,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
         boolean attestationPresent;
         if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
             attestationPresent = StringUtils.hasText(
-                    request.getHeader(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION));
+                    request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION));
         } else {
             attestationPresent = !isHeaderCarried(request)
                     && StringUtils.hasText(request.getParameter(EulerOAuth2ParameterNames.ATTESTATION));

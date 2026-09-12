@@ -19,6 +19,7 @@ package org.eulerframework.security.oauth2.server.authorization.web.authenticati
 import jakarta.servlet.http.HttpServletRequest;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
@@ -63,9 +64,9 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
 
         Map<String, Object> params = additionalParameters(this.converter.convert(request));
 
-        assertEquals(CHALLENGE_VALUE, params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
-        assertEquals(KID_VALUE, params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID));
-        assertEquals(ASSERTION_VALUE, params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
+        assertEquals(CHALLENGE_VALUE, params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
+        assertEquals(KID_VALUE, params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID));
+        assertEquals(ASSERTION_VALUE, params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
         assertNull(params.get(EulerOAuth2ParameterNames.ATTESTATION),
                 "the header carriage has no attestation analog");
     }
@@ -86,7 +87,7 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
     @Test
     void headerCarriageRequiresKid() {
         Map<String, String> headers = appleHeaders();
-        headers.remove(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID);
+        headers.remove(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
         HttpServletRequest request = request(headers, Map.of());
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
@@ -94,13 +95,13 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
 
         assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, ex.getError().getErrorCode());
         assertTrue(ex.getError().getDescription()
-                .contains(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID));
+                .contains(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID));
     }
 
     @Test
     void headerCarriageRequiresChallenge() {
         Map<String, String> headers = appleHeaders();
-        headers.remove(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+        headers.remove(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
         HttpServletRequest request = request(headers, Map.of());
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
@@ -108,7 +109,7 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
 
         assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, ex.getError().getErrorCode());
         assertTrue(ex.getError().getDescription()
-                .contains(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
+                .contains(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
     }
 
     // ---- deprecated form parameter carriage ----
@@ -123,9 +124,9 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
         Map<String, Object> params =
                 additionalParameters(this.converter.convert(request(appleTypeHeaderOnly(), form)));
 
-        assertEquals(CHALLENGE_VALUE, params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
-        assertEquals(KID_VALUE, params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID));
-        assertEquals(ASSERTION_VALUE, params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
+        assertEquals(CHALLENGE_VALUE, params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
+        assertEquals(KID_VALUE, params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID));
+        assertEquals(ASSERTION_VALUE, params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
         assertNull(params.get(EulerOAuth2ParameterNames.CHALLENGE),
                 "deprecated keys are not propagated downstream");
     }
@@ -140,7 +141,7 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
                 additionalParameters(this.converter.convert(request(appleTypeHeaderOnly(), form)));
 
         assertEquals(ATTESTATION_VALUE, params.get(EulerOAuth2ParameterNames.ATTESTATION));
-        assertNull(params.get(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID),
+        assertNull(params.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID),
                 "the key id is derivable from an attestation, so it is not part of that contract");
     }
 
@@ -196,12 +197,12 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
     @Test
     void resolveReportsAttestationForTheJwtVariantByHeader() {
         Map<String, String> popOnly = new LinkedHashMap<>();
-        popOnly.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_POP, "pop-jwt");
+        popOnly.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP, "pop-jwt");
         assertEquals(EulerClientAttestationProof.ASSERTION,
                 EulerOAuth2ClientAttestationAuthenticationConverter.resolveProof(request(popOnly, Map.of())));
 
         Map<String, String> both = new LinkedHashMap<>(popOnly);
-        both.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION, "attestation-jwt");
+        both.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION, "attestation-jwt");
         assertEquals(EulerClientAttestationProof.ATTESTATION,
                 EulerOAuth2ClientAttestationAuthenticationConverter.resolveProof(request(both, Map.of())));
     }
@@ -218,7 +219,7 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
         Map<String, String> headers = appleTypeHeaderOnly();
         assertFalse(EulerOAuth2ClientAttestationAuthenticationConverter.isHeaderCarried(request(headers, Map.of())));
 
-        headers.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION_VALUE);
+        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION_VALUE);
         assertTrue(EulerOAuth2ClientAttestationAuthenticationConverter.isHeaderCarried(request(headers, Map.of())));
     }
 
@@ -236,15 +237,15 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
 
     private static Map<String, String> appleHeaders() {
         Map<String, String> headers = appleTypeHeaderOnly();
-        headers.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, CHALLENGE_VALUE);
-        headers.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, KID_VALUE);
-        headers.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION_VALUE);
+        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, CHALLENGE_VALUE);
+        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, KID_VALUE);
+        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION_VALUE);
         return headers;
     }
 
     private static Map<String, String> appleTypeHeaderOnly() {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE,
+        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE,
                 EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.value());
         return headers;
     }

@@ -26,9 +26,11 @@ import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
+import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
@@ -42,6 +44,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -87,8 +90,8 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
         EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(validationService, clientRepository());
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
 
         Authentication result = provider.authenticate(token(params));
 
@@ -104,7 +107,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
         EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(validationService, clientRepository());
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
                 () -> provider.authenticate(token(params)));
@@ -121,7 +124,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
         Map<String, Object> params = appleParams();
         params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
 
         Authentication result = provider.authenticate(token(params));
 
@@ -140,8 +143,8 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
         Map<String, Object> params = appleParams();
         params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
 
         provider.authenticate(token(params));
 
@@ -158,7 +161,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
         Map<String, Object> params = appleParams();
         params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
 
         provider.authenticate(token(params));
 
@@ -175,8 +178,8 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
                 provider(validationService, clientRepository(), new RecordingChallengeService(false));
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
                 () -> provider.authenticate(token(params)));
@@ -231,7 +234,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
         Map<String, Object> params = appleParams();
         params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
                 () -> provider.authenticate(token(params)));
@@ -249,13 +252,47 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
                 provider(validationService, clientRepository());
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
                 () -> provider.authenticate(token(params)));
 
         assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode());
+        assertEquals(List.of(SUPPLIED_KID), validationService.assertionKeyIds);
+    }
+
+    @Test
+    void returnsNullForATraditionalClientAuthenticationRequest() {
+        EulerOAuth2ClientAttestationAuthenticationProvider provider =
+                provider(new RecordingValidationService(), clientRepository());
+
+        // Not this provider's to handle: returning null lets the ProviderManager move on to the
+        // provider that owns client_secret_basic.
+        assertNull(provider.authenticate(new OAuth2ClientAuthenticationToken(
+                "client-1", ClientAuthenticationMethod.CLIENT_SECRET_BASIC, "secret", Map.of())));
+    }
+
+    @Test
+    void claimsAnAdditionalSignalRequestDespiteItsTraditionalMethod() {
+        RecordingValidationService validationService = new RecordingValidationService();
+        EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(validationService, clientRepository());
+
+        Map<String, Object> params = appleParams();
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+
+        Authentication result = provider.authenticate(
+                new EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken(
+                        "__attestation__", ClientAuthenticationMethod.CLIENT_SECRET_BASIC, null, params));
+
+        // The subtype rather than the method admits this request. The registered client does not
+        // list client_secret_basic, so succeeding also proves the method check is skipped for an
+        // additional-signal request instead of rejecting it as invalid_client.
+        assertEquals(EulerOAuth2ClientAttestationAdditionalSignalAuthenticationToken.class, result.getClass());
+        assertEquals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC,
+                ((OAuth2ClientAuthenticationToken) result).getClientAuthenticationMethod(),
+                "the traditional method must be passed through rather than replaced");
         assertEquals(List.of(SUPPLIED_KID), validationService.assertionKeyIds);
     }
 
@@ -275,9 +312,9 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
     private static Map<String, Object> appleParams() {
         Map<String, Object> params = new LinkedHashMap<>();
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_TYPE,
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE,
                 EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST);
-        params.put(EulerOAuth2ParameterNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, "challenge-1");
+        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, "challenge-1");
         return params;
     }
 
