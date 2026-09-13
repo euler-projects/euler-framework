@@ -16,13 +16,24 @@
 package org.eulerframework.security.jackson;
 
 import org.eulerframework.resource.Tag;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
+import org.eulerframework.security.core.identity.UserIdentity;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.jackson.SecurityJacksonModule;
 import tools.jackson.core.Version;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
+/**
+ * Contributes the Euler types that the security {@code JsonMapper} may deserialize, and the mixins
+ * telling it how.
+ * <p>
+ * Any {@code Authentication} a grant provider writes into an authorization's
+ * {@code java.security.Principal} attribute must be registered here, together with every
+ * non-final type it holds. The authorization store reads the attribute map back in one pass, so
+ * one unregistered type fails the read outright rather than degrading a single field.
+ */
 public class EulerSecurityJacksonModule extends SecurityJacksonModule {
 
     public EulerSecurityJacksonModule() {
@@ -34,6 +45,8 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         builder.allowIfSubType(EulerUserDetails.class)
                 .allowIfSubType(EulerGrantedAuthority.class)
                 .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class)
+                .allowIfSubType(OneTimePasswordAuthenticationToken.class)
+                .allowIfSubType(UserIdentity.class)
                 .allowIfSubType(Tag.class)
                 .allowIfSubType("java.util.ImmutableCollections$List12")
                 .allowIfSubType("java.util.ImmutableCollections$ListN")
@@ -49,5 +62,7 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         context.setMixIn(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
         context.setMixIn(WechatAuthorizationCodeAuthenticationToken.class,
                 WechatAuthorizationCodeAuthenticationTokenMixin.class);
+        context.setMixIn(OneTimePasswordAuthenticationToken.class, OneTimePasswordAuthenticationTokenMixin.class);
+        context.setMixIn(UserIdentity.class, UserIdentityMixin.class);
     }
 }
