@@ -28,6 +28,8 @@ import org.eulerframework.security.oauth2.server.authorization.converter.EulerOA
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerAttestationEnrichingPublicClientAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationSuccessHandler;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OneTimePasswordAuthenticationConverter;
@@ -41,6 +43,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.web.authentication.PublicClientAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -219,12 +222,24 @@ public class EulerAuthorizationServerConfiguration {
                 .getEulerOAuth2ClientAttestationAuthenticationConverter(http);
         EulerOAuth2ClientAttestationAuthenticationProvider attestProvider = EulerOAuth2ConfigurerUtils
                 .getEulerOAuth2ClientAttestationAuthenticationProvider(http);
+        EulerOAuth2ClientAttestationAuthenticationSuccessHandler attestSuccessHandler =
+                new EulerOAuth2ClientAttestationAuthenticationSuccessHandler(
+                        EulerOAuth2ConfigurerUtils.getEulerOAuth2ClientAttestationVerifier(http));
 
-        // Register as standard Client Authentication
+        // Compose with Spring's client authentication instead of adding a filter. The attestation
+        // converter and provider are appended to the ends of their chains, so a request presenting a
+        // traditional credential is claimed by that credential's converter first; PublicClient's
+        // converter is decorated rather than replaced, so it keeps claiming PKCE-shaped requests.
         http.oauth2AuthorizationServer(oauth2 -> oauth2
                 .clientAuthentication(clientAuth -> clientAuth
-                        .authenticationConverter(attestConverter)
-                        .authenticationProvider(attestProvider)));
+                        .authenticationConverters(converters -> {
+                            converters.replaceAll(converter -> converter instanceof PublicClientAuthenticationConverter publicClientAuthenticationConverter
+                                    ? new EulerAttestationEnrichingPublicClientAuthenticationConverter(publicClientAuthenticationConverter)
+                                    : converter);
+                            converters.add(attestConverter);
+                        })
+                        .authenticationProviders(providers -> providers.add(attestProvider))
+                        .authenticationSuccessHandler(attestSuccessHandler)));
 
         // Add attestation metadata to OIDC provider configuration and AS metadata endpoints
         //   (draft-ietf-oauth-attestation-based-client-auth-08 Section 9)

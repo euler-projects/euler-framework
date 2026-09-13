@@ -16,13 +16,10 @@
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
-import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2OneTimePasswordAuthenticationToken;
-import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -92,16 +89,6 @@ public class OAuth2OneTimePasswordAuthenticationConverter implements Authenticat
 
         Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
 
-        // Optional verified App Attest registration carried by
-        // EulerOAuth2AttestationBasedClientAuthenticationFilter. When present,
-        // the provider enforces device-to-user consistency, and binds the device
-        // to the OTP-resolved user on first use only if this request presented an
-        // attestation (never for an assertion-only request).
-        AppAttestAttestationRegistration verifiedAppRegistration = (AppAttestAttestationRegistration) request.getAttribute(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE);
-        EulerClientAttestationProof clientAttestationProof = (EulerClientAttestationProof) request.getAttribute(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_ATTRIBUTE);
-
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
@@ -111,21 +98,6 @@ public class OAuth2OneTimePasswordAuthenticationConverter implements Authenticat
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
-        // Propagate the verified attestation as a generic additionalParameters
-        // entry so any grant type (current OTP / app_assertion, future
-        // password / refresh_token / ...) can opt in without adding a
-        // dedicated field per grant token class. In-process only; never
-        // serialized into any issued token.
-        if (verifiedAppRegistration != null) {
-            additionalParameters.put(
-                    EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
-                    verifiedAppRegistration);
-            if (clientAttestationProof != null) {
-                additionalParameters.put(
-                        EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER,
-                        clientAttestationProof);
-            }
-        }
 
         return new OAuth2OneTimePasswordAuthenticationToken(
                 OneTimePasswordAuthenticationToken.unauthenticated(otpTicket, otp),

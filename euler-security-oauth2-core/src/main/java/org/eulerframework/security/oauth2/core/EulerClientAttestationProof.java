@@ -26,14 +26,16 @@ package org.eulerframework.security.oauth2.core;
  * resolve to the same verified device registration, so without this discriminator the two
  * cases are indistinguishable once the request reaches a grant provider.
  * <p>
- * The distinction matters wherever a request may establish persistent state. Notably, the
- * device-to-user association backing the {@code app_assertion} compatibility grant is only
- * ever written for {@link #ATTESTATION} requests: an {@link #ASSERTION} request proves
- * possession of an already-registered key but does not, on its own, fix a relationship
- * between that key and a user.
+ * The distinction matters wherever a request may establish persistent state: only an
+ * {@link #ATTESTATION} request may fix a relationship between a key and a user, since an
+ * {@link #ASSERTION} request merely proves possession of an already-registered key.
  *
  * @see EulerOAuth2ClientAttestationType
+ * @deprecated compatibility logic; see
+ * {@link org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService}. Removed once
+ * the device-to-user mapping is retired.
  */
+@Deprecated
 public enum EulerClientAttestationProof {
 
     /**

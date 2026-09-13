@@ -24,7 +24,6 @@ import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -37,22 +36,17 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
-import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.server.authorization.authentication.OAuth2AppAssertionAuthenticationToken;
-import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 
 /**
  * Converts HTTP requests for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type into
  * {@link OAuth2AppAssertionAuthenticationToken} instances.
  * <p>
- * This converter reads the verified {@link AppAttestAttestationRegistration} from a request attribute
- * ({@link EulerOAuth2AttestationBasedClientAuthenticationFilter#VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE}) set by
- * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter}. If the attribute is absent, the converter returns
- * {@code null} (indicating the request did not pass attestation verification).
- * <p>
- * Assertion and challenge parameters ({@code kid}, {@code assertion},
- * {@code challenge}) are no longer extracted here — they are consumed by
- * {@link EulerOAuth2AttestationBasedClientAuthenticationFilter} during PoP verification.
+ * The verified attestation this grant depends on travels with the client authentication that becomes
+ * the token's principal; {@code OAuth2AppAssertionAuthenticationProvider} reads it from there and
+ * rejects a request whose client authenticated without one. Assertion and challenge parameters
+ * ({@code kid}, {@code assertion}, {@code challenge}) are not extracted here &mdash; they are
+ * consumed during attestation verification upstream.
  *
  * @deprecated see {@link EulerAuthorizationGrantType#APP_ASSERTION}.
  */
@@ -70,13 +64,7 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
             return null;
         }
 
-        // verified attestation registration from request attribute (set by EulerOAuth2AttestationBasedClientAuthenticationFilter after successful verification)
-        AppAttestAttestationRegistration verifiedAppRegistration = (AppAttestAttestationRegistration) request.getAttribute(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_ATTRIBUTE);
-        if (verifiedAppRegistration == null) {
-            // Filter did not verify attestation → this request is not attestation-backed
-            return null;
-        }
+        Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
 
         // scope (OPTIONAL)
         Set<String> scopes = null;
@@ -91,8 +79,6 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
                     Arrays.asList(StringUtils.delimitedListToStringArray(scope, " ")));
         }
 
-        Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
-
         Map<String, Object> additionalParameters = new HashMap<>();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
@@ -100,21 +86,6 @@ public class OAuth2AppAssertionAuthenticationConverter implements Authentication
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             }
         });
-        // Propagate the verified attestation as a generic additionalParameters
-        // entry. In-process only; never serialized into any issued token.
-        additionalParameters.put(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
-                verifiedAppRegistration);
-        // Propagate which proof this request presented: the provider may only establish the
-        // device-to-user association for an attestation request, never for an assertion-only
-        // renewal.
-        EulerClientAttestationProof proof = (EulerClientAttestationProof) request.getAttribute(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_ATTRIBUTE);
-        if (proof != null) {
-            additionalParameters.put(
-                    EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER,
-                    proof);
-        }
 
         return new OAuth2AppAssertionAuthenticationToken(
                 clientPrincipal,

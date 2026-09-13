@@ -31,6 +31,7 @@ import org.eulerframework.security.oauth2.server.authorization.web.authenticatio
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2ConfigurerUtilsAccessor;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 /**
@@ -62,6 +63,38 @@ final class EulerOAuth2ConfigurerUtils {
     }
 
     @Nonnull
+    public static EulerOAuth2ClientAttestationVerifier getEulerOAuth2ClientAttestationVerifier(HttpSecurity http) {
+        EulerOAuth2ClientAttestationVerifier verifier = http.getSharedObject(EulerOAuth2ClientAttestationVerifier.class);
+        if (verifier != null) {
+            return verifier;
+        }
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
+        if (applicationContext.getBeanNamesForType(EulerOAuth2ClientAttestationVerifier.class).length > 0) {
+            // A bean-provided verifier is expected to be fully configured by its own definition.
+            verifier = applicationContext.getBean(EulerOAuth2ClientAttestationVerifier.class);
+        } else {
+            ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
+            NonceService nonceService = EulerOAuth2ConfigurerUtils.getNonceService(http);
+            verifier = new EulerOAuth2ClientAttestationVerifier(challengeService, nonceService);
+            // No bean, so this fallback owns completing the initialization: wire the optional Apple
+            // App Attest services when present. Done here rather than in a configurer so the verifier
+            // is fully built in one place, like any other bean.
+            AppAttestAttestationRegistrationService registrationService =
+                    getDeviceAttestRegistrationServiceIfAvailable(http);
+            if (registrationService != null) {
+                verifier.setDeviceAttestRegistrationService(registrationService);
+            }
+            AppleAppAttestValidationService appleAppAttestValidationService =
+                    getAppleAppAttestValidationServiceIfAvailable(http);
+            if (appleAppAttestValidationService != null) {
+                verifier.setAppleAppAttestValidationService(appleAppAttestValidationService);
+            }
+        }
+        http.setSharedObject(EulerOAuth2ClientAttestationVerifier.class, verifier);
+        return verifier;
+    }
+
+    @Nonnull
     public static EulerOAuth2ClientAttestationAuthenticationProvider getEulerOAuth2ClientAttestationAuthenticationProvider(HttpSecurity http) {
         EulerOAuth2ClientAttestationAuthenticationProvider provider = http.getSharedObject(EulerOAuth2ClientAttestationAuthenticationProvider.class);
         if (provider != null) {
@@ -71,14 +104,12 @@ final class EulerOAuth2ConfigurerUtils {
         if (applicationContext.getBeanNamesForType(EulerOAuth2ClientAttestationAuthenticationProvider.class).length > 0) {
             provider = applicationContext.getBean(EulerOAuth2ClientAttestationAuthenticationProvider.class);
         } else {
-            ChallengeService challengeService = EulerOAuth2ConfigurerUtils.getChallengeService(http);
-            NonceService nonceService = EulerOAuth2ConfigurerUtils.getNonceService(http);
-            EulerOAuth2ClientAttestationVerifier oauth2ClientAttestationVerifier =
-                    new EulerOAuth2ClientAttestationVerifier(challengeService, nonceService);
             RegisteredClientRepository registeredClientRepository =
                     OAuth2ConfigurerUtilsAccessor.getRegisteredClientRepository(http);
+            OAuth2AuthorizationService authorizationService =
+                    OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http);
             provider = new EulerOAuth2ClientAttestationAuthenticationProvider(registeredClientRepository,
-                    oauth2ClientAttestationVerifier, challengeService);
+                    getEulerOAuth2ClientAttestationVerifier(http), authorizationService);
         }
         http.setSharedObject(EulerOAuth2ClientAttestationAuthenticationProvider.class, provider);
         return provider;

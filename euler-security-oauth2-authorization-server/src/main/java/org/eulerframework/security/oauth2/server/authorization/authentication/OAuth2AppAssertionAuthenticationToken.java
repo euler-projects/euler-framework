@@ -29,13 +29,10 @@ import java.util.Set;
 /**
  * Unauthenticated grant token for {@code grant_type=urn:ietf:params:oauth:grant-type:app_assertion}.
  * <p>
- * The verified App Attest registration is propagated through the parent
- * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters() additionalParameters}
- * map under the key
- * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter#VERIFIED_CLIENT_ATTESTATION_PARAMETER}.
- * For this grant the entry is mandatory: the converter rejects requests that
- * have not been verified by
- * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}.
+ * The verified App Attest registration this grant depends on travels on the client authentication
+ * that is this token's principal. For this grant it is mandatory:
+ * {@link OAuth2AppAssertionAuthenticationProvider} rejects a request whose client authenticated
+ * without one.
  *
  * @deprecated see {@link EulerAuthorizationGrantType#APP_ASSERTION}.
  */

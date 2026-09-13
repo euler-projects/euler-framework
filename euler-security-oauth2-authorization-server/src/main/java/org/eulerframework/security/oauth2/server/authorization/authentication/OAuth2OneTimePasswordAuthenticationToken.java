@@ -32,9 +32,8 @@ import java.util.Set;
  * user-level {@link OneTimePasswordAuthenticationToken} built from the
  * submitted {@code otp_ticket} id and {@code otp} value.
  * <p>
- * A verified App Attest registration, when present, is propagated through
- * {@link OAuth2AuthorizationGrantAuthenticationToken#getAdditionalParameters()
- * additionalParameters} and handled by {@code OAuth2OneTimePasswordAuthenticationProvider}.
+ * A verified App Attest registration, when present, travels on the client authentication that is
+ * this token's principal and is handled by {@code OAuth2OneTimePasswordAuthenticationProvider}.
  */
 public class OAuth2OneTimePasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 

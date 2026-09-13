@@ -15,6 +15,7 @@
  */
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,11 +23,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
+import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 
@@ -37,68 +40,106 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
 import org.springframework.util.StringUtils;
 
 /**
- * An {@link AuthenticationConverter} that extracts Client Attestation data from
- * the request and creates an unauthenticated {@link OAuth2ClientAuthenticationToken}
- * for {@code attest_jwt_client_auth} clients.
+ * The {@link AuthenticationConverter} for {@code attest_jwt_client_auth}, registered at the
+ * <i>end</i> of the {@code OAuth2ClientAuthenticationFilter} converter chain, so it claims only a
+ * request no traditional converter claimed &mdash; one whose attestation is therefore its sole
+ * credential rather than an overlay on one.
  * <p>
- * This converter is a pure "data carrier": it detects the presence of attestation
- * headers, collects all raw header values and request parameters into
- * {@code additionalParameters}, and creates a token with a placeholder principal.
- * <b>No JWT parsing, key lookup, or client_id resolution is performed here</b> —
- * all verification and resolution is deferred to
+ * {@link #convert} collects the attestation and the grant parameters into a token; it never verifies.
+ * Verification, which consumes the one-time challenge and resolves the {@code client_id}, belongs to
  * {@link EulerOAuth2ClientAttestationAuthenticationProvider}.
  *
- * @see EulerOAuth2ParameterNames
  * @see EulerClientAuthenticationMethod#ATTEST_JWT_CLIENT_AUTH
  */
 public final class EulerOAuth2ClientAttestationAuthenticationConverter implements AuthenticationConverter {
 
     /**
-     * Placeholder principal used for the unauthenticated token. The real {@code client_id}
-     * is resolved by the provider after attestation verification.
+     * Placeholder principal for a token this converter produces. An {@code attest_jwt_client_auth}
+     * client is identified by its attestation, not by a {@code client_id} form parameter, so the
+     * real {@code client_id} is resolved during verification by the provider. The placeholder only
+     * has to be a printable string to pass {@code OAuth2ClientAuthenticationFilter}'s client
+     * identifier syntax check.
      */
-    static final String ATTESTATION_PRINCIPAL_PLACEHOLDER = "__attestation__";
+    private static final String ATTESTATION_PRINCIPAL_PLACEHOLDER = "(attestation)";
 
     @Override
     public Authentication convert(HttpServletRequest request) {
-        // 1. Check for attestation signal
+        // Runs last, so a request presenting a traditional credential (including a PKCE-shaped one)
+        // was claimed earlier and never reaches here.
+        if (!carriesAttestationSignal(request)) {
+            return null;
+        }
+
+        Map<String, Object> additionalParameters = new HashMap<>();
+        collectAttestationParams(request, additionalParameters);
+        // Carry the grant parameters so the provider can enforce PKCE (code_verifier) via
+        // CodeVerifierAuthenticatorAccessor#authenticateIfAvailable for an authorization_code grant.
+        collectGrantParams(request, additionalParameters);
+        String principal = additionalParameters.containsKey(OAuth2ParameterNames.CLIENT_ID)
+                ? (String) additionalParameters.get(OAuth2ParameterNames.CLIENT_ID)
+                : ATTESTATION_PRINCIPAL_PLACEHOLDER;
+        return new OAuth2ClientAuthenticationToken(
+                principal, EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, null, additionalParameters);
+    }
+
+    /**
+     * Collect the raw attestation data from the request &mdash; no parsing, no verification, no DB
+     * lookup &mdash; into the parameter map consumed by
+     * {@link EulerOAuth2ClientAttestationVerifier#verify(Map)}.
+     * <p>
+     * It deliberately ignores any traditional credential the request may also carry, so it serves
+     * both to build an attestation-only token and to collect an attestation laid over a traditional
+     * authentication.
+     *
+     * @param request              the token endpoint request
+     * @param additionalParameters the map to collect into; left untouched if the request carries no
+     *                             attestation signal
+     */
+    public static void collectAttestationParams(HttpServletRequest request, Map<String, Object> additionalParameters) {
+        if (!carriesAttestationSignal(request)) {
+            return;
+        }
+
         String attestationJwt = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION);
         String attestationPopJwt = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
         String attestationType = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
-
-        if (attestationJwt == null && attestationPopJwt == null && attestationType == null) {
-            return null;
-        }
 
         EulerOAuth2ClientAttestationType clientAttestationType = attestationType != null
                 ? EulerOAuth2ClientAttestationType.parse(attestationType)
                 : EulerOAuth2ClientAttestationType.JWT;
 
-        // 2. Collect all raw attestation data — no parsing, no DB lookup
-        Map<String, Object> additionalParams = new LinkedHashMap<>();
-        additionalParams.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE, clientAttestationType);
+        additionalParameters.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE, clientAttestationType);
 
         if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
             // Unlike the draft, we treat OAuth-Client-Attestation as an optional header.
             // As long as the public key has not changed, it can be omitted.
             // However, if OAuth-Client-Attestation is omitted, the PoP JWT header must carry a verified kid.
-            copyOptional(attestationJwt, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION, additionalParams);
-            copyRequired(attestationPopJwt, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParams);
+            copyOptional(attestationJwt, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION, additionalParameters);
+            copyRequired(attestationPopJwt, EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP, additionalParameters);
         } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)) {
             if (isHeaderCarried(request)) {
-                convertAppleAppAttestHeaders(request, additionalParams);
+                convertAppleAppAttestHeaders(request, additionalParameters);
             } else {
-                convertAppleAppAttestFormParameters(request, additionalParams);
+                convertAppleAppAttestFormParameters(request, additionalParameters);
             }
         }
 
-        // Optional request client_id (for RFC6749 consistency check in Provider)
-        copyOptional(request, OAuth2ParameterNames.CLIENT_ID, additionalParams);
+        // Optional request client_id (for the RFC 6749 Section 6.3 consistency check in the verifier)
+        copyOptional(request, OAuth2ParameterNames.CLIENT_ID, additionalParameters);
+    }
 
-        return new OAuth2ClientAuthenticationToken(
-                ATTESTATION_PRINCIPAL_PLACEHOLDER,
-                EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH,
-                null, additionalParams);
+    /**
+     * Whether the request carries any client attestation signal, i.e. at least one of the
+     * {@code OAuth-Client-Attestation}, {@code -PoP} or {@code -Type} headers. A cheap presence
+     * check that neither parses nor validates, so it is safe to use as a routing signal.
+     *
+     * @param request the token endpoint request
+     * @return {@code true} if an attestation header is present
+     */
+    public static boolean carriesAttestationSignal(HttpServletRequest request) {
+        return request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION) != null
+                || request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP) != null
+                || request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE) != null;
     }
 
     /**
@@ -163,41 +204,32 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
     }
 
     /**
-     * Resolve which proof the request presents, mirroring the branch {@link #convert} takes.
+     * Resolve which proof a request presented from the parameters {@link #collectAttestationParams}
+     * collected for it: {@link EulerClientAttestationProof#ATTESTATION} when an attestation is among
+     * them, {@link EulerClientAttestationProof#ASSERTION} otherwise.
      * <p>
-     * Both an attestation and a proof of possession resolve to the same verified device
-     * registration, so the registration alone cannot tell device registration apart from
-     * device verification. Downstream components that may establish persistent state (notably
-     * the device-to-user association) need this discriminator, and the token endpoint filter
-     * publishes it alongside the verified registration.
-     * <p>
-     * Where the attestation is looked for depends on the variant: the {@code OAuth-Client-Attestation}
-     * header for {@link EulerOAuth2ClientAttestationType#JWT}, the deprecated {@code attestation}
-     * form parameter for {@link EulerOAuth2ClientAttestationType#APPLE_APP_ATTEST}. The Apple
-     * header carriage has no attestation analog and is therefore always
-     * {@link EulerClientAttestationProof#ASSERTION}. A request carrying both an attestation and a
-     * proof of possession is reported as {@link EulerClientAttestationProof#ATTESTATION}, because
-     * that is the branch the provider acts on first.
+     * Only the deprecated form carriage can carry an Apple attestation, so for that variant the
+     * {@code attestation} key's presence is itself the discriminator. An absent type key means the
+     * request carried no {@code OAuth-Client-Attestation-Type} header, which defaults to
+     * {@link EulerOAuth2ClientAttestationType#JWT}.
      *
-     * @param request the token endpoint request
+     * @param collectedParams the parameters collected by {@link #collectAttestationParams}
      * @return the proof the server will act on for this request
+     * @deprecated compatibility logic; see
+     * {@link org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService}. Removed
+     * once the device-to-user mapping is retired.
      */
-    public static EulerClientAttestationProof resolveProof(HttpServletRequest request) {
-        String attestationType = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
-        EulerOAuth2ClientAttestationType clientAttestationType = attestationType != null
-                ? EulerOAuth2ClientAttestationType.parse(attestationType)
-                : EulerOAuth2ClientAttestationType.JWT;
+    @Deprecated
+    public static EulerClientAttestationProof resolveProof(Map<String, Object> collectedParams) {
+        EulerOAuth2ClientAttestationType clientAttestationType =
+                (EulerOAuth2ClientAttestationType) collectedParams
+                        .get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
 
-        boolean attestationPresent;
-        if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
-            attestationPresent = StringUtils.hasText(
-                    request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION));
-        } else {
-            attestationPresent = !isHeaderCarried(request)
-                    && StringUtils.hasText(request.getParameter(EulerOAuth2ParameterNames.ATTESTATION));
-        }
+        String attestationKey = EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)
+                ? EulerOAuth2ParameterNames.ATTESTATION
+                : EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION;
 
-        return attestationPresent
+        return StringUtils.hasText((String) collectedParams.get(attestationKey))
                 ? EulerClientAttestationProof.ATTESTATION
                 : EulerClientAttestationProof.ASSERTION;
     }
@@ -207,6 +239,17 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
         if (value != null) {
             target.put(paramName, value);
         }
+    }
+
+    /**
+     * Collect the grant parameters PKCE enforcement needs downstream: {@code grant_type}, {@code code}
+     * and {@code code_verifier}. For a grant other than {@code authorization_code} these are simply
+     * absent.
+     */
+    private static void collectGrantParams(HttpServletRequest request, Map<String, Object> target) {
+        copyOptional(request, OAuth2ParameterNames.GRANT_TYPE, target);
+        copyOptional(request, OAuth2ParameterNames.CODE, target);
+        copyOptional(request, PkceParameterNames.CODE_VERIFIER, target);
     }
 
     private static void copyOptional(HttpServletRequest request, String paramName,

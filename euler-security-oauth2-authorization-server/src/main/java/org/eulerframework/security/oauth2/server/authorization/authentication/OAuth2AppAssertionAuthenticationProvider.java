@@ -62,30 +62,17 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
-import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 
 /**
  * Authentication provider for the {@code urn:ietf:params:oauth:grant-type:app_assertion} grant type.
  * <p>
- * This is a <b>thin layer</b> responsible only for anonymous user resolution and
- * token issuance. Assertion/challenge cryptographic verification is performed
- * upstream by {@code ClientAttestationFilter}.
+ * This is a <b>thin layer</b> responsible only for anonymous user resolution and token issuance; the
+ * assertion itself is verified during client authentication, before this provider runs.
  * <p>
  * Applies to <b>STATIC</b> App Attest clients only; DYNAMIC per-key clients are decoupled
  * from users and are rejected here. Any login factor the request may also carry is
  * <b>ignored</b>: the user is resolved solely from the device-to-user association.
- * <p>
- * Flow:
- * <ol>
- *   <li>Retrieve the already-authenticated {@code RegisteredClient}.</li>
- *   <li>Validate the grant type and requested scopes.</li>
- *   <li>Load the user associated with the device, provisioning an anonymous one only for an
- *       attestation request.</li>
- *   <li>Generate Access Token and ID Token (if openid scope). No Refresh Token is issued
- *       because every token request already requires full device attestation, making
- *       refresh tokens redundant.</li>
- * </ol>
  *
  * @deprecated see {@link EulerAuthorizationGrantType#APP_ASSERTION}.
  */
@@ -155,23 +142,16 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         this.validateScope(assertionAuthenticationToken, registeredClient);
         Set<String> authorizedScopes = Collections.unmodifiableSet(assertionAuthenticationToken.getScopes());
 
-        // Resolve anonymous user by verified attestation registration. The
-        // verified registration is propagated by
-        // OAuth2AppAssertionAuthenticationConverter through the parent
-        // additionalParameters map under VERIFIED_CLIENT_ATTESTATION_PARAMETER.
-        AppAttestAttestationRegistration verifiedAppRegistration =
-                (AppAttestAttestationRegistration) assertionAuthenticationToken.getAdditionalParameters()
-                        .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
-        if (verifiedAppRegistration == null) {
-            // Should not happen: the converter rejects requests that have not
-            // been verified by the attestation filter. Defensive guard only.
+        // Resolve anonymous user by verified attestation registration, which travels on the client
+        // authentication that is this grant token's principal. A client that did not authenticate
+        // with an attestation cannot drive this grant.
+        if (!(clientPrincipal instanceof EulerOAuth2ClientAttestationAuthenticationToken attestationAuthentication)) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT);
         }
+        AppAttestAttestationRegistration verifiedAppRegistration = attestationAuthentication.getVerifiedRegistration();
         AppAttestUser attestUser = new AppAttestUser(
                 verifiedAppRegistration.getKeyId(), verifiedAppRegistration.getTeamId(), verifiedAppRegistration.getBundleId(), verifiedAppRegistration.getPublicKey());
-        EulerClientAttestationProof proof = (EulerClientAttestationProof) assertionAuthenticationToken
-                .getAdditionalParameters()
-                .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER);
+        EulerClientAttestationProof proof = attestationAuthentication.getProof();
         UserDetails user;
         try {
             user = this.userDetailsService.loadUserByDeviceUser(attestUser);

@@ -24,7 +24,6 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
-import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +45,6 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -102,15 +100,16 @@ class OAuth2AppAssertionAuthenticationProviderTest {
     }
 
     @Test
-    void missingProofIsTreatedAsAssertionOnly() {
+    void clientWithoutAVerifiedAttestationIsRejected() {
         RecordingDeviceUserDetailsService userDetailsService = new RecordingDeviceUserDetailsService(false);
         OAuth2AppAssertionAuthenticationProvider provider = provider(userDetailsService);
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> provider.authenticate(token(null)));
+                () -> provider.authenticate(tokenWithoutAttestation()));
 
         assertEquals(OAuth2ErrorCodes.INVALID_GRANT, ex.getError().getErrorCode());
-        assertEquals(0, userDetailsService.createCalls.get(), "fail-safe: never write without a proof");
+        assertEquals(0, userDetailsService.createCalls.get(),
+                "without a verified attestation there is no device to associate a user with");
     }
 
     @Test
@@ -158,24 +157,29 @@ class OAuth2AppAssertionAuthenticationProviderTest {
     }
 
     private static OAuth2AppAssertionAuthenticationToken token(EulerClientAttestationProof proof) {
-        RegisteredClient registeredClient = RegisteredClient.withId("id-1")
+        return new OAuth2AppAssertionAuthenticationToken(
+                new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient(),
+                        EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, null, registration(), proof),
+                null, Map.of());
+    }
+
+    /**
+     * A client that authenticated without an attestation: the grant token's principal is the plain
+     * client authentication, which carries no verified registration.
+     */
+    private static OAuth2AppAssertionAuthenticationToken tokenWithoutAttestation() {
+        return new OAuth2AppAssertionAuthenticationToken(
+                new OAuth2ClientAuthenticationToken(registeredClient(),
+                        EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, registration()),
+                null, Map.of());
+    }
+
+    private static RegisteredClient registeredClient() {
+        return RegisteredClient.withId("id-1")
                 .clientId(CLIENT_ID)
                 .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
                 .authorizationGrantType(EulerAuthorizationGrantType.APP_ASSERTION)
                 .build();
-        OAuth2ClientAuthenticationToken clientPrincipal = new OAuth2ClientAuthenticationToken(
-                registeredClient, EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, registration());
-
-        Map<String, Object> additionalParameters = new HashMap<>();
-        additionalParameters.put(
-                EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER,
-                registration());
-        if (proof != null) {
-            additionalParameters.put(
-                    EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER,
-                    proof);
-        }
-        return new OAuth2AppAssertionAuthenticationToken(clientPrincipal, null, additionalParameters);
     }
 
     private static AppAttestAttestationRegistration registration() {

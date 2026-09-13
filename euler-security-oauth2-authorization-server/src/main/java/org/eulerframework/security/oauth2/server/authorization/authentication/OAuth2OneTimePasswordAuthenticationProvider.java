@@ -25,7 +25,6 @@ import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
-import org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -138,15 +137,15 @@ public class OAuth2OneTimePasswordAuthenticationProvider implements Authenticati
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
         }
 
-        // If the request carries a verified App Attest device (set by
-        // EulerOAuth2AttestationBasedClientAuthenticationFilter), enforce
-        // device-to-user consistency before token issuance.
-        AppAttestAttestationRegistration verifiedAppRegistration =
-                (AppAttestAttestationRegistration) otpAuthenticationToken.getAdditionalParameters()
-                        .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.VERIFIED_CLIENT_ATTESTATION_PARAMETER);
-        EulerClientAttestationProof clientAttestationProof =
-                (EulerClientAttestationProof) otpAuthenticationToken.getAdditionalParameters()
-                        .get(EulerOAuth2AttestationBasedClientAuthenticationFilter.CLIENT_ATTESTATION_PROOF_PARAMETER);
+        // If the client authenticated with an attestation, enforce device-to-user consistency
+        // before token issuance. Both values travel on the client authentication that is this
+        // grant token's principal.
+        AppAttestAttestationRegistration verifiedAppRegistration = null;
+        EulerClientAttestationProof clientAttestationProof = null;
+        if (clientPrincipal instanceof EulerOAuth2ClientAttestationAuthenticationToken attestationAuthentication) {
+            verifiedAppRegistration = attestationAuthentication.getVerifiedRegistration();
+            clientAttestationProof = attestationAuthentication.getProof();
+        }
         OneTimePasswordAuthenticationToken otpResult = (OneTimePasswordAuthenticationToken) userPrincipal;
         enforceDeviceConsistency(registeredClient, verifiedAppRegistration, clientAttestationProof,
                 otpResult.getUserIdentity().getUserId());
@@ -263,33 +262,16 @@ public class OAuth2OneTimePasswordAuthenticationProvider implements Authenticati
 
     /**
      * Enforce device-to-user consistency when an OTP request carries a
-     * verified App Attest device. {@code verifiedAppRegistration} is
-     * set by
-     * {@link org.eulerframework.security.oauth2.server.authorization.web.EulerOAuth2AttestationBasedClientAuthenticationFilter}
-     * and may be {@code null} for legacy clients.
-     *
-     * <p>Behaviour:
-     * <ul>
-     *   <li>{@code verifiedAppRegistration == null} &rarr; no-op.</li>
-     *   <li>{@link #deviceUserDetailsService} not set &rarr; no-op
-     *       (attestation is silently ignored).</li>
-     *   <li>Client marked {@code DYNAMIC} &rarr; no-op (per-key clients are
-     *       decoupled from users; the same KEY may serve different users).</li>
-     *   <li>Device already bound to a user other than {@code otpUserId}
-     *       &rarr; reject with {@code invalid_grant} /
-     *       {@code description="device mismatch"}. Enforced regardless of the proof
-     *       presented: an existing association was established by an attestation
-     *       request and remains authoritative for that key.</li>
-     *   <li>Device not yet bound and the request carried an <b>attestation</b> &rarr; bind it
-     *       to {@code otpUserId} via
-     *       {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)},
-     *       distinct from
-     *       {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)},
-     *       which would provision a brand-new anonymous user.</li>
-     *   <li>Device not yet bound and the request carried only an <b>assertion</b> &rarr;
-     *       no-op. An assertion proves possession of a registered key but does not fix that
-     *       key to a user, so no association is written.</li>
-     * </ul>
+     * verified App Attest device. {@code verifiedAppRegistration} is {@code null} when the client
+     * authenticated without an attestation.
+     * <p>
+     * A device already bound to a different user is rejected with {@code invalid_grant} regardless of
+     * the proof presented, since an existing association was established by an attestation and stays
+     * authoritative for that key. An unbound device is bound to {@code otpUserId} only for an
+     * {@link EulerClientAttestationProof#ATTESTATION} request, via
+     * {@link EulerDeviceUserDetailsService#bindToUser(AppAttestUser, String)} rather than
+     * {@link EulerDeviceUserDetailsService#createUser(AppAttestUser)}, which would provision a
+     * brand-new anonymous user instead; an assertion-only request leaves it unbound.
      *
      * @deprecated compatibility logic; see {@link EulerDeviceUserDetailsService}. Removed, along
      * with its call site, once the device-to-user mapping is retired.
