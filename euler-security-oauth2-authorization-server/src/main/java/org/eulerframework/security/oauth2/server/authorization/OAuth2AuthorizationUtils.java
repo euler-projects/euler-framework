@@ -16,6 +16,32 @@ import java.util.Map;
 import java.util.Set;
 
 public class OAuth2AuthorizationUtils {
+
+    /**
+     * Unwrap the resource owner behind the value a grant provider stored as the principal, either
+     * under an authorization's {@code java.security.Principal} attribute or under a token context's
+     * principal key.
+     * <p>
+     * Grant providers do not agree on what they store there: some a bare {@link UserDetails}, most an
+     * {@link Authentication} of their own type carrying one as its principal. Callers have to match
+     * on that shape rather than enumerate token types, or any grant they did not list silently
+     * yields nothing.
+     *
+     * @param principal the stored value, possibly {@code null}
+     * @return the resource owner, or {@code null} when the request has none, as with the
+     * client_credentials grant
+     */
+    public static UserDetails resolveUserDetails(Object principal) {
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails;
+        }
+        if (principal instanceof Authentication authentication
+                && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return userDetails;
+        }
+        return null;
+    }
+
     public static void putExtendClaims(OAuth2Authorization authorization, Set<String> scopes, Map<String, Object> claims) {
         if (scopes == null || scopes.isEmpty()) {
             return;
@@ -26,21 +52,15 @@ public class OAuth2AuthorizationUtils {
             return;
         }
 
-        // The attribute holds whatever the grant provider authenticated the user with: a bare
-        // UserDetails, or any Authentication carrying one as its principal. Matching on that shape
-        // rather than on concrete token types keeps grants whose tokens are Euler-specific covered.
         Object principalAttribute = authorization.getAttribute(Principal.class.getName());
+        UserDetails userDetails = resolveUserDetails(principalAttribute);
 
-        UserDetails userDetails = null;
-        Collection<? extends GrantedAuthority> tokenAuthorities = null;
-        if (principalAttribute instanceof UserDetails principal) {
-            userDetails = principal;
-        } else if (principalAttribute instanceof Authentication authentication) {
-            tokenAuthorities = authentication.getAuthorities();
-            if (authentication.getPrincipal() instanceof UserDetails principal) {
-                userDetails = principal;
-            }
-        }
+        // An Authentication whose principal is not a UserDetails still vouches for the authorities
+        // it was issued with, which is all there is to report in that case.
+        Collection<? extends GrantedAuthority> tokenAuthorities =
+                userDetails == null && principalAttribute instanceof Authentication authentication
+                        ? authentication.getAuthorities()
+                        : null;
 
         String username = null;
         Collection<? extends GrantedAuthority> authorities = null;

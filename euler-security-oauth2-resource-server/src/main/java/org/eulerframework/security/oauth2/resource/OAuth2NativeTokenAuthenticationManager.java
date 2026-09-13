@@ -16,14 +16,15 @@
 package org.eulerframework.security.oauth2.resource;
 
 import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
+import org.eulerframework.security.oauth2.server.authorization.OAuth2AuthorizationUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
@@ -34,6 +35,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Bearer
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.util.Assert;
 
+import java.security.Principal;
 import java.util.*;
 
 public class OAuth2NativeTokenAuthenticationManager implements AuthenticationManager {
@@ -88,10 +90,15 @@ public class OAuth2NativeTokenAuthenticationManager implements AuthenticationMan
         }
 
 
+        Object resourceOwnerPrincipal = authorization.getAttribute(Principal.class.getName());
+        UserDetails resourceOwner = OAuth2AuthorizationUtils.resolveUserDetails(resourceOwnerPrincipal);
+
         Collection<GrantedAuthority> resourceOwnerAuthorities = null;
-        Object resourceOwnerPrincipal = authorization.getAttribute("java.security.Principal");
-        if (resourceOwnerPrincipal instanceof UsernamePasswordAuthenticationToken) {
-            resourceOwnerAuthorities = ((UsernamePasswordAuthenticationToken) resourceOwnerPrincipal).getAuthorities();
+        if (resourceOwner != null) {
+            resourceOwnerAuthorities = new ArrayList<>(resourceOwner.getAuthorities());
+        } else if (resourceOwnerPrincipal instanceof Authentication resourceOwnerAuthentication) {
+            // No resource owner to read, so fall back to the authorities the token was issued with.
+            resourceOwnerAuthorities = new ArrayList<>(resourceOwnerAuthentication.getAuthorities());
         }
 
         Map<String, Object> claims = authorizedToken.getClaims();

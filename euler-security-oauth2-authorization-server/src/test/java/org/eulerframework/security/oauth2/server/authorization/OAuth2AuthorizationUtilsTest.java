@@ -43,6 +43,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -125,6 +127,25 @@ class OAuth2AuthorizationUtilsTest {
         assertTrue(claimsFor(otpToken(), Set.of(OidcScopes.OPENID)).isEmpty());
         assertTrue(claimsFor(otpToken(), Set.of()).isEmpty());
         assertTrue(claimsFor(null, BOTH_SCOPES).isEmpty());
+    }
+
+    @Test
+    void resolveUserDetailsUnwrapsEveryPrincipalShape() {
+        EulerUserDetails userDetails = userDetails();
+        Authentication otpToken = OneTimePasswordAuthenticationToken.authenticated(
+                userDetails, null, List.of(new SimpleGrantedAuthority("user")));
+
+        assertSame(userDetails, OAuth2AuthorizationUtils.resolveUserDetails(userDetails),
+                "a bare UserDetails is the resource owner itself");
+        assertSame(userDetails, OAuth2AuthorizationUtils.resolveUserDetails(otpToken),
+                "a grant-specific token is unwrapped to the UserDetails it carries");
+        assertNull(OAuth2AuthorizationUtils.resolveUserDetails(
+                        UsernamePasswordAuthenticationToken.authenticated(
+                                "euler", null, List.of(new SimpleGrantedAuthority("user")))),
+                "a principal that is not a UserDetails cannot yield one");
+        assertNull(OAuth2AuthorizationUtils.resolveUserDetails(null),
+                "an authorization with no user, as with the client_credentials grant");
+        assertNull(OAuth2AuthorizationUtils.resolveUserDetails("not-an-authentication"));
     }
 
     // ---- helpers ----
