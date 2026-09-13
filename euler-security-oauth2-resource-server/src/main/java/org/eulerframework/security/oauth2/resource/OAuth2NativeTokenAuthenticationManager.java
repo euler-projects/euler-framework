@@ -16,7 +16,6 @@
 package org.eulerframework.security.oauth2.resource;
 
 import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
-import org.eulerframework.security.oauth2.server.authorization.OAuth2AuthorizationUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -90,15 +89,17 @@ public class OAuth2NativeTokenAuthenticationManager implements AuthenticationMan
         }
 
 
-        Object resourceOwnerPrincipal = authorization.getAttribute(Principal.class.getName());
-        UserDetails resourceOwner = OAuth2AuthorizationUtils.resolveUserDetails(resourceOwnerPrincipal);
-
+        // The attribute holds whichever Authentication the grant provider produced, so match on the
+        // shape rather than on a concrete token type. Its own authorities are what gets reported,
+        // not the resource owner's: the login adds to them, notably the FactorGrantedAuthority that
+        // AbstractUserDetailsAuthenticationProvider appends on a password login, and this manager is
+        // itself factor-aware, adding FACTOR_BEARER below.
         Collection<GrantedAuthority> resourceOwnerAuthorities = null;
-        if (resourceOwner != null) {
-            resourceOwnerAuthorities = new ArrayList<>(resourceOwner.getAuthorities());
-        } else if (resourceOwnerPrincipal instanceof Authentication resourceOwnerAuthentication) {
-            // No resource owner to read, so fall back to the authorities the token was issued with.
+        Object resourceOwnerPrincipal = authorization.getAttribute(Principal.class.getName());
+        if (resourceOwnerPrincipal instanceof Authentication resourceOwnerAuthentication) {
             resourceOwnerAuthorities = new ArrayList<>(resourceOwnerAuthentication.getAuthorities());
+        } else if (resourceOwnerPrincipal instanceof UserDetails resourceOwner) {
+            resourceOwnerAuthorities = new ArrayList<>(resourceOwner.getAuthorities());
         }
 
         Map<String, Object> claims = authorizedToken.getClaims();
