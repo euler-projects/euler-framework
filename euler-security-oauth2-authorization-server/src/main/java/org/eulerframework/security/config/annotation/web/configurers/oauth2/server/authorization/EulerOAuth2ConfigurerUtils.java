@@ -89,6 +89,12 @@ final class EulerOAuth2ConfigurerUtils {
             if (appleAppAttestValidationService != null) {
                 verifier.setAppleAppAttestValidationService(appleAppAttestValidationService);
             }
+            // Historical STATIC client fallback: wire the RegisteredClientRepository when present so
+            // a fresh attestation of a historical STATIC app can bind its pre-existing client.
+            if (applicationContext.getBeanNamesForType(RegisteredClientRepository.class).length > 0) {
+                verifier.setRegisteredClientRepository(
+                        applicationContext.getBean(RegisteredClientRepository.class));
+            }
         }
         http.setSharedObject(EulerOAuth2ClientAttestationVerifier.class, verifier);
         return verifier;

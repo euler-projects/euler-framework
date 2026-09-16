@@ -27,7 +27,6 @@ import org.eulerframework.security.authentication.appattest.RegisteredAppReposit
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
@@ -108,7 +107,7 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
         registrationService.saveRegistration(keyRegistration(null));
         EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider provider = provider(
                 new StubChallengeService(true), new StubValidationService(keyRegistration(null)),
-                new InMemoryRegisteredAppRepository(app(RegisteredApp.OAuth2ClientType.DYNAMIC, true)));
+                new InMemoryRegisteredAppRepository(app(true)));
 
         Authentication result = provider.authenticate(token());
 
@@ -125,8 +124,6 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
         assertEquals(1, client.getClientAuthenticationMethods().size());
         assertNull(client.getClientSecret(), "an App Attest client must not carry a secret");
         assertTrue(client.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN));
-        assertEquals(RegisteredApp.OAuth2ClientType.DYNAMIC.name(),
-                client.getClientSettings().getSetting(EulerConfigurationSettingNames.Client.APP_ATTEST_CLIENT_TYPE));
 
         assertEquals(client.getClientId(), registrationService.findByKeyId(KEY_ID).getClientId(),
                 "the client_id should be bound back to the KEY registration");
@@ -144,7 +141,7 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
 
         EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider provider = provider(
                 new StubChallengeService(true), new StubValidationService(keyRegistration(bound.getClientId())),
-                new InMemoryRegisteredAppRepository(app(RegisteredApp.OAuth2ClientType.DYNAMIC, true)));
+                new InMemoryRegisteredAppRepository(app(true)));
 
         OAuth2ClientRegistration response =
                 ((OAuth2ClientRegistrationAuthenticationToken) provider.authenticate(token()))
@@ -155,11 +152,11 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
     }
 
     @Test
-    void rejectsAnAppThatIsNotDynamicOAuth2Enabled() {
+    void rejectsAnAppThatIsNotOAuth2Enabled() {
         registrationService.saveRegistration(keyRegistration(null));
         EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider provider = provider(
                 new StubChallengeService(true), new StubValidationService(keyRegistration(null)),
-                new InMemoryRegisteredAppRepository(app(RegisteredApp.OAuth2ClientType.STATIC, true)));
+                new InMemoryRegisteredAppRepository(app(false)));
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
                 () -> provider.authenticate(token()));
@@ -223,15 +220,12 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
                 new byte[16], KEY_ID.getBytes(), new byte[0], new byte[0], null, null, 1L);
     }
 
-    private static RegisteredApp app(RegisteredApp.OAuth2ClientType type, boolean oauth2Enabled) {
-        RegisteredApp.Builder builder = RegisteredApp.withId("myapp")
+    private static RegisteredApp app(boolean oauth2Enabled) {
+        return RegisteredApp.withId("myapp")
                 .teamId(TEAM_ID)
                 .bundleId(BUNDLE_ID)
-                .oauth2Enabled(oauth2Enabled);
-        if (oauth2Enabled) {
-            builder.oauth2ClientType(type);
-        }
-        return builder.build();
+                .oauth2Enabled(oauth2Enabled)
+                .build();
     }
 
     // ---- fakes ----

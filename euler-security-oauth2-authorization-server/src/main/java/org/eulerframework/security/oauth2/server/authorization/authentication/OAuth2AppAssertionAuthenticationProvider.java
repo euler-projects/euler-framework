@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
-import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +60,6 @@ import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsServic
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
-import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 
 /**
@@ -125,17 +123,6 @@ public class OAuth2AppAssertionAuthenticationProvider implements AuthenticationP
         }
 
         if (!registeredClient.getAuthorizationGrantTypes().contains(EulerAuthorizationGrantType.APP_ASSERTION)) {
-            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
-        }
-
-        // Assertion-only renewal is a STATIC-client compatibility path. DYNAMIC per-key
-        // clients are decoupled from users and must not resolve a user from the assertion
-        // alone (they renew via refresh_token). The grant-type check above already excludes
-        // them; this marker check is defense in depth against a client misconfigured with
-        // the app_assertion grant.
-        Object clientTypeMarker = registeredClient.getClientSettings()
-                .getSetting(EulerConfigurationSettingNames.Client.APP_ATTEST_CLIENT_TYPE);
-        if (RegisteredApp.OAuth2ClientType.DYNAMIC.name().equals(clientTypeMarker)) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
         }
 

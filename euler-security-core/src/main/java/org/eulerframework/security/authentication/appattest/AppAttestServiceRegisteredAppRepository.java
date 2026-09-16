@@ -39,14 +39,6 @@ import java.util.Collection;
  * {@code RegisteredClientRepository.save} implementation. Callers should rely on the
  * underlying service's primary-key uniqueness constraint as the authoritative
  * guarantee.
- *
- * <p>Listener notifications are not dispatched by this class. Because every write
- * terminates in {@link AppAttestAppService}, it is the service implementation's
- * responsibility to invoke {@link RegisteredAppChangeListener#onRegisteredAppSaved}
- * after its own persistence transaction succeeds. This keeps the notification inside
- * the same transactional boundary that owns the write, at the cost of each service
- * implementation having to wire in the listener list itself. A cleaner scheme is
- * pending; treat this contract as temporary.
  */
 public class AppAttestServiceRegisteredAppRepository implements RegisteredAppRepository {
 
@@ -111,7 +103,6 @@ public class AppAttestServiceRegisteredAppRepository implements RegisteredAppRep
                 .teamId(m.getTeamId())
                 .bundleId(m.getBundleId())
                 .oauth2Enabled(Boolean.TRUE.equals(m.getOauth2Enabled()))
-                .oauth2ClientType(m.getOauth2ClientType())
                 .build();
     }
 }

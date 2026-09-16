@@ -17,14 +17,12 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
-import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
 import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
-import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -147,7 +145,7 @@ public class OAuth2OneTimePasswordAuthenticationProvider implements Authenticati
             clientAttestationProof = attestationAuthentication.getProof();
         }
         OneTimePasswordAuthenticationToken otpResult = (OneTimePasswordAuthenticationToken) userPrincipal;
-        enforceDeviceConsistency(registeredClient, verifiedAppRegistration, clientAttestationProof,
+        enforceDeviceConsistency(verifiedAppRegistration, clientAttestationProof,
                 otpResult.getUserIdentity().getUserId());
 
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
@@ -277,19 +275,9 @@ public class OAuth2OneTimePasswordAuthenticationProvider implements Authenticati
      * with its call site, once the device-to-user mapping is retired.
      */
     @Deprecated
-    private void enforceDeviceConsistency(RegisteredClient registeredClient,
-                                          AppAttestAttestationRegistration verifiedAppRegistration,
+    private void enforceDeviceConsistency(AppAttestAttestationRegistration verifiedAppRegistration,
                                           EulerClientAttestationProof clientAttestationProof, String otpUserId) {
         if (verifiedAppRegistration == null || this.deviceUserDetailsService == null) {
-            return;
-        }
-
-        // DYNAMIC per-key clients are decoupled from users: the KEY authenticates the
-        // client, not a user, and the same KEY may serve different users over time. Skip
-        // device-to-user binding and consistency enforcement for them.
-        Object clientTypeMarker = registeredClient.getClientSettings()
-                .getSetting(EulerConfigurationSettingNames.Client.APP_ATTEST_CLIENT_TYPE);
-        if (RegisteredApp.OAuth2ClientType.DYNAMIC.name().equals(clientTypeMarker)) {
             return;
         }
 

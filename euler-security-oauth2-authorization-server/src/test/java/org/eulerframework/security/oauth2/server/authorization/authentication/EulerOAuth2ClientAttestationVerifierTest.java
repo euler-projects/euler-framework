@@ -20,15 +20,23 @@ import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.GeneratedChallenge;
 import org.eulerframework.security.authentication.InMemoryNonceService;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.AppAttestUtils;
+import org.eulerframework.security.authentication.appattest.InMemoryAppAttestAttestationRegistrationService;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
+import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,6 +45,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -267,6 +276,54 @@ class EulerOAuth2ClientAttestationVerifierTest {
         assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, ex.getError().getErrorCode());
     }
 
+    @Test
+    void attestationBindsTheHistoricalStaticClientWhenOneExists() {
+        RecordingValidationService validationService = new RecordingValidationService();
+        validationService.boundClientId = null; // a fresh attestation resolves no client_id
+        InMemoryAppAttestAttestationRegistrationService registrationService =
+                new InMemoryAppAttestAttestationRegistrationService();
+        registrationService.saveRegistration(registration(DERIVED_KID, null));
+        String staticClientId = AppAttestUtils.staticClientId("ABCD1234EF.com.example.app");
+        RegisteredClientRepository clientRepository =
+                new InMemoryRegisteredClientRepository(staticClient(staticClientId));
+        EulerOAuth2ClientAttestationVerifier verifier =
+                verifier(validationService, registrationService, clientRepository);
+
+        Map<String, Object> params = appleParams();
+        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
+
+        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
+
+        assertEquals(staticClientId, result.clientId(),
+                "the historical STATIC client should be resolved from teamId.bundleId and bound");
+        assertEquals(staticClientId, registrationService.findByKeyId(DERIVED_KID).getClientId(),
+                "the binding should be persisted back to the KEY registration");
+    }
+
+    @Test
+    void attestationForAnAppWithoutAHistoricalStaticClientIsRejected() {
+        RecordingValidationService validationService = new RecordingValidationService();
+        validationService.boundClientId = null;
+        InMemoryAppAttestAttestationRegistrationService registrationService =
+                new InMemoryAppAttestAttestationRegistrationService();
+        registrationService.saveRegistration(registration(DERIVED_KID, null));
+        // No client matches the derived STATIC client_id: an app registered after the change.
+        RegisteredClientRepository clientRepository =
+                new InMemoryRegisteredClientRepository(staticClient("some-unrelated-client"));
+        EulerOAuth2ClientAttestationVerifier verifier =
+                verifier(validationService, registrationService, clientRepository);
+
+        Map<String, Object> params = appleParams();
+        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
+
+        OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
+                () -> verifier.verify(params));
+
+        assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode());
+        assertNull(registrationService.findByKeyId(DERIVED_KID).getClientId(),
+                "no client should be bound when the historical STATIC lookup misses");
+    }
+
     // ---- helpers ----
 
     private static Map<String, Object> appleParams() {
@@ -287,6 +344,26 @@ class EulerOAuth2ClientAttestationVerifierTest {
                 new EulerOAuth2ClientAttestationVerifier(challengeService, new InMemoryNonceService());
         verifier.setAppleAppAttestValidationService(validationService);
         return verifier;
+    }
+
+    private static EulerOAuth2ClientAttestationVerifier verifier(
+            AppleAppAttestValidationService validationService,
+            AppAttestAttestationRegistrationService registrationService,
+            RegisteredClientRepository registeredClientRepository) {
+        EulerOAuth2ClientAttestationVerifier verifier =
+                new EulerOAuth2ClientAttestationVerifier(new RecordingChallengeService(true), new InMemoryNonceService());
+        verifier.setAppleAppAttestValidationService(validationService);
+        verifier.setDeviceAttestRegistrationService(registrationService);
+        verifier.setRegisteredClientRepository(registeredClientRepository);
+        return verifier;
+    }
+
+    private static RegisteredClient staticClient(String clientId) {
+        return RegisteredClient.withId("static-id")
+                .clientId(clientId)
+                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .build();
     }
 
     private static AppAttestAttestationRegistration registration(String keyId, String clientId) {

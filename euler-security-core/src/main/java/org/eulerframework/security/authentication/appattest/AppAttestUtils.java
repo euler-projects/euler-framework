@@ -118,16 +118,20 @@ public final class AppAttestUtils {
     }
 
     /**
-     * Compute the STATIC OAuth2 {@code client_id} for the given app.
+     * Compute the STATIC OAuth2 {@code client_id} for the given App ID.
      * <p>
-     * The client ID is the base64url-encoded (no padding) SHA-256 hash of the
-     * {@linkplain RegisteredApp#getAppId() App ID}. This encoding is URL-safe and
-     * deterministic, suitable for use as an OAuth2 client identifier.
+     * The client ID is the base64url-encoded (no padding) SHA-256 hash of the App ID
+     * ({@code teamId.bundleId}). This encoding is URL-safe and deterministic.
      *
-     * @param app the registered app
+     * @param appId the fully qualified app ID (e.g. {@code teamId.bundleId})
      * @return the base64url-encoded client ID (43 characters)
+     * @deprecated compatibility helper for the historical STATIC App Attest OAuth2 client.
+     * Used only by the STATIC-client fallback lookup in
+     * {@code EulerOAuth2ClientAttestationVerifier}; retired together with the deprecated
+     * {@code app_assertion} grant.
      */
-    public static String staticClientId(RegisteredApp app) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(appIdHash(app));
+    @Deprecated
+    public static String staticClientId(String appId) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(appIdHash(appId));
     }
 }

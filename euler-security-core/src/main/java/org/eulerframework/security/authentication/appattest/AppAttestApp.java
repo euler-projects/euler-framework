@@ -35,9 +35,9 @@ package org.eulerframework.security.authentication.appattest;
  *
  * <h2>OAuth2 integration</h2>
  * When {@link #getOauth2Enabled() oauth2Enabled} is {@link Boolean#TRUE}, the app
- * is also allowed to act as an OAuth2 client. The {@link #getOauth2ClientType()}
- * determines how its {@code client_id} is provisioned (see
- * {@link RegisteredApp.OAuth2ClientType}). A {@code null} value of
+ * is also allowed to act as an OAuth2 client, registering itself via the
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7591">RFC 7591 OAuth 2.0
+ * Dynamic Client Registration Protocol</a>. A {@code null} value of
  * {@code oauth2Enabled} is reserved for patch-style updates and means
  * "unchanged".
  *
@@ -118,14 +118,6 @@ public interface AppAttestApp {
      * enabled / disabled; {@code null} when the value is unspecified
      */
     Boolean getOauth2Enabled();
-
-    /**
-     * Returns how the OAuth2 {@code client_id} of this app is provisioned.
-     *
-     * @return the OAuth2 client type; {@code null} when
-     * {@link #getOauth2Enabled() oauth2Enabled} is {@link Boolean#FALSE}
-     */
-    RegisteredApp.OAuth2ClientType getOauth2ClientType();
 
     // -- Bridge --
 

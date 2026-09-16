@@ -82,13 +82,14 @@ public class AppAttestAttestationRegistration implements Serializable {
 
     /**
      * Return the resolved OAuth2 {@code client_id} bound to this registration, or
-     * {@code null} if the underlying {@link RegisteredApp} is not OAuth2-enabled or
-     * does not use the {@link RegisteredApp.OAuth2ClientType#STATIC} client type.
+     * {@code null} if no client is bound yet.
      * <p>
-     * For STATIC clients, this is the deterministic {@code base64url(SHA-256(appId))}
-     * derived at attestation time. For a DYNAMIC client the value stays {@code null} until
-     * the per-key client is dynamically registered and bound back via
-     * {@link AppAttestAttestationRegistrationService#bindClientId(String, String)}.
+     * The value may be {@code null} right after attestation. It becomes non-null once a
+     * client is bound back via
+     * {@link AppAttestAttestationRegistrationService#bindClientId(String, String)}: either
+     * the historical STATIC client resolved by the compatibility fallback in
+     * {@code EulerOAuth2ClientAttestationVerifier}, or the per-key client minted through
+     * RFC 7591 dynamic client registration.
      */
     public String getClientId() {
         return clientId;

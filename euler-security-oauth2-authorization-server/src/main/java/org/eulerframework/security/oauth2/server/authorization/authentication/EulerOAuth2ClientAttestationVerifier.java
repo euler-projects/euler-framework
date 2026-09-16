@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContext;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
 import org.springframework.util.Assert;
@@ -48,6 +49,7 @@ import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.NonceService;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.AppAttestUtils;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
@@ -63,6 +65,14 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
  * {@code OAuth-Client-Attestation-Type} and returns the resolved {@code client_id} with the verified
  * registration. The two {@code verify} overloads implement the JWT variant and return a
  * {@link PopVerificationResult}.
+ *
+ * <h2>Historical STATIC compatibility</h2>
+ * A fresh Apple App Attest attestation no longer resolves a {@code client_id} at registration
+ * time. On the deprecated {@code /oauth/token} attestation branch, this verifier therefore tries
+ * once to bind the pre-existing STATIC client of a historical app (see
+ * {@link #bindHistoricalStaticClientIfPresent}); apps registered after that change have no such
+ * client and are steered to RFC 7591 dynamic registration instead. This fallback is scoped to the
+ * deprecated attestation branch and is retired together with the {@code app_assertion} grant.
  *
  * @see EulerOAuth2ClientAttestationAuthenticationProvider
  * @see org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationSuccessHandler
@@ -82,6 +92,8 @@ public final class EulerOAuth2ClientAttestationVerifier {
 
     private AppleAppAttestValidationService appleAppAttestValidationService;
 
+    private RegisteredClientRepository registeredClientRepository;
+
 
     public EulerOAuth2ClientAttestationVerifier(ChallengeService challengeService, NonceService nonceService) {
         Assert.notNull(challengeService, "challengeService must not be null");
@@ -96,6 +108,20 @@ public final class EulerOAuth2ClientAttestationVerifier {
 
     public void setAppleAppAttestValidationService(AppleAppAttestValidationService appleAppAttestValidationService) {
         this.appleAppAttestValidationService = appleAppAttestValidationService;
+    }
+
+    /**
+     * Set the {@link RegisteredClientRepository} used by the historical STATIC client
+     * fallback. Optional: when absent, the fallback is skipped and an attestation that
+     * resolves no bound client is rejected as before.
+     *
+     * @param registeredClientRepository the registered client repository
+     * @deprecated the fallback exists only for historical STATIC App Attest clients and is
+     * retired together with the deprecated {@code app_assertion} grant.
+     */
+    @Deprecated
+    public void setRegisteredClientRepository(RegisteredClientRepository registeredClientRepository) {
+        this.registeredClientRepository = registeredClientRepository;
     }
 
     /**
@@ -173,6 +199,11 @@ public final class EulerOAuth2ClientAttestationVerifier {
                 // KEY (idempotent); the key ID is derived from the attestation's credentialId.
                 AppAttestAttestationRegistration registered =
                         this.appleAppAttestValidationService.validateAttestation(attestation, challenge);
+
+                // Historical STATIC compatibility: a fresh attestation no longer resolves a
+                // client_id at registration time, so try to bind the pre-existing STATIC client
+                // (if any) before requiring a bound client below.
+                registered = bindHistoricalStaticClientIfPresent(registered);
 
                 // Fail fast, before verifying any accompanying assertion.
                 requireBoundClientId(registered);
@@ -350,12 +381,57 @@ public final class EulerOAuth2ClientAttestationVerifier {
     }
 
     /**
+     * Bind the historical STATIC OAuth2 client to a freshly attested KEY when such a client
+     * already exists, returning the (possibly re-read) registration.
+     * <p>
+     * A new attestation no longer resolves a {@code client_id} at registration time. For a
+     * historical STATIC app, however, the shared client
+     * ({@code base64url(SHA-256(teamId.bundleId))}) was pre-provisioned before this change and
+     * still lives in the {@link RegisteredClientRepository}. When a fresh KEY of such an app
+     * attests through the deprecated {@code /oauth/token} path, derive that candidate
+     * {@code client_id} and, if it resolves to an existing client, bind it back to the KEY so the
+     * device inherits the app-level STATIC client without going through RFC 7591.
+     * <p>
+     * Apps registered after this change have no such client, so the lookup misses and the
+     * registration is returned unchanged; the caller's {@code requireBoundClientId} then rejects
+     * it and steers the client to RFC 7591 dynamic registration. This fallback is scoped to the
+     * deprecated attestation branch only: the dedicated KEY-registration endpoint never routes
+     * through this verifier, so the RFC 7591 flow is unaffected.
+     *
+     * @param registered the registration just produced by {@code validateAttestation}
+     * @return the registration with its {@code client_id} bound when a historical STATIC client
+     * was found; otherwise {@code registered} unchanged
+     * @deprecated compatibility logic for historical STATIC App Attest clients; retired together
+     * with the deprecated {@code app_assertion} grant.
+     */
+    @Deprecated
+    private AppAttestAttestationRegistration bindHistoricalStaticClientIfPresent(
+            AppAttestAttestationRegistration registered) {
+        if (registered == null || StringUtils.hasText(registered.getClientId())) {
+            return registered;
+        }
+        if (this.registeredClientRepository == null || this.appAttestAttestationRegistrationService == null) {
+            return registered;
+        }
+        String candidateClientId = AppAttestUtils.staticClientId(
+                registered.getTeamId() + "." + registered.getBundleId());
+        if (this.registeredClientRepository.findByClientId(candidateClientId) == null) {
+            return registered;
+        }
+        this.appAttestAttestationRegistrationService.bindClientId(registered.getKeyId(), candidateClientId);
+        AppAttestAttestationRegistration rebound =
+                this.appAttestAttestationRegistrationService.findByKeyId(registered.getKeyId());
+        return (rebound != null) ? rebound : registered;
+    }
+
+    /**
      * Require that a verified App Attest registration is bound to an OAuth2 client.
      * <p>
-     * Only a STATIC app has an app-level client, pre-provisioned when the app is saved, so its
-     * {@code client_id} is bound at attestation time. A DYNAMIC app has no shared client: its
-     * per-key {@code client_id} is minted and bound back during dynamic client registration, so
-     * until then nothing can be resolved. The same holds for an app that is not OAuth2-enabled.
+     * A fresh attestation resolves no {@code client_id} on its own. The binding is established
+     * either by the historical STATIC fallback ({@link #bindHistoricalStaticClientIfPresent}) or
+     * by RFC 7591 dynamic client registration, which mints a per-key client and binds it back.
+     * Until one of those happens, nothing can be resolved &mdash; including for an app that is not
+     * OAuth2-enabled.
      * <p>
      * Reported as {@code unauthorized_client} rather than an attestation failure, because the App
      * Attest proof itself was valid; the app is simply not allowed to authenticate this way yet.

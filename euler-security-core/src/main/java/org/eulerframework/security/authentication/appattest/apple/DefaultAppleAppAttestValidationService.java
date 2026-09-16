@@ -271,7 +271,7 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
                     keyId,
                     app.getTeamId(),
                     app.getBundleId(),
-                    resolveClientId(app),
+                    null,
                     aaguid,
                     credentialId,
                     certChainBytes,
@@ -495,23 +495,6 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
             return 1;
         }
         return 1 + (firstByte & 0x7F);
-    }
-
-    /**
-     * Resolve the OAuth2 {@code client_id} to bind to the attestation registration.
-     * <p>
-     * For STATIC OAuth2-enabled apps, this returns the deterministic
-     * {@code base64url(SHA-256(appId))}, whose client is pre-provisioned when the app is
-     * saved and therefore already exists before any device registers. For all other cases
-     * (DYNAMIC client type or OAuth2 disabled), {@code null} is returned: a DYNAMIC app has
-     * no shared client, and its per-key {@code client_id} is only minted and bound back
-     * during dynamic client registration, so nothing can be resolved at attestation time.
-     */
-    private static String resolveClientId(RegisteredApp app) {
-        if (app.isOauth2Enabled() && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.STATIC) {
-            return AppAttestUtils.staticClientId(app);
-        }
-        return null;
     }
 
     private X509Certificate loadRootCertificate() {

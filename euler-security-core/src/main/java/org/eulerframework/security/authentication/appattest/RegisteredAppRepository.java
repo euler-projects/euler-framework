@@ -43,12 +43,6 @@ public interface RegisteredAppRepository {
      * Save a registered app to this repository.
      * <p>
      * If an app with the same App ID already exists, it will be replaced.
-     * <p>
-     * {@link RegisteredAppChangeListener} fan-out is an implementation concern rather
-     * than a contract of this interface: in-memory implementations typically dispatch
-     * inline after the put, while service-backed implementations defer dispatch to the
-     * underlying service layer so that notification stays inside the same transactional
-     * boundary as the write.
      *
      * @param app the registered app to save
      */

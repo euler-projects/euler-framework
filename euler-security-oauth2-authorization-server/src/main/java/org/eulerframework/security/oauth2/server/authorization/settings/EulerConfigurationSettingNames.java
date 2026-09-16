@@ -41,14 +41,6 @@ public final class EulerConfigurationSettingNames {
 		 */
 		public static final String JWKS = CLIENT_SETTINGS_NAMESPACE.concat("jwks");
 
-		/**
-		 * The App Attest OAuth2 client type marker ({@code STATIC} or {@code DYNAMIC}),
-		 * used at token time to distinguish per-app shared clients from per-key
-		 * dynamically registered clients. A client without this setting is treated as
-		 * {@code STATIC} for backward compatibility.
-		 */
-		public static final String APP_ATTEST_CLIENT_TYPE = CLIENT_SETTINGS_NAMESPACE.concat("app-attest.client-type");
-
 		private Client() {
 		}
 

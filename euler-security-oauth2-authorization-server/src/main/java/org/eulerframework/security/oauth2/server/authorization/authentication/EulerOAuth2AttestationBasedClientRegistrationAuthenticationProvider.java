@@ -22,13 +22,11 @@ import org.eulerframework.security.authentication.appattest.AppAttestUtils;
 import org.eulerframework.security.authentication.appattest.RegisteredApp;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.oauth2.core.EulerAuthorizationGrantType;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
-import org.eulerframework.security.oauth2.server.authorization.settings.EulerConfigurationSettingNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -44,7 +42,6 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -53,8 +50,8 @@ import java.time.Duration;
 
 /**
  * An {@link AuthenticationProvider} that authenticates an RFC 7591 dynamic client registration
- * request by Apple App Attest device assertion, provisioning a per-KEY OAuth2 client for
- * {@link RegisteredApp.OAuth2ClientType#DYNAMIC DYNAMIC} apps.
+ * request by Apple App Attest device assertion, provisioning a per-KEY OAuth2 client for any
+ * OAuth2-enabled app.
  * <p>
  * This is an alternative credential for the registration endpoint rather than a replacement of it:
  * it is registered alongside {@link OAuth2ClientRegistrationAuthenticationProvider}, which keeps
@@ -70,10 +67,9 @@ import java.time.Duration;
  * JSON registration body by carrying the proof in headers.
  * <p>
  * On success a per-KEY client is minted (random {@code client_id}, authentication method
- * {@code attest_jwt_client_auth}, the {@code app_assertion} grant removed and
- * {@code refresh_token} added, marked DYNAMIC) and its {@code client_id} is bound back to the KEY
- * registration. A KEY that is already bound returns its existing client, so registration retries
- * are idempotent.
+ * {@code attest_jwt_client_auth}, {@code refresh_token} added) and its {@code client_id} is bound
+ * back to the KEY registration. A KEY that is already bound returns its existing client, so
+ * registration retries are idempotent.
  *
  * @see EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken
  */
@@ -129,9 +125,9 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
                 clientRegistrationAuthentication.getAssertion(),
                 challenge);
 
-        if (!isDynamicOAuth2Client(registration)) {
+        if (!isOAuth2EnabledApp(registration)) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT,
-                    "app is not enabled for DYNAMIC OAuth2 client registration", null));
+                    "app is not enabled for OAuth2 client registration", null));
         }
 
         RegisteredClient registeredClient = resolveOrProvisionClient(
@@ -152,14 +148,13 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
     }
 
     /**
-     * Whether the {@link RegisteredApp} owning the KEY is a DYNAMIC, OAuth2-enabled app, and so
-     * is allowed to mint a per-KEY client through this endpoint.
+     * Whether the {@link RegisteredApp} owning the KEY is OAuth2-enabled, and so is allowed to
+     * mint a per-KEY client through this endpoint.
      */
-    private boolean isDynamicOAuth2Client(AppAttestAttestationRegistration registration) {
+    private boolean isOAuth2EnabledApp(AppAttestAttestationRegistration registration) {
         byte[] appIdHash = AppAttestUtils.appIdHash(registration.getTeamId() + "." + registration.getBundleId());
         RegisteredApp app = this.registeredAppRepository.findByAppIdHash(appIdHash);
-        return app != null && app.isOauth2Enabled()
-                && app.getOauth2ClientType() == RegisteredApp.OAuth2ClientType.DYNAMIC;
+        return app != null && app.isOauth2Enabled();
     }
 
     /**
@@ -191,15 +186,12 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
                     methods.add(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH);
                 })
                 .authorizationGrantTypes(grantTypes -> {
-                    // DYNAMIC clients are per-KEY and decoupled from any user: they renew via
-                    // refresh_token + assertion, never via the assertion-only app_assertion grant.
-                    grantTypes.remove(EulerAuthorizationGrantType.APP_ASSERTION);
+                    // Per-KEY clients renew via refresh_token + assertion. The deprecated
+                    // app_assertion grant is deliberately not stripped here: it is rejected at the
+                    // persistence layer (EulerOAuth2ClientService), so no entry point — this one
+                    // included — can provision a client carrying it.
                     grantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
                 })
-                .clientSettings(ClientSettings.withSettings(base.getClientSettings().getSettings())
-                        .setting(EulerConfigurationSettingNames.Client.APP_ATTEST_CLIENT_TYPE,
-                                RegisteredApp.OAuth2ClientType.DYNAMIC.name())
-                        .build())
                 .tokenSettings(TokenSettings.builder()
                         .reuseRefreshTokens(false)
                         .refreshTokenTimeToLive(DEFAULT_REFRESH_TOKEN_TTL)

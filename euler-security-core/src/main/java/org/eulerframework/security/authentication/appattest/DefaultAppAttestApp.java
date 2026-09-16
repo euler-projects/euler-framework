@@ -20,8 +20,8 @@ import org.springframework.util.Assert;
 /**
  * Default mutable implementation of {@link AppAttestApp}.
  *
- * <p>Holds the five core fields ({@code registrationId} / {@code teamId} /
- * {@code bundleId} / {@code oauth2Enabled} / {@code oauth2ClientType}). The
+ * <p>Holds the four core fields ({@code registrationId} / {@code teamId} /
+ * {@code bundleId} / {@code oauth2Enabled}). The
  * {@code appId} view is derived inline; the SHA-256 digest of {@code appId}
  * is computed on demand by callers via {@link AppAttestUtils}.
  */
@@ -31,7 +31,6 @@ public class DefaultAppAttestApp implements AppAttestApp {
     private String teamId;
     private String bundleId;
     private Boolean oauth2Enabled;
-    private RegisteredApp.OAuth2ClientType oauth2ClientType;
 
     @Override
     public String getRegistrationId() {
@@ -70,21 +69,11 @@ public class DefaultAppAttestApp implements AppAttestApp {
     }
 
     @Override
-    public RegisteredApp.OAuth2ClientType getOauth2ClientType() {
-        return this.oauth2ClientType;
-    }
-
-    public void setOauth2ClientType(RegisteredApp.OAuth2ClientType oauth2ClientType) {
-        this.oauth2ClientType = oauth2ClientType;
-    }
-
-    @Override
     public void reloadRegisteredApp(RegisteredApp app) {
         Assert.notNull(app, "app must not be null");
         this.registrationId = app.getId();
         this.teamId = app.getTeamId();
         this.bundleId = app.getBundleId();
         this.oauth2Enabled = app.isOauth2Enabled();
-        this.oauth2ClientType = app.getOauth2ClientType();
     }
 }
