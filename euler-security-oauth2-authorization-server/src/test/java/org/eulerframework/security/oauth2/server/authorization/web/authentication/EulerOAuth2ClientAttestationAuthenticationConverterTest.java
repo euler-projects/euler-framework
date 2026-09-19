@@ -80,7 +80,7 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
 
     @Test
     void headerCarriageIgnoresFormParametersEntirely() {
-        // A stray attestation form parameter must not turn this into a device registration.
+        // A stray attestation form parameter must not turn this into an App instance registration.
         Map<String, String> strayAttestation = Map.of(EulerOAuth2ParameterNames.ATTESTATION, ATTESTATION_VALUE);
         Map<String, Object> params =
                 collect(request(appleHeaders(), strayAttestation));

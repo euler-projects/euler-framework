@@ -98,7 +98,7 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
 
         assertEquals(0, validationService.attestationCalls.get(),
-                "no attestation was supplied, so no device registration must happen");
+                "no attestation was supplied, so no App instance registration must happen");
         assertEquals(List.of(SUPPLIED_KID), validationService.assertionKeyIds);
         assertEquals(CLIENT_ID, result.clientId());
     }
@@ -130,7 +130,7 @@ class EulerOAuth2ClientAttestationVerifierTest {
 
         EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
 
-        assertEquals(1, validationService.attestationCalls.get(), "the device KEY is registered first");
+        assertEquals(1, validationService.attestationCalls.get(), "the App Attest KEY is registered first");
         assertEquals(List.of(DERIVED_KID), validationService.assertionKeyIds,
                 "the assertion must be verified against the kid derived from the attestation");
         assertSame(validationService.lastAssertionResult, result.registration(),
@@ -220,7 +220,7 @@ class EulerOAuth2ClientAttestationVerifierTest {
         assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode(),
                 "the App Attest proof was valid; the app simply has no client to authenticate as");
         assertEquals(1, validationService.attestationCalls.get(),
-                "the attestation is still verified, which is what registers the device KEY");
+                "the attestation is still verified, which is what registers the App Attest KEY");
     }
 
     @Test

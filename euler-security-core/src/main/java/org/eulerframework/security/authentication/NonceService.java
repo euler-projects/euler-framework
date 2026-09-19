@@ -26,7 +26,7 @@ import java.time.Duration;
  * <p>
  * Implementations must be thread-safe.
  *
- * @see <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html#section-12.1">
+ * @see <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html#section-12.1">
  *     Section 12.1 – Replay of Client Attestation PoP JWT</a>
  */
 public interface NonceService {

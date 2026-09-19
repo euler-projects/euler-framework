@@ -44,11 +44,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A filter that exposes a {@code POST /app_attest/register} endpoint for device KEY
+ * A filter that exposes a {@code POST /app_attest/register} endpoint for App instance
  * registration via Apple App Attest attestation.
  * <p>
- * This endpoint is anonymous (no authentication required) and performs <b>device
- * registration only</b>: it validates the attestation and records the KEY, but
+ * This endpoint requires no OAuth client credential or user session, but it is not anonymous:
+ * the attestation authenticates the caller as a genuine App instance. It performs <b>App
+ * instance registration only</b>: it validates the attestation and records the KEY, but
  * establishes no login state and creates no user. The filter uses an
  * {@link AuthenticationConverter} to extract registration parameters from the request
  * and delegates to an {@link AuthenticationProvider} for attestation validation and
@@ -118,7 +119,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             Authentication result = this.authenticationProvider.authenticate(authRequest);
             sendSuccessResponse(response, (AppAttestAttestationRegistrationAuthenticationToken) result);
         } catch (AuthenticationException ex) {
-            logger.debug("Device attestation registration failed: {}", ex.getMessage());
+            logger.debug("App instance registration failed: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
                     "registration_failed", ex.getMessage());
         }

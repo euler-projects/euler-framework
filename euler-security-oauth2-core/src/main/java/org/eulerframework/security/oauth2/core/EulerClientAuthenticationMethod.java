@@ -22,8 +22,8 @@ public class EulerClientAuthenticationMethod {
 
     /**
      * Attestation-based JWT client authentication method as registered in
-     * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html#section-13.4">
-     * Section 13.4</a> of the draft.
+     * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html#section-15.6">
+     * Section 15.6</a> of the draft.
      */
     public static final ClientAuthenticationMethod ATTEST_JWT_CLIENT_AUTH = new ClientAuthenticationMethod(
             "attest_jwt_client_auth");

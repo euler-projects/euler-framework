@@ -118,7 +118,7 @@ class EulerOAuth2ClientAttestationAuthenticationSuccessHandlerTest {
 
     @Test
     void rejectsWhenTheAttestationResolvesToADifferentClient() {
-        // Section 6.4: an attestation presented alongside a traditional credential must resolve to the
+        // Section 7.6: an attestation presented alongside a traditional credential must resolve to the
         // very client that authenticated.
         RecordingValidationService validationService = new RecordingValidationService();
         validationService.boundClientId = "some-other-client";

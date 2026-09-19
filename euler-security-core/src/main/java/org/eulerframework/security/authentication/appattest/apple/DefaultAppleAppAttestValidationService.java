@@ -129,8 +129,8 @@ public class DefaultAppleAppAttestValidationService implements AppleAppAttestVal
      */
     public DefaultAppleAppAttestValidationService(RegisteredAppRepository registeredAppRepository,
                                                   AppAttestAttestationRegistrationService appAttestAttestationRegistrationService) {
-        Assert.notNull(registeredAppRepository, "deviceRepository must not be null");
-        Assert.notNull(appAttestAttestationRegistrationService, "deviceAttestRegistrationService must not be null");
+        Assert.notNull(registeredAppRepository, "registeredAppRepository must not be null");
+        Assert.notNull(appAttestAttestationRegistrationService, "appAttestAttestationRegistrationService must not be null");
         this.appRepository = registeredAppRepository;
         this.rootCertificate = loadRootCertificate();
         this.appAttestAttestationRegistrationService = appAttestAttestationRegistrationService;

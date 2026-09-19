@@ -32,9 +32,9 @@ import javax.annotation.Nonnull;
 
 /**
  * {@link AuthenticationProvider} that verifies a device attestation and registers
- * the device KEY.
+ * the App Attest KEY.
  * <p>
- * This is a <b>device registration</b> operation, not a user authentication: it
+ * This is an <b>App instance registration</b> operation, not a user authentication: it
  * establishes no {@code SecurityContext} / login state and creates no user. Flow:
  * <ol>
  *     <li>Consumes the one-time challenge via {@link ChallengeService}</li>
@@ -64,7 +64,7 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
     @Override
     public Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException {
         Assert.isInstanceOf(AppAttestAttestationRegistrationAuthenticationToken.class, authentication,
-                () -> "Only DeviceAttestRegistrationAuthenticationToken is supported");
+                () -> "Only AppAttestAttestationRegistrationAuthenticationToken is supported");
         AppAttestAttestationRegistrationAuthenticationToken token = (AppAttestAttestationRegistrationAuthenticationToken) authentication;
 
         String attestation = token.getAttestation();
@@ -78,17 +78,17 @@ public class AppAttestAttestationRegistrationAuthenticationProvider implements A
         try {
             // 2. Validate attestation and save the KEY registration via the delegated
             // validation service. The key ID is derived from the attestation. No user is
-            // created: this endpoint only registers the device KEY.
+            // created: this endpoint only registers the App Attest KEY.
             AppAttestAttestationRegistration registration = this.validationService.validateAttestation(attestation, challenge);
 
-            logger.debug("Device attestation registration succeeded for keyId: {}", registration.getKeyId());
+            logger.debug("App instance registration succeeded for keyId: {}", registration.getKeyId());
 
-            // 3. Return an authenticated token carrying the verified device registration.
+            // 3. Return an authenticated token carrying the verified App instance registration.
             return AppAttestAttestationRegistrationAuthenticationToken.registered(registration);
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
-            throw new AuthenticationServiceException("Device attestation registration failed", e);
+            throw new AuthenticationServiceException("App instance registration failed", e);
         }
     }
 

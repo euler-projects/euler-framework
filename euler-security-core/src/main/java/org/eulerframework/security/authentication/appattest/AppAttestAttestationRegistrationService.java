@@ -17,10 +17,10 @@
 package org.eulerframework.security.authentication.appattest;
 
 /**
- * Service interface for storing and retrieving device attestation registrations.
+ * Service interface for storing and retrieving App instance registrations.
  * <p>
- * Registrations are created during the attestation (device registration) process
- * and used during assertion (device re-authentication) to verify the device's identity.
+ * Registrations are created during the attestation (App instance registration) process
+ * and used during assertion (App instance re-authentication) to verify the App instance's identity.
  *
  * @see AppAttestAttestationRegistration
  */
@@ -45,7 +45,7 @@ public interface AppAttestAttestationRegistrationService {
      * Bind an OAuth2 {@code client_id} to an existing registration if and only if
      * the registration currently has no bound client (bind-if-absent).
      * <p>
-     * Used by the DYNAMIC App Attest flow: the device KEY is registered first
+     * Used by the DYNAMIC App Attest flow: the App Attest KEY is registered first
      * (attestation), then a per-key OAuth2 client is dynamically registered and
      * its {@code client_id} is bound back to the KEY, so that subsequent
      * assertion-based client authentication can resolve the client from the KEY.

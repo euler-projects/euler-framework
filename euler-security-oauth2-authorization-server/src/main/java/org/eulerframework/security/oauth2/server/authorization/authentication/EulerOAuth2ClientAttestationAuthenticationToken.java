@@ -76,8 +76,8 @@ public final class EulerOAuth2ClientAttestationAuthenticationToken extends OAuth
     }
 
     /**
-     * The kind of proof the request presented, which is what tells device registration apart from
-     * device verification once the request reaches a grant provider.
+     * The kind of proof the request presented, which is what tells App instance registration apart from
+     * assertion verification once the request reaches a grant provider.
      *
      * @return the proof, never {@code null}
      * @deprecated compatibility logic; see

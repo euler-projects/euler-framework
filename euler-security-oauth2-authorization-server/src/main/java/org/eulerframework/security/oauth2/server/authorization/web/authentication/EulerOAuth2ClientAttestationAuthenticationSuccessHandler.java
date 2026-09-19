@@ -37,9 +37,9 @@ import java.util.Map;
 /**
  * The {@link AuthenticationSuccessHandler} for {@code OAuth2ClientAuthenticationFilter} that applies
  * a client attestation as an <b>additional signal</b> on top of a traditional client
- * authentication, as defined in Section 6.4 of
- * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html">
- * draft-ietf-oauth-attestation-based-client-auth-08</a>.
+ * authentication, as defined in Section 7.6 of
+ * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
+ * draft-ietf-oauth-attestation-based-client-auth-11</a>.
  * <p>
  * It replaces the filter's default handler and therefore ends by publishing the authenticated client
  * to the {@code SecurityContext} exactly as that handler does. Running after the traditional
@@ -49,7 +49,7 @@ import java.util.Map;
  * attestation was the credential and
  * {@link org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider}
  * already verified it. For any other method, when the request carries an attestation, this handler
- * verifies it, enforces the Section 6.4 requirement that it resolve to the very client that
+ * verifies it, enforces the Section 7.6 requirement that it resolve to the very client that
  * authenticated, and republishes that client as an
  * {@link org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationToken}.
  * A request with no attestation is published unchanged.
@@ -84,7 +84,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler impl
                 EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification verified =
                         this.clientAttestationVerifier.verify(attestationParams);
 
-                // Section 6.4: an attestation presented alongside a traditional credential must
+                // Section 7.6: an attestation presented alongside a traditional credential must
                 // resolve to the very client that authenticated; a mismatch is rejected, not ignored.
                 if (!registeredClient.getClientId().equals(verified.clientId())) {
                     throw new OAuth2AuthenticationException(

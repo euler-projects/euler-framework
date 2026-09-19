@@ -21,7 +21,7 @@ import java.util.Base64;
 /**
  * Generates fixed-length, high-entropy random usernames for users that are
  * provisioned implicitly (e.g. OTP signup, device attestation signup, social
- * login signup) where the upstream identifier (phone number, device key id,
+ * login signup) where the upstream identifier (phone number, App Attest key id,
  * WeChat openId, ...) must not leak into the local username.
  * <p>
  * All call sites that need to populate

@@ -23,8 +23,8 @@ import java.security.PublicKey;
  * Represents a registered device attestation, containing the flattened attestation
  * data, public key, JWKSet, and current sign count.
  * <p>
- * Created during the attestation (device registration) flow and used during assertion
- * (device re-authentication) to verify the device's identity.
+ * Created during the attestation (App instance registration) flow and used during assertion
+ * (App instance re-authentication) to verify the App instance's identity.
  * <p>
  * All attestation-specific fields are stored as primitive/JDK types for JDBC persistence
  * friendliness, avoiding direct coupling to any third-party validation library.

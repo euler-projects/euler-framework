@@ -27,7 +27,7 @@ import java.time.Instant;
 
 /**
  * JDBC implementation of {@link AppAttestAttestationRegistrationService} that persists
- * device attestation registrations in a relational database.
+ * App instance registrations in a relational database.
  * <p>
  * By default, this implementation uses the table {@code app_attest_attestation_registration}
  * with the following schema:
@@ -91,7 +91,7 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     private final String updateBindClientIdSql;
 
     /**
-     * Create a new {@code JdbcDeviceAttestRegistrationService} with the default table name.
+     * Create a new {@code JdbcAppAttestAttestationRegistrationService} with the default table name.
      *
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      */
@@ -100,7 +100,7 @@ public class JdbcAppAttestAttestationRegistrationService implements AppAttestAtt
     }
 
     /**
-     * Create a new {@code JdbcDeviceAttestRegistrationService} with a custom table name.
+     * Create a new {@code JdbcAppAttestAttestationRegistrationService} with a custom table name.
      *
      * @param jdbcOperations the JDBC operations (must not be {@code null})
      * @param tableName      the table name to use (must not be empty)

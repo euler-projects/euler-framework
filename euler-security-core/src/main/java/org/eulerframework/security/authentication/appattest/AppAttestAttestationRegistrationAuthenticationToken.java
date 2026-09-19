@@ -21,13 +21,13 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import java.util.Collections;
 
 /**
- * Authentication token for the device attestation registration endpoint.
+ * Authentication token for the App instance registration endpoint.
  * <p>
- * This token represents a <b>device/KEY</b> subject, not a user. The
+ * This token represents an <b>App instance KEY</b> subject, not a user. The
  * unauthenticated form carries the raw registration request ({@code attestation},
  * {@code challenge}); the authenticated form carries the verified
  * {@link AppAttestAttestationRegistration} as its principal and holds no authorities,
- * because device registration establishes no user login state. The key ID is derived
+ * because App instance registration establishes no user login state. The key ID is derived
  * from the attestation, so it is not carried on the unauthenticated form.
  */
 public class AppAttestAttestationRegistrationAuthenticationToken extends AbstractAuthenticationToken {
@@ -49,7 +49,7 @@ public class AppAttestAttestationRegistrationAuthenticationToken extends Abstrac
     }
 
     /**
-     * Create an authenticated token whose principal is the verified device
+     * Create an authenticated token whose principal is the verified App instance
      * registration. Carries no authorities.
      */
     AppAttestAttestationRegistrationAuthenticationToken(AppAttestAttestationRegistration registration) {
@@ -68,9 +68,9 @@ public class AppAttestAttestationRegistrationAuthenticationToken extends Abstrac
     }
 
     /**
-     * Creates an authenticated token carrying the verified device registration.
+     * Creates an authenticated token carrying the verified App instance registration.
      *
-     * @param registration the verified attestation registration (device subject)
+     * @param registration the verified attestation registration (App instance subject)
      * @return an authenticated token with no authorities
      */
     public static AppAttestAttestationRegistrationAuthenticationToken registered(AppAttestAttestationRegistration registration) {

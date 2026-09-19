@@ -40,7 +40,7 @@ public final class EulerOAuth2ParameterNames {
 
     /**
      * Base64-encoded Apple App Attest attestation object, submitted as a token endpoint form
-     * parameter to register the device key and authenticate the client in a single request.
+     * parameter to register the App Attest key and authenticate the client in a single request.
      * <p>
      * <b>This is the single place describing the retirement of the Apple App Attest form
      * parameter vocabulary at the token endpoint</b>, which covers this constant together with
@@ -49,7 +49,7 @@ public final class EulerOAuth2ParameterNames {
      * What is retired is carrying them as form parameters, in favour of the
      * {@code OAuth-Client-Attestation-*} headers named by {@link EulerOAuth2HeaderNames}.
      *
-     * @deprecated device registration belongs to the dedicated registration endpoint
+     * @deprecated App instance registration belongs to the dedicated registration endpoint
      * ({@code POST /app_attest/register}) and the OAuth2 flow is assertion-only, so no header
      * analog exists for an attestation. Retained because released STATIC clients still register
      * here, and removed together with the {@code app_assertion} grant and the device-to-user
@@ -60,7 +60,7 @@ public final class EulerOAuth2ParameterNames {
 
     /**
      * Base64-encoded Apple App Attest assertion object, submitted as a token endpoint form
-     * parameter to prove possession of an already-registered device key.
+     * parameter to prove possession of an already-registered App Attest key.
      *
      * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_ASSERTION} header;
      * see {@link #ATTESTATION}.

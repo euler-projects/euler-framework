@@ -40,8 +40,8 @@ import java.util.Map;
 /**
  * An {@link AuthenticationProvider} that authenticates a client whose client authentication method
  * is {@code attest_jwt_client_auth}, as defined in
- * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html">
- * draft-ietf-oauth-attestation-based-client-auth-08</a>. This is the <b>basic</b> path, in which the
+ * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
+ * draft-ietf-oauth-attestation-based-client-auth-11</a>. This is the <b>basic</b> path, in which the
  * attestation is the client's credential.
  * <p>
  * It is registered at the <i>end</i> of the provider chain and admits two token shapes, so a

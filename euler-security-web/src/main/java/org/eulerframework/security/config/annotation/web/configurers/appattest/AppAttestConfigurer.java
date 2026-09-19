@@ -24,9 +24,11 @@ import org.eulerframework.security.authentication.appattest.RegisteredAppReposit
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
+import org.eulerframework.security.web.authentication.appattest.AppAttestProviderConfigurationEndpointFilter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationAuthenticationConverter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationEndpointFilter;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
@@ -35,32 +37,38 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 /**
- * An {@link AbstractHttpConfigurer} for device attestation registration.
+ * An {@link AbstractHttpConfigurer} for Apple App Attest instance registration and its
+ * discovery document.
  * <p>
- * This configurer registers the challenge and registration endpoint filters into
- * the default security filter chain. Both endpoints are anonymous (no authentication
- * required) and exempt from CSRF protection.
+ * This configurer registers the challenge, registration and provider configuration endpoint
+ * filters into the default security filter chain. All three are exempt from CSRF protection and
+ * reachable without a prior session or OAuth credential; the registration endpoint authenticates
+ * the App instance via its attestation, while the challenge and discovery endpoints are anonymous.
  *
  * <h2>Endpoints</h2>
  * <ul>
  *     <li>{@code POST /app_attest/challenge} - generates a one-time challenge</li>
- *     <li>{@code POST /app_attest/register} - validates attestation and registers the device</li>
+ *     <li>{@code POST /app_attest/register} - validates attestation and registers the App Attest KEY</li>
+ *     <li>{@code GET /.well-known/app-attest-configuration} - the discovery document advertising
+ *     the two endpoints above</li>
  * </ul>
  *
  * <h2>Usage Example</h2>
  * <pre>
- * http.with(new DeviceAttestSecurityConfigurer(), deviceAttest -&gt; deviceAttest
+ * http.with(new AppAttestConfigurer(), appAttest -&gt; appAttest
  *     .challengeService(challengeService)
- *     .appleAppRepository(appleAppRepository)
- *     .registrationService(registrationService)
+ *     .validationService(validationService)
+ *     .providerConfigurationEndpoint(config -&gt; config
+ *         .providerConfigurationCustomizer(claims -&gt; claims.put("issuer", issuer)))
  * );
  * </pre>
  *
  * @see ChallengeEndpointFilter
  * @see AppAttestRegistrationEndpointFilter
+ * @see AppAttestProviderConfigurationEndpointFilter
  */
-public class AppAttestSecurityConfigurer
-        extends AbstractHttpConfigurer<AppAttestSecurityConfigurer, HttpSecurity> {
+public class AppAttestConfigurer
+        extends AbstractHttpConfigurer<AppAttestConfigurer, HttpSecurity> {
 
     private ChallengeService challengeService;
     private AppleAppAttestValidationService validationService;
@@ -73,67 +81,87 @@ public class AppAttestSecurityConfigurer
     private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
     private String registrationEndpointUri = DEFAULT_REGISTRATION_ENDPOINT_URI;
 
+    private final AppAttestProviderConfigurationEndpointConfigurer providerConfigurationEndpointConfigurer;
+
     private RequestMatcher endpointsMatcher;
+
+    public AppAttestConfigurer() {
+        this.providerConfigurationEndpointConfigurer =
+                new AppAttestProviderConfigurationEndpointConfigurer(this::postProcess);
+    }
 
     // ---- Fluent API ----
 
-    public AppAttestSecurityConfigurer challengeService(ChallengeService challengeService) {
+    public AppAttestConfigurer challengeService(ChallengeService challengeService) {
         this.challengeService = challengeService;
         return this;
     }
 
-    public AppAttestSecurityConfigurer validationService(AppleAppAttestValidationService validationService) {
+    public AppAttestConfigurer validationService(AppleAppAttestValidationService validationService) {
         this.validationService = validationService;
         return this;
     }
 
-    public AppAttestSecurityConfigurer appleDeviceRepository(RegisteredAppRepository registeredAppRepository) {
+    public AppAttestConfigurer registeredAppRepository(RegisteredAppRepository registeredAppRepository) {
         this.registeredAppRepository = registeredAppRepository;
         return this;
     }
 
-    public AppAttestSecurityConfigurer registrationService(AppAttestAttestationRegistrationService registrationService) {
+    public AppAttestConfigurer registrationService(AppAttestAttestationRegistrationService registrationService) {
         this.registrationService = registrationService;
         return this;
     }
 
     /**
-     * No-op. Device registration no longer resolves or creates users, so a user
+     * No-op. App instance registration no longer resolves or creates users, so a user
      * details service is not used. Retained for API compatibility.
      *
-     * @deprecated the registration endpoint registers the device KEY only and
+     * @deprecated the registration endpoint registers the App Attest KEY only and
      * creates no user
      */
     @Deprecated
-    public AppAttestSecurityConfigurer userDetailsService(EulerDeviceUserDetailsService userDetailsService) {
+    public AppAttestConfigurer userDetailsService(EulerDeviceUserDetailsService userDetailsService) {
         return this;
     }
 
     /**
-     * No-op. Device registration no longer provisions users, so a JIT provisioning
+     * No-op. App instance registration no longer provisions users, so a JIT provisioning
      * policy is not used. Retained for API compatibility.
      *
-     * @deprecated the registration endpoint registers the device KEY only and
+     * @deprecated the registration endpoint registers the App Attest KEY only and
      * creates no user
      */
     @Deprecated
-    public AppAttestSecurityConfigurer jitProvisioning(JitProvisioningPolicy jitProvisioning) {
+    public AppAttestConfigurer jitProvisioning(JitProvisioningPolicy jitProvisioning) {
         Assert.notNull(jitProvisioning, "jitProvisioning must not be null");
         return this;
     }
 
-    public AppAttestSecurityConfigurer challengeEndpointUri(String challengeEndpointUri) {
+    public AppAttestConfigurer challengeEndpointUri(String challengeEndpointUri) {
         this.challengeEndpointUri = challengeEndpointUri;
         return this;
     }
 
-    public AppAttestSecurityConfigurer registrationEndpointUri(String registrationEndpointUri) {
+    public AppAttestConfigurer registrationEndpointUri(String registrationEndpointUri) {
         this.registrationEndpointUri = registrationEndpointUri;
         return this;
     }
 
     /**
-     * Returns a {@link RequestMatcher} that matches all device attest endpoints.
+     * Configures the App Attest provider configuration (discovery) endpoint.
+     *
+     * @param providerConfigurationEndpointCustomizer the {@link Customizer} providing access to the
+     *                                                {@link AppAttestProviderConfigurationEndpointConfigurer}
+     * @return this configurer for chaining
+     */
+    public AppAttestConfigurer providerConfigurationEndpoint(
+            Customizer<AppAttestProviderConfigurationEndpointConfigurer> providerConfigurationEndpointCustomizer) {
+        providerConfigurationEndpointCustomizer.customize(this.providerConfigurationEndpointConfigurer);
+        return this;
+    }
+
+    /**
+     * Returns a {@link RequestMatcher} that matches all App Attest endpoints.
      * This can be used externally to configure additional security rules.
      */
     public RequestMatcher getEndpointsMatcher() {
@@ -151,11 +179,17 @@ public class AppAttestSecurityConfigurer
                         createRegistrationProvider(http),
                         this.registrationEndpointUri);
 
+        // The discovery document advertises the two endpoints above, so it needs their final URIs.
+        this.providerConfigurationEndpointConfigurer.setChallengeEndpointUri(this.challengeEndpointUri);
+        this.providerConfigurationEndpointConfigurer.setRegistrationEndpointUri(this.registrationEndpointUri);
+        this.providerConfigurationEndpointConfigurer.init(http);
+
         this.endpointsMatcher = new OrRequestMatcher(
                 challengeFilter.getRequestMatcher(),
-                registrationFilter.getRequestMatcher());
+                registrationFilter.getRequestMatcher(),
+                this.providerConfigurationEndpointConfigurer.getRequestMatcher());
 
-        // Exempt device attest endpoints from CSRF protection
+        // Exempt App Attest endpoints from CSRF protection
         http.csrf(csrf -> csrf.ignoringRequestMatchers(this.endpointsMatcher));
 
         // Store filters as shared objects for configure() to retrieve
@@ -172,6 +206,7 @@ public class AppAttestSecurityConfigurer
 
         http.addFilterBefore(postProcess(challengeFilter), AuthorizationFilter.class);
         http.addFilterBefore(postProcess(registrationFilter), AuthorizationFilter.class);
+        this.providerConfigurationEndpointConfigurer.configure(http);
     }
 
     // ---- Dependency resolution ----

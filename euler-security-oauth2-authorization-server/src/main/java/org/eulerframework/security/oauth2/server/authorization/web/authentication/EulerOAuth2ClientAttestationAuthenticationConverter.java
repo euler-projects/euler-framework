@@ -158,7 +158,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
     }
 
     /**
-     * Header carriage, the only non-deprecated one: assertion-only, since device registration
+     * Header carriage, the only non-deprecated one: assertion-only, since App instance registration
      * happens at the dedicated registration endpoint and no attestation header exists.
      */
     private static void convertAppleAppAttestHeaders(HttpServletRequest request,
@@ -174,7 +174,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
      * <p>
      * Unlike the header carriage this one may also carry an attestation, so {@code attestation}
      * and {@code assertion} are not mutually exclusive and the three combinations remain valid:
-     * attestation only (registers the device KEY and authenticates the client), assertion only
+     * attestation only (registers the App Attest KEY and authenticates the client), assertion only
      * (fast path for an already-registered KEY, which is the sole case requiring {@code kid}),
      * or both. Values are stored under the canonical header keys so that downstream components
      * stay transport-agnostic; only {@code attestation} keeps its own key, having no header

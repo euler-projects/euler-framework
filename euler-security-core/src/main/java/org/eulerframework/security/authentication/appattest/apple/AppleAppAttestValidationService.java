@@ -37,7 +37,7 @@ import org.springframework.security.core.AuthenticationException;
 public interface AppleAppAttestValidationService {
 
     /**
-     * Validate an App Attest attestation object (initial device KEY registration) and
+     * Validate an App Attest attestation object (initial App instance registration) and
      * return the validated registration data.
      * <p>
      * The key identifier is <b>derived from the attestation itself</b> (Apple sets the
@@ -60,14 +60,14 @@ public interface AppleAppAttestValidationService {
     AppAttestAttestationRegistration validateAttestation(String attestation, String challenge) throws AuthenticationException;
 
     /**
-     * Validate an App Attest assertion object (re-authentication with a registered device)
+     * Validate an App Attest assertion object (re-authentication with a registered App instance)
      * and return the registration data.
      * <p>
      * Unlike an attestation, an assertion's authenticator data does <b>not</b> embed the
      * credential ID, so the {@code keyId} must be supplied by the caller to locate the
      * registered public key.
      *
-     * @param keyId     the key identifier of the previously registered device
+     * @param keyId     the key identifier of the previously registered App instance
      * @param assertion the Base64-encoded assertion object
      * @param challenge the challenge used when generating the assertion
      * @return the registration associated with the validated assertion

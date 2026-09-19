@@ -17,7 +17,7 @@
 package org.eulerframework.security.oauth2.core;
 
 /**
- * Error codes defined by or related to draft-ietf-oauth-attestation-based-client-auth-08.
+ * Error codes defined by or related to draft-ietf-oauth-attestation-based-client-auth-11.
  */
 public final class EulerOAuth2ErrorCodes {
 

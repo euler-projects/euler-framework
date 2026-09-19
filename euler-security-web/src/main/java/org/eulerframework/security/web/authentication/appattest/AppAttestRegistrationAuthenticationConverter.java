@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * credential ID during validation, so the client does not need to send it.
  * <p>
  * Returns {@code null} if a required parameter is missing, indicating the request
- * is not a device attestation registration request.
+ * is not an App instance registration request.
  */
 public class AppAttestRegistrationAuthenticationConverter implements AuthenticationConverter {
 

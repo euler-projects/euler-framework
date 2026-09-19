@@ -32,7 +32,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -50,8 +50,13 @@ import java.util.Map;
  * Content-Type: application/json
  * Cache-Control: no-store
  *
- * {"challenge": "base64url-data"}
+ * {"attestation_challenge": "base64url-data", "challenge": "base64url-data"}
  * </pre>
+ * The canonical field is {@code attestation_challenge}, as required by Section 6.3 of
+ * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
+ * draft-ietf-oauth-attestation-based-client-auth-11</a>. The {@code challenge} field is a
+ * deprecated alias retained for released clients that already read it; Section 6.3 permits
+ * additional data alongside the required parameter.
  *
  * @see ChallengeService
  */
@@ -110,7 +115,13 @@ public class ChallengeEndpointFilter extends OncePerRequestFilter {
         response.addHeader("Cache-Control", "no-store");
         response.addHeader("Pragma", "no-cache");
 
-        Map<String, Object> body = Collections.singletonMap("challenge", generatedChallenge.challenge());
+        // Canonical field per draft-ietf-oauth-attestation-based-client-auth-11 Section 6.3, plus
+        // the deprecated `challenge` alias retained for released clients that already read it.
+        // Section 6.3 permits additional data alongside the required parameter, so emitting both
+        // is conformant. Remove `challenge` once no released client depends on it.
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("attestation_challenge", generatedChallenge.challenge());
+        body.put("challenge", generatedChallenge.challenge());
         response.getWriter().write(JacksonUtils.writeValueAsString(body));
     }
 }

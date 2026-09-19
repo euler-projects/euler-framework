@@ -69,9 +69,9 @@ class AppAttestAttestationRegistrationAuthenticationProviderTest {
 
         AppAttestAttestationRegistrationAuthenticationToken token =
                 (AppAttestAttestationRegistrationAuthenticationToken) result;
-        assertSame(registration, token.getPrincipal(), "principal is the device registration, not a user");
+        assertSame(registration, token.getPrincipal(), "principal is the App instance registration, not a user");
         assertEquals("kid-1", token.getKeyId());
-        assertTrue(token.getAuthorities().isEmpty(), "device registration grants no user authorities");
+        assertTrue(token.getAuthorities().isEmpty(), "App instance registration grants no user authorities");
     }
 
     @Test

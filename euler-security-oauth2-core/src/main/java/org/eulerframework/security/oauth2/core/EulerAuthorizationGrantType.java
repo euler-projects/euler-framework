@@ -27,7 +27,7 @@ public class EulerAuthorizationGrantType {
      * resolving the user from the device-to-user association that an earlier attestation
      * request established.
      * <p>
-     * An assertion proves possession of a registered device key, which authenticates the
+     * An assertion proves possession of a registered App Attest key, which authenticates the
      * client but does not identify a user. The grant survives only so that already-released
      * STATIC clients keep working: an attestation request JIT-provisions an anonymous user and
      * records the association, later assertion-only renewals read it, and a key that never went

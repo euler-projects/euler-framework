@@ -22,7 +22,7 @@ package org.eulerframework.security.provisioning.jit;
  * <p>JIT provisioning is an identity-type concern: it answers "what
  * happens when an identity of this type is seen for the first time",
  * regardless of which entry point (web login, OAuth2 token grant,
- * device registration) encountered it. Keying the policy by identity
+ * App instance registration) encountered it. Keying the policy by identity
  * type guarantees that the same person receives the same provisioning
  * outcome on every path.
  *

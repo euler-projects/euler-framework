@@ -58,8 +58,8 @@ import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterName
 
 /**
  * Unified verifier for Client Attestation and PoP JWTs as defined in
- * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html">
- * draft-ietf-oauth-attestation-based-client-auth-08</a>.
+ * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
+ * draft-ietf-oauth-attestation-based-client-auth-11</a>.
  * <p>
  * {@link #verify(Map)} is the entry point callers use: it dispatches on the collected
  * {@code OAuth-Client-Attestation-Type} and returns the resolved {@code client_id} with the verified
@@ -195,7 +195,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
             }
 
             if (StringUtils.hasText(attestation)) {
-                // Compatibility path; see EulerOAuth2ParameterNames#ATTESTATION. Register the device
+                // Compatibility path; see EulerOAuth2ParameterNames#ATTESTATION. Register the App Attest
                 // KEY (idempotent); the key ID is derived from the attestation's credentialId.
                 AppAttestAttestationRegistration registered =
                         this.appleAppAttestValidationService.validateAttestation(attestation, challenge);
@@ -216,7 +216,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
                 }
             } else {
                 // Assertion-only fast path; an assertion's authenticator data carries no credentialId,
-                // so the key ID must be supplied to locate the registered device.
+                // so the key ID must be supplied to locate the registered App Attest KEY.
                 String keyId = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
                 if (!StringUtils.hasText(keyId)) {
                     throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
@@ -435,7 +435,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
      * <p>
      * Reported as {@code unauthorized_client} rather than an attestation failure, because the App
      * Attest proof itself was valid; the app is simply not allowed to authenticate this way yet.
-     * The device KEY registration is deliberately kept: it was fully verified and is exactly what
+     * The App Attest KEY registration is deliberately kept: it was fully verified and is exactly what
      * the client needs for its next step, so rejecting the request does not force it to re-attest.
      */
     private static void requireBoundClientId(AppAttestAttestationRegistration registration) {
@@ -443,7 +443,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
             return;
         }
         throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT,
-                "No OAuth2 client is bound to this app; the device KEY is registered, "
+                "No OAuth2 client is bound to this app; the App Attest KEY is registered, "
                         + "complete dynamic client registration first", null));
     }
 
@@ -474,7 +474,7 @@ public final class EulerOAuth2ClientAttestationVerifier {
 
     /**
      * Result of a successful client attestation verification via {@link #verify(Map)}: the client
-     * the attestation authenticates and the verified device registration behind it.
+     * the attestation authenticates and the verified App instance registration behind it.
      *
      * @param clientId     the resolved, non-null {@code client_id} bound to the attestation
      * @param registration the verified {@link AppAttestAttestationRegistration}

@@ -25,9 +25,9 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 /**
  * An {@link AbstractHttpConfigurer} that registers the <b>challenge endpoint</b>
  * ({@code POST /oauth2/challenge} by default), which issues the fresh challenges clients include in
- * their attestation, as defined in Section 7 of
- * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-08.html">
- * draft-ietf-oauth-attestation-based-client-auth-08</a>.
+ * their attestation, as defined in Section 6.3 of
+ * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
+ * draft-ietf-oauth-attestation-based-client-auth-11</a>.
  * <p>
  * The attestation-based client authentication that consumes those challenges needs no configurer of
  * its own: it composes with Spring's client authentication infrastructure and is wired in

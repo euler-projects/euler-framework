@@ -229,7 +229,7 @@ public class Webauthn4jAppleAppAttestValidationService implements AppleAppAttest
             // 1. Load the stored registration
             AppAttestAttestationRegistration reg = this.registrationService.findByKeyId(keyId);
             if (reg == null) {
-                throw new AuthenticationServiceException("No registered device found for key ID");
+                throw new AuthenticationServiceException("No registered App instance found for key ID");
             }
 
             // 2. Construct the assertion request

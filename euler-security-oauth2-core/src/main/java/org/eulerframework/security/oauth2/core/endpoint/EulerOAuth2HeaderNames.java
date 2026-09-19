@@ -71,7 +71,7 @@ public final class EulerOAuth2HeaderNames {
 
     /**
      * Apple App Attest variant: the Base64-encoded assertion, proving possession of an
-     * already-registered device key.
+     * already-registered App Attest key.
      * <p>
      * Its presence also selects the header carriage at the token endpoint: a request carrying it
      * is read entirely from headers and never from the deprecated form parameters.

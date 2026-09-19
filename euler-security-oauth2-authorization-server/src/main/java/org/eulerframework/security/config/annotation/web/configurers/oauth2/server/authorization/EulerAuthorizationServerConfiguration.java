@@ -242,7 +242,7 @@ public class EulerAuthorizationServerConfiguration {
                         .authenticationSuccessHandler(attestSuccessHandler)));
 
         // Add attestation metadata to OIDC provider configuration and AS metadata endpoints
-        //   (draft-ietf-oauth-attestation-based-client-auth-08 Section 9)
+        //   (draft-ietf-oauth-attestation-based-client-auth-11 Section 8)
         AuthorizationServerSettings authorizationServerSettings = OAuth2ConfigurerUtilsAccessor
                 .getAuthorizationServerSettings(http);
         String issuer = authorizationServerSettings.getIssuer();

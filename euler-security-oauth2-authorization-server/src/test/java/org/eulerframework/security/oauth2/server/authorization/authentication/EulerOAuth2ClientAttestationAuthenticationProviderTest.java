@@ -105,7 +105,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
                 "the verified registration is handed downstream in a dedicated slot");
         assertEquals(EulerClientAttestationProof.ASSERTION, authenticated.getProof(),
                 "the proof resolved from the collected parameters rides along, so a grant provider "
-                        + "can tell this assertion-only request from a device registration");
+                        + "can tell this assertion-only request from an App instance registration");
     }
 
     @Test

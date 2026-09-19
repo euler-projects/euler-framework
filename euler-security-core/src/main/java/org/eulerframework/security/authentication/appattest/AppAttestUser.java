@@ -72,6 +72,6 @@ public class AppAttestUser implements Serializable {
 
     @Override
     public String toString() {
-        return "DeviceAttestationUser{keyId='" + keyId + "', teamId='" + teamId + "', bundleId='" + bundleId + "'}";
+        return "AppAttestUser{keyId='" + keyId + "', teamId='" + teamId + "', bundleId='" + bundleId + "'}";
     }
 }

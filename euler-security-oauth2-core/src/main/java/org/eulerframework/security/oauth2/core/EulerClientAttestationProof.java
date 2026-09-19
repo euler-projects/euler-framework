@@ -22,8 +22,8 @@ package org.eulerframework.security.oauth2.core;
  * <p>
  * A request may carry attestation data, a proof of possession, or both; this type records
  * which of them the server actually acted on, so that downstream components can tell
- * <em>device registration</em> apart from <em>device verification</em>. Both artifacts
- * resolve to the same verified device registration, so without this discriminator the two
+ * <em>App instance registration</em> apart from <em>assertion verification</em>. Both artifacts
+ * resolve to the same verified App instance registration, so without this discriminator the two
  * cases are indistinguishable once the request reaches a grant provider.
  * <p>
  * The distinction matters wherever a request may establish persistent state: only an
@@ -41,14 +41,14 @@ public enum EulerClientAttestationProof {
     /**
      * The request submitted attestation data ({@code OAuth-Client-Attestation} for the JWT
      * variant, or the {@code attestation} parameter for Apple App Attest), registering or
-     * re-registering the device key.
+     * re-registering the App Attest key.
      */
     ATTESTATION,
 
     /**
      * The request submitted only a proof of possession ({@code OAuth-Client-Attestation-PoP}
      * for the JWT variant, or the {@code assertion} parameter for Apple App Attest) against
-     * an already-registered device key.
+     * an already-registered App Attest key.
      */
     ASSERTION
 }
