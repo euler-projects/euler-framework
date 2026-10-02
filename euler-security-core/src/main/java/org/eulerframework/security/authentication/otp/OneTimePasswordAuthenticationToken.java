@@ -15,87 +15,58 @@
  */
 package org.eulerframework.security.authentication.otp;
 
-import org.eulerframework.security.core.identity.UserIdentity;
-import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
 import java.util.Collections;
 
 /**
- * {@link org.springframework.security.core.Authentication Authentication}
- * token for one-time-password login.
+ * Unauthenticated {@link org.springframework.security.core.Authentication
+ * Authentication} request token for one-time-password login.
  * <p>
- * The unauthenticated form carries the ticket id issued by the issue
- * endpoint as the principal and the submitted OTP value as the
- * credentials; the authenticated form carries the resolved
- * {@link EulerUserDetails} as the principal together with the
- * {@link UserIdentity} the ticket was verified against.
+ * It carries the ticket id issued by the issue endpoint ({@link #getTicketId()})
+ * and the submitted OTP value ({@link #getOtp()}, which is also the
+ * credentials). The principal is {@code null} until verification resolves the
+ * identity, mirroring Spring Security's {@code OneTimeTokenAuthenticationToken},
+ * which keeps the token value in a dedicated field separate from the principal.
+ * A successful verification yields a separate {@link OneTimePasswordAuthentication}
+ * result token.
  *
  * @see OneTimePasswordAuthenticationProvider
+ * @see OneTimePasswordAuthentication
  */
 public class OneTimePasswordAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final Object principal;
-    private final UserIdentity userIdentity;
+    private final String ticketId;
     private String otp;
-
-    private OneTimePasswordAuthenticationToken(String otpTicket, String otp) {
-        super(Collections.emptyList());
-        this.principal = otpTicket;
-        this.otp = otp;
-        this.userIdentity = null;
-        setAuthenticated(false);
-    }
-
-    private OneTimePasswordAuthenticationToken(EulerUserDetails principal, UserIdentity userIdentity,
-                                               Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principal = principal;
-        this.userIdentity = userIdentity;
-        super.setAuthenticated(true);
-    }
 
     /**
      * Create an unauthenticated token from the submitted ticket id and OTP
      * value.
      *
-     * @param otpTicket the ticket id issued by the issue endpoint
-     * @param otp       the one-time password value submitted by the user
+     * @param ticketId the ticket id issued by the issue endpoint
+     * @param otp      the one-time password value submitted by the user
      */
-    public static OneTimePasswordAuthenticationToken unauthenticated(String otpTicket, String otp) {
-        return new OneTimePasswordAuthenticationToken(otpTicket, otp);
+    public OneTimePasswordAuthenticationToken(String ticketId, String otp) {
+        super(Collections.emptyList());
+        this.ticketId = ticketId;
+        this.otp = otp;
     }
 
     /**
-     * Create an authenticated token for a successfully verified one-time
-     * password.
-     *
-     * @param principal    the resolved user details
-     * @param userIdentity the identity the ticket was verified against
-     * @param authorities  the authorities granted to the principal
+     * Returns the ticket id issued by the issue endpoint - the handle of the
+     * one-time password being presented. Analogous to Spring Security's
+     * {@code OneTimeTokenAuthenticationToken#getTokenValue()}.
      */
-    public static OneTimePasswordAuthenticationToken authenticated(EulerUserDetails principal, UserIdentity userIdentity,
-                                                                   Collection<? extends GrantedAuthority> authorities) {
-        return new OneTimePasswordAuthenticationToken(principal, userIdentity, authorities);
+    public String getTicketId() {
+        return this.ticketId;
     }
 
     /**
      * Returns the submitted OTP value, or {@code null} once
-     * {@link #eraseCredentials()} has been invoked. Always {@code null} on
-     * the authenticated form.
+     * {@link #eraseCredentials()} has been invoked.
      */
     public String getOtp() {
         return this.otp;
-    }
-
-    /**
-     * Returns the identity the ticket was verified against; {@code null} on
-     * the unauthenticated form.
-     */
-    public UserIdentity getUserIdentity() {
-        return this.userIdentity;
     }
 
     @Override
@@ -103,9 +74,14 @@ public class OneTimePasswordAuthenticationToken extends AbstractAuthenticationTo
         return this.otp;
     }
 
+    /**
+     * Always {@code null}: the identity is not known until the ticket is
+     * verified, at which point a {@link OneTimePasswordAuthentication} carries
+     * the resolved principal.
+     */
     @Override
     public Object getPrincipal() {
-        return this.principal;
+        return null;
     }
 
     @Override

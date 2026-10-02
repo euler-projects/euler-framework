@@ -53,6 +53,6 @@ public class OneTimePasswordAuthenticationConverter implements AuthenticationCon
             this.logger.debug("Incomplete OTP login submission: otp_ticket and otp are both required");
             return null;
         }
-        return OneTimePasswordAuthenticationToken.unauthenticated(otpTicket, otp);
+        return new OneTimePasswordAuthenticationToken(otpTicket, otp);
     }
 }

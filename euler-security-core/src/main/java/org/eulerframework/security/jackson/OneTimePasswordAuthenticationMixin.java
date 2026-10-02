@@ -20,25 +20,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
-/**
- * Binds the {@code OneTimePasswordAuthenticationToken} class name for Jackson.
- * <p>
- * Retained for backward compatibility only: OTP authorizations persisted before the Spring
- * Security 7 token split stored the authenticated result under this class name, and are read back
- * as {@link org.eulerframework.security.authentication.otp.OneTimePasswordAuthentication} through
- * {@link OneTimePasswordAuthenticationTokenDeserializer}. The live request token is never persisted.
- *
- * @deprecated a backward-compatibility shim only. Remove this mixin together with
- * {@link OneTimePasswordAuthenticationTokenDeserializer} and their registration in
- * {@code EulerSecurityJacksonModule} once the longest-lived refresh token issued before the split
- * has expired.
- */
-@Deprecated
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-@JsonDeserialize(using = OneTimePasswordAuthenticationTokenDeserializer.class)
+@JsonDeserialize(using = OneTimePasswordAuthenticationDeserializer.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-abstract class OneTimePasswordAuthenticationTokenMixin {
+abstract class OneTimePasswordAuthenticationMixin {
 
 }

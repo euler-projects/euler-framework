@@ -87,7 +87,7 @@ public final class EulerOAuth2ParameterNames {
 
     /**
      * The one-time password value the end-user typed back from the chosen
-     * {@code OtpChannel} delivery (e.g. SMS).
+     * {@code OneTimePasswordChannel} delivery (e.g. SMS).
      */
     public static final String OTP = "otp";
 }

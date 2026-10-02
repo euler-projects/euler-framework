@@ -100,7 +100,7 @@ public class OAuth2OneTimePasswordAuthenticationConverter implements Authenticat
         });
 
         return new OAuth2OneTimePasswordAuthenticationToken(
-                OneTimePasswordAuthenticationToken.unauthenticated(otpTicket, otp),
+                new OneTimePasswordAuthenticationToken(otpTicket, otp),
                 clientPrincipal, scopes, additionalParameters);
     }
 

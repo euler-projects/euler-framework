@@ -42,7 +42,7 @@ class OneTimePasswordAuthenticationConverterTests {
 
         OneTimePasswordAuthenticationToken token = (OneTimePasswordAuthenticationToken) authentication;
         assertEquals(false, token.isAuthenticated());
-        assertEquals("ot_2b8f4e", token.getPrincipal());
+        assertEquals("ot_2b8f4e", token.getTicketId());
         assertEquals("123456", token.getCredentials());
     }
 

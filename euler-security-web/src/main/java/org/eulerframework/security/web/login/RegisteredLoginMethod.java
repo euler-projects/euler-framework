@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
  * type has in common. Each type contributes a subclass carrying its own
  * settings as ordinary fields, e.g.
  * {@link RegisteredOAuth2LoginMethod} or
- * {@link RegisteredOtpLoginMethod}; the
+ * {@link RegisteredOneTimePasswordLoginMethod}; the
  * {@link LoginMethodHandler} serving that type receives instances of it.
  *
  * <p>This is the server-side registration; the publishable projection

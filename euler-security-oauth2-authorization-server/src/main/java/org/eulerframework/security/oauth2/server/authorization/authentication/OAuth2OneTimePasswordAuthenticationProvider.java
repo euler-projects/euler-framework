@@ -17,7 +17,7 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestUser;
-import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthentication;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.core.userdetails.UserDetailsNotFoundException;
@@ -144,7 +144,7 @@ public class OAuth2OneTimePasswordAuthenticationProvider implements Authenticati
             verifiedAppRegistration = attestationAuthentication.getVerifiedRegistration();
             clientAttestationProof = attestationAuthentication.getProof();
         }
-        OneTimePasswordAuthenticationToken otpResult = (OneTimePasswordAuthenticationToken) userPrincipal;
+        OneTimePasswordAuthentication otpResult = (OneTimePasswordAuthentication) userPrincipal;
         enforceDeviceConsistency(verifiedAppRegistration, clientAttestationProof,
                 otpResult.getUserIdentity().getUserId());
 

@@ -16,7 +16,7 @@
 
 package org.eulerframework.security.oauth2.server.authorization;
 
-import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthentication;
 import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.eulerframework.security.oauth2.core.oidc.EulerOidcScopes;
@@ -132,7 +132,7 @@ class OAuth2AuthorizationUtilsTest {
     @Test
     void resolveUserDetailsUnwrapsEveryPrincipalShape() {
         EulerUserDetails userDetails = userDetails();
-        Authentication otpToken = OneTimePasswordAuthenticationToken.authenticated(
+        Authentication otpToken = new OneTimePasswordAuthentication(
                 userDetails, null, List.of(new SimpleGrantedAuthority("user")));
 
         assertSame(userDetails, OAuth2AuthorizationUtils.resolveUserDetails(userDetails),
@@ -177,7 +177,7 @@ class OAuth2AuthorizationUtilsTest {
     }
 
     private static Authentication otpToken() {
-        return OneTimePasswordAuthenticationToken.authenticated(userDetails(), null,
+        return new OneTimePasswordAuthentication(userDetails(), null,
                 List.of(new SimpleGrantedAuthority("user")));
     }
 

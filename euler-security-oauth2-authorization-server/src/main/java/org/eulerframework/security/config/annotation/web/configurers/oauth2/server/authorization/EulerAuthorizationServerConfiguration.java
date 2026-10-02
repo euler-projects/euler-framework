@@ -176,9 +176,9 @@ public class EulerAuthorizationServerConfiguration {
      * @param authenticationConfiguration access point to the shared
      *                                  {@link org.springframework.security.authentication.AuthenticationManager}
      */
-    public static void configOtpAuthentication(HttpSecurity http,
+    public static void configOneTimePasswordAuthentication(HttpSecurity http,
                                                 AuthenticationConfiguration authenticationConfiguration) {
-        configOtpAuthentication(http, authenticationConfiguration, null);
+        configOneTimePasswordAuthentication(http, authenticationConfiguration, null);
     }
 
     /**
@@ -188,7 +188,7 @@ public class EulerAuthorizationServerConfiguration {
      * and first-sighting binding; when {@code null}, attestation attached
      * to OTP requests is ignored.
      */
-    public static void configOtpAuthentication(HttpSecurity http,
+    public static void configOneTimePasswordAuthentication(HttpSecurity http,
                                                 AuthenticationConfiguration authenticationConfiguration,
                                                 EulerDeviceUserDetailsService deviceUserDetailsService) {
         http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer

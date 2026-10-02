@@ -38,15 +38,14 @@ import java.util.Optional;
 
 class OneTimePasswordAuthenticationProviderTests {
 
-    private static final String TICKET_ID = "ot_test";
     private static final String CHANNEL = "sms";
     private static final String RECIPIENT = "+8613800138000";
     private static final String OTP = "123456";
 
     @Test
     void authenticatesAgainstAnExistingIdentity() {
-        InMemoryOtpTicketService ticketService = newTicketService();
-        ticketService.save(ticket(CHANNEL));
+        InMemoryOneTimePasswordService ticketService = newTicketService();
+        String ticketId = ticketService.generate(request(CHANNEL)).ticketId();
         RecordingIdentityService identityService = new RecordingIdentityService(
                 Optional.of(identity("usr_1")));
         RecordingUserService userService = new RecordingUserService();
@@ -55,35 +54,38 @@ class OneTimePasswordAuthenticationProviderTests {
                 type -> JitProvisioningPolicy.disabled());
 
         Authentication result = provider.authenticate(
-                OneTimePasswordAuthenticationToken.unauthenticated(TICKET_ID, OTP));
+                new OneTimePasswordAuthenticationToken(ticketId, OTP));
 
         Assertions.assertTrue(result.isAuthenticated());
-        OneTimePasswordAuthenticationToken authenticated = (OneTimePasswordAuthenticationToken) result;
+        OneTimePasswordAuthentication authenticated = (OneTimePasswordAuthentication) result;
         Assertions.assertEquals("usr_1", authenticated.getUserIdentity().getUserId());
-        Assertions.assertEquals("alice",
-                ((EulerUserDetails) authenticated.getPrincipal()).getUsername());
+        Assertions.assertEquals("alice", authenticated.getPrincipal().getUsername());
         Assertions.assertNull(userService.created);
+        Assertions.assertTrue(authenticated.getAuthorities().stream()
+                        .anyMatch(authority -> "FACTOR_OTP".equals(authority.getAuthority())),
+                "the result carries the OTP authentication factor");
 
         // The ticket is consumed exactly once.
-        Assertions.assertNull(ticketService.consume(TICKET_ID, OTP, null));
+        Assertions.assertNull(ticketService.consume(
+                new OneTimePasswordAuthenticationToken(ticketId, OTP)));
     }
 
     @Test
     void rejectsAnIncorrectOtpValue() {
-        InMemoryOtpTicketService ticketService = newTicketService();
-        ticketService.save(ticket(CHANNEL));
+        InMemoryOneTimePasswordService ticketService = newTicketService();
+        String ticketId = ticketService.generate(request(CHANNEL)).ticketId();
         OneTimePasswordAuthenticationProvider provider = new OneTimePasswordAuthenticationProvider(
                 ticketService, new RecordingIdentityService(Optional.empty()),
                 new RecordingUserService(), type -> JitProvisioningPolicy.disabled());
 
         Assertions.assertThrows(BadCredentialsException.class, () ->
-                provider.authenticate(OneTimePasswordAuthenticationToken.unauthenticated(TICKET_ID, "000000")));
+                provider.authenticate(new OneTimePasswordAuthenticationToken(ticketId, "000000")));
     }
 
     @Test
     void provisionsAnUnknownRecipientWhenJitIsEnabled() {
-        InMemoryOtpTicketService ticketService = newTicketService();
-        ticketService.save(ticket(CHANNEL));
+        InMemoryOneTimePasswordService ticketService = newTicketService();
+        String ticketId = ticketService.generate(request(CHANNEL)).ticketId();
         RecordingIdentityService identityService = new RecordingIdentityService(Optional.empty());
         RecordingUserService userService = new RecordingUserService();
         OneTimePasswordAuthenticationProvider provider = new OneTimePasswordAuthenticationProvider(
@@ -91,7 +93,7 @@ class OneTimePasswordAuthenticationProviderTests {
                 type -> JitProvisioningPolicy.enabled(List.of(EulerAuthority.USER)));
 
         Authentication result = provider.authenticate(
-                OneTimePasswordAuthenticationToken.unauthenticated(TICKET_ID, OTP));
+                new OneTimePasswordAuthenticationToken(ticketId, OTP));
 
         Assertions.assertTrue(result.isAuthenticated());
         Assertions.assertNotNull(userService.created);
@@ -103,39 +105,38 @@ class OneTimePasswordAuthenticationProviderTests {
 
     @Test
     void rejectsAnUnknownRecipientWhenJitIsDisabled() {
-        InMemoryOtpTicketService ticketService = newTicketService();
-        ticketService.save(ticket(CHANNEL));
+        InMemoryOneTimePasswordService ticketService = newTicketService();
+        String ticketId = ticketService.generate(request(CHANNEL)).ticketId();
         RecordingUserService userService = new RecordingUserService();
         OneTimePasswordAuthenticationProvider provider = new OneTimePasswordAuthenticationProvider(
                 ticketService, new RecordingIdentityService(Optional.empty()),
                 userService, type -> JitProvisioningPolicy.disabled());
 
         Assertions.assertThrows(BadCredentialsException.class, () ->
-                provider.authenticate(OneTimePasswordAuthenticationToken.unauthenticated(TICKET_ID, OTP)));
+                provider.authenticate(new OneTimePasswordAuthenticationToken(ticketId, OTP)));
         Assertions.assertNull(userService.created);
     }
 
     @Test
     void rejectsAChannelWithNoIdentityMapping() {
-        InMemoryOtpTicketService ticketService = newTicketService();
-        ticketService.save(ticket("fax"));
+        InMemoryOneTimePasswordService ticketService = newTicketService();
+        String ticketId = ticketService.generate(request("fax")).ticketId();
         OneTimePasswordAuthenticationProvider provider = new OneTimePasswordAuthenticationProvider(
                 ticketService, new RecordingIdentityService(Optional.empty()),
                 new RecordingUserService(), type -> JitProvisioningPolicy.disabled());
 
-        Assertions.assertThrows(OtpUnsupportedChannelException.class, () ->
-                provider.authenticate(OneTimePasswordAuthenticationToken.unauthenticated(TICKET_ID, OTP)));
+        Assertions.assertThrows(OneTimePasswordUnsupportedChannelException.class, () ->
+                provider.authenticate(new OneTimePasswordAuthenticationToken(ticketId, OTP)));
     }
 
     // ---------- fixtures ----------
 
-    private static InMemoryOtpTicketService newTicketService() {
-        return new InMemoryOtpTicketService(InMemoryOtpTicketService.DEFAULT_MAX_TICKETS, 5);
+    private static InMemoryOneTimePasswordService newTicketService() {
+        return new InMemoryOneTimePasswordService(length -> OTP, InMemoryOneTimePasswordService.DEFAULT_MAX_TICKETS, 5);
     }
 
-    private static OtpTicket ticket(String channel) {
-        return new OtpTicket(TICKET_ID, channel, RECIPIENT, "login", OTP,
-                Instant.now().plus(Duration.ofMinutes(5)), 0, false);
+    private static GenerateOneTimePasswordRequest request(String channel) {
+        return new GenerateOneTimePasswordRequest(channel, RECIPIENT, "login", 6, Duration.ofMinutes(5), OTP);
     }
 
     private static UserIdentity identity(String userId) {

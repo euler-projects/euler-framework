@@ -16,7 +16,7 @@
 
 package org.eulerframework.security.jackson;
 
-import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthentication;
 import org.eulerframework.security.core.identity.UserIdentity;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,15 +59,16 @@ class EulerSecurityJacksonModuleTest {
 
     @Test
     void roundTripsAnAuthenticatedOtpTokenCarriedAsTheAuthorizationPrincipal() {
-        OneTimePasswordAuthenticationToken token = OneTimePasswordAuthenticationToken.authenticated(
+        OneTimePasswordAuthentication token = new OneTimePasswordAuthentication(
                 userDetails(), userIdentity(), userDetails().getAuthorities());
 
-        OneTimePasswordAuthenticationToken read = readPrincipal(writePrincipal(token));
+        OneTimePasswordAuthentication read =
+                assertInstanceOf(OneTimePasswordAuthentication.class, readPrincipal(writePrincipal(token)));
 
         assertTrue(read.isAuthenticated());
-        assertNull(read.getOtp(), "the authenticated form carries no OTP");
+        assertNull(read.getCredentials(), "the authenticated form carries no credentials");
 
-        EulerUserDetails principal = assertInstanceOf(EulerUserDetails.class, read.getPrincipal());
+        EulerUserDetails principal = read.getPrincipal();
         assertEquals("usr_1", principal.getUserId());
         assertEquals("euler", principal.getUsername());
         assertEquals(1, principal.getAuthorities().size());
@@ -84,11 +84,11 @@ class EulerSecurityJacksonModuleTest {
 
     @Test
     void readsAnOtpAuthorizationStoredBeforeTheTokenWasRegistered() {
-        OneTimePasswordAuthenticationToken read = readPrincipal(LEGACY_OTP_ATTRIBUTES);
+        OneTimePasswordAuthentication read =
+                assertInstanceOf(OneTimePasswordAuthentication.class, readPrincipal(LEGACY_OTP_ATTRIBUTES));
 
         assertTrue(read.isAuthenticated());
-        EulerUserDetails principal = assertInstanceOf(EulerUserDetails.class, read.getPrincipal());
-        assertEquals("usr_1", principal.getUserId());
+        assertEquals("usr_1", read.getPrincipal().getUserId());
         assertEquals("phone", read.getUserIdentity().getIdentityType());
     }
 
@@ -104,19 +104,6 @@ class EulerSecurityJacksonModuleTest {
         assertEquals("wechat", restored.getIdentityType());
         assertNull(restored.getIdentityId(), "a prototype-shaped identity has no envelope id");
         assertEquals(Map.of("nickname", "euler-nick"), restored.getExtensions());
-    }
-
-    @Test
-    void roundTripsTheUnauthenticatedOtpToken() {
-        OneTimePasswordAuthenticationToken token =
-                OneTimePasswordAuthenticationToken.unauthenticated("ticket-1", "654321");
-
-        OneTimePasswordAuthenticationToken read = readPrincipal(writePrincipal(token));
-
-        assertFalse(read.isAuthenticated());
-        assertEquals("ticket-1", read.getPrincipal());
-        assertEquals("654321", read.getOtp());
-        assertNull(read.getUserIdentity());
     }
 
     // ---- helpers ----
@@ -140,13 +127,12 @@ class EulerSecurityJacksonModuleTest {
                 .build();
     }
 
-    private String writePrincipal(OneTimePasswordAuthenticationToken token) {
+    private String writePrincipal(Object token) {
         return writeAttributes(Map.of(Principal.class.getName(), token));
     }
 
-    private OneTimePasswordAuthenticationToken readPrincipal(String json) {
-        Object principal = readAttributes(json).get(Principal.class.getName());
-        return assertInstanceOf(OneTimePasswordAuthenticationToken.class, principal);
+    private Object readPrincipal(String json) {
+        return readAttributes(json).get(Principal.class.getName());
     }
 
     private String writeAttributes(Map<String, Object> attributes) {

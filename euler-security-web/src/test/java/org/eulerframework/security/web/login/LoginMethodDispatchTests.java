@@ -161,8 +161,8 @@ class LoginMethodDispatchTests {
         return new PasswordLoginMethodHandler(LOGIN_PROCESSING_URL, LOGIN_PAGE, METHOD_PARAMETER);
     }
 
-    private static OtpLoginMethodHandler otpHandler() {
-        return new OtpLoginMethodHandler(LOGIN_PAGE, METHOD_PARAMETER, OTP_LOGIN_PROCESSING_URL);
+    private static OneTimePasswordLoginMethodHandler otpHandler() {
+        return new OneTimePasswordLoginMethodHandler(LOGIN_PAGE, METHOD_PARAMETER, OTP_LOGIN_PROCESSING_URL);
     }
 
     /**
@@ -173,8 +173,8 @@ class LoginMethodDispatchTests {
         return new RegisteredPasswordLoginMethod("password", name, false);
     }
 
-    private static RegisteredOtpLoginMethod otpRegistration(String name) {
-        return new RegisteredOtpLoginMethod("otp", name, "phone", false, "sms");
+    private static RegisteredOneTimePasswordLoginMethod otpRegistration(String name) {
+        return new RegisteredOneTimePasswordLoginMethod("otp", name, "phone", false, "sms");
     }
 
     /**

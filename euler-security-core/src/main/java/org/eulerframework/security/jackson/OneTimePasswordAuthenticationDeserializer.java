@@ -31,22 +31,10 @@ import tools.jackson.databind.node.MissingNode;
 import java.util.Collection;
 
 /**
- * Reads OAuth2 authorizations persisted before the Spring Security 7 token split, which stored
- * the authenticated one-time-password result under the {@code OneTimePasswordAuthenticationToken}
- * class name. Such records are rebuilt as the split result type {@link OneTimePasswordAuthentication}.
- * <p>
- * The unauthenticated request token is never persisted, so this reader handles the authenticated
- * (result) shape only; getter-derived legacy fields such as {@code name}, {@code credentials} and
- * {@code otp} are ignored.
- *
- * @deprecated a backward-compatibility shim only, kept separate from
- * {@link OneTimePasswordAuthenticationDeserializer} so that no compatibility code leaks into the
- * go-forward path. Remove this class together with {@link OneTimePasswordAuthenticationTokenMixin}
- * and their registration once no pre-split OTP authorization remains, i.e. after the longest-lived
- * refresh token issued before the split has expired.
+ * Rebuilds an authenticated {@link OneTimePasswordAuthentication} result token from the
+ * {@code java.security.Principal} attribute of a persisted OAuth2 authorization.
  */
-@Deprecated
-class OneTimePasswordAuthenticationTokenDeserializer extends ValueDeserializer<OneTimePasswordAuthentication> {
+class OneTimePasswordAuthenticationDeserializer extends ValueDeserializer<OneTimePasswordAuthentication> {
 
     private static final TypeReference<Collection<GrantedAuthority>> GRANTED_AUTHORITY_COLLECTION = new TypeReference<>() {
     };

@@ -16,6 +16,7 @@
 package org.eulerframework.security.jackson;
 
 import org.eulerframework.resource.Tag;
+import org.eulerframework.security.authentication.otp.OneTimePasswordAuthentication;
 import org.eulerframework.security.authentication.otp.OneTimePasswordAuthenticationToken;
 import org.eulerframework.security.authentication.wechat.WechatAuthorizationCodeAuthenticationToken;
 import org.eulerframework.security.core.EulerGrantedAuthority;
@@ -45,6 +46,8 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         builder.allowIfSubType(EulerUserDetails.class)
                 .allowIfSubType(EulerGrantedAuthority.class)
                 .allowIfSubType(WechatAuthorizationCodeAuthenticationToken.class)
+                .allowIfSubType(OneTimePasswordAuthentication.class)
+                // Legacy: OTP authorizations persisted before the SS7 token split carry this class name.
                 .allowIfSubType(OneTimePasswordAuthenticationToken.class)
                 .allowIfSubType(UserIdentity.class)
                 .allowIfSubType(Tag.class)
@@ -62,6 +65,8 @@ public class EulerSecurityJacksonModule extends SecurityJacksonModule {
         context.setMixIn(EulerGrantedAuthority.class, EulerGrantedAuthorityMixin.class);
         context.setMixIn(WechatAuthorizationCodeAuthenticationToken.class,
                 WechatAuthorizationCodeAuthenticationTokenMixin.class);
+        context.setMixIn(OneTimePasswordAuthentication.class, OneTimePasswordAuthenticationMixin.class);
+        // Legacy read compatibility for pre-split OTP authorizations; removable once they expire.
         context.setMixIn(OneTimePasswordAuthenticationToken.class, OneTimePasswordAuthenticationTokenMixin.class);
         context.setMixIn(UserIdentity.class, UserIdentityMixin.class);
     }

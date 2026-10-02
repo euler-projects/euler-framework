@@ -32,14 +32,18 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
  * {@link AuthenticationProvider} that authenticates a user from a submitted
- * one-time password: consumes the ticket through {@link OtpTicketService},
+ * one-time password: consumes the ticket through {@link OneTimePasswordService},
  * resolves the verified recipient to a user through the identity SPI -
  * auto-provisioning a fresh user when the recipient is unknown - and loads
  * the resolved user's details.
@@ -66,7 +70,7 @@ public class OneTimePasswordAuthenticationProvider implements AuthenticationProv
 
     private final Logger logger = LoggerFactory.getLogger(OneTimePasswordAuthenticationProvider.class);
 
-    private final OtpTicketService otpTicketService;
+    private final OneTimePasswordService oneTimePasswordService;
     /**
      * Identity SPI used to reverse-resolve the OTP recipient back to a
      * user and to auto-provision a binding when the recipient is
@@ -76,15 +80,15 @@ public class OneTimePasswordAuthenticationProvider implements AuthenticationProv
     private final EulerUserService eulerUserService;
     private final JitProvisioningPolicyResolver jitProvisioningPolicyResolver;
 
-    public OneTimePasswordAuthenticationProvider(OtpTicketService otpTicketService,
+    public OneTimePasswordAuthenticationProvider(OneTimePasswordService oneTimePasswordService,
                                                  UserIdentityService userIdentityService,
                                                  EulerUserService eulerUserService,
                                                  JitProvisioningPolicyResolver jitProvisioningPolicyResolver) {
-        Assert.notNull(otpTicketService, "otpTicketService must not be null");
+        Assert.notNull(oneTimePasswordService, "oneTimePasswordService must not be null");
         Assert.notNull(userIdentityService, "userIdentityService must not be null");
         Assert.notNull(eulerUserService, "eulerUserService must not be null");
         Assert.notNull(jitProvisioningPolicyResolver, "jitProvisioningPolicyResolver must not be null");
-        this.otpTicketService = otpTicketService;
+        this.oneTimePasswordService = oneTimePasswordService;
         this.userIdentityService = userIdentityService;
         this.eulerUserService = eulerUserService;
         this.jitProvisioningPolicyResolver = jitProvisioningPolicyResolver;
@@ -98,12 +102,9 @@ public class OneTimePasswordAuthenticationProvider implements AuthenticationProv
 
         // 1. Atomically consume the OTP ticket. consume() performs the OTP
         //    value match.
-        OtpVerification verification;
+        OneTimePassword verification;
         try {
-            verification = this.otpTicketService.consume(
-                    (String) otpAuthenticationToken.getPrincipal(),
-                    otpAuthenticationToken.getOtp(),
-                    null);
+            verification = this.oneTimePasswordService.consume(otpAuthenticationToken);
         } catch (RuntimeException e) {
             throw new AuthenticationServiceException("OTP verification failed", e);
         }
@@ -136,8 +137,13 @@ public class OneTimePasswordAuthenticationProvider implements AuthenticationProv
             throw new AuthenticationServiceException("Failed to load user after auto-provision");
         }
 
-        OneTimePasswordAuthenticationToken result = OneTimePasswordAuthenticationToken.authenticated(
-                userDetails, identity, userDetails.getAuthorities());
+        // Stamp the OTP authentication factor alongside the user's own
+        // authorities, mirroring Spring Security's OneTimeToken provider.
+        Collection<GrantedAuthority> authorities = new HashSet<>(userDetails.getAuthorities());
+        authorities.add(FactorGrantedAuthority.fromFactor(OneTimePasswordAuthentication.OTP_FACTOR));
+
+        OneTimePasswordAuthentication result = new OneTimePasswordAuthentication(
+                userDetails, identity, authorities);
         result.setDetails(otpAuthenticationToken.getDetails());
         return result;
     }
@@ -150,7 +156,7 @@ public class OneTimePasswordAuthenticationProvider implements AuthenticationProv
     private static String resolveIdentityType(String channel) {
         String identityType = CHANNEL_TO_IDENTITY_TYPE.get(channel);
         if (identityType == null) {
-            throw new OtpUnsupportedChannelException("Unsupported OTP channel: " + channel, null);
+            throw new OneTimePasswordUnsupportedChannelException("Unsupported OTP channel: " + channel, null);
         }
         return identityType;
     }
@@ -158,7 +164,7 @@ public class OneTimePasswordAuthenticationProvider implements AuthenticationProv
     private static String resolveRawSubjectParamName(String channel) {
         String attributeName = CHANNEL_TO_RAW_SUB_PARAM_NAME.get(channel);
         if (attributeName == null) {
-            throw new OtpUnsupportedChannelException("Unsupported OTP channel: " + channel, null);
+            throw new OneTimePasswordUnsupportedChannelException("Unsupported OTP channel: " + channel, null);
         }
         return attributeName;
     }

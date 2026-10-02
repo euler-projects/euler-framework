@@ -266,7 +266,7 @@ public class EulerSecurityUserPageController extends PageSupportWebController im
      */
     @Value("${euler.security.authentication.otp.issue-endpoint-uri:"
             + OneTimePasswordLoginConfigurer.DEFAULT_ISSUE_ENDPOINT_URI + "}")
-    public void setOtpIssueEndpointUri(String otpIssueEndpointUri) {
+    public void setOneTimePasswordIssueEndpointUri(String otpIssueEndpointUri) {
         this.otpIssueEndpointUri = otpIssueEndpointUri;
     }
 

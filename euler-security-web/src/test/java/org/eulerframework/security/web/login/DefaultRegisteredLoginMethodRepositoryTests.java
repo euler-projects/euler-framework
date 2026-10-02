@@ -128,8 +128,8 @@ class DefaultRegisteredLoginMethodRepositoryTests {
         return new RegisteredPasswordLoginMethod(id, name, false);
     }
 
-    private static RegisteredOtpLoginMethod otp(String id, String name) {
-        return new RegisteredOtpLoginMethod(id, name, "phone", false, "sms");
+    private static RegisteredOneTimePasswordLoginMethod otp(String id, String name) {
+        return new RegisteredOneTimePasswordLoginMethod(id, name, "phone", false, "sms");
     }
 
     private static RegisteredOAuth2LoginMethod oauth2(String id, String name) {

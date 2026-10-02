@@ -16,16 +16,15 @@
 
 package org.eulerframework.security.config.annotation.web.configurers.otp;
 
-import org.eulerframework.security.authentication.otp.OtpChannel;
-import org.eulerframework.security.authentication.otp.OtpGenerator;
-import org.eulerframework.security.authentication.otp.OtpPolicyResolver;
-import org.eulerframework.security.authentication.otp.OtpRecipientResolver;
-import org.eulerframework.security.authentication.otp.OtpTestAccountSupport;
-import org.eulerframework.security.authentication.otp.OtpTicketIssueAuthenticationProvider;
-import org.eulerframework.security.authentication.otp.OtpTicketService;
+import org.eulerframework.security.authentication.otp.OneTimePasswordChannel;
+import org.eulerframework.security.authentication.otp.OneTimePasswordPolicyResolver;
+import org.eulerframework.security.authentication.otp.OneTimePasswordRecipientResolver;
+import org.eulerframework.security.authentication.otp.OneTimePasswordTestAccountSupport;
+import org.eulerframework.security.authentication.otp.OneTimePasswordIssueAuthenticationProvider;
+import org.eulerframework.security.authentication.otp.OneTimePasswordService;
 import org.eulerframework.security.web.authentication.otp.OneTimePasswordAuthenticationFilter;
-import org.eulerframework.security.web.authentication.otp.OtpTicketIssueAuthenticationConverter;
-import org.eulerframework.security.web.authentication.otp.OtpTicketIssueEndpointFilter;
+import org.eulerframework.security.web.authentication.otp.OneTimePasswordIssueAuthenticationConverter;
+import org.eulerframework.security.web.authentication.otp.OneTimePasswordIssueEndpointFilter;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
@@ -48,7 +47,7 @@ import org.springframework.util.Assert;
  * <ul>
  *     <li>{@code POST /otp/tickets} (default, configurable via
  *         {@link #issueEndpointUri(String)}), anonymous and CSRF-exempt,
- *         served by {@link OtpTicketIssueEndpointFilter}</li>
+ *         served by {@link OneTimePasswordIssueEndpointFilter}</li>
  * </ul>
  *
  * <h2>Login endpoint</h2>
@@ -63,36 +62,34 @@ import org.springframework.util.Assert;
  * <pre>
  * http.with(new OneTimePasswordLoginConfigurer(), otp -&gt; otp
  *     .loginPage("/login")
- *     .otpChannel(otpChannel)
+ *     .oneTimePasswordChannel(oneTimePasswordChannel)
  *     .recipientResolver(recipientResolver)
  *     .ticketService(ticketService)
- *     .otpGenerator(otpGenerator)
  *     .policyResolver(policyResolver)
  * );
  * </pre>
  * Any issue-endpoint dependency that is not explicitly set is resolved from
  * the application context as a single bean of the corresponding type, except
- * for {@link OtpRecipientResolver}, which is optional - when absent, requests
+ * for {@link OneTimePasswordRecipientResolver}, which is optional - when absent, requests
  * carrying {@code identity_id} are rejected with {@code invalid_identity_id}.
  *
  * @see OneTimePasswordAuthenticationFilter
- * @see OtpTicketIssueEndpointFilter
- * @see OtpTicketIssueAuthenticationProvider
+ * @see OneTimePasswordIssueEndpointFilter
+ * @see OneTimePasswordIssueAuthenticationProvider
  */
 public class OneTimePasswordLoginConfigurer
         extends AbstractAuthenticationFilterConfigurer<HttpSecurity, OneTimePasswordLoginConfigurer, OneTimePasswordAuthenticationFilter> {
 
     public static final String DEFAULT_ISSUE_ENDPOINT_URI = "/otp/tickets";
 
-    private OtpChannel otpChannel;
-    private OtpRecipientResolver recipientResolver;
-    private OtpTicketService ticketService;
-    private OtpGenerator otpGenerator;
-    private OtpPolicyResolver policyResolver;
-    private OtpTestAccountSupport testAccountSupport;
+    private OneTimePasswordChannel oneTimePasswordChannel;
+    private OneTimePasswordRecipientResolver recipientResolver;
+    private OneTimePasswordService ticketService;
+    private OneTimePasswordPolicyResolver policyResolver;
+    private OneTimePasswordTestAccountSupport testAccountSupport;
     private String issueEndpointUri = DEFAULT_ISSUE_ENDPOINT_URI;
 
-    private OtpTicketIssueEndpointFilter issueEndpointFilter;
+    private OneTimePasswordIssueEndpointFilter issueEndpointFilter;
 
     public OneTimePasswordLoginConfigurer() {
         super(new OneTimePasswordAuthenticationFilter(),
@@ -101,27 +98,22 @@ public class OneTimePasswordLoginConfigurer
 
     // ---- Fluent API: issue endpoint dependencies ----
 
-    public OneTimePasswordLoginConfigurer otpChannel(OtpChannel otpChannel) {
-        this.otpChannel = otpChannel;
+    public OneTimePasswordLoginConfigurer oneTimePasswordChannel(OneTimePasswordChannel oneTimePasswordChannel) {
+        this.oneTimePasswordChannel = oneTimePasswordChannel;
         return this;
     }
 
-    public OneTimePasswordLoginConfigurer recipientResolver(OtpRecipientResolver recipientResolver) {
+    public OneTimePasswordLoginConfigurer recipientResolver(OneTimePasswordRecipientResolver recipientResolver) {
         this.recipientResolver = recipientResolver;
         return this;
     }
 
-    public OneTimePasswordLoginConfigurer ticketService(OtpTicketService ticketService) {
+    public OneTimePasswordLoginConfigurer ticketService(OneTimePasswordService ticketService) {
         this.ticketService = ticketService;
         return this;
     }
 
-    public OneTimePasswordLoginConfigurer otpGenerator(OtpGenerator otpGenerator) {
-        this.otpGenerator = otpGenerator;
-        return this;
-    }
-
-    public OneTimePasswordLoginConfigurer policyResolver(OtpPolicyResolver policyResolver) {
+    public OneTimePasswordLoginConfigurer policyResolver(OneTimePasswordPolicyResolver policyResolver) {
         this.policyResolver = policyResolver;
         return this;
     }
@@ -131,7 +123,7 @@ public class OneTimePasswordLoginConfigurer
      * resolved recipient matches one of its entries receive the configured
      * fixed OTP and skip real delivery. Pass {@code null} to disable (default).
      */
-    public OneTimePasswordLoginConfigurer testAccountSupport(OtpTestAccountSupport testAccountSupport) {
+    public OneTimePasswordLoginConfigurer testAccountSupport(OneTimePasswordTestAccountSupport testAccountSupport) {
         this.testAccountSupport = testAccountSupport;
         return this;
     }
@@ -156,8 +148,8 @@ public class OneTimePasswordLoginConfigurer
 
     @Override
     public void init(HttpSecurity http) {
-        this.issueEndpointFilter = new OtpTicketIssueEndpointFilter(
-                new OtpTicketIssueAuthenticationConverter(),
+        this.issueEndpointFilter = new OneTimePasswordIssueEndpointFilter(
+                new OneTimePasswordIssueAuthenticationConverter(),
                 createIssueProvider(http),
                 this.issueEndpointUri);
 
@@ -201,56 +193,48 @@ public class OneTimePasswordLoginConfigurer
 
     // ---- Dependency resolution ----
 
-    private OtpTicketIssueAuthenticationProvider createIssueProvider(HttpSecurity http) {
-        OtpTicketIssueAuthenticationProvider provider = new OtpTicketIssueAuthenticationProvider(
+    private OneTimePasswordIssueAuthenticationProvider createIssueProvider(HttpSecurity http) {
+        OneTimePasswordIssueAuthenticationProvider provider = new OneTimePasswordIssueAuthenticationProvider(
                 resolvePolicyResolver(http),
-                resolveOtpGenerator(http),
-                resolveOtpChannel(http),
+                resolveOneTimePasswordChannel(http),
                 resolveTicketService(http),
                 resolveRecipientResolver(http));
         provider.setTestAccountSupport(this.testAccountSupport);
         return provider;
     }
 
-    private OtpChannel resolveOtpChannel(HttpSecurity http) {
-        if (this.otpChannel != null) {
-            return this.otpChannel;
+    private OneTimePasswordChannel resolveOneTimePasswordChannel(HttpSecurity http) {
+        if (this.oneTimePasswordChannel != null) {
+            return this.oneTimePasswordChannel;
         }
-        return http.getSharedObject(ApplicationContext.class).getBean(OtpChannel.class);
+        return http.getSharedObject(ApplicationContext.class).getBean(OneTimePasswordChannel.class);
     }
 
-    private OtpTicketService resolveTicketService(HttpSecurity http) {
+    private OneTimePasswordService resolveTicketService(HttpSecurity http) {
         if (this.ticketService != null) {
             return this.ticketService;
         }
-        return http.getSharedObject(ApplicationContext.class).getBean(OtpTicketService.class);
+        return http.getSharedObject(ApplicationContext.class).getBean(OneTimePasswordService.class);
     }
 
-    private OtpGenerator resolveOtpGenerator(HttpSecurity http) {
-        if (this.otpGenerator != null) {
-            return this.otpGenerator;
-        }
-        return http.getSharedObject(ApplicationContext.class).getBean(OtpGenerator.class);
-    }
-
-    private OtpPolicyResolver resolvePolicyResolver(HttpSecurity http) {
+    private OneTimePasswordPolicyResolver resolvePolicyResolver(HttpSecurity http) {
         if (this.policyResolver != null) {
             return this.policyResolver;
         }
-        return http.getSharedObject(ApplicationContext.class).getBean(OtpPolicyResolver.class);
+        return http.getSharedObject(ApplicationContext.class).getBean(OneTimePasswordPolicyResolver.class);
     }
 
     /**
-     * {@link OtpRecipientResolver} is optional - returns {@code null} when no
+     * {@link OneTimePasswordRecipientResolver} is optional - returns {@code null} when no
      * bean is registered. Requests carrying {@code identity_id} will then be
      * rejected with {@code invalid_identity_id}.
      */
-    private OtpRecipientResolver resolveRecipientResolver(HttpSecurity http) {
+    private OneTimePasswordRecipientResolver resolveRecipientResolver(HttpSecurity http) {
         if (this.recipientResolver != null) {
             return this.recipientResolver;
         }
         try {
-            return http.getSharedObject(ApplicationContext.class).getBean(OtpRecipientResolver.class);
+            return http.getSharedObject(ApplicationContext.class).getBean(OneTimePasswordRecipientResolver.class);
         } catch (NoSuchBeanDefinitionException ignored) {
             return null;
         }
