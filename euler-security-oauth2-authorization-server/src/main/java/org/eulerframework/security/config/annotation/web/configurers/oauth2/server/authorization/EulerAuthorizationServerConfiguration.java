@@ -254,6 +254,8 @@ public class EulerAuthorizationServerConfiguration {
                                 .providerConfigurationCustomizer(builder -> {
                                     builder.tokenEndpointAuthenticationMethod(
                                             EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
+                                    builder.tokenEndpointAuthenticationMethod(
+                                            EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue());
                                     builder.claim("challenge_endpoint", challengeEndpointFullUri);
                                     builder.claim("client_attestation_signing_alg_values_supported",
                                             supportedSigningAlgs);
@@ -266,6 +268,8 @@ public class EulerAuthorizationServerConfiguration {
                         .authorizationServerMetadataCustomizer(builder -> {
                             builder.tokenEndpointAuthenticationMethod(
                                     EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue());
+                            builder.tokenEndpointAuthenticationMethod(
+                                    EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue());
                             builder.claim("challenge_endpoint", challengeEndpointFullUri);
                             builder.claim("client_attestation_signing_alg_values_supported",
                                     supportedSigningAlgs);

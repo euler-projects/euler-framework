@@ -18,8 +18,7 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 import jakarta.annotation.Nonnull;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientAttestationUtils;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -38,8 +37,10 @@ import org.springframework.util.Assert;
 import java.util.Map;
 
 /**
- * An {@link AuthenticationProvider} that authenticates a client whose client authentication method
- * is {@code attest_jwt_client_auth}, as defined in
+ * An {@link AuthenticationProvider} that authenticates a client by its client attestation, i.e. one
+ * whose client authentication method is {@code attest_jwt_client_auth} (the draft's standard PoP
+ * JWT) or {@code attest_appattest_client_auth} (an Apple App Attest assertion as the proof of
+ * possession), per
  * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
  * draft-ietf-oauth-attestation-based-client-auth-11</a>. This is the <b>basic</b> path, in which the
  * attestation is the client's credential.
@@ -47,13 +48,14 @@ import java.util.Map;
  * It is registered at the <i>end</i> of the provider chain and admits two token shapes, so a
  * converter's output and a provider's consumption are not one-to-one here:
  * <ol>
- *   <li>{@code attest_jwt_client_auth}, for a request whose attestation is its only credential. The
+ *   <li>either attestation-based method, for a request whose attestation is its only credential. The
  *       {@code client_id} is not a reliable form parameter, so verifying the attestation is what
  *       resolves it.</li>
- *   <li>{@code NONE} carrying an attestation and a {@code code_verifier}, for an
- *       {@code authorization_code} + PKCE request from a client whose real method is
- *       {@code attest_jwt_client_auth} and which {@code PublicClientAuthenticationProvider}
- *       therefore declines.</li>
+ *   <li>{@code NONE} carrying a {@code code_verifier}, for an {@code authorization_code} + PKCE
+ *       request from a client whose real method is attestation-based and which
+ *       {@code PublicClientAuthenticationProvider} therefore declines. That token carries
+ *       {@code NONE} instead of the real method, so the client is what identifies the mechanism
+ *       here.</li>
  * </ol>
  * In both cases this provider verifies the attestation exactly once, resolves and validates the
  * client, and enforces PKCE via {@link CodeVerifierAuthenticatorAccessor} &mdash; these clients are
@@ -66,6 +68,7 @@ import java.util.Map;
  *
  * @see EulerOAuth2ClientAttestationVerifier
  * @see EulerClientAuthenticationMethod#ATTEST_JWT_CLIENT_AUTH
+ * @see EulerClientAuthenticationMethod#ATTEST_APPATTEST_CLIENT_AUTH
  */
 public final class EulerOAuth2ClientAttestationAuthenticationProvider implements AuthenticationProvider {
 
@@ -92,29 +95,40 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
         final String clientId;
         final AppAttestAttestationRegistration registration;
+        // The attestation-based method this request authenticates with: it decides how the
+        // attestation is verified, and the client must actually declare it.
+        final ClientAuthenticationMethod attestMethod;
 
-        if (EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.equals(method)) {
+        if (EulerClientAuthenticationMethod.isAttestationBased(method)) {
             // Basic path: the attestation is the credential and identifies the client, so verifying
             // it is what resolves the client_id (consumes the one-time challenge exactly once).
+            attestMethod = method;
             EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification verified =
-                    this.clientAttestationVerifier.verify(params);
+                    this.clientAttestationVerifier.verify(params, attestMethod);
             clientId = verified.clientId();
             registration = verified.registration();
         } else if (ClientAuthenticationMethod.NONE.equals(method)
-                && params.containsKey(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE)
                 && params.containsKey(PkceParameterNames.CODE_VERIFIER)) {
-            // authorization_code + PKCE from a client whose real method is attest_jwt_client_auth,
-            // declined by PublicClientAuthenticationProvider and routed here. Look the client up
-            // before verifying so a genuine public client is left to its own outcome.
+            // authorization_code + PKCE from a client whose real method is attestation-based,
+            // declined by PublicClientAuthenticationProvider and routed here. The token therefore
+            // carries NONE rather than that method, so the client itself is what says which
+            // mechanism this request must be verified with.
             clientId = (String) clientAuthentication.getPrincipal();
             RegisteredClient candidate = this.registeredClientRepository.findByClientId(clientId);
             if (candidate == null
-                    || candidate.getClientAuthenticationMethods().contains(ClientAuthenticationMethod.NONE)
-                    || !candidate.getClientAuthenticationMethods()
-                            .contains(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)) {
+                    || candidate.getClientAuthenticationMethods().contains(ClientAuthenticationMethod.NONE)) {
                 return null;
             }
-            registration = this.clientAttestationVerifier.verify(params).registration();
+            // RFC 7591 admits exactly one token_endpoint_auth_method per client, so an
+            // attestation-based client has exactly one.
+            attestMethod = candidate.getClientAuthenticationMethods().stream()
+                    .filter(EulerClientAuthenticationMethod::isAttestationBased)
+                    .findFirst()
+                    .orElse(null);
+            if (attestMethod == null) {
+                return null;
+            }
+            registration = this.clientAttestationVerifier.verify(params, attestMethod).registration();
         } else {
             return null;
         }
@@ -123,8 +137,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
         if (registeredClient == null) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
-        if (!registeredClient.getClientAuthenticationMethods()
-                .contains(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)) {
+        if (!registeredClient.getClientAuthenticationMethods().contains(attestMethod)) {
             throw invalidClient("authentication_method");
         }
 
@@ -134,8 +147,8 @@ public final class EulerOAuth2ClientAttestationAuthenticationProvider implements
 
         // The attestation is the credential here, so there is none to carry alongside it.
         return new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient,
-                EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, null, registration,
-                EulerOAuth2ClientAttestationAuthenticationConverter.resolveProof(params));
+                attestMethod, null, registration,
+                OAuth2ClientAttestationUtils.resolveProof(params));
     }
 
     @Override

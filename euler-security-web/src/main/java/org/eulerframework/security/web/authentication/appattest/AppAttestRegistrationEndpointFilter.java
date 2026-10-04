@@ -58,11 +58,9 @@ import java.util.Map;
  * The attestation is single-use: a {@code kid} is attested exactly once here; all
  * subsequent flows use assertions.
  * <p>
- * Request parameters:
- * <ul>
- *     <li>{@code attestation} - the Base64-encoded attestation object</li>
- *     <li>{@code challenge} - the challenge value obtained from the challenge endpoint</li>
- * </ul>
+ * The attestation and challenge are accepted in either carriage (never mixed): the form
+ * parameters {@code app_attest_attestation} / {@code app_attest_challenge}, or the HTTP headers
+ * {@code App-Attest-Attestation} / {@code App-Attest-Challenge}.
  * <p>
  * The key ID is derived from the attestation's credential ID and returned in the
  * response; the client does not send it.
@@ -112,7 +110,7 @@ public class AppAttestRegistrationEndpointFilter extends OncePerRequestFilter {
             Authentication authRequest = this.authenticationConverter.convert(request);
             if (authRequest == null) {
                 sendErrorResponse(response, HttpStatus.BAD_REQUEST,
-                        "invalid_request", "Missing required parameters: attestation, challenge");
+                        "invalid_request", "Missing required App Attest parameters: app_attest_attestation, app_attest_challenge (form) or App-Attest-Attestation, App-Attest-Challenge (headers)");
                 return;
             }
 

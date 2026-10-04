@@ -118,9 +118,10 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
 
         RegisteredClient client = this.clientRepository.findByClientId(response.getClientId());
         assertNotNull(client, "the minted client should be saved");
-        assertEquals(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue(),
+        assertEquals(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue(),
                 response.getTokenEndpointAuthenticationMethod());
-        assertTrue(client.getClientAuthenticationMethods().contains(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH));
+        assertTrue(client.getClientAuthenticationMethods()
+                .contains(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH));
         assertEquals(1, client.getClientAuthenticationMethods().size());
         assertNull(client.getClientSecret(), "an App Attest client must not carry a secret");
         assertTrue(client.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN));

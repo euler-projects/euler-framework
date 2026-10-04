@@ -25,9 +25,8 @@ import org.eulerframework.security.authentication.appattest.AppAttestUtils;
 import org.eulerframework.security.authentication.appattest.InMemoryAppAttestAttestationRegistrationService;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -50,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests for the Apple App Attest branch of {@link EulerOAuth2ClientAttestationVerifier#verify(Map)},
+ * Tests for the Apple App Attest branch of {@link EulerOAuth2ClientAttestationVerifier#verify},
  * the single verification entry point shared by the basic path (through
  * {@link EulerOAuth2ClientAttestationAuthenticationProvider}) and the enhanced path (through the
  * post-authentication filter). Covers the three valid {@code attestation} / {@code assertion}
@@ -75,9 +74,9 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
 
-        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
+        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifyApple(verifier, params);
 
         assertEquals(1, validationService.attestationCalls.get());
         assertEquals(0, validationService.assertionCalls.get(),
@@ -92,10 +91,10 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_KID, SUPPLIED_KID);
 
-        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
+        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifyApple(verifier, params);
 
         assertEquals(0, validationService.attestationCalls.get(),
                 "no attestation was supplied, so no App instance registration must happen");
@@ -109,10 +108,10 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION, ex.getError().getErrorCode());
         assertEquals(0, validationService.assertionCalls.get(),
@@ -125,10 +124,10 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
 
-        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
+        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifyApple(verifier, params);
 
         assertEquals(1, validationService.attestationCalls.get(), "the App Attest KEY is registered first");
         assertEquals(List.of(DERIVED_KID), validationService.assertionKeyIds,
@@ -143,11 +142,11 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_KID, SUPPLIED_KID);
 
-        verifier.verify(params);
+        verifyApple(verifier, params);
 
         assertEquals(List.of(DERIVED_KID), validationService.assertionKeyIds,
                 "the attestation is the authoritative source of the kid");
@@ -160,10 +159,10 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService, challengeService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
 
-        verifier.verify(params);
+        verifyApple(verifier, params);
 
         assertEquals(1, challengeService.consumeCalls.get(),
                 "a single challenge backs both the attestation and the assertion, so it is consumed once");
@@ -178,11 +177,11 @@ class EulerOAuth2ClientAttestationVerifierTest {
                 verifier(validationService, new RecordingChallengeService(false));
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_KID, SUPPLIED_KID);
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION, ex.getError().getErrorCode());
         assertEquals(0, validationService.assertionCalls.get(),
@@ -196,7 +195,7 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService, challengeService);
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(appleParams()));
+                () -> verifyApple(verifier, appleParams()));
 
         assertEquals(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION, ex.getError().getErrorCode());
         assertEquals(0, validationService.attestationCalls.get());
@@ -212,10 +211,10 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode(),
                 "the App Attest proof was valid; the app simply has no client to authenticate as");
@@ -230,11 +229,11 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode());
         assertEquals(0, validationService.assertionCalls.get(),
@@ -248,11 +247,11 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_KID, SUPPLIED_KID);
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode());
         assertEquals(List.of(SUPPLIED_KID), validationService.assertionKeyIds);
@@ -264,14 +263,14 @@ class EulerOAuth2ClientAttestationVerifierTest {
         EulerOAuth2ClientAttestationVerifier verifier = verifier(validationService);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, "assertion-1");
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, SUPPLIED_KID);
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1");
+        params.put(AppAttestParameterNames.HEADER_KID, SUPPLIED_KID);
         params.put(OAuth2ParameterNames.CLIENT_ID, "some-other-client");
 
         // Draft Section 6.3: a client_id carried in the request must match the one the attestation
         // resolves to.
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, ex.getError().getErrorCode());
     }
@@ -290,9 +289,9 @@ class EulerOAuth2ClientAttestationVerifierTest {
                 verifier(validationService, registrationService, clientRepository);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
 
-        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifier.verify(params);
+        EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification result = verifyApple(verifier, params);
 
         assertEquals(staticClientId, result.clientId(),
                 "the historical STATIC client should be resolved from teamId.bundleId and bound");
@@ -314,10 +313,10 @@ class EulerOAuth2ClientAttestationVerifierTest {
                 verifier(validationService, registrationService, clientRepository);
 
         Map<String, Object> params = appleParams();
-        params.put(EulerOAuth2ParameterNames.ATTESTATION, "attestation-1");
+        params.put(AppAttestParameterNames.HEADER_ATTESTATION, "attestation-1");
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> verifier.verify(params));
+                () -> verifyApple(verifier, params));
 
         assertEquals(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, ex.getError().getErrorCode());
         assertNull(registrationService.findByKeyId(DERIVED_KID).getClientId(),
@@ -326,11 +325,18 @@ class EulerOAuth2ClientAttestationVerifierTest {
 
     // ---- helpers ----
 
+    /**
+     * Every case here exercises the Apple App Attest branch, so the method the verifier dispatches
+     * on is the same one throughout.
+     */
+    private static EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification verifyApple(
+            EulerOAuth2ClientAttestationVerifier verifier, Map<String, Object> params) {
+        return verifier.verify(params, EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH);
+    }
+
     private static Map<String, Object> appleParams() {
         Map<String, Object> params = new LinkedHashMap<>();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE,
-                EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST);
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, "challenge-1");
+        params.put(AppAttestParameterNames.HEADER_CHALLENGE, "challenge-1");
         return params;
     }
 

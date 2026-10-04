@@ -111,6 +111,10 @@ public final class EulerOAuth2ClientRegistrationRegisteredClientConverter
 			builder.clientAuthenticationMethod(ClientAuthenticationMethod.NONE);
 			// Public client — no client_secret
 		}
+		else if (EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue().equals(authMethod)) {
+			builder.clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH);
+			// Attestation-based client — no client_secret
+		}
 		else if (EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue().equals(authMethod)) {
 			builder.clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH);
 			// Attestation-based client — no client_secret

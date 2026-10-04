@@ -23,8 +23,7 @@ import org.eulerframework.security.authentication.appattest.AppAttestAttestation
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -49,8 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link EulerOAuth2ClientAttestationAuthenticationProvider}, the basic path in which the
- * attestation is the client's credential. It admits two token shapes &mdash; an
- * {@code attest_jwt_client_auth} token from the appended converter, and a {@code NONE} token carrying
+ * attestation is the client's credential. It admits two token shapes &mdash; an attestation-based
+ * method token from the appended converter, and a {@code NONE} token carrying
  * an attestation and a {@code code_verifier} that {@code PublicClientAuthenticationProvider} declined
  * &mdash; verifies the attestation, resolves and validates the client, and enforces PKCE. What is
  * asserted here is that routing and those gates; the attestation cryptography itself is covered by
@@ -85,7 +84,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
                 CLIENT_ID, ClientAuthenticationMethod.NONE, null, params)));
     }
 
-    // ---- basic path: attest_jwt_client_auth token ----
+    // ---- basic path: an attestation-based method token ----
 
     @Test
     void authenticatesAnAttestationTokenAndCarriesTheVerifiedRegistration() {
@@ -98,7 +97,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
         assertTrue(result.isAuthenticated());
         EulerOAuth2ClientAttestationAuthenticationToken authenticated =
                 (EulerOAuth2ClientAttestationAuthenticationToken) result;
-        assertEquals(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH,
+        assertEquals(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH,
                 authenticated.getClientAuthenticationMethod());
         assertEquals(CLIENT_ID, authenticated.getRegisteredClient().getClientId());
         assertSame(captured[0], authenticated.getVerifiedRegistration(),
@@ -120,7 +119,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
     }
 
     @Test
-    void rejectsWhenTheClientDoesNotDeclareAttestJwtClientAuth() {
+    void rejectsWhenTheClientDoesNotDeclareTheAttestationBasedMethod() {
         EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(secretOnlyClient());
 
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
@@ -134,8 +133,8 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
     @Test
     void authenticatesAPkceShapedTokenFromAnAttestOnlyClient() {
         RecordingValidationService validationService = new RecordingValidationService();
-        // The client's real method is attest_jwt_client_auth (no NONE), so PublicClient's provider
-        // declined this authorization_code + PKCE token and ProviderManager routed it here.
+        // The client's real method is attest_appattest_client_auth (no NONE), so PublicClient's
+        // provider declined this authorization_code + PKCE token and ProviderManager routed it here.
         EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(attestClient(), validationService);
 
         Map<String, Object> params = appleParams();
@@ -145,7 +144,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
         assertTrue(result.isAuthenticated());
         OAuth2ClientAuthenticationToken authenticated = (OAuth2ClientAuthenticationToken) result;
-        assertEquals(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH,
+        assertEquals(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH,
                 authenticated.getClientAuthenticationMethod());
         assertEquals(CLIENT_ID, authenticated.getRegisteredClient().getClientId());
     }
@@ -188,16 +187,15 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
     private static Map<String, Object> appleParams() {
         Map<String, Object> params = new LinkedHashMap<>();
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE, EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST);
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, CHALLENGE);
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION);
-        params.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, KID);
+        params.put(AppAttestParameterNames.HEADER_CHALLENGE, CHALLENGE);
+        params.put(AppAttestParameterNames.HEADER_ASSERTION, ASSERTION);
+        params.put(AppAttestParameterNames.HEADER_KID, KID);
         return params;
     }
 
     private static OAuth2ClientAuthenticationToken attestToken(Map<String, Object> params) {
         return new OAuth2ClientAuthenticationToken(
-                "(attestation)", EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, null, params);
+                "(attestation)", EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, null, params);
     }
 
     private static EulerOAuth2ClientAttestationAuthenticationProvider provider(RegisteredClient client) {
@@ -220,7 +218,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
     private static RegisteredClient clientWithId(String clientId) {
         return RegisteredClient.withId("id-" + clientId)
                 .clientId(clientId)
-                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
+                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("https://example.com/callback")

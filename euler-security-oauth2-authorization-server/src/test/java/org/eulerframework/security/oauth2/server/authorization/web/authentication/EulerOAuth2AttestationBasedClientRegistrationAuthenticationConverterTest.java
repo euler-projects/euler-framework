@@ -23,6 +23,7 @@ import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,9 +57,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverterTest {
 
     private static final String TYPE = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE;
-    private static final String KID = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID;
-    private static final String CHALLENGE = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE;
-    private static final String ASSERTION = EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION;
+    private static final String KID = AppAttestParameterNames.HEADER_KID;
+    private static final String CHALLENGE = AppAttestParameterNames.HEADER_CHALLENGE;
+    private static final String ASSERTION = AppAttestParameterNames.HEADER_ASSERTION;
 
     private static final String APPLE_APP_ATTEST = EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.value();
     private static final String KID_VALUE = "key-id-1";
@@ -103,32 +104,35 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverterTest {
     void prefersAppAttestOverAnAuthenticatedBearerToken() {
         authenticateInitialAccessToken();
 
-        // Only the type header is present, so the App Attest branch is taken and reports the
-        // missing kid rather than falling through to the initial access token path.
+        // Only an incomplete App Attest credential is present, so its branch is taken and reports
+        // the missing challenge rather than falling through to the initial access token path.
         OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> this.converter.convert(request(Map.of(TYPE, APPLE_APP_ATTEST), "{}")));
+                () -> this.converter.convert(request(Map.of(KID, KID_VALUE), "{}")));
 
         assertEquals(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION, ex.getError().getErrorCode());
-        assertTrue(ex.getError().getDescription().contains(KID));
+        assertTrue(ex.getError().getDescription().contains(CHALLENGE));
     }
 
     @Test
-    void rejectsAnUnsupportedClientAttestationType() {
-        Map<String, String> headers = appAttestHeaders();
-        headers.put(TYPE, "unknown_type");
+    void ignoresTheDeprecatedClientAttestationTypeHeader() {
+        // This endpoint dispatches on the App Attest credential alone: released clients never
+        // registered dynamically, so the deprecated type header is not consulted here. Neither its
+        // legacy value nor an unknown one may change the outcome.
+        for (String type : List.of(APPLE_APP_ATTEST, "unknown_type")) {
+            Map<String, String> headers = appAttestHeaders();
+            headers.put(TYPE, type);
 
-        OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
-                () -> this.converter.convert(request(headers, "{}")));
+            var authentication = this.converter.convert(
+                    request(headers, "{\"client_name\":\"App Attest Client\"}"));
 
-        // EulerOAuth2ClientAttestationType.parse owns this message and names the offending value,
-        // which is more useful to the caller than the header name would be.
-        assertEquals(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION, ex.getError().getErrorCode());
-        assertTrue(ex.getError().getDescription().contains("unknown_type"));
+            assertEquals(EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken.class,
+                    authentication.getClass(), () -> "type " + type + " should be ignored");
+        }
     }
 
     @Test
     void reportsEachMissingAppAttestHeader() {
-        for (String missing : List.of(TYPE, KID, CHALLENGE, ASSERTION)) {
+        for (String missing : List.of(KID, CHALLENGE, ASSERTION)) {
             Map<String, String> headers = appAttestHeaders();
             headers.remove(missing);
 
@@ -192,7 +196,6 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverterTest {
 
     private static Map<String, String> appAttestHeaders() {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(TYPE, APPLE_APP_ATTEST);
         headers.put(KID, KID_VALUE);
         headers.put(CHALLENGE, CHALLENGE_VALUE);
         headers.put(ASSERTION, ASSERTION_VALUE);

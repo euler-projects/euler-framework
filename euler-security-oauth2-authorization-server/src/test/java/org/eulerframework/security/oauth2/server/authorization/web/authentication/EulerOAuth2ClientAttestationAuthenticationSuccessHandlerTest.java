@@ -24,10 +24,9 @@ import org.eulerframework.security.authentication.appattest.AppAttestAttestation
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
@@ -81,13 +80,14 @@ class EulerOAuth2ClientAttestationAuthenticationSuccessHandlerTest {
 
     @Test
     void skipsEnhancementForTheBasicAttestPath() {
-        // method == attest_jwt_client_auth: the provider already verified the attestation and carried
-        // the registration; the handler must not verify again (which would double-consume the challenge).
+        // method == attest_appattest_client_auth: the provider already verified the attestation and
+        // carried the registration; the handler must not verify again (which would double-consume
+        // the challenge).
         RecordingValidationService validationService = new RecordingValidationService();
         EulerOAuth2ClientAttestationAuthenticationSuccessHandler handler = handler(validationService);
         AppAttestAttestationRegistration registration = registration(KID_VALUE, CLIENT_ID);
         OAuth2ClientAuthenticationToken result = new OAuth2ClientAuthenticationToken(
-                attestClient(), EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH, registration);
+                attestClient(), EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, registration);
 
         handler.onAuthenticationSuccess(request(appleHeaders(), Map.of()), null, result);
 
@@ -157,18 +157,16 @@ class EulerOAuth2ClientAttestationAuthenticationSuccessHandlerTest {
     private static RegisteredClient attestClient() {
         return RegisteredClient.withId("id-attest")
                 .clientId(CLIENT_ID)
-                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
+                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .build();
     }
 
     private static Map<String, String> appleHeaders() {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE,
-                EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.value());
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, CHALLENGE_VALUE);
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, KID_VALUE);
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION_VALUE);
+        headers.put(AppAttestParameterNames.HEADER_CHALLENGE, CHALLENGE_VALUE);
+        headers.put(AppAttestParameterNames.HEADER_KID, KID_VALUE);
+        headers.put(AppAttestParameterNames.HEADER_ASSERTION, ASSERTION_VALUE);
         return headers;
     }
 

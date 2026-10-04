@@ -22,6 +22,16 @@ import jakarta.annotation.Nonnull;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 
+/**
+ * The values of the {@code OAuth-Client-Attestation-Type} request header, which used to declare
+ * which client attestation variant a request meant.
+ *
+ * @deprecated the variant is no longer declared but derived from the credential a request carries,
+ * so this type survives only to parse that header for released clients. See
+ * {@link org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_TYPE};
+ * removed together with it.
+ */
+@Deprecated
 public record EulerOAuth2ClientAttestationType(String value) {
 
     /**

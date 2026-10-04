@@ -24,9 +24,9 @@ import org.eulerframework.security.authentication.appattest.RegisteredAppReposit
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerOAuth2ClientRegistrationRegisteredClientConverter;
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -67,8 +67,8 @@ import java.time.Duration;
  * JSON registration body by carrying the proof in headers.
  * <p>
  * On success a per-KEY client is minted (random {@code client_id}, authentication method
- * {@code attest_jwt_client_auth}, {@code refresh_token} added) and its {@code client_id} is bound
- * back to the KEY registration. A KEY that is already bound returns its existing client, so
+ * {@code attest_appattest_client_auth}, {@code refresh_token} added) and its {@code client_id} is
+ * bound back to the KEY registration. A KEY that is already bound returns its existing client, so
  * registration retries are idempotent.
  *
  * @see EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken
@@ -117,7 +117,7 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
 
         String challenge = clientRegistrationAuthentication.getChallenge();
         if (!this.challengeService.consumeChallenge(challenge)) {
-            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+            throw invalidClientAttestation(AppAttestParameterNames.HEADER_CHALLENGE);
         }
 
         AppAttestAttestationRegistration registration = this.validationService.validateAssertion(
@@ -179,11 +179,13 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
         RegisteredClient registeredClient = RegisteredClient.from(base)
                 // Force attest-only client authentication: the base converter defaults to
                 // client_secret_basic (with a generated secret) when the request omits
-                // token_endpoint_auth_method, which does not apply to an App Attest client.
+                // token_endpoint_auth_method, which does not apply to an App Attest client. The
+                // method value names the proof of possession actually used here (an Apple App Attest
+                // assertion), per Section 5 of the draft.
                 .clientSecret(null)
                 .clientAuthenticationMethods(methods -> {
                     methods.clear();
-                    methods.add(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH);
+                    methods.add(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH);
                 })
                 .authorizationGrantTypes(grantTypes -> {
                     // Per-KEY clients renew via refresh_token + assertion. The deprecated

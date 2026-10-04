@@ -35,6 +35,7 @@ import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -51,10 +52,12 @@ import org.eulerframework.security.authentication.appattest.AppAttestAttestation
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
 import org.eulerframework.security.authentication.appattest.AppAttestUtils;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
+import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
+import org.eulerframework.security.web.authentication.appattest.AppAttestCredential;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 
 /**
  * Unified verifier for Client Attestation and PoP JWTs as defined in
@@ -128,14 +131,17 @@ public final class EulerOAuth2ClientAttestationVerifier {
      * Verify the client attestation carried in {@code collectedParams} and resolve the client it
      * authenticates, without touching any {@code RegisteredClientRepository}.
      * <p>
-     * Dispatch is by the {@code OAuth-Client-Attestation-Type} the converter collected:
+     * Dispatch is by {@code method}, resolved from the request by the converter, so a further proof
+     * of possession mechanism only needs its own branch here:
      * <ul>
-     *   <li>{@link EulerOAuth2ClientAttestationType#JWT} &mdash; verify the PoP JWT (and, when
-     *       present, the Client Attestation JWT) via the kid-based flow below.</li>
-     *   <li>{@link EulerOAuth2ClientAttestationType#APPLE_APP_ATTEST} &mdash; consume the one-time
-     *       challenge exactly once, then validate the {@code attestation} and/or {@code assertion}.
-     *       The two are not mutually exclusive; see {@link EulerOAuth2ParameterNames#ATTESTATION}
-     *       for the combined-request semantics. Only available when Apple App Attest is enabled.</li>
+     *   <li>{@link EulerClientAuthenticationMethod#ATTEST_APPATTEST_CLIENT_AUTH} &mdash; consume the
+     *       one-time challenge exactly once, then validate the {@code attestation} and/or
+     *       {@code assertion}. The two are not mutually exclusive; see
+     *       {@link EulerOAuth2ParameterNames#ATTESTATION} for the combined-request semantics. Only
+     *       available when Apple App Attest is enabled.</li>
+     *   <li>{@link EulerClientAuthenticationMethod#ATTEST_JWT_CLIENT_AUTH}, the draft's standard
+     *       variant &mdash; verify the PoP JWT (and, when present, the Client Attestation JWT) via
+     *       the kid-based flow below.</li>
      * </ul>
      * The returned {@code clientId} is always non-null: an attestation that verifies but resolves
      * no bound client is rejected here rather than handed back ambiguous, so callers can look the
@@ -143,55 +149,48 @@ public final class EulerOAuth2ClientAttestationVerifier {
      *
      * @param collectedParams the attestation data collected by
      *                        {@link org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter}
+     * @param method          the client authentication method that collection resolved the request
+     *                        to, which decides how the attestation is verified
      * @return the resolved {@code client_id} and the verified registration
      * @throws OAuth2AuthenticationException if verification fails or no client is bound
      */
-    public ClientAttestationVerification verify(Map<String, Object> collectedParams) {
-        EulerOAuth2ClientAttestationType clientAttestationType = (EulerOAuth2ClientAttestationType) collectedParams
-                .get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+    public ClientAttestationVerification verify(Map<String, Object> collectedParams,
+                                                ClientAuthenticationMethod method) {
+        Assert.notNull(method, "method must not be null");
 
         final String resolvedClientId;
         final AppAttestAttestationRegistration registration;
 
-        if (EulerOAuth2ClientAttestationType.JWT.equals(clientAttestationType)) {
-            String attestationJwt = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION);
-            String attestationPopJwt = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
-            if (attestationPopJwt == null) {
-                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
-            }
-            PopVerificationResult result = attestationJwt == null
-                    ? verify(attestationPopJwt)
-                    : verify(attestationJwt, attestationPopJwt);
-            registration = result.registration();
-            resolvedClientId = result.clientId();
-        } else if (EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(clientAttestationType)) {
+        if (EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.equals(method)) {
             if (this.appleAppAttestValidationService == null) {
                 throw new OAuth2AuthenticationException(
                         new OAuth2Error(EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,
-                                "APP_ATTEST attestation type is not supported; "
-                                        + "enable euler.security.authentication.app-attest to use this attestation type", null));
+                                "Apple App Attest credentials are not supported; "
+                                        + "enable euler.security.authentication.app-attest to accept them", null));
             }
 
-            // The converter normalizes both carriages onto the canonical header keys, so this
-            // verifier is transport-agnostic; only the deprecated attestation has no header analog.
-            String challenge = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+            // The converter normalizes every App Attest carriage onto the canonical keys, so this
+            // verifier stays transport-agnostic.
+            AppAttestCredential appleCredential = AppAttestCredential.fromCollectedParameters(collectedParams);
+
+            String challenge = appleCredential.challenge();
             if (!StringUtils.hasText(challenge)) {
-                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+                throw invalidClientAttestation(AppAttestParameterNames.HEADER_CHALLENGE);
             }
 
-            String attestation = (String) collectedParams.get(EulerOAuth2ParameterNames.ATTESTATION);
-            String assertion = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+            String attestation = appleCredential.attestation();
+            String assertion = appleCredential.assertion();
             if (!StringUtils.hasText(attestation) && !StringUtils.hasText(assertion)) {
                 // Reject before consuming, so a malformed request does not burn an otherwise valid
                 // one-time challenge.
-                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+                throw invalidClientAttestation(AppAttestParameterNames.HEADER_ASSERTION);
             }
 
             // Consume the one-time challenge exactly once, before any verification. Consumption is
             // decoupled from verification (both only use the challenge as nonce input), so a single
             // challenge may legitimately back both an attestation and an assertion derived from it.
             if (!this.challengeService.consumeChallenge(challenge)) {
-                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
+                throw invalidClientAttestation(AppAttestParameterNames.HEADER_CHALLENGE);
             }
 
             if (StringUtils.hasText(attestation)) {
@@ -217,17 +216,30 @@ public final class EulerOAuth2ClientAttestationVerifier {
             } else {
                 // Assertion-only fast path; an assertion's authenticator data carries no credentialId,
                 // so the key ID must be supplied to locate the registered App Attest KEY.
-                String keyId = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
+                String keyId = appleCredential.kid();
                 if (!StringUtils.hasText(keyId)) {
-                    throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
+                    throw invalidClientAttestation(AppAttestParameterNames.HEADER_KID);
                 }
                 registration = this.appleAppAttestValidationService.validateAssertion(keyId, assertion, challenge);
                 requireBoundClientId(registration);
             }
 
             resolvedClientId = registration.getClientId();
+        } else if (EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.equals(method)) {
+            String attestationJwt = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION);
+            String attestationPopJwt = (String) collectedParams.get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
+            if (attestationPopJwt == null) {
+                throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP);
+            }
+            PopVerificationResult result = attestationJwt == null
+                    ? verify(attestationPopJwt)
+                    : verify(attestationJwt, attestationPopJwt);
+            registration = result.registration();
+            resolvedClientId = result.clientId();
         } else {
-            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+            throw new OAuth2AuthenticationException(new OAuth2Error(
+                    EulerOAuth2ErrorCodes.INVALID_CLIENT_ATTESTATION,
+                    "Unsupported client authentication method: " + method.getValue(), null));
         }
 
         if (resolvedClientId == null) {

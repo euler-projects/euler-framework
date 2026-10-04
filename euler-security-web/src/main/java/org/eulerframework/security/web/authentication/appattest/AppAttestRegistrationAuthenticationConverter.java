@@ -23,29 +23,29 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
 
 /**
- * Extracts the {@code attestation} and {@code challenge} parameters from an HTTP request
- * and constructs a {@link AppAttestAttestationRegistrationAuthenticationToken}.
+ * Extracts the App Attest attestation and challenge from an HTTP request and constructs an
+ * {@link AppAttestAttestationRegistrationAuthenticationToken}.
  * <p>
- * The key ID is not read from the request: it is derived from the attestation's
- * credential ID during validation, so the client does not need to send it.
+ * Both credential carriages are resolved by {@link AppAttestCredentialResolver} and never mixed:
+ * the {@code App-Attest-*} headers, or the {@code app_attest_*} form parameters.
  * <p>
- * Returns {@code null} if a required parameter is missing, indicating the request
- * is not an App instance registration request.
+ * The key ID is not read from the request: it is derived from the attestation's credential ID
+ * during validation, so the client does not need to send it.
+ * <p>
+ * Returns {@code null} if the attestation or challenge is missing, indicating the request is not
+ * an App instance registration request.
  */
 public class AppAttestRegistrationAuthenticationConverter implements AuthenticationConverter {
 
-    private static final String PARAM_ATTESTATION = "attestation";
-    private static final String PARAM_CHALLENGE = "challenge";
-
     @Override
     public Authentication convert(HttpServletRequest request) {
-        String attestation = request.getParameter(PARAM_ATTESTATION);
-        String challenge = request.getParameter(PARAM_CHALLENGE);
+        AppAttestCredential credential = AppAttestCredentialResolver.resolve(request);
 
-        if (!StringUtils.hasText(attestation) || !StringUtils.hasText(challenge)) {
+        if (!StringUtils.hasText(credential.attestation()) || !StringUtils.hasText(credential.challenge())) {
             return null;
         }
 
-        return AppAttestAttestationRegistrationAuthenticationToken.unauthenticated(attestation, challenge);
+        return AppAttestAttestationRegistrationAuthenticationToken.unauthenticated(
+                credential.attestation(), credential.challenge());
     }
 }

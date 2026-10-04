@@ -17,8 +17,7 @@
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -64,9 +63,9 @@ class EulerAttestationEnrichingPublicClientAuthenticationConverterTest {
         assertEquals("verifier-1", result.getAdditionalParameters().get(PkceParameterNames.CODE_VERIFIER));
         // The attestation is merged in so the provider can verify it from the token.
         assertEquals(CHALLENGE_VALUE,
-                result.getAdditionalParameters().get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE));
+                result.getAdditionalParameters().get(AppAttestParameterNames.HEADER_CHALLENGE));
         assertEquals(KID_VALUE,
-                result.getAdditionalParameters().get(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID));
+                result.getAdditionalParameters().get(AppAttestParameterNames.HEADER_KID));
         // client_id is placed in the parameters for the verifier's Section 6.3 consistency check.
         assertEquals(CLIENT_ID, result.getAdditionalParameters().get(OAuth2ParameterNames.CLIENT_ID));
     }
@@ -93,11 +92,9 @@ class EulerAttestationEnrichingPublicClientAuthenticationConverterTest {
 
     private static Map<String, String> appleHeaders() {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE,
-                EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.value());
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE, CHALLENGE_VALUE);
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID, KID_VALUE);
-        headers.put(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION, ASSERTION_VALUE);
+        headers.put(AppAttestParameterNames.HEADER_CHALLENGE, CHALLENGE_VALUE);
+        headers.put(AppAttestParameterNames.HEADER_KID, KID_VALUE);
+        headers.put(AppAttestParameterNames.HEADER_ASSERTION, ASSERTION_VALUE);
         return headers;
     }
 

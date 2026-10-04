@@ -25,8 +25,14 @@ package org.eulerframework.security.oauth2.core.endpoint;
  * fields and must be read with {@code getHeader}, never {@code getParameter}. Spring Security's
  * own {@code OAuth2ParameterNames} likewise contains no header names. The first two follow
  * <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth">
- * draft-ietf-oauth-attestation-based-client-auth</a>; the rest extend that family for the Apple
- * App Attest variant.
+ * draft-ietf-oauth-attestation-based-client-auth</a>;
+ * {@link #OAUTH_CLIENT_ATTESTATION_TYPE} is a deprecated extension of that family, retained only to
+ * recognize released clients.
+ * <p>
+ * The Apple App Attest variant deliberately has <b>no</b> constants here: it carries its credential
+ * in the App Attest business domain's own names &mdash; the {@code App-Attest-*} headers or the
+ * {@code app_attest_*} form parameters &mdash; rather than in OAuth-specific headers, so the two
+ * business domains share one vocabulary for the same Apple payload.
  * <p>
  * Each name serves a second purpose on the server side: it is also the key under which the value
  * is stored in {@code additionalParameters}, onto which the converters normalize both the header
@@ -50,32 +56,17 @@ public final class EulerOAuth2HeaderNames {
 
     /**
      * Custom extension: Client Attestation type identifier.
-     * Defaults to {@link org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType#JWT} when absent.
+     *
+     * @deprecated the variant is no longer declared but resolved from the credential carriage: an
+     * Apple App Attest credential (the {@code App-Attest-*} headers or the {@code app_attest_*} form
+     * parameters) selects the Apple variant, anything else selects the draft's standard JWT variant.
+     * Retained solely as the discriminator for released clients, which carry the Apple credential in
+     * the deprecated {@code attestation} / {@code assertion} / {@code challenge} / {@code kid} form
+     * parameters &mdash; names too generic to be told apart from an unrelated form parameter, so
+     * carriage cannot identify them. Those clients only call the token endpoint. Removed together
+     * with {@link EulerOAuth2ParameterNames#ATTESTATION}.
      */
+    @Deprecated
     public static final String OAUTH_CLIENT_ATTESTATION_TYPE = "OAuth-Client-Attestation-Type";
-
-    /**
-     * Apple App Attest variant: the key identifier. Required, since an assertion carries no key
-     * identifier of its own.
-     * <p>
-     * Used by the token endpoint and by the dynamic client registration endpoint, whose JSON body
-     * leaves no room for these values.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_KID = "OAuth-Client-Attestation-Kid";
-
-    /**
-     * Apple App Attest variant: the one-time challenge, in its raw form. It is the nonce input to
-     * {@code attestKey} and {@code generateAssertion}, which take its SHA-256 digest.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_CHALLENGE = "OAuth-Client-Attestation-Challenge";
-
-    /**
-     * Apple App Attest variant: the Base64-encoded assertion, proving possession of an
-     * already-registered App Attest key.
-     * <p>
-     * Its presence also selects the header carriage at the token endpoint: a request carrying it
-     * is read entirely from headers and never from the deprecated form parameters.
-     */
-    public static final String OAUTH_CLIENT_ATTESTATION_ASSERTION = "OAuth-Client-Attestation-Assertion";
 
 }

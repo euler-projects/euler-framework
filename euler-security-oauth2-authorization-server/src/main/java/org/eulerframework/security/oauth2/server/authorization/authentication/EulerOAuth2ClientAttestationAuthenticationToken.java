@@ -46,7 +46,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationToken extends OAuth
     /**
      * @param registeredClient            the authenticated client
      * @param clientAuthenticationMethod  the method the client authenticated with
-     *                                    ({@code attest_jwt_client_auth} for the basic path, or the
+     *                                    (an attestation-based method for the basic path, or the
      *                                    traditional method for the enhanced path)
      * @param credentials                 the credential the underlying authentication produced,
      *                                    preserved as-is (may be {@code null})

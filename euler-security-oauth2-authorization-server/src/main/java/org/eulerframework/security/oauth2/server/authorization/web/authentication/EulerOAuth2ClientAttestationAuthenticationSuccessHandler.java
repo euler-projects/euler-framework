@@ -23,6 +23,7 @@ import org.eulerframework.security.oauth2.server.authorization.authentication.Eu
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -45,7 +46,7 @@ import java.util.Map;
  * to the {@code SecurityContext} exactly as that handler does. Running after the traditional
  * credential has been accepted also means a bad credential never burns the one-time challenge.
  * <p>
- * A client that authenticated with {@code attest_jwt_client_auth} is published unchanged: there the
+ * A client that authenticated with an attestation-based method is published unchanged: there the
  * attestation was the credential and
  * {@link org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider}
  * already verified it. For any other method, when the request carries an attestation, this handler
@@ -55,7 +56,7 @@ import java.util.Map;
  * A request with no attestation is published unchanged.
  *
  * @see EulerOAuth2ClientAttestationVerifier
- * @see EulerOAuth2ClientAttestationAuthenticationConverter#collectAttestationParams
+ * @see OAuth2ClientAttestationUtils#collectAttestationParams
  */
 public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -73,16 +74,17 @@ public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler impl
         Authentication result = authentication;
 
         if (authentication instanceof OAuth2ClientAuthenticationToken clientAuthentication
-                && !EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH
-                        .equals(clientAuthentication.getClientAuthenticationMethod())
-                && EulerOAuth2ClientAttestationAuthenticationConverter.carriesAttestationSignal(request)) {
+                && !EulerClientAuthenticationMethod
+                        .isAttestationBased(clientAuthentication.getClientAuthenticationMethod())
+                && OAuth2ClientAttestationUtils.carriesAttestationSignal(request)) {
 
             RegisteredClient registeredClient = clientAuthentication.getRegisteredClient();
             if (registeredClient != null) {
                 Map<String, Object> attestationParams = new HashMap<>();
-                EulerOAuth2ClientAttestationAuthenticationConverter.collectAttestationParams(request, attestationParams);
+                ClientAuthenticationMethod attestationMethod = OAuth2ClientAttestationUtils
+                        .collectAttestationParams(request, attestationParams);
                 EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification verified =
-                        this.clientAttestationVerifier.verify(attestationParams);
+                        this.clientAttestationVerifier.verify(attestationParams, attestationMethod);
 
                 // Section 7.6: an attestation presented alongside a traditional credential must
                 // resolve to the very client that authenticated; a mismatch is rejected, not ignored.
@@ -96,7 +98,7 @@ public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler impl
                 result = new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient,
                         clientAuthentication.getClientAuthenticationMethod(),
                         clientAuthentication.getCredentials(), verified.registration(),
-                        EulerOAuth2ClientAttestationAuthenticationConverter.resolveProof(attestationParams));
+                        OAuth2ClientAttestationUtils.resolveProof(attestationParams));
             }
         }
 

@@ -41,7 +41,7 @@ import java.util.Map;
  * The grant parameters PKCE enforcement needs are already in the token, since the delegate copies
  * every form parameter.
  *
- * @see EulerOAuth2ClientAttestationAuthenticationConverter#collectAttestationParams
+ * @see OAuth2ClientAttestationUtils#collectAttestationParams
  */
 public final class EulerAttestationEnrichingPublicClientAuthenticationConverter implements AuthenticationConverter {
 
@@ -56,7 +56,7 @@ public final class EulerAttestationEnrichingPublicClientAuthenticationConverter 
     public Authentication convert(HttpServletRequest request) {
         Authentication result = this.delegate.convert(request);
         if (!(result instanceof OAuth2ClientAuthenticationToken token)
-                || !EulerOAuth2ClientAttestationAuthenticationConverter.carriesAttestationSignal(request)) {
+                || !OAuth2ClientAttestationUtils.carriesAttestationSignal(request)) {
             return result;
         }
 
@@ -67,7 +67,7 @@ public final class EulerAttestationEnrichingPublicClientAuthenticationConverter 
         }
 
         Map<String, Object> merged = new HashMap<>(token.getAdditionalParameters());
-        EulerOAuth2ClientAttestationAuthenticationConverter.collectAttestationParams(request, merged);
+        OAuth2ClientAttestationUtils.collectAttestationParams(request, merged);
         // Keep the request client_id in the parameters too, so the verifier's Section 6.3
         // consistency check can run it against the client_id the attestation resolves to.
         merged.putIfAbsent(OAuth2ParameterNames.CLIENT_ID, clientId);

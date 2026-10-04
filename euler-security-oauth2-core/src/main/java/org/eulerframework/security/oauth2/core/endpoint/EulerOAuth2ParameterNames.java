@@ -32,8 +32,8 @@ public final class EulerOAuth2ParameterNames {
     /**
      * Apple App Attest key identifier, submitted as a token endpoint form parameter.
      *
-     * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_KID} header; see
-     * {@link #ATTESTATION} for the retirement of the whole form parameter vocabulary.
+     * @deprecated use the {@code App-Attest-Kid} header, or the {@code app_attest_kid} form
+     * parameter; see {@link #ATTESTATION} for the retirement of the whole form parameter vocabulary.
      */
     @Deprecated
     public static final String KEY_ID = "kid";
@@ -46,12 +46,14 @@ public final class EulerOAuth2ParameterNames {
      * parameter vocabulary at the token endpoint</b>, which covers this constant together with
      * {@link #KEY_ID}, {@link #ASSERTION} and {@link #CHALLENGE}. The concepts do not go away:
      * an assertion remains the only accepted proof and a challenge remains its required nonce.
-     * What is retired is carrying them as form parameters, in favour of the
-     * {@code OAuth-Client-Attestation-*} headers named by {@link EulerOAuth2HeaderNames}.
+     * What is retired is carrying them under these names, in favour of the App Attest business
+     * domain's own carriage: the {@code App-Attest-*} headers or the {@code app_attest_*} form
+     * parameters.
      *
      * @deprecated App instance registration belongs to the dedicated registration endpoint
-     * ({@code POST /app_attest/register}) and the OAuth2 flow is assertion-only, so no header
-     * analog exists for an attestation. Retained because released STATIC clients still register
+     * ({@code POST /app_attest/register}) and the OAuth2 flow is assertion-only, so the App Attest
+     * carriage at the OAuth2 endpoints accepts no attestation and this parameter survives only in
+     * the deprecated form vocabulary. Retained because released STATIC clients still register
      * here, and removed together with the {@code app_assertion} grant and the device-to-user
      * mapping — the only flows that need an attestation at the token endpoint.
      */
@@ -62,8 +64,8 @@ public final class EulerOAuth2ParameterNames {
      * Base64-encoded Apple App Attest assertion object, submitted as a token endpoint form
      * parameter to prove possession of an already-registered App Attest key.
      *
-     * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_ASSERTION} header;
-     * see {@link #ATTESTATION}.
+     * @deprecated use the {@code App-Attest-Assertion} header, or the {@code app_attest_assertion}
+     * form parameter; see {@link #ATTESTATION}.
      */
     @Deprecated
     public static final String ASSERTION = "assertion";
@@ -73,8 +75,8 @@ public final class EulerOAuth2ParameterNames {
      * form parameter in its raw form. It is the nonce input to {@code attestKey} and
      * {@code generateAssertion}, which take its SHA-256 digest.
      *
-     * @deprecated use the {@link EulerOAuth2HeaderNames#OAUTH_CLIENT_ATTESTATION_CHALLENGE} header;
-     * see {@link #ATTESTATION}.
+     * @deprecated use the {@code App-Attest-Challenge} header, or the {@code app_attest_challenge}
+     * form parameter; see {@link #ATTESTATION}.
      */
     @Deprecated
     public static final String CHALLENGE = "challenge";

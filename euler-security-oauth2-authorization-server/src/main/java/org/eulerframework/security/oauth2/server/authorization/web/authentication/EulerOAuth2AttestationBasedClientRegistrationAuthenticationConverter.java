@@ -16,10 +16,11 @@
 package org.eulerframework.security.oauth2.server.authorization.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.security.oauth2.core.EulerOAuth2ClientAttestationType;
 import org.eulerframework.security.oauth2.core.EulerOAuth2ErrorCodes;
-import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2HeaderNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken;
+import org.eulerframework.security.web.authentication.appattest.AppAttestCredential;
+import org.eulerframework.security.web.authentication.appattest.AppAttestCredentialResolver;
+import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.security.core.Authentication;
@@ -42,7 +43,7 @@ import org.springframework.util.StringUtils;
  * the {@code DelegatingAuthenticationConverter} reaches only when this one returns {@code null}.
  * The two converters split the RFC 7591 registration endpoint by credential:
  * <ul>
- *   <li>App Attest headers present &rarr; this converter, taking precedence even when a bearer
+ *   <li>an App Attest credential present &rarr; this converter, taking precedence even when a bearer
  *       token is also present, since the assertion is the more specific credential</li>
  *   <li>an authenticated initial access token &rarr; {@code null}, falling through to Spring's
  *       converter and its {@code OAuth2ClientRegistrationAuthenticationProvider}</li>
@@ -70,8 +71,9 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationCo
 
     @Override
     public Authentication convert(HttpServletRequest request) {
-        if (carriesClientAttestation(request)) {
-            return convertClientAttestation(request);
+        AppAttestCredential credential = AppAttestCredentialResolver.resolve(request);
+        if (credential.isPresent()) {
+            return convertClientAttestation(request, credential);
         }
 
         if (!isInitialAccessTokenAuthenticated()) {
@@ -84,50 +86,31 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationCo
     }
 
     /**
-     * Validate the App Attest headers structurally, then read the request body. The checks are
-     * deliberately limited to header presence and shape so that an unauthenticated caller cannot
-     * get the body parsed by sending headers that are merely well-formed; consuming the challenge
-     * and verifying the assertion stay in the provider, where side effects and crypto belong.
+     * Validate the App Attest credential structurally, then read the request body. The checks are
+     * deliberately limited to field presence and shape so that an unauthenticated caller cannot get
+     * the body parsed by sending fields that are merely well-formed; consuming the challenge and
+     * verifying the assertion stay in the provider, where side effects and crypto belong.
+     * <p>
+     * Unlike the token endpoint, this endpoint knows no deprecated carriage: released clients never
+     * registered dynamically, so the credential is read from the App Attest carriage alone.
      */
-    private Authentication convertClientAttestation(HttpServletRequest request) {
-        // Checked for presence before parsing: parse rejects an unknown value on its own, and
-        // without this an absent header would be reported as an unsupported type of "null"
-        // rather than as the missing header it is.
-        String type = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
-        if (!StringUtils.hasText(type)
-                || !EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.equals(EulerOAuth2ClientAttestationType.parse(type))) {
-            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE);
+    private Authentication convertClientAttestation(HttpServletRequest request, AppAttestCredential credential) {
+        // The credential rides the App Attest carriage shared with /app_attest/**: the App-Attest-*
+        // headers or the app_attest_* form parameters, never a mix of the two.
+        if (!StringUtils.hasText(credential.kid())) {
+            throw invalidClientAttestation(AppAttestParameterNames.HEADER_KID);
         }
 
-        String keyId = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
-        if (!StringUtils.hasText(keyId)) {
-            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID);
+        if (!StringUtils.hasText(credential.challenge())) {
+            throw invalidClientAttestation(AppAttestParameterNames.HEADER_CHALLENGE);
         }
 
-        String challenge = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
-        if (!StringUtils.hasText(challenge)) {
-            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE);
-        }
-
-        String assertion = request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
-        if (!StringUtils.hasText(assertion)) {
-            throw invalidClientAttestation(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION);
+        if (!StringUtils.hasText(credential.assertion())) {
+            throw invalidClientAttestation(AppAttestParameterNames.HEADER_ASSERTION);
         }
 
         return new EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken(
-                readClientRegistration(request), keyId, challenge, assertion);
-    }
-
-    /**
-     * Whether the request carries any App Attest header. Any one of them routes the request here
-     * rather than to Spring's converter, so that a partially formed attempt is reported as the
-     * specific missing header instead of as an uncredentialed registration.
-     */
-    private static boolean carriesClientAttestation(HttpServletRequest request) {
-        return StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE))
-                || StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_KID))
-                || StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_CHALLENGE))
-                || StringUtils.hasText(request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_ASSERTION));
+                readClientRegistration(request), credential.kid(), credential.challenge(), credential.assertion());
     }
 
     /**
