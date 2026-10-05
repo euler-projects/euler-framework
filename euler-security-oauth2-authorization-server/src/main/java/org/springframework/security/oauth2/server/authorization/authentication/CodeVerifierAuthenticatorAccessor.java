@@ -26,9 +26,11 @@ import org.springframework.util.Assert;
  * {@code code_verifier} check Spring performs for its own client authentication providers can be
  * reused from another package.
  * <p>
- * {@code authenticateIfAvailable} is forwarded rather than {@code authenticateRequired} because it
- * self-gates on the grant type: a no-op for any grant other than {@code authorization_code}, so
- * callers can invoke it unconditionally.
+ * Both entry points are exposed because they serve different client authentication semantics:
+ * {@link #authenticateIfAvailable} self-gates on the grant type and is suitable for a client's own
+ * authentication method, while {@link #authenticateRequired} additionally rejects a request that is
+ * not an {@code authorization_code} + PKCE request and is used when a client declares
+ * {@code token_endpoint_auth_method=none}.
  *
  * @see CodeVerifierAuthenticator
  */
@@ -44,5 +46,10 @@ public class CodeVerifierAuthenticatorAccessor {
     public void authenticateIfAvailable(OAuth2ClientAuthenticationToken clientAuthentication,
                                         RegisteredClient registeredClient) {
         this.codeVerifierAuthenticator.authenticateIfAvailable(clientAuthentication, registeredClient);
+    }
+
+    public void authenticateRequired(OAuth2ClientAuthenticationToken clientAuthentication,
+                                     RegisteredClient registeredClient) {
+        this.codeVerifierAuthenticator.authenticateRequired(clientAuthentication, registeredClient);
     }
 }

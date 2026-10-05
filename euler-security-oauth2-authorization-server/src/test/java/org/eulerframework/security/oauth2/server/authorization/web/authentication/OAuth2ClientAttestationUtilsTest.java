@@ -242,17 +242,6 @@ class OAuth2ClientAttestationUtilsTest {
         assertTrue(AppAttestCredentialResolver.isHeaderCarried(request(headers, Map.of())));
     }
 
-    @Test
-    void carriesAttestationSignalDetectsAnyOfTheAttestationHeaders() {
-        assertFalse(OAuth2ClientAttestationUtils.carriesAttestationSignal(request(Map.of(), Map.of())));
-        assertTrue(OAuth2ClientAttestationUtils.carriesAttestationSignal(
-                request(Map.of(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE,
-                        EulerOAuth2ClientAttestationType.APPLE_APP_ATTEST.value()), Map.of())));
-        assertTrue(OAuth2ClientAttestationUtils.carriesAttestationSignal(
-                request(Map.of(AppAttestParameterNames.HEADER_ASSERTION, "assertion-1"), Map.of())),
-                "the App Attest carriage is a signal on its own, without the deprecated type header");
-    }
-
     // ---- helpers ----
 
     private static Map<String, Object> collect(HttpServletRequest request) {

@@ -28,7 +28,6 @@ import org.eulerframework.security.oauth2.server.authorization.converter.EulerOA
 import org.eulerframework.security.oauth2.server.authorization.converter.EulerRegisteredClientOAuth2ClientRegistrationConverter;
 import org.eulerframework.security.oauth2.server.authorization.oidc.authentication.UserDetailsOidcUserInfoMapper;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2AttestationBasedClientRegistrationAuthenticationConverter;
-import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerAttestationEnrichingPublicClientAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationSuccessHandler;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter;
@@ -46,6 +45,7 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.web.authentication.PublicClientAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -224,20 +224,18 @@ public class EulerAuthorizationServerConfiguration {
                 .getEulerOAuth2ClientAttestationAuthenticationProvider(http);
         EulerOAuth2ClientAttestationAuthenticationSuccessHandler attestSuccessHandler =
                 new EulerOAuth2ClientAttestationAuthenticationSuccessHandler(
-                        EulerOAuth2ConfigurerUtils.getEulerOAuth2ClientAttestationVerifier(http));
+                        EulerOAuth2ConfigurerUtils.getEulerOAuth2ClientAttestationVerifier(http),
+                        attestConverter);
 
-        // Compose with Spring's client authentication instead of adding a filter. The attestation
-        // converter and provider are appended to the ends of their chains, so a request presenting a
-        // traditional credential is claimed by that credential's converter first; PublicClient's
-        // converter is decorated rather than replaced, so it keeps claiming PKCE-shaped requests.
+        // Keep Spring's traditional credential converters first. The attestation converter goes
+        // immediately before PublicClientAuthenticationConverter so an attestation-bearing PKCE
+        // request is represented by its actual attestation method instead of being mislabeled NONE;
+        // a genuine public-client request, which carries no attestation, still falls through to
+        // Spring unchanged.
         http.oauth2AuthorizationServer(oauth2 -> oauth2
                 .clientAuthentication(clientAuth -> clientAuth
-                        .authenticationConverters(converters -> {
-                            converters.replaceAll(converter -> converter instanceof PublicClientAuthenticationConverter publicClientAuthenticationConverter
-                                    ? new EulerAttestationEnrichingPublicClientAuthenticationConverter(publicClientAuthenticationConverter)
-                                    : converter);
-                            converters.add(attestConverter);
-                        })
+                        .authenticationConverters(converters ->
+                                insertBeforePublicClientConverter(converters, attestConverter))
                         .authenticationProviders(providers -> providers.add(attestProvider))
                         .authenticationSuccessHandler(attestSuccessHandler)));
 
@@ -296,6 +294,17 @@ public class EulerAuthorizationServerConfiguration {
                             .authenticationProvider(grantProvider)
                             .accessTokenRequestConverter(new OAuth2AppAssertionAuthenticationConverter())));
         }
+    }
+
+    static void insertBeforePublicClientConverter(List<AuthenticationConverter> converters,
+                                                  AuthenticationConverter attestationConverter) {
+        for (int i = 0; i < converters.size(); i++) {
+            if (converters.get(i) instanceof PublicClientAuthenticationConverter) {
+                converters.add(i, attestationConverter);
+                return;
+            }
+        }
+        throw new IllegalStateException("PublicClientAuthenticationConverter is not configured");
     }
 
     /**

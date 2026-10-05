@@ -40,16 +40,4 @@ public class EulerClientAuthenticationMethod {
      */
     public static final ClientAuthenticationMethod ATTEST_APPATTEST_CLIENT_AUTH = new ClientAuthenticationMethod(
             "attest_appattest_client_auth");
-
-    /**
-     * Whether the given method is one of the attestation-based client authentication methods, i.e.
-     * {@link #ATTEST_JWT_CLIENT_AUTH} or {@link #ATTEST_APPATTEST_CLIENT_AUTH}. Useful where the
-     * variant is not yet known, such as before the credential has been verified.
-     *
-     * @param method the client authentication method to test
-     * @return {@code true} if the method is attestation-based
-     */
-    public static boolean isAttestationBased(ClientAuthenticationMethod method) {
-        return ATTEST_JWT_CLIENT_AUTH.equals(method) || ATTEST_APPATTEST_CLIENT_AUTH.equals(method);
-    }
 }

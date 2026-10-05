@@ -30,13 +30,21 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
 import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -47,13 +55,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests for {@link EulerOAuth2ClientAttestationAuthenticationProvider}, the basic path in which the
- * attestation is the client's credential. It admits two token shapes &mdash; an attestation-based
- * method token from the appended converter, and a {@code NONE} token carrying
- * an attestation and a {@code code_verifier} that {@code PublicClientAuthenticationProvider} declined
- * &mdash; verifies the attestation, resolves and validates the client, and enforces PKCE. What is
- * asserted here is that routing and those gates; the attestation cryptography itself is covered by
- * {@link EulerOAuth2ClientAttestationVerifierTest}, and PKCE by Spring's {@code CodeVerifierAuthenticator}.
+ * Tests for {@link EulerOAuth2ClientAttestationAuthenticationProvider}. Its input is always an
+ * attestation-based request token: the converter now precedes Spring's public-client converter, so
+ * PKCE does not change that shape. After the attestation resolves the authoritative client, the
+ * provider either accepts it as the client's own authentication method or, for a client declaring
+ * {@code none}, requires PKCE and carries it as an additional signal.
  */
 class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
@@ -128,43 +134,42 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
         assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, ex.getError().getErrorCode());
     }
 
-    // ---- PKCE-shaped path: NONE token declined by PublicClient ----
+    // ---- public client: PKCE + attestation as an additional signal ----
 
     @Test
-    void authenticatesAPkceShapedTokenFromAnAttestOnlyClient() {
+    void authenticatesPublicClientWithAttestationAsAdditionalSignal() {
+        RegisteredClient client = publicClient();
         RecordingValidationService validationService = new RecordingValidationService();
-        // The client's real method is attest_appattest_client_auth (no NONE), so PublicClient's
-        // provider declined this authorization_code + PKCE token and ProviderManager routed it here.
-        EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(attestClient(), validationService);
+        EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(
+                client, validationService, authorizationService(client, "verifier-1"));
 
-        Map<String, Object> params = appleParams();
-        params.put(PkceParameterNames.CODE_VERIFIER, "verifier-1");
-        Authentication result = provider.authenticate(new OAuth2ClientAuthenticationToken(
-                CLIENT_ID, ClientAuthenticationMethod.NONE, null, params));
+        Map<String, Object> params = authorizationCodeParams("verifier-1");
+        EulerOAuth2ClientAttestationAuthenticationToken authenticated =
+                (EulerOAuth2ClientAttestationAuthenticationToken) provider.authenticate(attestToken(params));
 
-        assertTrue(result.isAuthenticated());
-        OAuth2ClientAuthenticationToken authenticated = (OAuth2ClientAuthenticationToken) result;
-        assertEquals(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH,
-                authenticated.getClientAuthenticationMethod());
+        assertEquals(ClientAuthenticationMethod.NONE, authenticated.getClientAuthenticationMethod(),
+                "the attestation is an additional signal; the public client's method remains none");
         assertEquals(CLIENT_ID, authenticated.getRegisteredClient().getClientId());
+        assertSame(validationService.lastAssertionResult, authenticated.getVerifiedRegistration());
+        assertEquals(1, validationService.assertionCalls.get());
     }
 
     @Test
-    void declinesAPkceShapedTokenFromAGenuinePublicClient() {
-        // The client declares NONE, so this is a public client whose attestation is only an
-        // additional signal (or whose PKCE failed); it must be left to surface its own outcome, and
-        // the one-time challenge must not be burned here.
+    void requiresValidPkceForPublicClientAdditionalSignal() {
+        RegisteredClient client = publicClient();
         RecordingValidationService validationService = new RecordingValidationService();
-        EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(publicClient(), validationService);
+        EulerOAuth2ClientAttestationAuthenticationProvider provider = provider(
+                client, validationService, authorizationService(client, "expected-verifier"));
 
-        Map<String, Object> params = appleParams();
-        params.put(PkceParameterNames.CODE_VERIFIER, "verifier-1");
-        assertNull(provider.authenticate(new OAuth2ClientAuthenticationToken(
-                CLIENT_ID, ClientAuthenticationMethod.NONE, null, params)));
-        assertEquals(0, validationService.assertionCalls.get(), "declined before verifying");
+        OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
+                () -> provider.authenticate(attestToken(authorizationCodeParams("wrong-verifier"))));
+
+        assertEquals(OAuth2ErrorCodes.INVALID_GRANT, ex.getError().getErrorCode());
+        assertEquals(1, validationService.assertionCalls.get(),
+                "the attestation resolves the authoritative client before its NONE method requires PKCE");
     }
 
-    // ---- PKCE enforcement ----
+    // ---- PKCE enforcement for attestation-authenticated clients ----
 
     @Test
     void enforcesPkceForAnAuthorizationCodeRequest() {
@@ -198,17 +203,66 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
                 "(attestation)", EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, null, params);
     }
 
+    private static Map<String, Object> authorizationCodeParams(String codeVerifier) {
+        Map<String, Object> params = appleParams();
+        params.put(OAuth2ParameterNames.CLIENT_ID, CLIENT_ID);
+        params.put(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.AUTHORIZATION_CODE.getValue());
+        params.put(OAuth2ParameterNames.CODE, "code-1");
+        params.put(PkceParameterNames.CODE_VERIFIER, codeVerifier);
+        return params;
+    }
+
+    private static InMemoryOAuth2AuthorizationService authorizationService(
+            RegisteredClient client, String codeVerifier) {
+        InMemoryOAuth2AuthorizationService service = new InMemoryOAuth2AuthorizationService();
+        OAuth2AuthorizationRequest authorizationRequest = OAuth2AuthorizationRequest.authorizationCode()
+                .authorizationUri("https://as.example/oauth2/authorize")
+                .clientId(CLIENT_ID)
+                .redirectUri("https://example.com/callback")
+                .additionalParameters(parameters -> {
+                    parameters.put(PkceParameterNames.CODE_CHALLENGE, s256(codeVerifier));
+                    parameters.put(PkceParameterNames.CODE_CHALLENGE_METHOD, "S256");
+                })
+                .build();
+        Instant issuedAt = Instant.now();
+        OAuth2Authorization authorization = OAuth2Authorization.withRegisteredClient(client)
+                .id("authorization-1")
+                .principalName("user-1")
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .attribute(OAuth2AuthorizationRequest.class.getName(), authorizationRequest)
+                .token(new OAuth2AuthorizationCode("code-1", issuedAt, issuedAt.plusSeconds(300)))
+                .build();
+        service.save(authorization);
+        return service;
+    }
+
+    private static String s256(String codeVerifier) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(digest.digest(codeVerifier.getBytes(StandardCharsets.US_ASCII)));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
     private static EulerOAuth2ClientAttestationAuthenticationProvider provider(RegisteredClient client) {
         return provider(client, new RecordingValidationService());
     }
 
     private static EulerOAuth2ClientAttestationAuthenticationProvider provider(
             RegisteredClient client, AppleAppAttestValidationService validationService) {
+        return provider(client, validationService, new InMemoryOAuth2AuthorizationService());
+    }
+
+    private static EulerOAuth2ClientAttestationAuthenticationProvider provider(
+            RegisteredClient client, AppleAppAttestValidationService validationService,
+            InMemoryOAuth2AuthorizationService authorizationService) {
         EulerOAuth2ClientAttestationVerifier verifier = new EulerOAuth2ClientAttestationVerifier(
                 new RecordingChallengeService(), new InMemoryNonceService());
         verifier.setAppleAppAttestValidationService(validationService);
         return new EulerOAuth2ClientAttestationAuthenticationProvider(
-                new FakeRegisteredClientRepository(client), verifier, new InMemoryOAuth2AuthorizationService());
+                new FakeRegisteredClientRepository(client), verifier, authorizationService);
     }
 
     private static RegisteredClient attestClient() {
@@ -233,6 +287,8 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .redirectUri("https://example.com/callback")
+                .clientSettings(org.springframework.security.oauth2.server.authorization.settings.ClientSettings
+                        .builder().requireProofKey(true).build())
                 .build();
     }
 
@@ -267,6 +323,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
 
         final java.util.concurrent.atomic.AtomicInteger assertionCalls = new java.util.concurrent.atomic.AtomicInteger();
         private final AppAttestAttestationRegistration[] capture;
+        private AppAttestAttestationRegistration lastAssertionResult;
 
         RecordingValidationService() {
             this(null);
@@ -285,6 +342,7 @@ class EulerOAuth2ClientAttestationAuthenticationProviderTest {
         public AppAttestAttestationRegistration validateAssertion(String keyId, String assertion, String challenge) {
             this.assertionCalls.incrementAndGet();
             AppAttestAttestationRegistration result = registration(keyId, CLIENT_ID);
+            this.lastAssertionResult = result;
             if (this.capture != null) {
                 this.capture[0] = result;
             }

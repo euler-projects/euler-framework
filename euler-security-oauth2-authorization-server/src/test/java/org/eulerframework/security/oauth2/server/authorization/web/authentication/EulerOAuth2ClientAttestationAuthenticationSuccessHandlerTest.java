@@ -80,19 +80,30 @@ class EulerOAuth2ClientAttestationAuthenticationSuccessHandlerTest {
 
     @Test
     void skipsEnhancementForTheBasicAttestPath() {
-        // method == attest_appattest_client_auth: the provider already verified the attestation and
-        // carried the registration; the handler must not verify again (which would double-consume
-        // the challenge).
+        // The provider already verified the attestation and carried the registration; the handler
+        // must recognize the result-token shape rather than infer that from a particular method.
         RecordingValidationService validationService = new RecordingValidationService();
         EulerOAuth2ClientAttestationAuthenticationSuccessHandler handler = handler(validationService);
-        AppAttestAttestationRegistration registration = registration(KID_VALUE, CLIENT_ID);
-        OAuth2ClientAuthenticationToken result = new OAuth2ClientAuthenticationToken(
-                attestClient(), EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, registration);
+        OAuth2ClientAuthenticationToken result = verifiedResult(
+                attestClient(), EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH);
 
         handler.onAuthenticationSuccess(request(appleHeaders(), Map.of()), null, result);
 
         assertSame(result, SecurityContextHolder.getContext().getAuthentication());
         assertEquals(0, validationService.assertionCalls.get(), "the basic path is not re-verified here");
+    }
+
+    @Test
+    void skipsEnhancementForPublicClientResultAlreadyVerifiedByTheProvider() {
+        RecordingValidationService validationService = new RecordingValidationService();
+        EulerOAuth2ClientAttestationAuthenticationSuccessHandler handler = handler(validationService);
+        OAuth2ClientAuthenticationToken result = verifiedResult(publicClient(), ClientAuthenticationMethod.NONE);
+
+        handler.onAuthenticationSuccess(request(appleHeaders(), Map.of()), null, result);
+
+        assertSame(result, SecurityContextHolder.getContext().getAuthentication());
+        assertEquals(0, validationService.assertionCalls.get(),
+                "NONE + PKCE already carried the attestation as an additional signal through the provider");
     }
 
     @Test
@@ -138,7 +149,8 @@ class EulerOAuth2ClientAttestationAuthenticationSuccessHandlerTest {
         EulerOAuth2ClientAttestationVerifier verifier = new EulerOAuth2ClientAttestationVerifier(
                 new RecordingChallengeService(), new InMemoryNonceService());
         verifier.setAppleAppAttestValidationService(validationService);
-        return new EulerOAuth2ClientAttestationAuthenticationSuccessHandler(verifier);
+        return new EulerOAuth2ClientAttestationAuthenticationSuccessHandler(verifier,
+                new EulerOAuth2ClientAttestationAuthenticationConverter());
     }
 
     private static OAuth2ClientAuthenticationToken traditionalResult(RegisteredClient client) {
@@ -146,11 +158,26 @@ class EulerOAuth2ClientAttestationAuthenticationSuccessHandlerTest {
                 client, ClientAuthenticationMethod.CLIENT_SECRET_BASIC, TRADITIONAL_CREDENTIAL);
     }
 
+    private static OAuth2ClientAuthenticationToken verifiedResult(
+            RegisteredClient client, ClientAuthenticationMethod method) {
+        return new EulerOAuth2ClientAttestationAuthenticationToken(client, method, null,
+                registration(KID_VALUE, CLIENT_ID), EulerClientAttestationProof.ASSERTION);
+    }
+
     private static RegisteredClient secretClient() {
         return RegisteredClient.withId("id-secret")
                 .clientId(CLIENT_ID)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .build();
+    }
+
+    private static RegisteredClient publicClient() {
+        return RegisteredClient.withId("id-public")
+                .clientId(CLIENT_ID)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("https://example.com/callback")
                 .build();
     }
 

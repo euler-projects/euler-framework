@@ -24,7 +24,6 @@ import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.endpoint.EulerOAuth2ParameterNames;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider;
 import org.eulerframework.security.web.authentication.appattest.AppAttestParameterNames;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
@@ -33,10 +32,12 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 
 /**
  * The {@link AuthenticationConverter} for the attestation-based client authentication methods
- * ({@code attest_jwt_client_auth} and {@code attest_appattest_client_auth}), registered at the
- * <i>end</i> of the {@code OAuth2ClientAuthenticationFilter} converter chain, so it claims only a
- * request no traditional converter claimed &mdash; one whose attestation is therefore its sole
- * credential rather than an overlay on one.
+ * ({@code attest_jwt_client_auth} and {@code attest_appattest_client_auth}), registered after
+ * Spring's traditional credential converters and immediately before its
+ * {@code PublicClientAuthenticationConverter}. Traditional credentials therefore retain priority;
+ * among otherwise unclaimed requests, an attestation-bearing PKCE request keeps its actual
+ * attestation method instead of being labeled {@code none}, while a request with no attestation
+ * continues to Spring's public-client converter.
  * <p>
  * {@link #convert} collects the attestation and the grant parameters into a token; it never verifies.
  * Reading the attestation off the request belongs to {@link OAuth2ClientAttestationUtils}, which the
@@ -73,6 +74,9 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
      */
     private static final String[] CONSUMED_PARAMETER_EXCLUSIONS = {
             OAuth2ParameterNames.CLIENT_ID,
+            OAuth2ParameterNames.CLIENT_SECRET,
+            OAuth2ParameterNames.CLIENT_ASSERTION_TYPE,
+            OAuth2ParameterNames.CLIENT_ASSERTION,
             AppAttestParameterNames.PARAM_ATTESTATION,
             AppAttestParameterNames.PARAM_KID,
             AppAttestParameterNames.PARAM_CHALLENGE,
@@ -84,9 +88,9 @@ public final class EulerOAuth2ClientAttestationAuthenticationConverter implement
     };
 
     @Override
-    public Authentication convert(HttpServletRequest request) {
-        // Runs last, so a request presenting a traditional credential (including a PKCE-shaped one)
-        // was claimed earlier and never reaches here.
+    public OAuth2ClientAuthenticationToken convert(HttpServletRequest request) {
+        // Traditional credential converters run first. If none claimed the request, capture an
+        // attestation before Spring's shape-only public-client converter can label it NONE.
         Map<String, Object> additionalParameters = new HashMap<>();
         ClientAuthenticationMethod method =
                 OAuth2ClientAttestationUtils.collectAttestationParams(request, additionalParameters);

@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
@@ -331,7 +332,9 @@ class EulerOAuth2ClientAttestationVerifierTest {
      */
     private static EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification verifyApple(
             EulerOAuth2ClientAttestationVerifier verifier, Map<String, Object> params) {
-        return verifier.verify(params, EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH);
+        OAuth2ClientAuthenticationToken clientAuthentication = new OAuth2ClientAuthenticationToken(
+                "(attestation)", EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, null, params);
+        return verifier.verify(clientAuthentication);
     }
 
     private static Map<String, Object> appleParams() {

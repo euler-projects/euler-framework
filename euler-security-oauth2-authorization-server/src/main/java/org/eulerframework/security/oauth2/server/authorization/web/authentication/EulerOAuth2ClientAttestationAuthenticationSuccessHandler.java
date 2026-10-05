@@ -17,13 +17,11 @@ package org.eulerframework.security.oauth2.server.authorization.web.authenticati
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationToken;
 import org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationVerifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -31,9 +29,6 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.Assert;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The {@link AuthenticationSuccessHandler} for {@code OAuth2ClientAuthenticationFilter} that applies
@@ -46,26 +41,30 @@ import java.util.Map;
  * to the {@code SecurityContext} exactly as that handler does. Running after the traditional
  * credential has been accepted also means a bad credential never burns the one-time challenge.
  * <p>
- * A client that authenticated with an attestation-based method is published unchanged: there the
- * attestation was the credential and
- * {@link org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationProvider}
- * already verified it. For any other method, when the request carries an attestation, this handler
- * verifies it, enforces the Section 7.6 requirement that it resolve to the very client that
- * authenticated, and republishes that client as an
+ * An {@link EulerOAuth2ClientAttestationAuthenticationToken} is published unchanged: the
+ * attestation provider already verified its signal, whether it was the client's authentication
+ * method or an additional signal on top of {@code none} + PKCE. For any other successful method,
+ * when the request carries an attestation this handler verifies it, enforces the Section 7.6
+ * requirement that it resolve to the very client that authenticated, and republishes that client as
+ * an
  * {@link org.eulerframework.security.oauth2.server.authorization.authentication.EulerOAuth2ClientAttestationAuthenticationToken}.
  * A request with no attestation is published unchanged.
  *
  * @see EulerOAuth2ClientAttestationVerifier
- * @see OAuth2ClientAttestationUtils#collectAttestationParams
+ * @see EulerOAuth2ClientAttestationAuthenticationConverter
  */
 public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final EulerOAuth2ClientAttestationVerifier clientAttestationVerifier;
+    private final EulerOAuth2ClientAttestationAuthenticationConverter clientAttestationConverter;
 
     public EulerOAuth2ClientAttestationAuthenticationSuccessHandler(
-            EulerOAuth2ClientAttestationVerifier clientAttestationVerifier) {
+            EulerOAuth2ClientAttestationVerifier clientAttestationVerifier,
+            EulerOAuth2ClientAttestationAuthenticationConverter clientAttestationConverter) {
         Assert.notNull(clientAttestationVerifier, "clientAttestationVerifier must not be null");
+        Assert.notNull(clientAttestationConverter, "clientAttestationConverter must not be null");
         this.clientAttestationVerifier = clientAttestationVerifier;
+        this.clientAttestationConverter = clientAttestationConverter;
     }
 
     @Override
@@ -74,17 +73,14 @@ public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler impl
         Authentication result = authentication;
 
         if (authentication instanceof OAuth2ClientAuthenticationToken clientAuthentication
-                && !EulerClientAuthenticationMethod
-                        .isAttestationBased(clientAuthentication.getClientAuthenticationMethod())
-                && OAuth2ClientAttestationUtils.carriesAttestationSignal(request)) {
+                && !(authentication instanceof EulerOAuth2ClientAttestationAuthenticationToken)) {
 
             RegisteredClient registeredClient = clientAuthentication.getRegisteredClient();
-            if (registeredClient != null) {
-                Map<String, Object> attestationParams = new HashMap<>();
-                ClientAuthenticationMethod attestationMethod = OAuth2ClientAttestationUtils
-                        .collectAttestationParams(request, attestationParams);
+            OAuth2ClientAuthenticationToken attestationAuthentication =
+                    this.clientAttestationConverter.convert(request);
+            if (registeredClient != null && attestationAuthentication != null) {
                 EulerOAuth2ClientAttestationVerifier.ClientAttestationVerification verified =
-                        this.clientAttestationVerifier.verify(attestationParams, attestationMethod);
+                        this.clientAttestationVerifier.verify(attestationAuthentication);
 
                 // Section 7.6: an attestation presented alongside a traditional credential must
                 // resolve to the very client that authenticated; a mismatch is rejected, not ignored.
@@ -98,7 +94,8 @@ public final class EulerOAuth2ClientAttestationAuthenticationSuccessHandler impl
                 result = new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient,
                         clientAuthentication.getClientAuthenticationMethod(),
                         clientAuthentication.getCredentials(), verified.registration(),
-                        OAuth2ClientAttestationUtils.resolveProof(attestationParams));
+                        OAuth2ClientAttestationUtils.resolveProof(
+                                attestationAuthentication.getAdditionalParameters()));
             }
         }
 

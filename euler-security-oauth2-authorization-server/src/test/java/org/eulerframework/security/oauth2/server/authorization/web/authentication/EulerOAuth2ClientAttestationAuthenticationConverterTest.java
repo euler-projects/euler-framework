@@ -93,6 +93,9 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
         form.put(OAuth2ParameterNames.GRANT_TYPE, "authorization_code");
         form.put(OAuth2ParameterNames.CODE, "code-1");
         form.put(PkceParameterNames.CODE_VERIFIER, "verifier-1");
+        form.put(OAuth2ParameterNames.CLIENT_SECRET, "consumed-secret");
+        form.put(OAuth2ParameterNames.CLIENT_ASSERTION_TYPE, "consumed-assertion-type");
+        form.put(OAuth2ParameterNames.CLIENT_ASSERTION, "consumed-client-assertion");
         form.put(AppAttestParameterNames.PARAM_KID, "kid-from-form");
 
         OAuth2ClientAuthenticationToken token =
@@ -101,6 +104,9 @@ class EulerOAuth2ClientAttestationAuthenticationConverterTest {
         assertEquals("authorization_code", token.getAdditionalParameters().get(OAuth2ParameterNames.GRANT_TYPE));
         assertEquals("code-1", token.getAdditionalParameters().get(OAuth2ParameterNames.CODE));
         assertEquals("verifier-1", token.getAdditionalParameters().get(PkceParameterNames.CODE_VERIFIER));
+        assertNull(token.getAdditionalParameters().get(OAuth2ParameterNames.CLIENT_SECRET));
+        assertNull(token.getAdditionalParameters().get(OAuth2ParameterNames.CLIENT_ASSERTION_TYPE));
+        assertNull(token.getAdditionalParameters().get(OAuth2ParameterNames.CLIENT_ASSERTION));
         assertNull(token.getAdditionalParameters().get(AppAttestParameterNames.PARAM_KID),
                 "the attestation collection already consumed it under its canonical key, so the raw "
                         + "form name must not ride along as a second, ambiguous copy");

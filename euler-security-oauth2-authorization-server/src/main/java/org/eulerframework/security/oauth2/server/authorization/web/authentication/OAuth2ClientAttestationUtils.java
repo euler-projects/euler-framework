@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.util.StringUtils;
 
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
@@ -40,16 +41,14 @@ import org.eulerframework.security.web.authentication.appattest.AppAttestParamet
  * Reads a client attestation off a token endpoint request and normalizes it into a parameter map,
  * deciding along the way which client authentication mechanism the request asked for.
  * <p>
- * Three components need this and none of them owns it: {@link EulerOAuth2ClientAttestationAuthenticationConverter}
- * to build an attestation-only token, {@link EulerAttestationEnrichingPublicClientAuthenticationConverter}
- * to lay an attestation over a public-client token, and
- * {@link EulerOAuth2ClientAttestationAuthenticationSuccessHandler} to verify one laid over a
- * traditional authentication. Keeping it here stops those three from depending on a sibling
- * converter for request parsing.
+ * {@link EulerOAuth2ClientAttestationAuthenticationConverter} is the sole request-side consumer: the
+ * filter chain invokes it for attestation-based authentication, and the success handler reuses the
+ * same converter for an attestation laid over a traditional authentication. This class keeps the
+ * converter focused on producing a token rather than carrying the parsing implementation itself.
  * <p>
- * This class also defines the normalized parameter format &mdash; every carriage lands on the same
- * canonical keys so that {@link EulerOAuth2ClientAttestationVerifier} stays transport-agnostic
- * &mdash; and so it owns reading that format back, which is what {@link #resolveProof} does.
+ * It also defines the normalized parameter format &mdash; every carriage lands on the same canonical
+ * keys so that {@link EulerOAuth2ClientAttestationVerifier} stays transport-agnostic &mdash; and owns
+ * reading that format back, which is what {@link #resolveProof} does.
  *
  * @see EulerClientAuthenticationMethod#ATTEST_JWT_CLIENT_AUTH
  * @see EulerClientAuthenticationMethod#ATTEST_APPATTEST_CLIENT_AUTH
@@ -58,8 +57,9 @@ public final class OAuth2ClientAttestationUtils {
 
     /**
      * Collect the raw attestation data from the request &mdash; no parsing, no verification, no DB
-     * lookup &mdash; into the parameter map consumed by
-     * {@link EulerOAuth2ClientAttestationVerifier#verify(Map, ClientAuthenticationMethod)}.
+     * lookup &mdash; into the normalized parameter map placed in an
+     * {@link OAuth2ClientAuthenticationToken} and consumed by
+     * {@link EulerOAuth2ClientAttestationVerifier#verify(OAuth2ClientAuthenticationToken)}.
      * <p>
      * It deliberately ignores any traditional credential the request may also carry, so it serves
      * both to build an attestation-only token and to collect an attestation laid over a traditional
@@ -76,7 +76,7 @@ public final class OAuth2ClientAttestationUtils {
      * @return the client authentication method the request resolved to, or {@code null} when it
      *         carried no attestation signal and nothing was collected
      */
-    public static ClientAuthenticationMethod collectAttestationParams(HttpServletRequest request,
+    static ClientAuthenticationMethod collectAttestationParams(HttpServletRequest request,
                                                                      Map<String, Object> additionalParameters) {
         if (!carriesAttestationSignal(request)) {
             return null;
@@ -117,7 +117,7 @@ public final class OAuth2ClientAttestationUtils {
      * @param request the token endpoint request
      * @return {@code true} if an attestation signal is present
      */
-    public static boolean carriesAttestationSignal(HttpServletRequest request) {
+    private static boolean carriesAttestationSignal(HttpServletRequest request) {
         return request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION) != null
                 || request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_POP) != null
                 || request.getHeader(EulerOAuth2HeaderNames.OAUTH_CLIENT_ATTESTATION_TYPE) != null

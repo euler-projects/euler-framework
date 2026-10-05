@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContext;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
@@ -64,9 +65,9 @@ import org.eulerframework.security.web.authentication.appattest.AppAttestParamet
  * <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-attestation-based-client-auth-11.html">
  * draft-ietf-oauth-attestation-based-client-auth-11</a>.
  * <p>
- * {@link #verify(Map)} is the entry point callers use: it dispatches on the collected
- * {@code OAuth-Client-Attestation-Type} and returns the resolved {@code client_id} with the verified
- * registration. The two {@code verify} overloads implement the JWT variant and return a
+ * {@link #verify(OAuth2ClientAuthenticationToken)} is the entry point callers use: it dispatches on
+ * the token's client authentication method and returns the resolved {@code client_id} with the
+ * verified registration. The two {@code verify} overloads implement the JWT variant and return a
  * {@link PopVerificationResult}.
  *
  * <h2>Historical STATIC compatibility</h2>
@@ -128,11 +129,11 @@ public final class EulerOAuth2ClientAttestationVerifier {
     }
 
     /**
-     * Verify the client attestation carried in {@code collectedParams} and resolve the client it
-     * authenticates, without touching any {@code RegisteredClientRepository}.
+     * Verify the client attestation request token and resolve the client it authenticates, without
+     * touching any {@code RegisteredClientRepository}.
      * <p>
-     * Dispatch is by {@code method}, resolved from the request by the converter, so a further proof
-     * of possession mechanism only needs its own branch here:
+     * Dispatch is by the token's client authentication method, resolved from the request by the
+     * converter, so a further proof of possession mechanism only needs its own branch here:
      * <ul>
      *   <li>{@link EulerClientAuthenticationMethod#ATTEST_APPATTEST_CLIENT_AUTH} &mdash; consume the
      *       one-time challenge exactly once, then validate the {@code attestation} and/or
@@ -147,16 +148,16 @@ public final class EulerOAuth2ClientAttestationVerifier {
      * no bound client is rejected here rather than handed back ambiguous, so callers can look the
      * client up directly.
      *
-     * @param collectedParams the attestation data collected by
-     *                        {@link org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter}
-     * @param method          the client authentication method that collection resolved the request
-     *                        to, which decides how the attestation is verified
+     * @param clientAuthentication the token produced from the attestation-bearing request; its
+     *                             method selects the verifier and its additional parameters carry the
+     *                             normalized proof
      * @return the resolved {@code client_id} and the verified registration
      * @throws OAuth2AuthenticationException if verification fails or no client is bound
      */
-    public ClientAttestationVerification verify(Map<String, Object> collectedParams,
-                                                ClientAuthenticationMethod method) {
-        Assert.notNull(method, "method must not be null");
+    public ClientAttestationVerification verify(OAuth2ClientAuthenticationToken clientAuthentication) {
+        Assert.notNull(clientAuthentication, "clientAuthentication must not be null");
+        Map<String, Object> collectedParams = clientAuthentication.getAdditionalParameters();
+        ClientAuthenticationMethod method = clientAuthentication.getClientAuthenticationMethod();
 
         final String resolvedClientId;
         final AppAttestAttestationRegistration registration;
@@ -485,7 +486,8 @@ public final class EulerOAuth2ClientAttestationVerifier {
     }
 
     /**
-     * Result of a successful client attestation verification via {@link #verify(Map)}: the client
+     * Result of a successful client attestation verification via
+     * {@link #verify(OAuth2ClientAuthenticationToken)}: the client
      * the attestation authenticates and the verified App instance registration behind it.
      *
      * @param clientId     the resolved, non-null {@code client_id} bound to the attestation
