@@ -60,6 +60,37 @@ public interface UserIdentityService {
     String IDENTITY_TYPE_PARAMETER = "identity_type";
 
     /**
+     * The {@code identity_type} of the backend holding a self-held public key, whose
+     * private half never leaves the device that generated it.
+     *
+     * <p>Declared here rather than on that backend, which lives in the application, so
+     * that framework flows authenticating against it &mdash; the jwt-bearer grant &mdash;
+     * and the backend itself cannot drift apart on the value.
+     */
+    String IDENTITY_TYPE_PUBLIC_KEY = "public_key";
+
+    /**
+     * Extension key under which the {@code public_key} backend reads the registered public
+     * JWK from a prototype, and writes it back on a persisted identity.
+     *
+     * <p>As with the other backends, what goes in is the raw value and what comes out is
+     * its projection:
+     * <ul>
+     *   <li>on a prototype, and as the {@code rawSubject} of
+     *       {@link #findUserIdentityByRawSubject(String, String)}, the JWK as a JSON
+     *       <b>string</b>;</li>
+     *   <li>on a persisted identity, the same JWK as its JSON <b>object</b> form, which is
+     *       what a wire projection has to hand back rather than an escaped string.</li>
+     * </ul>
+     *
+     * <p>The backend derives the persisted {@code subject} from the key as its RFC 7638
+     * thumbprint, the same way the phone backend hashes the number it is given. Declared
+     * beside {@link #IDENTITY_TYPE_PUBLIC_KEY} for the same reason: framework flows and the
+     * backend cannot be allowed to drift on either name.
+     */
+    String PROPERTY_JWK = "jwk";
+
+    /**
      * Logical identity type handled by this backend.
      *
      * @return a stable, non-empty value such as {@code "phone"},

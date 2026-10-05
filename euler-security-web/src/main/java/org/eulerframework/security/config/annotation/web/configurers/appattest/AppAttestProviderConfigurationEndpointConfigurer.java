@@ -46,6 +46,7 @@ public final class AppAttestProviderConfigurationEndpointConfigurer {
 
     private String challengeEndpointUri;
     private String registrationEndpointUri;
+    private String keysEndpointUri;
     private Consumer<Map<String, Object>> providerConfigurationCustomizer;
 
     private RequestMatcher requestMatcher;
@@ -77,6 +78,10 @@ public final class AppAttestProviderConfigurationEndpointConfigurer {
         this.registrationEndpointUri = registrationEndpointUri;
     }
 
+    void setKeysEndpointUri(String keysEndpointUri) {
+        this.keysEndpointUri = keysEndpointUri;
+    }
+
     void init(HttpSecurity http) {
         this.requestMatcher = PathPatternRequestMatcher.pathPattern(HttpMethod.GET,
                 AppAttestProviderConfigurationEndpointFilter.DEFAULT_PROVIDER_CONFIGURATION_ENDPOINT_URI);
@@ -84,7 +89,7 @@ public final class AppAttestProviderConfigurationEndpointConfigurer {
 
     void configure(HttpSecurity http) {
         AppAttestProviderConfigurationEndpointFilter filter = new AppAttestProviderConfigurationEndpointFilter(
-                this.challengeEndpointUri, this.registrationEndpointUri);
+                this.challengeEndpointUri, this.registrationEndpointUri, this.keysEndpointUri);
         if (this.providerConfigurationCustomizer != null) {
             filter.setProviderConfigurationCustomizer(this.providerConfigurationCustomizer);
         }

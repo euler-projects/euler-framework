@@ -20,10 +20,14 @@ import org.eulerframework.security.authentication.ChallengeService;
 import org.eulerframework.security.authentication.appattest.apple.AppleAppAttestValidationService;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationAuthenticationProvider;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistrationService;
+import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyService;
 import org.eulerframework.security.authentication.appattest.RegisteredAppRepository;
 import org.eulerframework.security.core.userdetails.EulerDeviceUserDetailsService;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.eulerframework.security.web.authentication.ChallengeEndpointFilter;
+import org.eulerframework.security.web.authentication.appattest.AppAttestIssuedKeyRegistrationAuthenticationConverter;
+import org.eulerframework.security.web.authentication.appattest.AppAttestIssuedKeyRegistrationEndpointFilter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestProviderConfigurationEndpointFilter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationAuthenticationConverter;
 import org.eulerframework.security.web.authentication.appattest.AppAttestRegistrationEndpointFilter;
@@ -37,20 +41,23 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 /**
- * An {@link AbstractHttpConfigurer} for Apple App Attest instance registration and its
- * discovery document.
+ * An {@link AbstractHttpConfigurer} for Apple App Attest instance registration, the public keys an
+ * instance issues, and their discovery document.
  * <p>
- * This configurer registers the challenge, registration and provider configuration endpoint
- * filters into the default security filter chain. All three are exempt from CSRF protection and
- * reachable without a prior session or OAuth credential; the registration endpoint authenticates
- * the App instance via its attestation, while the challenge and discovery endpoints are anonymous.
+ * This configurer registers the challenge, registration, issued-key registration and provider
+ * configuration endpoint filters into the default security filter chain. All four are exempt from
+ * CSRF protection and reachable without a prior session or OAuth credential; the two registration
+ * endpoints authenticate the App instance (by attestation and by assertion respectively), while the
+ * challenge and discovery endpoints are anonymous.
  *
  * <h2>Endpoints</h2>
  * <ul>
  *     <li>{@code POST /app_attest/challenge} - generates a one-time challenge</li>
  *     <li>{@code POST /app_attest/register} - validates attestation and registers the App Attest KEY</li>
+ *     <li>{@code POST /app_attest/keys} - registers a public key the authenticated App instance
+ *     issued, so it can sign jwt-bearer assertions</li>
  *     <li>{@code GET /.well-known/app-attest-configuration} - the discovery document advertising
- *     the two endpoints above</li>
+ *     the three endpoints above</li>
  * </ul>
  *
  * <h2>Usage Example</h2>
@@ -65,6 +72,7 @@ import org.springframework.util.Assert;
  *
  * @see ChallengeEndpointFilter
  * @see AppAttestRegistrationEndpointFilter
+ * @see AppAttestIssuedKeyRegistrationEndpointFilter
  * @see AppAttestProviderConfigurationEndpointFilter
  */
 public class AppAttestConfigurer
@@ -74,12 +82,15 @@ public class AppAttestConfigurer
     private AppleAppAttestValidationService validationService;
     private RegisteredAppRepository registeredAppRepository;
     private AppAttestAttestationRegistrationService registrationService;
+    private AppAttestIssuedKeyService issuedKeyService;
 
     private static final String DEFAULT_CHALLENGE_ENDPOINT_URI = "/app_attest/challenge";
     public static final String DEFAULT_REGISTRATION_ENDPOINT_URI = "/app_attest/register";
+    public static final String DEFAULT_KEYS_ENDPOINT_URI = "/app_attest/keys";
 
     private String challengeEndpointUri = DEFAULT_CHALLENGE_ENDPOINT_URI;
     private String registrationEndpointUri = DEFAULT_REGISTRATION_ENDPOINT_URI;
+    private String keysEndpointUri = DEFAULT_KEYS_ENDPOINT_URI;
 
     private final AppAttestProviderConfigurationEndpointConfigurer providerConfigurationEndpointConfigurer;
 
@@ -109,6 +120,11 @@ public class AppAttestConfigurer
 
     public AppAttestConfigurer registrationService(AppAttestAttestationRegistrationService registrationService) {
         this.registrationService = registrationService;
+        return this;
+    }
+
+    public AppAttestConfigurer issuedKeyService(AppAttestIssuedKeyService issuedKeyService) {
+        this.issuedKeyService = issuedKeyService;
         return this;
     }
 
@@ -147,6 +163,11 @@ public class AppAttestConfigurer
         return this;
     }
 
+    public AppAttestConfigurer keysEndpointUri(String keysEndpointUri) {
+        this.keysEndpointUri = keysEndpointUri;
+        return this;
+    }
+
     /**
      * Configures the App Attest provider configuration (discovery) endpoint.
      *
@@ -178,15 +199,22 @@ public class AppAttestConfigurer
                         new AppAttestRegistrationAuthenticationConverter(),
                         createRegistrationProvider(http),
                         this.registrationEndpointUri);
+        AppAttestIssuedKeyRegistrationEndpointFilter issuedKeyFilter =
+                new AppAttestIssuedKeyRegistrationEndpointFilter(
+                        new AppAttestIssuedKeyRegistrationAuthenticationConverter(),
+                        createIssuedKeyRegistrationProvider(http),
+                        this.keysEndpointUri);
 
-        // The discovery document advertises the two endpoints above, so it needs their final URIs.
+        // The discovery document advertises the three endpoints above, so it needs their final URIs.
         this.providerConfigurationEndpointConfigurer.setChallengeEndpointUri(this.challengeEndpointUri);
         this.providerConfigurationEndpointConfigurer.setRegistrationEndpointUri(this.registrationEndpointUri);
+        this.providerConfigurationEndpointConfigurer.setKeysEndpointUri(this.keysEndpointUri);
         this.providerConfigurationEndpointConfigurer.init(http);
 
         this.endpointsMatcher = new OrRequestMatcher(
                 challengeFilter.getRequestMatcher(),
                 registrationFilter.getRequestMatcher(),
+                issuedKeyFilter.getRequestMatcher(),
                 this.providerConfigurationEndpointConfigurer.getRequestMatcher());
 
         // Exempt App Attest endpoints from CSRF protection
@@ -195,6 +223,7 @@ public class AppAttestConfigurer
         // Store filters as shared objects for configure() to retrieve
         http.setSharedObject(ChallengeEndpointFilter.class, challengeFilter);
         http.setSharedObject(AppAttestRegistrationEndpointFilter.class, registrationFilter);
+        http.setSharedObject(AppAttestIssuedKeyRegistrationEndpointFilter.class, issuedKeyFilter);
     }
 
     @Override
@@ -203,9 +232,12 @@ public class AppAttestConfigurer
                 http.getSharedObject(ChallengeEndpointFilter.class);
         AppAttestRegistrationEndpointFilter registrationFilter =
                 http.getSharedObject(AppAttestRegistrationEndpointFilter.class);
+        AppAttestIssuedKeyRegistrationEndpointFilter issuedKeyFilter =
+                http.getSharedObject(AppAttestIssuedKeyRegistrationEndpointFilter.class);
 
         http.addFilterBefore(postProcess(challengeFilter), AuthorizationFilter.class);
         http.addFilterBefore(postProcess(registrationFilter), AuthorizationFilter.class);
+        http.addFilterBefore(postProcess(issuedKeyFilter), AuthorizationFilter.class);
         this.providerConfigurationEndpointConfigurer.configure(http);
     }
 
@@ -215,6 +247,13 @@ public class AppAttestConfigurer
         return new AppAttestAttestationRegistrationAuthenticationProvider(
                 resolveChallengeService(http),
                 resolveValidationService(http));
+    }
+
+    private AppAttestIssuedKeyRegistrationAuthenticationProvider createIssuedKeyRegistrationProvider(HttpSecurity http) {
+        return new AppAttestIssuedKeyRegistrationAuthenticationProvider(
+                resolveChallengeService(http),
+                resolveValidationService(http),
+                resolveIssuedKeyService(http));
     }
 
     private ChallengeService resolveChallengeService(HttpSecurity http) {
@@ -247,5 +286,13 @@ public class AppAttestConfigurer
         }
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
         return context.getBean(AppAttestAttestationRegistrationService.class);
+    }
+
+    private AppAttestIssuedKeyService resolveIssuedKeyService(HttpSecurity http) {
+        if (this.issuedKeyService != null) {
+            return this.issuedKeyService;
+        }
+        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+        return context.getBean(AppAttestIssuedKeyService.class);
     }
 }

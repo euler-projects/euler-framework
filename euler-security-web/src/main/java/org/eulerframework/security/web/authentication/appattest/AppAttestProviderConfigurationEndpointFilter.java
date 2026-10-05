@@ -54,7 +54,8 @@ import java.util.function.Consumer;
  * Content-Type: application/json
  *
  * {"challenge_endpoint": "https://as.example.com/app_attest/challenge",
- *  "registration_endpoint": "https://as.example.com/app_attest/register"}
+ *  "registration_endpoint": "https://as.example.com/app_attest/register",
+ *  "keys_endpoint": "https://as.example.com/app_attest/keys"}
  * </pre>
  * The endpoint URLs are absolute, derived from the request. A
  * {@link #setProviderConfigurationCustomizer(Consumer) customizer} may add or override claims.
@@ -72,6 +73,7 @@ public class AppAttestProviderConfigurationEndpointFilter extends OncePerRequest
     private final RequestMatcher requestMatcher;
     private final String challengeEndpointUri;
     private final String registrationEndpointUri;
+    private final String keysEndpointUri;
 
     private Consumer<Map<String, Object>> providerConfigurationCustomizer = (claims) -> {
     };
@@ -79,15 +81,19 @@ public class AppAttestProviderConfigurationEndpointFilter extends OncePerRequest
     /**
      * @param challengeEndpointUri    the {@code URI} of the App Attest challenge endpoint to advertise
      * @param registrationEndpointUri the {@code URI} of the App Attest registration endpoint to advertise
+     * @param keysEndpointUri         the {@code URI} of the issued-key registration endpoint to advertise
      */
     public AppAttestProviderConfigurationEndpointFilter(String challengeEndpointUri,
-                                                        String registrationEndpointUri) {
+                                                        String registrationEndpointUri,
+                                                        String keysEndpointUri) {
         Assert.hasText(challengeEndpointUri, "challengeEndpointUri must not be empty");
         Assert.hasText(registrationEndpointUri, "registrationEndpointUri must not be empty");
+        Assert.hasText(keysEndpointUri, "keysEndpointUri must not be empty");
         this.requestMatcher = PathPatternRequestMatcher.pathPattern(
                 HttpMethod.GET, DEFAULT_PROVIDER_CONFIGURATION_ENDPOINT_URI);
         this.challengeEndpointUri = challengeEndpointUri;
         this.registrationEndpointUri = registrationEndpointUri;
+        this.keysEndpointUri = keysEndpointUri;
     }
 
     /**
@@ -125,6 +131,7 @@ public class AppAttestProviderConfigurationEndpointFilter extends OncePerRequest
         Map<String, Object> claims = new LinkedHashMap<>();
         claims.put("challenge_endpoint", baseUrl + this.challengeEndpointUri);
         claims.put("registration_endpoint", baseUrl + this.registrationEndpointUri);
+        claims.put("keys_endpoint", baseUrl + this.keysEndpointUri);
         this.providerConfigurationCustomizer.accept(claims);
 
         response.setStatus(HttpStatus.OK.value());

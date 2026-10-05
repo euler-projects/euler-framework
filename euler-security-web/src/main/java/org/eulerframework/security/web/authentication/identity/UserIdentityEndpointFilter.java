@@ -89,7 +89,6 @@ import java.util.Optional;
  *   "identity_id":   "...",
  *   "identity_type": "phone",
  *   "subject":       "9c1b8e2a3f6d...",
- *   "identifier":    "",
  *   "bound_at":      1778899139687,
  *   "phone":         "+8613*****00"
  * }
@@ -102,11 +101,6 @@ import java.util.Optional;
  * <p>{@code subject} is the deterministic per-type unique key derived
  * by the owning backend from the raw value; the derivation function is
  * implementation defined and opaque to this filter.
- *
- * <p>{@code identifier} is a fixed empty-string placeholder retained
- * for clients whose parsing logic expects the key to be present; new
- * clients should consume {@code subject} and the per-type extension
- * attributes instead.
  *
  * <h2>Error mapping</h2>
  * <p>Exceptions raised by the {@link UserIdentityService} are
@@ -320,10 +314,9 @@ public class UserIdentityEndpointFilter extends OncePerRequestFilter {
      * Hand-rolled serialisation that emits the envelope fields
      * explicitly (omitting the SPI-internal {@code userId}) and then
      * appends the per-type extension attributes returned by
-     * {@link UserIdentity#getExtensions()}. {@code identifier} is
-     * emitted as a fixed empty string for clients whose parsing logic
-     * expects the key to be present; new clients should consume
-     * {@code subject} and the per-type extension attributes instead.
+     * {@link UserIdentity#getExtensions()}. The stable per-identity key
+     * is published as {@code subject}; the name {@code identifier} it was
+     * once carried under is no longer emitted at all.
      */
     private Map<String, Object> toJson(UserIdentity identity) {
         Map<String, Object> body = new LinkedHashMap<>();

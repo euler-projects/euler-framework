@@ -31,6 +31,7 @@ import org.eulerframework.security.oauth2.server.authorization.web.authenticatio
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationSuccessHandler;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.EulerOAuth2ClientAttestationAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2AppAssertionAuthenticationConverter;
+import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2JwtBearerAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2OneTimePasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2PasswordAuthenticationConverter;
 import org.eulerframework.security.oauth2.server.authorization.web.authentication.OAuth2WechatAuthorizationCodeAuthenticationConverter;
@@ -213,6 +214,43 @@ public class EulerAuthorizationServerConfiguration {
         } catch (Exception e) {
             throw ExceptionUtils.asRuntimeException(e);
         }
+    }
+
+    /**
+     * Register the {@code grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer} converter
+     * and provider on the authorization server's token endpoint.
+     * <p>
+     * Unlike the other grants here this one is standard, so it registers under Spring's own
+     * {@link org.springframework.security.oauth2.core.AuthorizationGrantType#JWT_BEARER}
+     * rather than a custom grant type; what is not standard is that Spring Authorization
+     * Server ships no provider for it, only the client-side half.
+     *
+     * @param http                 the {@link HttpSecurity} being built
+     * @param issuerAuthenticators the trust anchors able to vouch for an assertion's {@code iss},
+     *                             asked in order; at least one, or the grant can never
+     *                             authenticate anything. Each carries its own identity model,
+     *                             user store and provisioning policy, so nothing else about the
+     *                             deployment has to be described here.
+     */
+    public static void configJwtBearerAuthentication(HttpSecurity http,
+                                                     List<JwtBearerIssuerAuthenticator> issuerAuthenticators) {
+        http.oauth2AuthorizationServer(oauth2AuthorizationServer -> oauth2AuthorizationServer
+                .tokenEndpoint(configurer -> configurer
+                        .authenticationProvider(getOAuth2JwtBearerAuthenticationProvider(http, issuerAuthenticators))
+                        .accessTokenRequestConverter(new OAuth2JwtBearerAuthenticationConverter())));
+    }
+
+    private static OAuth2JwtBearerAuthenticationProvider getOAuth2JwtBearerAuthenticationProvider(
+            HttpSecurity http,
+            List<JwtBearerIssuerAuthenticator> issuerAuthenticators) {
+        return new OAuth2JwtBearerAuthenticationProvider(
+                issuerAuthenticators,
+                // Resolved from the security builder rather than passed in, so that this grant
+                // shares the very nonce store the client attestation verifier already uses.
+                EulerOAuth2ConfigurerUtils.getNonceService(http),
+                OAuth2ConfigurerUtilsAccessor.getAuthorizationService(http),
+                OAuth2ConfigurerUtilsAccessor.getTokenGenerator(http)
+        );
     }
 
     public static void configClientAttestationAuthentication(HttpSecurity http,

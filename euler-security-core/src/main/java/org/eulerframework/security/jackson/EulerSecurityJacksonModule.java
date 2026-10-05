@@ -27,13 +27,18 @@ import tools.jackson.core.Version;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 /**
- * Contributes the Euler types that the security {@code JsonMapper} may deserialize, and the mixins
- * telling it how.
+ * Contributes the core Euler types that the security {@code JsonMapper} may deserialize, and the
+ * mixins telling it how.
  * <p>
  * Any {@code Authentication} a grant provider writes into an authorization's
- * {@code java.security.Principal} attribute must be registered here, together with every
+ * {@code java.security.Principal} attribute must be registered, together with every
  * non-final type it holds. The authorization store reads the attribute map back in one pass, so
  * one unregistered type fails the read outright rather than degrading a single field.
+ * <p>
+ * Only the types this module can see belong here. One owned by another module is registered by that
+ * module's own {@link SecurityJacksonModule}, discovered as described in
+ * {@link EulerSecurityJacksonModules} &mdash; which is where a new result principal has to be added
+ * if it lives outside this module.
  */
 public class EulerSecurityJacksonModule extends SecurityJacksonModule {
 
