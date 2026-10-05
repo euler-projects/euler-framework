@@ -34,6 +34,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -77,6 +78,7 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
         implements AuthenticationProvider {
 
     private static final Duration DEFAULT_REFRESH_TOKEN_TTL = Duration.ofDays(30);
+    private static final String INVALID_CLIENT_METADATA = "invalid_client_metadata";
 
     private final Logger logger =
             LoggerFactory.getLogger(EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider.class);
@@ -164,6 +166,8 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
      */
     private RegisteredClient resolveOrProvisionClient(OAuth2ClientRegistration clientRegistration,
                                                       AppAttestAttestationRegistration registration) {
+        ClientAuthenticationMethod clientAuthenticationMethod =
+                resolveClientAuthenticationMethod(clientRegistration);
         String boundClientId = registration.getClientId();
         if (StringUtils.hasText(boundClientId)) {
             RegisteredClient existing = this.registeredClientRepository.findByClientId(boundClientId);
@@ -177,15 +181,13 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
         RegisteredClient base = this.registeredClientConverter.convert(clientRegistration);
 
         RegisteredClient registeredClient = RegisteredClient.from(base)
-                // Force attest-only client authentication: the base converter defaults to
-                // client_secret_basic (with a generated secret) when the request omits
-                // token_endpoint_auth_method, which does not apply to an App Attest client. The
-                // method value names the proof of possession actually used here (an Apple App Attest
-                // assertion), per Section 5 of the draft.
+                // The base converter defaults an omitted token_endpoint_auth_method to
+                // client_secret_basic and may generate a secret. This endpoint instead defaults to
+                // its single supported method, validated before conversion above.
                 .clientSecret(null)
                 .clientAuthenticationMethods(methods -> {
                     methods.clear();
-                    methods.add(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH);
+                    methods.add(clientAuthenticationMethod);
                 })
                 .authorizationGrantTypes(grantTypes -> {
                     // Per-KEY clients renew via refresh_token + assertion. The deprecated
@@ -205,6 +207,23 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
         this.logger.info("Provisioned DYNAMIC OAuth2 client '{}' for App Attest keyId '{}'",
                 registeredClient.getClientId(), registration.getKeyId());
         return registeredClient;
+    }
+
+    /**
+     * Resolve the single RFC 7591 {@code token_endpoint_auth_method} this specialized registration
+     * flow supports. Omission selects the endpoint's App Attest default; an explicit different value
+     * is rejected rather than silently replaced, so the response cannot surprise a client that asked
+     * for credentials this flow does not provision.
+     */
+    private static ClientAuthenticationMethod resolveClientAuthenticationMethod(
+            OAuth2ClientRegistration clientRegistration) {
+        String requested = clientRegistration.getTokenEndpointAuthenticationMethod();
+        if (requested == null
+                || EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue().equals(requested)) {
+            return EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH;
+        }
+        throw new OAuth2AuthenticationException(new OAuth2Error(INVALID_CLIENT_METADATA,
+                "Unsupported token_endpoint_auth_method for App Attest registration: " + requested, null));
     }
 
     private static OAuth2AuthenticationException invalidClientAttestation(String parameterName) {

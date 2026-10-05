@@ -131,6 +131,40 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
     }
 
     @Test
+    void acceptsTheExplicitAppAttestAuthenticationMethod() {
+        registrationService.saveRegistration(keyRegistration(null));
+        EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider provider = provider(
+                new StubChallengeService(true), new StubValidationService(keyRegistration(null)),
+                new InMemoryRegisteredAppRepository(app(true)));
+
+        OAuth2ClientRegistration response =
+                ((OAuth2ClientRegistrationAuthenticationToken) provider.authenticate(token(
+                        EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue())))
+                        .getClientRegistration();
+
+        assertEquals(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH.getValue(),
+                response.getTokenEndpointAuthenticationMethod());
+    }
+
+    @Test
+    void rejectsUnsupportedTokenEndpointAuthenticationMethods() {
+        for (String requested : List.of(
+                EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH.getValue(),
+                ClientAuthenticationMethod.NONE.getValue(),
+                "unknown_method")) {
+            EulerOAuth2AttestationBasedClientRegistrationAuthenticationProvider provider = provider(
+                    new StubChallengeService(true), new StubValidationService(keyRegistration(null)),
+                    new InMemoryRegisteredAppRepository(app(true)));
+
+            OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
+                    () -> provider.authenticate(token(requested)));
+
+            assertEquals("invalid_client_metadata", ex.getError().getErrorCode(),
+                    () -> "unexpected result for " + requested);
+        }
+    }
+
+    @Test
     void returnsTheExistingClientWhenTheKeyIsAlreadyBound() {
         RegisteredClient bound = RegisteredClient.withId("id-1")
                 .clientId("already-bound-client")
@@ -208,12 +242,19 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
     }
 
     private static EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken token() {
-        OAuth2ClientRegistration clientRegistration = OAuth2ClientRegistration.builder()
+        return token(null);
+    }
+
+    private static EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken token(
+            String tokenEndpointAuthenticationMethod) {
+        OAuth2ClientRegistration.Builder builder = OAuth2ClientRegistration.builder()
                 .clientName(BUNDLE_ID)
-                .grantType(AuthorizationGrantType.REFRESH_TOKEN.getValue())
-                .build();
+                .grantType(AuthorizationGrantType.REFRESH_TOKEN.getValue());
+        if (tokenEndpointAuthenticationMethod != null) {
+            builder.tokenEndpointAuthenticationMethod(tokenEndpointAuthenticationMethod);
+        }
         return new EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken(
-                clientRegistration, KEY_ID, CHALLENGE, ASSERTION);
+                builder.build(), KEY_ID, CHALLENGE, ASSERTION);
     }
 
     private static AppAttestAttestationRegistration keyRegistration(String boundClientId) {
