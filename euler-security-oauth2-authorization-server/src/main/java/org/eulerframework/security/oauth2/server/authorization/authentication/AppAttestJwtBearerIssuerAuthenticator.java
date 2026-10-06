@@ -17,8 +17,8 @@ package org.eulerframework.security.oauth2.server.authorization.authentication;
 
 import com.nimbusds.jose.jwk.JWK;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKey;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyService;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationService;
 import org.eulerframework.security.core.EulerUserService;
 import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
@@ -28,7 +28,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import java.text.ParseException;
 
@@ -45,71 +44,82 @@ import java.text.ParseException;
  * <p>
  * All this class adds to
  * {@link AbstractUserIdentityJwtBearerIssuerAuthenticator} is what is an App Attest fact rather than
- * an identity-model fact: who the issuer may be, where a first login's key comes from, that a first
- * login is the point of this issuer at all, and who may ask for one.
- * <p>
- * Keys are looked up in {@link AppAttestIssuedKeyService}, which the {@code POST /app_attest/keys}
- * endpoint writes. That endpoint authenticates its caller with an assertion over an App Attest KEY
- * whose bound {@code client_id} becomes the issuer, so an issuer appearing in the registry is by
- * construction a client that was minted by attestation-based dynamic registration. That is enough to
- * look a key up by, but not enough to open an account on: see
- * {@link #requireProvisioningAllowed(JwtBearerAssertion)}.
+ * an identity-model fact: who the issuer may be, where the key an assertion verifies against comes
+ * from, that a first login is the point of this issuer at all, and who may ask for one.
  *
- * @see AppAttestIssuedKeyService
+ * <h2>The key registry is addressed by App Attest KEY, not by issuer</h2>
+ * Keys are looked up in {@link AppAttestInstanceKeyRegistrationService}, which the {@code POST /app_attest/keys}
+ * endpoint writes. That registry belongs to the App Attest domain and is keyed by the App Attest KEY
+ * the registering instance authenticated with; it holds no {@code client_id}, because the two
+ * domains meet only at {@code app_attest_attestation_registration.client_id} and the registry has no
+ * reason to know about the OAuth2 side. This class is the meeting point: it already holds the
+ * verified registration &mdash; {@link #supports} requires one &mdash; so it reads the App Attest
+ * KEY straight off it and needs no second lookup to translate between the two.
+ * <p>
+ * Addressing the registry that way is also tighter than addressing it by {@code iss} would be: the
+ * key has to have been registered by the very App Attest KEY that authenticated this request, not
+ * merely by some instance that happens to share a {@code client_id}.
+ * <p>
+ * It is addressed on <b>every</b> login, not only a first one: an account holds its key's
+ * thumbprint and no copy of the key, so this registry is what supplies the material to verify
+ * against. Which makes its rows load-bearing for accounts that already exist. Two consequences: a
+ * row must not be removed while an account is bound to the key it holds, and an instance whose App
+ * Attest KEY is replaced has to register its keys again before the accounts they opened can log in.
+ *
+ * @see AppAttestInstanceKeyRegistrationService
  */
 public class AppAttestJwtBearerIssuerAuthenticator extends AbstractUserIdentityJwtBearerIssuerAuthenticator {
 
-    private final AppAttestIssuedKeyService issuedKeyService;
+    private final AppAttestInstanceKeyRegistrationService instanceKeyRegistrationService;
 
-    public AppAttestJwtBearerIssuerAuthenticator(AppAttestIssuedKeyService issuedKeyService,
+    public AppAttestJwtBearerIssuerAuthenticator(AppAttestInstanceKeyRegistrationService instanceKeyRegistrationService,
                                                  UserIdentityService userIdentityService,
                                                  EulerUserService userService,
                                                  JitProvisioningPolicyResolver jitProvisioningPolicyResolver) {
         super(userIdentityService, userService, jitProvisioningPolicyResolver);
-        Assert.notNull(issuedKeyService, "issuedKeyService must not be null");
-        this.issuedKeyService = issuedKeyService;
+        Assert.notNull(instanceKeyRegistrationService, "instanceKeyRegistrationService must not be null");
+        this.instanceKeyRegistrationService = instanceKeyRegistrationService;
     }
 
     /**
      * An App Attest issuer is the App instance that authenticated this very request, so the
      * assertion's {@code iss} has to name the {@code client_id} bound to the App Attest KEY the
      * client authentication was verified against. Reading it from that verified KEY rather than
-     * from the resolved client keeps this authenticator and {@code POST /app_attest/keys} agreeing
-     * on what an issuer is by construction, since the endpoint registers under the same value.
+     * from the resolved client keeps this authenticator and the OAuth2 domain agreeing on what an
+     * issuer is by construction, since dynamic client registration binds the two.
      */
     @Override
     public boolean supports(String issuer, OAuth2ClientAuthenticationToken clientPrincipal) {
-        if (!(clientPrincipal instanceof EulerOAuth2ClientAttestationAuthenticationToken attestationAuthentication)) {
-            return false;
-        }
-        AppAttestAttestationRegistration registration = attestationAuthentication.getVerifiedRegistration();
+        AppAttestAttestationRegistration registration = verifiedRegistration(clientPrincipal);
         return registration != null && issuer.equals(registration.getClientId());
     }
 
     @Override
     protected String identityType() {
-        return UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY;
+        return AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE;
     }
 
     @Override
     @Nullable
-    protected JWK resolveRegisteredKey(String issuer, @Nullable String keyId) {
-        if (!StringUtils.hasText(keyId)) {
-            // The registry is keyed by (issuer, keyId); without a key ID there is nothing to look
-            // up. The caller reports the missing header rather than an unknown key.
+    protected JWK resolveRegisteredKey(JwtBearerAssertion assertion) {
+        AppAttestAttestationRegistration registration = verifiedRegistration(assertion.getClientPrincipal());
+        if (registration == null) {
+            // supports() has already refused this request; reaching here means an authenticator was
+            // handed an assertion it did not claim, and there is no instance to look a key up for.
             return null;
         }
-        AppAttestIssuedKey issuedKey = this.issuedKeyService.findByIssuerAndKeyId(issuer, keyId);
-        if (issuedKey == null) {
+        AppAttestInstanceKeyRegistration keyRegistration = this.instanceKeyRegistrationService
+                .findByAppAttestKidAndJwkKid(registration.getKeyId(), assertion.getKeyId());
+        if (keyRegistration == null) {
             return null;
         }
         try {
-            return JWK.parse(issuedKey.jwk());
+            return JWK.parse(keyRegistration.jwk());
         } catch (ParseException | RuntimeException e) {
             // This JSON was written by this server, so it failing to parse is a storage fault
             // rather than something the caller can be told to fix.
-            throw new IllegalStateException(
-                    "Stored issued key is not a parsable JWK (issuer='" + issuer + "', keyId='" + keyId + "')", e);
+            throw new IllegalStateException("Stored instance key is not a parsable JWK (appAttestKid='"
+                    + registration.getKeyId() + "', jwkKid='" + assertion.getKeyId() + "')", e);
         }
     }
 
@@ -149,5 +159,19 @@ public class AppAttestJwtBearerIssuerAuthenticator extends AbstractUserIdentityJ
                     + "', which is not App Attest client authentication; it may not open an account");
         }
         return super.requireProvisioningAllowed(assertion);
+    }
+
+    /**
+     * The App Attest registration this request's client authentication was verified against, or
+     * {@code null} if it carries none &mdash; which is to say, if the client authenticated some
+     * other way and no attestation was presented alongside it.
+     */
+    @Nullable
+    private static AppAttestAttestationRegistration verifiedRegistration(
+            OAuth2ClientAuthenticationToken clientPrincipal) {
+        if (!(clientPrincipal instanceof EulerOAuth2ClientAttestationAuthenticationToken attestationAuthentication)) {
+            return null;
+        }
+        return attestationAuthentication.getVerifiedRegistration();
     }
 }

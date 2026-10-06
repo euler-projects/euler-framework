@@ -143,6 +143,39 @@ public final class JwkUtils {
     }
 
     /**
+     * Parse a JWK from its JSON form and require a key ID to be that key's RFC 7638 thumbprint.
+     *
+     * <p>For a store that files a key under an identifier a caller later quotes to get it back.
+     * If the identifier and the key are allowed to disagree, a lookup answers with a key nobody
+     * asked for &mdash; and where that identifier is also what an account is bound to, it becomes
+     * a way to authenticate with one key as an account holding another. Deriving the thumbprint
+     * here rather than trusting the value handed in is what closes that, and having one place do
+     * it is what holds every writer of such a store to the same rule.
+     *
+     * @param keyId   the key ID claimed for the JWK; must not be empty
+     * @param jwkJson the JWK as JSON; must not be empty
+     * @return the parsed key
+     * @throws IllegalArgumentException if the JSON is not a parsable JWK, or its thumbprint is
+     *                                  not {@code keyId}
+     */
+    public static JWK requireThumbprintKeyId(String keyId, String jwkJson) {
+        Assert.hasText(keyId, "keyId must not be empty");
+        Assert.hasText(jwkJson, "jwkJson must not be empty");
+        JWK jwk;
+        try {
+            jwk = JWK.parse(jwkJson);
+        } catch (ParseException | RuntimeException e) {
+            throw new IllegalArgumentException("Not a parsable JWK: " + e.getMessage(), e);
+        }
+        String thumbprint = computeThumbprint(jwk);
+        if (!keyId.equals(thumbprint)) {
+            throw new IllegalArgumentException("keyId must be the RFC 7638 thumbprint of the JWK, which is '"
+                    + thumbprint + "'");
+        }
+        return jwk;
+    }
+
+    /**
      * Reduce a caller-supplied JWK to its public members and reject key material this
      * framework cannot verify a signature with.
      *

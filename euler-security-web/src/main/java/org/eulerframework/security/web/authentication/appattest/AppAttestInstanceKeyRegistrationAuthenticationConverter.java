@@ -17,8 +17,8 @@
 package org.eulerframework.security.web.authentication.appattest;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyRegistrationAuthenticationToken;
-import org.eulerframework.security.authentication.appattest.InvalidIssuedKeyException;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.InvalidInstanceKeyException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Extracts an issued-key registration request and constructs an
- * {@link AppAttestIssuedKeyRegistrationAuthenticationToken}.
+ * Extracts an App instance key registration request and constructs an
+ * {@link AppAttestInstanceKeyRegistrationAuthenticationToken}.
  * <p>
  * The caller is authenticated with an App Attest <b>assertion</b>, not an attestation: the
  * KEY was attested once at App instance registration, and every later call in the App Attest
@@ -42,10 +42,10 @@ import java.nio.charset.StandardCharsets;
  * JWK machinery where it already lives instead of pulling it into the web layer.
  * <p>
  * Returns {@code null} if the assertion credential is incomplete or the body is empty,
- * indicating the request is not an issued-key registration request. A body too large to hold
+ * indicating the request is not a key registration request. A body too large to hold
  * a public JWK is reported as the request error it is rather than buffered.
  */
-public class AppAttestIssuedKeyRegistrationAuthenticationConverter implements AuthenticationConverter {
+public class AppAttestInstanceKeyRegistrationAuthenticationConverter implements AuthenticationConverter {
 
     /**
      * Upper bound on the request body, in bytes.
@@ -77,7 +77,7 @@ public class AppAttestIssuedKeyRegistrationAuthenticationConverter implements Au
             return null;
         }
 
-        return AppAttestIssuedKeyRegistrationAuthenticationToken.unauthenticated(
+        return AppAttestInstanceKeyRegistrationAuthenticationToken.unauthenticated(
                 credential.kid(), credential.challenge(), credential.assertion(), publicKeyJson);
     }
 
@@ -86,7 +86,7 @@ public class AppAttestIssuedKeyRegistrationAuthenticationConverter implements Au
             // One byte past the bound, so exceeding it can be told from exactly filling it.
             byte[] body = request.getInputStream().readNBytes(MAX_REQUEST_BODY_SIZE + 1);
             if (body.length > MAX_REQUEST_BODY_SIZE) {
-                throw new InvalidIssuedKeyException(
+                throw new InvalidInstanceKeyException(
                         "The request body exceeds " + MAX_REQUEST_BODY_SIZE + " bytes");
             }
             return new String(body, StandardCharsets.UTF_8);

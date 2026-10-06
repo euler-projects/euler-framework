@@ -21,22 +21,21 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import java.util.Collections;
 
 /**
- * Authentication token for the issued-key registration endpoint.
+ * Authentication token for the App instance key registration endpoint.
  * <p>
  * Like {@link AppAttestAttestationRegistrationAuthenticationToken} this represents an
- * <b>App instance</b> subject, not a user: registering a key it issued creates no
- * account and establishes no login state. The unauthenticated form carries the App Attest
- * assertion credential that authenticates the caller ({@code keyId}, {@code challenge},
- * {@code assertion}) together with the public key it wants registered; the authenticated
- * form carries the stored {@link AppAttestIssuedKey} as its principal and holds no
- * authorities.
+ * <b>App instance</b> subject, not a user: registering a key it generated creates no account
+ * and establishes no login state. The unauthenticated form carries the App Attest assertion
+ * credential that authenticates the caller ({@code keyId}, {@code challenge}, {@code assertion})
+ * together with the public key it wants registered; the authenticated form carries the stored
+ * {@link AppAttestInstanceKeyRegistration} as its principal and holds no authorities.
  * <p>
- * The public key travels as the raw JSON the caller submitted and is parsed and validated
- * by the provider, which is where the JWK machinery lives. Its {@code kid} is <em>not</em>
- * taken from the request: the server derives it from the key material, which is what makes
- * a repeated registration idempotent.
+ * The public key travels as the raw JSON the caller submitted and is parsed and validated by the
+ * provider, which is where the JWK machinery lives. Its {@code kid} is <em>not</em> taken from the
+ * request: the server derives it from the key material, which is what makes a repeated
+ * registration idempotent.
  */
-public class AppAttestIssuedKeyRegistrationAuthenticationToken extends AbstractAuthenticationToken {
+public class AppAttestInstanceKeyRegistrationAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String keyId;
     private final String challenge;
@@ -53,8 +52,8 @@ public class AppAttestIssuedKeyRegistrationAuthenticationToken extends AbstractA
      * @param assertion     the Base64-encoded App Attest assertion
      * @param publicKeyJson the public JWK to register, as submitted (JSON)
      */
-    AppAttestIssuedKeyRegistrationAuthenticationToken(String keyId, String challenge, String assertion,
-                                                       String publicKeyJson) {
+    AppAttestInstanceKeyRegistrationAuthenticationToken(String keyId, String challenge, String assertion,
+                                                        String publicKeyJson) {
         super(Collections.emptyList());
         this.keyId = keyId;
         this.challenge = challenge;
@@ -65,12 +64,12 @@ public class AppAttestIssuedKeyRegistrationAuthenticationToken extends AbstractA
     }
 
     /**
-     * Create an authenticated token whose principal is the registered issued key. Carries
-     * no authorities.
+     * Create an authenticated token whose principal is the key registration. Carries no
+     * authorities.
      */
-    AppAttestIssuedKeyRegistrationAuthenticationToken(AppAttestIssuedKey issuedKey) {
+    AppAttestInstanceKeyRegistrationAuthenticationToken(AppAttestInstanceKeyRegistration registration) {
         super(Collections.emptyList());
-        this.principal = issuedKey;
+        this.principal = registration;
         this.keyId = null;
         this.challenge = null;
         this.assertion = null;
@@ -82,19 +81,21 @@ public class AppAttestIssuedKeyRegistrationAuthenticationToken extends AbstractA
      * Creates an unauthenticated token carrying the assertion credential and the public
      * key to register.
      */
-    public static AppAttestIssuedKeyRegistrationAuthenticationToken unauthenticated(
+    public static AppAttestInstanceKeyRegistrationAuthenticationToken unauthenticated(
             String keyId, String challenge, String assertion, String publicKeyJson) {
-        return new AppAttestIssuedKeyRegistrationAuthenticationToken(keyId, challenge, assertion, publicKeyJson);
+        return new AppAttestInstanceKeyRegistrationAuthenticationToken(keyId, challenge, assertion, publicKeyJson);
     }
 
     /**
-     * Creates an authenticated token carrying the registered issued key.
+     * Creates an authenticated token carrying the key registration as stored.
      *
-     * @param issuedKey the key as stored, with its server-derived {@code kid}
+     * @param registration the registration as stored, its key carrying the server-derived
+     *                     {@code kid}
      * @return an authenticated token with no authorities
      */
-    public static AppAttestIssuedKeyRegistrationAuthenticationToken registered(AppAttestIssuedKey issuedKey) {
-        return new AppAttestIssuedKeyRegistrationAuthenticationToken(issuedKey);
+    public static AppAttestInstanceKeyRegistrationAuthenticationToken registered(
+            AppAttestInstanceKeyRegistration registration) {
+        return new AppAttestInstanceKeyRegistrationAuthenticationToken(registration);
     }
 
     @Override
@@ -109,7 +110,8 @@ public class AppAttestIssuedKeyRegistrationAuthenticationToken extends AbstractA
 
     /**
      * The App Attest KEY identifier the request authenticated with, or {@code null} for an
-     * authenticated token.
+     * authenticated token. This is the {@code appAttestKid} of the key being registered, not
+     * the {@code jwkKid} the server derives from the submitted JWK.
      */
     public String getKeyId() {
         return this.keyId;
@@ -132,9 +134,9 @@ public class AppAttestIssuedKeyRegistrationAuthenticationToken extends AbstractA
     }
 
     /**
-     * The stored issued key, or {@code null} for an unauthenticated token.
+     * The stored registration, or {@code null} for an unauthenticated token.
      */
-    public AppAttestIssuedKey getIssuedKey() {
-        return this.principal instanceof AppAttestIssuedKey issuedKey ? issuedKey : null;
+    public AppAttestInstanceKeyRegistration getRegistration() {
+        return this.principal instanceof AppAttestInstanceKeyRegistration registration ? registration : null;
     }
 }

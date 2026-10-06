@@ -25,15 +25,15 @@ package org.eulerframework.security.authentication.appattest;
  * checked separately, so an endpoint reports it as a request error and not as an
  * authentication failure.
  *
- * @see AppAttestIssuedKeyRegistrationAuthenticationProvider
+ * @see AppAttestInstanceKeyRegistrationAuthenticationProvider
  */
-public class InvalidIssuedKeyException extends RuntimeException {
+public class InvalidInstanceKeyException extends RuntimeException {
 
-    public InvalidIssuedKeyException(String message) {
+    public InvalidInstanceKeyException(String message) {
         super(message);
     }
 
-    public InvalidIssuedKeyException(String message, Throwable cause) {
+    public InvalidInstanceKeyException(String message, Throwable cause) {
         super(message, cause);
     }
 }

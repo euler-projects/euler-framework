@@ -16,6 +16,7 @@
 
 package org.eulerframework.security.oauth2.server.authorization.jackson;
 
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
 import org.eulerframework.security.core.identity.UserIdentity;
 import org.eulerframework.security.core.identity.UserIdentityService;
 import org.eulerframework.security.core.userdetails.EulerUserDetails;
@@ -74,7 +75,7 @@ class EulerAuthorizationServerJacksonModuleTest {
         UserIdentity userIdentity = UserIdentity
                 .withExtensions(Map.of(UserIdentityService.PROPERTY_JWK, jwk))
                 .identityId("idt_2")
-                .identityType(UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY)
+                .identityType(AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE)
                 .subject("thumbprint-1")
                 .userId("usr_1")
                 .boundAt(Instant.parse("2026-01-01T00:00:00Z"))
@@ -93,7 +94,7 @@ class EulerAuthorizationServerJacksonModuleTest {
         assertEquals(authorities.size(), read.getAuthorities().size());
 
         UserIdentity restored = read.getUserIdentity();
-        assertEquals(UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY, restored.getIdentityType());
+        assertEquals(AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE, restored.getIdentityType());
         assertEquals("thumbprint-1", restored.getSubject());
         assertEquals(jwk, restored.getExtensions().get(UserIdentityService.PROPERTY_JWK),
                 "the key has to come back as the same JSON object, not as a string");

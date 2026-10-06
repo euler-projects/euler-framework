@@ -36,10 +36,8 @@ import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,20 +52,27 @@ import java.util.Set;
  * second kind of issuer adds a type and a subclass rather than a branch here.
  *
  * <h2>The two ways an assertion finds its account</h2>
+ * Both resolve the verification key the same way &mdash; from the issuer, by the assertion's
+ * {@code kid} ({@link #resolveRegisteredKey}) &mdash; and differ only in how the account is named.
+ * The {@code kid} is mandatory on both: it selects the key, the {@code sub} selects the account,
+ * and neither stands in for the other.
  * <ul>
  *   <li><b>It names its {@code sub}</b> &mdash; an ordinary login. The subject routes to an
- *       account and the signature is verified against the key that account's own identity
- *       holds. The issuer's key registry is never consulted on this path, which is what keeps
- *       an account reachable when the issuer's own credentials are later rotated or revoked: an
- *       app that re-registers and gets a new {@code client_id} keeps the accounts its users
- *       already opened. Nothing here writes, so a caller who cannot produce the account's own
- *       key simply does not get in.</li>
- *   <li><b>It names no {@code sub}</b> &mdash; a first login, which opens an account. Nothing
- *       identifies the caller except the key, so the signature is verified against the key the
- *       issuer registered ({@link #resolveRegisteredKey}) and that key becomes the identity the
- *       new account is bound to. Allowed only where {@link #allowsProvisioningWithoutSubject()}
- *       and the deployment's provisioning policy for this identity type both say so.</li>
+ *       account, and the key the issuer vouches for has to be the one that account's own identity
+ *       is bound to. Nothing here writes, so a caller who cannot produce the account's own key
+ *       simply does not get in.</li>
+ *   <li><b>It names no {@code sub}</b> &mdash; a first login. Nothing identifies the caller except
+ *       the key, so the key the issuer vouches for becomes the identity the new account is bound
+ *       to; a key already bound logs into that account instead of opening a second one. Allowed
+ *       only where {@link #allowsProvisioningWithoutSubject()} and the deployment's provisioning
+ *       policy for this identity type both say so.</li>
  * </ul>
+ * <p>
+ * Both apply the same account rule ({@link #requiresExclusiveAccount()}), so leaving the
+ * {@code sub} off is not a way around it. What consulting the issuer on every login does cost is
+ * that an account is reachable only for as long as the issuer still vouches for its key: rotating
+ * or revoking the credentials this issuer answers from has to leave the keys accounts are bound to
+ * in place, or those accounts stop authenticating.
  *
  * <h2>The two steps the provider calls, in its order</h2>
  * {@link #authenticate} reads and {@link #provision} writes, and the provider makes the assertion
@@ -132,19 +137,27 @@ public abstract class AbstractUserIdentityJwtBearerIssuerAuthenticator implement
     protected abstract String identityType();
 
     /**
-     * The public key this issuer registered under the given {@code kid}.
+     * The public key this issuer vouches for the assertion's {@code kid}.
      * <p>
-     * Consulted only when the account has to be found from the key itself, that is when the
-     * assertion carries no {@code sub}. A login that names its subject verifies against the key
-     * stored on that account's identity instead, so this may answer {@code null} for an issuer
-     * that keeps no registry of its own.
+     * Consulted on <b>every</b> login, with and without a {@code sub}: it is the only source of a
+     * verification key, because an account names the key it holds by that key's thumbprint rather
+     * than keeping a copy of it. An issuer therefore has to keep vouching for a key for as long as
+     * the accounts that key opened remain reachable, which is a retention obligation on whatever
+     * registry it answers from.
+     * <p>
+     * The whole assertion is passed rather than the two strings a lookup would obviously need,
+     * because where a key comes from is the issuer's business: one addresses its registry by the
+     * {@code iss}, another by the client authentication the request arrived under, a third by a
+     * header member this class does not read. {@link JwtBearerAssertion#getKeyId()} is never empty
+     * when this is called &mdash; {@link #authenticate} refuses an assertion carrying none &mdash;
+     * and {@link JwtBearerAssertion#getIssuer()} is the issuer {@link #supports} has already
+     * claimed.
      *
-     * @param issuer the assertion's {@code iss}, which {@link #supports} has already claimed
-     * @param keyId  the assertion header's {@code kid}; never empty on the path that calls this
-     * @return the public JWK, or {@code null} if the issuer has no such key
+     * @param assertion the assertion whose signature has to be verified; never {@code null}
+     * @return the public JWK, or {@code null} if the issuer vouches for no key by that name
      */
     @Nullable
-    protected abstract JWK resolveRegisteredKey(String issuer, @Nullable String keyId);
+    protected abstract JWK resolveRegisteredKey(JwtBearerAssertion assertion);
 
     /**
      * Whether an assertion from this issuer may open an account when it carries no {@code sub}.
@@ -196,6 +209,13 @@ public abstract class AbstractUserIdentityJwtBearerIssuerAuthenticator implement
     @Override
     @Nullable
     public final Authentication authenticate(JwtBearerAssertion assertion) {
+        // The kid selects the key and the sub selects the account, on both paths, so neither is
+        // optional and neither stands in for the other. Answered precisely and before anything
+        // about an account is looked at: it describes the caller's own request, so it cannot say
+        // anything about whether a subject exists or what it holds.
+        if (assertion.getKeyId() == null) {
+            throw JwtBearerErrors.invalidGrant("the assertion must carry a kid header");
+        }
         String subject = assertion.getSubject();
         UserIdentity userIdentity = subject != null
                 ? authenticateNamedSubject(assertion, subject)
@@ -222,7 +242,7 @@ public abstract class AbstractUserIdentityJwtBearerIssuerAuthenticator implement
     @Nullable
     public final EulerUser provision(JwtBearerAssertion assertion) {
         JWK registeredKey = assertion.getSubject() == null && allowsProvisioningWithoutSubject()
-                ? registeredKey(assertion)
+                ? resolveRegisteredKey(assertion)
                 : null;
         if (registeredKey == null) {
             // authenticate() has already refused an assertion that names a subject, comes from an
@@ -305,67 +325,58 @@ public abstract class AbstractUserIdentityJwtBearerIssuerAuthenticator implement
             throw JwtBearerErrors.invalidGrant("the assertion subject is unknown");
         }
 
-        List<UserIdentity> identities = this.userIdentityService.listUserIdentities(user.getUserId());
+        UserIdentity userIdentity = selectOwnTypeIdentity(user.getUserId(), assertion.getKeyId());
+        if (userIdentity == null) {
+            throw JwtBearerErrors.invalidGrant(
+                    "the account has no " + identityType() + " identity for this kid");
+        }
+
+        // The key comes from the issuer exactly as it does for a first login: the account names the
+        // key it holds by that key's thumbprint, and the issuer is what vouches for the material
+        // behind it. A key the issuer no longer vouches for authenticates nothing, however exactly
+        // the account names it.
+        JWK registeredKey = resolveRegisteredKey(assertion);
+        if (registeredKey == null) {
+            throw JwtBearerErrors.invalidGrant("the assertion issuer vouches for no key for this kid");
+        }
+
+        assertion.verifySignature(registeredKey);
+        return userIdentity;
+    }
+
+    /**
+     * The identity of this type that the given {@code kid} names, on an account that carries no
+     * identity of any other type.
+     * <p>
+     * One rule for both paths, and the reason the subject-less one comes through here too: an
+     * account that has since been bound to something proving who the person is has to stop being
+     * reachable by this weak factor, and leaving the {@code sub} off must not be a way around that.
+     * <p>
+     * The binding it applies is {@code subject == kid}. An identity's subject is the thumbprint of
+     * the key it was created from, so the account names the key it holds and nothing has to be read
+     * back from a stored copy of it &mdash; which is also why a key ID is never optional here: it is
+     * the only thing that says which key an assertion is about.
+     *
+     * @param userId the account to read
+     * @param keyId  the assertion's {@code kid}; never {@code null}
+     * @return the identity, or {@code null} if the account holds no identity of this type for that
+     *         key
+     * @throws OAuth2AuthenticationException {@code invalid_grant} if the account also carries an
+     *                                       identity of another type
+     */
+    @Nullable
+    private UserIdentity selectOwnTypeIdentity(String userId, String keyId) {
+        List<UserIdentity> identities = this.userIdentityService.listUserIdentities(userId);
         List<UserIdentity> ownTypeIdentities = identities.stream()
                 .filter(identity -> identityType().equals(identity.getIdentityType()))
                 .toList();
         if (requiresExclusiveAccount() && identities.size() != ownTypeIdentities.size()) {
             throw JwtBearerErrors.invalidGrant("the account is bound to another identity type");
         }
-
-        UserIdentity userIdentity = findByKeyId(ownTypeIdentities, assertion.getKeyId());
-        if (userIdentity == null) {
-            throw JwtBearerErrors.invalidGrant(assertion.getKeyId() != null
-                    ? "the account has no " + identityType() + " identity for this kid"
-                    : "the account has no " + identityType() + " identity");
-        }
-
-        assertion.verifySignature(identityJwk(userIdentity));
-        return userIdentity;
-    }
-
-    /**
-     * The identity the assertion's {@code kid} names, or {@code null} when the account holds none
-     * that matches. An account holding exactly one key of this type does not need the caller to
-     * say which, so a missing {@code kid} selects it; an account holding several does, and one
-     * naming a key the account does not hold matches nothing.
-     */
-    @Nullable
-    private static UserIdentity findByKeyId(List<UserIdentity> identities, @Nullable String keyId) {
-        if (keyId == null) {
-            return identities.size() == 1 ? identities.get(0) : null;
-        }
-        return identities.stream()
-                .filter(identity -> keyId.equals(identityJwk(identity).getKeyID()))
+        return ownTypeIdentities.stream()
+                .filter(identity -> keyId.equals(identity.getSubject()))
                 .findFirst()
                 .orElse(null);
-    }
-
-    private static JWK identityJwk(UserIdentity userIdentity) {
-        Object jwk = userIdentity.getProperty(UserIdentityService.PROPERTY_JWK);
-        try {
-            // The backend hands the key back in its projected JSON object form; a JSON string is
-            // accepted as well, so a caller that assembled the identity itself does not have to
-            // know which of the two the backend chose.
-            if (jwk instanceof String json) {
-                return JWK.parse(json);
-            }
-            if (jwk instanceof Map<?, ?> members) {
-                return JWK.parse(jwkMembers(members));
-            }
-        } catch (ParseException | RuntimeException e) {
-            throw new IllegalStateException(
-                    "The identity '" + userIdentity.getIdentityId() + "' carries an unparsable jwk", e);
-        }
-        // The backend persisted this identity without a usable key, which no login could ever
-        // verify against; a server-side data fault rather than something to blame the caller for.
-        throw new IllegalStateException(
-                "The identity '" + userIdentity.getIdentityId() + "' carries no jwk");
-    }
-
-    @SuppressWarnings("unchecked")  // a JWK's JSON object form is Map<String, Object> by construction
-    private static Map<String, Object> jwkMembers(Map<?, ?> members) {
-        return (Map<String, Object>) members;
     }
 
     // ========== Path 2: the assertion names no subject ==========
@@ -378,6 +389,10 @@ public abstract class AbstractUserIdentityJwtBearerIssuerAuthenticator implement
      * An issuer that opens no accounts is refused here, before any signature is looked at: what it
      * would take to answer otherwise is a caller holding a registered key, and telling such a
      * caller that this issuer does not do first logins is the only thing that check could leak.
+     * <p>
+     * A key that is already bound does not open a second account: it resolves to the account it
+     * belongs to through the same gate an ordinary login goes through, so omitting the {@code sub}
+     * buys nothing.
      *
      * @return the identity that key is already bound to, or {@code null} when it is bound to none
      *         and an account has to be opened for it
@@ -389,31 +404,30 @@ public abstract class AbstractUserIdentityJwtBearerIssuerAuthenticator implement
             // caller tell it apart from an account that could not be opened for another reason.
             throw refuse("this issuer opens no account for an assertion without a sub");
         }
-        JWK registeredKey = registeredKey(assertion);
+        JWK registeredKey = resolveRegisteredKey(assertion);
         if (registeredKey == null) {
-            throw JwtBearerErrors.invalidGrant(assertion.getKeyId() == null
-                    // The issuer's registry is keyed by (issuer, kid), so without a key ID there is
-                    // nothing to verify against.
-                    ? "the assertion must carry a kid header to open an account"
-                    : "the assertion issuer has not registered a key for this kid");
+            throw JwtBearerErrors.invalidGrant("the assertion issuer has not registered a key for this kid");
         }
         assertion.verifySignature(registeredKey);
 
         // The key's own JSON is the raw subject; the identity backend derives the persisted subject
         // from it, so the same key always lands on the same identity however it was serialised here.
-        return this.userIdentityService
+        UserIdentity bound = this.userIdentityService
                 .findUserIdentityByRawSubject(identityType(), registeredKey.toJSONString())
                 .orElse(null);
-    }
-
-    /**
-     * The key this issuer registered under the assertion's {@code kid}, or {@code null} when the
-     * assertion names no key or the issuer vouches for none by that name.
-     */
-    @Nullable
-    private JWK registeredKey(JwtBearerAssertion assertion) {
-        String keyId = assertion.getKeyId();
-        return keyId == null ? null : resolveRegisteredKey(assertion.getIssuer(), keyId);
+        if (bound == null) {
+            return null;
+        }
+        // Already bound, so this is an ordinary login that left the sub off, and it clears the same
+        // account rule. Re-selecting by kid rather than returning `bound` is what applies that rule;
+        // the two agree because the registry files a key under its own thumbprint.
+        try {
+            return selectOwnTypeIdentity(bound.getUserId(), assertion.getKeyId());
+        } catch (OAuth2AuthenticationException ex) {
+            // Collapsed exactly as the named-subject path collapses it: what it describes is an
+            // account, and holding a key that is bound to one is not proof of anything about it.
+            throw refuse(ex.getError().getDescription());
+        }
     }
 
     /**

@@ -29,8 +29,8 @@ import org.eulerframework.resource.Tag;
 import org.eulerframework.security.authentication.InMemoryNonceService;
 import org.eulerframework.security.authentication.NonceService;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKey;
-import org.eulerframework.security.authentication.appattest.InMemoryAppAttestIssuedKeyService;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
+import org.eulerframework.security.authentication.appattest.InMemoryAppAttestInstanceKeyRegistrationService;
 import org.eulerframework.security.core.EulerAuthority;
 import org.eulerframework.security.core.EulerUser;
 import org.eulerframework.security.core.EulerUserService;
@@ -105,12 +105,18 @@ class OAuth2JwtBearerAuthenticationProviderTest {
      * so a test that has to tell an existing account from a freshly opened one can.
      */
     private static final String USER_ID = "usr-existing";
+    /**
+     * The App Attest KEY every fixture client authenticated with. This is what the key registry
+     * is addressed by &mdash; not {@link #CLIENT_ID}, which is only what makes that KEY's
+     * {@code client_id} usable as an assertion's {@code iss}.
+     */
+    private static final String ATTEST_KID = "attest-kid";
 
     private ECKey signingKey;
     private String keyId;
     private ECKey secondKey;
     private String secondKeyId;
-    private InMemoryAppAttestIssuedKeyService issuedKeyService;
+    private InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService;
     private RecordingIdentityService identityService;
     private RecordingUserService userService;
     private InMemoryOAuth2AuthorizationService authorizationService;
@@ -137,17 +143,18 @@ class OAuth2JwtBearerAuthenticationProviderTest {
         this.keyId = JwkUtils.computeThumbprint(publicKey);
         publicKey = JwkUtils.withKeyId(publicKey, this.keyId);
 
-        this.issuedKeyService = new InMemoryAppAttestIssuedKeyService();
-        this.issuedKeyService.saveKey(new AppAttestIssuedKey(CLIENT_ID, this.keyId, publicKey.toJSONString()));
+        this.instanceKeyRegistrationService = new InMemoryAppAttestInstanceKeyRegistrationService();
+        this.instanceKeyRegistrationService.saveRegistration(
+                new AppAttestInstanceKeyRegistration(ATTEST_KID, this.keyId, publicKey.toJSONString()));
 
-        // A second key, registered under the same issuer but bound to no account: a perfectly
+        // A second key, registered by the same App instance but bound to no account: a perfectly
         // valid key that a login naming somebody else's account must still be refused for.
         this.secondKey = new ECKeyGenerator(Curve.P_256).generate();
         JWK secondPublicKey = JwkUtils.toPublicJwk(this.secondKey);
         this.secondKeyId = JwkUtils.computeThumbprint(secondPublicKey);
         secondPublicKey = JwkUtils.withKeyId(secondPublicKey, this.secondKeyId);
-        this.issuedKeyService.saveKey(
-                new AppAttestIssuedKey(CLIENT_ID, this.secondKeyId, secondPublicKey.toJSONString()));
+        this.instanceKeyRegistrationService.saveRegistration(
+                new AppAttestInstanceKeyRegistration(ATTEST_KID, this.secondKeyId, secondPublicKey.toJSONString()));
 
         this.identityService = new RecordingIdentityService();
         this.userService = new RecordingUserService();
@@ -183,7 +190,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
         assertIssuedToken(result);
         assertEquals(1, this.userService.created.size());
         assertEquals(1, this.identityService.created.size());
-        assertEquals(UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY,
+        assertEquals(AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE,
                 this.identityService.created.get(0).getIdentityType());
         // The key is the identity's whole uniqueness: its thumbprint is the persisted subject.
         assertEquals(this.keyId, this.identityService.created.get(0).getSubject());
@@ -334,15 +341,45 @@ class OAuth2JwtBearerAuthenticationProviderTest {
         assertEquals(0, this.userService.created.size());
     }
 
-    /** An account holding one key has nothing to choose between, so the header may omit the kid. */
+    /**
+     * The {@code kid} selects the key and the {@code sub} selects the account, and neither stands
+     * in for the other. An account holding one key has nothing to choose between, but choosing for
+     * the caller is what would let "the signature does not match" mean "this account exists and
+     * holds exactly one key", so the header is required on both paths.
+     */
     @Test
-    void acceptsAnAssertionThatOmitsTheKidWhenTheAccountHasOneKey() throws Exception {
+    void refusesAnAssertionThatOmitsTheKid() throws Exception {
         bindExistingAccount();
 
-        assertIssuedToken(provider().authenticate(token(sign(
-                new JWSHeader.Builder(JWSAlgorithm.ES256).build(), claims(CLIENT_ID, "alice", 0)).serialize())));
+        OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
+                () -> provider().authenticate(token(sign(
+                        new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
+                        claims(CLIENT_ID, "alice", 0)).serialize())));
 
-        assertEquals(0, this.identityService.created.size());
+        assertEquals(OAuth2ErrorCodes.INVALID_GRANT, ex.getError().getErrorCode());
+        assertTrue(ex.getError().getDescription().contains("kid"),
+                "a missing header describes the request and nothing else, so it is reported precisely");
+    }
+
+    /**
+     * The account rule the named-subject path has always applied, and the reason the subject-less
+     * one goes through the same gate: an account upgraded with an identity that proves who the
+     * person is has to stop being reachable by the weak factor that opened it, and dropping the
+     * {@code sub} must not be a way around that.
+     */
+    @Test
+    void rejectsASubjectlessLoginForAnAccountThatHasSinceGainedAnotherIdentityType() throws Exception {
+        provider().authenticate(token(assertion(this.keyId, null, 0)));
+        String userId = this.identityService.created.get(0).getUserId();
+        this.identityService.addOtherTypeIdentity(userId);
+
+        OAuth2AuthenticationException ex = assertThrows(OAuth2AuthenticationException.class,
+                () -> provider().authenticate(token(assertion(this.keyId, null, 1))));
+
+        assertEquals(OAuth2ErrorCodes.INVALID_GRANT, ex.getError().getErrorCode());
+        // Collapsed like every other account-state refusal, and the same answer both paths give.
+        assertEquals(JwtBearerErrors.NO_ACCOUNT_DETAIL, ex.getError().getDescription());
+        assertEquals(1, this.userService.created.size(), "and no second account is opened for the key");
     }
 
     // ---- signature and RFC 7523 claim checks ----
@@ -630,7 +667,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
     /** The account an ordinary login resolves to, already bound to the registered key. */
     private void bindExistingAccount() {
         this.identityService.createUserIdentity(USER_ID, UserIdentity.builder()
-                .identityType(UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY)
+                .identityType(AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE)
                 .property(UserIdentityService.PROPERTY_JWK, publicJwkJson())
                 .build());
         // This is arrangement, not the act under test: the recordings it produced would
@@ -653,7 +690,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
 
     private OAuth2JwtBearerAuthenticationProvider provider(JitProvisioningPolicyResolver policyResolver) {
         return providerWith(new AppAttestJwtBearerIssuerAuthenticator(
-                this.issuedKeyService,
+                this.instanceKeyRegistrationService,
                 this.identityService,
                 this.userService,
                 policyResolver));
@@ -695,7 +732,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
                 .build();
         return new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient, method,
                 ClientAuthenticationMethod.NONE.equals(method) ? null : "credential",
-                new AppAttestAttestationRegistration("attest-kid", "ABCD1234EF", "com.example.app", CLIENT_ID,
+                new AppAttestAttestationRegistration(ATTEST_KID, "ABCD1234EF", "com.example.app", CLIENT_ID,
                         null, null, null, null, null, null, 0),
                 EulerClientAttestationProof.ASSERTION);
     }
@@ -715,7 +752,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
     private static Authentication attestedClient(RegisteredClient registeredClient) {
         return new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient,
                 EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, null,
-                new AppAttestAttestationRegistration("attest-kid", "ABCD1234EF", "com.example.app", CLIENT_ID,
+                new AppAttestAttestationRegistration(ATTEST_KID, "ABCD1234EF", "com.example.app", CLIENT_ID,
                         null, null, null, null, null, null, 0),
                 EulerClientAttestationProof.ASSERTION);
     }
@@ -886,7 +923,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
 
         @Override
         public String identityType() {
-            return UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY;
+            return AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE;
         }
 
         @Override
@@ -907,8 +944,9 @@ class OAuth2JwtBearerAuthenticationProviderTest {
             if (this.bySubject.containsKey(subject)) {
                 throw new IdentityOccupiedException(identityType());
             }
-            UserIdentity identity = UserIdentity.withExtensions(
-                            Map.of(UserIdentityService.PROPERTY_JWK, parse(jwkJson).toJSONObject()))
+            // No jwk is projected: a persisted identity carries the thumbprint as its subject and
+            // the key material stays with the issuer, which is where a login reads it from.
+            UserIdentity identity = UserIdentity.withExtensions(new LinkedHashMap<>())
                     .identityId("idn_" + UUID.randomUUID())
                     .identityType(identityType())
                     .subject(subject)

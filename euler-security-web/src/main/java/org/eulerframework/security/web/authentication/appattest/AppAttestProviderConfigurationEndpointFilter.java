@@ -81,7 +81,7 @@ public class AppAttestProviderConfigurationEndpointFilter extends OncePerRequest
     /**
      * @param challengeEndpointUri    the {@code URI} of the App Attest challenge endpoint to advertise
      * @param registrationEndpointUri the {@code URI} of the App Attest registration endpoint to advertise
-     * @param keysEndpointUri         the {@code URI} of the issued-key registration endpoint to advertise
+     * @param keysEndpointUri         the {@code URI} of the instance-key registration endpoint to advertise
      */
     public AppAttestProviderConfigurationEndpointFilter(String challengeEndpointUri,
                                                         String registrationEndpointUri,

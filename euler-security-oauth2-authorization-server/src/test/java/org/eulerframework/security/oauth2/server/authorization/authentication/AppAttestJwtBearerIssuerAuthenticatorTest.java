@@ -16,19 +16,23 @@
 
 package org.eulerframework.security.oauth2.server.authorization.authentication;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.eulerframework.security.authentication.appattest.AppAttestAttestationRegistration;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKey;
-import org.eulerframework.security.authentication.appattest.InMemoryAppAttestIssuedKeyService;
-import org.eulerframework.security.core.identity.UserIdentityService;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
+import org.eulerframework.security.authentication.appattest.InMemoryAppAttestInstanceKeyRegistrationService;
 import org.eulerframework.security.oauth2.core.EulerClientAuthenticationMethod;
 import org.eulerframework.security.oauth2.core.EulerClientAttestationProof;
 import org.eulerframework.security.provisioning.jit.JitProvisioningPolicy;
 import org.eulerframework.security.util.JwkUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
@@ -52,8 +56,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AppAttestJwtBearerIssuerAuthenticatorTest {
 
     private static final String CLIENT_ID = "client-1";
+    private static final String ATTEST_KID = "attest-kid";
 
-    private final InMemoryAppAttestIssuedKeyService issuedKeyService = new InMemoryAppAttestIssuedKeyService();
+    private final InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
+            new InMemoryAppAttestInstanceKeyRegistrationService();
 
     /**
      * An issuer is claimed for the App instance that authenticated this request, and only for it.
@@ -71,10 +77,7 @@ class AppAttestJwtBearerIssuerAuthenticatorTest {
      */
     @Test
     void doesNotClaimAnIssuerForAClientThatAuthenticatedSomeOtherWay() {
-        OAuth2ClientAuthenticationToken secretClient = new OAuth2ClientAuthenticationToken(registeredClient(),
-                ClientAuthenticationMethod.CLIENT_SECRET_BASIC, null);
-
-        assertFalse(authenticator().supports(CLIENT_ID, secretClient));
+        assertFalse(authenticator().supports(CLIENT_ID, secretClient()));
     }
 
     /** An assertion may only be read against the issuer this request was proved to be. */
@@ -90,7 +93,7 @@ class AppAttestJwtBearerIssuerAuthenticatorTest {
      */
     @Test
     void namesTheIdentityTypeItsKeysAreStoredUnder() {
-        assertEquals(UserIdentityService.IDENTITY_TYPE_PUBLIC_KEY, authenticator().identityType());
+        assertEquals(AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE, authenticator().identityType());
     }
 
     /**
@@ -103,26 +106,69 @@ class AppAttestJwtBearerIssuerAuthenticatorTest {
     }
 
     @Test
-    void findsARegisteredKeyAndNothingAnIssuerNeverRegistered() throws Exception {
-        ECKey key = new ECKeyGenerator(Curve.P_256).generate();
-        JWK publicKey = JwkUtils.toPublicJwk(key);
-        String keyId = JwkUtils.computeThumbprint(publicKey);
-        this.issuedKeyService.saveKey(new AppAttestIssuedKey(CLIENT_ID, keyId,
-                JwkUtils.withKeyId(publicKey, keyId).toJSONString()));
+    void findsARegisteredKeyAndNothingTheInstanceNeverRegistered() throws Exception {
+        String jwkKid = registerKeyFor(ATTEST_KID);
 
         AppAttestJwtBearerIssuerAuthenticator authenticator = authenticator();
-        assertNotNull(authenticator.resolveRegisteredKey(CLIENT_ID, keyId));
-        assertNull(authenticator.resolveRegisteredKey(CLIENT_ID, "a-kid-nobody-registered"));
-        // The registry is keyed by issuer as well as key ID, so another issuer's copy of the same
-        // key is not this issuer's to hand out.
-        assertNull(authenticator.resolveRegisteredKey("some-other-issuer", keyId));
-        assertNull(authenticator.resolveRegisteredKey(CLIENT_ID, null));
+        assertNotNull(authenticator.resolveRegisteredKey(assertion(jwkKid, attestedClient())));
+        assertNull(authenticator.resolveRegisteredKey(assertion("a-kid-nobody-registered", attestedClient())));
+        // No kid in the header is not a wildcard: there is nothing to look up with.
+        assertNull(authenticator.resolveRegisteredKey(assertion(null, attestedClient())));
+    }
+
+    /**
+     * The registry is addressed by App Attest KEY rather than by issuer, so a key another instance
+     * registered stays invisible here even though that instance is bound to the same
+     * {@code client_id} and would therefore name the same {@code iss}. This is the tighter of the
+     * two addressings: the key has to have been registered by the very KEY that authenticated this
+     * request.
+     */
+    @Test
+    void findsNothingRegisteredUnderAnotherAppAttestKey() throws Exception {
+        String jwkKid = registerKeyFor("some-other-attest-kid");
+
+        assertNull(authenticator().resolveRegisteredKey(assertion(jwkKid, attestedClient())));
+    }
+
+    /**
+     * A request that carries no verified attestation has no App Attest KEY to look a key up under,
+     * so there is nothing to resolve &mdash; whatever the assertion header names.
+     */
+    @Test
+    void findsNothingForAClientThatWasNotAuthenticatedByAppAttest() throws Exception {
+        String jwkKid = registerKeyFor(ATTEST_KID);
+
+        assertNull(authenticator().resolveRegisteredKey(assertion(jwkKid, secretClient())));
     }
 
     // ---- helpers ----
 
+    /**
+     * Register a freshly generated public key under the given App Attest KEY and return the
+     * {@code kid} a client would quote to have it looked up.
+     */
+    private String registerKeyFor(String appAttestKid) throws Exception {
+        ECKey key = new ECKeyGenerator(Curve.P_256).generate();
+        JWK publicKey = JwkUtils.toPublicJwk(key);
+        String jwkKid = JwkUtils.computeThumbprint(publicKey);
+        this.instanceKeyRegistrationService.saveRegistration(new AppAttestInstanceKeyRegistration(appAttestKid, jwkKid,
+                JwkUtils.withKeyId(publicKey, jwkKid).toJSONString()));
+        return jwkKid;
+    }
+
+    /**
+     * An assertion as the grant provider hands one over. Unsigned on purpose: nothing this class
+     * tests verifies a signature, and what is under test is which key the anchor resolves.
+     */
+    private static JwtBearerAssertion assertion(@Nullable String keyId,
+                                                OAuth2ClientAuthenticationToken clientPrincipal) throws Exception {
+        SignedJWT jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyId).build(),
+                new JWTClaimsSet.Builder().issuer(CLIENT_ID).build());
+        return new JwtBearerAssertion(jwt, jwt.getJWTClaimsSet(), clientPrincipal);
+    }
+
     private AppAttestJwtBearerIssuerAuthenticator authenticator() {
-        return new AppAttestJwtBearerIssuerAuthenticator(this.issuedKeyService,
+        return new AppAttestJwtBearerIssuerAuthenticator(this.instanceKeyRegistrationService,
                 new OAuth2JwtBearerAuthenticationProviderTest.RecordingIdentityService(),
                 new OAuth2JwtBearerAuthenticationProviderTest.RecordingUserService(),
                 type -> JitProvisioningPolicy.disabled());
@@ -139,8 +185,13 @@ class AppAttestJwtBearerIssuerAuthenticatorTest {
     private static OAuth2ClientAuthenticationToken attestedClient() {
         return new EulerOAuth2ClientAttestationAuthenticationToken(registeredClient(),
                 EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH, null,
-                new AppAttestAttestationRegistration("attest-kid", "ABCD1234EF", "com.example.app", CLIENT_ID,
+                new AppAttestAttestationRegistration(ATTEST_KID, "ABCD1234EF", "com.example.app", CLIENT_ID,
                         null, null, null, null, null, null, 0),
                 EulerClientAttestationProof.ASSERTION);
+    }
+
+    private static OAuth2ClientAuthenticationToken secretClient() {
+        return new OAuth2ClientAuthenticationToken(registeredClient(),
+                ClientAuthenticationMethod.CLIENT_SECRET_BASIC, null);
     }
 }

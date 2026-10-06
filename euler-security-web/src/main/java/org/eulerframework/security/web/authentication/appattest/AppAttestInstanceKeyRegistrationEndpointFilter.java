@@ -22,10 +22,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eulerframework.common.util.jackson.JacksonUtils;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKey;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyRegistrationAuthenticationProvider;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyRegistrationAuthenticationToken;
-import org.eulerframework.security.authentication.appattest.InvalidIssuedKeyException;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationProvider;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.InvalidInstanceKeyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -47,19 +47,23 @@ import java.util.Map;
 
 /**
  * A filter that exposes a {@code POST /app_attest/keys} endpoint for registering the public
- * keys an App instance issues, so that it can sign jwt-bearer assertions.
+ * keys an App instance generates itself.
  * <p>
  * The endpoint is a RESTful collection: one App instance may register several keys, and
- * registration is idempotent per key because the {@code kid} is derived from the key
- * material rather than chosen by the caller. Like the App instance registration endpoint it
- * requires no OAuth client credential or user session, but it is not anonymous either: an
- * App Attest assertion authenticates the caller as a genuine App instance whose KEY is
- * already bound to an OAuth2 client, and that client becomes the JWT {@code iss} the key is
- * registered under.
+ * registration is idempotent per key because the {@code kid} is derived from the key material
+ * rather than chosen by the caller. Like the App instance registration endpoint it requires no
+ * OAuth client credential and no user session, but it is not anonymous either: an App Attest
+ * assertion authenticates the caller as a genuine App instance, and the key is filed under the
+ * App Attest KEY that authenticated it.
  * <p>
- * It performs <b>key registration only</b>. No account is created and no subject is
- * produced; an account is provisioned later, by the first jwt-bearer login presenting an
- * assertion signed by a key registered here.
+ * What a registered key may then be used for is not this endpoint's business and is not decided
+ * here. The trust it carries is exactly what App Attest proves &mdash; an unmodified installation
+ * of a registered app, on genuine Apple hardware, generated this key and holds its private half
+ * in the platform's secure area &mdash; and any consumer that wants more than that has to
+ * establish the rest itself.
+ * <p>
+ * It performs <b>key registration only</b>. No account is created, no subject is produced and no
+ * login state is established.
  * <p>
  * The App Attest credential is accepted in either carriage (never mixed): the
  * {@code App-Attest-Kid} / {@code App-Attest-Challenge} / {@code App-Attest-Assertion}
@@ -76,21 +80,21 @@ import java.util.Map;
  * invalid_request}, as is a body that is not a registrable JWK or is larger than one could
  * be; a credential that does not verify with {@code 401 key_registration_failed}.
  *
- * @see AppAttestIssuedKeyRegistrationAuthenticationConverter
- * @see AppAttestIssuedKeyRegistrationAuthenticationProvider
+ * @see AppAttestInstanceKeyRegistrationAuthenticationConverter
+ * @see AppAttestInstanceKeyRegistrationAuthenticationProvider
  */
-public class AppAttestIssuedKeyRegistrationEndpointFilter extends OncePerRequestFilter {
+public class AppAttestInstanceKeyRegistrationEndpointFilter extends OncePerRequestFilter {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(AppAttestIssuedKeyRegistrationEndpointFilter.class);
+            LoggerFactory.getLogger(AppAttestInstanceKeyRegistrationEndpointFilter.class);
 
     private final AuthenticationConverter authenticationConverter;
     private final AuthenticationProvider authenticationProvider;
     private final RequestMatcher requestMatcher;
 
-    public AppAttestIssuedKeyRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
-                                                        AuthenticationProvider authenticationProvider,
-                                                        String endpointUri) {
+    public AppAttestInstanceKeyRegistrationEndpointFilter(AuthenticationConverter authenticationConverter,
+                                                          AuthenticationProvider authenticationProvider,
+                                                          String endpointUri) {
         Assert.notNull(authenticationConverter, "authenticationConverter must not be null");
         Assert.notNull(authenticationProvider, "authenticationProvider must not be null");
         Assert.hasText(endpointUri, "endpointUri must not be empty");
@@ -126,12 +130,12 @@ public class AppAttestIssuedKeyRegistrationEndpointFilter extends OncePerRequest
             }
 
             Authentication result = this.authenticationProvider.authenticate(authRequest);
-            sendSuccessResponse(response, (AppAttestIssuedKeyRegistrationAuthenticationToken) result);
-        } catch (InvalidIssuedKeyException ex) {
-            logger.debug("Issued-key registration request rejected: {}", ex.getMessage());
+            sendSuccessResponse(response, (AppAttestInstanceKeyRegistrationAuthenticationToken) result);
+        } catch (InvalidInstanceKeyException ex) {
+            logger.debug("Key registration request rejected: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.BAD_REQUEST, "invalid_request", ex.getMessage());
         } catch (AuthenticationException ex) {
-            logger.debug("Issued-key registration failed: {}", ex.getMessage());
+            logger.debug("Key registration failed: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "key_registration_failed", ex.getMessage());
         }
     }
@@ -139,15 +143,15 @@ public class AppAttestIssuedKeyRegistrationEndpointFilter extends OncePerRequest
     /**
      * Write the registered key back exactly as the store holds it: it already carries its
      * server-derived {@code kid}, and it was read back after the write rather than taken from
-     * the request, so the response is the JWK a login will actually be verified against.
+     * the request, so the response is the JWK the registry will actually hand to a consumer.
      */
     private void sendSuccessResponse(HttpServletResponse response,
-                                     AppAttestIssuedKeyRegistrationAuthenticationToken result) throws IOException {
-        AppAttestIssuedKey issuedKey = result.getIssuedKey();
+                                     AppAttestInstanceKeyRegistrationAuthenticationToken result) throws IOException {
+        AppAttestInstanceKeyRegistration registration = result.getRegistration();
         response.setStatus(HttpStatus.CREATED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write(issuedKey.jwk());
+        response.getWriter().write(registration.jwk());
     }
 
     private void sendErrorResponse(HttpServletResponse response, HttpStatus status,

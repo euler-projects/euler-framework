@@ -19,9 +19,9 @@ package org.eulerframework.security.web.authentication.appattest;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKey;
-import org.eulerframework.security.authentication.appattest.AppAttestIssuedKeyRegistrationAuthenticationToken;
-import org.eulerframework.security.authentication.appattest.InvalidIssuedKeyException;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
+import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.InvalidInstanceKeyException;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -35,18 +35,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Pins the endpoint contract of {@link AppAttestIssuedKeyRegistrationEndpointFilter}: which
+ * Pins the endpoint contract of {@link AppAttestInstanceKeyRegistrationEndpointFilter}: which
  * requests it answers, what a registration returns, and how the two distinct kinds of
  * failure are told apart &mdash; a request the server could not use is a {@code 400}, while
  * a credential that did not verify is a {@code 401}.
  */
-class AppAttestIssuedKeyRegistrationEndpointFilterTest {
+class AppAttestInstanceKeyRegistrationEndpointFilterTest {
 
     private static final String ENDPOINT = "/app_attest/keys";
     private static final String KID = "attest-kid-1";
     private static final String CHALLENGE = "challenge-1";
     private static final String ASSERTION = "assertion-1";
-    private static final String ISSUER = "client-1";
 
     /**
      * A body the converter forwards verbatim. Deciding whether it is a registrable key is the
@@ -58,11 +57,11 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
 
     @Test
     void registersAKeyAndReturnsItWithItsServerDerivedKid() throws Exception {
-        AppAttestIssuedKey stored = new AppAttestIssuedKey(ISSUER, "thumbprint-1",
+        AppAttestInstanceKeyRegistration stored = new AppAttestInstanceKeyRegistration(KID, "thumbprint-1",
                 "{\"kty\":\"EC\",\"kid\":\"thumbprint-1\"}");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        filter(authentication -> AppAttestIssuedKeyRegistrationAuthenticationToken.registered(stored))
+        filter(authentication -> AppAttestInstanceKeyRegistrationAuthenticationToken.registered(stored))
                 .doFilter(request(headers(), SUBMITTED_JWK), response, new RecordingFilterChain());
 
         assertEquals(201, response.getStatus());
@@ -104,7 +103,7 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
         // The credential was fine; what the caller asked to register was not. Reporting this
         // as 401 would send the client to re-fetch a challenge for a body it must rewrite.
         filter(authentication -> {
-            throw new InvalidIssuedKeyException("The JWK cannot be registered: unsupported key type");
+            throw new InvalidInstanceKeyException("The JWK cannot be registered: unsupported key type");
         }).doFilter(request(headers(), "{\"kty\":\"oct\"}"), response, new RecordingFilterChain());
 
         assertEquals(400, response.getStatus());
@@ -117,14 +116,14 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter(authentication -> {
-            throw new BadCredentialsException("No OAuth2 client is bound to this App Attest KEY");
+            throw new BadCredentialsException("Invalid or expired challenge");
         }).doFilter(request(headers(), SUBMITTED_JWK), response, new RecordingFilterChain());
 
         assertEquals(401, response.getStatus());
         assertTrue(response.getContentAsString().contains("key_registration_failed"));
         // The reason travels to the client, so an actionable message from the provider is not
         // swallowed by the mapping.
-        assertTrue(response.getContentAsString().contains("No OAuth2 client is bound"));
+        assertTrue(response.getContentAsString().contains("Invalid or expired challenge"));
     }
 
     @Test
@@ -159,7 +158,7 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
     void anOversizedBodyIsABadRequestThatNeverReachesTheProvider() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
         String oversized = "{\"jwk\":\"" + "x".repeat(
-                AppAttestIssuedKeyRegistrationAuthenticationConverter.MAX_REQUEST_BODY_SIZE) + "\"}";
+                AppAttestInstanceKeyRegistrationAuthenticationConverter.MAX_REQUEST_BODY_SIZE) + "\"}";
 
         filter(recordingProvider())
                 .doFilter(request(headers(), oversized), response, new RecordingFilterChain());
@@ -172,10 +171,10 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
     /** The bound refuses a body that could not be a key, not the largest one that could. */
     @Test
     void aBodyExactlyAtTheLimitIsStillAccepted() throws Exception {
-        AppAttestIssuedKey stored = new AppAttestIssuedKey(ISSUER, "thumbprint-1", "{}");
+        AppAttestInstanceKeyRegistration stored = new AppAttestInstanceKeyRegistration(KID, "thumbprint-1", "{}");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        filter(authentication -> AppAttestIssuedKeyRegistrationAuthenticationToken.registered(stored))
+        filter(authentication -> AppAttestInstanceKeyRegistrationAuthenticationToken.registered(stored))
                 .doFilter(request(headers(), padToLimit(SUBMITTED_JWK)), response, new RecordingFilterChain());
 
         assertEquals(201, response.getStatus());
@@ -188,16 +187,16 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
      * the boundary against which the refusal above is meaningful.
      */
     private static String padToLimit(String body) {
-        int limit = AppAttestIssuedKeyRegistrationAuthenticationConverter.MAX_REQUEST_BODY_SIZE;
+        int limit = AppAttestInstanceKeyRegistrationAuthenticationConverter.MAX_REQUEST_BODY_SIZE;
         String prefix = body.substring(0, body.length() - 1) + ",\"pad\":\"";
         int filler = limit - prefix.length() - 2;   // the closing quote and brace
         assertTrue(filler > 0, "the fixture body must leave room to pad up to the limit");
         return prefix + "p".repeat(filler) + "\"}";
     }
 
-    private static AppAttestIssuedKeyRegistrationEndpointFilter filter(StubProvider provider) {
-        return new AppAttestIssuedKeyRegistrationEndpointFilter(
-                new AppAttestIssuedKeyRegistrationAuthenticationConverter(), provider, ENDPOINT);
+    private static AppAttestInstanceKeyRegistrationEndpointFilter filter(StubProvider provider) {
+        return new AppAttestInstanceKeyRegistrationEndpointFilter(
+                new AppAttestInstanceKeyRegistrationAuthenticationConverter(), provider, ENDPOINT);
     }
 
     /** A provider that never runs, for the cases the filter has to answer on its own. */
@@ -233,7 +232,7 @@ class AppAttestIssuedKeyRegistrationEndpointFilterTest {
 
         @Override
         default boolean supports(Class<?> authentication) {
-            return AppAttestIssuedKeyRegistrationAuthenticationToken.class.isAssignableFrom(authentication);
+            return AppAttestInstanceKeyRegistrationAuthenticationToken.class.isAssignableFrom(authentication);
         }
     }
 

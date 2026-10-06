@@ -60,33 +60,26 @@ public interface UserIdentityService {
     String IDENTITY_TYPE_PARAMETER = "identity_type";
 
     /**
-     * The {@code identity_type} of the backend holding a self-held public key, whose
-     * private half never leaves the device that generated it.
+     * Extension key under which a key-backed identity backend reads the public JWK to register
+     * from a prototype.
      *
-     * <p>Declared here rather than on that backend, which lives in the application, so
-     * that framework flows authenticating against it &mdash; the jwt-bearer grant &mdash;
-     * and the backend itself cannot drift apart on the value.
-     */
-    String IDENTITY_TYPE_PUBLIC_KEY = "public_key";
-
-    /**
-     * Extension key under which the {@code public_key} backend reads the registered public
-     * JWK from a prototype, and writes it back on a persisted identity.
-     *
-     * <p>As with the other backends, what goes in is the raw value and what comes out is
-     * its projection:
-     * <ul>
-     *   <li>on a prototype, and as the {@code rawSubject} of
-     *       {@link #findUserIdentityByRawSubject(String, String)}, the JWK as a JSON
-     *       <b>string</b>;</li>
-     *   <li>on a persisted identity, the same JWK as its JSON <b>object</b> form, which is
-     *       what a wire projection has to hand back rather than an escaped string.</li>
-     * </ul>
+     * <p>What goes in is the raw value: on a prototype, and as the {@code rawSubject} of
+     * {@link #findUserIdentityByRawSubject(String, String)}, the JWK as a JSON <b>string</b>.
      *
      * <p>The backend derives the persisted {@code subject} from the key as its RFC 7638
-     * thumbprint, the same way the phone backend hashes the number it is given. Declared
-     * beside {@link #IDENTITY_TYPE_PUBLIC_KEY} for the same reason: framework flows and the
-     * backend cannot be allowed to drift on either name.
+     * thumbprint, the same way the phone backend hashes the number it is given. That thumbprint
+     * is the whole of what a persisted identity has to carry: a login names the key it signs with
+     * by its {@code kid}, which is that same thumbprint, and asks the issuer for the key material
+     * &mdash; so a backend is free to keep only the subject and hand back no JWK at all. Whether
+     * it also projects one onto a persisted identity is its own choice, and a caller must not
+     * depend on finding one there.
+     *
+     * <p>Declared here rather than on the backend that uses it, which lives in the application,
+     * because a framework flow provisioning such an identity has to agree with that backend on
+     * the name and the two sit on opposite sides of this interface. The {@code identity_type}
+     * such a backend stores under is deliberately <b>not</b> declared here: an identity type is
+     * one issuer's key space rather than a generic credential kind, so it belongs to the domain
+     * that owns the issuer's keys.
      */
     String PROPERTY_JWK = "jwk";
 
