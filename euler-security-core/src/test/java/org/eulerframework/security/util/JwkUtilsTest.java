@@ -67,40 +67,6 @@ class JwkUtilsTest {
         assertEquals(fromPublic, JwkUtils.computeThumbprint(JwkUtils.withKeyId(key, "some-other-kid")));
     }
 
-    /**
-     * The pairing a key store has to insist on: a caller quotes the identifier to get the key back,
-     * so an identifier that does not describe the key it is filed with makes a lookup answer with a
-     * key nobody asked for.
-     */
-    @Test
-    void acceptsAKeyIdThatIsTheKeysOwnThumbprint() throws Exception {
-        ECKey key = new ECKeyGenerator(Curve.P_256).generate();
-
-        JWK parsed = JwkUtils.requireThumbprintKeyId(
-                JwkUtils.computeThumbprint(key), key.toPublicJWK().toJSONString());
-
-        assertEquals(key.toECPublicKey(), parsed.toECKey().toECPublicKey());
-    }
-
-    @Test
-    void rejectsAKeyIdThatIsNotTheKeysThumbprint() throws Exception {
-        ECKey key = new ECKeyGenerator(Curve.P_256).generate();
-        ECKey other = new ECKeyGenerator(Curve.P_256).generate();
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                JwkUtils.requireThumbprintKeyId(
-                        JwkUtils.computeThumbprint(other), key.toPublicJWK().toJSONString()));
-
-        assertTrue(ex.getMessage().contains(JwkUtils.computeThumbprint(key)),
-                "naming the value it should have been is what makes the refusal actionable");
-    }
-
-    @Test
-    void rejectsAKeyIdPairedWithSomethingThatIsNotAJwk() {
-        assertThrows(IllegalArgumentException.class, () ->
-                JwkUtils.requireThumbprintKeyId("some-kid", "{\"not\":\"a jwk\"}"));
-    }
-
     @Test
     void stripsPrivateMembersFromASubmittedKey() throws Exception {
         ECKey key = new ECKeyGenerator(Curve.P_256).keyID("caller-chosen").generate();

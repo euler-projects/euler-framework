@@ -25,6 +25,7 @@ import org.eulerframework.common.util.jackson.JacksonUtils;
 import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationProvider;
 import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.DuplicateInstanceKeyException;
 import org.eulerframework.security.authentication.appattest.InvalidInstanceKeyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,12 +50,13 @@ import java.util.Map;
  * A filter that exposes a {@code POST /app_attest/keys} endpoint for registering the public
  * keys an App instance generates itself.
  * <p>
- * The endpoint is a RESTful collection: one App instance may register several keys, and
- * registration is idempotent per key because the {@code kid} is derived from the key material
- * rather than chosen by the caller. Like the App instance registration endpoint it requires no
- * OAuth client credential and no user session, but it is not anonymous either: an App Attest
- * assertion authenticates the caller as a genuine App instance, and the key is filed under the
- * App Attest KEY that authenticated it.
+ * The endpoint is a RESTful collection: one App instance may register several keys, each under a
+ * {@code kid} of the caller's own choosing, carried in the submitted JWK and unique across the
+ * whole registry. Registration is a {@code POST} and behaves like one &mdash; a key ID already
+ * taken is a conflict rather than an overwrite, and the caller picks another. Like the App
+ * instance registration endpoint it requires no OAuth client credential and no user session, but
+ * it is not anonymous either: an App Attest assertion authenticates the caller as a genuine App
+ * instance, and the key is filed under the App Attest KEY that authenticated it.
  * <p>
  * What a registered key may then be used for is not this endpoint's business and is not decided
  * here. The trust it carries is exactly what App Attest proves &mdash; an unmodified installation
@@ -71,14 +73,16 @@ import java.util.Map;
  * usable in practice, since the body carries the JWK as JSON. The {@code kid} is required
  * because an assertion's authenticator data does not embed the credential ID.
  * <p>
- * Success response (HTTP 201), the registered key as a JWK including its server-derived
- * {@code kid}:
+ * Success response (HTTP 201), the key as registered, which is the submitted JWK reduced to its
+ * public members and carrying the caller's own {@code kid}:
  * <pre>
  * {"kty":"EC","crv":"P-256","x":"...","y":"...","alg":"ES256","kid":"..."}
  * </pre>
  * A request whose credential or body is incomplete is answered with {@code 400
- * invalid_request}, as is a body that is not a registrable JWK or is larger than one could
- * be; a credential that does not verify with {@code 401 key_registration_failed}.
+ * invalid_request}, as is a body that is not a registrable JWK, carries no {@code kid}, or is
+ * larger than one could be; a credential that does not verify with {@code 401
+ * key_registration_failed}; a {@code kid} the registry already holds with {@code 409
+ * kid_already_registered}.
  *
  * @see AppAttestInstanceKeyRegistrationAuthenticationConverter
  * @see AppAttestInstanceKeyRegistrationAuthenticationProvider
@@ -134,6 +138,13 @@ public class AppAttestInstanceKeyRegistrationEndpointFilter extends OncePerReque
         } catch (InvalidInstanceKeyException ex) {
             logger.debug("Key registration request rejected: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.BAD_REQUEST, "invalid_request", ex.getMessage());
+        } catch (DuplicateInstanceKeyException ex) {
+            // A conflict with what the registry already holds, not a fault of the request or of
+            // the credential, so neither of the two answers above describes it. Which key IDs are
+            // taken is discoverable by anyone who can authenticate as an App instance, exactly as
+            // a taken username is; a fresh UUID is not guessable and a guessable one is no secret.
+            logger.debug("Key registration conflicted: {}", ex.getMessage());
+            sendErrorResponse(response, HttpStatus.CONFLICT, "kid_already_registered", ex.getMessage());
         } catch (AuthenticationException ex) {
             logger.debug("Key registration failed: {}", ex.getMessage());
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "key_registration_failed", ex.getMessage());

@@ -16,7 +16,6 @@
 
 package org.eulerframework.security.authentication.appattest;
 
-import org.eulerframework.security.util.JwkUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
@@ -32,12 +31,12 @@ import java.time.Instant;
  * with the following schema:
  * <pre>{@code
  * CREATE TABLE app_attest_instance_key_registration (
+ *     jwk_kid        VARCHAR(128) NOT NULL,
  *     app_attest_kid VARCHAR(255) NOT NULL,
- *     jwk_kid        VARCHAR(255) NOT NULL,
  *     jwk            TEXT         NOT NULL,
  *     created_date   DATETIME(3)  NOT NULL,
- *     modified_date  DATETIME(3)  NOT NULL,
- *     PRIMARY KEY (app_attest_kid, jwk_kid)
+ *     PRIMARY KEY (jwk_kid),
+ *     KEY idx_app_attest_instance_key_app_attest_kid (app_attest_kid)
  * );
  * }</pre>
  * <p>
@@ -47,12 +46,17 @@ import java.time.Instant;
  * keys in different namespaces. Qualifying both is what keeps a reader from taking one for the
  * other.
  * <p>
- * The composite primary key is what makes {@link #saveRegistration} idempotent: the insert of an
- * already-registered pair is rejected by the database and turned into an update of that row, so a
- * repeated registration neither adds an entry nor fails. Doing it against the database rather than
- * with a read-then-write keeps two concurrent registrations of the same key from both believing
- * they were first. Every call ends by reading the row back, so what a caller reports is what was
- * persisted and not what was handed in.
+ * The primary key is {@code jwk_kid} alone: a key ID is unique across the whole registry and not
+ * merely within one instance. A lookup still names both halves, because a consumer may only read
+ * the keys of the instance it has authenticated, and {@code app_attest_kid} in the WHERE clause
+ * is what says so.
+ * <p>
+ * {@link #saveRegistration} is insert-only. A collision on the primary key is reported rather than
+ * settled by overwriting: the row already there may belong to another instance, and replacing it
+ * could discard the key an account is bound to. Inserting and letting the database refuse is also
+ * what keeps two concurrent registrations of one key ID from both believing they won. Every call
+ * ends by reading the row back, so what a caller reports is what was persisted and not what was
+ * handed in.
  * <p>
  * The {@code jwk} column has to hold the JWK as submitted <b>and hand it back verbatim</b>, which
  * is what TEXT does and what rules out the two tempting alternatives. A column too narrow is either
@@ -71,25 +75,20 @@ public class JdbcAppAttestInstanceKeyRegistrationService implements AppAttestIns
     // @formatter:off
     private static final String DEFAULT_TABLE_NAME = "app_attest_instance_key_registration";
 
-    private static final String COLUMN_APP_ATTEST_KID = "app_attest_kid";
     private static final String COLUMN_JWK_KID        = "jwk_kid";
+    private static final String COLUMN_APP_ATTEST_KID = "app_attest_kid";
     private static final String COLUMN_JWK            = "jwk";
     private static final String COLUMN_CREATED_DATE   = "created_date";
-    private static final String COLUMN_MODIFIED_DATE  = "modified_date";
     // @formatter:on
 
     private static final String INSERT_KEY_SQL =
-            "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?)";
-
-    private static final String UPDATE_KEY_SQL =
-            "UPDATE %s SET %s = ?, %s = ? WHERE %s = ? AND %s = ?";
+            "INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?)";
 
     private static final String SELECT_KEY_SQL =
             "SELECT %s, %s, %s FROM %s WHERE %s = ? AND %s = ?";
 
     private final JdbcOperations jdbcOperations;
     private final String insertSql;
-    private final String updateSql;
     private final String selectSql;
 
     /**
@@ -112,52 +111,30 @@ public class JdbcAppAttestInstanceKeyRegistrationService implements AppAttestIns
         Assert.hasText(tableName, "tableName must not be empty");
         this.jdbcOperations = jdbcOperations;
         this.insertSql = String.format(INSERT_KEY_SQL, tableName,
-                COLUMN_APP_ATTEST_KID, COLUMN_JWK_KID, COLUMN_JWK,
-                COLUMN_CREATED_DATE, COLUMN_MODIFIED_DATE);
-        // created_date is deliberately absent: it records when the instance first vouched for
-        // this key, which a later registration of the same key does not change.
-        this.updateSql = String.format(UPDATE_KEY_SQL, tableName,
-                COLUMN_JWK, COLUMN_MODIFIED_DATE,
-                COLUMN_APP_ATTEST_KID, COLUMN_JWK_KID);
+                COLUMN_JWK_KID, COLUMN_APP_ATTEST_KID, COLUMN_JWK, COLUMN_CREATED_DATE);
+        // jwk_kid first: it is the primary key, so the lookup is an index hit and the instance
+        // check is a filter on the row it found.
         this.selectSql = String.format(SELECT_KEY_SQL,
                 COLUMN_APP_ATTEST_KID, COLUMN_JWK_KID, COLUMN_JWK,
-                tableName, COLUMN_APP_ATTEST_KID, COLUMN_JWK_KID);
+                tableName, COLUMN_JWK_KID, COLUMN_APP_ATTEST_KID);
     }
 
     @Override
     public AppAttestInstanceKeyRegistration saveRegistration(AppAttestInstanceKeyRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
-        // A consumer looks a key up by the kid an assertion names and verifies the assertion with
-        // the jwk it gets back, and an account is bound to a key by that same kid. A row whose two
-        // halves disagree would therefore let a caller holding one key authenticate as an account
-        // bound to another. The registration endpoint derives jwk_kid from the material and cannot
-        // get it wrong; this is here because saveRegistration is a public SPI and that endpoint is
-        // not its only caller.
-        JwkUtils.requireThumbprintKeyId(registration.jwkKid(), registration.jwk());
         Timestamp now = Timestamp.from(Instant.now());
         try {
             this.jdbcOperations.update(this.insertSql, ps -> {
-                int index = 0;
-                ps.setString(++index, registration.appAttestKid());
-                ps.setString(++index, registration.jwkKid());
-                ps.setString(++index, registration.jwk());
-                ps.setTimestamp(++index, now);
-                ps.setTimestamp(++index, now);
+                ps.setString(1, registration.jwkKid());
+                ps.setString(2, registration.appAttestKid());
+                ps.setString(3, registration.jwk());
+                ps.setTimestamp(4, now);
             });
         } catch (DuplicateKeyException e) {
-            // Already registered. Overwrite rather than keep the first: the key ID is the
-            // thumbprint of the key material, so the shared (appAttestKid, jwkKid) proves the two
-            // submissions are the same key and only metadata the thumbprint does not cover
-            // (alg, use, an x5c chain) can differ. Nothing verifies against those, so the
-            // registry is better off saying what the instance last told it than what it said
-            // first - and a client that reserialises its key slightly differently is not
-            // thereby stuck with a registration that no longer describes what it holds.
-            this.jdbcOperations.update(this.updateSql, ps -> {
-                ps.setString(1, registration.jwk());
-                ps.setTimestamp(2, now);
-                ps.setString(3, registration.appAttestKid());
-                ps.setString(4, registration.jwkKid());
-            });
+            // Taken. Reported rather than overwritten: the row already there may belong to another
+            // instance, and even when it does not, replacing it could discard the key an account is
+            // bound to and leave that account unreachable with nothing to detect the cause by.
+            throw new DuplicateInstanceKeyException(registration.jwkKid());
         }
 
         // Read back rather than return the argument, and check it against what was written.

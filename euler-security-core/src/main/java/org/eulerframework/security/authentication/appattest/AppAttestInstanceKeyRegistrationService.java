@@ -35,39 +35,35 @@ package org.eulerframework.security.authentication.appattest;
 public interface AppAttestInstanceKeyRegistrationService {
 
     /**
-     * Register a public key under the App instance that submitted it, replacing any earlier
-     * registration of the same key by the same instance.
+     * Register a public key under the App instance that submitted it.
      * <p>
-     * Implementations are idempotent on {@code (appAttestKid, jwkKid)}: registering the same key
-     * again neither adds an entry nor fails. Callers rely on this, because the key ID is derived
-     * from the key material, so a client retrying a registration that already succeeded presents
-     * the very same pair &mdash; and a client that lost the response to its first attempt still
-     * has to be told the key ID, which is why a repeat answers like a success rather than like a
-     * conflict.
+     * Insert-only. A key ID is unique across the whole registry and is never reassigned, so a
+     * collision is a conflict for the caller to settle and not something to overwrite: the row
+     * already there may belong to another instance, and even when it does not, replacing the key
+     * an account may already be bound to would strand that account with nothing left to detect it
+     * by. A registered row is therefore immutable, which also means no part of it is rewritable by
+     * whoever can authenticate as its instance &mdash; a consumer added later that reads more of
+     * the JWK than its {@code kty} and key material inherits nothing caller-controlled.
      * <p>
-     * A repeat <b>overwrites</b>, and that is safe precisely because of how the key ID is derived:
-     * it is the RFC 7638 thumbprint, which covers a key's required members and nothing else, so
-     * two registrations sharing a key ID are the same key by construction. The only thing a later
-     * one can change is metadata the thumbprint does not cover ({@code alg}, {@code use}, an
-     * {@code x5c} chain), and no signature is ever verified against those &mdash; verification goes
-     * by the key's {@code kty} and material. Keeping the latest therefore cannot weaken a consumer,
-     * while keeping the first would leave the registry describing a key differently from how its
-     * instance now presents it.
-     * <p>
-     * Note what this does make the registry: a row's metadata is rewritable by whoever can
-     * authenticate as its instance. That is inert today because nothing reads it. A consumer added
-     * later &mdash; anything trusting {@code x5c} for a certificate path, say &mdash; would be
-     * inheriting caller-controlled input and must validate it as such.
+     * This is a {@code POST} and behaves like one: a repeat of a registration that already
+     * succeeded is refused rather than answered as if it had. The caller loses nothing by it,
+     * because the key ID is one it chose &mdash; it does not need the response to learn it, and a
+     * registration whose response was lost is stored all the same.
      *
      * @param registration the registration to save; never {@code null}
-     * @return the registration as stored after this call, read back from the store rather than
-     *         echoed from the argument, so that a caller reports what was persisted; never
-     *         {@code null}
+     * @return the registration as stored, read back from the store rather than echoed from the
+     *         argument, so that a caller reports what was persisted; never {@code null}
+     * @throws DuplicateInstanceKeyException if the registry already holds {@code jwkKid}
      */
     AppAttestInstanceKeyRegistration saveRegistration(AppAttestInstanceKeyRegistration registration);
 
     /**
      * Retrieve the registration of a key an App instance registered.
+     * <p>
+     * Both halves are required even though {@code jwkKid} alone is unique: a consumer may only
+     * read the keys registered by the instance it has itself authenticated, and naming that
+     * instance in the query is what enforces it. A key ID registered by someone else is not found
+     * here, so one instance cannot answer for another's key however it learned the identifier.
      *
      * @param appAttestKid the App Attest KEY identifying the instance
      * @param jwkKid       the {@code kid} of the key wanted

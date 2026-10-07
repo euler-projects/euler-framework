@@ -29,6 +29,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.text.ParseException;
@@ -48,11 +49,11 @@ import java.text.ParseException;
  *         by the caller to locate the registered KEY.</li>
  *     <li>Registers the key under the App Attest KEY that authenticated the request, which
  *         is what identifies the App instance</li>
- *     <li>Derives the key's own {@code kid} from the key material rather than trusting a
- *         caller-chosen one, and stores the pair via
- *         {@link AppAttestInstanceKeyRegistrationService#saveRegistration}, which is idempotent &mdash; a repeat
- *         registration of the same key updates the existing entry &mdash; and hands back the
- *         key as persisted, so the response reports the store rather than the request</li>
+ *     <li>Takes the key's own {@code kid} from the submitted JWK &mdash; the caller chooses it,
+ *         and it is what a later assertion has to name to reach this key &mdash; and stores the
+ *         pair via {@link AppAttestInstanceKeyRegistrationService#saveRegistration}, which is
+ *         insert-only: a key ID already taken is a conflict rather than an overwrite. Hands back
+ *         the key as persisted, so the response reports the store rather than the request</li>
  * </ol>
  * <p>
  * The instance is identified by its App Attest KEY and by nothing else. In particular this does
@@ -66,12 +67,12 @@ import java.text.ParseException;
  * body is answered as the request error it is ({@link InvalidInstanceKeyException}) without
  * burning a challenge the client then has to fetch again.
  * <p>
- * Deriving the {@code kid} as the RFC 7638 thumbprint is what makes registration idempotent and
- * the key addressable: two registrations of the same key material collide on the same
- * {@code (appAttestKid, jwkKid)}, so a retry cannot produce a second entry, and a client that
- * later quotes the {@code kid} is quoting the key's own fingerprint. Because the collision proves
- * the two submissions are the same key, the later one is free to replace the earlier &mdash; see
- * {@link AppAttestInstanceKeyRegistrationService#saveRegistration}.
+ * The {@code kid} is the caller's to choose and is opaque: a handle on a row, not a statement
+ * about the key. Nothing here derives it from the key material and nothing downstream needs it to
+ * be derivable &mdash; what binds an account to a key is the key's own thumbprint, which the
+ * identity backend computes and stores, and what verifies a signature is the key material. Keeping
+ * the identifier out of both is what lets it stay a plain name. It is required, because it is the
+ * only thing a later assertion can quote to reach this row.
  * <p>
  * No proof of possession is demanded here. The private key cannot leave the platform's secure
  * area, so possession proves itself on first use, when a signature has to verify; requiring a
@@ -84,6 +85,11 @@ public class AppAttestInstanceKeyRegistrationAuthenticationProvider implements A
 
     private static final Logger logger =
             LoggerFactory.getLogger(AppAttestInstanceKeyRegistrationAuthenticationProvider.class);
+
+    /**
+     * Bound on a caller-chosen key ID, matching the {@code jwk_kid} column it is stored in.
+     */
+    private static final int MAX_KEY_ID_LENGTH = 128;
 
     private final ChallengeService challengeService;
     private final AppleAppAttestValidationService validationService;
@@ -112,6 +118,7 @@ public class AppAttestInstanceKeyRegistrationAuthenticationProvider implements A
         //    body costs the client a retry rather than a fresh challenge.
         JWK submittedKey = parsePublicKey(token.getPublicKeyJson());
         JWK publicKey = toRegistrablePublicKey(submittedKey);
+        String jwkKid = requireKeyId(publicKey);
 
         // 2. Consume the one-time challenge
         if (!this.challengeService.consumeChallenge(token.getChallenge())) {
@@ -134,13 +141,11 @@ public class AppAttestInstanceKeyRegistrationAuthenticationProvider implements A
         //    key is filed under is the one that was proved rather than the one that was claimed.
         String appAttestKid = registration.getKeyId();
 
-        // 5. Derive the key's own ID from its material and register the pair. What comes back is
-        //    the registration as persisted, read back by the store, which is what the response
-        //    reports.
-        String jwkKid = JwkUtils.computeThumbprint(publicKey);
+        // 5. Register the key under the App Attest KEY that just authenticated the request, filed
+        //    by the key ID the caller chose for it. What comes back is the registration as
+        //    persisted, read back by the store, which is what the response reports.
         AppAttestInstanceKeyRegistration keyRegistration = this.instanceKeyRegistrationService.saveRegistration(
-                new AppAttestInstanceKeyRegistration(
-                        appAttestKid, jwkKid, JwkUtils.withKeyId(publicKey, jwkKid).toJSONString()));
+                new AppAttestInstanceKeyRegistration(appAttestKid, jwkKid, publicKey.toJSONString()));
 
         if (logger.isDebugEnabled()) {
             logger.debug("Registered key '{}' for App Attest KEY '{}'",
@@ -168,6 +173,34 @@ public class AppAttestInstanceKeyRegistrationAuthenticationProvider implements A
         } catch (JOSEException e) {
             throw new InvalidInstanceKeyException("The JWK cannot be registered: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * The identifier the caller chose for its own key, which is what the row is filed under and
+     * what a later assertion has to name to reach it.
+     * <p>
+     * Bounded because it becomes a primary key column, and screened for control characters because
+     * it is echoed into a JSON response and written into a log line, neither of which should have
+     * to sanitise what this accepted. Nothing else about it is constrained: it is a name, and what
+     * makes it usable is that it is unique, which the registry enforces when it stores the row.
+     */
+    private static String requireKeyId(JWK publicKey) {
+        String keyId = publicKey.getKeyID();
+        if (!StringUtils.hasText(keyId)) {
+            throw new InvalidInstanceKeyException(
+                    "The JWK must carry a kid: it is the identifier the key is registered under");
+        }
+        if (keyId.length() > MAX_KEY_ID_LENGTH) {
+            throw new InvalidInstanceKeyException(
+                    "The JWK kid must not exceed " + MAX_KEY_ID_LENGTH + " characters");
+        }
+        for (int i = 0; i < keyId.length(); i++) {
+            char c = keyId.charAt(i);
+            if (c < 0x20 || c == 0x7F) {
+                throw new InvalidInstanceKeyException("The JWK kid must not contain control characters");
+            }
+        }
+        return keyId;
     }
 
     @Override

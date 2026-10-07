@@ -21,6 +21,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistration;
 import org.eulerframework.security.authentication.appattest.AppAttestInstanceKeyRegistrationAuthenticationToken;
+import org.eulerframework.security.authentication.appattest.DuplicateInstanceKeyException;
 import org.eulerframework.security.authentication.appattest.InvalidInstanceKeyException;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -36,9 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Pins the endpoint contract of {@link AppAttestInstanceKeyRegistrationEndpointFilter}: which
- * requests it answers, what a registration returns, and how the two distinct kinds of
- * failure are told apart &mdash; a request the server could not use is a {@code 400}, while
- * a credential that did not verify is a {@code 401}.
+ * requests it answers, what a registration returns, and how the three distinct kinds of
+ * failure are told apart &mdash; a request the server could not use is a {@code 400}, a
+ * credential that did not verify is a {@code 401}, and a key ID the registry already holds is
+ * a {@code 409}.
  */
 class AppAttestInstanceKeyRegistrationEndpointFilterTest {
 
@@ -124,6 +126,23 @@ class AppAttestInstanceKeyRegistrationEndpointFilterTest {
         // The reason travels to the client, so an actionable message from the provider is not
         // swallowed by the mapping.
         assertTrue(response.getContentAsString().contains("Invalid or expired challenge"));
+    }
+
+    @Test
+    void aKeyIdAlreadyRegisteredIsAConflictNotABadRequest() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        // The credential verified and the body was registrable; the identifier is simply taken.
+        // Reporting this as 400 would send the client to rewrite a request that was well formed,
+        // and as 401 would send it to re-fetch a challenge for a credential that was fine.
+        filter(authentication -> {
+            throw new DuplicateInstanceKeyException("client-chosen-1");
+        }).doFilter(request(headers(), SUBMITTED_JWK), response, new RecordingFilterChain());
+
+        assertEquals(409, response.getStatus());
+        assertTrue(response.getContentAsString().contains("kid_already_registered"));
+        assertTrue(response.getContentAsString().contains("client-chosen-1"),
+                "the taken identifier is the caller's own, so naming it tells it what to change");
     }
 
     @Test

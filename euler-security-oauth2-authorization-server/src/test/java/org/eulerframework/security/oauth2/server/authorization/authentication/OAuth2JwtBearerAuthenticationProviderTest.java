@@ -138,9 +138,10 @@ class OAuth2JwtBearerAuthenticationProviderTest {
 
         this.signingKey = new ECKeyGenerator(Curve.P_256).keyIDFromThumbprint(true).generate();
         JWK publicKey = JwkUtils.toPublicJwk(this.signingKey);
-        // The registration endpoint derives the kid from the key material, so the fixtures have
-        // to agree with it for a login to select the right key.
-        this.keyId = JwkUtils.computeThumbprint(publicKey);
+        // A label, and deliberately not the key's thumbprint: a login selects a key by its ID and
+        // an account is bound to one by its thumbprint, and the two must not be allowed to pass a
+        // test by happening to be the same value.
+        this.keyId = "key-1";
         publicKey = JwkUtils.withKeyId(publicKey, this.keyId);
 
         this.instanceKeyRegistrationService = new InMemoryAppAttestInstanceKeyRegistrationService();
@@ -151,7 +152,7 @@ class OAuth2JwtBearerAuthenticationProviderTest {
         // valid key that a login naming somebody else's account must still be refused for.
         this.secondKey = new ECKeyGenerator(Curve.P_256).generate();
         JWK secondPublicKey = JwkUtils.toPublicJwk(this.secondKey);
-        this.secondKeyId = JwkUtils.computeThumbprint(secondPublicKey);
+        this.secondKeyId = "key-2";
         secondPublicKey = JwkUtils.withKeyId(secondPublicKey, this.secondKeyId);
         this.instanceKeyRegistrationService.saveRegistration(
                 new AppAttestInstanceKeyRegistration(ATTEST_KID, this.secondKeyId, secondPublicKey.toJSONString()));
@@ -192,8 +193,10 @@ class OAuth2JwtBearerAuthenticationProviderTest {
         assertEquals(1, this.identityService.created.size());
         assertEquals(AppAttestInstanceKeyRegistration.USER_IDENTITY_TYPE,
                 this.identityService.created.get(0).getIdentityType());
-        // The key is the identity's whole uniqueness: its thumbprint is the persisted subject.
-        assertEquals(this.keyId, this.identityService.created.get(0).getSubject());
+        // The key is the identity's whole uniqueness: its thumbprint is the persisted subject,
+        // which is not the kid that addressed it - the kid only found the row.
+        assertEquals(JwkUtils.computeThumbprint(this.signingKey),
+                this.identityService.created.get(0).getSubject());
     }
 
     @Test

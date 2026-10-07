@@ -38,6 +38,8 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,6 +62,8 @@ class AppAttestJwtBearerIssuerAuthenticatorTest {
 
     private final InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
             new InMemoryAppAttestInstanceKeyRegistrationService();
+
+    private final AtomicInteger nextKeyId = new AtomicInteger();
 
     /**
      * An issuer is claimed for the App instance that authenticated this request, and only for it.
@@ -145,14 +149,16 @@ class AppAttestJwtBearerIssuerAuthenticatorTest {
 
     /**
      * Register a freshly generated public key under the given App Attest KEY and return the
-     * {@code kid} a client would quote to have it looked up.
+     * {@code kid} a client would quote to have it looked up. The ID is a label rather than the
+     * key's thumbprint, which is what it is in the endpoint: the registry addresses rows by it and
+     * says nothing about the key behind it.
      */
     private String registerKeyFor(String appAttestKid) throws Exception {
         ECKey key = new ECKeyGenerator(Curve.P_256).generate();
         JWK publicKey = JwkUtils.toPublicJwk(key);
-        String jwkKid = JwkUtils.computeThumbprint(publicKey);
-        this.instanceKeyRegistrationService.saveRegistration(new AppAttestInstanceKeyRegistration(appAttestKid, jwkKid,
-                JwkUtils.withKeyId(publicKey, jwkKid).toJSONString()));
+        String jwkKid = "label-" + this.nextKeyId.getAndIncrement();
+        this.instanceKeyRegistrationService.saveRegistration(new AppAttestInstanceKeyRegistration(
+                appAttestKid, jwkKid, JwkUtils.withKeyId(publicKey, jwkKid).toJSONString()));
         return jwkKid;
     }
 

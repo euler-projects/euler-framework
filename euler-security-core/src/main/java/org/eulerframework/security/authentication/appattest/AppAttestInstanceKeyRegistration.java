@@ -38,12 +38,15 @@ import org.springframework.util.Assert;
  *
  * @param appAttestKid the App Attest KEY the registering instance authenticated with; the
  *                     instance this key belongs to
- * @param jwkKid       the {@code kid} of {@code jwk}, by which a consumer addresses it; the
- *                     RFC 7638 JWK Thumbprint of the key, derived by the server rather than
- *                     supplied by the client. {@link AppAttestInstanceKeyRegistrationService}
- *                     implementations require the two to agree before storing anything, so a
- *                     registration cannot name one key and carry another
- * @param jwk          the public JWK (RFC 7517) as JSON, carrying no private members
+ * @param jwkKid       the {@code kid} of {@code jwk}, by which a consumer addresses it. Chosen by
+ *                     the registering instance and opaque: it is a handle on a row and says
+ *                     nothing about the key, which is what keeps it free to stay fixed while the
+ *                     registry grows and free to be anything the caller finds convenient. Unique
+ *                     across the whole registry and never reassigned, so what binds an account to
+ *                     a key cannot be this &mdash; it is the key's own thumbprint, derived and
+ *                     stored by the identity backend
+ * @param jwk          the public JWK (RFC 7517) as JSON, carrying no private members and carrying
+ *                     {@code jwkKid} as its {@code kid}, since that is where the value comes from
  * @see AppAttestInstanceKeyRegistrationService
  */
 public record AppAttestInstanceKeyRegistration(String appAttestKid, String jwkKid, String jwk) {

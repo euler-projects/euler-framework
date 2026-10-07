@@ -16,7 +16,6 @@
 
 package org.eulerframework.security.authentication.appattest;
 
-import org.eulerframework.security.util.JwkUtils;
 import org.springframework.util.Assert;
 
 import java.util.Map;
@@ -42,36 +41,33 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InMemoryAppAttestInstanceKeyRegistrationService implements AppAttestInstanceKeyRegistrationService {
 
-    private final Map<String, AppAttestInstanceKeyRegistration> keys = new ConcurrentHashMap<>();
+    private final Map<String, AppAttestInstanceKeyRegistration> keysByJwkKid = new ConcurrentHashMap<>();
 
     @Override
     public AppAttestInstanceKeyRegistration saveRegistration(AppAttestInstanceKeyRegistration registration) {
         Assert.notNull(registration, "registration must not be null");
-        // Same rule the JDBC implementation applies, for the same reason: a consumer answers a
-        // lookup by kid with the jwk filed under it, so the two have to describe one key.
-        JwkUtils.requireThumbprintKeyId(registration.jwkKid(), registration.jwk());
-        String indexKey = indexKey(registration.appAttestKid(), registration.jwkKid());
-        // put rather than putIfAbsent: the key ID is the thumbprint of the key material, so a
-        // repeated registration is by definition the same key, and the latest description of
-        // it is the one worth keeping. Mirrors JdbcAppAttestInstanceKeyRegistrationService,
-        // which updates the row an insert collided with.
-        this.keys.put(indexKey, registration);
+        // putIfAbsent rather than put: a key ID is unique across the whole registry and is never
+        // reassigned, so a collision is a conflict for the caller to settle, not an overwrite.
+        // Mirrors JdbcAppAttestInstanceKeyRegistrationService, which lets the insert fail.
+        if (this.keysByJwkKid.putIfAbsent(registration.jwkKid(), registration) != null) {
+            throw new DuplicateInstanceKeyException(registration.jwkKid());
+        }
         // Read back rather than return the argument, so both implementations answer with what
         // is registered and a caller cannot tell them apart.
-        return this.keys.get(indexKey);
+        return this.keysByJwkKid.get(registration.jwkKid());
     }
 
     @Override
     public AppAttestInstanceKeyRegistration findByAppAttestKidAndJwkKid(String appAttestKid, String jwkKid) {
-        return this.keys.get(indexKey(appAttestKid, jwkKid));
-    }
-
-    /**
-     * Flatten the composite key into one map key. The separator cannot occur in either part:
-     * an App Attest {@code kid} and a Base64URL thumbprint are both drawn from alphabets that
-     * exclude it.
-     */
-    private static String indexKey(String appAttestKid, String jwkKid) {
-        return appAttestKid + '\n' + jwkKid;
+        // No row has a null key ID, so this is the same answer the JDBC implementation gives by
+        // way of a WHERE clause that matches nothing - and a ConcurrentHashMap cannot even be
+        // asked the question.
+        if (jwkKid == null) {
+            return null;
+        }
+        AppAttestInstanceKeyRegistration registration = this.keysByJwkKid.get(jwkKid);
+        // The key ID alone is unique, but a consumer may only read the keys of the instance it has
+        // authenticated - so a key ID somebody else registered is not found here.
+        return registration != null && registration.appAttestKid().equals(appAttestKid) ? registration : null;
     }
 }

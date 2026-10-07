@@ -16,7 +16,6 @@
 
 package org.eulerframework.security.authentication.appattest;
 
-import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
@@ -37,181 +36,197 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link AppAttestInstanceKeyRegistrationAuthenticationProvider}: what an
- * authenticated App instance may register a key under, how the key ID is derived, and
- * which submitted keys are turned away.
+ * authenticated App instance may register a key under, what it has to say about the key it
+ * submits, and which submissions are turned away.
  */
 class AppAttestInstanceKeyRegistrationAuthenticationProviderTest {
 
     private static final String ATTEST_KID = "attest-kid-1";
+    private static final String OTHER_ATTEST_KID = "attest-kid-2";
     private static final String CLIENT_ID = "client-1";
     private static final String CHALLENGE = "challenge-1";
     private static final String ASSERTION = "assertion-1";
+    private static final String KEY_ID = "client-chosen-1";
+    private static final String OTHER_KEY_ID = "client-chosen-2";
 
     @Test
     void registersTheKeyUnderTheAuthenticatedAppAttestKey() throws Exception {
         RecordingChallengeService challengeService = new RecordingChallengeService(true);
         InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
                 new InMemoryAppAttestInstanceKeyRegistrationService();
-        JWK submitted = new ECKeyGenerator(Curve.P_256).keyID("caller-chosen").generate();
+        JWK submitted = new ECKeyGenerator(Curve.P_256).generate();
 
         Authentication result = provider(challengeService, registration(CLIENT_ID), instanceKeyRegistrationService)
-                .authenticate(token(submitWithoutPrivateMembers(submitted)));
+                .authenticate(token(submit(submitted, KEY_ID)));
 
         assertTrue(challengeService.consumed.get(), "the one-time challenge must be consumed");
         assertTrue(result.isAuthenticated());
 
-        AppAttestInstanceKeyRegistration instanceKey =
+        AppAttestInstanceKeyRegistration keyRegistration =
                 ((AppAttestInstanceKeyRegistrationAuthenticationToken) result).getRegistration();
-        assertEquals(ATTEST_KID, instanceKey.appAttestKid(),
+        assertEquals(ATTEST_KID, keyRegistration.appAttestKid(),
                 "the key is filed under the App Attest KEY that proved the caller, taken from the"
                         + " verified registration rather than from the request header");
-        // The kid is derived from the key material, not taken from the caller, so it is the
-        // thumbprint - and the value a later consumer has to name.
-        String expectedJwkKid = JwkUtils.computeThumbprint(JwkUtils.toPublicJwk(submitted));
-        assertEquals(expectedJwkKid, instanceKey.jwkKid());
-        assertFalse("caller-chosen".equals(JWK.parse(instanceKey.jwk()).getKeyID()),
-                "a caller-chosen kid cannot be trusted to be unique, so it is replaced");
-        assertEquals(expectedJwkKid, JWK.parse(instanceKey.jwk()).getKeyID());
+        assertEquals(KEY_ID, keyRegistration.jwkKid(), "the caller's own key ID is kept as given");
+        assertEquals(KEY_ID, JWK.parse(keyRegistration.jwk()).getKeyID(),
+                "and the stored JWK carries it, so the row and the response agree on it");
 
-        assertSame(instanceKey, instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, expectedJwkKid));
+        assertSame(keyRegistration,
+                instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, KEY_ID));
         assertTrue(result.getAuthorities().isEmpty(), "key registration grants no user authorities");
+    }
+
+    /**
+     * The key ID is a name, not a fingerprint. Nothing about an account is bound to it &mdash; that
+     * is the key's own thumbprint, which the identity backend derives &mdash; so pinning it to the
+     * thumbprint here would only make the identifier carry a second meaning it does not need.
+     */
+    @Test
+    void theKeyIdIsNotDerivedFromTheKeyMaterial() throws Exception {
+        InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
+                new InMemoryAppAttestInstanceKeyRegistrationService();
+        JWK submitted = new ECKeyGenerator(Curve.P_256).generate();
+
+        AppAttestInstanceKeyRegistration keyRegistration =
+                authenticate(provider(new RecordingChallengeService(true), registration(CLIENT_ID),
+                        instanceKeyRegistrationService), submitted, KEY_ID).getRegistration();
+
+        assertNotEquals(JwkUtils.computeThumbprint(JwkUtils.toPublicJwk(submitted)), keyRegistration.jwkKid());
     }
 
     @Test
     void persistsNoPrivateKeyMaterial() throws Exception {
         InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
                 new InMemoryAppAttestInstanceKeyRegistrationService();
-        JWK withPrivateHalf = new ECKeyGenerator(Curve.P_256).generate();
+        ECKey withPrivateHalf = new ECKeyGenerator(Curve.P_256).keyID(KEY_ID).generate();
 
         provider(new RecordingChallengeService(true), registration(CLIENT_ID), instanceKeyRegistrationService)
                 .authenticate(token(withPrivateHalf.toJSONString()));
 
-        AppAttestInstanceKeyRegistration stored = instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(
-                ATTEST_KID, JwkUtils.computeThumbprint(JwkUtils.toPublicJwk(withPrivateHalf)));
+        AppAttestInstanceKeyRegistration stored =
+                instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, KEY_ID);
         assertFalse(JWK.parse(stored.jwk()).isPrivate(),
                 "the column is meant to be readable, so no private member may reach it");
     }
 
+    /**
+     * One instance may hold several keys, and each is its own entry: the key ID addresses a row
+     * and nothing else, so two keys are two rows however alike or unlike their identifiers are.
+     */
     @Test
-    void registeringTheSameKeyTwiceLeavesOneEntry() throws Exception {
+    void aSecondKeyUnderANewIdIsItsOwnEntry() throws Exception {
         InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
                 new InMemoryAppAttestInstanceKeyRegistrationService();
-        JWK submitted = new ECKeyGenerator(Curve.P_256).generate();
         AppAttestInstanceKeyRegistrationAuthenticationProvider provider =
                 provider(new RecordingChallengeService(true), registration(CLIENT_ID), instanceKeyRegistrationService);
 
-        AppAttestInstanceKeyRegistration first = authenticate(provider, submitted).getRegistration();
-        AppAttestInstanceKeyRegistration second = authenticate(provider, submitted).getRegistration();
+        AppAttestInstanceKeyRegistration first =
+                authenticate(provider, new ECKeyGenerator(Curve.P_256).generate(), KEY_ID).getRegistration();
+        AppAttestInstanceKeyRegistration second =
+                authenticate(provider, new ECKeyGenerator(Curve.P_256).generate(), OTHER_KEY_ID).getRegistration();
 
-        // A retry of a registration that already succeeded presents the same key material, so
-        // it lands on the same derived key ID and must not add a second entry.
-        assertEquals(first.jwkKid(), second.jwkKid());
-        assertEquals(first.jwk(), second.jwk());
+        assertNotEquals(first.jwk(), second.jwk());
+        assertEquals(first.jwk(), instanceKeyRegistrationService
+                .findByAppAttestKidAndJwkKid(ATTEST_KID, KEY_ID).jwk());
+        assertEquals(second.jwk(), instanceKeyRegistrationService
+                .findByAppAttestKidAndJwkKid(ATTEST_KID, OTHER_KEY_ID).jwk());
     }
 
     /**
-     * A repeat registration replaces the entry rather than being ignored by it, and the
-     * response reports what the store now holds. The thumbprint covers a key's required
-     * members only, so the same key presented with a different {@code alg} lands on the same
-     * entry - and echoing the request would have left the two descriptions of one key
-     * disagreeing with no way to say which was registered.
+     * Registration is a {@code POST} and behaves like one, including against a repeat of the very
+     * same submission. Settling a collision by overwriting would let a caller discard the key an
+     * account may already be bound to, and leave that account unreachable with nothing recording
+     * why. What a caller loses by being refused is nothing it did not already have: it chose the
+     * key ID, so it does not need the response to learn it.
      */
     @Test
-    void aRepeatRegistrationOverwritesAndReportsWhatIsStored() throws Exception {
+    void registeringTheSameKeyIdAgainIsAConflict() throws Exception {
         InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
                 new InMemoryAppAttestInstanceKeyRegistrationService();
-        ECKey key = new ECKeyGenerator(Curve.P_256).generate();
         AppAttestInstanceKeyRegistrationAuthenticationProvider provider =
                 provider(new RecordingChallengeService(true), registration(CLIENT_ID), instanceKeyRegistrationService);
+        ECKey key = new ECKeyGenerator(Curve.P_256).generate();
 
-        AppAttestInstanceKeyRegistration first = authenticate(provider, key).getRegistration();
-        assertNull(JWK.parse(first.jwk()).getAlgorithm(), "the fixture's first submission declared none");
+        AppAttestInstanceKeyRegistration first = authenticate(provider, key, KEY_ID).getRegistration();
+        DuplicateInstanceKeyException ex = assertThrows(DuplicateInstanceKeyException.class,
+                () -> authenticate(provider, key, KEY_ID));
 
-        ECKey sameKeyDeclaringAnAlgorithm =
-                new ECKey.Builder(key.toPublicJWK()).algorithm(JWSAlgorithm.ES256).build();
-        AppAttestInstanceKeyRegistration second = authenticate(provider, sameKeyDeclaringAnAlgorithm).getRegistration();
-
-        assertEquals(first.jwkKid(), second.jwkKid(), "the same key material derives the same key ID");
-        assertEquals(JWSAlgorithm.ES256, JWK.parse(second.jwk()).getAlgorithm(),
-                "the latest registration is the one in force");
-        assertEquals(second.jwk(),
-                instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, first.jwkKid()).jwk(),
-                "the response is the persisted row, not the submitted one");
+        assertEquals(KEY_ID, ex.getJwkKid());
+        assertEquals(first.jwk(), instanceKeyRegistrationService
+                        .findByAppAttestKidAndJwkKid(ATTEST_KID, KEY_ID).jwk(),
+                "the refused repeat leaves the registered key exactly as it was");
     }
 
     /**
-     * Overwriting is safe because of what identifies the entry: the key ID is the key's own
-     * fingerprint, so a repeat cannot change the key material and a different key cannot reach
-     * an existing entry at all. Only metadata the thumbprint does not cover is rewritable, and
-     * no signature is verified against that.
+     * The key ID is unique across the whole registry, not merely within one instance, so what one
+     * instance took is taken for everybody. Cheap to live with - a caller generates a fresh
+     * identifier and moves on - and it is what keeps one identifier meaning one key everywhere.
      */
     @Test
-    void anOverwriteCannotChangeTheKeyMaterialAndADifferentKeyCannotOverwrite() throws Exception {
+    void aKeyIdAnotherInstanceTookIsAConflict() throws Exception {
         InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
                 new InMemoryAppAttestInstanceKeyRegistrationService();
         ECKey key = new ECKeyGenerator(Curve.P_256).generate();
+
+        authenticate(provider(new RecordingChallengeService(true), registration(CLIENT_ID),
+                instanceKeyRegistrationService), key, KEY_ID);
+
+        AppAttestInstanceKeyRegistrationAuthenticationProvider otherInstance =
+                provider(new RecordingChallengeService(true),
+                        registration(OTHER_ATTEST_KID, CLIENT_ID), instanceKeyRegistrationService);
         ECKey otherKey = new ECKeyGenerator(Curve.P_256).generate();
-        AppAttestInstanceKeyRegistrationAuthenticationProvider provider =
-                provider(new RecordingChallengeService(true), registration(CLIENT_ID), instanceKeyRegistrationService);
-
-        AppAttestInstanceKeyRegistration first = authenticate(provider, key).getRegistration();
-        AppAttestInstanceKeyRegistration resubmitted = authenticate(provider,
-                new ECKey.Builder(key.toPublicJWK()).algorithm(JWSAlgorithm.ES256).build()).getRegistration();
-        AppAttestInstanceKeyRegistration different = authenticate(provider, otherKey).getRegistration();
-
-        // The overwrite left the key itself alone...
-        assertEquals(JWK.parse(first.jwk()).toECKey().getX(), JWK.parse(resubmitted.jwk()).toECKey().getX());
-        assertEquals(JWK.parse(first.jwk()).toECKey().getY(), JWK.parse(resubmitted.jwk()).toECKey().getY());
-        // ...and it landed on the first key's own entry, which now holds the latest
-        // description of that key rather than the first one.
-        assertEquals(resubmitted.jwk(),
-                instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, first.jwkKid()).jwk());
-
-        // A different key derives a different key ID, so it is its own entry and reaches
-        // nothing that was already registered.
-        assertFalse(first.jwkKid().equals(different.jwkKid()));
-        assertEquals(different.jwk(),
-                instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, different.jwkKid()).jwk());
-        assertEquals(resubmitted.jwk(),
-                instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(ATTEST_KID, first.jwkKid()).jwk(),
-                "registering another key must not disturb the one already registered");
+        assertThrows(DuplicateInstanceKeyException.class,
+                () -> otherInstance.authenticate(token(OTHER_ATTEST_KID, submit(otherKey, KEY_ID))));
     }
 
     /**
-     * The registry is the App Attest domain's, and that domain has no OAuth2 vocabulary: the
-     * instance is identified by its App Attest KEY alone. An instance that never completed
-     * dynamic client registration therefore still registers its keys, and nothing about the
-     * entry records a client.
+     * The key ID is the only thing a later assertion can quote to reach this row, so a submission
+     * without one could be stored and never addressed again.
      */
     @Test
-    void registersAKeyForAnInstanceWithNoOAuthClientBound() throws Exception {
-        InMemoryAppAttestInstanceKeyRegistrationService instanceKeyRegistrationService =
-                new InMemoryAppAttestInstanceKeyRegistrationService();
+    void rejectsAKeyWithNoId() throws Exception {
         JWK submitted = new ECKeyGenerator(Curve.P_256).generate();
 
-        Authentication result = provider(new RecordingChallengeService(true), registration(null),
-                instanceKeyRegistrationService)
-                .authenticate(token(submitWithoutPrivateMembers(submitted)));
+        assertThrows(InvalidInstanceKeyException.class, () ->
+                provider(new RecordingChallengeService(true), registration(CLIENT_ID),
+                        new InMemoryAppAttestInstanceKeyRegistrationService())
+                        .authenticate(token(submitWithoutPrivateMembers(submitted))));
+    }
 
-        assertTrue(result.isAuthenticated());
-        AppAttestInstanceKeyRegistration instanceKey =
-                ((AppAttestInstanceKeyRegistrationAuthenticationToken) result).getRegistration();
-        assertEquals(ATTEST_KID, instanceKey.appAttestKid());
-        assertSame(instanceKey, instanceKeyRegistrationService.findByAppAttestKidAndJwkKid(
-                ATTEST_KID, JwkUtils.computeThumbprint(JwkUtils.toPublicJwk(submitted))));
+    @Test
+    void rejectsAnOverlongKeyId() throws Exception {
+        JWK submitted = new ECKeyGenerator(Curve.P_256).generate();
+
+        assertThrows(InvalidInstanceKeyException.class, () ->
+                provider(new RecordingChallengeService(true), registration(CLIENT_ID),
+                        new InMemoryAppAttestInstanceKeyRegistrationService())
+                        .authenticate(token(submit(submitted, "k".repeat(129)))));
+    }
+
+    /** It is echoed into a JSON response and written into a log line, neither of which sanitises. */
+    @Test
+    void rejectsAKeyIdWithControlCharacters() throws Exception {
+        JWK submitted = new ECKeyGenerator(Curve.P_256).generate();
+
+        assertThrows(InvalidInstanceKeyException.class, () ->
+                provider(new RecordingChallengeService(true), registration(CLIENT_ID),
+                        new InMemoryAppAttestInstanceKeyRegistrationService())
+                        .authenticate(token(submit(submitted, "key\ninjected: yes"))));
     }
 
     @Test
     void rejectsASymmetricKey() {
         OctetSequenceKey secret = new OctetSequenceKey.Builder(
-                "01234567890123456789012345678901".getBytes(StandardCharsets.UTF_8)).build();
+                "01234567890123456789012345678901".getBytes(StandardCharsets.UTF_8))
+                .keyID(KEY_ID)
+                .build();
 
         assertThrows(InvalidInstanceKeyException.class, () ->
                 provider(new RecordingChallengeService(true), registration(CLIENT_ID),
@@ -250,7 +265,7 @@ class AppAttestInstanceKeyRegistrationAuthenticationProviderTest {
                 new AppAttestInstanceKeyRegistrationAuthenticationProvider(
                         new RecordingChallengeService(false), validationService,
                         new InMemoryAppAttestInstanceKeyRegistrationService())
-                        .authenticate(token(submitWithoutPrivateMembers(submitted))));
+                        .authenticate(token(submit(submitted, KEY_ID))));
         assertEquals(0, validationService.assertionCalls.get(),
                 "the assertion must not be validated when the challenge is invalid");
     }
@@ -258,19 +273,27 @@ class AppAttestInstanceKeyRegistrationAuthenticationProviderTest {
     // ---- helpers ----
 
     private static AppAttestInstanceKeyRegistrationAuthenticationToken authenticate(
-            AppAttestInstanceKeyRegistrationAuthenticationProvider provider, JWK submitted) {
+            AppAttestInstanceKeyRegistrationAuthenticationProvider provider, JWK key, String keyId) throws Exception {
         return (AppAttestInstanceKeyRegistrationAuthenticationToken) provider.authenticate(
-                token(submitWithoutPrivateMembers(submitted)));
+                token(submit(key, keyId)));
     }
 
-    /** What a client sends: the public half of the key it generated. */
+    /** What a client sends: the public half of the key it generated, under the ID it chose. */
+    private static String submit(JWK key, String keyId) throws Exception {
+        return JwkUtils.withKeyId(JwkUtils.toPublicJwk(key), keyId).toJSONString();
+    }
+
     private static String submitWithoutPrivateMembers(JWK key) {
         return key.toPublicJWK().toJSONString();
     }
 
     private static AppAttestInstanceKeyRegistrationAuthenticationToken token(String publicKeyJson) {
+        return token(ATTEST_KID, publicKeyJson);
+    }
+
+    private static AppAttestInstanceKeyRegistrationAuthenticationToken token(String attestKid, String publicKeyJson) {
         return AppAttestInstanceKeyRegistrationAuthenticationToken.unauthenticated(
-                ATTEST_KID, CHALLENGE, ASSERTION, publicKeyJson);
+                attestKid, CHALLENGE, ASSERTION, publicKeyJson);
     }
 
     private static AppAttestInstanceKeyRegistrationAuthenticationProvider provider(
@@ -282,8 +305,12 @@ class AppAttestInstanceKeyRegistrationAuthenticationProviderTest {
     }
 
     private static AppAttestAttestationRegistration registration(String clientId) {
+        return registration(ATTEST_KID, clientId);
+    }
+
+    private static AppAttestAttestationRegistration registration(String appAttestKid, String clientId) {
         return new AppAttestAttestationRegistration(
-                ATTEST_KID, "ABCD1234EF", "com.example.app", clientId,
+                appAttestKid, "ABCD1234EF", "com.example.app", clientId,
                 new byte[16], new byte[0], new byte[0], new byte[0],
                 null, "{}", 0);
     }
@@ -330,7 +357,8 @@ class AppAttestInstanceKeyRegistrationAuthenticationProviderTest {
         public AppAttestAttestationRegistration validateAssertion(String keyId, String assertion, String challenge)
                 throws AuthenticationException {
             this.assertionCalls.incrementAndGet();
-            assertEquals(ATTEST_KID, keyId, "an assertion carries no credential ID, so the caller supplies it");
+            assertEquals(this.registration.getKeyId(), keyId,
+                    "an assertion carries no credential ID, so the caller supplies it");
             return this.registration;
         }
     }
