@@ -112,8 +112,6 @@ public class JdbcAppAttestInstanceKeyRegistrationService implements AppAttestIns
         this.jdbcOperations = jdbcOperations;
         this.insertSql = String.format(INSERT_KEY_SQL, tableName,
                 COLUMN_JWK_KID, COLUMN_APP_ATTEST_KID, COLUMN_JWK, COLUMN_CREATED_DATE);
-        // jwk_kid first: it is the primary key, so the lookup is an index hit and the instance
-        // check is a filter on the row it found.
         this.selectSql = String.format(SELECT_KEY_SQL,
                 COLUMN_APP_ATTEST_KID, COLUMN_JWK_KID, COLUMN_JWK,
                 tableName, COLUMN_JWK_KID, COLUMN_APP_ATTEST_KID);
@@ -163,8 +161,8 @@ public class JdbcAppAttestInstanceKeyRegistrationService implements AppAttestIns
     public AppAttestInstanceKeyRegistration findByAppAttestKidAndJwkKid(String appAttestKid, String jwkKid) {
         return this.jdbcOperations.query(this.selectSql,
                 ps -> {
-                    ps.setString(1, appAttestKid);
-                    ps.setString(2, jwkKid);
+                    ps.setString(1, jwkKid);
+                    ps.setString(2, appAttestKid);
                 },
                 rs -> {
                     if (!rs.next()) {
