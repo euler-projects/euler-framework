@@ -69,8 +69,10 @@ import java.time.Duration;
  * <p>
  * On success a per-KEY client is minted (random {@code client_id}, authentication method
  * {@code attest_appattest_client_auth}, {@code refresh_token} added) and its {@code client_id} is
- * bound back to the KEY registration. A KEY that is already bound returns its existing client, so
- * registration retries are idempotent.
+ * bound back to the KEY registration. Re-registering a KEY that is already bound follows PUT (not
+ * PATCH) semantics: the {@code client_id} is held stable while every other field is overwritten
+ * with the freshly submitted metadata, so a client can add a grant it omitted the first time
+ * without minting a new KEY.
  *
  * @see EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken
  */
@@ -160,27 +162,17 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
     }
 
     /**
-     * Return the client already bound to the KEY (idempotent retry), or mint a new per-KEY client
-     * from the parsed RFC 7591 request, save it and bind its {@code client_id} back to the KEY
-     * registration.
+     * Build the per-KEY client from the parsed RFC 7591 request, then either mint it (first
+     * registration, binding the new {@code client_id} back to the KEY) or, when the KEY is already
+     * bound, overwrite the existing client in place under PUT semantics.
      */
     private RegisteredClient resolveOrProvisionClient(OAuth2ClientRegistration clientRegistration,
                                                       AppAttestAttestationRegistration registration) {
         ClientAuthenticationMethod clientAuthenticationMethod =
                 resolveClientAuthenticationMethod(clientRegistration);
-        String boundClientId = registration.getClientId();
-        if (StringUtils.hasText(boundClientId)) {
-            RegisteredClient existing = this.registeredClientRepository.findByClientId(boundClientId);
-            if (existing == null) {
-                throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT,
-                        "bound client_id no longer exists", null));
-            }
-            return existing;
-        }
 
         RegisteredClient base = this.registeredClientConverter.convert(clientRegistration);
-
-        RegisteredClient registeredClient = RegisteredClient.from(base)
+        RegisteredClient.Builder builder = RegisteredClient.from(base)
                 // The base converter defaults an omitted token_endpoint_auth_method to
                 // client_secret_basic and may generate a secret. This endpoint instead defaults to
                 // its single supported method, validated before conversion above.
@@ -199,9 +191,31 @@ public final class EulerOAuth2AttestationBasedClientRegistrationAuthenticationPr
                 .tokenSettings(TokenSettings.builder()
                         .reuseRefreshTokens(false)
                         .refreshTokenTimeToLive(DEFAULT_REFRESH_TOKEN_TTL)
-                        .build())
-                .build();
+                        .build());
 
+        String boundClientId = registration.getClientId();
+        if (StringUtils.hasText(boundClientId)) {
+            RegisteredClient existing = this.registeredClientRepository.findByClientId(boundClientId);
+            if (existing == null) {
+                throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT,
+                        "bound client_id no longer exists", null));
+            }
+            // PUT, not PATCH: hold the identity (registrationId, client_id and the original issue
+            // time) so the repository save() overwrites the same row, and replace every other field
+            // with the freshly parsed registration. This is how a client adds a grant it omitted on
+            // first registration (e.g. authorization_code) without minting a new KEY.
+            RegisteredClient updated = builder
+                    .id(existing.getId())
+                    .clientId(existing.getClientId())
+                    .clientIdIssuedAt(existing.getClientIdIssuedAt())
+                    .build();
+            this.registeredClientRepository.save(updated);
+            this.logger.info("Re-registered DYNAMIC OAuth2 client '{}' for App Attest keyId '{}' (full overwrite)",
+                    updated.getClientId(), registration.getKeyId());
+            return updated;
+        }
+
+        RegisteredClient registeredClient = builder.build();
         this.registeredClientRepository.save(registeredClient);
         this.registrationService.bindClientId(registration.getKeyId(), registeredClient.getClientId());
         this.logger.info("Provisioned DYNAMIC OAuth2 client '{}' for App Attest keyId '{}'",

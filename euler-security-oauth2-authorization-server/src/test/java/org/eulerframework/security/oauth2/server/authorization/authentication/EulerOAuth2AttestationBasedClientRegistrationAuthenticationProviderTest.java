@@ -165,10 +165,10 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
     }
 
     @Test
-    void returnsTheExistingClientWhenTheKeyIsAlreadyBound() {
+    void keepsClientIdAndOverwritesMetadataOnReregistration() {
         RegisteredClient bound = RegisteredClient.withId("id-1")
                 .clientId("already-bound-client")
-                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_JWT_CLIENT_AUTH)
+                .clientAuthenticationMethod(EulerClientAuthenticationMethod.ATTEST_APPATTEST_CLIENT_AUTH)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .build();
         this.clientRepository.save(bound);
@@ -178,12 +178,22 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
                 new StubChallengeService(true), new StubValidationService(keyRegistration(bound.getClientId())),
                 new InMemoryRegisteredAppRepository(app(true)));
 
+        // The bound client carried only refresh_token. Re-registering with authorization_code must
+        // keep the same client_id (PUT, not a fresh mint) and overwrite the grant set in place.
         OAuth2ClientRegistration response =
-                ((OAuth2ClientRegistrationAuthenticationToken) provider.authenticate(token()))
+                ((OAuth2ClientRegistrationAuthenticationToken) provider.authenticate(tokenWithGrants(
+                        AuthorizationGrantType.AUTHORIZATION_CODE.getValue(),
+                        AuthorizationGrantType.REFRESH_TOKEN.getValue())))
                         .getClientRegistration();
 
-        assertEquals(bound.getClientId(), response.getClientId(), "a retry should be idempotent");
+        assertEquals(bound.getClientId(), response.getClientId(), "PUT keeps the client_id stable");
         assertEquals(1, this.clientRepository.saved.size(), "no second client should be minted");
+
+        RegisteredClient updated = this.clientRepository.findByClientId(bound.getClientId());
+        assertEquals("id-1", updated.getId(),
+                "the registrationId is preserved so the repository save() updates in place");
+        assertTrue(updated.getAuthorizationGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE),
+                "the newly requested grant overwrites the previous set");
     }
 
     @Test
@@ -252,6 +262,19 @@ class EulerOAuth2AttestationBasedClientRegistrationAuthenticationProviderTest {
                 .grantType(AuthorizationGrantType.REFRESH_TOKEN.getValue());
         if (tokenEndpointAuthenticationMethod != null) {
             builder.tokenEndpointAuthenticationMethod(tokenEndpointAuthenticationMethod);
+        }
+        return new EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken(
+                builder.build(), KEY_ID, CHALLENGE, ASSERTION);
+    }
+
+    private static EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken tokenWithGrants(
+            String... grantTypes) {
+        OAuth2ClientRegistration.Builder builder = OAuth2ClientRegistration.builder()
+                .clientName(BUNDLE_ID)
+                // A RegisteredClient carrying authorization_code must have at least one redirect_uri.
+                .redirectUri("https://client.example.com/callback");
+        for (String grantType : grantTypes) {
+            builder.grantType(grantType);
         }
         return new EulerOAuth2AttestationBasedClientRegistrationAuthenticationToken(
                 builder.build(), KEY_ID, CHALLENGE, ASSERTION);
