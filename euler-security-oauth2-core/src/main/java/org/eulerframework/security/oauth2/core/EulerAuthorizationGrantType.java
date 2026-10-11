@@ -41,5 +41,16 @@ public class EulerAuthorizationGrantType {
     @Deprecated
     public static final AuthorizationGrantType APP_ASSERTION = new AuthorizationGrantType("urn:ietf:params:oauth:grant-type:app_assertion");
 
+    /**
+     * The {@code otp} grant: exchanges an {@code otp_ticket} + {@code otp} user authentication
+     * directly for tokens at the token endpoint.
+     *
+     * @deprecated superseded by the Authorization Challenge Endpoint
+     * ({@code POST /authorize-challenge}) of draft-ietf-oauth-first-party-apps, which exchanges the
+     * same OTP for a standard {@code authorization_code} that is then redeemed with the standard
+     * {@code authorization_code} grant and PKCE. Retained, unchanged, so already-released clients
+     * keep working; removable once no released client depends on the direct {@code otp} grant.
+     */
+    @Deprecated
     public static final AuthorizationGrantType OTP = new AuthorizationGrantType("otp");
 }

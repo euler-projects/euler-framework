@@ -176,7 +176,11 @@ public class EulerAuthorizationServerConfiguration {
      * @param http                      the {@link HttpSecurity} being built
      * @param authenticationConfiguration access point to the shared
      *                                  {@link org.springframework.security.authentication.AuthenticationManager}
+     * @deprecated the {@code otp} grant is superseded by the Authorization Challenge Endpoint
+     * ({@code POST /authorize-challenge}), configured on {@link EulerOAuth2AuthorizationServerConfigurer};
+     * retained for already-released clients.
      */
+    @Deprecated
     public static void configOneTimePasswordAuthentication(HttpSecurity http,
                                                 AuthenticationConfiguration authenticationConfiguration) {
         configOneTimePasswordAuthentication(http, authenticationConfiguration, null);
@@ -188,7 +192,12 @@ public class EulerAuthorizationServerConfiguration {
      * Attest device are subject to device-to-user consistency enforcement
      * and first-sighting binding; when {@code null}, attestation attached
      * to OTP requests is ignored.
+     *
+     * @deprecated the {@code otp} grant is superseded by the Authorization Challenge Endpoint
+     * ({@code POST /authorize-challenge}), configured on {@link EulerOAuth2AuthorizationServerConfigurer};
+     * retained for already-released clients.
      */
+    @Deprecated
     public static void configOneTimePasswordAuthentication(HttpSecurity http,
                                                 AuthenticationConfiguration authenticationConfiguration,
                                                 EulerDeviceUserDetailsService deviceUserDetailsService) {
@@ -198,6 +207,7 @@ public class EulerAuthorizationServerConfiguration {
                         .accessTokenRequestConverter(new OAuth2OneTimePasswordAuthenticationConverter())));
     }
 
+    @Deprecated
     private static OAuth2OneTimePasswordAuthenticationProvider getOAuth2OneTimePasswordAuthenticationProvider(HttpSecurity http,
                                                                                        AuthenticationConfiguration authenticationConfiguration,
                                                                                        EulerDeviceUserDetailsService deviceUserDetailsService) {
@@ -253,9 +263,22 @@ public class EulerAuthorizationServerConfiguration {
         );
     }
 
+    /**
+     * Variant that also advertises the challenge endpoints in the authorization server metadata and OIDC
+     * provider configuration: the attestation {@code challengeEndpointUri}, and the Authorization Challenge
+     * Endpoint (draft-ietf-oauth-first-party-apps) when {@code authorizationChallengeEndpointUri} is
+     * non-{@code null}. The claims are added here rather than by a separate customizer because Spring's
+     * metadata customizers are single-valued: a second {@code authorizationServerMetadataCustomizer} call
+     * overwrites the first.
+     *
+     * @param challengeEndpointUri              the attestation challenge endpoint URI to advertise
+     * @param authorizationChallengeEndpointUri the authorization challenge endpoint URI to advertise, or {@code null}
+     */
     public static void configClientAttestationAuthentication(HttpSecurity http,
                                                              AuthenticationConfiguration authenticationConfiguration,
-                                                             JitProvisioningPolicy jitProvisioning) {
+                                                             JitProvisioningPolicy jitProvisioning,
+                                                             String challengeEndpointUri,
+                                                             String authorizationChallengeEndpointUri) {
         EulerOAuth2ClientAttestationAuthenticationConverter attestConverter = EulerOAuth2ConfigurerUtils
                 .getEulerOAuth2ClientAttestationAuthenticationConverter(http);
         EulerOAuth2ClientAttestationAuthenticationProvider attestProvider = EulerOAuth2ConfigurerUtils
@@ -277,12 +300,37 @@ public class EulerAuthorizationServerConfiguration {
                         .authenticationProviders(providers -> providers.add(attestProvider))
                         .authenticationSuccessHandler(attestSuccessHandler)));
 
+        // When the authorization challenge endpoint is enabled, guard it with the same attestation-based
+        // client authentication, configured through this framework's own client authentication configurer
+        // (a peer sub-configurer of EulerOAuth2AuthorizationServerConfigurer bound to the challenge
+        // endpoint's matcher), mirroring how Spring's clientAuthentication guards the token endpoint. That
+        // configurer carries no default converters or providers, so contribute only the App Attest
+        // converter here; its provider is already in the shared AuthenticationManager (registered for the
+        // token endpoint above), which the challenge endpoint's client authentication filter reuses.
+        if (authorizationChallengeEndpointUri != null) {
+            EulerOAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                    http.getConfigurer(EulerOAuth2AuthorizationServerConfigurer.class);
+            if (authorizationServerConfigurer == null) {
+                throw new IllegalStateException(
+                        "EulerOAuth2AuthorizationServerConfigurer must be registered to guard the "
+                                + "authorization challenge endpoint with client authentication");
+            }
+            RequestMatcher authorizationChallengeMatcher = PathPatternRequestMatcher.pathPattern(
+                    HttpMethod.POST, authorizationChallengeEndpointUri);
+            authorizationServerConfigurer.clientAuthentication(clientAuth -> clientAuth
+                    .requestMatcher(authorizationChallengeMatcher)
+                    .authenticationConverter(attestConverter));
+        }
+
         // Add attestation metadata to OIDC provider configuration and AS metadata endpoints
         //   (draft-ietf-oauth-attestation-based-client-auth-11 Section 8)
         AuthorizationServerSettings authorizationServerSettings = OAuth2ConfigurerUtilsAccessor
                 .getAuthorizationServerSettings(http);
         String issuer = authorizationServerSettings.getIssuer();
-        String challengeEndpointFullUri = (issuer != null ? issuer : "") + EulerOAuth2AuthorizationServerConfigurer.DEFAULT_CHALLENGE_ENDPOINT_URI;
+        String challengeEndpointFullUri = (issuer != null ? issuer : "") + challengeEndpointUri;
+        String authorizationChallengeEndpointFullUri = authorizationChallengeEndpointUri != null
+                ? (issuer != null ? issuer : "") + authorizationChallengeEndpointUri
+                : null;
         List<String> supportedSigningAlgs = List.of("ES256");
         http.oauth2AuthorizationServer(oauth2 -> oauth2
                 .oidc(oidc -> oidc
@@ -297,6 +345,10 @@ public class EulerAuthorizationServerConfiguration {
                                             supportedSigningAlgs);
                                     builder.claim("client_attestation_pop_signing_alg_values_supported",
                                             supportedSigningAlgs);
+                                    if (authorizationChallengeEndpointFullUri != null) {
+                                        builder.claim("authorization_challenge_endpoint",
+                                                authorizationChallengeEndpointFullUri);
+                                    }
                                 })
                         )
                 )
@@ -311,6 +363,10 @@ public class EulerAuthorizationServerConfiguration {
                                     supportedSigningAlgs);
                             builder.claim("client_attestation_pop_signing_alg_values_supported",
                                     supportedSigningAlgs);
+                            if (authorizationChallengeEndpointFullUri != null) {
+                                builder.claim("authorization_challenge_endpoint",
+                                        authorizationChallengeEndpointFullUri);
+                            }
                         })
                 )
         );

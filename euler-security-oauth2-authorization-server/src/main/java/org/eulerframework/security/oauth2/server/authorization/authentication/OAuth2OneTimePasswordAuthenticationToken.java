@@ -34,7 +34,11 @@ import java.util.Set;
  * <p>
  * A verified App Attest registration, when present, travels on the client authentication that is
  * this token's principal and is handled by {@code OAuth2OneTimePasswordAuthenticationProvider}.
+ *
+ * @deprecated the {@code otp} grant is superseded by the Authorization Challenge Endpoint
+ * ({@code POST /authorize-challenge}); retained, unchanged, for already-released clients.
  */
+@Deprecated
 public class OAuth2OneTimePasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
     private final OneTimePasswordAuthenticationToken userPrincipal;

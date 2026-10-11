@@ -46,7 +46,12 @@ import java.util.Set;
  * <p>
  * The sensitive {@code otp} parameter is stripped from
  * {@code additionalParameters} so it cannot leak through audit / logging.
+ *
+ * @deprecated the {@code otp} grant is superseded by the Authorization Challenge Endpoint
+ * ({@code POST /authorize-challenge}), which exchanges the same OTP for a standard
+ * {@code authorization_code}; retained, unchanged, for already-released clients.
  */
+@Deprecated
 public class OAuth2OneTimePasswordAuthenticationConverter implements AuthenticationConverter {
 
     private static final String DEFAULT_ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";

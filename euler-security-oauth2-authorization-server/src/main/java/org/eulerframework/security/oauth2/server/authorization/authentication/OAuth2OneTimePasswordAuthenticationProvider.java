@@ -63,7 +63,12 @@ import java.util.Set;
  * consistency is enforced: a device bound to a different user is rejected
  * with {@code invalid_grant}, and an unbound device is bound to the resolved
  * user on first use.
+ *
+ * @deprecated the {@code otp} grant is superseded by the Authorization Challenge Endpoint
+ * ({@code POST /authorize-challenge}), which exchanges the same OTP for a standard
+ * {@code authorization_code}; retained, unchanged, for already-released clients.
  */
+@Deprecated
 public class OAuth2OneTimePasswordAuthenticationProvider implements AuthenticationProvider {
 
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";

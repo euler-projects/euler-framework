@@ -27,4 +27,8 @@ public class OAuth2ConfigurerUtilsAccessor {
     public static String withMultipleIssuersPattern(String endpointUri) {
         return OAuth2ConfigurerUtils.withMultipleIssuersPattern(endpointUri);
     }
+
+    public static <T> T getOptionalBean(HttpSecurity httpSecurity, Class<T> type) {
+        return OAuth2ConfigurerUtils.getOptionalBean(httpSecurity, type);
+    }
 }
